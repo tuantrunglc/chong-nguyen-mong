@@ -1,0 +1,33 @@
+# Decision log: GDD
+
+- 2026-10-15: v0 bắt đầu tạo GDD (intent: create). Đầu vào: brief (status final), addendum, decision-log của brief.
+- 2026-10-15: Viết bằng tiếng Việt, theo đúng cách đã làm ở brief.
+- 2026-10-15: Phân loại thể loại: turn-based-tactics (chính, độ phức tạp trung bình) + các phần tử roguelike (độ phức tạp cao). Quy ước bắt buộc phải ghi rõ: luật lưới, thứ tự lượt, kinh tế hành động, AI địch, đa dạng nhiệm vụ, cấu trúc lượt chơi, seed determinism, meta so với in-run progression.
+- 2026-10-15: Đặt cờ needs_narrative (guide tactics có đánh dấu narrative-recommended). Sẽ đề xuất gds-create-narrative ở bước Finalize.
+- 2026-10-15: Chọn chế độ kèm cặp (facilitative). Mỗi lượt đưa đề xuất có sẵn con số để người dùng sửa.
+- 2026-10-15: Độ sâu: combat (lưới, unit, hành động, địa hình, trận mẫu) viết chi tiết đủ để làm prototype. Lớp roguelite chỉ dựng khung, đánh dấu "chi tiết hóa sau prototype".
+- 2026-10-15: Điền sẵn từ brief các phần Executive Summary, Goals, Pillars, Core Loop (không hỏi lại).
+- 2026-10-15: CHỐT lưới: ô vuông 7×7, đi 4 hướng không chéo; tầm đi của tướng 3 ô, của quân Nguyên 2–3 ô; không có chi phí địa hình (ô đi được hoặc bị chặn); không có vùng khống chế (đi xuyên qua quân mình, không xuyên qua quân địch); không có độ cao hay tầm nhìn.
+- 2026-10-15: CHỐT prototype chỉ đánh trên bộ; sông là chướng ngại; thủy chiến và thuyền để sau.
+- 2026-10-15: ĐỔI so với brief: prototype dùng 3 tướng thay vì 2 (brief ghi 2–3, MVP ghi 2). Hệ quả: thêm 1 bộ unit cần thiết kế và cân bằng; vẫn chấp nhận được với bàn 7×7.
+- 2026-10-15: Người dùng thay Trần Nhật Duật bằng Dã Tượng. Đang bàn có nên xếp lại vai cho hợp hình tượng voi chiến không (vai đánh xa không hợp với Dã Tượng).
+- 2026-10-15: CHỐT bộ 3 tướng: Nguyễn Khoái (Tiên phong, thay Dã Tượng), Phạm Ngũ Lão (Phóng lao), Trần Khánh Dư (Phục binh). Chọn cách xếp vai theo hình tượng (phương án A). Nguyên tắc: chi tiết nào thuộc truyền thuyết hay dã sử thì ghi rõ là "theo truyền thuyết và dã sử". Vai gameplay của từng tướng phải được đối chiếu với tư liệu, hiện đánh dấu [CHƯA KIỂM CHỨNG SỬ].
+- 2026-10-15: CHỐT quân Nguyên trong prototype: Kỵ binh Mông Cổ (2 máu, đi 3, xung phong thẳng hàng 1 sát thương), Cung kỵ (1 máu, đi 3, bắn tối đa 3 ô 1 sát thương), Bộ binh Nguyên (3 máu, đi 2, chém ô kề 1 sát thương).
+- 2026-10-15: CHỐT trình tự hiệp: (1) địch chuẩn bị (di chuyển và báo đòn), (2) lượt người chơi, (3) địch ra đòn theo thứ tự, (4) báo quân tiếp viện. Luật then chốt: địch đánh vào Ô hoặc hướng đã báo, không đánh vào người; quân địch có thể ăn đòn của đồng đội.
+- 2026-10-15: CHỐT hoàn tác: cho hủy nước đi khi tướng chưa đánh, và cho "chơi lại hiệp này" 1 lần mỗi trận.
+- 2026-10-15: Số mưu kế mỗi trận: người dùng chưa trả lời, chuyển sang bàn cùng nội dung mưu kế.
+- 2026-10-15: CHỐT 4 loại địa hình cho prototype: Sông (chặn; quân Nguyên bị đẩy hoặc kéo xuống thì chết đuối), Rừng (chặn đường đi và đường đánh; bị đẩy vào thì mất 1 máu), Hầm chông (đi vào được; ai vào cũng mất 1 máu), Kho lương (chặn; quân Nguyên đứng kề hồi 1 máu mỗi hiệp). Luật va chạm: cả hai bên va chạm đều mất 1 máu.
+- 2026-10-15: CHỐT luật quân tiếp viện bị chặn: quân không ra được, người đứng chặn mất 1 máu (người dùng không phản đối).
+- 2026-10-15: CHỐT 2 mưu kế cho prototype, mỗi cái dùng 1 lần mỗi trận: Sát Thát (+1 sát thương cho mọi đòn của tướng trong lượt) và Vườn không nhà trống (đốt mọi kho lương; quân Nguyên mất 1 máu và từ đó không hồi máu). Mưu kế Rút lui chiến thuật và Nghi binh để dành cho lớp roguelite.
+- 2026-10-15: CHỐT 2 kiểu nhiệm vụ: Tiêu diệt (hạ hết quân Nguyên, không có tiếp viện) và Giữ ải (5 hiệp, không để quân Nguyên vào ô ải, có tiếp viện). Thua khi cả 3 tướng gục, hoặc khi để mất ải.
+- 2026-10-15: CHỐT 5 trận dạy chơi cho prototype (sông → rừng/kỵ binh → kéo/chông → kho lương/giữ ải → tổng hợp).
+- 2026-10-15: Tên trận: người dùng không chọn → prototype dùng tên tạm "Trận 1–5". Cho một agent chạy ngầm tra các trận đánh trên bộ năm 1287–1288 để đề xuất địa danh (chưa chốt).
+- 2026-10-15: CHỐT khung roguelite (chi tiết hóa sau prototype): bản đồ 1288 gồm 8–10 nút chia 3 chặng; loại nút gồm trận thường, trận tinh nhuệ, sự kiện lịch sử, nghỉ quân; phần thưởng chọn 1 trong 3; thua một trận là hết lượt chơi; tướng gục thì trận sau còn 1 máu; seed quyết định bản đồ và phần thưởng (combat tất định); meta là mở khóa tướng và mưu kế.
+- 2026-10-15: CHỐT điều khiển bằng chuột (bấm để chọn, đi, đánh; rê chuột xem thông tin), phím tắt Z/Space/R, không dùng kéo thả.
+- 2026-10-15: CHỐT thông số kỹ thuật: chạy trên trình duyệt desktop (Chrome/Firefox/Edge), bản build ≤50MB, tải ≤10 giây ở mạng 20Mbps, 60 FPS, lưu trong trình duyệt và tự lưu sau mỗi trận, chữ tách ra file riêng để dịch.
+- 2026-10-15: Art và audio giữ nguyên như brief.
+- 2026-10-15: Tra cứu sử 1287–1288 lưu ở history-notes-1288.md. Phát hiện: Phạm Ngũ Lão KHÔNG có tên trong Toàn thư các năm 1287–1288 (chỉ VNSL ghi ông ở trận Nội Bàng); Nguyễn Khoái và Trần Khánh Dư có tên trong chính sử. Chờ người dùng quyết có giữ Phạm Ngũ Lão hay không.
+- 2026-10-15: CHỐT giữ Phạm Ngũ Lão (phương án a), chú thích nguồn "theo Việt Nam sử lược"; Toàn thư không chép ông trong các năm 1287–1288.
+- 2026-10-15: Viết phần Epic theo đề xuất E0–E4 (130 giờ). Người dùng chưa xác nhận rõ; ghi vào GDD và nhắc lại ở bước Finalize.
+- 2026-10-15: Đã viết đủ mọi phần của gdd.md và epics.md. Trạng thái vẫn là draft. Người dùng dừng phiên ("xong thì push lên, về tôi làm tiếp").
+- VIỆC CÒN LẠI cho phiên sau (bước Finalize): (1) người dùng xác nhận cách chia Epic E0–E4; (2) rà decision log; (3) đối chiếu với brief; (4) cho validator kiểm tra theo checklist; (5) xử lý các mục ASSUMPTION/NOTE; (6) đề xuất gds-create-narrative (cờ needs_narrative); (7) chuyển trạng thái sang final.
