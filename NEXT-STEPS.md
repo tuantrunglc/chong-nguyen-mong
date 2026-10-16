@@ -35,7 +35,6 @@ Cập nhật lần cuối: 2026-10-16
 Mỗi bước chạy trong một **cửa sổ context mới** của Claude Code.
 
 1. ~~**Chốt GDD**~~: xong ngày 2026-10-16. Đã chốt các mục treo, thêm Enemy AI, thứ tự hiệp, mục Vision, Narrative (khung), Risks. Chi tiết xem `decision-log.md` của GDD.
-   - Còn 1 giả định cần xác nhận: tướng bị Nguyễn Khoái đẩy vào sông thì tính như va chạm, không chết đuối.
 2. **(Tùy chọn) Cốt truyện:** `/gds-create-narrative`.
 3. **Kiến trúc:** `/gds-game-architecture`. Bước này bắt buộc.
 4. **Epics & Stories:** `/gds-create-epics-and-stories`, sau đó `/gds-check-implementation-readiness`.

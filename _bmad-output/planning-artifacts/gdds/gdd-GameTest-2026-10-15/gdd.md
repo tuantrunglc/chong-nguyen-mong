@@ -212,7 +212,7 @@ AI phải tất định và đọc được: người chơi đoán được quâ
 | Ký hiệu | Địa hình | Đi vào được | Chặn đường đánh | Hiệu ứng |
 |---|---|---|---|---|
 | `.` | Đất trống | Có | Không | Không có |
-| `~` | **Sông** | Không | Không (lao và tên bay qua được) | Quân Nguyên bị đẩy hoặc kéo xuống sông thì **chết ngay**. Tướng nhà Trần bị đẩy vào sông (chỉ xảy ra khi trúng đòn của Nguyễn Khoái) thì tính như va chạm: mất 1 máu, đứng yên. [ASSUMPTION: tướng không chết đuối] |
+| `~` | **Sông** | Không | Không (lao và tên bay qua được) | Quân Nguyên bị đẩy hoặc kéo xuống sông thì **chết ngay**. Tướng nhà Trần bị đẩy vào sông (chỉ xảy ra khi trúng đòn của Nguyễn Khoái) thì tính như va chạm: mất 1 máu, đứng yên. |
 | `#` | **Rừng** | Không | **Có** (chặn lao, tên, xung phong) | Bị đẩy vào rừng là va chạm: mất 1 máu, đứng yên tại chỗ |
 | `^` | **Hầm chông** | Có | Không | Bất kỳ quân nào bước vào hoặc bị đẩy vào đều **mất 1 máu**. Đứng yên trên ô thì không mất thêm. |
 | `L` | **Kho lương** | Không | Có | Cuối mỗi hiệp, mỗi quân Nguyên đứng kề (4 hướng) kho lương hồi **1 máu**, không vượt máu tối đa. Bị đốt bởi mưu kế *Vườn không nhà trống*. |
@@ -445,7 +445,6 @@ Mục tiêu là trả lời câu hỏi: **giải thế trận có vui không?** 
 
 ### Chỉ mục giả định và ghi chú
 - [ASSUMPTION] Mưu kế mở dần theo trận (Campaign Structure).
-- [ASSUMPTION] Tướng nhà Trần bị đẩy vào sông thì tính như va chạm, không chết đuối (Terrain).
 - [KIỂM TRA KHI PLAYTEST E4] Tầm kéo của Trần Khánh Dư: chốt 2 ô (Unit Types).
 - [KIỂM TRA KHI PLAYTEST E4] Độ mạnh của Vườn không nhà trống: chốt giữ nguyên (Primary Mechanics).
 - [HOÃN SANG E8] Hình ảnh quân cờ (Art Style).
