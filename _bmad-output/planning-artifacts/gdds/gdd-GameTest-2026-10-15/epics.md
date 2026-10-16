@@ -39,10 +39,11 @@ Ngân sách: 13 tuần × 10 giờ ≈ 130 giờ. Các epic làm tuần tự.
   - Va chạm.
   - Sông nhấn chìm quân Nguyên.
   - Thắng và thua với kiểu nhiệm vụ Tiêu diệt.
+  - Rê chuột xem máu, đòn sắp đánh, thứ tự ra đòn.
 - **Không có:** rừng, chông, kho lương, mưu kế, quân tiếp viện.
 - **Chơi được khi xong:** chơi trọn trận 1.
 - **Mốc kiểm tra cuối tuần 8:** tác giả tự chơi. Nếu chán thì sửa luật trước khi làm tiếp.
-- **Nếu trễ:** cắt Cung kỵ.
+- **Nếu trễ:** cắt Cung kỵ và trận 5.
 - **Phụ thuộc:** E1.
 
 ## E3: Địa hình & mưu kế (tuần 9–10, khoảng 20 giờ)
@@ -75,4 +76,14 @@ Ngân sách: 13 tuần × 10 giờ ≈ 130 giờ. Các epic làm tuần tự.
 - E6: Phần thưởng & mở khóa
 - E7: Trận Bạch Đằng
 - E8: Hình ảnh & âm thanh
+- E8b: Nội dung chữ: giới thiệu trận, sự kiện lịch sử, mô tả tướng, trích *Hịch tướng sĩ* (theo kết quả `gds-create-narrative`)
 - E9: Phát hành web
+  - Danh sách kiểm tra trước khi phát hành:
+    - Đối chiếu tiểu sử, vai trò tướng và địa danh với *Toàn thư*, *Cương mục*, *Việt Nam sử lược*; ghi nguồn và ghi rõ chỗ hư cấu.
+    - Kiểm tra trang phục, vũ khí thời Trần trong mọi hình ảnh; sửa tay hình AI.
+    - Khai báo dùng AI theo quy định của itch.io (và Steam về sau).
+    - Kiểm tra bản quyền nhạc và bản thu âm.
+    - Tìm hiểu Nghị định 147/2024 có áp dụng cho bản web miễn phí không.
+    - Cho người lạ (không phải người thân) chơi thử.
+    - Chốt tên game (tiếng Việt, có thể kèm tên tiếng Anh).
+    - Giới thiệu trong các cộng đồng mê sử.

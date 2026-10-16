@@ -2,9 +2,9 @@
 title: 'Chống Nguyên Mông (tên tạm): Game Design Document'
 game_type: 'turn-based-tactics + roguelike'
 platforms: ['web (HTML5)', 'itch.io', 'PC/Steam (về sau)']
-status: draft
+status: final
 created: '2026-10-15'
-updated: '2026-10-15'
+updated: '2026-10-16'
 inputs:
   - _bmad-output/planning-artifacts/briefs/brief-GameTest-2026-10-15/brief.md
   - _bmad-output/planning-artifacts/briefs/brief-GameTest-2026-10-15/addendum.md
@@ -20,6 +20,17 @@ inputs:
 
 ## Executive Summary
 
+**Một câu:** Bạn là Trần Hưng Đạo, giải từng thế trận chống đại quân Nguyên Mông, trên đường dẫn tới Bạch Đằng.
+
+### Vision and Core Feel
+**Cảm giác cốt lõi là Hào khí Đông A.** Trong trận, người chơi cân não và thắng nhờ cái đầu. Hào khí không nằm ở cơ chế, nên không phải là trụ cột. Nó đến từ phần trình bày bao quanh trận đánh:
+- tiếng trống trận;
+- những câu trích *Hịch tướng sĩ* giữa các trận;
+- cảm giác cả một dân tộc đứng sau lưng mình;
+- trận Bạch Đằng ở cuối.
+
+Prototype chưa cần có hào khí (chỉ kiểm chứng combat). Từ giai đoạn 1, hào khí do E8 (hình ảnh, âm thanh) và phần Narrative gánh.
+
 ### Core Concept
 Game tactics roguelite 2D, đánh theo lượt. Người chơi vào vai Trần Hưng Đạo, đứng ngoài bàn cờ chỉ huy 2–3 tướng có thật. Mỗi trận là một bài toán: địch luôn báo trước nước đi, người chơi dùng địa hình (sông nước, cọc gỗ, vườn không nhà trống) và các mưu kế của Trần Hưng Đạo để phá thế trận. Một lượt chơi đi trọn một cuộc kháng chiến. Bản đầu tiên là cuộc kháng chiến 1288, kết thúc ở trận Bạch Đằng.
 
@@ -29,7 +40,7 @@ Game tactics roguelite 2D, đánh theo lượt. Người chơi vào vai Trần H
 
 ### Unique Selling Points (USPs)
 1. Game chiến thuật đầu tiên cho người Việt tự tay đánh lại các trận chống Nguyên Mông, với tướng thật và trận thật.
-2. Có những luật địa hình chỉ thời Trần mới có: thủy triều kết hợp bãi cọc, vườn không nhà trống.
+2. Có những luật và mưu kế chỉ thời Trần mới có: thủy triều kết hợp bãi cọc (giai đoạn 1), vườn không nhà trống (prototype dùng như mưu kế trong một trận; lớp roguelite có thể cho hiệu ứng kéo dài sang các trận sau, làm quân Nguyên yếu dần).
 3. Combat tất định: địch báo trước nước đi, không có may rủi. Về độ sâu combat, game không định vượt Into the Breach.
 
 ---
@@ -43,6 +54,15 @@ Game tactics roguelite 2D, đánh theo lượt. Người chơi vào vai Trần H
 
 ### Background and Rationale
 Đây là dự án đam mê của một lập trình viên web chưa từng làm game, không vẽ, không làm nhạc, mỗi tuần dành khoảng 10 giờ, ngân sách vài trăm USD. Engine là Godot. Research thị trường cho thấy tactics roguelite là thể loại hẹp nhưng có tỷ lệ thành công cao hơn mức trung bình, và chưa có game nào khai thác bối cảnh Trần–Nguyên. Nguồn: brief và addendum.
+
+Mục tiêu là làm xong một game mình tự hào, không phải tối đa doanh thu. Steam chỉ có khoảng 0,25% người dùng tiếng Việt và bị chặn một phần ở Việt Nam, nên kênh chính cho khán giả Việt là bản web miễn phí.
+
+### References
+| Game | Lấy | Không lấy |
+|---|---|---|
+| *Into the Breach* | Địch báo trước đòn, combat tất định, bàn nhỏ, đẩy/kéo và va chạm | Độ sâu combat (không định vượt) |
+| *Shogun Showdown* | Trận ngắn, ít đơn vị, bối cảnh lịch sử châu Á | — |
+| *Slay the Spire* | Bản đồ nút chia chặng, phần thưởng chọn 1 trong 3 | Bộ bài, may rủi khi rút bài |
 
 
 ## Core Gameplay
@@ -64,7 +84,7 @@ Game tactics roguelite 2D, đánh theo lượt. Người chơi vào vai Trần H
 
 - Tướng còn 0 máu thì gục và không hành động được nữa trong trận đó.
 - Trong prototype, sau mỗi trận các tướng được hồi đầy máu.
-- Luật tướng gục khi đang trong một lượt chơi roguelite: *chi tiết hóa sau prototype*.
+- Luật tướng gục trong lượt chơi roguelite: xem Permadeath and Progression.
 - Một lượt chơi roguelite thắng khi hạ được trận cuối (Bạch Đằng), thua khi thua bất kỳ trận nào.
 
 ## Game Mechanics
@@ -76,7 +96,7 @@ Game tactics roguelite 2D, đánh theo lượt. Người chơi vào vai Trần H
 | **Đẩy, kéo, va chạm** | Đòn của Nguyễn Khoái đẩy, đòn của Trần Khánh Dư kéo. Va chạm với quân khác hoặc vật cản làm cả hai mất 1 máu. Đây là cách chính để dùng địa hình. | Địa hình là vũ khí |
 | **Đánh vào ô** | Đòn địch gắn với ô, không gắn với người, nên có thể né, có thể làm lệch, và địch có thể đánh trúng nhau. | Thấy trước, tính được |
 | **Địa hình gây hiệu ứng** | Sông, rừng, hầm chông, kho lương (xem phần Terrain). | Địa hình là vũ khí, Tôn trọng lịch sử |
-| **Mưu kế của Trần Hưng Đạo** | Mỗi mưu kế dùng 1 lần mỗi trận, dùng được bất cứ lúc nào trong lượt người chơi, không tốn hành động của tướng. Prototype có 2 mưu kế (bảng dưới). | Tôn trọng lịch sử, Hào khí |
+| **Mưu kế của Trần Hưng Đạo** | Mỗi mưu kế dùng 1 lần mỗi trận, dùng được bất cứ lúc nào trong lượt người chơi, không tốn hành động của tướng. Prototype có 2 mưu kế (bảng dưới). | Tôn trọng lịch sử |
 | **Hoàn tác** | Hủy nước đi khi chưa đánh. Chơi lại hiệp: 1 lần mỗi trận. | Thấy trước, tính được |
 
 **Mưu kế trong prototype:**
@@ -86,7 +106,7 @@ Game tactics roguelite 2D, đánh theo lượt. Người chơi vào vai Trần H
 | **Sát Thát** | Trong lượt này, mọi đòn đánh *có gây sát thương* của tướng được **+1 sát thương**. Đòn kéo của Trần Khánh Dư không được cộng. | Quân sĩ thích hai chữ "Sát Thát" lên cánh tay |
 | **Vườn không nhà trống** | Đốt toàn bộ kho lương trên bàn: các ô kho lương thành ô trống, đi vào được. Mọi quân Nguyên trên bàn **mất 1 máu**. Từ đó đến hết trận, quân Nguyên không hồi máu được nữa. | Chiến lược vườn không nhà trống năm 1285 và 1288 |
 
-[NOTE FOR DESIGNER] "Vườn không nhà trống" hạ ngay mọi Cung kỵ (chỉ có 1 máu). Cần playtest xem có quá mạnh không. Nếu quá mạnh, đổi thành "mất 1 máu, nhưng không làm quân địch chết, tối thiểu còn 1 máu".
+[KIỂM TRA KHI PLAYTEST E4] Đã chốt giữ nguyên (2026-10-16). "Vườn không nhà trống" hạ ngay mọi Cung kỵ (chỉ có 1 máu). Nếu playtest thấy quá mạnh, đổi thành "mất 1 máu, nhưng không làm quân địch chết, tối thiểu còn 1 máu".
 
 Mưu kế để dành cho lớp roguelite (chưa có trong prototype): Rút lui chiến thuật, Nghi binh.
 ### Controls and Input
@@ -132,7 +152,7 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 
 [CHƯA KIỂM CHỨNG SỬ] Vai của từng tướng là trừu tượng hóa để phục vụ gameplay. Trước khi phát hành phải đối chiếu tiểu sử và vai trò năm 1287–1288 với tư liệu như *Đại Việt sử ký toàn thư*. Chi tiết nào thuộc truyền thuyết hay dã sử phải ghi rõ "theo truyền thuyết và dã sử".
 
-[NOTE FOR DESIGNER] Đòn kéo của Trần Khánh Dư đi được tối đa 2 ô. Nếu playtest thấy quá mạnh thì giảm xuống 1 ô.
+[KIỂM TRA KHI PLAYTEST E4] Đã chốt tầm kéo 2 ô (2026-10-16). Nếu playtest thấy quá mạnh thì giảm xuống 1 ô.
 
 **Quân Nguyên trong prototype.** Mọi đòn đánh của quân Nguyên đều được báo trước một lượt (xem Action Economy).
 
@@ -146,7 +166,9 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 ### Action Economy
 
 **Trình tự một hiệp.** Hai bên đi luân phiên. Phe địch tách làm hai pha: chuẩn bị và ra đòn.
-1. **Địch chuẩn bị.** Từng quân Nguyên di chuyển, sau đó báo trước đòn đánh. Ô bị nhắm được tô đỏ. Mỗi đòn có số thứ tự ra đòn (1, 2, 3…) hiển thị ngay trên bàn.
+1. **Địch chuẩn bị.**
+   - Quân tiếp viện đã báo ở hiệp trước xuất hiện trước tiên. Nếu ô đó có người đứng, quân tiếp viện không xuất hiện và người đứng trên ô nhận **1 sát thương**.
+   - Sau đó từng quân Nguyên (kể cả quân vừa xuất hiện) di chuyển rồi báo trước đòn đánh, theo luật ở mục *Enemy AI*. Ô bị nhắm được tô đỏ. Mỗi đòn có số thứ tự ra đòn (1, 2, 3…) hiển thị ngay trên bàn; số thứ tự là thứ tự các quân hành động.
 2. **Lượt người chơi.**
    - Mỗi tướng được *đi* tối đa 3 ô, rồi *đánh* một lần. Có thể đánh mà không đi.
    - Tướng đã đánh thì không đi được nữa.
@@ -154,7 +176,9 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
    - Mưu kế của Trần Hưng Đạo dùng được bất cứ lúc nào trong lượt và không tốn hành động của tướng.
    - Bấm "Kết thúc lượt" để chuyển sang pha tiếp theo.
 3. **Địch ra đòn.** Các đòn được thực hiện lần lượt theo đúng thứ tự đã báo.
-4. **Quân tiếp viện.** Các ô sẽ có quân Nguyên xuất hiện ở hiệp sau được đánh dấu trước. Nếu đến lúc xuất hiện mà ô đó có người đứng, quân tiếp viện không xuất hiện và người đứng trên ô nhận **1 sát thương**.
+4. **Cuối hiệp.**
+   - Quân Nguyên đứng kề kho lương hồi 1 máu (nếu kho còn và chưa dùng *Vườn không nhà trống*).
+   - Đánh dấu các ô sẽ có quân tiếp viện xuất hiện ở đầu hiệp sau.
 
 **Luật then chốt: địch đánh vào ô, không đánh vào người.**
 - Đòn đã báo gắn với một ô cố định. Riêng Kỵ binh gắn với một hướng cố định, tính từ vị trí của nó.
@@ -162,12 +186,23 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 - Quân địch bị đẩy hoặc kéo vào ô bị nhắm sẽ ăn đòn của chính đồng đội.
 - Quân đang chuẩn bị đánh mà bị đẩy sang ô khác thì đòn của nó dịch theo, giữ nguyên hướng và khoảng cách tương đối.
 - Quân bị hạ trước lượt ra đòn của mình thì đòn đó bị hủy.
+- **Mọi đòn trúng mọi người đứng trên ô bị nhắm**, không phân phe. Lao của Phạm Ngũ Lão, đòn đẩy của Nguyễn Khoái và đòn của địch đều có thể trúng tướng nhà Trần.
+- **Kỵ binh xung phong** thì đứng yên tại chỗ, đòn trúng vật đầu tiên trên hàng theo hướng đã báo. Sông không chặn đòn xung phong; rừng thì chặn.
+- **Kéo mục tiêu đã đứng kề** Trần Khánh Dư thì mục tiêu đứng yên, không ai mất máu.
 
 **Hoàn tác.**
 - Tướng đã đi nhưng chưa đánh thì được hủy nước đi.
 - Được **"chơi lại hiệp này" 1 lần mỗi trận**: đưa bàn cờ về trạng thái đầu lượt người chơi.
 
 **Không có:** đòn phản công, đòn đánh khi địch rời ô kề, giới hạn thời gian mỗi lượt.
+
+### Enemy AI
+AI phải tất định và đọc được: người chơi đoán được quân Nguyên sẽ làm gì mà không cần xem code.
+- **Thứ tự hành động:** theo thứ tự cố định ghi trong file dữ liệu trận; quân tiếp viện hành động sau quân đã có trên bàn.
+- **Mục tiêu:** tướng nhà Trần gần nhất (tính theo số bước đi). Trận *Giữ ải*: Kỵ binh và Bộ binh nhắm ô ải; Cung kỵ vẫn nhắm tướng gần nhất.
+- **Chọn ô đứng:** trong tầm đi, ưu tiên ô mà từ đó đòn trúng được mục tiêu. Không có ô như vậy thì đi tới ô gần mục tiêu nhất.
+- **Hòa điểm:** chọn theo thứ tự hướng cố định Bắc → Đông → Nam → Tây.
+- **Không có:** AI tránh ô đỏ của đồng đội, AI tránh địa hình nguy hiểm, AI phối hợp. Chính chỗ AI "ngây thơ" này tạo cơ hội cho người chơi dùng trụ cột *Địa hình là vũ khí*.
 ### Positioning and Tactics
 - **Vị trí là tài nguyên chính.** Sát thương trực tiếp thấp (1–2), máu địch 1–3. Phần lớn quân địch bị hạ nhờ địa hình, va chạm, hoặc đòn của chính đồng đội chúng.
 - **Thẳng hàng.** Lao, xung phong và kéo đều đi theo đường thẳng, nên việc đứng thẳng hàng hay lệch hàng mang ý nghĩa chiến thuật.
@@ -177,7 +212,7 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 | Ký hiệu | Địa hình | Đi vào được | Chặn đường đánh | Hiệu ứng |
 |---|---|---|---|---|
 | `.` | Đất trống | Có | Không | Không có |
-| `~` | **Sông** | Không | Không (lao và tên bay qua được) | Quân Nguyên bị đẩy hoặc kéo xuống sông thì **chết ngay**. Tướng nhà Trần không bao giờ bị đẩy xuống sông trong prototype, vì quân Nguyên không có đòn đẩy. |
+| `~` | **Sông** | Không | Không (lao và tên bay qua được) | Quân Nguyên bị đẩy hoặc kéo xuống sông thì **chết ngay**. Tướng nhà Trần bị đẩy vào sông (chỉ xảy ra khi trúng đòn của Nguyễn Khoái) thì tính như va chạm: mất 1 máu, đứng yên. [ASSUMPTION: tướng không chết đuối] |
 | `#` | **Rừng** | Không | **Có** (chặn lao, tên, xung phong) | Bị đẩy vào rừng là va chạm: mất 1 máu, đứng yên tại chỗ |
 | `^` | **Hầm chông** | Có | Không | Bất kỳ quân nào bước vào hoặc bị đẩy vào đều **mất 1 máu**. Đứng yên trên ô thì không mất thêm. |
 | `L` | **Kho lương** | Không | Có | Cuối mỗi hiệp, mỗi quân Nguyên đứng kề (4 hướng) kho lương hồi **1 máu**, không vượt máu tối đa. Bị đốt bởi mưu kế *Vườn không nhà trống*. |
@@ -210,6 +245,7 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 - Lượt chơi bắt đầu với 3 tướng (Nguyễn Khoái, Phạm Ngũ Lão, Trần Khánh Dư) và 2 mưu kế.
 - Độ khó tăng dần theo chặng: thêm quân, thêm loại quân, thêm quân tiếp viện.
 - Thắng lượt chơi khi hạ được trận Bạch Đằng.
+- Loại nút: trận thường, trận tinh nhuệ, sự kiện lịch sử, nghỉ quân.
 ### Procedural Generation
 - **Phần sinh ngẫu nhiên:** bố cục bản đồ nút, việc chọn trận cho từng nút (lấy từ kho trận làm tay, chia theo chặng), nội dung phần thưởng.
 - **Phần không ngẫu nhiên:** combat. Mọi trận đều tất định.
@@ -227,6 +263,8 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
   - **Tướng mới:** thay một tướng đang có.
 - Không có vật phẩm tiêu hao, không có độ hiếm, không có lời nguyền. Theo trụ cột *Nhỏ mà xong*.
 - Danh sách nâng cấp cụ thể: *chi tiết hóa sau prototype*.
+
+**Chỉ tiêu nội dung bản 1288** (theo brief, ước lượng): 4–6 tướng có thể thu nạp (mỗi trận ra trận 3), 4–6 loại quân Nguyên, 6–10 mưu kế, vài luật địa hình đặc trưng. Độ chơi lại đến từ bản đồ theo seed và tổ hợp tướng với mưu kế.
 ### Difficulty Modifiers
 Không có trong prototype hay bản 1288 đầu tiên. Sẽ cân nhắc sau, ví dụ thêm các mức khó tăng dần như Ascension của Slay the Spire.
 
@@ -261,16 +299,24 @@ Thứ người chơi tiến bộ chủ yếu là **kỹ năng đọc bàn cờ**
 
 **Các trận viết dưới dạng dữ liệu** (bố cục địa hình, vị trí quân, lịch tiếp viện), không viết trong code. Như vậy thêm hay sửa trận không cần lập trình.
 
+## Narrative and Presentation
+*Khung theo brief. Chi tiết làm bằng `gds-create-narrative` sau khi chốt GDD.*
+- **Cách kể:** mỗi lần chỉ vài dòng ngắn: trước mỗi trận (1–2 dòng giới thiệu địa danh hoặc sự kiện), ở các nút sự kiện lịch sử trên bản đồ, và trong mô tả tướng.
+- **Trích dẫn tư liệu thật**, ví dụ *Hịch tướng sĩ*, kèm tên nguồn.
+- **Không có** hội thoại dài, cốt truyện rẽ nhánh.
+- **Hư cấu và dã sử ghi rõ.** Chỗ nào là truyền thuyết hay dã sử thì ghi "theo truyền thuyết và dã sử"; chỗ nào chỉ có ở một nguồn thì ghi nguồn (ví dụ Phạm Ngũ Lão: "theo *Việt Nam sử lược*").
+- Prototype chỉ cần tên tạm "Trận 1–5", không có chữ kể chuyện.
+
 ## Art and Audio Direction
 
 ### Art Style
 - **Bàn cờ và quân cờ** (tạm thời): theo phong cách cờ tướng. Mỗi quân là một đồng tròn khắc chữ hoặc biểu tượng, đặt trên nền bản đồ cổ. Tác giả tự làm được bằng code và font chữ.
-  [NOTE FOR DESIGNER] Tác giả thấy quân cờ chỉ có chữ hoặc biểu tượng "chưa đẹp lắm". Cần thử thêm, ví dụ viền sơn mài, hoặc đặt hình bóng tướng lên đồng tròn.
+  [HOÃN SANG E8] Prototype dùng chữ hoặc biểu tượng đơn giản (chốt 2026-10-16). Ở E8 thử viền sơn mài, hoặc đặt hình bóng tướng lên đồng tròn.
 - **Ô đỏ báo đòn** phải nổi bật nhất trên màn hình. Thứ tự ra đòn hiện bằng số lớn.
 - **Tranh minh họa giữa các trận và cảnh Bạch Đằng:** phong cách sơn mài hoặc Đông Hồ. Thuê vẽ 1–3 bức chủ đạo ở giai đoạn 1.
 - **Chính sách AI:**
   - Giai đoạn prototype: chỉ dùng AI để thử ý tưởng và làm hình tạm.
-  - Bản phát hành: đối chiếu với tư liệu lịch sử và sửa tay, hoặc thuê vẽ.
+  - Bản phát hành: mọi hình ảnh phải đối chiếu với tư liệu lịch sử (kể cả trang phục thời Trần) và sửa tay. Tranh chủ đạo thì thuê vẽ.
   - Khai báo việc dùng AI trên itch.io và Steam.
 
 ### Audio and Music
@@ -326,6 +372,7 @@ Mỗi epic đều kết thúc bằng một thứ chơi được. Chi tiết xem 
 - E6 Phần thưởng & mở khóa
 - E7 Trận Bạch Đằng (thủy triều, bãi cọc, thuyền)
 - E8 Hình ảnh & âm thanh
+- E8b Nội dung chữ (giới thiệu trận, sự kiện, mô tả tướng)
 - E9 Phát hành web
 
 ## Success Metrics
@@ -342,7 +389,7 @@ Mục tiêu là trả lời câu hỏi: **giải thế trận có vui không?** 
 - **Hỏi "còn trận nữa không?"** khi xong trận 5.
 - **Tác giả tự thấy vui** ở mốc tuần 8.
 
-Đạt phần lớn các dấu hiệu trên thì chuyển sang giai đoạn 1.
+Đạt ≥3 trong 5 dấu hiệu trên thì chuyển sang giai đoạn 1.
 
 ## Out of Scope
 
@@ -382,9 +429,24 @@ Mục tiêu là trả lời câu hỏi: **giải thế trận có vui không?** 
 
 **Rủi ro ngoài thiết kế:** Nghị định 147/2024 có áp dụng cho bản web miễn phí hay không. Cần tìm hiểu trước khi phát hành công khai ở giai đoạn 1. Đây không phải tư vấn luật.
 
+### Risks
+| # | Rủi ro | Cách giảm |
+|---|---|---|
+| 1 | **Năng lực (lớn nhất):** chưa từng làm game, không vẽ, không làm nhạc, mà hào khí phụ thuộc vào phần trình bày | Quân cờ kiểu cờ tướng; chỉ chi tiền cho tranh chủ đạo và nhạc; prototype trước rồi mới chi |
+| 2 | **Phạm vi phình ra** | Trụ cột *Nhỏ mà xong*; mỗi giai đoạn có điểm dừng; phương án cắt khi E2 trễ |
+| 3 | **Combat không vui** | Toàn bộ giai đoạn 0 để kiểm chứng; mốc tự chơi hết tuần 8 |
+| 4 | **Người thử thiên vị** (người thân hay khen) | Quan sát hành vi thay vì hỏi ý kiến (Success Metrics); từ giai đoạn 1 thêm người lạ chơi thử |
+| 5 | **Sai sử, AI vẽ sai trang phục** | Trụ cột *Tôn trọng lịch sử*; đối chiếu tư liệu trước khi phát hành (E9) |
+| 6 | **Mất động lực** (một mình, 10 giờ/tuần, nhiều tháng) | Mốc ngắn, mỗi epic kết thúc bằng thứ chơi được; cho người thật chơi sớm |
+
+### Open Questions (không chặn prototype)
+- Tên game: dùng tên tiếng Việt kèm một tên tiếng Anh? Quyết trước khi phát hành giai đoạn 1.
+- Trận Bạch Đằng thiết kế như trận boss thế nào: quyết ở E7.
+
 ### Chỉ mục giả định và ghi chú
 - [ASSUMPTION] Mưu kế mở dần theo trận (Campaign Structure).
-- [NOTE FOR DESIGNER] Tầm kéo của Trần Khánh Dư (Unit Types).
-- [NOTE FOR DESIGNER] Độ mạnh của Vườn không nhà trống (Primary Mechanics).
-- [NOTE FOR DESIGNER] Hình ảnh quân cờ (Art Style).
+- [ASSUMPTION] Tướng nhà Trần bị đẩy vào sông thì tính như va chạm, không chết đuối (Terrain).
+- [KIỂM TRA KHI PLAYTEST E4] Tầm kéo của Trần Khánh Dư: chốt 2 ô (Unit Types).
+- [KIỂM TRA KHI PLAYTEST E4] Độ mạnh của Vườn không nhà trống: chốt giữ nguyên (Primary Mechanics).
+- [HOÃN SANG E8] Hình ảnh quân cờ (Art Style).
 - [CHƯA KIỂM CHỨNG SỬ] Vai gameplay của các tướng (Unit Types).

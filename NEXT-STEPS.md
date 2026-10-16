@@ -1,6 +1,6 @@
 # Ghi chú làm tiếp: Chống Nguyên Mông (tên tạm)
 
-Cập nhật lần cuối: 2026-10-15
+Cập nhật lần cuối: 2026-10-16
 
 ## Đang ở đâu
 
@@ -8,8 +8,8 @@ Cập nhật lần cuối: 2026-10-15
 |---|---|---|
 | Nghiên cứu thị trường | ✅ Xong | `_bmad-output/planning-artifacts/research/market-game-lich-su-viet-nam-2026-10-15/research.md` |
 | Game Brief | ✅ Xong (final) | `_bmad-output/planning-artifacts/briefs/brief-GameTest-2026-10-15/brief.md` |
-| GDD | 🟡 Bản nháp đầy đủ, **chưa chốt** | `_bmad-output/planning-artifacts/gdds/gdd-GameTest-2026-10-15/gdd.md` |
-| Epics | 🟡 Bản nháp | `.../gdds/gdd-GameTest-2026-10-15/epics.md` |
+| GDD | ✅ **Final** (2026-10-16) | `_bmad-output/planning-artifacts/gdds/gdd-GameTest-2026-10-15/gdd.md` |
+| Epics (mức GDD) | ✅ Chốt E0–E4 | `.../gdds/gdd-GameTest-2026-10-15/epics.md` |
 | Ghi chú sử 1287–1288 | ✅ Tra cứu sơ bộ | `.../gdds/gdd-GameTest-2026-10-15/history-notes-1288.md` |
 | Kiến trúc, Sprint, Code | ⏳ Chưa làm | — |
 
@@ -34,14 +34,8 @@ Cập nhật lần cuối: 2026-10-15
 
 Mỗi bước chạy trong một **cửa sổ context mới** của Claude Code.
 
-1. **Chốt GDD:** chạy `/gds-gdd`, chọn *update/finalize* trên GDD hiện có.
-   - Xác nhận cách chia Epic E0–E4 (130 giờ). Hiện đang ghi tạm theo đề xuất.
-   - Đối chiếu GDD với brief, rồi chạy validator theo checklist.
-   - Xử lý các mục còn treo:
-     - Tầm kéo của Trần Khánh Dư: 2 ô hay 1 ô?
-     - Vườn không nhà trống có quá mạnh không?
-     - Hình ảnh quân cờ: chữ hoặc biểu tượng thì "chưa đẹp lắm".
-   - Chuyển trạng thái GDD sang `final`.
+1. ~~**Chốt GDD**~~: xong ngày 2026-10-16. Đã chốt các mục treo, thêm Enemy AI, thứ tự hiệp, mục Vision, Narrative (khung), Risks. Chi tiết xem `decision-log.md` của GDD.
+   - Còn 1 giả định cần xác nhận: tướng bị Nguyễn Khoái đẩy vào sông thì tính như va chạm, không chết đuối.
 2. **(Tùy chọn) Cốt truyện:** `/gds-create-narrative`.
 3. **Kiến trúc:** `/gds-game-architecture`. Bước này bắt buộc.
 4. **Epics & Stories:** `/gds-create-epics-and-stories`, sau đó `/gds-check-implementation-readiness`.

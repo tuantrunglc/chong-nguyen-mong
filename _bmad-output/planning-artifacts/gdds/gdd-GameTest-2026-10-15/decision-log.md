@@ -31,3 +31,19 @@
 - 2026-10-15: Viết phần Epic theo đề xuất E0–E4 (130 giờ). Người dùng chưa xác nhận rõ; ghi vào GDD và nhắc lại ở bước Finalize.
 - 2026-10-15: Đã viết đủ mọi phần của gdd.md và epics.md. Trạng thái vẫn là draft. Người dùng dừng phiên ("xong thì push lên, về tôi làm tiếp").
 - VIỆC CÒN LẠI cho phiên sau (bước Finalize): (1) người dùng xác nhận cách chia Epic E0–E4; (2) rà decision log; (3) đối chiếu với brief; (4) cho validator kiểm tra theo checklist; (5) xử lý các mục ASSUMPTION/NOTE; (6) đề xuất gds-create-narrative (cờ needs_narrative); (7) chuyển trạng thái sang final.
+- 2026-10-16: Bắt đầu Finalize (intent: update/finalize), phiên mới sau khi clone repo.
+- 2026-10-16: CHỐT cách chia Epic E0–E4 (130 giờ, 13 tuần) giữ nguyên như bản nháp, kể cả mốc kiểm tra hết tuần 8 và phương án cắt khi E2 trễ.
+- 2026-10-16: CHỐT tầm kéo Trần Khánh Dư = 2 ô cho prototype; xem lại ở playtest E4 (phương án dự phòng: 1 ô).
+- 2026-10-16: CHỐT giữ Vườn không nhà trống như thiết kế (1 lần/trận, mở từ trận 4); playtest quyết; phương án dự phòng: mất 1 máu nhưng tối thiểu còn 1 máu.
+- 2026-10-16: HOÃN hình ảnh quân cờ sang E8. Prototype dùng chữ/biểu tượng đơn giản.
+- 2026-10-16: Đối chiếu brief và validator xong. Đã tự sửa: bỏ "Hào khí" khỏi cột trụ cột của mưu kế; dòng luật tướng gục trỏ sang Permadeath; thêm danh sách loại nút; khôi phục chính sách AI theo brief ("sửa tay VÀ thuê vẽ tranh chủ đạo", kiểm trang phục thời Trần); ngưỡng chuyển giai đoạn 1 = ≥3/5 dấu hiệu; epics E2 thêm rê chuột xem thông tin, phương án trễ cắt Cung kỵ và trận 5.
+- 2026-10-16: Validator: KHÔNG ĐẠT G-1 vì thiếu Enemy AI. Phase-blocker cho architecture: luật AI địch, thứ tự chính xác trong hiệp. Đang hỏi người dùng.
+- 2026-10-16: CHỐT Enemy AI: tất định; nhắm tướng gần nhất (Giữ ải: Kỵ binh và Bộ binh nhắm ô ải); ưu tiên ô đứng mà đòn trúng mục tiêu; hòa thì theo hướng B→Đ→N→T; thứ tự ra đòn bằng thứ tự hành động, ghi trong dữ liệu trận. Đã thêm mục Enemy AI, xử lý G-1.
+- 2026-10-16: CHỐT thứ tự hiệp: quân tiếp viện xuất hiện đầu bước 1 và chuẩn bị đòn ngay trong hiệp đó; kho lương hồi máu ở bước 4 (cuối hiệp), sau khi địch ra đòn; cuối hiệp báo tiếp viện cho hiệp sau.
+- 2026-10-16: CHỐT mọi đòn trúng mọi người đứng trên ô (kể cả tướng nhà Trần). Kỵ binh xung phong đứng yên, sông không chặn, rừng chặn. Kéo mục tiêu đã đứng kề thì không có hiệu ứng.
+- 2026-10-16: Hệ quả của luật đánh trúng quân mình: tướng bị Nguyễn Khoái đẩy vào sông thì tính như va chạm (mất 1 máu, đứng yên). Gắn ASSUMPTION, chờ người dùng xác nhận.
+- 2026-10-16: Đối chiếu brief: thêm Một câu + Vision and Core Feel (Hào khí Đông A ở phần trình bày, không phải trụ cột); References; câu "không tối đa doanh thu" và bối cảnh Steam; mục Narrative and Presentation (khung); chỉ tiêu nội dung bản 1288; bảng 6 rủi ro; Open Questions (tên game, Bạch Đằng); USP 2 sửa cho khớp với Vườn không nhà trống là mưu kế; epics thêm E8b Nội dung chữ và danh sách kiểm tra phát hành ở E9.
+- 2026-10-16: GHI RÕ ĐỔI so với brief: MVP brief ghi 1–2 luật địa hình, 1–2 mưu kế; GDD prototype có 4 địa hình, 2 mưu kế, quân tiếp viện và nhiệm vụ Giữ ải. Chấp nhận vì mỗi trận chỉ thêm một luật; nếu E2/E3 trễ thì cắt theo phương án đã có (trận 5, Cung kỵ).
+- 2026-10-16: Polish: workflow.doc_standards rỗng, không có chuẩn riêng để áp. Bỏ qua bước này.
+- 2026-10-16: Narrative: cờ needs_narrative vẫn bật. Đã thêm khung Narrative and Presentation vào GDD. Bước tiếp (tùy chọn) là gds-create-narrative.
+- 2026-10-16: GDD v1 FINAL. status: final. Còn mở nhưng không chặn: 2 ASSUMPTION (mưu kế mở dần theo trận; tướng bị đẩy vào sông không chết đuối), 2 mục kiểm tra khi playtest E4, 1 mục hoãn sang E8, kiểm chứng sử (trước khi phát hành), tên game, thiết kế Bạch Đằng (E7). Bước tiếp theo bắt buộc: gds-game-architecture.
