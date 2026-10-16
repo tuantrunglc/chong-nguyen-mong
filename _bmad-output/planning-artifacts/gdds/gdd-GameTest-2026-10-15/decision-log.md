@@ -47,4 +47,4 @@
 - 2026-10-16: Polish: workflow.doc_standards rỗng, không có chuẩn riêng để áp. Bỏ qua bước này.
 - 2026-10-16: Narrative: cờ needs_narrative vẫn bật. Đã thêm khung Narrative and Presentation vào GDD. Bước tiếp (tùy chọn) là gds-create-narrative.
 - 2026-10-16: GDD v1 FINAL. status: final. Còn mở nhưng không chặn: 2 ASSUMPTION (mưu kế mở dần theo trận; tướng bị đẩy vào sông không chết đuối), 2 mục kiểm tra khi playtest E4, 1 mục hoãn sang E8, kiểm chứng sử (trước khi phát hành), tên game, thiết kế Bạch Đằng (E7). Bước tiếp theo bắt buộc: gds-game-architecture.
-- 2026-10-17: CHỐT luật sông: tướng nhà Trần bị đẩy vào sông thì tính như va chạm (mất 1 máu, đứng yên), không chết đuối. Đã bỏ tag ASSUMPTION.
+- 2026-10-16: CHỐT luật sông: tướng nhà Trần bị đẩy vào sông thì tính như va chạm (mất 1 máu, đứng yên), không chết đuối. Đã bỏ tag ASSUMPTION.
