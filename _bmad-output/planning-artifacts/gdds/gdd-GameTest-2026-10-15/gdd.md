@@ -82,7 +82,9 @@ Mục tiêu là làm xong một game mình tự hào, không phải tối đa do
 | **Tiêu diệt** | Hạ hết quân Nguyên trên bàn (không có tiếp viện) | Cả 3 tướng gục |
 | **Giữ ải** | Qua hết **5 hiệp** mà không quân Nguyên nào bước vào ô ải (đánh dấu ở mép bàn phía nhà Trần) | Cả 3 tướng gục, hoặc một quân Nguyên bước vào ô ải |
 
-- Tướng còn 0 máu thì gục và không hành động được nữa trong trận đó.
+- Tướng còn 0 máu thì gục và không hành động được nữa trong trận đó. Tướng gục bị nhấc khỏi bàn, không chiếm ô. [MẶC ĐỊNH, duyệt qua kịch bản luật] [KIỂM TRA KHI PLAYTEST E4] Phương án thay thế: để xác lại làm vật cản.
+- Kiểm tra thắng/thua sau mỗi lần có quân gục, cả trong lượt người chơi lẫn trong pha địch. Nếu thắng và thua xảy ra cùng lúc thì **thắng được ưu tiên**. [MẶC ĐỊNH, duyệt qua kịch bản luật]
+- Giữ ải: quân Nguyên vào ô ải **bằng bất kỳ cách nào** (kể cả bị người chơi kéo vào) thì thua ngay. [MẶC ĐỊNH, duyệt qua kịch bản luật]
 - Trong prototype, sau mỗi trận các tướng được hồi đầy máu.
 - Luật tướng gục trong lượt chơi roguelite: xem Permadeath and Progression.
 - Một lượt chơi roguelite thắng khi hạ được trận cuối (Bạch Đằng), thua khi thua bất kỳ trận nào.
@@ -97,13 +99,14 @@ Mục tiêu là làm xong một game mình tự hào, không phải tối đa do
 | **Đánh vào ô** | Đòn địch gắn với ô, không gắn với người, nên có thể né, có thể làm lệch, và địch có thể đánh trúng nhau. | Thấy trước, tính được |
 | **Địa hình gây hiệu ứng** | Sông, rừng, hầm chông, kho lương (xem phần Terrain). | Địa hình là vũ khí, Tôn trọng lịch sử |
 | **Mưu kế của Trần Hưng Đạo** | Mỗi mưu kế dùng 1 lần mỗi trận, dùng được bất cứ lúc nào trong lượt người chơi, không tốn hành động của tướng. Prototype có 2 mưu kế (bảng dưới). | Tôn trọng lịch sử |
-| **Hoàn tác** | Hủy nước đi khi chưa đánh. Chơi lại hiệp: 1 lần mỗi trận. | Thấy trước, tính được |
+| **Hoàn tác** | Hủy **nước đi gần nhất**, khi tướng đó chưa đánh. Chơi lại hiệp: 1 lần mỗi trận. | Thấy trước, tính được |
+| **Xem trước kết quả đòn** | Khi rê chuột lên mục tiêu của một đòn, game hiện bóng mờ vị trí cuối của các quân bị ảnh hưởng và số máu sau đòn. Có từ E2 (bản tối giản), trau chuốt ở E4. Chốt 2026-10-16. | Thấy trước, tính được |
 
 **Mưu kế trong prototype:**
 
 | Mưu kế | Hiệu ứng | Cảm hứng lịch sử |
 |---|---|---|
-| **Sát Thát** | Trong lượt này, mọi đòn đánh *có gây sát thương* của tướng được **+1 sát thương**. Đòn kéo của Trần Khánh Dư không được cộng. | Quân sĩ thích hai chữ "Sát Thát" lên cánh tay |
+| **Sát Thát** | Trong **lượt người chơi** này, mọi đòn đánh *có gây sát thương* của tướng được **+1 sát thương**. Đòn kéo của Trần Khánh Dư không được cộng. Sát thương do va chạm, hầm chông, mép bàn cũng không được cộng. | Quân sĩ thích hai chữ "Sát Thát" lên cánh tay |
 | **Vườn không nhà trống** | Đốt toàn bộ kho lương trên bàn: các ô kho lương thành ô trống, đi vào được. Mọi quân Nguyên trên bàn **mất 1 máu**. Từ đó đến hết trận, quân Nguyên không hồi máu được nữa. | Chiến lược vườn không nhà trống năm 1285 và 1288 |
 
 [KIỂM TRA KHI PLAYTEST E4] Đã chốt giữ nguyên (2026-10-16). "Vườn không nhà trống" hạ ngay mọi Cung kỵ (chỉ có 1 máu). Nếu playtest thấy quá mạnh, đổi thành "mất 1 máu, nhưng không làm quân địch chết, tối thiểu còn 1 máu".
@@ -134,6 +137,7 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 - **Cản đường:** được đi xuyên qua ô có quân mình, không được đi xuyên qua ô có quân địch. Không có vùng khống chế, không có đòn đánh khi địch rời ô kề.
 - **Độ cao, tầm nhìn:** không có. Toàn bộ bàn cờ luôn hiển thị.
 - **Hiển thị đường đi:** khi chọn tướng, tô sáng các ô đi tới được. Khi rê chuột lên một ô, hiện đường đi.
+- **Chọn đường của tướng:** người chơi bấm ô đích, game tự chọn đường **ít hầm chông nhất**; hòa thì theo thứ tự hướng B→Đ→N→T. Ô sáng và đường đi hiện số máu sẽ mất. [MẶC ĐỊNH, duyệt qua kịch bản luật]
 - **Phạm vi prototype:** chỉ đánh trên bộ. Sông là ô bị chặn với mọi quân. Thuyền và thủy chiến để sau.
 ### Unit Types and Classes
 
@@ -142,8 +146,8 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 | Tướng | Vai | Đòn chính | Ý đồ chiến thuật |
 |---|---|---|---|
 | **Nguyễn Khoái** | Tiên phong (cận chiến) | Đánh 1 ô kề, **2 sát thương**, đẩy mục tiêu lùi **1 ô** theo hướng đánh | Đẩy địch vào chướng ngại, vào bẫy hoặc vào nhau |
-| **Phạm Ngũ Lão** | Phóng lao (đánh xa) | Phóng thẳng hàng, tầm **2–4 ô**, trúng vật đầu tiên trên đường, **1 sát thương** | Kết liễu từ xa. Gợi đến câu "Hoành sóc giang sơn" trong *Thuật hoài* |
-| **Trần Khánh Dư** | Phục binh (khống chế) | Kéo một địch thẳng hàng trong **3 ô** về phía mình **2 ô** (dừng sớm nếu bị chặn), **0 sát thương** | Kéo địch khỏi vị trí đẹp hoặc kéo vào bẫy, làm lệch đòn địch đã báo trước |
+| **Phạm Ngũ Lão** | Phóng lao (đánh xa) | Phóng thẳng hàng, **bay qua ô kề**, trúng vật đầu tiên ở ô thứ **2–4**, **1 sát thương**. Rừng hoặc kho lương ở bất kỳ ô nào trên đường, kể cả ô kề, đều chặn lao [MẶC ĐỊNH, duyệt qua kịch bản luật]. Sông không chặn | Kết liễu từ xa. Gợi đến câu "Hoành sóc giang sơn" trong *Thuật hoài* |
+| **Trần Khánh Dư** | Phục binh (khống chế) | Kéo **vật đầu tiên trên hàng** trong vòng **3 ô** về phía mình **2 ô** (dừng sớm nếu bị chặn), **0 sát thương**. Vật đó phải là quân Nguyên; nếu vật đầu tiên là tướng, rừng hoặc kho lương thì không kéo được [MẶC ĐỊNH, duyệt qua kịch bản luật] | Kéo địch khỏi vị trí đẹp hoặc kéo vào bẫy, làm lệch đòn địch đã báo trước |
 
 **Nguồn sử của từng tướng** (chi tiết trong `history-notes-1288.md`):
 - **Trần Khánh Dư:** *Toàn thư* chép rõ trận Vân Đồn, khi ông đánh tan đoàn thuyền lương.
@@ -158,8 +162,8 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 
 | Quân | Máu | Đi | Đòn đánh | Vai trò |
 |---|---|---|---|---|
-| **Kỵ binh Mông Cổ** | 2 | 3 | Xung phong thẳng hàng, **1 sát thương** vào vật đầu tiên trên đường | Đe dọa từ xa theo đường thẳng, buộc người chơi phải tránh khỏi hàng |
-| **Cung kỵ** | 1 | 3 | Bắn vào ô đã nhắm, tầm **2–3 ô**, **1 sát thương** | Yếu máu, ưu tiên hạ trước |
+| **Kỵ binh Mông Cổ** | 2 | 3 | Xung phong thẳng hàng, **1 sát thương** vào vật đầu tiên trên đường. Hàng trống tới mép bàn thì trượt [MẶC ĐỊNH, duyệt qua kịch bản luật] | Đe dọa từ xa theo đường thẳng, buộc người chơi phải tránh khỏi hàng |
+| **Cung kỵ** | 1 | 3 | Bắn vào ô đã nhắm, ô đó phải **thẳng hàng**, cách **2–3 ô** [MẶC ĐỊNH, duyệt qua kịch bản luật], **1 sát thương**. Tên bay qua quân; chỉ rừng hoặc kho lương nằm giữa mới chặn | Yếu máu, ưu tiên hạ trước |
 | **Bộ binh Nguyên** | 3 | 2 | Chém 1 ô kề, **1 sát thương** | Trâu nhưng chậm. Thường phải xử lý bằng địa hình, khó hạ bằng sát thương |
 
 **Tiến triển của unit:** chỉ có trong lượt chơi roguelite. Phần này *chi tiết hóa sau prototype*. Prototype không có lên cấp.
@@ -167,7 +171,7 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 
 **Trình tự một hiệp.** Hai bên đi luân phiên. Phe địch tách làm hai pha: chuẩn bị và ra đòn.
 1. **Địch chuẩn bị.**
-   - Quân tiếp viện đã báo ở hiệp trước xuất hiện trước tiên. Nếu ô đó có người đứng, quân tiếp viện không xuất hiện và người đứng trên ô nhận **1 sát thương**.
+   - Quân tiếp viện đã báo ở hiệp trước xuất hiện trước tiên. Nếu ô đó có người đứng (**bất kể phe nào**), quân tiếp viện bị hủy và người đứng trên ô nhận **1 sát thương**.
    - Sau đó từng quân Nguyên (kể cả quân vừa xuất hiện) di chuyển rồi báo trước đòn đánh, theo luật ở mục *Enemy AI*. Ô bị nhắm được tô đỏ. Mỗi đòn có số thứ tự ra đòn (1, 2, 3…) hiển thị ngay trên bàn; số thứ tự là thứ tự các quân hành động.
 2. **Lượt người chơi.**
    - Mỗi tướng được *đi* tối đa 3 ô, rồi *đánh* một lần. Có thể đánh mà không đi.
@@ -184,14 +188,14 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 - Đòn đã báo gắn với một ô cố định. Riêng Kỵ binh gắn với một hướng cố định, tính từ vị trí của nó.
 - Tướng rời khỏi ô bị nhắm thì né được đòn.
 - Quân địch bị đẩy hoặc kéo vào ô bị nhắm sẽ ăn đòn của chính đồng đội.
-- Quân đang chuẩn bị đánh mà bị đẩy sang ô khác thì đòn của nó dịch theo, giữ nguyên hướng và khoảng cách tương đối.
+- Quân đang chuẩn bị đánh mà bị đẩy sang ô khác thì đòn của nó dịch theo, giữ nguyên hướng và khoảng cách tương đối. Nếu đòn dịch ra ngoài bàn thì bị hủy. [MẶC ĐỊNH, duyệt qua kịch bản luật]
 - Quân bị hạ trước lượt ra đòn của mình thì đòn đó bị hủy.
 - **Mọi đòn trúng mọi người đứng trên ô bị nhắm**, không phân phe. Lao của Phạm Ngũ Lão, đòn đẩy của Nguyễn Khoái và đòn của địch đều có thể trúng tướng nhà Trần.
 - **Kỵ binh xung phong** thì đứng yên tại chỗ, đòn trúng vật đầu tiên trên hàng theo hướng đã báo. Sông không chặn đòn xung phong; rừng thì chặn.
 - **Kéo mục tiêu đã đứng kề** Trần Khánh Dư thì mục tiêu đứng yên, không ai mất máu.
 
 **Hoàn tác.**
-- Tướng đã đi nhưng chưa đánh thì được hủy nước đi.
+- Chỉ hủy được **nước đi gần nhất**, và chỉ khi tướng đó chưa đánh. Muốn quay lại xa hơn thì dùng "chơi lại hiệp". [MẶC ĐỊNH, duyệt qua kịch bản luật]
 - Được **"chơi lại hiệp này" 1 lần mỗi trận**: đưa bàn cờ về trạng thái đầu lượt người chơi.
 
 **Không có:** đòn phản công, đòn đánh khi địch rời ô kề, giới hạn thời gian mỗi lượt.
@@ -214,10 +218,12 @@ AI phải tất định và đọc được: người chơi đoán được quâ
 | `.` | Đất trống | Có | Không | Không có |
 | `~` | **Sông** | Không | Không (lao và tên bay qua được) | Quân Nguyên bị đẩy hoặc kéo xuống sông thì **chết ngay**. Tướng nhà Trần bị đẩy vào sông (chỉ xảy ra khi trúng đòn của Nguyễn Khoái) thì tính như va chạm: mất 1 máu, đứng yên. |
 | `#` | **Rừng** | Không | **Có** (chặn lao, tên, xung phong) | Bị đẩy vào rừng là va chạm: mất 1 máu, đứng yên tại chỗ |
-| `^` | **Hầm chông** | Có | Không | Bất kỳ quân nào bước vào hoặc bị đẩy vào đều **mất 1 máu**. Đứng yên trên ô thì không mất thêm. |
+| `^` | **Hầm chông** | Có | Không | Bất kỳ quân nào đi vào ô, **kể cả chỉ đi ngang qua** (tự đi, bị đẩy hoặc bị kéo), đều **mất 1 máu** mỗi ô hầm chông. Gục giữa đường thì dừng tại đó. Đứng yên trên ô thì không mất thêm. Quân Nguyên không tránh hầm chông. |
 | `L` | **Kho lương** | Không | Có | Cuối mỗi hiệp, mỗi quân Nguyên đứng kề (4 hướng) kho lương hồi **1 máu**, không vượt máu tối đa. Bị đốt bởi mưu kế *Vườn không nhà trống*. |
 
 **Luật va chạm:** đẩy hoặc kéo một quân vào quân khác hay vào vật cản (rừng, kho lương, mép bàn) thì quân bị đẩy đứng yên, và **cả hai bên va chạm đều mất 1 máu**. Riêng mép bàn chỉ làm quân bị đẩy mất máu.
+
+**Thứ tự phân giải đầy đủ** (đẩy/kéo từng ô, pha địch, mưu kế, gục/thắng/thua) nằm trong `game-architecture.md`, mục *Bảng thứ tự phân giải*. Các mục gắn [MẶC ĐỊNH, duyệt qua kịch bản luật] sẽ được tác giả duyệt bằng kịch bản ở E2–E3.
 
 **Để sau prototype:** thủy triều và bãi cọc (Bạch Đằng), thuyền, làng cần bảo vệ, đồi, ải, thời tiết.
 ### Campaign Structure

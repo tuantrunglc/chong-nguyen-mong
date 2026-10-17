@@ -1,6 +1,6 @@
 # Ghi chú làm tiếp: Chống Nguyên Mông (tên tạm)
 
-Cập nhật lần cuối: 2026-10-16
+Cập nhật lần cuối: 2026-10-17
 
 ## Đang ở đâu
 
@@ -11,7 +11,10 @@ Cập nhật lần cuối: 2026-10-16
 | GDD | ✅ **Final** (2026-10-16) | `_bmad-output/planning-artifacts/gdds/gdd-GameTest-2026-10-15/gdd.md` |
 | Epics (mức GDD) | ✅ Chốt E0–E4 | `.../gdds/gdd-GameTest-2026-10-15/epics.md` |
 | Ghi chú sử 1287–1288 | ✅ Tra cứu sơ bộ | `.../gdds/gdd-GameTest-2026-10-15/history-notes-1288.md` |
-| Kiến trúc, Sprint, Code | ⏳ Chưa làm | — |
+| Kiến trúc game | ✅ Xong (9/9 bước) | `_bmad-output/planning-artifacts/game-architecture.md` |
+| Luật cho AI (project context) | ✅ Xong (57 luật) | `_bmad-output/project-context.md` |
+| Epic & story (chi tiết) | ✅ Xong: 5 epic, 45 story | `_bmad-output/planning-artifacts/epics.md` |
+| Kiểm tra sẵn sàng, Sprint, Code | ⏳ Chưa làm | — |
 
 ## Game đã chốt (tóm tắt)
 
@@ -27,20 +30,20 @@ Cập nhật lần cuối: 2026-10-16
   - Địa hình: sông, rừng, hầm chông, kho lương.
   - Mưu kế: Sát Thát, Vườn không nhà trống.
 - **Khán giả và phát hành:** người Việt mê sử. Bản web hoặc itch.io trước, Steam sau.
-- **Công cụ và nguồn lực:** Godot, làm một mình, 10 giờ mỗi tuần, ngân sách vài trăm USD.
+- **Công cụ và nguồn lực:** Godot 4.7.2 (chỉ GDScript, web đơn luồng), GUT 9.7.1, làm một mình, 10 giờ mỗi tuần, ngân sách vài trăm USD.
+- **Cách làm:** AI viết toàn bộ code; tác giả quyết luật và test. Luật được viết thành **kịch bản bàn cờ chữ**, tác giả duyệt bằng `tools/xem_kich_ban.sh` trước khi AI code. Một lệnh kiểm tra tất cả: `tools/test.sh`.
 - **Mục tiêu 3 tháng:** prototype gồm 5 trận làm tay, cho người thân chơi thử.
 
 ## Việc cần làm tiếp (theo thứ tự)
 
-Mỗi bước chạy trong một **cửa sổ context mới** của Claude Code.
+Mỗi bước chạy trong một **cửa sổ context mới** của Claude Code (`/clear`).
 
-1. ~~**Chốt GDD**~~: xong ngày 2026-10-16. Đã chốt các mục treo, thêm Enemy AI, thứ tự hiệp, mục Vision, Narrative (khung), Risks. Chi tiết xem `decision-log.md` của GDD.
-2. **(Tùy chọn) Cốt truyện:** `/gds-create-narrative`.
-3. **Kiến trúc:** `/gds-game-architecture`. Bước này bắt buộc.
-4. **Epics & Stories:** `/gds-create-epics-and-stories`, sau đó `/gds-check-implementation-readiness`.
-5. **Sprint:** `/gds-sprint-planning`, rồi lặp `/gds-create-story` → `/gds-dev-story` → `/gds-code-review`.
-
-Muốn đi nhanh: sau khi chốt GDD, có thể dùng `gds-agent-game-solo-dev` để dựng ngay prototype combat (E0–E2) trong Godot, chưa cần qua bước kiến trúc.
+1. ~~Chốt GDD~~ (2026-10-16).
+2. ~~Kiến trúc~~, ~~project context~~, ~~epic & story~~ (2026-10-16/17). GDD đã được bổ sung các luật chốt trong lúc làm kiến trúc.
+3. **Kiểm tra sẵn sàng:** `/gds-check-implementation-readiness`. Bước này bắt buộc, làm tiếp theo.
+4. **Sprint:** `/gds-sprint-planning`.
+5. **Làm từng story, bắt đầu từ Story 0.1:** `/gds-create-story` → `/gds-dev-story` → (tùy chọn) `/gds-code-review`. Sau mỗi story: chạy `tools/test.sh` và làm theo các bước Cho/Khi/Thì của story.
+6. **(Tùy chọn, giai đoạn 1) Cốt truyện:** `/gds-create-narrative`.
 
 Không nhớ đang ở bước nào thì chạy `/bmad-help`.
 
@@ -49,3 +52,6 @@ Không nhớ đang ở bước nào thì chạy `/bmad-help`.
 - Toàn bộ quyết định và lý do nằm trong `decision-log.md` của GDD và `.decision-log.md` của brief.
 - **Phạm Ngũ Lão không có tên trong *Toàn thư* các năm 1287–1288.** Thông tin về ông lấy theo *Việt Nam sử lược*, nên trong game phải ghi chú nguồn.
 - Chưa rõ Nghị định 147/2024 có áp dụng cho bản web miễn phí hay không. Cần tìm hiểu trước khi phát hành công khai.
+- **Việc tác giả tự làm ở Story 0.5:** tạo tài khoản itch.io (nếu chưa có), tạo trang game để riêng tư, chạy `butler login` một lần.
+- **Còn treo, tác giả chưa quyết:** công cụ giải thử (để sau E4); có công khai bản web hay không (mặc định riêng tư).
+- Các luật gắn **[MẶC ĐỊNH]** trong GDD sẽ được duyệt qua kịch bản luật ở từng story.
