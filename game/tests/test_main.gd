@@ -3,16 +3,26 @@ extends GutTest
 ## Không so với chữ cụ thể: tác giả được quyền sửa chữ trong CSV.
 
 const MAIN_SCENE: String = "res://scenes/main.tscn"
+const PROBE_DIR: String = "user://test_main"
+const PROBE_FILE: String = PROBE_DIR + "/thu_luu.json"
 
 var _old_window_title: String = ""
 
 
 func before_each() -> void:
 	_old_window_title = get_window().title
+	DirAccess.make_dir_recursive_absolute(PROBE_DIR)
+	SaveProbe.path = PROBE_FILE
+	Log.clear()
 
 
 func after_each() -> void:
 	get_window().title = _old_window_title
+	SaveProbe.path = SaveProbe.DEFAULT_PATH
+	if FileAccess.file_exists(PROBE_FILE):
+		DirAccess.remove_absolute(PROBE_FILE)
+	DirAccess.remove_absolute(PROBE_DIR)
+	Log.clear()
 
 
 func _make_main() -> Node2D:
@@ -45,3 +55,10 @@ func test_window_title_uses_translated_text() -> void:
 	get_window().title = ""
 	_make_main()
 	assert_eq(get_window().title, tr("app.title"))
+
+
+func test_counts_each_open_and_logs_even_without_dev() -> void:
+	_make_main()
+	_make_main()
+	assert_true(FileAccess.file_exists(PROBE_FILE), "có ghi file thử lưu")
+	assert_has(Log.get_lines(), "[INFO][luu_thu] lần mở thứ 2, user:// bền: true")

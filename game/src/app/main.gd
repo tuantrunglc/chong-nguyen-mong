@@ -36,8 +36,13 @@ func _ready() -> void:
 	_version_label.position = BoardView.viewport_size - _version_label.size - Vector2(VERSION_MARGIN, VERSION_MARGIN)
 	add_child(_version_label)
 
+	# Thử lưu user:// (Story 0.5): luôn đếm và ghi log, vì trên itch.io không bật được dev trong iframe
+	# (tác giả chốt 2026-10-17). Xem bằng F12 → Console. Chữ trên màn hình chỉ hiện khi bật dev.
+	var opens: int = SaveProbe.bump(SaveProbe.path)
+	Log.info("luu_thu", "lần mở thứ %d, user:// bền: %s" % [opens, OS.is_userfs_persistent()])
+
 	var dev_tools: DevTools = DevTools.new()
-	dev_tools.setup(AppState.launch.dev)
+	dev_tools.setup(AppState.launch.dev, opens)
 	add_child(dev_tools)
 
 
