@@ -102,12 +102,17 @@ bao_cao+=("${chi_tiet_2[@]+"${chi_tiet_2[@]}"}")
 # game/.godot/ không có trong git: phải quét trước, nếu không GUT thoát mã 0 mà không chạy test nào.
 da_quet=1
 IMPORT_LOG="$KET_QUA_DIR/import.log"
+IMPORT_LOG_LAN1="$KET_QUA_DIR/import.lan1.log"
 LOI_SCRIPT='SCRIPT ERROR|Parse Error'
 ma_quet=0
+da_quet_lai=0
+rm -f "$IMPORT_LOG_LAN1"
 "$GODOT" --headless --path "$GAME" --import >"$IMPORT_LOG" 2>&1 || ma_quet=$?
 # Repo mới clone: lần quét đầu Godot nạp Theme trước khi quét xong font nên báo lỗi oan.
-# Có lỗi thì quét lại một lần; lỗi thật trong script vẫn còn ở lần hai.
+# Có lỗi thì quét lại một lần; lỗi thật trong script vẫn còn ở lần hai. Giữ log lần đầu để đối chiếu.
 if (( ma_quet == 0 )) && grep -qE "$LOI_SCRIPT" "$IMPORT_LOG"; then
+	da_quet_lai=1
+	mv "$IMPORT_LOG" "$IMPORT_LOG_LAN1"
 	"$GODOT" --headless --path "$GAME" --import >"$IMPORT_LOG" 2>&1 || ma_quet=$?
 fi
 if (( ma_quet == 0 )); then
@@ -127,6 +132,9 @@ else
 	ghi_buoc 3 "Quét project" "trượt"
 	bao_cao+=("  ❌ không quét được project (xem build/test/import.log)")
 	ly_do_truot+=("không quét được project")
+fi
+if (( da_quet_lai )); then
+	bao_cao+=("  ↻ lần quét đầu báo lỗi nên đã quét lại một lần (log lần đầu: build/test/import.lan1.log)")
 fi
 
 # ---------- Bước 4: chạy test GUT ----------

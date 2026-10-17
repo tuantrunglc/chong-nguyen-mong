@@ -26,3 +26,8 @@
 
 - Story 0.5: bản web phải hiện tiêu đề tiếng Việt (không phải `app.title`); kiểm trên trình duyệt đặt ngôn ngữ tiếng Anh.
 - Giấy phép OFL yêu cầu `OFL.txt` đi kèm font khi phát hành. Preset export (Story 0.5) phải gồm `assets/fonts/OFL.txt` (filter `*.txt` hoặc đúng file đó), hoặc ghi giấy phép ở chỗ người chơi thấy được.
+
+## Deferred from: code review of 0-4-chu-tieng-viet-va-font (2026-10-17)
+
+- Bước 3 của `tools/test.sh` (quét lại một lần khi lần đầu có lỗi oan trên repo mới clone) chưa có tự kiểm tự động. Cần hai ca: bản sao không có `game/.godot/` phải "đạt"; bản sao có script lỗi cú pháp thật phải "trượt" dù đã quét lại.
+- `config/name` trong `game/project.godot` vẫn viết cứng "Chống Nguyên Mông" (Task 4.2 của Story 0.4 bảo giữ). Sửa `app.title` trong CSV thì tên app trên Dock macOS và tiêu đề cửa sổ lúc mới mở (trước `_ready()`) vẫn là tên cũ. Story 0.5 kiểm thêm tên trang/tab trên trình duyệt; tác giả quyết có cần đồng bộ không.

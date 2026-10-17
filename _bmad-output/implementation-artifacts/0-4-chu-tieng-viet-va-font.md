@@ -4,7 +4,7 @@ baseline_commit: bec53eb
 
 # Story 0.4: Chữ tiếng Việt và font
 
-Status: review
+Status: done
 
 ## Story
 
@@ -142,6 +142,36 @@ tôi muốn mọi chữ trong game nằm trong một file riêng và hiện đ�
     - chạy `--import` rồi chụp khung hình: tiêu đề đổi theo, đủ dấu.
   - [x] 7.5 Thử AC 4 trên bản sao tạm: đặt `locale/fallback="en"` thì `test_i18n.gd` phải **trượt**. Việc này chứng minh test bắt được lỗi.
   - [x] 7.6 Commit khi xanh. Lời commit gợi ý: `Thêm file dịch, font Be Vietnam Pro và Theme chung (Story 0.4)`. Chuyển story sang `review`.
+
+### Review Findings
+
+Code review 2026-10-17. Bốn lớp: Blind Hunter, Edge Case Hunter, Verification Gap, Acceptance Auditor. Không lớp nào hỏng.
+
+- [x] [Review][Patch] Tắt mượn font hệ thống (tác giả chốt 2026-10-17: máy hiện giống web, thiếu chữ thì thấy ô vuông ngay): đặt `allow_system_fallback=false` ở cả hai `.ttf.import` [game/assets/fonts/font_be_vietnam_pro_regular.ttf.import:22]
+- [x] [Review][Patch] Không test nào chạy `main.gd`: đổi nhầm `TitleLabel`, bỏ `tr()`, xóa dòng `get_window().title` thì `tools/test.sh` vẫn xanh. Riêng tiêu đề cửa sổ: `config/name` đã là "Chống Nguyên Mông" nên mắt thường không phân biệt được dòng đó có chạy hay không. Thêm `test_main.gd` kiểm chữ tiêu đề = `tr("app.title")`, đúng `TitleLabel`, nằm trên bàn cờ (đáy < 52), tiêu đề cửa sổ = `tr("app.title")` [game/src/app/main.gd:17]
+- [x] [Review][Patch] Test Theme không kiểm cỡ chữ 16/28 và `TitleLabel/base_type` (quyết định 2 của tác giả: chữ đậm cỡ 28) [game/tests/test_font.gd:29]
+- [x] [Review][Patch] Test font chỉ kiểm chữ cái; chưa kiểm chữ số và dấu đang hiện trên màn hình (`·` của nhãn phiên bản, `: , . - "`) [game/tests/test_font.gd:7]
+- [x] [Review][Patch] Bước 3 `tools/test.sh` quét lại thì ghi đè `import.log`: mất log lần đầu, báo cáo không nói đã quét lại. Giữ log lần đầu (`import.lan1.log`) và in một dòng "đã quét lại" [tools/test.sh:110]
+- [x] [Review][Defer] Bước 3 `tools/test.sh` (quét lại khi có lỗi oan) chưa có tự kiểm: repo mới clone phải "đạt", script lỗi thật phải "trượt" [tools/test.sh:105] — deferred: cùng loại với các mục tự kiểm `test.sh` đã hoãn; chưa có khung mẫu cho repo mới clone
+- [x] [Review][Defer] `config/name` vẫn viết cứng "Chống Nguyên Mông" (Task 4.2 bảo giữ): sửa `app.title` trong CSV thì tên app trên Dock macOS và tiêu đề cửa sổ trước `_ready()` vẫn là tên cũ [game/project.godot:8] — deferred: đổi thì phải sửa spec; tác giả quyết ở Story 0.5 khi làm bản xuất
+
+#### Rejected
+
+- Label tự dịch lại chữ đã `tr()` (dịch hai lần), tiêu đề không đổi khi đổi ngôn ngữ — low: chữ tiếng Việt không trùng khóa nào nên không hại; nút đổi ngôn ngữ thuộc Giai đoạn 2.
+- Nhãn phiên bản và chữ DEV vẫn qua bộ dịch tự động — low: chỉ đổi nếu có khóa đúng là "DEV" hoặc "v0.1.0 · ..."; không có.
+- `_keys()` tách CSV bằng tay: khóa có ngoặc kép, giá trị nhiều dòng, dòng khóa rỗng — low: tác giả chỉ sửa giá trị; giá trị có dấu phẩy vẫn tách đúng khóa.
+- CSV có BOM làm hỏng test — false: BOM chỉ nằm ở dòng tiêu đề, mà `_keys()` bỏ dòng 0.
+- Excel lưu bằng dấu `;` — false: test trượt rõ ràng (khóa thành `app.title;...`), đúng hành vi.
+- Dấu dạng tổ hợp (NFD) — maybe-false, nếu có cũng chỉ low: chưa có chữ NFD nào trong CSV.
+- Sửa CSV làm `text.vi.translation` thành "đã sửa" — low: file sinh lại giống hệt khi CSV trả về như cũ (git status sạch sau các lần chạy).
+- Thiếu `text.vi.translation` mà `test.sh` không bắt — false: `test_every_key_translates_on_english_machine` trượt vì `tr()` trả về tên khóa.
+- Tiêu đề dài tràn hoặc đè chữ DEV — low: màn hình rộng 1280, cỡ 28 chứa được khoảng 60 chữ.
+- Thiếu bản dịch thì không ghi log — low: test đã bắt.
+- `theme.get_font` trả font mặc định nên thông báo lỗi chỉ sai đường dẫn — low: chỉ là chữ trong thông báo, test vẫn trượt đúng.
+- Font không phải `FontFile` thì thông báo lẫn với "không nạp được" — low: test vẫn trượt.
+- Lần quét đầu thoát mã khác 0 không được quét lại — false: Debug Log ghi bản sao mới clone ra "đạt".
+- `chay.sh` trên repo mới clone gặp lỗi oan mà im lặng — maybe-false, nếu có cũng chỉ low: Theme được nạp lúc game chạy, khi font đã quét xong.
+- Dòng mẫu "Ultimate context engine analysis completed" trong Completion Notes; hướng dẫn sửa CSV chưa cảnh báo Excel — sửa chính file story đang review.
 
 ## Dev Notes
 
@@ -324,12 +354,14 @@ Claude Opus 5.5 (claude-opus-5-5)
 - `game/assets/fonts/font_be_vietnam_pro_regular.ttf` (+ `.import`) (mới)
 - `game/assets/fonts/font_be_vietnam_pro_bold.ttf` (+ `.import`) (mới)
 - `game/assets/fonts/OFL.txt` (mới)
+- Hai file `.ttf.import`: sau code review đặt `allow_system_fallback=false`
 - `game/assets/theme/main_theme.tres` (mới)
 - `game/i18n/text.csv`, `text.csv.import`, `text.vi.translation` (mới; hai file sau do Godot sinh)
 - `game/project.godot` (sửa: `[gui]`, `[internationalization]`)
 - `game/src/app/main.gd` (sửa: tiêu đề, tiêu đề cửa sổ)
 - `game/tests/test_i18n.gd`, `.uid` (mới)
 - `game/tests/test_font.gd`, `.uid` (mới)
+- `game/tests/test_main.gd`, `.uid` (mới, sau code review)
 - `tools/test.sh` (sửa: bước 3 quét lại khi lần đầu có lỗi)
 - `_bmad-output/implementation-artifacts/deferred-work.md` (thêm 2 mục cho Story 0.5)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` (trạng thái)
@@ -338,3 +370,4 @@ Claude Opus 5.5 (claude-opus-5-5)
 ### Change Log
 
 - 2026-10-17: Thêm font Be Vietnam Pro, Theme chung, file dịch `text.csv` (fallback `vi`), tiêu đề màn hình và cửa sổ; 6 test mới (tổng 46). `tools/test.sh` quét project lại một lần khi lần đầu có lỗi (repo vừa clone).
+- 2026-10-17: Sửa theo code review: tắt mượn font hệ thống (tác giả chốt); thêm `test_main.gd` (4 test: chữ tiêu đề, kiểu chữ đậm, nằm trên bàn cờ, tiêu đề cửa sổ); test Theme kiểm cỡ chữ 16/28; test font kiểm chữ số và dấu; `tools/test.sh` giữ log lần quét đầu (`import.lan1.log`) và báo "đã quét lại". Tổng 50 test.
