@@ -4,7 +4,7 @@ baseline_commit: a557bd4
 
 # Story 0.6: Cài công cụ AI (MCP)
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -177,15 +177,15 @@ tôi muốn AI tự nhìn thấy được game đang chạy,
     Dùng đúng ID thư viện và tên công cụ đã kiểm được ở Task 7 (sửa ví dụ trên nếu khác).
   - [x] 6.2 Ghi vào `NEXT-STEPS.md` một mục "Công cụ AI (MCP)": cài bằng `tools/cai_dat.sh`, lần đầu phải mở lại Claude Code và đồng ý 2 server; kiểm bằng `claude mcp list`.
 
-- [ ] **Task 7: Kiểm thật cùng tác giả** (AC: 1, 3, 4, 5, 6, 9)
+- [x] **Task 7: Kiểm thật cùng tác giả** (AC: 1, 3, 4, 5, 6, 9)
   - [x] 7.1 Chạy `tools/cai_dat.sh` (AI chạy được, không cần tác giả): lần đầu cài MCP; lần hai in `Đã cài …` cho cả 3 phần. Thử Node thiếu: chạy khối kiểm Node với `PATH` không có `node` (bản sao tạm của đoạn kiểm, giống cách Story 0.5 thử trượt 25 MB), thấy lỗi tiếng Việt, mã 1.
-  - [ ] 7.2 Commit phần đã xong (test xanh). Hướng dẫn tác giả (theo "Hướng dẫn cho tác giả" ở Dev Notes): thoát Claude Code, mở lại, đồng ý 2 server, gõ `claude mcp list`. Cả hai phải `✔ Connected`. **Phiên AI hiện tại không dùng được MCP mới cho tới khi mở lại**: phần kiểm 7.3–7.5 làm ở phiên mới (tác giả gọi lại `/gds-dev-story` cho story này, AI đọc Debug Log để biết đang ở đâu).
-  - [ ] 7.3 AC 4: chạy `tools/chay.sh --dev` nền, gọi `capture_screenshot`, mô tả ảnh. Nếu `capture_screenshot` không hiện trong danh sách công cụ, gọi `tool_catalog` với từ khóa "screenshot" (nhóm `testing` tự bật). Nếu Claude Code không làm mới danh sách công cụ sau khi bật nhóm, ghi lại và thử gọi thẳng công cụ; vẫn không được thì **hỏi tác giả** (không tự đổi profile `compact`, vì đó là quyết định #23).
-  - [ ] 7.4 AC 5: đọc đầu ra của lệnh nền, thấy `[INFO][mcp] mở cổng 7777 cho GoPeak (chỉ máy này)` và `[INFO][luu_thu] ...`. Thử thêm `inject_mouse_click` vào giữa bàn cờ (không cần kết quả gì, chỉ cần không lỗi) để biết bơm input dùng được cho E1.
-  - [ ] 7.5 AC 6: tra Context7 một API Godot dự án sẽ dùng (ví dụ `Tween` hoặc `TranslationServer`), ghi ID thư viện và nhánh đã dùng vào Debug Log.
+  - [x] 7.2 Commit phần đã xong (test xanh). Hướng dẫn tác giả (theo "Hướng dẫn cho tác giả" ở Dev Notes): thoát Claude Code, mở lại, đồng ý 2 server, gõ `claude mcp list`. Cả hai phải `✔ Connected`. **Phiên AI hiện tại không dùng được MCP mới cho tới khi mở lại**: phần kiểm 7.3–7.5 làm ở phiên mới (tác giả gọi lại `/gds-dev-story` cho story này, AI đọc Debug Log để biết đang ở đâu).
+  - [x] 7.3 AC 4: chạy `tools/chay.sh --dev` nền, gọi `capture_screenshot`, mô tả ảnh. Nếu `capture_screenshot` không hiện trong danh sách công cụ, gọi `tool_catalog` với từ khóa "screenshot" (nhóm `testing` tự bật). Nếu Claude Code không làm mới danh sách công cụ sau khi bật nhóm, ghi lại và thử gọi thẳng công cụ; vẫn không được thì **hỏi tác giả** (không tự đổi profile `compact`, vì đó là quyết định #23).
+  - [x] 7.4 AC 5: đọc đầu ra của lệnh nền, thấy `[INFO][mcp] mở cổng 7777 cho GoPeak (chỉ máy này)` và `[INFO][luu_thu] ...`. Thử thêm `inject_mouse_click` vào giữa bàn cờ (không cần kết quả gì, chỉ cần không lỗi) để biết bơm input dùng được cho E1.
+  - [x] 7.5 AC 6: tra Context7 một API Godot dự án sẽ dùng (ví dụ `Tween` hoặc `TranslationServer`), ghi ID thư viện và nhánh đã dùng vào Debug Log.
   - [x] 7.6 AC 8: khi game đang chạy `--dev`, `lsof -nP -iTCP:7777 -sTCP:LISTEN` phải cho thấy `127.0.0.1:7777` (không phải `*:7777`). Chạy `tools/chay.sh` **không** `--dev`: `lsof` không thấy cổng 7777.
   - [x] 7.7 AC 9: `tools/build_web.sh` đạt; kiểm bản web không có addon: `strings build/web/index.pck | grep -c godot_mcp` ra `0` (hoặc cách khác chắc hơn, ghi vào Debug Log). Dung lượng bản nén không đổi đáng kể (≈ 10.4 MB).
-  - [ ] 7.8 Ghi kết quả vào Debug Log, cập nhật Completion Notes (kèm hướng dẫn tác giả tự test), File List, Change Log. Commit.
+  - [x] 7.8 Ghi kết quả vào Debug Log, cập nhật Completion Notes (kèm hướng dẫn tác giả tự test), File List, Change Log. Commit.
 
 ## Dev Notes
 
@@ -396,9 +396,23 @@ Claude Opus 5.5 (`claude-opus-5-5`)
 - 7.7: `tools/build_web.sh` đạt, bản nén 10.4 MB (không đổi). `strings build/web/index.pck | grep -c godot_mcp` → 0; chuỗi "MCP Runtime"/`_start_server`/`inject_mouse` → 0. Chỉ có `src/debug/mcp_runtime.gd` (file bọc, trên web `should_start` trả false). `addons/gut` → 0.
 - 7.2: đã commit `ce32126` (77/77 xanh). **Dừng ở đây chờ tác giả** mở lại Claude Code và duyệt 2 server. Phiên sau: làm 7.2 (kiểm `claude mcp list` ✔ Connected) → 7.3 → 7.4 → 7.5 → 7.8.
 
+**Phiên 2 (2026-10-18), sau khi tác giả mở lại Claude Code và duyệt 2 server:**
+
+- 7.2: tác giả gõ `claude mcp list` → `gopeak: tools/mcp_gopeak.sh - ✔ Connected`, `context7: tools/mcp_context7.sh - ✔ Connected`.
+- 7.3: `tools/chay.sh --dev` nền. Profile `compact` không có `capture_screenshot`; gọi `tool_catalog` với `query: "screenshot"` → `newlyActivated: ["testing"]`. Claude Code thấy ngay công cụ mới (tên `mcp__gopeak__capture-screenshot`, phải nạp qua ToolSearch), không cần khởi động lại, không đổi profile. Ảnh 1280×720: tiêu đề "Hào Khí Đông A", bàn 7×7 màu be viền nâu, "DEV · lần mở thứ 3" đỏ góc trên trái, `v0.1.0 · c60d7c3` góc dưới phải. Đạt AC 4.
+- 7.4: log đọc từ đầu ra lệnh nền: `[INFO][app] dev=1`, `[INFO][luu_thu] lần mở thứ 3, user:// bền: true`, `[INFO][mcp] mở cổng 7777 cho GoPeak (chỉ máy này)`, kèm `[MCP Runtime] Client connected/disconnected` mỗi lần GoPeak gọi. `inject_mouse_click` qua GoPeak (`x: 640, y: 380`, công cụ nhận `x`/`y` riêng, server tự đổi sang `[x, y]`) → `input_injected`, game không báo lỗi. Đạt AC 5.
+- 7.5: `resolve-library-id` "Godot" → `/godotengine/godot-docs` (45 772 đoạn, bản `__branch__4.5`, `__branch__4.7`). ID dùng được: **`/godotengine/godot-docs/__branch__4.7`**. Tra "Tween create_tween/tween_property" → trích `class_tween.rst` và `class_node.rst`, nguồn ghi `github.com/godotengine/godot-docs/blob/4.7/...`. Không cần API key. Đạt AC 6.
+- Tắt game bằng `pkill` (mã 143 là do tắt, không phải lỗi). `tools/test.sh` lại: 77/77 đạt.
+
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
+- Đạt AC 1–9. GoPeak 2.3.8 và Context7 4.1.1 ghim bằng `tools/mcp/package-lock.json`, cài vào `.tools/mcp/` bằng `tools/cai_dat.sh`; `.mcp.json` chỉ gọi script trong `tools/`.
+- Addon runtime GoPeak chép từ gói npm đã ghim, sửa 1 dòng để chỉ nghe `127.0.0.1`; chỉ bật khi dev + desktop + có cửa sổ (`game/src/debug/mcp_runtime.gd`), không thêm autoload, không có trong bản web.
+- Cách AI chụp màn hình (đã ghi trong `CLAUDE.md`): `tools/chay.sh --dev` nền → `tool_catalog` "screenshot" → `capture_screenshot`. Không dùng `run_project` (chạy headless).
+- Lệch kiến trúc: xem mục "Lệch so với tài liệu kiến trúc" ở Dev Notes (chỉ cài runtime, không cài addon editor; thêm `tools/mcp/`, 2 script, `.mcp.json`). Đề xuất ghi vào project-context quy tắc chụp bằng `chay.sh --dev`: chờ tác giả duyệt.
+- Test: 77 (thêm 13 so với 64 trước story).
+- **Tác giả tự test:** mở Claude Code trong thư mục repo, nói "chụp màn hình game" → AI gửi ảnh có bàn cờ, chữ DEV đỏ, nhãn phiên bản. Nói "xem log game" → AI kể các dòng `[INFO][...]`, có dòng `[INFO][mcp] mở cổng 7777`. Nói "tra Context7 cách dùng Tween trong Godot 4.7" → AI trích tài liệu, nguồn có `blob/4.7`.
 
 ### File List
 
@@ -427,3 +441,6 @@ Claude Opus 5.5 (`claude-opus-5-5`)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ### Change Log
+
+- 2026-10-18: Phần trên máy (Task 0–6, 7.1, 7.6, 7.7): ghim GoPeak 2.3.8 + Context7 4.1.1, `cai_dat.sh` cài MCP, `.mcp.json`, addon runtime chỉ nghe `127.0.0.1`, 13 test mới (tổng 77).
+- 2026-10-18: Kiểm cùng tác giả (7.2–7.5): 2 server ✔ Connected, chụp màn hình qua GoPeak, đọc log, bơm click, tra Context7 `/godotengine/godot-docs/__branch__4.7`. Chuyển sang review.
