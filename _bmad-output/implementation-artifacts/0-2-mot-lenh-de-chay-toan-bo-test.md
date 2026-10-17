@@ -1,5 +1,5 @@
 ---
-baseline_commit: 4eed81294bf170dd56fa2ff55f83fc6cf5671156
+baseline_commit: 38ce3615abd4976b57869240811dcabfc5e8cd2f
 ---
 
 # Story 0.2: Một lệnh để chạy toàn bộ test
