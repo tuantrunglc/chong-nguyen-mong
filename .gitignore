@@ -2,3 +2,8 @@
 *.log
 __pycache__/
 .venv/
+build/
+.tools/
+game/.godot/
+game/build_info.json
+*.tmp
