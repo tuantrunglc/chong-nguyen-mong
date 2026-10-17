@@ -1,5 +1,5 @@
 # generated: 2026-10-17 10:21
-# last_updated: 2026-10-17 12:00
+# last_updated: 2026-10-17 11:50
 # project: GameTest
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-10-17 10:21"
-last_updated: "2026-10-17 12:00"
+last_updated: "2026-10-17 11:50"
 project: GameTest
 project_key: NOKEY
 tracking_system: file-system
@@ -43,8 +43,8 @@ story_location: _bmad-output/implementation-artifacts
 
 development_status:
   epic-0: in-progress
-  0-1-project-godot-trong-chay-duoc-tren-may: review
-  0-2-mot-lenh-de-chay-toan-bo-test: backlog
+  0-1-project-godot-trong-chay-duoc-tren-may: done
+  0-2-mot-lenh-de-chay-toan-bo-test: ready-for-dev
   0-3-log-co-dev-va-tham-so-khoi-dong: backlog
   0-4-chu-tieng-viet-va-font: backlog
   0-5-ban-web-tren-itch-io-rieng-tu: backlog
