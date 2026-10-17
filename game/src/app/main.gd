@@ -1,15 +1,29 @@
 extends Node2D
-## Màn hình gốc: bàn cờ trống và nhãn phiên bản ở góc dưới phải.
+## Màn hình gốc: tiêu đề, bàn cờ trống và nhãn phiên bản ở góc dưới phải.
 
 const BUILD_INFO_PATH: String = "res://build_info.json"
 const VERSION_FONT_SIZE: int = 14
 const VERSION_MARGIN: int = 8
+## Tiêu đề nằm phía trên bàn cờ (bàn cờ bắt đầu ở y = 52).
+const TITLE_TOP: int = 4
+const TITLE_HEIGHT: int = 44
 
+var _title_label: Label
 var _board_view: BoardView
 var _version_label: Label
 
 
 func _ready() -> void:
+	get_window().title = tr("app.title")
+
+	_title_label = Label.new()
+	_title_label.text = tr("app.title")
+	_title_label.theme_type_variation = &"TitleLabel"
+	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_title_label.size = Vector2(BoardView.viewport_size.x, TITLE_HEIGHT)
+	_title_label.position = Vector2(0, TITLE_TOP)
+	add_child(_title_label)
+
 	_board_view = BoardView.new()
 	add_child(_board_view)
 

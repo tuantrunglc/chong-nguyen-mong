@@ -4,7 +4,7 @@ baseline_commit: bec53eb
 
 # Story 0.4: Chữ tiếng Việt và font
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -28,8 +28,8 @@ tôi muốn mọi chữ trong game nằm trong một file riêng và hiện đ�
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Font Be Vietnam Pro** (AC: 1, 3)
-  - [ ] 1.1 Tải từ repo `google/fonts`, **ghim theo commit** `c13390277dfb1fcc7415d84ef7ef9cfc1e52f8c1`. Đường dẫn là `https://raw.githubusercontent.com/google/fonts/<commit>/ofl/bevietnampro/<file>`. Kiểm SHA-256 trước khi chép (đã kiểm 2026-10-17):
+- [x] **Task 1: Font Be Vietnam Pro** (AC: 1, 3)
+  - [x] 1.1 Tải từ repo `google/fonts`, **ghim theo commit** `c13390277dfb1fcc7415d84ef7ef9cfc1e52f8c1`. Đường dẫn là `https://raw.githubusercontent.com/google/fonts/<commit>/ofl/bevietnampro/<file>`. Kiểm SHA-256 trước khi chép (đã kiểm 2026-10-17):
 
     | File | SHA-256 | Dung lượng |
     |---|---|---|
@@ -38,14 +38,14 @@ tôi muốn mọi chữ trong game nằm trong một file riêng và hiện đ�
     | `OFL.txt` | `6b7f8f73609a25ea78c891e34cf37b06f8a676b7ea986e941e43b009110f2a85` | 4 397 byte |
 
     SHA khác thì **dừng lại và báo**, không chép.
-  - [ ] 1.2 Chép vào `game/assets/fonts/` và đặt tên theo quy ước asset (tiền tố theo loại, `snake_case`):
+  - [x] 1.2 Chép vào `game/assets/fonts/` và đặt tên theo quy ước asset (tiền tố theo loại, `snake_case`):
     - `font_be_vietnam_pro_regular.ttf`
     - `font_be_vietnam_pro_bold.ttf`
     - `OFL.txt` (giấy phép OFL bắt buộc đi kèm font; giữ nguyên tên)
-  - [ ] 1.3 Không sửa file font. Để thiết lập import mặc định của Godot. Commit cả các file `.ttf.import` do `--import` sinh ra.
+  - [x] 1.3 Không sửa file font. Để thiết lập import mặc định của Godot. Commit cả các file `.ttf.import` do `--import` sinh ra.
 
-- [ ] **Task 2: Theme dùng chung** (AC: 3)
-  - [ ] 2.1 Tạo `game/assets/theme/main_theme.tres`, viết tay. Mẫu dưới đây, chỉnh nếu Godot báo lỗi khi import:
+- [x] **Task 2: Theme dùng chung** (AC: 3)
+  - [x] 2.1 Tạo `game/assets/theme/main_theme.tres`, viết tay. Mẫu dưới đây, chỉnh nếu Godot báo lỗi khi import:
     ```
     [gd_resource type="Theme" load_steps=3 format=3]
 
@@ -61,11 +61,11 @@ tôi muốn mọi chữ trong game nằm trong một file riêng và hiện đ�
     ```
     - `TitleLabel` là *type variation*: nhãn nào đặt `theme_type_variation = &"TitleLabel"` thì dùng chữ đậm cỡ 28.
     - Cỡ chữ và kiểu chữ nằm ở **một chỗ** này, không rải trong code.
-  - [ ] 2.2 Thêm vào `game/project.godot` mục `[gui]` với dòng `theme/custom="res://assets/theme/main_theme.tres"`. Theme này áp lên **mọi** Control trong game, kể cả Label nằm dưới Node2D như nhãn phiên bản và chữ DEV.
-  - [ ] 2.3 **Không** đổi `add_theme_font_size_override` hiện có (nhãn phiên bản cỡ 14, chữ DEV cỡ 20, màu đỏ của DEV). Các nhãn đó chỉ đổi font, giữ cỡ chữ.
+  - [x] 2.2 Thêm vào `game/project.godot` mục `[gui]` với dòng `theme/custom="res://assets/theme/main_theme.tres"`. Theme này áp lên **mọi** Control trong game, kể cả Label nằm dưới Node2D như nhãn phiên bản và chữ DEV.
+  - [x] 2.3 **Không** đổi `add_theme_font_size_override` hiện có (nhãn phiên bản cỡ 14, chữ DEV cỡ 20, màu đỏ của DEV). Các nhãn đó chỉ đổi font, giữ cỡ chữ.
 
-- [ ] **Task 3: File dịch `text.csv`** (AC: 1, 2, 4)
-  - [ ] 3.1 Tạo `game/i18n/text.csv`, mã hóa UTF-8, **không BOM**, xuống dòng `\n`. Nội dung:
+- [x] **Task 3: File dịch `text.csv`** (AC: 1, 2, 4)
+  - [x] 3.1 Tạo `game/i18n/text.csv`, mã hóa UTF-8, **không BOM**, xuống dòng `\n`. Nội dung:
     ```
     keys,vi
     app.title,Chống Nguyên Mông
@@ -73,7 +73,7 @@ tôi muốn mọi chữ trong game nằm trong một file riêng và hiện đ�
     - Cột đầu tên là `keys`, cột tiếp theo là mã ngôn ngữ.
     - Sau này thêm tiếng Anh thì chỉ cần thêm cột `en`.
     - Giá trị có dấu phẩy thì bọc trong `"..."`.
-  - [ ] 3.2 Thêm vào `game/project.godot`:
+  - [x] 3.2 Thêm vào `game/project.godot`:
     ```
     [internationalization]
 
@@ -82,26 +82,26 @@ tôi muốn mọi chữ trong game nằm trong một file riêng và hiện đ�
     ```
     - **`locale/fallback="vi"` là bắt buộc** (AC 4). Mặc định của Godot là `"en"`. Đã kiểm 2026-10-17 trên Godot 4.7.2: khi đặt `TranslationServer.set_locale("en")`, `tr("app.title")` trả về **`app.title`** nếu fallback là `en`, và trả về `Chống Nguyên Mông` nếu fallback là `vi`.
     - Máy tác giả đang là `vi_VN` nên sẽ không thấy lỗi này. Máy người thân và trình duyệt thì có thể thấy.
-  - [ ] 3.3 `--import` sinh ra hai file **ngay cạnh** CSV (không phải trong `.godot/`):
+  - [x] 3.3 `--import` sinh ra hai file **ngay cạnh** CSV (không phải trong `.godot/`):
     - `game/i18n/text.vi.translation`;
     - `game/i18n/text.csv.import`.
 
     **Commit cả hai.** Lý do: nếu repo mới clone chưa có `text.vi.translation`, lần `--import` đầu sẽ in `ERROR: Cannot open file 'res://i18n/text.vi.translation'`, vì `project.godot` trỏ tới file chưa tồn tại (đã kiểm). `.gitignore` hiện chỉ bỏ `game/.godot/`, nên hai file này không bị bỏ qua.
-  - [ ] 3.4 Sửa CSV xong thì `tools/chay.sh` và `tools/test.sh` tự `--import` lại, nên file `.translation` cập nhật theo. Đây là cơ chế của AC 2. Không cần code đọc CSV lúc chạy.
+  - [x] 3.4 Sửa CSV xong thì `tools/chay.sh` và `tools/test.sh` tự `--import` lại, nên file `.translation` cập nhật theo. Đây là cơ chế của AC 2. Không cần code đọc CSV lúc chạy.
 
-- [ ] **Task 4: Hiện tiêu đề** (AC: 1, 2)
-  - [ ] 4.1 Trong `game/src/app/main.gd` (`_ready()`), tạo `Label` tiêu đề:
+- [x] **Task 4: Hiện tiêu đề** (AC: 1, 2)
+  - [x] 4.1 Trong `game/src/app/main.gd` (`_ready()`), tạo `Label` tiêu đề:
     - `text = tr("app.title")`, `theme_type_variation = &"TitleLabel"`;
     - canh giữa ngang: `horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER`, `size = Vector2(BoardView.viewport_size.x, 44)`, `position = Vector2(0, 4)`.
     - Bàn cờ bắt đầu ở y = 52, nên tiêu đề nằm gọn phía trên. Chữ DEV ở góc trái (x = 8) không đè lên tiêu đề ở giữa.
     - Đặt hằng `TITLE_HEIGHT` và `TITLE_TOP` cho hai số trên.
-  - [ ] 4.2 Đặt tiêu đề cửa sổ: `get_window().title = tr("app.title")`. Trên web, Godot đổi theo tiêu đề tab trình duyệt.
+  - [x] 4.2 Đặt tiêu đề cửa sổ: `get_window().title = tr("app.title")`. Trên web, Godot đổi theo tiêu đề tab trình duyệt.
     - `application/config/name` trong `project.godot` **giữ nguyên**. Đó là tên project, dùng trước khi script chạy.
-  - [ ] 4.3 Thêm tiêu đề **trước** `_board_view`, để thứ tự vẽ không đổi với các phần đã có. Giữ nguyên nhãn phiên bản, `DevTools`, `BUILD_INFO_PATH`, `_read_version()`.
-  - [ ] 4.4 Nhãn phiên bản (`v0.1.0 · <commit>`) và chữ "DEV" **không** qua `tr()`. Tác giả đã chốt ở Story 0.3 rằng đó là nhãn kỹ thuật, không dịch.
+  - [x] 4.3 Thêm tiêu đề **trước** `_board_view`, để thứ tự vẽ không đổi với các phần đã có. Giữ nguyên nhãn phiên bản, `DevTools`, `BUILD_INFO_PATH`, `_read_version()`.
+  - [x] 4.4 Nhãn phiên bản (`v0.1.0 · <commit>`) và chữ "DEV" **không** qua `tr()`. Tác giả đã chốt ở Story 0.3 rằng đó là nhãn kỹ thuật, không dịch.
 
-- [ ] **Task 5: Test** (AC: 4, 5)
-  - [ ] 5.1 `game/tests/test_i18n.gd`:
+- [x] **Task 5: Test** (AC: 4, 5)
+  - [x] 5.1 `game/tests/test_i18n.gd`:
     - đọc `res://i18n/text.csv` bằng `FileAccess`;
     - bỏ dòng tiêu đề và dòng rỗng; khóa là phần trước dấu phẩy đầu tiên (khóa không bao giờ chứa dấu phẩy);
     - với **mỗi** khóa, sau khi `TranslationServer.set_locale("en")`, kiểm `tr(khóa) != khóa` và không rỗng.
@@ -113,35 +113,35 @@ tôi muốn mọi chữ trong game nằm trong một file riêng và hiện đ�
     - `ProjectSettings.get_setting("internationalization/locale/fallback") == "vi"`.
 
     **Không** viết test so `tr("app.title") == "Chống Nguyên Mông"`: tác giả được quyền sửa chữ này (AC 2), test như vậy sẽ trượt oan.
-  - [ ] 5.2 `game/tests/test_font.gd`. Với **cả hai** file font (`load(...) as FontFile`), mọi ký tự trong chuỗi dưới đây, cùng bản `.to_upper()` của nó, đều phải có `font.has_char(ch.unicode_at(0))`:
+  - [x] 5.2 `game/tests/test_font.gd`. Với **cả hai** file font (`load(...) as FontFile`), mọi ký tự trong chuỗi dưới đây, cùng bản `.to_upper()` của nó, đều phải có `font.has_char(ch.unicode_at(0))`:
     ```
     aàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệghiìỉĩíịklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvxyỳỷỹýỵ
     ```
     Khi trượt, ghi rõ những ký tự thiếu trong thông điệp. Đã kiểm 2026-10-17: Be Vietnam Pro Regular không thiếu ký tự nào.
-  - [ ] 5.3 Thêm vào `test_font.gd` một ca kiểm Theme:
+  - [x] 5.3 Thêm vào `test_font.gd` một ca kiểm Theme:
     - `ProjectSettings.get_setting("gui/theme/custom")` là `"res://assets/theme/main_theme.tres"`;
     - theme nạp được và `default_font.resource_path` là file Regular;
     - type variation `TitleLabel` có font Bold.
-  - [ ] 5.4 Mỗi test có ít nhất một assert, vì `tools/test.sh` báo trượt nếu có test không có assert nào.
+  - [x] 5.4 Mỗi test có ít nhất một assert, vì `tools/test.sh` báo trượt nếu có test không có assert nào.
 
-- [ ] **Task 6: Ghi chú cho Story 0.5** (AC: —)
-  - [ ] 6.1 Thêm vào `_bmad-output/implementation-artifacts/deferred-work.md`:
+- [x] **Task 6: Ghi chú cho Story 0.5** (AC: —)
+  - [x] 6.1 Thêm vào `_bmad-output/implementation-artifacts/deferred-work.md`:
     - "Story 0.5: bản web phải hiện tiêu đề tiếng Việt (không phải `app.title`), kiểm trên trình duyệt đặt ngôn ngữ tiếng Anh."
     - "Giấy phép OFL yêu cầu `OFL.txt` đi kèm font khi phát hành. Preset export phải gồm `assets/fonts/OFL.txt` (filter `*.txt` hoặc đúng file đó), hoặc ghi giấy phép ở chỗ người chơi thấy được."
 
-- [ ] **Task 7: Kiểm tra** (AC: 1–5)
-  - [ ] 7.1 Viết test trước (Task 5), chạy `tools/test.sh` và thấy **trượt**. Ghi vào Debug Log.
-  - [ ] 7.2 Làm Task 1–4 tới khi `tools/test.sh` **xanh**. Dự kiến 40 + 3 + 3 ≈ 46 test. Ghi số thật.
-  - [ ] 7.3 Chụp khung hình bằng `--write-movie <thư mục>/f.png --quit-after 3`, có và không có `-- --dev`. Đọc ảnh, ghi vào Debug Log. Phải thấy:
+- [x] **Task 7: Kiểm tra** (AC: 1–5)
+  - [x] 7.1 Viết test trước (Task 5), chạy `tools/test.sh` và thấy **trượt**. Ghi vào Debug Log.
+  - [x] 7.2 Làm Task 1–4 tới khi `tools/test.sh` **xanh**. Dự kiến 40 + 3 + 3 ≈ 46 test. Ghi số thật.
+  - [x] 7.3 Chụp khung hình bằng `--write-movie <thư mục>/f.png --quit-after 3`, có và không có `-- --dev`. Đọc ảnh, ghi vào Debug Log. Phải thấy:
     - tiêu đề "Chống Nguyên Mông" đậm, ở giữa phía trên bàn cờ;
     - nhãn phiên bản dùng font mới;
     - khi bật dev, chữ DEV đỏ dùng font mới;
     - bàn cờ ở đúng chỗ cũ.
-  - [ ] 7.4 Thử AC 2 trên **bản sao tạm**, không sửa repo thật:
+  - [x] 7.4 Thử AC 2 trên **bản sao tạm**, không sửa repo thật:
     - sửa `app.title` thành `Thử dấu: ữ, ặ, ượ` (bọc ngoặc kép vì có dấu phẩy);
     - chạy `--import` rồi chụp khung hình: tiêu đề đổi theo, đủ dấu.
-  - [ ] 7.5 Thử AC 4 trên bản sao tạm: đặt `locale/fallback="en"` thì `test_i18n.gd` phải **trượt**. Việc này chứng minh test bắt được lỗi.
-  - [ ] 7.6 Commit khi xanh. Lời commit gợi ý: `Thêm file dịch, font Be Vietnam Pro và Theme chung (Story 0.4)`. Chuyển story sang `review`.
+  - [x] 7.5 Thử AC 4 trên bản sao tạm: đặt `locale/fallback="en"` thì `test_i18n.gd` phải **trượt**. Việc này chứng minh test bắt được lỗi.
+  - [x] 7.6 Commit khi xanh. Lời commit gợi ý: `Thêm file dịch, font Be Vietnam Pro và Theme chung (Story 0.4)`. Chuyển story sang `review`.
 
 ## Dev Notes
 
@@ -289,10 +289,52 @@ Kèm theo các file `.uid` do Godot sinh.
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5)
+
 ### Debug Log References
+
+- Đỏ trước khi viết code: `❌ trượt: 6 test trượt` (3 test i18n, 3 test font), mã 1.
+- Font tải theo commit `c13390277dfb…`, `shasum -a 256 -c` đều OK cho cả 3 file.
+- **Phát hiện khi làm:** lần `--import` đầu trên repo vừa clone (chưa có `game/.godot/`), Godot nạp Theme của project **trước** khi quét font, nên in `Parse Error: [ext_resource] referenced non-existent resource` (10 dòng ERROR). Lần quét thứ hai sạch, 0 ERROR. Bước 3 của `tools/test.sh` (thêm ở review 0.2) bắt `Parse Error` nên báo đỏ oan.
+  - Sửa: nếu lần quét đầu có `SCRIPT ERROR|Parse Error` thì quét lại một lần, chỉ xét log lần hai.
+  - Kiểm trên bản sao như repo vừa clone: `✅ 46/46`. Cùng bản sao, thêm dòng hỏng vào `main.gd` → `[3/4] Quét project: trượt`, chỉ `main.gd:48`, `❌ trượt: có script game lỗi`.
+- Sau khi viết code: `✅ 46/46 test đạt`, mã 0 (40 cũ + 3 i18n + 3 font).
+- `git diff game/project.godot` sau `--import`: chỉ có các dòng `[gui]` và `[internationalization]` đã thêm.
+- Khung hình `--write-movie` (khung thứ 3):
+  - không dev: tiêu đề "Chống Nguyên Mông" đậm ở giữa trên bàn cờ; bàn cờ đúng chỗ; nhãn phiên bản dùng Be Vietnam Pro;
+  - có dev: thêm chữ DEV đỏ, cùng font.
+- AC 2 trên bản sao: đổi `app.title` thành `"Thử dấu: ữ, ặ, ượ"` → tiêu đề hiện `Thử dấu: ữ, ặ, ượ` đủ dấu.
+- AC 4 trên bản sao: đặt `locale/fallback="en"` → `test_every_key_translates_on_english_machine` và `test_fallback_locale_is_vietnamese` trượt, mã 1.
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
+- Font Be Vietnam Pro Regular và Bold (OFL), kèm `OFL.txt`, trong `game/assets/fonts/`. Theme `main_theme.tres` dùng font Regular cỡ 16, có kiểu `TitleLabel` chữ đậm cỡ 28. Theme đặt làm theme của cả project (`gui/theme/custom`).
+- `game/i18n/text.csv` có khóa `app.title`. Thêm `locale/fallback="vi"` để máy tiếng Anh vẫn ra tiếng Việt. Commit cả `text.vi.translation` và `text.csv.import` do Godot sinh.
+- `main.gd`: tiêu đề `tr("app.title")` ở giữa phía trên bàn cờ, và đặt tiêu đề cửa sổ.
+- **Lệch so với story:** sửa thêm `tools/test.sh` bước 3 (quét lại một lần khi lần đầu có lỗi). Không sửa thì repo vừa clone báo đỏ oan ngay lần đầu. Xem Debug Log.
+- **Hướng dẫn tác giả tự test:**
+  1. Gõ `tools/test.sh` → dòng cuối `✅ 46/46 test đạt`.
+  2. Gõ `tools/chay.sh` → phía trên bàn cờ có tiêu đề **Chống Nguyên Mông**, chữ đậm. Thanh tiêu đề cửa sổ cũng ghi như vậy.
+  3. Mở `game/i18n/text.csv`, sửa dòng `app.title` thành `app.title,"Thử dấu: ữ, ặ, ượ"`, lưu, gõ lại `tools/chay.sh` → tiêu đề đổi theo, đủ dấu. Rồi sửa lại như cũ (hoặc nhờ AI trả lại).
+  4. Gõ `tools/chay.sh --dev` → chữ DEV và nhãn phiên bản cùng kiểu chữ với tiêu đề (chữ thường).
 
 ### File List
+
+- `game/assets/fonts/font_be_vietnam_pro_regular.ttf` (+ `.import`) (mới)
+- `game/assets/fonts/font_be_vietnam_pro_bold.ttf` (+ `.import`) (mới)
+- `game/assets/fonts/OFL.txt` (mới)
+- `game/assets/theme/main_theme.tres` (mới)
+- `game/i18n/text.csv`, `text.csv.import`, `text.vi.translation` (mới; hai file sau do Godot sinh)
+- `game/project.godot` (sửa: `[gui]`, `[internationalization]`)
+- `game/src/app/main.gd` (sửa: tiêu đề, tiêu đề cửa sổ)
+- `game/tests/test_i18n.gd`, `.uid` (mới)
+- `game/tests/test_font.gd`, `.uid` (mới)
+- `tools/test.sh` (sửa: bước 3 quét lại khi lần đầu có lỗi)
+- `_bmad-output/implementation-artifacts/deferred-work.md` (thêm 2 mục cho Story 0.5)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (trạng thái)
+- `_bmad-output/implementation-artifacts/0-4-chu-tieng-viet-va-font.md` (story này)
+
+### Change Log
+
+- 2026-10-17: Thêm font Be Vietnam Pro, Theme chung, file dịch `text.csv` (fallback `vi`), tiêu đề màn hình và cửa sổ; 6 test mới (tổng 46). `tools/test.sh` quét project lại một lần khi lần đầu có lỗi (repo vừa clone).

@@ -26,6 +26,15 @@ window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="keep"
 
+[gui]
+
+theme/custom="res://assets/theme/main_theme.tres"
+
+[internationalization]
+
+locale/fallback="vi"
+locale/translations=PackedStringArray("res://i18n/text.vi.translation")
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

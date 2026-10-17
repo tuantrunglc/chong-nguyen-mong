@@ -102,14 +102,22 @@ bao_cao+=("${chi_tiet_2[@]+"${chi_tiet_2[@]}"}")
 # game/.godot/ không có trong git: phải quét trước, nếu không GUT thoát mã 0 mà không chạy test nào.
 da_quet=1
 IMPORT_LOG="$KET_QUA_DIR/import.log"
-if "$GODOT" --headless --path "$GAME" --import >"$IMPORT_LOG" 2>&1; then
+LOI_SCRIPT='SCRIPT ERROR|Parse Error'
+ma_quet=0
+"$GODOT" --headless --path "$GAME" --import >"$IMPORT_LOG" 2>&1 || ma_quet=$?
+# Repo mới clone: lần quét đầu Godot nạp Theme trước khi quét xong font nên báo lỗi oan.
+# Có lỗi thì quét lại một lần; lỗi thật trong script vẫn còn ở lần hai.
+if (( ma_quet == 0 )) && grep -qE "$LOI_SCRIPT" "$IMPORT_LOG"; then
+	"$GODOT" --headless --path "$GAME" --import >"$IMPORT_LOG" 2>&1 || ma_quet=$?
+fi
+if (( ma_quet == 0 )); then
 	# Chống xanh giả: script game lỗi cú pháp thì --import vẫn thoát mã 0, chỉ ghi vào log.
-	if grep -qE 'SCRIPT ERROR|Parse Error' "$IMPORT_LOG"; then
+	if grep -qE "$LOI_SCRIPT" "$IMPORT_LOG"; then
 		ghi_buoc 3 "Quét project" "trượt"
 		bao_cao+=("  ❌ có script game lỗi (xem build/test/import.log):")
 		while IFS= read -r dong; do
 			bao_cao+=("     $dong")
-		done < <(grep -A1 -E 'SCRIPT ERROR|Parse Error' "$IMPORT_LOG" | grep -vE '^--$' | head -10)
+		done < <(grep -A1 -E "$LOI_SCRIPT" "$IMPORT_LOG" | grep -vE '^--$' | head -10)
 		ly_do_truot+=("có script game lỗi")
 	else
 		ghi_buoc 3 "Quét project" "đạt"
