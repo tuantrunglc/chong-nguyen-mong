@@ -2,7 +2,8 @@
 # File dùng chung, không gõ trực tiếp. Mọi script trong tools/ đều `source` file này
 # để dùng đúng một bản Godot 4.7.2 nằm trong .tools/, không dùng bản nào khác trên máy.
 #
-# Biến đặt ra: REPO_ROOT, GODOT_VERSION, GODOT_DIR, GODOT_OS, GODOT, GODOT_DATA_DIR.
+# Biến đặt ra: REPO_ROOT, GODOT_VERSION, GODOT_DIR, GODOT_OS, GODOT, GODOT_DATA_DIR,
+# BUTLER_VERSION, BUTLER_DIR, BUTLER. Hàm: ghi_build_info.
 # GODOT_DATA_DIR: chế độ tự chứa, Godot ghi dữ liệu editor (gồm export template) vào đây.
 # Đặt GODOT_BO_QUA_KIEM_TRA=1 trước khi source để không thoát khi chưa cài (dùng cho cai_dat.sh).
 set -euo pipefail
@@ -28,6 +29,23 @@ case "$(uname -s)-$(uname -m)" in
 		exit 1
 		;;
 esac
+
+# butler: công cụ của itch.io để đẩy bản web lên (tools/deploy_itch.sh). Cài bằng tools/cai_dat.sh.
+BUTLER_VERSION="15.32.0"
+BUTLER_DIR="$REPO_ROOT/.tools/butler-$BUTLER_VERSION"
+BUTLER="$BUTLER_DIR/butler"
+
+# Ghi mã commit vào game/build_info.json để game hiện ở góc màn hình. Có thay đổi chưa commit thì thêm "-sua".
+ghi_build_info() {
+	local commit="dev"
+	if command -v git >/dev/null 2>&1 && git -C "$REPO_ROOT" rev-parse --short HEAD >/dev/null 2>&1; then
+		commit="$(git -C "$REPO_ROOT" rev-parse --short HEAD)"
+		if [[ -n "$(git -C "$REPO_ROOT" status --porcelain)" ]]; then
+			commit="$commit-sua"
+		fi
+	fi
+	printf '{"commit": "%s"}\n' "$commit" > "$REPO_ROOT/game/build_info.json"
+}
 
 if [[ "${GODOT_BO_QUA_KIEM_TRA:-0}" != "1" ]]; then
 	if [[ ! -f "$GODOT_DIR/.installed" || ! -x "$GODOT" ]]; then

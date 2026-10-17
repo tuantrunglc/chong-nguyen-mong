@@ -1,5 +1,5 @@
 # generated: 2026-10-17 10:21
-# last_updated: 2026-10-17 23:30
+# last_updated: 2026-10-17 23:45
 # project: GameTest
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-10-17 10:21"
-last_updated: "2026-10-17 23:30"
+last_updated: "2026-10-17 23:45"
 project: GameTest
 project_key: NOKEY
 tracking_system: file-system
@@ -47,7 +47,7 @@ development_status:
   0-2-mot-lenh-de-chay-toan-bo-test: done
   0-3-log-co-dev-va-tham-so-khoi-dong: done
   0-4-chu-tieng-viet-va-font: done
-  0-5-ban-web-tren-itch-io-rieng-tu: ready-for-dev
+  0-5-ban-web-tren-itch-io-rieng-tu: in-progress
   0-6-cai-cong-cu-ai-mcp: backlog
   epic-0-retrospective: optional
   epic-1: backlog

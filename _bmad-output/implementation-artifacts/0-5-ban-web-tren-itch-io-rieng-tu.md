@@ -4,7 +4,7 @@ baseline_commit: 27b40d8
 
 # Story 0.5: Bản web trên itch.io (riêng tư)
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 
@@ -34,11 +34,11 @@ tôi muốn mở game qua một đường link,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 0: Hỏi tác giả trước khi làm** (AC: 1, 3, 5)
-  - [ ] 0.1 Hỏi các câu ở mục "Câu hỏi cho tác giả" (cuối Dev Notes). Ghi câu trả lời vào mục "Quyết định của tác giả". Chưa có tên tài khoản và tên trang itch.io thì vẫn làm được Task 1–4 và 6; Task 5 chờ.
+- [x] **Task 0: Hỏi tác giả trước khi làm** (AC: 1, 3, 5)
+  - [x] 0.1 Hỏi các câu ở mục "Câu hỏi cho tác giả" (cuối Dev Notes). Ghi câu trả lời vào mục "Quyết định của tác giả". Chưa có tên tài khoản và tên trang itch.io thì vẫn làm được Task 1–4 và 6; Task 5 chờ.
 
-- [ ] **Task 1: Preset export Web** (AC: 2, 4, 7)
-  - [ ] 1.1 Tạo `game/export_presets.cfg`, viết tay. Mẫu đã chạy được trên Godot 4.7.2 (kiểm 2026-10-17, xem Ghi chú kỹ thuật):
+- [x] **Task 1: Preset export Web** (AC: 2, 4, 7)
+  - [x] 1.1 Tạo `game/export_presets.cfg`, viết tay. Mẫu đã chạy được trên Godot 4.7.2 (kiểm 2026-10-17, xem Ghi chú kỹ thuật):
     ```
     [preset.0]
 
@@ -62,31 +62,31 @@ tôi muốn mở game qua một đường link,
     - `variant/thread_support=false`: **đơn luồng** (template `web_nothreads_release.zip`). Không cần SharedArrayBuffer hay header COOP/COEP trên itch.io.
     - `include_filter`: `*.json` để có `build_info.json` (và sau này `data/*.json`); `assets/fonts/OFL.txt` để giấy phép font đi kèm (mục hoãn từ Story 0.4).
     - Chỉ có preset Web. Preset Windows để giai đoạn 2.
-  - [ ] 1.2 Commit `export_presets.cfg`. Kiểm `.gitignore` không bỏ qua file này (hiện không bỏ).
-  - [ ] 1.3 Không cần mở editor. Lệnh `--export-release` không viết lại file preset (đã kiểm).
+  - [x] 1.2 Commit `export_presets.cfg`. Kiểm `.gitignore` không bỏ qua file này (hiện không bỏ).
+  - [x] 1.3 Không cần mở editor. Lệnh `--export-release` không viết lại file preset (đã kiểm).
 
-- [ ] **Task 2: `tools/build_web.sh`** (AC: 2, 4)
-  - [ ] 2.1 Đầu script: `source "$(dirname "${BASH_SOURCE[0]}")/_godot.sh"`, `set -euo pipefail`, chú thích đầu file tiếng Việt như các script khác.
-  - [ ] 2.2 Ghi `game/build_info.json` y như `tools/chay.sh` (mã commit, thêm `-sua` nếu cây có thay đổi chưa commit). **Chuyển đoạn này thành hàm `ghi_build_info` trong `tools/_godot.sh`** và cho cả `chay.sh` lẫn `build_web.sh` gọi, để chỉ có một chỗ.
-  - [ ] 2.3 Kiểm có export template web: `"$GODOT_DATA_DIR/export_templates/4.7.2.stable/web_nothreads_release.zip"`. Thiếu thì in `Lỗi: chưa có export template web. Chạy tools/cai_dat.sh.` và thoát 1.
-  - [ ] 2.4 Quét project trước (`--headless --path game --import`), giống bước 3 của `tools/test.sh`: repo vừa clone thì lần quét đầu có lỗi oan, nên quét lại một lần nếu log có `SCRIPT ERROR|Parse Error`. Lần hai còn lỗi thì báo trượt, in 10 dòng lỗi đầu, thoát 1.
-  - [ ] 2.5 Xóa và tạo lại `build/web/`. Chạy `"$GODOT" --headless --path "$REPO_ROOT/game" --export-release "Web" "$REPO_ROOT/build/web/index.html"`, log vào `build/web_export.log`. Mã khác 0, hoặc thiếu `build/web/index.html` / `index.wasm` / `index.pck`, thì báo trượt kèm đường dẫn log.
+- [x] **Task 2: `tools/build_web.sh`** (AC: 2, 4)
+  - [x] 2.1 Đầu script: `source "$(dirname "${BASH_SOURCE[0]}")/_godot.sh"`, `set -euo pipefail`, chú thích đầu file tiếng Việt như các script khác.
+  - [x] 2.2 Ghi `game/build_info.json` y như `tools/chay.sh` (mã commit, thêm `-sua` nếu cây có thay đổi chưa commit). **Chuyển đoạn này thành hàm `ghi_build_info` trong `tools/_godot.sh`** và cho cả `chay.sh` lẫn `build_web.sh` gọi, để chỉ có một chỗ.
+  - [x] 2.3 Kiểm có export template web: `"$GODOT_DATA_DIR/export_templates/4.7.2.stable/web_nothreads_release.zip"`. Thiếu thì in `Lỗi: chưa có export template web. Chạy tools/cai_dat.sh.` và thoát 1.
+  - [x] 2.4 Quét project trước (`--headless --path game --import`), giống bước 3 của `tools/test.sh`: repo vừa clone thì lần quét đầu có lỗi oan, nên quét lại một lần nếu log có `SCRIPT ERROR|Parse Error`. Lần hai còn lỗi thì báo trượt, in 10 dòng lỗi đầu, thoát 1.
+  - [x] 2.5 Xóa và tạo lại `build/web/`. Chạy `"$GODOT" --headless --path "$REPO_ROOT/game" --export-release "Web" "$REPO_ROOT/build/web/index.html"`, log vào `build/web_export.log`. Mã khác 0, hoặc thiếu `build/web/index.html` / `index.wasm` / `index.pck`, thì báo trượt kèm đường dẫn log.
     - Log export có dòng `ERROR` thì cũng báo trượt (Godot có thể thoát 0 mà vẫn lỗi; cùng lý do "chống xanh giả" ở `test.sh`).
-  - [ ] 2.6 Chép `game/assets/fonts/OFL.txt` vào `build/web/OFL.txt` (giấy phép đi kèm bản phát hành, ai mở thư mục cũng thấy).
-  - [ ] 2.7 Đo bản nén: `(cd build/web && zip -qr -9 ../web.zip .)`, lấy dung lượng `build/web.zip`. In:
+  - [x] 2.6 Chép `game/assets/fonts/OFL.txt` vào `build/web/OFL.txt` (giấy phép đi kèm bản phát hành, ai mở thư mục cũng thấy).
+  - [x] 2.7 Đo bản nén: `(cd build/web && zip -qr -9 ../web.zip .)`, lấy dung lượng `build/web.zip`. In:
     - `Dung lượng bản nén: 10.4 MB (giới hạn 25 MB)` (1 MB = 1 000 000 byte, một chữ số thập phân);
     - kèm dung lượng chưa nén của `build/web/`.
     - Vượt 25 000 000 byte thì in `❌ trượt: bản nén vượt 25 MB` và thoát 1.
-  - [ ] 2.8 Dòng cuối khi đạt: `✅ Đã build bản web vào build/web/ (v<phiên bản> · <commit>)`. Lấy phiên bản bằng `grep` dòng `config/version` trong `game/project.godot`.
-  - [ ] 2.9 Không thêm `build_web.sh` vào `tools/test.sh` (chậm, cần template). `test.sh` chỉ kiểm preset (Task 6).
+  - [x] 2.8 Dòng cuối khi đạt: `✅ Đã build bản web vào build/web/ (v<phiên bản> · <commit>)`. Lấy phiên bản bằng `grep` dòng `config/version` trong `game/project.godot`.
+  - [x] 2.9 Không thêm `build_web.sh` vào `tools/test.sh` (chậm, cần template). `test.sh` chỉ kiểm preset (Task 6).
 
-- [ ] **Task 3: Cài `butler`** (AC: 1)
-  - [ ] 3.1 Thêm vào `tools/_godot.sh`: `BUTLER_VERSION="15.32.0"`, `BUTLER_DIR="$REPO_ROOT/.tools/butler-$BUTLER_VERSION"`, `BUTLER="$BUTLER_DIR/butler"`. Cập nhật dòng chú thích "Biến đặt ra".
-  - [ ] 3.2 Sửa `tools/cai_dat.sh`:
+- [x] **Task 3: Cài `butler`** (AC: 1)
+  - [x] 3.1 Thêm vào `tools/_godot.sh`: `BUTLER_VERSION="15.32.0"`, `BUTLER_DIR="$REPO_ROOT/.tools/butler-$BUTLER_VERSION"`, `BUTLER="$BUTLER_DIR/butler"`. Cập nhật dòng chú thích "Biến đặt ra".
+  - [x] 3.2 Sửa `tools/cai_dat.sh`:
     - **Hiện script thoát sớm** (`exit 0`) khi Godot đã cài. Phải đổi để phần butler vẫn chạy: tách thành hai khối "cài Godot nếu chưa có" và "cài butler nếu chưa có".
     - Chạy lại khi đã có cả hai thì in `Đã cài Godot 4.7.2` và `Đã cài butler 15.32.0`, không tải gì.
     - Xóa dòng `# butler: thêm ở Story 0.5`.
-  - [ ] 3.3 Tải `https://broth.itch.zone/butler/<nền tảng>/15.32.0/archive/default` (file zip), **ghim phiên bản** và kiểm SHA-256 trước khi giải nén. Đã tải và đo 2026-10-17:
+  - [x] 3.3 Tải `https://broth.itch.zone/butler/<nền tảng>/15.32.0/archive/default` (file zip), **ghim phiên bản** và kiểm SHA-256 trước khi giải nén. Đã tải và đo 2026-10-17:
 
     | Nền tảng (`GODOT_OS` + `uname -m`) | `<nền tảng>` | SHA-256 | Dung lượng |
     |---|---|---|---|
@@ -95,13 +95,13 @@ tôi muốn mở game qua một đường link,
     | Linux x86_64 | `linux-amd64` | `2335971394ef6596f95ded0833e85ee28755e13761716ef4c91d6b11f69162f5` | 10 734 695 byte |
 
     SHA khác thì xóa file, in lỗi tiếng Việt và thoát 1 (giống `kiem_tra` hiện có, nhưng dùng SHA-256 ghi cứng trong script vì broth không có file SHA-512).
-  - [ ] 3.4 Zip gồm 3 file: `butler`, `7z.so`, `libc7zip.dylib` (macOS). Giải nén **cả ba** vào `$BUTLER_DIR`, `chmod +x butler`. Trên macOS gỡ `com.apple.quarantine` như với Godot (`|| true`). Kiểm `"$BUTLER" --version` có chứa `v15.32.0`.
-  - [ ] 3.5 Dùng lại hàm `tai` có sẵn được thì dùng (nó ghép `$BASE_URL` của Godot, nên cần thêm tham số URL hoặc viết hàm `tai_url`). Giữ cách tải tiếp phần dở (`-C -`).
+  - [x] 3.4 Zip gồm 3 file: `butler`, `7z.so`, `libc7zip.dylib` (macOS). Giải nén **cả ba** vào `$BUTLER_DIR`, `chmod +x butler`. Trên macOS gỡ `com.apple.quarantine` như với Godot (`|| true`). Kiểm `"$BUTLER" --version` có chứa `v15.32.0`.
+  - [x] 3.5 Dùng lại hàm `tai` có sẵn được thì dùng (nó ghép `$BASE_URL` của Godot, nên cần thêm tham số URL hoặc viết hàm `tai_url`). Giữ cách tải tiếp phần dở (`-C -`).
 
-- [ ] **Task 4: Đăng nhập và đẩy lên itch.io** (AC: 1, 3)
-  - [ ] 4.1 Tạo `tools/itch.cfg` (commit), một dòng: `ITCH_TARGET=<tài khoản>/<tên trang>` theo câu trả lời Task 0. Chú thích đầu file nói tác giả sửa dòng này khi đổi trang.
-  - [ ] 4.2 Tạo `tools/dang_nhap_itch.sh`: kiểm `$BUTLER` đã cài (chưa thì bảo chạy `tools/cai_dat.sh`), rồi chạy `"$BUTLER" login`. butler mở trình duyệt để tác giả bấm đồng ý, sau đó lưu khóa trên máy (ngoài repo). In câu tiếng Việt giải thích trước khi chạy.
-  - [ ] 4.3 Tạo `tools/deploy_itch.sh`:
+- [x] **Task 4: Đăng nhập và đẩy lên itch.io** (AC: 1, 3)
+  - [x] 4.1 Tạo `tools/itch.cfg` (commit), một dòng: `ITCH_TARGET=<tài khoản>/<tên trang>` theo câu trả lời Task 0. Chú thích đầu file nói tác giả sửa dòng này khi đổi trang.
+  - [x] 4.2 Tạo `tools/dang_nhap_itch.sh`: kiểm `$BUTLER` đã cài (chưa thì bảo chạy `tools/cai_dat.sh`), rồi chạy `"$BUTLER" login`. butler mở trình duyệt để tác giả bấm đồng ý, sau đó lưu khóa trên máy (ngoài repo). In câu tiếng Việt giải thích trước khi chạy.
+  - [x] 4.3 Tạo `tools/deploy_itch.sh`:
     1. Đọc `ITCH_TARGET` từ `tools/itch.cfg`. Rỗng hoặc vẫn là chữ mẫu thì báo lỗi tiếng Việt, thoát 1.
     2. Thiếu `build/web/index.html` thì in `Chưa có bản build. Chạy tools/build_web.sh trước.`, thoát 1.
     3. Đọc mã commit từ `game/build_info.json`. Có đuôi `-sua` thì in cảnh báo "bản này có thay đổi chưa commit" (vẫn đẩy).
@@ -109,42 +109,42 @@ tôi muốn mở game qua một đường link,
     5. Lỗi chưa đăng nhập thì in gợi ý chạy `tools/dang_nhap_itch.sh`.
     6. **Kiểm riêng tư:** `curl -s -o /dev/null -w '%{http_code}' https://<tài khoản>.itch.io/<tên trang>` không kèm đăng nhập. Mã `404` nghĩa là trang đang Draft (người lạ không xem được) → in `🔒 Trang đang riêng tư`. Mã khác thì in cảnh báo lớn `⚠️ Trang có thể đang CÔNG KHAI`, kèm hướng dẫn chuyển về Draft. **Phải kiểm thật** hành vi này (Draft trả 404) khi làm, ghi vào Debug Log; nếu khác thì sửa cách kiểm và ghi lại.
     7. In đường link `https://<tài khoản>.itch.io/<tên trang>` và nhắc: trang Draft chỉ xem được khi đã đăng nhập itch.io bằng tài khoản của tác giả.
-  - [ ] 4.4 Không bao giờ đổi trang sang công khai bằng script. butler không đổi chế độ hiển thị của trang; giữ như vậy.
+  - [x] 4.4 Không bao giờ đổi trang sang công khai bằng script. butler không đổi chế độ hiển thị của trang; giữ như vậy.
 
-- [ ] **Task 5: Thử lưu `user://` trong iframe** (AC: 5)
-  - [ ] 5.1 Tạo `game/src/debug/save_probe.gd` (`class_name SaveProbe`, `extends RefCounted`). Hàm static `bump(path: String) -> int`:
+- [x] **Task 5: Thử lưu `user://` trong iframe** (AC: 5)
+  - [x] 5.1 Tạo `game/src/debug/save_probe.gd` (`class_name SaveProbe`, `extends RefCounted`). Hàm static `bump(path: String) -> int`:
     - đọc file JSON `{"so_lan_mo": N}` ở `path` (thiếu hoặc hỏng thì coi N = 0, dùng `JSON.new().parse()` như `BuildInfo` để không in ERROR);
     - ghi lại `N + 1`, trả về `N + 1`;
     - ép kiểu tường minh, `int()` giá trị đọc được (JSON trả `float`).
-  - [ ] 5.2 Hằng đường dẫn thật: `user://thu_luu.json`. Không dùng `user://save.json` (để dành cho lưu game thật ở E4).
-  - [ ] 5.3 Gọi ở đâu và hiện thế nào: **theo câu trả lời câu hỏi 3**. Mặc định đề xuất:
+  - [x] 5.2 Hằng đường dẫn thật: `user://thu_luu.json`. Không dùng `user://save.json` (để dành cho lưu game thật ở E4).
+  - [x] 5.3 Gọi ở đâu và hiện thế nào: **theo câu trả lời câu hỏi 3**. Mặc định đề xuất:
     - `DevTools.setup(true)` gọi `SaveProbe.bump(...)`; chữ DEV đổi thành `DEV · lần mở thứ N`;
     - ghi `Log.info("luu_thu", "lần mở thứ %d, user:// bền: %s" % [n, OS.is_userfs_persistent()])` (cũng chỉ khi bật dev).
     - Tải lại trang mà N tăng lên là đạt AC 5. N luôn là 1 là `user://` không bền.
-  - [ ] 5.4 Không bật dev thì không ghi file nào.
+  - [x] 5.4 Không bật dev thì không ghi file nào.
 
-- [ ] **Task 6: Test** (AC: 7, 8)
-  - [ ] 6.1 `game/tests/test_export_preset.gd`: đọc `res://export_presets.cfg` bằng `ConfigFile` (file nằm trong `game/`, đọc được ở chế độ headless). Kiểm:
+- [x] **Task 6: Test** (AC: 7, 8)
+  - [x] 6.1 `game/tests/test_export_preset.gd`: đọc `res://export_presets.cfg` bằng `ConfigFile` (file nằm trong `game/`, đọc được ở chế độ headless). Kiểm:
     - có đúng một preset `platform="Web"`, tên `Web`;
     - `include_filter` chứa `*.json`;
     - `exclude_filter` chứa `tests/*` và `addons/gut/*`;
     - `[preset.0.options] variant/thread_support == false`;
     - `export_path` là `../build/web/index.html`.
-  - [ ] 6.2 `game/tests/test_save_probe.gd`: dùng thư mục `user://test_save_probe/` (tạo ở `before_each`, xóa ở `after_each`, theo mẫu `test_build_info.gd`):
+  - [x] 6.2 `game/tests/test_save_probe.gd`: dùng thư mục `user://test_save_probe/` (tạo ở `before_each`, xóa ở `after_each`, theo mẫu `test_build_info.gd`):
     - chưa có file → `bump` trả 1;
     - gọi hai lần → trả 2;
     - file hỏng (`{so_lan_mo:`) → trả 1, không in ERROR;
     - file có `so_lan_mo` là chuỗi → trả 1.
-  - [ ] 6.3 Sửa `test_dev_tools.gd` nếu chữ DEV đổi (Task 5.3). Test DevTools phải dùng đường dẫn thử, **không** ghi vào `user://thu_luu.json` thật: cho `setup()` nhận đường dẫn file probe làm tham số tùy chọn, hoặc hằng có thể ghi đè trong test.
-  - [ ] 6.4 Mỗi test có ít nhất một assert.
+  - [x] 6.3 Sửa `test_dev_tools.gd` nếu chữ DEV đổi (Task 5.3). Test DevTools phải dùng đường dẫn thử, **không** ghi vào `user://thu_luu.json` thật: cho `setup()` nhận đường dẫn file probe làm tham số tùy chọn, hoặc hằng có thể ghi đè trong test.
+  - [x] 6.4 Mỗi test có ít nhất một assert.
 
-- [ ] **Task 7: Kiểm trên máy (AI làm)** (AC: 2, 4, 7)
-  - [ ] 7.1 Viết test trước (Task 6), chạy `tools/test.sh`, thấy **trượt**. Ghi vào Debug Log.
-  - [ ] 7.2 Làm Task 1–5 tới khi `tools/test.sh` **xanh**. Hiện có 50 test; ghi số thật.
-  - [ ] 7.3 Chạy `tools/build_web.sh`. Ghi dung lượng bản nén vào Debug Log (dự kiến khoảng 10.4 MB).
-  - [ ] 7.4 Thử trượt 25 MB trên **bản sao tạm**: tạm hạ giới hạn (hoặc thêm một file lớn vào `build/web/` trước bước đo) → script thoát 1 và in câu trượt. Ghi lại.
-  - [ ] 7.5 Mở bản build bằng Chrome headless trên máy (cách ở Ghi chú kỹ thuật), có `?dev=1`, `--lang=en-US`. Đọc ảnh: bàn cờ, tiêu đề tiếng Việt, DEV, phiên bản và commit.
-  - [ ] 7.6 Chạy lại `tools/cai_dat.sh` khi đã cài đủ: không tải lại gì. Trên bản sao `.tools/` tạm (hoặc xóa riêng thư mục butler) thì cài butler được và kiểm SHA đúng.
+- [x] **Task 7: Kiểm trên máy (AI làm)** (AC: 2, 4, 7)
+  - [x] 7.1 Viết test trước (Task 6), chạy `tools/test.sh`, thấy **trượt**. Ghi vào Debug Log.
+  - [x] 7.2 Làm Task 1–5 tới khi `tools/test.sh` **xanh**. Hiện có 50 test; ghi số thật.
+  - [x] 7.3 Chạy `tools/build_web.sh`. Ghi dung lượng bản nén vào Debug Log (dự kiến khoảng 10.4 MB).
+  - [x] 7.4 Thử trượt 25 MB trên **bản sao tạm**: tạm hạ giới hạn (hoặc thêm một file lớn vào `build/web/` trước bước đo) → script thoát 1 và in câu trượt. Ghi lại.
+  - [x] 7.5 Mở bản build bằng Chrome headless trên máy (cách ở Ghi chú kỹ thuật), có `?dev=1`, `--lang=en-US`. Đọc ảnh: bàn cờ, tiêu đề tiếng Việt, DEV, phiên bản và commit.
+  - [x] 7.6 Chạy lại `tools/cai_dat.sh` khi đã cài đủ: không tải lại gì. Trên bản sao `.tools/` tạm (hoặc xóa riêng thư mục butler) thì cài butler được và kiểm SHA đúng.
 
 - [ ] **Task 8: Cùng tác giả đưa lên itch.io** (AC: 1, 3, 4, 5, 6)
   - [ ] 8.1 Hướng dẫn tác giả từng bước AC 1 (xem "Hướng dẫn cho tác giả" ở Dev Notes). Chờ tác giả làm xong.
@@ -363,9 +363,18 @@ Kèm các file `.uid` do Godot sinh.
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+Claude Opus 5.5 (claude-opus-5-5)
 
 ### Debug Log References
+
+- Đỏ trước khi viết code: `test.sh` trượt — 3 test DevTools trượt, `test_save_probe.gd` lỗi `SaveProbe` chưa có, `test_export_preset.gd` lỗi (hàm `_get` trùng `Object._get`, đã đổi tên thành `_preset_value`).
+- Sau khi viết code: `✅ 61/61 test đạt` (50 cũ + 5 preset + 5 probe + 1 DevTools đếm lần mở).
+- `tools/build_web.sh`: `Dung lượng bản nén: 10.4 MB (giới hạn 25 MB); chưa nén: 40.0 MB`, `✅ Đã build bản web vào build/web/ (v0.1.0 · 4c39723-sua)`, mã 0. `build/web/` có `OFL.txt`.
+- Thử trượt 25 MB: bản sao script hạ giới hạn xuống 5 MB → `❌ trượt: bản nén vượt 25 MB`, mã 1 (chữ trong thông báo viết cứng 25, chỉ số giới hạn bị hạ). Đã xóa bản sao.
+- `tools/cai_dat.sh`: lần đầu cài butler 15.32.0, SHA-256 khớp, `butler --version` = v15.32.0; chạy lại → `Đã cài Godot 4.7.2` / `Đã cài butler 15.32.0`, không tải. Thử file hỏng (ghi chữ "hong" vào zip trong `.tools/tai_ve`, xóa `.installed` của butler) → `Lỗi: … sai mã SHA-256`, mã 1; chạy lại cài đúng.
+- `tools/deploy_itch.sh`: `itch.cfg` còn chữ mẫu → `Lỗi: chưa điền tài khoản itch.io…`, mã 1. Điền tạm `thu/thu-nghiem` → `Lỗi: butler chưa đăng nhập itch.io…`, mã 1 (khóa mặc định của butler trên macOS: `~/Library/Application Support/itch/butler_creds`, lấy từ `butler --help`). Đã trả `itch.cfg` về chữ mẫu.
+- itch.io: trang không tồn tại (`leafo.itch.io/khong-co-trang-nay-xyz`) trả 404 cho người chưa đăng nhập. Trang Draft trả 404 hay không: **chưa kiểm** (chờ tài khoản, Task 8).
+- Chrome headless (`en-US`, `?dev=1`, cùng một hồ sơ trình duyệt, mở 3 lần): tiêu đề "Hào Khí Đông A" đủ dấu, `DEV · lần mở thứ 1` rồi `DEV · lần mở thứ 2` (lần mở giữa chụp lúc còn màn hình tải), nhãn `v0.1.0 · 4c39723-sua`. `user://` bền trên Chrome khi **không** có iframe.
 
 ### Completion Notes List
 
@@ -373,4 +382,19 @@ Kèm các file `.uid` do Godot sinh.
 
 ### File List
 
+- `game/export_presets.cfg` (mới)
+- `game/src/debug/save_probe.gd`, `.uid` (mới)
+- `game/src/debug/dev_tools.gd` (sửa: thử lưu, chữ DEV kèm số lần mở)
+- `game/tests/test_export_preset.gd`, `.uid` (mới)
+- `game/tests/test_save_probe.gd`, `.uid` (mới)
+- `game/tests/test_dev_tools.gd` (sửa)
+- `tools/_godot.sh` (sửa: biến butler, hàm `ghi_build_info`)
+- `tools/cai_dat.sh` (sửa: cài butler 15.32.0)
+- `tools/chay.sh` (sửa: dùng `ghi_build_info`)
+- `tools/build_web.sh`, `tools/deploy_itch.sh`, `tools/dang_nhap_itch.sh`, `tools/itch.cfg` (mới)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (trạng thái)
+- `_bmad-output/implementation-artifacts/0-5-ban-web-tren-itch-io-rieng-tu.md` (story này)
+
 ### Change Log
+
+- 2026-10-17: Phần làm trên máy (Task 0–7): preset Web đơn luồng, `build_web.sh` (kiểm 25 MB), butler 15.32.0 ghim SHA-256, `deploy_itch.sh` + `dang_nhap_itch.sh` + `itch.cfg`, thử lưu `user://` khi bật dev. 11 test mới (tổng 61). Còn Task 8 (cần tài khoản itch.io của tác giả).

@@ -5,15 +5,8 @@ set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/_godot.sh"
 
-# Ghi mã commit để game hiện ở góc màn hình. Có thay đổi chưa commit thì thêm "-sua".
-commit="dev"
-if command -v git >/dev/null 2>&1 && git -C "$REPO_ROOT" rev-parse --short HEAD >/dev/null 2>&1; then
-	commit="$(git -C "$REPO_ROOT" rev-parse --short HEAD)"
-	if [[ -n "$(git -C "$REPO_ROOT" status --porcelain)" ]]; then
-		commit="$commit-sua"
-	fi
-fi
-printf '{"commit": "%s"}\n' "$commit" > "$REPO_ROOT/game/build_info.json"
+# Ghi mã commit để game hiện ở góc màn hình.
+ghi_build_info
 
 # game/.godot/ không có trong git: quét project trước để Godot biết mọi class_name (repo mới clone hoặc vừa thêm file).
 if ! "$GODOT" --headless --path "$REPO_ROOT/game" --import >/dev/null 2>&1; then
