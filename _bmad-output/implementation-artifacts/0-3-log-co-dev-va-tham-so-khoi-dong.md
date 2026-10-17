@@ -4,7 +4,7 @@ baseline_commit: 747f150
 
 # Story 0.3: Log, cờ dev và tham số khởi động
 
-Status: review
+Status: done
 
 ## Story
 
@@ -165,6 +165,35 @@ tôi muốn có một chế độ dev tách riêng,
     Mở ảnh xem rồi ghi kết quả vào Debug Log. Lưu ý: `--write-movie` truyền **trước** `--`, tham số game để sau `--`.
   - [x] 7.6 Thử vi phạm: tạm thêm `print("x")` vào `game/src/app/main.gd` → bước 1 của `tools/test.sh` trượt, ghi `src/app/main.gd:<dòng>: chỉ Log được in ra console...`. Gỡ ra rồi chạy lại cho xanh.
   - [x] 7.7 Commit khi xanh. Lời commit gợi ý: `Thêm Log, cờ dev và tham số khởi động (Story 0.3)`. Chuyển story sang `review`.
+
+### Review Findings
+
+Code review 2026-10-17. Bốn lớp: Blind Hunter, Edge Case Hunter, Verification Gap, Acceptance Auditor. Không lớp nào hỏng.
+
+- [x] [Review][Patch] Luật "tran chỉ dùng khi bật dev" (tác giả chốt) không có test: nằm trong `AppState._ready()`, xóa `launch.tran = 0` thì test vẫn xanh. Chuyển luật thành hàm thuần trên `LaunchOptions` rồi test cả hai nhánh [game/src/app/app_state.gd:19]
+- [x] [Review][Patch] Test "tắt dev thì phím không có tác dụng" không chứng minh được gì: `Log.debug_enabled` đang tắt nên dù phím có chạy cũng không ra dòng log. Bật `debug_enabled` trong ca đó, và bấm đủ F1–F5 (kiểm đủ 5 câu) [game/tests/test_dev_tools.gd:33]
+- [x] [Review][Patch] `set_process_unhandled_input(false)` trong `setup()` vô tác dụng vì Godot bật lại khi node vào cây (đã kiểm: `is_processing_unhandled_input()` = true). Chuyển việc tắt vào `_ready()` [game/src/debug/dev_tools.gd:23]
+- [x] [Review][Patch] Luật "chỉ Log được in ra console" bỏ sót `push_error(`, `push_warning(`, `print_stack(`, `print_tree(`. `push_error` còn làm GUT trượt oan. Thêm vào mẫu và thêm file mẫu vi phạm [tools/check_boundaries.sh:59]
+- [x] [Review][Patch] Thiếu test ghi lại hành vi `--dev=1` (là tham số lạ) và `?dev=1&dev=0` (giá trị sau thắng, dev tắt) [game/tests/test_launch_options.gd:1]
+- [x] [Review][Patch] Rủi ro trình duyệt chiếm phím F1/F5 chỉ ghi trong Dev Notes của story này; thêm vào `deferred-work.md` cho Story 0.5/1.6 [_bmad-output/implementation-artifacts/deferred-work.md:1]
+- [x] [Review][Defer] `LaunchOptions.read_current()` (đường web qua `JavaScriptBridge` và đường desktop) chưa có test; itch.io có thể thêm khóa lạ vào URL iframe làm in WARN mỗi lần mở [game/src/app/launch_options.gd:35] — deferred: chỉ kiểm được khi có bản web (Story 0.5), gộp vào mục iframe itch.io
+- [x] [Review][Defer] Luật mới "lõi không gọi `Log.`" chưa ghi vào danh sách cấm trong `project-context.md` và `game-architecture.md` (hai nơi này vẫn ghi `print`) [tools/check_boundaries.sh:47] — deferred: sửa tài liệu agent-context cần tác giả duyệt
+
+#### Rejected
+
+- `?dev` có giá trị khác `1` (`?dev=true`, `?dev`) tắt dev mà không báo — đúng như Task 2.4 ("im lặng bỏ qua"); muốn có cảnh báo thì sửa spec.
+- `tran` vượt số trận không bị chặn — Task 2.4 để E1 làm khi có danh sách trận.
+- `--tran=99999999999999999999` tràn int64 — low: đã kiểm, Godot in ERROR và lấy giá trị lớn nhất; không ai gõ như vậy.
+- Gọi `setup(true)` hai lần ra hai chữ DEV; `setup(true)` rồi `setup(false)` không gỡ — low: `main.gd` chỉ gọi một lần.
+- Action `dev_fN` đã tồn tại với phím khác thì bị bỏ qua; action không bao giờ bị xóa — low: không có code nào khác tạo action tên này.
+- Action bị xóa khi đang bật dev làm `is_action_pressed` báo lỗi — low: chỉ xảy ra nếu test tự xóa action giữa chừng.
+- Shift+F1 không có tác dụng (`exact_match = true`) — đúng như Task 4.3.
+- Thông điệp có xuống dòng làm một mục log thành nhiều dòng — low: chưa có chỗ nào ghi thông điệp nhiều dòng.
+- `AppState.launch` có thể null khi `main.gd` đọc — false: autoload luôn `_ready()` trước scene chính.
+- Lõi có thể né luật bằng `var l = Log` — low: cố tình né, review sẽ thấy.
+- Chữ "DEV" nằm trong `Node2D` nên sẽ trôi theo camera — low: kiến trúc không có camera (bàn cố định 1280×720).
+- Thứ tự `setup()` trước `add_child()` trong test khác Task 4.5 — cùng gốc với mục `set_process_unhandled_input`, sửa ở đó.
+- File story không có trong diff — false: cố ý bỏ ra vì là spec dùng để đối chiếu.
 
 ## Dev Notes
 
@@ -379,6 +408,7 @@ Claude Opus 5.5 (claude-opus-5-5)
 - `tools/chay.sh` (sửa chú thích)
 - `tools/mau_ranh_gioi/vi_pham/core/in_ra.gd` (sửa `mong_doi`)
 - `tools/mau_ranh_gioi/vi_pham/core/ghi_log.gd`, `vi_pham/battle/in_ra.gd`, `hop_le/debug/log.gd` (mới)
+- `tools/mau_ranh_gioi/vi_pham/battle/bao_loi.gd` (mới, theo code review)
 - `_bmad-output/implementation-artifacts/deferred-work.md` (thêm mục iframe itch.io cho Story 0.5)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` (trạng thái)
 - `_bmad-output/implementation-artifacts/0-3-log-co-dev-va-tham-so-khoi-dong.md` (story này)
@@ -386,3 +416,4 @@ Claude Opus 5.5 (claude-opus-5-5)
 ### Change Log
 
 - 2026-10-17: Thêm `Log`, `LaunchOptions`, autoload `AppState`, `DevTools` (chữ DEV, F1–F5 khóa khi không bật dev); luật "chỉ Log được in ra console" và "lõi không ghi log" trong `check_boundaries.sh`; 28 test mới (tổng 35).
+- 2026-10-17: Sửa theo code review: luật "tran chỉ khi bật dev" chuyển thành `LaunchOptions.require_dev_for_tran()` có test; test DevTools bấm đủ F1–F5 và bật DEBUG ở ca tắt dev; tắt nhận phím trong `_ready()`; luật console bắt thêm `push_error`/`push_warning`/`print_stack`/`print_tree`; thêm test `--dev=1`, `?dev=1&dev=0`; ghi rủi ro phím F1/F5 trên trình duyệt vào deferred-work. Tổng 40 test.

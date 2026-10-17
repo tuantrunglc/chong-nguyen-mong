@@ -55,8 +55,8 @@ quet "$DATA" '\bNode\w*\b|get_tree\(|\$[A-Za-z_"%]' "src/data không được d�
 quet "$SRC" '\.(hp|cell)[[:space:]]*([-+*/%]=|=[^=])' "chỉ Effects được sửa máu và vị trí (.hp/.cell)" \
 	'' "$SRC/core/effects.gd"
 
-# Chỉ Log được in ra console, ở mọi nơi trong src/.
-quet "$SRC" '\bprint(err|raw|s|t|_rich|_debug|_verbose)?\(' \
+# Chỉ Log được in ra console, ở mọi nơi trong src/. push_error còn làm GUT báo trượt oan.
+quet "$SRC" '\bprint(err|raw|s|t|_rich|_debug|_verbose|_stack|_tree|_tree_pretty)?\(|\bpush_(error|warning)\(' \
 	"chỉ Log được in ra console (dùng Log.info/warn/error/debug)" '' "$SRC/debug/log.gd"
 
 if (( so_loi > 0 )); then

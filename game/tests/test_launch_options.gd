@@ -70,6 +70,10 @@ func test_unknown_arg() -> void:
 	_assert_options(_desktop(["--xyz"]), false, 0, ['bỏ qua tham số lạ: "--xyz"'])
 
 
+func test_dev_with_value_is_unknown() -> void:
+	_assert_options(_desktop(["--dev=1"]), false, 0, ['bỏ qua tham số lạ: "--dev=1"'])
+
+
 func test_tran_with_space_is_unknown() -> void:
 	_assert_options(_desktop(["--tran", "3"]), false, 0,
 		['bỏ qua tham số lạ: "--tran"', 'bỏ qua tham số lạ: "3"'])
@@ -87,6 +91,10 @@ func test_web_dev_zero_is_off() -> void:
 	_assert_options(_web("?dev=0"), false, 0, [])
 
 
+func test_web_last_dev_value_wins() -> void:
+	_assert_options(_web("?dev=1&dev=0"), false, 0, [])
+
+
 func test_web_tran_not_a_number() -> void:
 	_assert_options(_web("?tran=x"), false, 0,
 		['tham số ?tran không hợp lệ: "x", cần số nguyên từ 1'])
@@ -102,3 +110,21 @@ func test_web_value_is_uri_decoded() -> void:
 
 func test_web_empty_pairs_are_ignored() -> void:
 	_assert_options(_web("?&&dev=1&"), true, 0, [])
+
+
+func test_tran_without_dev_is_dropped() -> void:
+	var o: LaunchOptions = _desktop(["--tran=3"])
+	o.require_dev_for_tran()
+	_assert_options(o, false, 0, ["bỏ qua tran=3 vì chưa bật dev"])
+
+
+func test_tran_with_dev_is_kept() -> void:
+	var o: LaunchOptions = _desktop(["--dev", "--tran=3"])
+	o.require_dev_for_tran()
+	_assert_options(o, true, 3, [])
+
+
+func test_no_tran_without_dev_gives_no_warning() -> void:
+	var o: LaunchOptions = _desktop([])
+	o.require_dev_for_tran()
+	_assert_options(o, false, 0, [])

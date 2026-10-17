@@ -20,11 +20,17 @@ func _reset() -> void:
 			InputMap.erase_action(action)
 
 
-func _press_f1(tools: DevTools) -> void:
-	var ev: InputEventKey = InputEventKey.new()
-	ev.physical_keycode = KEY_F1
-	ev.pressed = true
-	tools._unhandled_input(ev)
+## Bấm lần lượt F1–F5, theo đúng thứ tự main.gd dùng: setup() rồi mới vào cây.
+func _make_and_press_all(enabled: bool) -> DevTools:
+	var tools: DevTools = DevTools.new()
+	tools.setup(enabled)
+	add_child_autofree(tools)
+	for key: Key in DevTools.KEYS:
+		var ev: InputEventKey = InputEventKey.new()
+		ev.physical_keycode = key
+		ev.pressed = true
+		tools._unhandled_input(ev)
+	return tools
 
 
 func _has_label(tools: DevTools) -> bool:
@@ -35,22 +41,26 @@ func _has_label(tools: DevTools) -> bool:
 
 
 func test_dev_off_keys_do_nothing() -> void:
-	var tools: DevTools = DevTools.new()
-	tools.setup(false)
-	add_child_autofree(tools)
-	_press_f1(tools)
+	# Bật DEBUG để nếu phím lọt qua thì chắc chắn có dòng log.
+	Log.debug_enabled = true
+	var tools: DevTools = _make_and_press_all(false)
 	assert_eq(Log.get_lines().size(), 0, "không có dòng log nào")
 	assert_false(_has_label(tools), "không có chữ DEV")
 	assert_false(InputMap.has_action("dev_f1"), "không đăng ký phím dev")
+	assert_false(tools.is_processing_unhandled_input(), "không nhận phím")
 
 
-func test_dev_on_shows_badge_and_logs_f1() -> void:
+func test_dev_on_shows_badge_and_logs_each_key() -> void:
 	Log.debug_enabled = true
-	var tools: DevTools = DevTools.new()
-	tools.setup(true)
-	add_child_autofree(tools)
-	_press_f1(tools)
-	assert_eq(Log.get_lines(), PackedStringArray(["[DEBUG][dev] f1: chưa có công cụ tọa độ (story 1.2)"]))
+	var tools: DevTools = _make_and_press_all(true)
+	assert_eq(Log.get_lines(), PackedStringArray([
+		"[DEBUG][dev] f1: chưa có công cụ tọa độ (story 1.2)",
+		"[DEBUG][dev] f2: chưa có sao chép báo lỗi (story 2.13)",
+		"[DEBUG][dev] f3: chưa có xem ý định ai (story 2.6)",
+		"[DEBUG][dev] f4: không dùng",
+		"[DEBUG][dev] f5: chưa có nạp lại dữ liệu (story 1.6)",
+	]))
+	assert_true(tools.is_processing_unhandled_input(), "nhận phím")
 	var badge: Label = null
 	for child: Node in tools.get_children():
 		if child is Label:

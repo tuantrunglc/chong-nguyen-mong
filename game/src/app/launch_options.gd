@@ -41,6 +41,13 @@ static func read_current() -> LaunchOptions:
 	return parse(OS.get_cmdline_user_args(), "")
 
 
+## Tác giả chốt 2026-10-17: chọn trận chỉ dùng được khi bật dev. Không bật thì bỏ tran, kèm cảnh báo.
+func require_dev_for_tran() -> void:
+	if tran > 0 and not dev:
+		warnings.append("bỏ qua tran=%d vì chưa bật dev" % tran)
+		tran = 0
+
+
 func _set_tran(value: String, flag: String) -> void:
 	if value.is_valid_int() and value.to_int() >= 1:
 		tran = value.to_int()

@@ -15,3 +15,9 @@
 ## Deferred from: Story 0.3 (2026-10-17)
 
 - Chưa kiểm chứng: trên itch.io, game chạy trong iframe có địa chỉ riêng (`html5.itch.zone/...`). Thêm `?dev=1` vào link trang itch.io **có thể không** tới được game, vì `LaunchOptions` đọc `window.location.search` của chính iframe. Story 0.5 phải thử: (1) link trang + `?dev=1`; (2) mở thẳng địa chỉ iframe + `?dev=1`. Ghi lại cách nào chạy được.
+
+## Deferred from: code review of 0-3-log-co-dev-va-tham-so-khoi-dong (2026-10-17)
+
+- `LaunchOptions.read_current()` chưa có test: cả đường web (`JavaScriptBridge.eval("window.location.search")`) lẫn đường desktop. Story 0.5 kiểm cùng mục iframe itch.io ở trên. Nếu itch.io thêm khóa lạ vào URL của iframe thì mỗi lần mở game sẽ in một dòng WARN; khi đó cần quyết có bỏ qua các khóa đó không.
+- Luật mới "lõi luật không được gọi `Log.`" (`check_boundaries.sh`) chưa ghi vào danh sách cấm của `src/core/` trong `project-context.md` và `game-architecture.md` (hai nơi vẫn chỉ ghi `print`). Cần tác giả duyệt rồi mới sửa tài liệu.
+- Rủi ro cho Story 0.5 / 1.6: trên trình duyệt, F1 mở trợ giúp và F5 tải lại trang. Phím dev F1/F5 có thể không tới được game. Khi có bản web phải thử; nếu bị chiếm thì chặn mặc định của trình duyệt (qua `JavaScriptBridge`) hoặc hỏi tác giả đổi phím.

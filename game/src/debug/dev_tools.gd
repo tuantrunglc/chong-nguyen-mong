@@ -21,7 +21,6 @@ var _enabled: bool = false
 
 func setup(enabled: bool) -> void:
 	_enabled = enabled
-	set_process_unhandled_input(enabled)
 	if not enabled:
 		return
 	for i: int in range(KEYS.size()):
@@ -39,6 +38,11 @@ func setup(enabled: bool) -> void:
 	badge.add_theme_color_override("font_color", BADGE_COLOR)
 	badge.position = Vector2(BADGE_MARGIN, BADGE_MARGIN)
 	add_child(badge)
+
+
+func _ready() -> void:
+	# Godot tự bật lại xử lý input khi node vào cây, nên phải tắt ở đây chứ không ở setup().
+	set_process_unhandled_input(_enabled)
 
 
 func _unhandled_input(event: InputEvent) -> void:
