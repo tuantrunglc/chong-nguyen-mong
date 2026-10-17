@@ -45,6 +45,9 @@ func _ready() -> void:
 	dev_tools.setup(AppState.launch.dev, opens)
 	add_child(dev_tools)
 
+	# Công cụ AI (Story 0.6): chỉ khi bật dev trên desktop có cửa sổ.
+	McpRuntime.start_if_enabled(self, AppState.launch.dev)
+
 
 func _read_version() -> String:
 	var value: Variant = ProjectSettings.get_setting("application/config/version", "0.0.0")

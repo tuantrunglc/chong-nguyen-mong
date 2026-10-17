@@ -3,7 +3,7 @@
 # để dùng đúng một bản Godot 4.7.2 nằm trong .tools/, không dùng bản nào khác trên máy.
 #
 # Biến đặt ra: REPO_ROOT, GODOT_VERSION, GODOT_DIR, GODOT_OS, GODOT, GODOT_DATA_DIR,
-# BUTLER_VERSION, BUTLER_DIR, BUTLER. Hàm: ghi_build_info.
+# BUTLER_VERSION, BUTLER_DIR, BUTLER, GOPEAK_VERSION, CONTEXT7_VERSION, MCP_DIR. Hàm: ghi_build_info.
 # GODOT_DATA_DIR: chế độ tự chứa, Godot ghi dữ liệu editor (gồm export template) vào đây.
 # Đặt GODOT_BO_QUA_KIEM_TRA=1 trước khi source để không thoát khi chưa cài (dùng cho cai_dat.sh).
 set -euo pipefail
@@ -34,6 +34,11 @@ esac
 BUTLER_VERSION="15.32.0"
 BUTLER_DIR="$REPO_ROOT/.tools/butler-$BUTLER_VERSION"
 BUTLER="$BUTLER_DIR/butler"
+
+# Công cụ AI (MCP): GoPeak và Context7. Phiên bản ghim trong tools/mcp/package.json + package-lock.json.
+GOPEAK_VERSION="2.3.8"
+CONTEXT7_VERSION="4.1.1"
+MCP_DIR="$REPO_ROOT/.tools/mcp"
 
 # Ghi mã commit vào game/build_info.json để game hiện ở góc màn hình. Có thay đổi chưa commit thì thêm "-sua".
 ghi_build_info() {

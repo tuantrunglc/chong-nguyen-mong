@@ -1,5 +1,5 @@
 extends GutTest
-## Preset export Web: đơn luồng, có file JSON, không mang theo test và GUT.
+## Preset export Web: đơn luồng, có file JSON, không mang theo test, GUT và addon GoPeak.
 
 const PRESET_PATH: String = "res://export_presets.cfg"
 
@@ -38,6 +38,10 @@ func test_excludes_tests_and_gut() -> void:
 	var exclude: String = str(_preset_value("exclude_filter"))
 	assert_string_contains(exclude, "tests/*")
 	assert_string_contains(exclude, "addons/gut/*")
+
+
+func test_excludes_gopeak_runtime() -> void:
+	assert_string_contains(str(_preset_value("exclude_filter")), "addons/godot_mcp_runtime/*")
 
 
 func test_single_threaded() -> void:

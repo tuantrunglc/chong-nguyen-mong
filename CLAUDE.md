@@ -16,6 +16,14 @@
 - `tools/chay.sh`: chạy game. Nhận thêm `--dev`, `--tran=N`.
 - `tools/test.sh`: chạy toàn bộ test, in tóm tắt tiếng Việt; mã thoát khác 0 là trượt.
 
+## Nhìn game đang chạy (MCP)
+
+- Chụp màn hình: chạy `tools/chay.sh --dev` ở chế độ nền, chờ khoảng 5 giây, rồi gọi `capture_screenshot` của GoPeak (chưa thấy công cụ thì gọi `tool_catalog` với từ khóa "screenshot" để bật nhóm `testing`). Xong thì tắt game.
+- Xem log: đọc đầu ra của lệnh `tools/chay.sh` đang chạy nền (dòng `[INFO][...]`). Không dùng `run_project` của GoPeak: nó chạy `--headless`, không có cửa sổ, không có `--dev`.
+- Bơm input (`inject_mouse_click`, `inject_key`…): tác giả cho phép, chỉ khi `--dev`, chỉ để thử. Tọa độ dạng `[x, y]`.
+- Tra API Godot: Context7, thư viện `/godotengine/godot-docs`, nhánh 4.7.
+- MCP chỉ để *nhìn* và *thử*. Luật và dữ liệu trận chỉ sửa trong code, có test đi kèm.
+
 ## Tiến độ
 
 Theo dõi ở `_bmad-output/implementation-artifacts/sprint-status.yaml`.

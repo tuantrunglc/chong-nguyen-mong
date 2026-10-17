@@ -1,0 +1,9 @@
+{
+  "name": "chong-nguyen-mong-mcp",
+  "private": true,
+  "description": "Công cụ AI (MCP) của repo. Cài bằng tools/cai_dat.sh vào .tools/mcp/.",
+  "dependencies": {
+    "gopeak": "2.3.8",
+    "@upstash/context7-mcp": "4.1.1"
+  }
+}

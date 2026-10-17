@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Cài Godot 4.7.2, export template và butler (đẩy bản web lên itch.io) vào .tools/ trong repo.
+# Cài Godot 4.7.2, export template, butler (đẩy bản web lên itch.io) và công cụ AI (GoPeak, Context7)
+# vào .tools/ trong repo.
 # Chạy lại khi đã cài thì không tải lại.
 set -euo pipefail
 
@@ -149,3 +150,63 @@ else
 fi
 
 rm -rf "$TAI_VE"
+
+# Công cụ AI (MCP): cài bằng npm ci từ file khóa trong tools/mcp/ (ghim cả thư viện phụ thuộc, kèm SHA-512).
+# Đặt sau Godot và butler: thiếu Node.js thì báo lỗi, phần đã cài ở trên vẫn dùng được.
+kiem_node() {
+	local ban
+	if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+		ban=""
+	else
+		ban="$(node -p 'process.versions.node' 2>/dev/null || true)"
+	fi
+	local chinh phu
+	IFS=. read -r chinh phu _ <<< "${ban:-0.0.0}"
+	if [[ -z "$ban" ]] || (( chinh < 20 || (chinh == 20 && phu < 18) )); then
+		echo "Lỗi: chưa có Node.js 20.18 trở lên (cần cho công cụ AI). Cài từ https://nodejs.org rồi chạy lại." >&2
+		exit 1
+	fi
+}
+
+cai_mcp() {
+	local khoa="$REPO_ROOT/tools/mcp/package-lock.json"
+	local ma
+	ma="$(sha256 "$khoa")"
+	if [[ -f "$MCP_DIR/.installed" && "$(cat "$MCP_DIR/.installed")" == "$ma" ]]; then
+		echo "Đã cài GoPeak $GOPEAK_VERSION và Context7 $CONTEXT7_VERSION"
+		return
+	fi
+
+	echo "Đang cài công cụ AI (GoPeak $GOPEAK_VERSION, Context7 $CONTEXT7_VERSION) ..."
+	rm -rf "$MCP_DIR"
+	mkdir -p "$MCP_DIR"
+	cp "$REPO_ROOT/tools/mcp/package.json" "$khoa" "$MCP_DIR/"
+	# --ignore-scripts: không chạy postinstall của gói nào (GoPeak có postinstall cài hook vào shell).
+	if ! npm ci --ignore-scripts --no-audit --no-fund --prefix "$MCP_DIR"; then
+		echo "Lỗi: không cài được công cụ AI. Kiểm tra mạng rồi chạy lại." >&2
+		exit 1
+	fi
+
+	local goi ban_mong_doi file_chay ban
+	for goi in gopeak @upstash/context7-mcp; do
+		case "$goi" in
+			gopeak) ban_mong_doi="$GOPEAK_VERSION"; file_chay="build/cli.js" ;;
+			*) ban_mong_doi="$CONTEXT7_VERSION"; file_chay="dist/index.js" ;;
+		esac
+		if [[ ! -f "$MCP_DIR/node_modules/$goi/$file_chay" ]]; then
+			echo "Lỗi: cài xong mà không thấy $goi/$file_chay." >&2
+			exit 1
+		fi
+		ban="$(node -p "require(process.argv[1]).version" "$MCP_DIR/node_modules/$goi/package.json")"
+		if [[ "$ban" != "$ban_mong_doi" ]]; then
+			echo "Lỗi: $goi cài ra bản $ban, cần đúng $ban_mong_doi." >&2
+			exit 1
+		fi
+	done
+
+	echo "$ma" > "$MCP_DIR/.installed"
+	echo "Đã cài GoPeak $GOPEAK_VERSION và Context7 $CONTEXT7_VERSION"
+}
+
+kiem_node
+cai_mcp

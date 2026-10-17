@@ -1,0 +1,6 @@
+{
+  "mcpServers": {
+    "gopeak": { "command": "tools/mcp_gopeak.sh", "args": [] },
+    "context7": { "command": "tools/mcp_context7.sh", "args": [] }
+  }
+}
