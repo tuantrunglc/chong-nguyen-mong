@@ -1,0 +1,101 @@
+# generated: 2026-10-17 10:21
+# last_updated: 2026-10-17 10:23
+# project: GameTest
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: "2026-10-17 10:21"
+last_updated: "2026-10-17 10:23"
+project: GameTest
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  epic-0: in-progress
+  0-1-project-godot-trong-chay-duoc-tren-may: ready-for-dev
+  0-2-mot-lenh-de-chay-toan-bo-test: backlog
+  0-3-log-co-dev-va-tham-so-khoi-dong: backlog
+  0-4-chu-tieng-viet-va-font: backlog
+  0-5-ban-web-tren-itch-io-rieng-tu: backlog
+  0-6-cai-cong-cu-ai-mcp: backlog
+  epic-0-retrospective: optional
+  epic-1: backlog
+  1-1-nap-chi-so-va-tran-tu-file-bao-loi-bang-tieng-viet: backlog
+  1-2-hien-ban-co-tran-1-bo-cuc-dau-tien: backlog
+  1-3-kich-ban-luat-va-cong-cu-duyet-tren-terminal: backlog
+  1-4-chon-tuong-va-xem-cac-o-di-duoc: backlog
+  1-5-di-huy-nuoc-di-ket-thuc-luot: backlog
+  1-6-f5-nap-lai-du-lieu: backlog
+  epic-1-retrospective: optional
+  epic-2: backlog
+  2-1-nguyen-khoai-danh-day-va-va-cham: backlog
+  2-2-song-va-danh-trung-quan-minh: backlog
+  2-3-pham-ngu-lao-phong-lao: backlog
+  2-4-tran-khanh-du-keo: backlog
+  2-5-mau-guc-thang-va-thua-tieu-diet: backlog
+  2-6-dich-chuan-bi-ai-di-va-chon-muc-tieu: backlog
+  2-7-hien-thi-bao-don: backlog
+  2-8-dich-ra-don-theo-thu-tu: backlog
+  2-9-don-dich-theo-va-huy-don: backlog
+  2-10-re-chuot-xem-thong-tin: backlog
+  2-11-hoat-anh-phat-lai-su-kien: backlog
+  2-12-xem-truoc-ket-qua-don: backlog
+  2-13-f2-sao-chep-bao-loi: backlog
+  2-14-hoan-thien-tran-1-va-moc-tu-choi-het-e2: backlog
+  2-15-cung-ky-cat-duoc-neu-tre: backlog
+  epic-2-retrospective: optional
+  epic-3: backlog
+  3-1-rung-va-vat-can-chan-don: backlog
+  3-2-choi-lai-hiep: backlog
+  3-3-tran-2: backlog
+  3-4-ham-chong: backlog
+  3-5-tran-3: backlog
+  3-6-kho-luong: backlog
+  3-7-quan-tiep-vien: backlog
+  3-8-nhiem-vu-giu-ai: backlog
+  3-9-muu-ke-vuon-khong-nha-trong-va-nut-muu-ke: backlog
+  3-10-muu-ke-sat-that: backlog
+  3-11-tran-4-giu-ai: backlog
+  epic-3-retrospective: optional
+  epic-4: backlog
+  4-1-man-hinh-chinh: backlog
+  4-2-chuoi-5-tran-va-man-chuyen-tran: backlog
+  4-3-tu-luu: backlog
+  4-4-tua-nhanh-pha-dich: backlog
+  4-5-tran-5: backlog
+  4-6-tinh-chinh-5-tran: backlog
+  4-7-kiem-tra-hieu-nang-va-trinh-duyet: backlog
+  4-8-goi-y-luat-dau-tran: backlog
+  4-9-choi-thu-voi-nguoi-than: backlog
+  epic-4-retrospective: optional
