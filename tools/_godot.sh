@@ -3,7 +3,8 @@
 # để dùng đúng một bản Godot 4.7.2 nằm trong .tools/, không dùng bản nào khác trên máy.
 #
 # Biến đặt ra: REPO_ROOT, GODOT_VERSION, GODOT_DIR, GODOT_OS, GODOT, GODOT_DATA_DIR,
-# BUTLER_VERSION, BUTLER_DIR, BUTLER, GOPEAK_VERSION, CONTEXT7_VERSION, MCP_DIR. Hàm: ghi_build_info.
+# BUTLER_VERSION, BUTLER_DIR, BUTLER, GOPEAK_VERSION, CONTEXT7_VERSION, MCP_DIR. Hàm: sha256, ma_cai_mcp,
+# ghi_build_info.
 # GODOT_DATA_DIR: chế độ tự chứa, Godot ghi dữ liệu editor (gồm export template) vào đây.
 # Đặt GODOT_BO_QUA_KIEM_TRA=1 trước khi source để không thoát khi chưa cài (dùng cho cai_dat.sh).
 set -euo pipefail
@@ -39,6 +40,17 @@ BUTLER="$BUTLER_DIR/butler"
 GOPEAK_VERSION="2.3.8"
 CONTEXT7_VERSION="4.1.1"
 MCP_DIR="$REPO_ROOT/.tools/mcp"
+
+if command -v sha256sum >/dev/null 2>&1; then
+	sha256() { sha256sum "$1" | awk '{print $1}'; }
+else
+	sha256() { shasum -a 256 "$1" | awk '{print $1}'; }
+fi
+
+# Mã của bộ công cụ AI cần cài: băm cả package.json và file khóa. Ghi vào .tools/mcp/.installed khi cài xong.
+ma_cai_mcp() {
+	echo "$(sha256 "$REPO_ROOT/tools/mcp/package.json")-$(sha256 "$REPO_ROOT/tools/mcp/package-lock.json")"
+}
 
 # Ghi mã commit vào game/build_info.json để game hiện ở góc màn hình. Có thay đổi chưa commit thì thêm "-sua".
 ghi_build_info() {

@@ -4,7 +4,7 @@ baseline_commit: a557bd4
 
 # Story 0.6: Cài công cụ AI (MCP)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -187,6 +187,26 @@ tôi muốn AI tự nhìn thấy được game đang chạy,
   - [x] 7.7 AC 9: `tools/build_web.sh` đạt; kiểm bản web không có addon: `strings build/web/index.pck | grep -c godot_mcp` ra `0` (hoặc cách khác chắc hơn, ghi vào Debug Log). Dung lượng bản nén không đổi đáng kể (≈ 10.4 MB).
   - [x] 7.8 Ghi kết quả vào Debug Log, cập nhật Completion Notes (kèm hướng dẫn tác giả tự test), File List, Change Log. Commit.
 
+### Review Findings
+
+Code review 2026-10-18 (Blind Hunter, Edge Case Hunter, Acceptance Auditor), diff `a557bd4..HEAD` (bỏ file khóa và thân addon chép nguyên; addon so với bản gốc chỉ khác dòng `listen`).
+
+- [x] [Review][Decision] Chưa chặn bản phát hành — `should_start` chỉ xét dev/web/headless. Hiện chỉ có preset Web (đã loại addon) nên chưa sao; nếu sau này thêm preset desktop mà quên loại addon thì bản phát hành chạy với `--dev` sẽ mở cổng 7777 điều khiển được game. Có thêm điều kiện `OS.is_debug_build()` (chỉ bản chạy bằng `chay.sh`/editor mới mở cổng) không? **Tác giả chọn (2026-10-18): thêm `OS.is_debug_build()`** → thành Patch bên dưới.
+- [x] [Review][Patch] Thêm điều kiện bản debug (`OS.is_debug_build()`) để bản phát hành không bao giờ mở cổng 7777 [game/src/debug/mcp_runtime.gd:125]
+- [x] [Review][Patch] Cổng 7777 bận (mở game 2 lần) mà log vẫn báo "mở cổng 7777" và trả true; GoPeak âm thầm nói chuyện với cửa sổ kia [game/src/debug/mcp_runtime.gd:139]
+- [x] [Review][Patch] Không kiểm null sau `load()` addon: addon lỗi biên dịch thì `--dev` báo lỗi runtime trong `main._ready` thay vì cảnh báo [game/src/debug/mcp_runtime.gd:137]
+- [x] [Review][Patch] Kiểm Node cho qua 20.18.0 nhưng Context7 4.1.1 đòi `>=20.18.1`; thiếu npm mà thông báo chỉ nói thiếu Node [tools/cai_dat.sh:369]
+- [x] [Review][Patch] `CLAUDE.md` ghi sai dạng tọa độ (`[x, y]` là của giao thức TCP; công cụ GoPeak nhận `x`, `y` riêng) và chưa ghi ID Context7 đã kiểm `/godotengine/godot-docs/__branch__4.7` [CLAUDE.md:25]
+- [x] [Review][Patch] Script khởi động MCP chỉ kiểm có file `.installed`, không kiểm khớp file khóa hiện tại (kéo bản mới về mà chưa chạy `cai_dat.sh` thì vẫn chạy bản cũ); lỗi thiếu tiền tố `Lỗi:` [tools/mcp_gopeak.sh:8]
+- [x] [Review][Patch] Dấu `.installed` chỉ băm file khóa, sửa `package.json` mà không sửa khóa thì `cai_dat.sh` vẫn báo đã cài [tools/cai_dat.sh:378]
+- [x] [Review][Patch] Test bảng chân trị tính `expected` bằng đúng biểu thức của code (test lặp lại code) [game/tests/test_mcp_runtime.gd:9]
+- [x] [Review][Patch] Phiên bản ghi ở 3 nơi (`_godot.sh`, `package.json`/khóa, test) mà không test nào nối `_godot.sh` và gốc file khóa với `package.json` [game/tests/test_mcp_config.gd]
+- [x] [Review][Patch] Đổi yêu cầu Node 18+ (kiến trúc) thành 20.18.1+ chưa ghi vào mục lệch kiến trúc [_bmad-output/implementation-artifacts/0-6-cai-cong-cu-ai-mcp.md]
+- [x] [Review][Defer] Nâng phiên bản mà mất mạng: `rm -rf .tools/mcp` chạy trước `npm ci` nên mất luôn bản cũ đang chạy được [tools/cai_dat.sh:385] — deferred, ít gặp
+- [x] [Review][Defer] Context7 không cần Godot nhưng script vẫn source `_godot.sh` (chưa cài Godot hoặc máy không hỗ trợ thì Context7 cũng không chạy) [tools/mcp_context7.sh:7] — deferred, ít gặp
+- [x] [Review][Defer] Claude Code mở từ chỗ PATH không có `node`, hoặc `node_modules` bị xóa một phần: server chỉ báo "failed", không có lời nhắc tiếng Việt [tools/mcp_gopeak.sh:15] — deferred, ít gặp
+- [x] [Review][Defer] `.mcp.json` dùng đường tương đối, phụ thuộc thư mục Claude Code khởi động [.mcp.json:3] — deferred, đã chạy được từ gốc repo
+
 ## Dev Notes
 
 ### Bối cảnh
@@ -269,6 +289,7 @@ tôi muốn AI tự nhìn thấy được game đang chạy,
 - game-architecture ghi "addon editor/runtime cài vào project" và "(addon của GoPeak) cài bằng script của GoPeak". Story này chỉ cài **runtime**, chép từ gói npm đã ghim, sửa 1 dòng (`127.0.0.1`), không cài addon editor. Lý do: script cài trên GitHub lấy nhánh `main` (không ghim); addon editor cần mở editor; plugin runtime tự thêm autoload thứ hai.
 - Thêm thư mục `game/addons/godot_mcp_runtime/` (cây thư mục kiến trúc ghi chung là "addon của GoPeak").
 - Thêm `tools/mcp/`, `tools/mcp_gopeak.sh`, `tools/mcp_context7.sh`, `.mcp.json`: mục mới so với cây thư mục kiến trúc (giống `tools/chay.sh` ở Story 0.1).
+- Node.js: kiến trúc ghi "18+", thực tế cần **20.18.1+** (Context7 4.1.1 đòi `>=20.18.1`). `cai_dat.sh` kiểm đúng 20.18.1 (sau code review).
 - Đề xuất (không tự sửa tài liệu): ghi vào project-context "GoPeak: chụp bằng `tools/chay.sh --dev` + `capture_screenshot`, không dùng `run_project`". Tác giả duyệt rồi mới ghi.
 
 ### Hướng dẫn cho tác giả (AI đọc lại cho tác giả ở Task 7.2)
@@ -404,6 +425,14 @@ Claude Opus 5.5 (`claude-opus-5-5`)
 - 7.5: `resolve-library-id` "Godot" → `/godotengine/godot-docs` (45 772 đoạn, bản `__branch__4.5`, `__branch__4.7`). ID dùng được: **`/godotengine/godot-docs/__branch__4.7`**. Tra "Tween create_tween/tween_property" → trích `class_tween.rst` và `class_node.rst`, nguồn ghi `github.com/godotengine/godot-docs/blob/4.7/...`. Không cần API key. Đạt AC 6.
 - Tắt game bằng `pkill` (mã 143 là do tắt, không phải lỗi). `tools/test.sh` lại: 77/77 đạt.
 
+**Sửa theo code review (2026-10-18):**
+
+- RED: thêm/sửa test trước → `Too many arguments for "should_start()"` (test 4 tham số). GREEN: **80/80 đạt** (thêm `test_release_build_never_starts_even_with_dev`, `test_package_lock_root_matches_package_json`, `test_godot_sh_versions_match_pinned`; bảng chân trị viết thẳng tổ hợp duy nhất được mở).
+- `should_start` thêm `is_debug` (`OS.is_debug_build()`): bản phát hành không mở cổng. `chay.sh` dùng Godot editor (debug) nên vẫn mở.
+- Mở game 2 lần `--dev`: cửa sổ 1 `[INFO][mcp] mở cổng 7777`; cửa sổ 2 `ERROR: [MCP Runtime] Failed to start server on port 7777: 22` rồi `[WARN][mcp] không mở được cổng 7777 (có game khác đang mở?)...`, node addon bị gỡ. `lsof` chỉ thấy 1 tiến trình ở `127.0.0.1:7777`. Chụp qua GoPeak ra cửa sổ 1 ("lần mở thứ 4").
+- `sha256` chuyển sang `_godot.sh`; thêm `ma_cai_mcp` (băm `package.json` + file khóa). Dấu cũ → `tools/mcp_gopeak.sh` báo `Lỗi: công cụ AI đã cài là bản cũ ...`, mã 1. `cai_dat.sh` lần 1 cài lại (`added 133 packages`), lần 2 in `Đã cài ...` cả 3 phần. Gửi `initialize` vào 2 script: trả JSON đúng.
+- `kiem_node` (bản sao, `/bin/bash` 3.2, node giả): 20.17.9 lỗi, **20.18.0 lỗi**, 20.18.1/22.0.0/26.8.1 đạt; có node thiếu npm → `Lỗi: có Node.js nhưng thiếu npm ...`; không node → lỗi, mã 1.
+
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
@@ -411,7 +440,8 @@ Claude Opus 5.5 (`claude-opus-5-5`)
 - Addon runtime GoPeak chép từ gói npm đã ghim, sửa 1 dòng để chỉ nghe `127.0.0.1`; chỉ bật khi dev + desktop + có cửa sổ (`game/src/debug/mcp_runtime.gd`), không thêm autoload, không có trong bản web.
 - Cách AI chụp màn hình (đã ghi trong `CLAUDE.md`): `tools/chay.sh --dev` nền → `tool_catalog` "screenshot" → `capture_screenshot`. Không dùng `run_project` (chạy headless).
 - Lệch kiến trúc: xem mục "Lệch so với tài liệu kiến trúc" ở Dev Notes (chỉ cài runtime, không cài addon editor; thêm `tools/mcp/`, 2 script, `.mcp.json`). Đề xuất ghi vào project-context quy tắc chụp bằng `chay.sh --dev`: chờ tác giả duyệt.
-- Test: 77 (thêm 13 so với 64 trước story).
+- Test: 80 (thêm 16 so với 64 trước story; 3 test thêm sau code review).
+- Sau code review: bản phát hành không bao giờ mở cổng 7777 (tác giả chọn); mở game 2 lần thì cửa sổ sau báo `[WARN][mcp]`; script MCP từ chối chạy bản cài cũ; Node cần 20.18.1+.
 - **Tác giả tự test:** mở Claude Code trong thư mục repo, nói "chụp màn hình game" → AI gửi ảnh có bàn cờ, chữ DEV đỏ, nhãn phiên bản. Nói "xem log game" → AI kể các dòng `[INFO][...]`, có dòng `[INFO][mcp] mở cổng 7777`. Nói "tra Context7 cách dùng Tween trong Godot 4.7" → AI trích tài liệu, nguồn có `blob/4.7`.
 
 ### File List
@@ -444,3 +474,4 @@ Claude Opus 5.5 (`claude-opus-5-5`)
 
 - 2026-10-18: Phần trên máy (Task 0–6, 7.1, 7.6, 7.7): ghim GoPeak 2.3.8 + Context7 4.1.1, `cai_dat.sh` cài MCP, `.mcp.json`, addon runtime chỉ nghe `127.0.0.1`, 13 test mới (tổng 77).
 - 2026-10-18: Kiểm cùng tác giả (7.2–7.5): 2 server ✔ Connected, chụp màn hình qua GoPeak, đọc log, bơm click, tra Context7 `/godotengine/godot-docs/__branch__4.7`. Chuyển sang review.
+- 2026-10-18: Sửa theo code review: chặn bản phát hành (`OS.is_debug_build()`), báo cổng bận, kiểm null khi nạp addon, Node 20.18.1+ và báo thiếu npm, script MCP kiểm bản cài khớp `tools/mcp/`, sửa `CLAUDE.md` (tọa độ `x`/`y`, ID Context7). 3 test mới (tổng 80). 4 mục hoãn vào `deferred-work.md`. Story xong.

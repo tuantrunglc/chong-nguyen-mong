@@ -46,3 +46,10 @@
 - Các chốt mới trong script `tools/` chưa có test tự động, chỉ kiểm tay trong Debug Log: chốt 25 MB của `build_web.sh`, chống xanh giả khi export (grep `ERROR` trong log), `cai_dat.sh` từ chối butler sai SHA-256, `deploy_itch.sh` chặn chữ mẫu `ITCH_TARGET`, và `ghi_build_info` (chuyển từ `chay.sh` sang `_godot.sh`) cho kết quả giống hệt. Làm cùng các mục test script `tools/` đã hoãn ở trên.
 - Ngoại lệ luật kiến trúc: `SaveProbe` nằm ở `src/debug/` nhưng chạy với mọi người chơi (luật 5 nói `src/debug/` luôn kiểm cờ dev). Tác giả chọn để nguyên tới khi gỡ ở E4. Lưu ý `Log` (cũng ở `src/debug/`) vốn đã chạy luôn; khi sửa tài liệu kiến trúc nên ghi rõ.
 - AC 4/6 của Story 0.5 còn hai phần chưa kiểm (tác giả hoãn): tiêu đề trên itch.io khi Chrome đặt ngôn ngữ tiếng Anh; cột Transferred trong DevTools (itch.io có nén `index.wasm` không). Đo cùng Firefox/Edge và thời gian tải ở E4.
+
+## Deferred from: code review of 0-6-cai-cong-cu-ai-mcp (2026-10-18)
+
+- `tools/cai_dat.sh` xóa `.tools/mcp` trước khi `npm ci`: nâng phiên bản lúc mất mạng thì mất luôn GoPeak/Context7 đang chạy được. Sửa: cài vào thư mục tạm rồi đổi chỗ.
+- `tools/mcp_context7.sh` source `_godot.sh` (theo mẫu Task 3.2) nên Context7 không chạy khi chưa cài Godot hoặc máy không hỗ trợ, dù Context7 không cần Godot.
+- Script MCP không kiểm `node` lúc Claude Code khởi động (PATH khác khi mở từ app, `node_modules` bị xóa một phần): chỉ thấy "failed", không có lời nhắc tiếng Việt.
+- `.mcp.json` dùng đường tương đối `tools/...`: phụ thuộc Claude Code khởi động ở gốc repo.

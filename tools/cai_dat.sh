@@ -20,11 +20,6 @@ if command -v sha512sum >/dev/null 2>&1; then
 else
 	sha512() { shasum -a 512 "$1" | awk '{print $1}'; }
 fi
-if command -v sha256sum >/dev/null 2>&1; then
-	sha256() { sha256sum "$1" | awk '{print $1}'; }
-else
-	sha256() { shasum -a 256 "$1" | awk '{print $1}'; }
-fi
 
 TAI_VE="$REPO_ROOT/.tools/tai_ve"
 mkdir -p "$TAI_VE"
@@ -153,17 +148,21 @@ rm -rf "$TAI_VE"
 
 # Công cụ AI (MCP): cài bằng npm ci từ file khóa trong tools/mcp/ (ghim cả thư viện phụ thuộc, kèm SHA-512).
 # Đặt sau Godot và butler: thiếu Node.js thì báo lỗi, phần đã cài ở trên vẫn dùng được.
+# Context7 4.1.1 đòi Node >= 20.18.1.
 kiem_node() {
-	local ban
-	if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
-		ban=""
-	else
+	local ban=""
+	if command -v node >/dev/null 2>&1; then
 		ban="$(node -p 'process.versions.node' 2>/dev/null || true)"
 	fi
-	local chinh phu
-	IFS=. read -r chinh phu _ <<< "${ban:-0.0.0}"
-	if [[ -z "$ban" ]] || (( chinh < 20 || (chinh == 20 && phu < 18) )); then
-		echo "Lỗi: chưa có Node.js 20.18 trở lên (cần cho công cụ AI). Cài từ https://nodejs.org rồi chạy lại." >&2
+	local chinh phu va
+	IFS=. read -r chinh phu va <<< "${ban:-0.0.0}"
+	va="${va%%[!0-9]*}"
+	if [[ -z "$ban" ]] || (( chinh < 20 || (chinh == 20 && (phu < 18 || (phu == 18 && ${va:-0} < 1))) )); then
+		echo "Lỗi: chưa có Node.js 20.18.1 trở lên (cần cho công cụ AI). Cài từ https://nodejs.org rồi chạy lại." >&2
+		exit 1
+	fi
+	if ! command -v npm >/dev/null 2>&1; then
+		echo "Lỗi: có Node.js nhưng thiếu npm (cần cho công cụ AI). Cài lại Node.js từ https://nodejs.org rồi chạy lại." >&2
 		exit 1
 	fi
 }
@@ -171,7 +170,7 @@ kiem_node() {
 cai_mcp() {
 	local khoa="$REPO_ROOT/tools/mcp/package-lock.json"
 	local ma
-	ma="$(sha256 "$khoa")"
+	ma="$(ma_cai_mcp)"
 	if [[ -f "$MCP_DIR/.installed" && "$(cat "$MCP_DIR/.installed")" == "$ma" ]]; then
 		echo "Đã cài GoPeak $GOPEAK_VERSION và Context7 $CONTEXT7_VERSION"
 		return

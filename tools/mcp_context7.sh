@@ -7,7 +7,11 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/_godot.sh"
 
 if [[ ! -f "$MCP_DIR/.installed" ]]; then
-	echo "Chưa có công cụ AI. Chạy tools/cai_dat.sh trước." >&2
+	echo "Lỗi: chưa có công cụ AI. Chạy tools/cai_dat.sh trước." >&2
+	exit 1
+fi
+if [[ "$(cat "$MCP_DIR/.installed")" != "$(ma_cai_mcp)" ]]; then
+	echo "Lỗi: công cụ AI đã cài là bản cũ (tools/mcp/ vừa đổi). Chạy tools/cai_dat.sh rồi mở lại Claude Code." >&2
 	exit 1
 fi
 

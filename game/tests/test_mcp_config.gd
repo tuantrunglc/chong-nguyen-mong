@@ -72,3 +72,15 @@ func test_package_lock_pins_versions_with_integrity() -> void:
 func test_gopeak_script_uses_compact_profile() -> void:
 	var text: String = FileAccess.get_file_as_string(_repo_path("tools/mcp_gopeak.sh"))
 	assert_string_contains(text, "GOPEAK_TOOL_PROFILE=\"compact\"")
+
+
+func test_package_lock_root_matches_package_json() -> void:
+	var deps: Dictionary = _dict(_read_json("tools/mcp/package.json").get("dependencies"))
+	var root: Dictionary = _dict(_dict(_read_json("tools/mcp/package-lock.json").get("packages")).get(""))
+	assert_eq(_dict(root.get("dependencies")), deps, "file khóa sinh từ đúng package.json")
+
+
+func test_godot_sh_versions_match_pinned() -> void:
+	var text: String = FileAccess.get_file_as_string(_repo_path("tools/_godot.sh"))
+	assert_string_contains(text, "GOPEAK_VERSION=\"%s\"" % GOPEAK_VERSION)
+	assert_string_contains(text, "CONTEXT7_VERSION=\"%s\"" % CONTEXT7_VERSION)

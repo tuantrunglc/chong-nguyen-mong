@@ -5,13 +5,20 @@ extends GutTest
 const ADDON_DIR: String = "res://addons/godot_mcp_runtime"
 
 
-func test_should_start_only_with_dev_on_desktop_with_window() -> void:
+func test_should_start_only_with_dev_on_desktop_debug_build_with_window() -> void:
+	# Chỉ đúng một tổ hợp được mở cổng: dev, không web, có cửa sổ, bản debug.
 	for dev: bool in [false, true]:
 		for is_web: bool in [false, true]:
 			for is_headless: bool in [false, true]:
-				var expected: bool = dev and not is_web and not is_headless
-				assert_eq(McpRuntime.should_start(dev, is_web, is_headless), expected,
-						"dev=%s web=%s headless=%s" % [dev, is_web, is_headless])
+				for is_debug: bool in [false, true]:
+					var combo: Array = [dev, is_web, is_headless, is_debug]
+					assert_eq(McpRuntime.should_start(dev, is_web, is_headless, is_debug),
+							combo == [true, false, false, true],
+							"dev=%s web=%s headless=%s debug=%s" % combo)
+
+
+func test_release_build_never_starts_even_with_dev() -> void:
+	assert_false(McpRuntime.should_start(true, false, false, false))
 
 
 func test_does_not_start_without_dev() -> void:

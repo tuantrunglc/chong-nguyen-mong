@@ -50,7 +50,7 @@ Không nhớ đang ở bước nào thì chạy `/bmad-help`.
 ## Công cụ AI (MCP)
 
 - GoPeak 2.3.8 (AI chụp màn hình, xem log, bấm thử vào game đang chạy `--dev`) và Context7 4.1.1 (AI tra tài liệu Godot 4.7). Ghim phiên bản trong `tools/mcp/`.
-- Cài: `tools/cai_dat.sh` (cần Node.js 20.18 trở lên). Chạy lại không cài lại.
+- Cài: `tools/cai_dat.sh` (cần Node.js 20.18.1 trở lên). Chạy lại không cài lại.
 - Lần đầu sau khi cài: thoát Claude Code, mở lại trong thư mục repo, đồng ý dùng 2 server `gopeak` và `context7`.
 - Kiểm: gõ `! claude mcp list`, thấy `gopeak` và `context7` đều `✔ Connected`.
 
