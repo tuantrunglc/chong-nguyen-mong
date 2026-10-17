@@ -4,7 +4,7 @@ baseline_commit: 90aa4b48dfa1846e3958117c1ddad51a9aca4c3f
 
 # Story 0.1: Project Godot trống chạy được trên máy
 
-Status: review
+Status: done
 
 ## Story
 
@@ -73,6 +73,36 @@ tôi muốn có một project Godot chạy được bằng một lệnh,
   - [x] 6.3 Chạy `tools/chay.sh`. Nếu đã có MCP (Story 0.6 chưa làm, nên có lẽ chưa có), chụp màn hình; nếu chưa thì nhờ tác giả xác nhận bằng mắt theo AC 1–3.
   - [x] 6.4 Thử viết một biến không gõ kiểu trong `main.gd` (ví dụ `var x = 1`), chạy lại và xác nhận Godot báo **lỗi**, không chỉ cảnh báo. Rồi xóa dòng thử.
   - [x] 6.5 Story này chưa có `tools/test.sh` (Story 0.2), nên "xong" nghĩa là: 6.1–6.4 đạt và tác giả đã xác nhận bằng mắt. Sau đó commit bằng lời tiếng Việt.
+
+### Review Findings
+
+Code review 2026-10-17, commit `4eed812`.
+
+- [x] [Review][Patch] Repo mới clone: `tools/chay.sh` mở ra màn hình trống vì lỗi `Could not find type "BoardView"`. `game/.godot/` bị gitignore, nên chưa có bộ đệm `class_name`. Thêm file có `class_name` mới thì bộ đệm cũ cũng gây lỗi y hệt. Đã chạy thử trên bản clone sạch và thấy lỗi. Cách sửa: chạy `"$GODOT" --headless --path game --import` trước khi mở game (thêm khoảng 2,4 giây), đã thử và hết lỗi. [tools/chay.sh:18]
+- [x] [Review][Patch] `tools/_godot.sh` thiếu `set -euo pipefail`, trái với Task 4.4. Hiện chưa hỏng gì vì cả hai script gọi nó đều đã đặt cờ này. [tools/_godot.sh:1]
+- [x] [Review][Patch] Kích thước màn hình 1280×720 khai báo hai nơi (`BoardView.VIEWPORT_SIZE` và `project.godot`). Đổi độ phân giải trong `project.godot` thì bàn cờ và nhãn phiên bản lệch chỗ. Nên đọc từ `ProjectSettings`. [game/src/battle/board_view.gd:6]
+- [x] [Review][Defer] Chưa có test tự động cho `_read_commit` (fallback về `dev`) [game/src/app/main.gd:31] — deferred: chưa có bộ test, viết test GUT ở Story 0.2
+- [x] [Review][Defer] Chưa có test tự động cho việc canh giữa trong `BoardView.setup` [game/src/battle/board_view.gd:16] — deferred: chưa có bộ test, làm ở Story 0.2
+- [x] [Review][Defer] Chưa có test cho đuôi `-sua` trong `chay.sh` và việc từ chối file sai checksum trong `cai_dat.sh` [tools/cai_dat.sh:42] — deferred: chưa có bộ test shell, xét lại khi có `tools/test.sh` ở Story 0.2
+- [x] [Review][Defer] Bản export có thể không chứa `build_info.json`, vì `.json` không nằm trong danh sách export mặc định, nên nhãn sẽ hiện `dev` [game/src/app/main.gd:4] — deferred: chưa kiểm chứng, sẽ rõ ở Story 0.5 (export). Cần thêm `*.json` vào bộ lọc include.
+
+**Rejected:**
+
+- Ký tự `·` trong nhãn không phải ASCII (Task 3.5): mâu thuẫn nằm trong spec (AC 2 bắt dùng `·`), code làm đúng AC 2. Muốn sửa thì phải sửa spec, nên không tính.
+- `editor_data/` nằm cạnh `Godot.app` thay vì như Task 1.5 viết: false. Đây là cách Godot thật sự làm trên macOS, đã ghi trong Completion Notes và `GODOT_DATA_DIR`.
+- Dòng mẫu thừa trong Completion Notes, `last_updated` là giờ tròn, File List thiếu chính file story: phải sửa file spec mới xử lý được, nên không tính.
+- Lệnh kiểm tra "đã cài" không xem có template chưa: false. `.installed` chỉ được tạo sau khi template đã chuyển xong, và có `set -e`.
+- `-C -` với file `.tmp` đã tải đủ, và `.tmp` của SUMS bị nối thêm: low. Chỉ xảy ra khi máy dừng đúng lúc giữa curl và `mv`; nội dung ở xa không đổi.
+- Máy thiếu `curl`, `unzip`, `sha512sum`/`shasum`, hoặc thiếu ổ đĩa: low. macOS có sẵn các lệnh này; muốn sửa phải thêm phần kiểm tra.
+- Cấu trúc `.tpz` thay đổi, `mv` bỏ sót dotfile: low. Phiên bản đã ghim ở 4.7.2.
+- File SUMS có dấu `*` trước tên file: low. Đã kiểm với file 4.7.2 thật.
+- Checksum lấy cùng nguồn với file tải về nên không chống được file bị tráo: low. Đổi cách làm thì phải đổi spec.
+- Cài lại thì xóa `editor_data/`: low. Chỉ xảy ra khi chưa có `.installed`.
+- `setup()` với kích thước bàn cờ ≤ 0 hoặc lớn hơn màn hình: low. Chưa có chỗ nào gọi với giá trị như vậy.
+- Thư mục chưa commit (untracked) cũng làm hiện `-sua`: false. Có file chưa commit thì đúng là "có sửa".
+- `main.tscn` không có `uid=`: low. Đã import trên bản clone sạch, git không thấy thay đổi gì.
+- `._sc_` nằm trong bundle đã ký làm hỏng chữ ký: false. Game đã chạy được trên macOS.
+- Hai lần chạy `chay.sh` cùng lúc ghi đè `build_info.json`: low, khó xảy ra.
 
 ## Dev Notes
 
@@ -215,3 +245,4 @@ Claude Opus 5.5 (claude-opus-5-5)
 ### Change Log
 
 - 2026-10-17: Tạo project Godot trống trong `game/`, bàn 7×7 vẽ bằng code, nhãn phiên bản; `tools/cai_dat.sh`, `tools/chay.sh`, `tools/_godot.sh`; `CLAUDE.md`; cập nhật `.gitignore`.
+- 2026-10-17: Sửa theo code review: `chay.sh` quét project (`--import`) trước khi chạy để repo mới clone không lỗi `BoardView`; `_godot.sh` thêm `set -euo pipefail`; `BoardView.viewport_size` đọc từ `project.godot`.

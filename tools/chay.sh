@@ -15,4 +15,10 @@ if command -v git >/dev/null 2>&1 && git -C "$REPO_ROOT" rev-parse --short HEAD 
 fi
 printf '{"commit": "%s"}\n' "$commit" > "$REPO_ROOT/game/build_info.json"
 
+# game/.godot/ không có trong git: quét project trước để Godot biết mọi class_name (repo mới clone hoặc vừa thêm file).
+if ! "$GODOT" --headless --path "$REPO_ROOT/game" --import >/dev/null 2>&1; then
+	echo "Lỗi: Godot không quét được project trong game/." >&2
+	exit 1
+fi
+
 exec "$GODOT" --path "$REPO_ROOT/game" -- "$@"

@@ -3,7 +3,11 @@ extends Node2D
 ## Vẽ bàn cờ trống bằng code, đặt giữa khung 1280×720. Chưa có địa hình, chưa có quân.
 
 const CELL_SIZE: int = 88
-const VIEWPORT_SIZE: Vector2 = Vector2(1280, 720)
+## Đọc từ project.godot để chỉ có một nơi khai báo kích thước màn hình.
+static var viewport_size: Vector2 = Vector2(
+	ProjectSettings.get_setting("display/window/size/viewport_width") as int,
+	ProjectSettings.get_setting("display/window/size/viewport_height") as int
+)
 const CELL_COLOR: Color = Color(0.93, 0.87, 0.73)
 const LINE_COLOR: Color = Color(0.36, 0.24, 0.14)
 const LINE_WIDTH: float = 2.0
@@ -17,7 +21,7 @@ func setup(new_cols: int = 7, new_rows: int = 7) -> void:
 	cols = new_cols
 	rows = new_rows
 	var board_size: Vector2 = Vector2(cols * CELL_SIZE, rows * CELL_SIZE)
-	position = (VIEWPORT_SIZE - board_size) / 2.0
+	position = (viewport_size - board_size) / 2.0
 	queue_redraw()
 
 

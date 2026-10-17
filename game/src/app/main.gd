@@ -19,7 +19,7 @@ func _ready() -> void:
 	_version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_version_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 	_version_label.size = Vector2(400, 40)
-	_version_label.position = BoardView.VIEWPORT_SIZE - _version_label.size - Vector2(VERSION_MARGIN, VERSION_MARGIN)
+	_version_label.position = BoardView.viewport_size - _version_label.size - Vector2(VERSION_MARGIN, VERSION_MARGIN)
 	add_child(_version_label)
 
 
