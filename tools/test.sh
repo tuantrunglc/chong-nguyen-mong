@@ -24,16 +24,33 @@ ghi_buoc() {
 # ---------- Bước 1: kiểm ranh giới ----------
 chi_tiet_1=()
 buoc1_dat=1
-# Tự kiểm công cụ trên file mẫu: mỗi file vi phạm phải bị bắt, bộ hợp lệ phải đạt.
-ra_mau="$("$REPO_ROOT/tools/check_boundaries.sh" "$MAU/vi_pham" 2>&1 || true)"
-cong_cu_hong=0
+# Tự kiểm công cụ trên file mẫu: bộ vi phạm phải thoát mã 1 và mỗi file phải bị bắt
+# đúng lý do ghi ở dòng "# mong_doi: <lý do>" của nó; bộ hợp lệ phải đạt.
+ma_mau=0
+ra_mau="$("$REPO_ROOT/tools/check_boundaries.sh" "$MAU/vi_pham" 2>&1)" || ma_mau=$?
+mau_hong=()
+(( ma_mau == 1 )) || mau_hong+=("vi_pham/ thoát mã $ma_mau, phải là 1")
+so_mau=0
 while IFS= read -r f; do
-	grep -qF "${f#"$MAU"/}:" <<<"$ra_mau" || cong_cu_hong=1
-done < <(find "$MAU/vi_pham" -type f -name '*.gd')
-"$REPO_ROOT/tools/check_boundaries.sh" "$MAU/hop_le" >/dev/null 2>&1 || cong_cu_hong=1
-if (( cong_cu_hong )); then
+	so_mau=$((so_mau + 1))
+	ten="${f#"$MAU"/}"
+	so_mong_doi=0
+	while IFS= read -r ly_do; do
+		so_mong_doi=$((so_mong_doi + 1))
+		# Không dùng grep -q: grep thoát sớm làm grep trước nhận SIGPIPE, pipefail báo sai.
+		grep -F "$ten:" <<<"$ra_mau" | grep -F ": $ly_do" >/dev/null \
+			|| mau_hong+=("$ten không bị bắt với lý do \"$ly_do\"")
+	done < <(sed -nE 's/^#[[:space:]]*mong_doi:[[:space:]]*//p' "$f")
+	(( so_mong_doi > 0 )) || mau_hong+=("$ten thiếu dòng \"# mong_doi: <lý do>\"")
+done < <(find "$MAU/vi_pham" -type f -name '*.gd' | sort)
+(( so_mau > 0 )) || mau_hong+=("vi_pham/ không có file mẫu nào")
+"$REPO_ROOT/tools/check_boundaries.sh" "$MAU/hop_le" >/dev/null 2>&1 || mau_hong+=("hop_le/ bị báo vi phạm")
+if (( ${#mau_hong[@]} > 0 )); then
 	buoc1_dat=0
-	chi_tiet_1+=("  ❌ công cụ kiểm ranh giới bị hỏng (tools/mau_ranh_gioi không cho kết quả đúng)")
+	chi_tiet_1+=("  ❌ công cụ kiểm ranh giới bị hỏng (tools/mau_ranh_gioi không cho kết quả đúng):")
+	for dong in "${mau_hong[@]}"; do
+		chi_tiet_1+=("     $dong")
+	done
 	ly_do_truot+=("công cụ kiểm ranh giới bị hỏng")
 fi
 ma=0
@@ -63,14 +80,15 @@ else
 	so_khoa=0
 	so_bi_sua=0
 	while IFS= read -r f; do
+		# Không dùng grep -q: với file lớn, git show nhận SIGPIPE và pipefail làm bỏ sót file khóa.
 		git -C "$REPO_ROOT" show "HEAD:$f" 2>/dev/null \
-			| grep -qE '"da_duyet"[[:space:]]*:[[:space:]]*true' || continue
+			| grep -E '"da_duyet"[[:space:]]*:[[:space:]]*true' >/dev/null || continue
 		so_khoa=$((so_khoa + 1))
 		if ! git -C "$REPO_ROOT" diff --quiet HEAD -- "$f"; then
 			chi_tiet_2+=("  ❌ $f: kịch bản đã duyệt bị sửa so với commit gần nhất")
 			so_bi_sua=$((so_bi_sua + 1))
 		fi
-	done < <(git -C "$REPO_ROOT" ls-tree -r --name-only HEAD -- game | grep '\.json$' || true)
+	done < <(git -C "$REPO_ROOT" -c core.quotePath=false ls-tree -r --name-only HEAD -- game | grep '\.json$' || true)
 	if (( so_bi_sua > 0 )); then
 		ghi_buoc 2 "Kịch bản đã duyệt" "trượt"
 		ly_do_truot+=("$so_bi_sua kịch bản đã duyệt bị sửa")
@@ -83,8 +101,19 @@ bao_cao+=("${chi_tiet_2[@]+"${chi_tiet_2[@]}"}")
 # ---------- Bước 3: quét project ----------
 # game/.godot/ không có trong git: phải quét trước, nếu không GUT thoát mã 0 mà không chạy test nào.
 da_quet=1
-if "$GODOT" --headless --path "$GAME" --import >"$KET_QUA_DIR/import.log" 2>&1; then
-	ghi_buoc 3 "Quét project" "đạt"
+IMPORT_LOG="$KET_QUA_DIR/import.log"
+if "$GODOT" --headless --path "$GAME" --import >"$IMPORT_LOG" 2>&1; then
+	# Chống xanh giả: script game lỗi cú pháp thì --import vẫn thoát mã 0, chỉ ghi vào log.
+	if grep -qE 'SCRIPT ERROR|Parse Error' "$IMPORT_LOG"; then
+		ghi_buoc 3 "Quét project" "trượt"
+		bao_cao+=("  ❌ có script game lỗi (xem build/test/import.log):")
+		while IFS= read -r dong; do
+			bao_cao+=("     $dong")
+		done < <(grep -A1 -E 'SCRIPT ERROR|Parse Error' "$IMPORT_LOG" | grep -vE '^--$' | head -10)
+		ly_do_truot+=("có script game lỗi")
+	else
+		ghi_buoc 3 "Quét project" "đạt"
+	fi
 else
 	da_quet=0
 	ghi_buoc 3 "Quét project" "trượt"
@@ -134,19 +163,40 @@ else
 			ly_do_truot+=("$so_truot test trượt")
 		fi
 
-		# Chống xanh giả: GUT bỏ qua file lỗi cú pháp mà vẫn thoát mã 0.
+		# Chống xanh giả: test không có assert nào thì GUT không tính là trượt.
+		so_khong_assert=0
+		while IFS=$'\t' read -r ten_file ten_test; do
+			chi_tiet_4+=("  ❌ $ten_file › $ten_test: không có assert nào")
+			so_khong_assert=$((so_khong_assert + 1))
+		done < <(awk '
+			/<testcase / && /status="no asserts"/ {
+				match($0, / name="[^"]*"/); ten = substr($0, RSTART + 7, RLENGTH - 8)
+				match($0, /classname="[^"]*"/); lop = substr($0, RSTART + 11, RLENGTH - 12)
+				printf "%s\t%s\n", lop, ten
+			}
+		' "$GUT_XML")
+		(( so_khong_assert == 0 )) || ly_do_truot+=("$so_khong_assert test không có assert")
+
+		# Chống xanh giả: GUT bỏ qua file lỗi cú pháp mà vẫn thoát mã 0. Lỗi khi chạy cũng ghi SCRIPT ERROR.
 		if grep -qE 'SCRIPT ERROR|Parse Error' "$GUT_LOG"; then
-			chi_tiet_4+=("  ❌ có file lỗi cú pháp, GUT đã bỏ qua nó:")
+			chi_tiet_4+=("  ❌ có lỗi script khi chạy test (file lỗi cú pháp thì GUT đã bỏ qua nó):")
 			while IFS= read -r dong; do
 				chi_tiet_4+=("     $dong")
 			done < <(grep -A1 -E 'SCRIPT ERROR|Parse Error' "$GUT_LOG" | grep -vE '^--$' | head -10)
-			ly_do_truot+=("có file test lỗi cú pháp")
+			ly_do_truot+=("có lỗi script khi chạy test")
 		fi
 		so_file_test=0
 		if [[ -d "$GAME/tests" ]]; then
 			so_file_test="$(find "$GAME/tests" -type f -name 'test_*.gd' | wc -l | tr -d ' ')"
 		fi
-		so_file_chay="$(grep -c '<testsuite ' "$GUT_XML" || true)"
+		# GUT ghi một <testsuite> cho mỗi inner class ("tests/x.gd.TenLop"): đếm theo file .gd.
+		so_file_chay="$(awk '
+			match($0, /<testsuite name="[^"]*\.gd/) {
+				k = substr($0, RSTART, RLENGTH)
+				if (!(k in da_gap)) { da_gap[k] = 1; n++ }
+			}
+			END { print n + 0 }
+		' "$GUT_XML")"
 		if (( so_file_test != so_file_chay )); then
 			chi_tiet_4+=("  ❌ có file test không được chạy ($so_file_chay/$so_file_test file)")
 			ly_do_truot+=("có file test không được chạy")

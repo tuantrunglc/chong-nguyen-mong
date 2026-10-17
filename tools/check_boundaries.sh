@@ -36,11 +36,12 @@ quet() {
 
 # Luật 1: src/core chỉ là dữ liệu thuần (RefCounted): không Node, không I/O, không ngẫu nhiên.
 CORE="$SRC/core"
-quet "$CORE" '^[[:space:]]*extends[[:space:]]' "lõi luật chỉ được extends RefCounted" \
-	'^[[:space:]]*extends[[:space:]]+RefCounted[[:space:]]*$'
+# Bắt cả dạng một dòng "class_name Ten extends X".
+quet "$CORE" '^[[:space:]]*(class_name[[:space:]]+[A-Za-z_0-9]+[[:space:]]+)?extends[[:space:]]' \
+	"lõi luật chỉ được extends RefCounted" '(^|[[:space:]])extends[[:space:]]+RefCounted[[:space:]]*$'
 quet "$CORE" '\bNode\w*\b' "lõi luật không được dùng Node"
 quet "$CORE" 'get_tree\(|get_node\(|\$[A-Za-z_"%]' "lõi luật không được truy cập cây scene"
-quet "$CORE" '\bInput\b' "lõi luật không được đọc Input"
+quet "$CORE" '\bInput(Event\w*|Map)?\b' "lõi luật không được đọc Input"
 quet "$CORE" '\bFileAccess\b|\bDirAccess\b' "lõi luật không được đọc/ghi file"
 quet "$CORE" '\bTime\.' "lõi luật không được dùng thời gian thực"
 quet "$CORE" '\brandi|\brandf|\brandomize\(|RandomNumberGenerator' "lõi luật không được dùng số ngẫu nhiên"
@@ -51,7 +52,7 @@ DATA="$SRC/data"
 quet "$DATA" '\bNode\w*\b|get_tree\(|\$[A-Za-z_"%]' "src/data không được dùng Node"
 
 # Chỉ Effects được sửa máu và vị trí, ở mọi nơi trong src/.
-quet "$SRC" '\.(hp|cell)[[:space:]]*(\+=|-=|=[^=])' "chỉ Effects được sửa máu và vị trí (.hp/.cell)" \
+quet "$SRC" '\.(hp|cell)[[:space:]]*([-+*/%]=|=[^=])' "chỉ Effects được sửa máu và vị trí (.hp/.cell)" \
 	'' "$SRC/core/effects.gd"
 
 if (( so_loi > 0 )); then

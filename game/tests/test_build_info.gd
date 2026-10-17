@@ -35,6 +35,11 @@ func test_json_array_returns_dev() -> void:
 	assert_eq(BuildInfo.read_commit(TEST_FILE), "dev")
 
 
+func test_missing_commit_key_returns_dev() -> void:
+	_write("{\"khac\": 1}")
+	assert_eq(BuildInfo.read_commit(TEST_FILE), "dev")
+
+
 func test_non_string_commit_returns_dev() -> void:
 	_write("{\"commit\": 123}")
 	assert_eq(BuildInfo.read_commit(TEST_FILE), "dev")

@@ -4,7 +4,7 @@ baseline_commit: 38ce3615abd4976b57869240811dcabfc5e8cd2f
 
 # Story 0.2: Một lệnh để chạy toàn bộ test
 
-Status: review
+Status: done
 
 ## Story
 
@@ -112,6 +112,36 @@ tôi muốn gõ một lệnh và biết ngay game có đang hỏng không,
   - [x] 7.5 Ba bẫy xanh giả: (a) clone repo sang thư mục tạm, symlink `.tools/godot-4.7.2`, chạy `tools/test.sh` → phải đạt (vì có bước import); (b) thêm tạm file test có `var x = 1` → trượt, lý do lỗi cú pháp; (c) tạm đổi tên `game/tests` → trượt, lý do không có test. Hoàn tác hết.
   - [x] 7.6 `tools/chay.sh` vẫn mở game bình thường (bàn cờ + nhãn phiên bản) sau khi tách `BuildInfo`.
   - [x] 7.7 `git status` sạch ngoài các file của story; các file `.uid` do Godot sinh cho `build_info.gd` và `test_build_info.gd` được commit. Commit bằng lời tiếng Việt, ví dụ `Thêm tools/test.sh, GUT 9.7.1 và kiểm ranh giới (Story 0.2)`.
+
+### Review Findings
+
+Code review 2026-10-17. Bốn lớp: Blind Hunter, Edge Case Hunter, Verification Gap, Acceptance Auditor. Không lớp nào hỏng.
+
+- [x] [Review][Patch] Test không có assert nào phải tính là trượt (tác giả quyết 2026-10-17): `<testcase assertions="0">` không phải pending thì báo "❌ tên file › tên test: không có assert nào" [tools/test.sh:104]
+- [x] [Review][Patch] Script game lỗi cú pháp mà vẫn báo ✅ (đã kiểm chứng: thêm dòng hỏng vào `main.gd` thì `--import` thoát 0, `import.log` có `Parse Error`, GUT 6/6 đạt). Bước 3 phải quét `import.log` tìm `SCRIPT ERROR|Parse Error` và báo trượt kèm tên file [tools/test.sh:91]
+- [x] [Review][Patch] Tự kiểm công cụ ranh giới quá yếu: mẫu `vi_pham/` chỉ chạm 4/9 luật core (thiếu Input, FileAccess/DirAccess, Time, random, print, `get_node(`/`$`, luật Node riêng bị luật extends che); chỉ so tên file chứ không so lý do; bỏ qua mã thoát của lần chạy `vi_pham` (`|| true`); `hop_le/` thiếu `data/`. Cần một mẫu cho mỗi luật, so đúng lý do, đòi mã thoát ≠ 0 [tools/test.sh:28]
+- [x] [Review][Patch] Regex ranh giới bỏ sót cách viết thường gặp: `class_name Foo extends Node` trên một dòng, `.hp *= / /= / %=`, `InputEvent`/`InputMap` (đã kiểm chứng cả ba không bị bắt) [tools/check_boundaries.sh:43]
+- [x] [Review][Patch] Đếm file test sai khi file test có inner class: GUT ghi một `<testsuite>` cho mỗi inner class, nên báo nhầm "có file test không được chạy". Đếm theo đường dẫn script duy nhất [tools/test.sh:143]
+- [x] [Review][Patch] Khóa da_duyet có thể bị bỏ qua: `grep -q` + `pipefail` gây SIGPIPE (mã 141) với file lớn; `ls-tree` mặc định đóng ngoặc tên file không phải ASCII. Dùng `grep ... >/dev/null` và `git -c core.quotePath=false` [tools/test.sh:63]
+- [x] [Review][Patch] Lỗi runtime (`SCRIPT ERROR` khi chạy test) bị báo nhầm là "file lỗi cú pháp, GUT đã bỏ qua nó". Sửa câu báo cho đúng cả hai loại [tools/test.sh:131]
+- [x] [Review][Patch] Thiếu test `BuildInfo.read_commit` cho JSON hợp lệ nhưng không có khóa `commit` (`{"khac": 1}`), nhánh mặc định của `info.get` [game/tests/test_build_info.gd:45]
+- [x] [Review][Patch] `deferred-work.md` còn ghi test BoardView "Làm ở Story 0.2" trong khi story này không làm; đổi thành "khi có kích thước bàn thứ hai" [_bmad-output/implementation-artifacts/deferred-work.md:4]
+- [x] [Review][Defer] Khóa da_duyet chưa có tự kiểm tự động [tools/test.sh:56] — deferred: repo chưa có file da_duyet nào; thêm khi có kịch bản đã duyệt đầu tiên
+- [x] [Review][Defer] Các nhánh chống xanh giả ở bước 4 chỉ được kiểm bằng tay [tools/test.sh:104] — deferred: cần tách phần đọc XML/log thành hàm nhận file mẫu; đã có mục "test cho tools shell" trong deferred-work
+- [x] [Review][Defer] Godot treo (import hoặc test `await` mãi) thì `tools/test.sh` không bao giờ kết thúc [tools/test.sh:91] — deferred: macOS không có sẵn `timeout`, cần cơ chế riêng
+- [x] [Review][Defer] Luật core chưa chặn `OS.get_ticks_msec()`/`OS.get_unix_time()`, `Engine.get_main_loop()`, `rand_from_seed(` [tools/check_boundaries.sh:41] — deferred: thêm luật là sửa luật kiến trúc, cần cập nhật game-architecture.md trước
+
+#### Rejected
+
+- Awk bỏ sót test trượt không có CDATA — false: `junit_xml_export.gd` luôn ghi `<failure><![CDATA[...]]>` ở dòng ngay sau `<testcase>` khi status là fail.
+- Khóa da_duyet chỉ so với HEAD, sửa rồi commit là qua — đúng như AC4 ("so với commit gần nhất"); muốn chặt hơn thì phải sửa spec.
+- `.hp =` ở cuối dòng không bị bắt — false: câu lệnh không hoàn chỉnh, GDScript không parse được.
+- Tóm tắt in "0 lỗi ranh giới" khi `check_boundaries.sh` thoát mã 2 — low: chỉ xảy ra khi mất `game/src`, mã thoát vẫn đúng.
+- `grep` lỗi regex (mã 2) bị `|| true` che — low: đã kiểm `\b`, `\w` chạy đúng trên grep macOS; bản vá tự kiểm theo từng luật sẽ bắt được.
+- Thư mục `vi_pham/` rỗng thì tự kiểm qua dễ dàng — low: sẽ được bản vá tự kiểm theo từng luật giải quyết.
+- `"da_duyet":` và `true` nằm trên hai dòng khác nhau — low: định dạng JSON hiếm gặp.
+- `_write()` trong test không kiểm `FileAccess.open` trả null — low: `user://` luôn ghi được khi chạy test.
+- `main.gd` không có test tự động cho đường dẫn `BUILD_INFO_PATH` — low: nhãn phiên bản đã được kiểm bằng ảnh chụp ở Task 7.6.
 
 ## Dev Notes
 
@@ -321,6 +351,8 @@ Claude Opus 5.5 (claude-opus-5-5)
 - `tools/mau_ranh_gioi/vi_pham/battle/sua_vi_tri.gd` (mới)
 - `tools/mau_ranh_gioi/hop_le/core/effects.gd`, `rules_thu.gd` (mới)
 - `tools/mau_ranh_gioi/hop_le/battle/xem.gd` (mới)
+- `tools/mau_ranh_gioi/vi_pham/core/class_name_mot_dong.gd`, `khai_bao_node.gd`, `lay_node_con.gd`, `ky_hieu_dola.gd`, `doc_input.gd`, `nhan_input_event.gd`, `doc_file.gd`, `dung_thoi_gian.gd`, `ngau_nhien.gd`, `in_ra.gd`, `nhan_mau.gd` (mới, theo code review)
+- `tools/mau_ranh_gioi/hop_le/data/doc_file.gd` (mới, theo code review)
 - `_bmad-output/implementation-artifacts/deferred-work.md` (sửa: đánh dấu xong mục `_read_commit`)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` (sửa trạng thái)
 - `_bmad-output/implementation-artifacts/0-2-mot-lenh-de-chay-toan-bo-test.md` (story này)
@@ -328,3 +360,4 @@ Claude Opus 5.5 (claude-opus-5-5)
 ### Change Log
 
 - 2026-10-17: Thêm `tools/test.sh` (4 bước, tóm tắt tiếng Việt, chặn 3 bẫy xanh giả), `tools/check_boundaries.sh` cùng bộ mẫu tự kiểm, khóa `da_duyet`, GUT 9.7.1; tách `BuildInfo` và viết 6 test đầu tiên.
+- 2026-10-17: Sửa theo code review: bước 3 báo trượt khi script game lỗi cú pháp; test không có assert tính là trượt; tự kiểm ranh giới so đúng lý do (`# mong_doi:`) và mã thoát, thêm 12 file mẫu; regex bắt `class_name X extends`, `.hp *=`, `InputEvent`/`InputMap`; đếm file test theo file .gd (inner class); khóa `da_duyet` không còn SIGPIPE và đọc được tên file có dấu; thêm test thiếu khóa `commit` (7 test).
