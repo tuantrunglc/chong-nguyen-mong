@@ -45,7 +45,7 @@ quet "$CORE" '\bInput(Event\w*|Map)?\b' "lõi luật không được đọc Inpu
 quet "$CORE" '\bFileAccess\b|\bDirAccess\b' "lõi luật không được đọc/ghi file"
 quet "$CORE" '\bTime\.' "lõi luật không được dùng thời gian thực"
 quet "$CORE" '\brandi|\brandf|\brandomize\(|RandomNumberGenerator' "lõi luật không được dùng số ngẫu nhiên"
-quet "$CORE" '\bprint(err|raw|t|_rich)?\(' "lõi luật không được dùng print"
+quet "$CORE" '\bLog\.' "lõi luật không được ghi log"
 
 # Luật 2: src/data không dùng Node (được dùng FileAccess).
 DATA="$SRC/data"
@@ -54,6 +54,10 @@ quet "$DATA" '\bNode\w*\b|get_tree\(|\$[A-Za-z_"%]' "src/data không được d�
 # Chỉ Effects được sửa máu và vị trí, ở mọi nơi trong src/.
 quet "$SRC" '\.(hp|cell)[[:space:]]*([-+*/%]=|=[^=])' "chỉ Effects được sửa máu và vị trí (.hp/.cell)" \
 	'' "$SRC/core/effects.gd"
+
+# Chỉ Log được in ra console, ở mọi nơi trong src/.
+quet "$SRC" '\bprint(err|raw|s|t|_rich|_debug|_verbose)?\(' \
+	"chỉ Log được in ra console (dùng Log.info/warn/error/debug)" '' "$SRC/debug/log.gd"
 
 if (( so_loi > 0 )); then
 	echo "Ranh giới: $so_loi lỗi"

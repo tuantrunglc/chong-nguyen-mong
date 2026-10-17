@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Chạy game bản desktop trên máy. Ví dụ: tools/chay.sh --dev --tran=3
-# Mọi tham số được chuyển nguyên vào game (game đọc ở Story 0.3).
+# Mọi tham số được chuyển nguyên vào game (--dev, --tran=N).
 set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/_godot.sh"

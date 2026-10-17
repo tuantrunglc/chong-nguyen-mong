@@ -22,6 +22,10 @@ func _ready() -> void:
 	_version_label.position = BoardView.viewport_size - _version_label.size - Vector2(VERSION_MARGIN, VERSION_MARGIN)
 	add_child(_version_label)
 
+	var dev_tools: DevTools = DevTools.new()
+	dev_tools.setup(AppState.launch.dev)
+	add_child(dev_tools)
+
 
 func _read_version() -> String:
 	var value: Variant = ProjectSettings.get_setting("application/config/version", "0.0.0")

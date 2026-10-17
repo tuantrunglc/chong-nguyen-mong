@@ -4,7 +4,7 @@ baseline_commit: 747f150
 
 # Story 0.3: Log, cờ dev và tham số khởi động
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -23,49 +23,49 @@ tôi muốn có một chế độ dev tách riêng,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Lớp `Log`** (AC: 4)
-  - [ ] 1.1 Tạo `game/src/debug/log.gd`: `class_name Log`, không `extends` (mặc định RefCounted), **chỉ có hàm và biến static**, **không phải autoload**.
+- [x] **Task 1: Lớp `Log`** (AC: 4)
+  - [x] 1.1 Tạo `game/src/debug/log.gd`: `class_name Log`, không `extends` (mặc định RefCounted), **chỉ có hàm và biến static**, **không phải autoload**.
     - `const MAX_LINES: int = 200`
     - `static var debug_enabled: bool = false`. `AppState` đặt giá trị này theo cờ dev (Task 3).
     - `static var _lines: PackedStringArray`
     - `static func error(system: String, message: String) -> void`, cùng `warn`, `info`, `debug`.
     - `static func get_lines() -> PackedStringArray`: trả **bản sao**, để F2 (Story 2.13) dùng sau này.
     - `static func clear() -> void`: dùng trong test.
-  - [ ] 1.2 Định dạng dòng: `"[%s][%s] %s" % [cap, system, message]`, với `cap` là `ERROR`/`WARN`/`INFO`/`DEBUG`. Ví dụ `[INFO][app] tran=3`. Hàm `Log` **không** tự đổi chữ hoa/thường hay thêm bớt dấu chấm; người gọi tự viết thông điệp đúng mẫu "chữ thường, không chấm cuối câu" của kiến trúc.
-  - [ ] 1.3 Nơi in: ERROR và WARN dùng `printerr()`, INFO và DEBUG dùng `print()`.
+  - [x] 1.2 Định dạng dòng: `"[%s][%s] %s" % [cap, system, message]`, với `cap` là `ERROR`/`WARN`/`INFO`/`DEBUG`. Ví dụ `[INFO][app] tran=3`. Hàm `Log` **không** tự đổi chữ hoa/thường hay thêm bớt dấu chấm; người gọi tự viết thông điệp đúng mẫu "chữ thường, không chấm cuối câu" của kiến trúc.
+  - [x] 1.3 Nơi in: ERROR và WARN dùng `printerr()`, INFO và DEBUG dùng `print()`.
     - **Không** dùng `push_error()`/`push_warning()`. GUT coi `push_error` là lỗi engine và **làm trượt test**, nên mọi test đi qua đường ghi log ERROR (ví dụ bộ nạp ở Story 1.1) sẽ trượt oan.
     - Đã kiểm 2026-10-17 trên Godot 4.7.2 + GUT 9.7.1: test gọi `printerr` vẫn đạt.
-  - [ ] 1.4 DEBUG khi `debug_enabled == false`: **không in và không lưu vào bộ nhớ**. Các cấp khác luôn in và luôn lưu.
-  - [ ] 1.5 Bộ nhớ: thêm dòng vào cuối `_lines`; vượt `MAX_LINES` thì bỏ dòng cũ nhất (`remove_at(0)`). Đừng tối ưu bằng ring buffer: 200 dòng thì không đáng.
-  - [ ] 1.6 Viết `game/tests/test_log.gd`. `before_each`: `Log.clear()` và `Log.debug_enabled = false`. `after_each`: trả lại y như vậy, vì biến static còn sống qua các file test. Các ca:
+  - [x] 1.4 DEBUG khi `debug_enabled == false`: **không in và không lưu vào bộ nhớ**. Các cấp khác luôn in và luôn lưu.
+  - [x] 1.5 Bộ nhớ: thêm dòng vào cuối `_lines`; vượt `MAX_LINES` thì bỏ dòng cũ nhất (`remove_at(0)`). Đừng tối ưu bằng ring buffer: 200 dòng thì không đáng.
+  - [x] 1.6 Viết `game/tests/test_log.gd`. `before_each`: `Log.clear()` và `Log.debug_enabled = false`. `after_each`: trả lại y như vậy, vì biến static còn sống qua các file test. Các ca:
     - mỗi cấp ra đúng định dạng `[CẤP][he_thong] thông điệp`;
     - ghi 201 dòng thì còn đúng 200, dòng đầu tiên là dòng thứ 2 đã ghi;
     - DEBUG lúc tắt dev không có trong `get_lines()`; bật thì có;
     - sửa mảng do `get_lines()` trả về không làm đổi bộ nhớ của `Log`;
     - `clear()` làm rỗng bộ nhớ.
 
-- [ ] **Task 2: Đọc tham số khởi động, `LaunchOptions`** (AC: 3, 5)
-  - [ ] 2.1 Tạo `game/src/app/launch_options.gd`: `class_name LaunchOptions extends RefCounted`.
+- [x] **Task 2: Đọc tham số khởi động, `LaunchOptions`** (AC: 3, 5)
+  - [x] 2.1 Tạo `game/src/app/launch_options.gd`: `class_name LaunchOptions extends RefCounted`.
     - Trường: `var dev: bool = false`, `var tran: int = 0` (0 nghĩa là không chọn trận), `var warnings: Array[String] = []`.
-  - [ ] 2.2 `static func parse(user_args: PackedStringArray, url_query: String) -> LaunchOptions`: **hàm thuần**, không đọc OS, không ghi log, để test được trực tiếp. Lỗi được trả trong `warnings`; người gọi tự ghi log.
+  - [x] 2.2 `static func parse(user_args: PackedStringArray, url_query: String) -> LaunchOptions`: **hàm thuần**, không đọc OS, không ghi log, để test được trực tiếp. Lỗi được trả trong `warnings`; người gọi tự ghi log.
     - Đọc `user_args` trước, rồi tới `url_query`.
     - Cùng một khóa xuất hiện nhiều lần thì **giá trị hợp lệ sau cùng** thắng.
-  - [ ] 2.3 Luật cho tham số desktop (`user_args`):
+  - [x] 2.3 Luật cho tham số desktop (`user_args`):
     - `--dev` → `dev = true`.
     - `--tran=N`: N qua được `String.is_valid_int()` và `>= 1` thì `tran = N`.
     - Còn lại (`abc`, `0`, `-2`, `3.5`, rỗng) → `warnings` thêm `tham số --tran không hợp lệ: "<giá trị>", cần số nguyên từ 1`, và `tran` giữ giá trị cũ.
     - Mọi tham số khác (kể cả `--tran 3` có dấu cách, `--dev=1`) → `bỏ qua tham số lạ: "<tham số>"`.
-  - [ ] 2.4 Luật cho chuỗi URL (`url_query`, ví dụ `?dev=1&tran=3`):
+  - [x] 2.4 Luật cho chuỗi URL (`url_query`, ví dụ `?dev=1&tran=3`):
     - Bỏ dấu `?` đầu nếu có, tách theo `&`, mỗi cặp tách ở dấu `=` **đầu tiên**, giá trị qua `uri_decode()`. Chuỗi rỗng hoặc cặp rỗng (`&&`) thì bỏ qua, không báo.
     - `dev=1` → `dev = true`. `dev` có giá trị khác thì im lặng bỏ qua, coi như tắt.
     - `tran=N`: cùng luật như desktop; câu báo dùng `tham số ?tran không hợp lệ: ...`.
     - Khóa khác → `bỏ qua tham số lạ trên URL: "<khóa>"`.
     - **Chưa** kiểm N lớn hơn số trận: chưa có danh sách trận. Story 1.x (nạp trận theo `tran`) sẽ báo nếu trận không tồn tại.
-  - [ ] 2.5 `static func read_current() -> LaunchOptions`:
+  - [x] 2.5 `static func read_current() -> LaunchOptions`:
     - Nếu `OS.has_feature("web")`: đọc `JavaScriptBridge.eval("window.location.search", true)`. Kết quả là `Variant`: kiểm `is String` rồi ép kiểu; không phải chuỗi thì dùng `""`. Gọi `parse(PackedStringArray(), query)`.
     - Ngược lại: gọi `parse(OS.get_cmdline_user_args(), "")`.
     - `OS.get_cmdline_user_args()` chỉ trả các tham số đứng **sau** `--`. `tools/chay.sh` đã chạy `"$GODOT" --path game -- "$@"`, và đã kiểm 2026-10-17: ra `["--dev", "--tran=3"]`.
-  - [ ] 2.6 Viết `game/tests/test_launch_options.gd`, kiểm cả `dev`, `tran` và `warnings` (đúng câu, đúng thứ tự). Các ca:
+  - [x] 2.6 Viết `game/tests/test_launch_options.gd`, kiểm cả `dev`, `tran` và `warnings` (đúng câu, đúng thứ tự). Các ca:
     - rỗng;
     - `--dev`;
     - `--tran=3`;
@@ -81,8 +81,8 @@ tôi muốn có một chế độ dev tách riêng,
     - `?foo=1`;
     - `?tran=%33` (uri_decode ra 3).
 
-- [ ] **Task 3: Autoload `AppState`** (AC: 1, 3, 5)
-  - [ ] 3.1 Tạo `game/src/app/app_state.gd`: `extends Node`, **không có `class_name`**. Godot báo lỗi nếu `class_name` trùng tên autoload. Đây là **autoload duy nhất** của dự án (kiến trúc, luật 4).
+- [x] **Task 3: Autoload `AppState`** (AC: 1, 3, 5)
+  - [x] 3.1 Tạo `game/src/app/app_state.gd`: `extends Node`, **không có `class_name`**. Godot báo lỗi nếu `class_name` trùng tên autoload. Đây là **autoload duy nhất** của dự án (kiến trúc, luật 4).
     - Có `var launch: LaunchOptions`.
     - Trong `_ready()`:
       - `launch = LaunchOptions.read_current()`;
@@ -92,23 +92,23 @@ tôi muốn có một chế độ dev tách riêng,
       - nếu `launch.tran > 0` và `launch.dev` thì `Log.info("app", "tran=%d" % launch.tran)`;
       - nếu `launch.tran > 0` mà **không** `launch.dev` thì `Log.warn("app", "bỏ qua tran=%d vì chưa bật dev" % launch.tran)` rồi đặt `launch.tran = 0`, để mọi chỗ đọc `AppState.launch.tran` sau này (E1) thấy 0. `LaunchOptions.parse` vẫn đọc `tran` bình thường, không biết luật này: luật nằm ở `AppState`.
     - **Không** ghi gì khi không có tham số nào.
-  - [ ] 3.2 Thêm vào `game/project.godot`, viết bằng tay, giữ nguyên các phần khác:
+  - [x] 3.2 Thêm vào `game/project.godot`, viết bằng tay, giữ nguyên các phần khác:
     ```
     [autoload]
 
     AppState="*res://src/app/app_state.gd"
     ```
-  - [ ] 3.3 Autoload **cũng chạy khi GUT chạy test** (đã kiểm 2026-10-17). Lúc đó không có tham số người dùng (các cờ `-gdir=...` không phải user args), nên `AppState` im lặng. Đừng để `AppState` đọc file hay làm gì khác: E1 mới thêm `stats`, tiến độ, cài đặt.
+  - [x] 3.3 Autoload **cũng chạy khi GUT chạy test** (đã kiểm 2026-10-17). Lúc đó không có tham số người dùng (các cờ `-gdir=...` không phải user args), nên `AppState` im lặng. Đừng để `AppState` đọc file hay làm gì khác: E1 mới thêm `stats`, tiến độ, cài đặt.
 
-- [ ] **Task 4: `DevTools` và chữ "DEV"** (AC: 1, 2)
-  - [ ] 4.1 Tạo `game/src/debug/dev_tools.gd`: `class_name DevTools extends Node2D`. Code debug chỉ nằm trong `src/debug/` (kiến trúc, luật 5).
-  - [ ] 4.2 `func setup(enabled: bool) -> void`:
+- [x] **Task 4: `DevTools` và chữ "DEV"** (AC: 1, 2)
+  - [x] 4.1 Tạo `game/src/debug/dev_tools.gd`: `class_name DevTools extends Node2D`. Code debug chỉ nằm trong `src/debug/` (kiến trúc, luật 5).
+  - [x] 4.2 `func setup(enabled: bool) -> void`:
     - `enabled == false`: đặt `_enabled = false`, `set_process_unhandled_input(false)`, rồi `return`. Không tạo chữ, không đăng ký phím.
     - `enabled == true`:
       - đăng ký 5 action `dev_f1`…`dev_f5` vào `InputMap` bằng code, mỗi action một `InputEventKey` với `physical_keycode = KEY_F1`…`KEY_F5`. Chỉ thêm khi `not InputMap.has_action(...)`.
       - tạo `Label` "DEV" ở góc **trên trái** (lề 8px), cỡ chữ 20, màu đỏ `Color(0.85, 0.1, 0.1)`. Bàn cờ bắt đầu ở x=332 nên không đè lên.
     - **Vì sao đăng ký bằng code:** project-context yêu cầu phím tắt đi qua InputMap. Viết `InputEventKey` tay vào `project.godot` thì dài và dễ sai. Không bật dev thì action không tồn tại, nên chắc chắn không phím nào có tác dụng.
-  - [ ] 4.3 `_unhandled_input(event)`:
+  - [x] 4.3 `_unhandled_input(event)`:
     - Dòng đầu tiên là `if not _enabled: return`. Kiến trúc yêu cầu luôn kiểm cờ dev trước khi chạy, kể cả khi đã tắt xử lý input.
     - Với mỗi action, `event.is_action_pressed(action, false, true)` thì `Log.debug("dev", ...)` rồi `get_viewport().set_input_as_handled()`.
     - Câu log theo bảng dưới, chữ thường, không chấm cuối:
@@ -121,13 +121,13 @@ tôi muốn có một chế độ dev tách riêng,
     | F4 | `f4: không dùng` | — |
     | F5 | `f5: chưa có nạp lại dữ liệu (story 1.6)` | 1.6 |
 
-  - [ ] 4.4 Sửa `game/src/app/main.gd`: trong `_ready()`, **sau** khi thêm `_board_view` và `_version_label`:
+  - [x] 4.4 Sửa `game/src/app/main.gd`: trong `_ready()`, **sau** khi thêm `_board_view` và `_version_label`:
     - `var dev_tools: DevTools = DevTools.new()`
     - `dev_tools.setup(AppState.launch.dev)`
     - `add_child(dev_tools)`
 
     Giữ nguyên bàn cờ, nhãn phiên bản, `BUILD_INFO_PATH`, `_read_version()`.
-  - [ ] 4.5 Viết `game/tests/test_dev_tools.gd`. Tạo `DevTools` bằng `add_child_autofree(DevTools.new())`, gọi `setup(...)`, rồi gọi thẳng `_unhandled_input(ev)` với `InputEventKey` (`physical_keycode = KEY_F1`, `pressed = true`). Các ca:
+  - [x] 4.5 Viết `game/tests/test_dev_tools.gd`. Tạo `DevTools` bằng `add_child_autofree(DevTools.new())`, gọi `setup(...)`, rồi gọi thẳng `_unhandled_input(ev)` với `InputEventKey` (`physical_keycode = KEY_F1`, `pressed = true`). Các ca:
     - **tắt dev:** `Log.get_lines()` không thêm dòng nào, không có node con `Label`, `InputMap.has_action("dev_f1")` là false;
     - **bật dev:** có đúng dòng `[DEBUG][dev] f1: chưa có công cụ tọa độ (story 1.2)`, và có `Label` chữ "DEV".
 
@@ -135,36 +135,36 @@ tôi muốn có một chế độ dev tách riêng,
 
     Đây là test logic khóa phím, chạy được không cần màn hình. Phần nhìn chữ "DEV" vẫn do tác giả test bằng mắt.
 
-- [ ] **Task 5: Luật "không `print()` ngoài `Log`"** (AC: 4)
-  - [ ] 5.1 Trong `tools/check_boundaries.sh`:
+- [x] **Task 5: Luật "không `print()` ngoài `Log`"** (AC: 4)
+  - [x] 5.1 Trong `tools/check_boundaries.sh`:
     - **bỏ** luật core `\bprint(err|raw|t|_rich)?\(` ("lõi luật không được dùng print");
     - **thêm** luật cho toàn `src/`, miễn đúng file `"$SRC/debug/log.gd"` (tham số thứ 5 của `quet`), mẫu `'\bprint(err|raw|s|t|_rich|_debug|_verbose)?\('`, lý do `"chỉ Log được in ra console (dùng Log.info/warn/error/debug)"`.
-  - [ ] 5.2 Thêm luật core: mẫu `'\bLog\.'`, lý do `"lõi luật không được ghi log"`. Lý do: kiến trúc nói lõi chỉ được phụ thuộc vào `src/core/`, và không ghi log trong vòng phân giải. `src/data/` **được** dùng `Log` (luật 2), nên không chặn ở đó.
-  - [ ] 5.3 Cập nhật bộ mẫu `tools/mau_ranh_gioi/` theo cơ chế `# mong_doi:` có sẵn từ review Story 0.2 (xem `README.md` trong thư mục đó):
+  - [x] 5.2 Thêm luật core: mẫu `'\bLog\.'`, lý do `"lõi luật không được ghi log"`. Lý do: kiến trúc nói lõi chỉ được phụ thuộc vào `src/core/`, và không ghi log trong vòng phân giải. `src/data/` **được** dùng `Log` (luật 2), nên không chặn ở đó.
+  - [x] 5.3 Cập nhật bộ mẫu `tools/mau_ranh_gioi/` theo cơ chế `# mong_doi:` có sẵn từ review Story 0.2 (xem `README.md` trong thư mục đó):
     - `vi_pham/core/in_ra.gd`: đổi dòng `# mong_doi:` sang lý do mới;
     - thêm `vi_pham/battle/in_ra.gd` (`extends Node2D`, có `prints("x")`): lý do mới;
     - thêm `vi_pham/core/ghi_log.gd` (`extends RefCounted`, có `Log.info("x", "y")`): `lõi luật không được ghi log`;
     - thêm `hop_le/debug/log.gd` (có `print(line)` và `printerr(line)`): phải đạt.
-  - [ ] 5.4 Chạy `tools/check_boundaries.sh tools/mau_ranh_gioi/vi_pham`: mỗi file mẫu mới phải hiện đúng lý do. Chạy `hop_le` phải đạt. Sau đó `tools/test.sh` bước 1 phải "đạt".
+  - [x] 5.4 Chạy `tools/check_boundaries.sh tools/mau_ranh_gioi/vi_pham`: mỗi file mẫu mới phải hiện đúng lý do. Chạy `hop_le` phải đạt. Sau đó `tools/test.sh` bước 1 phải "đạt".
 
-- [ ] **Task 6: Dọn chú thích và ghi chú** (AC: —)
-  - [ ] 6.1 `tools/chay.sh` dòng 3: bỏ "(game đọc ở Story 0.3)". Câu mới: `# Mọi tham số được chuyển nguyên vào game (--dev, --tran=N).` Không sửa gì khác trong file.
-  - [ ] 6.2 Thêm vào `_bmad-output/implementation-artifacts/deferred-work.md` một mục cho Story 0.5:
+- [x] **Task 6: Dọn chú thích và ghi chú** (AC: —)
+  - [x] 6.1 `tools/chay.sh` dòng 3: bỏ "(game đọc ở Story 0.3)". Câu mới: `# Mọi tham số được chuyển nguyên vào game (--dev, --tran=N).` Không sửa gì khác trong file.
+  - [x] 6.2 Thêm vào `_bmad-output/implementation-artifacts/deferred-work.md` một mục cho Story 0.5:
     - **Nội dung mục:** "Chưa kiểm chứng: trên itch.io, game chạy trong iframe có địa chỉ riêng (`html5.itch.zone/...`). Thêm `?dev=1` vào link trang itch.io **có thể không** tới được game. Story 0.5 phải thử: (1) link trang + `?dev=1`; (2) mở thẳng địa chỉ iframe + `?dev=1`. Ghi lại cách nào chạy được."
     - **Lý do:** `LaunchOptions` đọc `window.location.search` của chính iframe.
 
-- [ ] **Task 7: Kiểm tra** (AC: 1–6)
-  - [ ] 7.1 Viết test trước (Task 1.6, 2.6, 4.5), chạy `tools/test.sh` thấy **trượt** vì chưa có class. Ghi vào Debug Log. Lỗi `Identifier not declared` được báo trượt chứ không xanh giả: đây là điều review 0.2 đã sửa.
-  - [ ] 7.2 Viết code tới khi `tools/test.sh` **xanh**. Số test dự kiến khoảng 7 + 6 + 19 + 2 ≈ 34. Ghi số thật vào Debug Log.
-  - [ ] 7.3 `tools/chay.sh --dev --tran=3`, chạy headless bằng `--quit-after` nếu được, hoặc đọc output terminal: phải thấy `[INFO][app] dev=1` và `[INFO][app] tran=3`.
-  - [ ] 7.4 `tools/chay.sh --tran=3` (không dev): thấy `[WARN][app] bỏ qua tran=3 vì chưa bật dev`, không có `[INFO][app] tran=3`. `tools/chay.sh --dev --tran=abc --xyz`: phải thấy 2 dòng `[WARN][app] ...` đúng câu ở Task 2.3, và game vẫn mở.
-  - [ ] 7.5 Chụp khung hình bằng `--write-movie <file>.png --quit-after N` (máy **không** cho `screencapture`):
+- [x] **Task 7: Kiểm tra** (AC: 1–6)
+  - [x] 7.1 Viết test trước (Task 1.6, 2.6, 4.5), chạy `tools/test.sh` thấy **trượt** vì chưa có class. Ghi vào Debug Log. Lỗi `Identifier not declared` được báo trượt chứ không xanh giả: đây là điều review 0.2 đã sửa.
+  - [x] 7.2 Viết code tới khi `tools/test.sh` **xanh**. Số test dự kiến khoảng 7 + 6 + 19 + 2 ≈ 34. Ghi số thật vào Debug Log.
+  - [x] 7.3 `tools/chay.sh --dev --tran=3`, chạy headless bằng `--quit-after` nếu được, hoặc đọc output terminal: phải thấy `[INFO][app] dev=1` và `[INFO][app] tran=3`.
+  - [x] 7.4 `tools/chay.sh --tran=3` (không dev): thấy `[WARN][app] bỏ qua tran=3 vì chưa bật dev`, không có `[INFO][app] tran=3`. `tools/chay.sh --dev --tran=abc --xyz`: phải thấy 2 dòng `[WARN][app] ...` đúng câu ở Task 2.3, và game vẫn mở.
+  - [x] 7.5 Chụp khung hình bằng `--write-movie <file>.png --quit-after N` (máy **không** cho `screencapture`):
     - có `--dev`: chữ "DEV" đỏ ở góc trên trái, bàn cờ và nhãn phiên bản vẫn đúng chỗ;
     - không có `--dev`: không có chữ "DEV".
 
     Mở ảnh xem rồi ghi kết quả vào Debug Log. Lưu ý: `--write-movie` truyền **trước** `--`, tham số game để sau `--`.
-  - [ ] 7.6 Thử vi phạm: tạm thêm `print("x")` vào `game/src/app/main.gd` → bước 1 của `tools/test.sh` trượt, ghi `src/app/main.gd:<dòng>: chỉ Log được in ra console...`. Gỡ ra rồi chạy lại cho xanh.
-  - [ ] 7.7 Commit khi xanh. Lời commit gợi ý: `Thêm Log, cờ dev và tham số khởi động (Story 0.3)`. Chuyển story sang `review`.
+  - [x] 7.6 Thử vi phạm: tạm thêm `print("x")` vào `game/src/app/main.gd` → bước 1 của `tools/test.sh` trượt, ghi `src/app/main.gd:<dòng>: chỉ Log được in ra console...`. Gỡ ra rồi chạy lại cho xanh.
+  - [x] 7.7 Commit khi xanh. Lời commit gợi ý: `Thêm Log, cờ dev và tham số khởi động (Story 0.3)`. Chuyển story sang `review`.
 
 ## Dev Notes
 
@@ -333,10 +333,56 @@ Kèm theo các file `.uid` do Godot sinh.
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5)
+
 ### Debug Log References
+
+- Đỏ trước khi viết code: `tools/test.sh` báo `Parse Error: Could not find type "DevTools"` / `Identifier "Log" not declared`, dòng cuối `❌ trượt: có lỗi script khi chạy test, có file test không được chạy`, mã 1.
+- Sau khi viết code: `✅ 35/35 test đạt`, mã 0 (7 BuildInfo + 6 Log + 20 LaunchOptions + 2 DevTools).
+- Chạy headless `--quit-after 5 -- <tham số>`:
+  - `--dev --tran=3` → `[INFO][app] dev=1`, `[INFO][app] tran=3`;
+  - không tham số → không có dòng log nào;
+  - `--tran=3` → chỉ `[WARN][app] bỏ qua tran=3 vì chưa bật dev`;
+  - `--dev --tran=abc --xyz` → `[WARN][app] tham số --tran không hợp lệ: "abc", cần số nguyên từ 1`, `[WARN][app] bỏ qua tham số lạ: "--xyz"`, `[INFO][app] dev=1`.
+- Khung hình `--write-movie` (khung thứ 3): có `--dev` thì chữ "DEV" đỏ ở góc trên trái, bàn cờ 7×7 giữa màn hình, nhãn phiên bản góc dưới phải; không `--dev` thì không có chữ "DEV".
+- Thử vi phạm: thêm `print("x")` vào `main.gd` → `[1/4] Kiểm ranh giới: trượt`, `❌ src/app/main.gd:37: chỉ Log được in ra console (dùng Log.info/warn/error/debug)`, mã 1. Gỡ ra → `✅ 35/35`.
+- `check_boundaries.sh tools/mau_ranh_gioi/vi_pham`: 20 lỗi, có đủ `ghi_log.gd`, `battle/in_ra.gd`, `core/in_ra.gd` với lý do mới; `hop_le` đạt.
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
+- `Log` (`src/debug/log.gd`): 4 cấp, ERROR/WARN qua `printerr`, INFO/DEBUG qua `print`, giữ 200 dòng, `get_lines()` trả bản sao, `clear()` cho test. DEBUG chỉ khi `Log.debug_enabled`.
+- `LaunchOptions` (`src/app/launch_options.gd`): `parse()` thuần, `read_current()` đọc URL trên web hoặc user args trên desktop.
+- `AppState` (autoload duy nhất, `src/app/app_state.gd`): ghi cảnh báo tham số, đặt `Log.debug_enabled`. Theo quyết định của tác giả, `tran` chỉ được ghi nhận khi bật dev; không bật dev thì WARN và đặt `tran = 0`.
+- `DevTools` (`src/debug/dev_tools.gd`): chữ "DEV" và phím F1–F5 (đăng ký vào InputMap bằng code, chỉ khi bật dev). Mỗi phím hiện chỉ ghi một dòng DEBUG, nói rõ story nào làm công cụ thật.
+- `check_boundaries.sh`: luật print chuyển thành luật cho toàn `src/` (miễn `src/debug/log.gd`), bắt thêm `prints`/`print_debug`/`print_verbose`; thêm luật lõi không gọi `Log.`.
+- Phím F1–F5 bấm thật trên cửa sổ chưa thử tự động được (không có quyền điều khiển màn hình); logic khóa phím đã có test `test_dev_tools.gd` (gọi thẳng `_unhandled_input`). Tác giả thử bằng tay theo hướng dẫn dưới.
+- **Hướng dẫn tác giả tự test:**
+  1. Gõ `tools/test.sh` → dòng cuối `✅ 35/35 test đạt`.
+  2. Gõ `tools/chay.sh --dev --tran=3` → góc trên trái có chữ **DEV** đỏ; terminal có `[INFO][app] dev=1` và `[INFO][app] tran=3`. Bấm F1 → terminal thêm `[DEBUG][dev] f1: chưa có công cụ tọa độ (story 1.2)`. Đóng game.
+  3. Gõ `tools/chay.sh` → không có chữ DEV; bấm F1–F5 → terminal không thêm dòng nào.
+  4. Gõ `tools/chay.sh --tran=3` → không có `tran=3` kiểu INFO; chỉ có `[WARN][app] bỏ qua tran=3 vì chưa bật dev`.
+  5. Gõ `tools/chay.sh --dev --tran=abc` → có `[WARN][app] tham số --tran không hợp lệ: "abc", cần số nguyên từ 1`, game vẫn mở.
 
 ### File List
+
+- `game/project.godot` (sửa: thêm `[autoload]` AppState)
+- `game/src/app/main.gd` (sửa: tạo `DevTools`)
+- `game/src/app/app_state.gd`, `.uid` (mới)
+- `game/src/app/launch_options.gd`, `.uid` (mới)
+- `game/src/debug/log.gd`, `.uid` (mới)
+- `game/src/debug/dev_tools.gd`, `.uid` (mới)
+- `game/tests/test_log.gd`, `.uid` (mới)
+- `game/tests/test_launch_options.gd`, `.uid` (mới)
+- `game/tests/test_dev_tools.gd`, `.uid` (mới)
+- `tools/check_boundaries.sh` (sửa: luật print toàn `src/`, luật Log trong lõi)
+- `tools/chay.sh` (sửa chú thích)
+- `tools/mau_ranh_gioi/vi_pham/core/in_ra.gd` (sửa `mong_doi`)
+- `tools/mau_ranh_gioi/vi_pham/core/ghi_log.gd`, `vi_pham/battle/in_ra.gd`, `hop_le/debug/log.gd` (mới)
+- `_bmad-output/implementation-artifacts/deferred-work.md` (thêm mục iframe itch.io cho Story 0.5)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (trạng thái)
+- `_bmad-output/implementation-artifacts/0-3-log-co-dev-va-tham-so-khoi-dong.md` (story này)
+
+### Change Log
+
+- 2026-10-17: Thêm `Log`, `LaunchOptions`, autoload `AppState`, `DevTools` (chữ DEV, F1–F5 khóa khi không bật dev); luật "chỉ Log được in ra console" và "lõi không ghi log" trong `check_boundaries.sh`; 28 test mới (tổng 35).
