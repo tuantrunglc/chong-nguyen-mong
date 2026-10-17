@@ -4,7 +4,7 @@ game_type: 'turn-based-tactics + roguelike'
 platforms: ['web (HTML5)', 'itch.io', 'PC/Steam (về sau)']
 status: final
 created: '2026-10-15'
-updated: '2026-10-16'
+updated: '2026-10-17'
 inputs:
   - _bmad-output/planning-artifacts/briefs/brief-GameTest-2026-10-15/brief.md
   - _bmad-output/planning-artifacts/briefs/brief-GameTest-2026-10-15/addendum.md
@@ -79,8 +79,8 @@ Mục tiêu là làm xong một game mình tự hào, không phải tối đa do
 
 | Kiểu nhiệm vụ | Thắng | Thua |
 |---|---|---|
-| **Tiêu diệt** | Hạ hết quân Nguyên trên bàn (không có tiếp viện) | Cả 3 tướng gục |
-| **Giữ ải** | Qua hết **5 hiệp** mà không quân Nguyên nào bước vào ô ải (đánh dấu ở mép bàn phía nhà Trần) | Cả 3 tướng gục, hoặc một quân Nguyên bước vào ô ải |
+| **Tiêu diệt** | Hạ hết quân Nguyên trên bàn (không có tiếp viện) | Mọi tướng trên bàn đều gục |
+| **Giữ ải** | Qua hết **5 hiệp** mà không quân Nguyên nào bước vào ô ải (đánh dấu ở mép bàn phía nhà Trần) | Mọi tướng trên bàn đều gục, hoặc một quân Nguyên bước vào ô ải |
 
 - Tướng còn 0 máu thì gục và không hành động được nữa trong trận đó. Tướng gục bị nhấc khỏi bàn, không chiếm ô. [MẶC ĐỊNH, duyệt qua kịch bản luật] [KIỂM TRA KHI PLAYTEST E4] Phương án thay thế: để xác lại làm vật cản.
 - Kiểm tra thắng/thua sau mỗi lần có quân gục, cả trong lượt người chơi lẫn trong pha địch. Nếu thắng và thua xảy ra cùng lúc thì **thắng được ưu tiên**. [MẶC ĐỊNH, duyệt qua kịch bản luật]
@@ -99,7 +99,7 @@ Mục tiêu là làm xong một game mình tự hào, không phải tối đa do
 | **Đánh vào ô** | Đòn địch gắn với ô, không gắn với người, nên có thể né, có thể làm lệch, và địch có thể đánh trúng nhau. | Thấy trước, tính được |
 | **Địa hình gây hiệu ứng** | Sông, rừng, hầm chông, kho lương (xem phần Terrain). | Địa hình là vũ khí, Tôn trọng lịch sử |
 | **Mưu kế của Trần Hưng Đạo** | Mỗi mưu kế dùng 1 lần mỗi trận, dùng được bất cứ lúc nào trong lượt người chơi, không tốn hành động của tướng. Prototype có 2 mưu kế (bảng dưới). | Tôn trọng lịch sử |
-| **Hoàn tác** | Hủy **nước đi gần nhất**, khi tướng đó chưa đánh. Chơi lại hiệp: 1 lần mỗi trận. | Thấy trước, tính được |
+| **Hoàn tác** | Hủy **nước đi gần nhất**, khi tướng đó chưa đánh; đánh hoặc dùng mưu kế thì xóa lịch sử hủy. Chơi lại hiệp: 1 lần mỗi trận. | Thấy trước, tính được |
 | **Xem trước kết quả đòn** | Khi rê chuột lên mục tiêu của một đòn, game hiện bóng mờ vị trí cuối của các quân bị ảnh hưởng và số máu sau đòn. Có từ E2 (bản tối giản), trau chuốt ở E4. Chốt 2026-10-16. | Thấy trước, tính được |
 
 **Mưu kế trong prototype:**
@@ -141,7 +141,7 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 - **Phạm vi prototype:** chỉ đánh trên bộ. Sông là ô bị chặn với mọi quân. Thuyền và thủy chiến để sau.
 ### Unit Types and Classes
 
-**Tướng nhà Trần.** Người chơi điều khiển 3 tướng. Mỗi tướng có 3 máu và đi được 3 ô. Mỗi tướng giữ một vai riêng, không trùng nhau.
+**Tướng nhà Trần.** Người chơi điều khiển tối đa 3 tướng (trận 1–2 của prototype chỉ có 2 tướng, xem Campaign Structure). Mỗi tướng có 3 máu và đi được 3 ô. Mỗi tướng giữ một vai riêng, không trùng nhau.
 
 | Tướng | Vai | Đòn chính | Ý đồ chiến thuật |
 |---|---|---|---|
@@ -191,12 +191,14 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 - Quân đang chuẩn bị đánh mà bị đẩy sang ô khác thì đòn của nó dịch theo, giữ nguyên hướng và khoảng cách tương đối. Nếu đòn dịch ra ngoài bàn thì bị hủy. [MẶC ĐỊNH, duyệt qua kịch bản luật]
 - Quân bị hạ trước lượt ra đòn của mình thì đòn đó bị hủy.
 - **Mọi đòn trúng mọi người đứng trên ô bị nhắm**, không phân phe. Lao của Phạm Ngũ Lão, đòn đẩy của Nguyễn Khoái và đòn của địch đều có thể trúng tướng nhà Trần.
+- **Không được chọn tướng mình làm mục tiêu.** Bấm vào tướng mình luôn là chọn tướng đó. Tướng mình chỉ trúng đòn như *hệ quả*: lao trúng vật đầu tiên trên hàng là tướng mình, hoặc quân bị đẩy/kéo va vào tướng mình. Chốt 2026-10-17.
 - **Kỵ binh xung phong** thì đứng yên tại chỗ, đòn trúng vật đầu tiên trên hàng theo hướng đã báo. Sông không chặn đòn xung phong; rừng thì chặn.
 - **Kéo mục tiêu đã đứng kề** Trần Khánh Dư thì mục tiêu đứng yên, không ai mất máu.
 
 **Hoàn tác.**
 - Chỉ hủy được **nước đi gần nhất**, và chỉ khi tướng đó chưa đánh. Muốn quay lại xa hơn thì dùng "chơi lại hiệp". [MẶC ĐỊNH, duyệt qua kịch bản luật]
-- Được **"chơi lại hiệp này" 1 lần mỗi trận**: đưa bàn cờ về trạng thái đầu lượt người chơi.
+- **Đánh hoặc dùng mưu kế thì xóa sạch lịch sử hủy.** Sau một đòn đánh hay một mưu kế, không hủy được nước đi nào trước đó. Chốt 2026-10-17.
+- Được **"chơi lại hiệp này" 1 lần mỗi trận**: đưa bàn cờ về trạng thái đầu lượt người chơi, **kể cả trả lại mưu kế đã dùng trong lượt đó**. Chốt 2026-10-17.
 
 **Không có:** đòn phản công, đòn đánh khi địch rời ô kề, giới hạn thời gian mỗi lượt.
 
@@ -234,10 +236,11 @@ AI phải tất định và đọc được: người chơi đoán được quâ
 |---|---|---|---|---|
 | 1 | Tiêu diệt | Né ô đỏ, đẩy địch xuống sông | 3 Bộ binh | Sông |
 | 2 | Tiêu diệt | Kỵ binh xung phong, dùng rừng chặn đường, địch đánh trúng nhau | 2 Kỵ binh, 1 Bộ binh | Rừng, sông |
-| 3 | Tiêu diệt | Đòn kéo của Trần Khánh Dư, hầm chông | 2 Bộ binh, 2 Cung kỵ | Hầm chông, rừng |
+| 3 | Tiêu diệt | Trần Khánh Dư ra trận: đòn kéo, hầm chông | 2 Bộ binh, 2 Cung kỵ | Hầm chông, rừng |
 | 4 | Giữ ải | Kho lương, *Vườn không nhà trống*, quân tiếp viện | 4 quân khởi đầu, +1 mỗi hiệp | Kho lương, sông |
 | 5 | Giữ ải | Tổng hợp mọi luật, *Sát Thát* | 5 quân khởi đầu, +1–2 mỗi hiệp | Đủ các loại |
 
+- **Tướng ra trận theo nhịp dạy chơi:** trận 1–2 chỉ có Nguyễn Khoái và Phạm Ngũ Lão; Trần Khánh Dư ra trận từ trận 3. File trận quy định tướng nào có mặt. Chốt 2026-10-17.
 - Mưu kế mở dần theo trận: *Vườn không nhà trống* có từ trận 4, *Sát Thát* có từ trận 5. [ASSUMPTION: mở mưu kế theo nhịp dạy chơi]
 - Tên trận và địa danh: prototype dùng tên tạm "Trận 1–5". Bản phát hành phải gắn mỗi trận với một địa danh hoặc sự kiện có thật trong năm 1287–1288, kèm 1–2 dòng giới thiệu trước trận.
 
@@ -355,21 +358,23 @@ Thứ người chơi tiến bộ chủ yếu là **kỹ năng đọc bàn cờ**
 ## Development Epics
 
 ### Epic Structure
-Mỗi epic đều kết thúc bằng một thứ chơi được. Chi tiết xem `epics.md`.
+Mỗi epic đều kết thúc bằng một thứ chơi được. Chi tiết (story, tiêu chí nghiệm thu) xem `_bmad-output/planning-artifacts/epics.md`; file `epics.md` trong thư mục GDD này là bản tổng quát cũ, đã được thay thế.
 
 **Giai đoạn 0: Prototype (13 tuần × 10 giờ ≈ 130 giờ)**
 
 | Epic | Tuần | Giờ | Chơi được khi xong |
 |---|---|---|---|
-| E0 Học Godot | 1–3 | ~30 | Một quân đi được trên lưới ô |
-| E1 Bàn cờ & di chuyển | 4–5 | ~20 | Di chuyển 3 tướng trên bàn của trận 1 |
-| E2 Combat cốt lõi ⚠️ | 6–8 | ~30 | Chơi trọn trận 1 |
-| E3 Địa hình & mưu kế | 9–10 | ~20 | Chơi được trận 4 |
+| E0 Dựng nền | 1–2 | ~12 | Bàn cờ trống chạy trên itch.io (riêng tư); một lệnh chạy toàn bộ test |
+| E1 Bàn cờ & di chuyển | 2–3 | ~18 | Di chuyển các tướng trên bàn của trận 1 |
+| E2 Combat cốt lõi ⚠️ | 4–7 | ~35 | Chơi trọn trận 1 |
+| E3 Địa hình & mưu kế | 7–10 | ~35 | Chơi được trận 2–4 |
 | E4 Năm trận & chơi thử | 11–13 | ~30 | Prototype hoàn chỉnh chạy trên web, có người thân chơi thử |
+
+Chia lại giờ ngày 2026-10-17: E0 đổi từ "Học Godot" thành "Dựng nền" vì code do AI viết, nên bớt giờ E0 để bù cho E2 và E3.
 
 **Thứ tự làm:** E0 → E1 → E2 → E3 → E4, bắt buộc tuần tự.
 
-**Mốc kiểm tra: hết tuần 8.** Tác giả tự chơi trận 1. Nếu thấy chán thì dừng lại và sửa luật trước khi làm E3.
+**Mốc kiểm tra: hết E2 (khoảng tuần 7).** Tác giả tự chơi trận 1. Nếu thấy chán thì dừng lại và sửa luật trước khi làm E3.
 
 **Nếu E2 trễ:** cắt trận 5 và loại quân Cung kỵ. Không cắt luật lõi (đánh vào ô, đẩy và kéo).
 
@@ -393,7 +398,7 @@ Mục tiêu là trả lời câu hỏi: **giải thế trận có vui không?** 
 - **Dừng lại suy nghĩ trước nước đi**, nhìn ô đỏ trước khi đánh. Đây là dấu hiệu trụ cột *Thấy trước, tính được* đang có tác dụng.
 - **Dùng địa hình để hạ địch** (sông, va chạm, đòn của đồng đội) chứ không chỉ đánh thẳng. Dấu hiệu trụ cột *Địa hình là vũ khí*.
 - **Hỏi "còn trận nữa không?"** khi xong trận 5.
-- **Tác giả tự thấy vui** ở mốc tuần 8.
+- **Tác giả tự thấy vui** ở mốc hết E2.
 
 Đạt ≥3 trong 5 dấu hiệu trên thì chuyển sang giai đoạn 1.
 
@@ -440,7 +445,7 @@ Mục tiêu là trả lời câu hỏi: **giải thế trận có vui không?** 
 |---|---|---|
 | 1 | **Năng lực (lớn nhất):** chưa từng làm game, không vẽ, không làm nhạc, mà hào khí phụ thuộc vào phần trình bày | Quân cờ kiểu cờ tướng; chỉ chi tiền cho tranh chủ đạo và nhạc; prototype trước rồi mới chi |
 | 2 | **Phạm vi phình ra** | Trụ cột *Nhỏ mà xong*; mỗi giai đoạn có điểm dừng; phương án cắt khi E2 trễ |
-| 3 | **Combat không vui** | Toàn bộ giai đoạn 0 để kiểm chứng; mốc tự chơi hết tuần 8 |
+| 3 | **Combat không vui** | Toàn bộ giai đoạn 0 để kiểm chứng; mốc tự chơi hết E2 |
 | 4 | **Người thử thiên vị** (người thân hay khen) | Quan sát hành vi thay vì hỏi ý kiến (Success Metrics); từ giai đoạn 1 thêm người lạ chơi thử |
 | 5 | **Sai sử, AI vẽ sai trang phục** | Trụ cột *Tôn trọng lịch sử*; đối chiếu tư liệu trước khi phát hành (E9) |
 | 6 | **Mất động lực** (một mình, 10 giờ/tuần, nhiều tháng) | Mốc ngắn, mỗi epic kết thúc bằng thứ chơi được; cho người thật chơi sớm |

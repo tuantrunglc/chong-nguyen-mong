@@ -6,6 +6,8 @@ updated: '2026-10-15'
 
 # Development Epics
 
+> ⚠️ **Đã được thay thế (2026-10-17).** Bản chia epic và story hiện hành là `_bmad-output/planning-artifacts/epics.md`. File này chỉ giữ lại để tra lịch sử; giờ và tên epic dưới đây đã cũ.
+
 Ngân sách: 13 tuần × 10 giờ ≈ 130 giờ. Các epic làm tuần tự.
 
 ## E0: Học Godot (tuần 1–3, khoảng 30 giờ)

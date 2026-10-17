@@ -23,17 +23,17 @@ File này chia các yêu cầu trong GDD và tài liệu kiến trúc thành epi
 
 **Bàn cờ và dữ liệu trận**
 - FR1: Bàn 7×7 ô vuông, đi 4 hướng, không đi chéo; khoảng cách tính bằng số ô (Manhattan).
-- FR2: Mỗi trận nạp từ file dữ liệu: địa hình, vị trí quân, thứ tự hành động của quân Nguyên, lịch tiếp viện, kiểu nhiệm vụ, mưu kế được dùng. Thêm hoặc sửa trận không cần sửa code.
+- FR2: Mỗi trận nạp từ file dữ liệu: địa hình, vị trí quân, tướng nào ra trận, thứ tự hành động của quân Nguyên, lịch tiếp viện, kiểu nhiệm vụ, mưu kế được dùng. Thêm hoặc sửa trận không cần sửa code.
 - FR3: Hiển thị 5 loại ô (đất trống, sông, rừng, hầm chông, kho lương) và ô ải; quân là đồng tròn có chữ hoặc biểu tượng.
 - FR4: Chỉ số (máu, tầm đi, tầm đánh, sát thương, độ đẩy, tầm kéo, tham số mưu kế) nạp từ `chi_so.json`; tác giả tự sửa được.
 
 **Tướng và di chuyển**
-- FR5: 3 tướng (Nguyễn Khoái, Phạm Ngũ Lão, Trần Khánh Dư), mỗi tướng 3 máu, đi tối đa 3 ô.
+- FR5: Tối đa 3 tướng (Nguyễn Khoái, Phạm Ngũ Lão, Trần Khánh Dư), mỗi tướng 3 máu, đi tối đa 3 ô. File trận quy định tướng nào ra trận: trận 1–2 chỉ có Nguyễn Khoái và Phạm Ngũ Lão; Trần Khánh Dư từ trận 3.
 - FR6: Chọn tướng bằng chuột hoặc phím `1` `2` `3`; tô sáng các ô đi tới được; rê chuột lên ô thì hiện đường đi.
 - FR7: Được đi xuyên quân mình, không đi xuyên quân địch; sông, rừng, kho lương chặn đường.
 - FR8: Game chọn đường **ít hầm chông nhất**, hòa thì theo B→Đ→N→T. Ô sáng và đường đi hiện số máu sẽ mất. [MẶC ĐỊNH]
 - FR9: Mỗi tướng đi rồi đánh một lần; có thể đánh mà không đi; đã đánh thì không đi được nữa; ba tướng hành động theo thứ tự tùy ý.
-- FR10: Hủy **nước đi gần nhất** (nút Hủy, phím `Z`), chỉ khi tướng đó chưa đánh. [MẶC ĐỊNH]
+- FR10: Hủy **nước đi gần nhất** (nút Hủy, phím `Z`), chỉ khi tướng đó chưa đánh [MẶC ĐỊNH]. Đánh hoặc dùng mưu kế thì xóa sạch lịch sử hủy (chốt 2026-10-17).
 - FR11: Kết thúc lượt bằng nút hoặc phím `Space`.
 
 **Đòn của tướng**
@@ -41,7 +41,7 @@ File này chia các yêu cầu trong GDD và tài liệu kiến trúc thành epi
 - FR13: Phạm Ngũ Lão phóng lao thẳng hàng, bay qua ô kề, trúng vật đầu tiên ở ô thứ 2–4, 1 sát thương. Rừng hoặc kho lương ở bất kỳ ô nào trên đường, kể cả ô kề, chặn lao [MẶC ĐỊNH]. Sông không chặn.
 - FR14: Trần Khánh Dư kéo vật đầu tiên trên hàng trong vòng 3 ô về phía mình 2 ô, 0 sát thương. Vật đó phải là quân Nguyên; nếu là tướng, rừng hoặc kho lương thì không kéo được [MẶC ĐỊNH]. Mục tiêu đã đứng kề thì không có gì xảy ra.
 - FR15: Đánh bằng cách bấm ô hoặc mục tiêu trong tầm. Tướng đã đi rồi thì phải bấm thêm lần nữa để xác nhận.
-- FR16: Mọi đòn trúng mọi quân trên ô bị nhắm, không phân phe (kể cả đòn của tướng trúng tướng mình).
+- FR16: Mọi đòn trúng mọi quân trên ô bị nhắm, không phân phe. Không được chọn tướng mình làm mục tiêu: bấm vào tướng mình luôn là chọn tướng đó; tướng mình chỉ trúng đòn như hệ quả (lao trúng vật đầu tiên trên hàng, bị quân khác va vào) (chốt 2026-10-17).
 
 **Đẩy, kéo, va chạm**
 - FR17: Đẩy và kéo đi từng ô. Gặp mép bàn, rừng hoặc kho lương thì dừng và quân bị đẩy mất 1 máu; gặp quân khác thì dừng và cả hai mất 1 máu; qua mỗi ô hầm chông mất 1 máu; xuống sông thì quân Nguyên chết đuối, còn tướng tính như va chạm.
@@ -79,12 +79,12 @@ File này chia các yêu cầu trong GDD và tài liệu kiến trúc thành epi
 - FR35: Cuối hiệp, game báo trước ô tiếp viện của hiệp sau. Đầu hiệp sau, quân tiếp viện xuất hiện trước tiên, rồi báo đòn ngay trong hiệp đó. Nếu ô có quân đứng (bất kể phe nào), quân đứng đó mất 1 máu và quân tiếp viện bị hủy.
 
 **Thắng, thua**
-- FR36: Tiêu diệt: thắng khi hạ hết quân Nguyên; thua khi cả 3 tướng gục.
-- FR37: Giữ ải: thắng khi hết bước cuối hiệp của hiệp 5; thua khi cả 3 tướng gục, hoặc khi quân Nguyên vào ô ải bằng bất kỳ cách nào [MẶC ĐỊNH].
+- FR36: Tiêu diệt: thắng khi hạ hết quân Nguyên; thua khi mọi tướng trên bàn đều gục.
+- FR37: Giữ ải: thắng khi hết bước cuối hiệp của hiệp 5; thua khi mọi tướng trên bàn đều gục, hoặc khi quân Nguyên vào ô ải bằng bất kỳ cách nào [MẶC ĐỊNH].
 - FR38: Kiểm tra thắng/thua sau mỗi lần có quân gục; thắng và thua xảy ra cùng lúc thì thắng được ưu tiên [MẶC ĐỊNH]. Tướng gục bị nhấc khỏi bàn [MẶC ĐỊNH, KIỂM TRA KHI PLAYTEST E4].
 
 **Hoàn tác và thông tin**
-- FR39: Chơi lại hiệp (nút hoặc phím `R`), 1 lần mỗi trận, đưa bàn về đầu lượt người chơi.
+- FR39: Chơi lại hiệp (nút hoặc phím `R`), 1 lần mỗi trận, đưa bàn về đầu lượt người chơi, trả lại cả mưu kế đã dùng trong lượt đó (chốt 2026-10-17).
 - FR40: Rê chuột lên quân hiện máu, đòn sắp đánh, thứ tự ra đòn; rê lên ô hiện loại địa hình.
 - FR41: Xem trước kết quả đòn: rê lên mục tiêu thì hiện bóng mờ vị trí cuối và số máu sau đòn (E2 bản tối giản, E4 trau chuốt).
 - FR42: Tua nhanh hoạt ảnh pha địch.
@@ -127,7 +127,12 @@ File này chia các yêu cầu trong GDD và tài liệu kiến trúc thành epi
 
 ### Yêu cầu UX
 
-Không có tài liệu UX riêng. Các yêu cầu giao diện lấy từ GDD (Controls and Input, Art Style) và đã nằm trong FR6, FR11, FR15, FR24, FR34, FR39–FR42, NFR8–NFR9.
+Không có tài liệu UX riêng. Các yêu cầu giao diện lấy từ GDD (Controls and Input, Art Style) và đã nằm trong FR6, FR11, FR15, FR24, FR34, FR39–FR42, NFR8–NFR9. Bổ sung sau bước readiness (2026-10-17), mỗi mục là tiêu chí nghiệm thu trong story tương ứng:
+- tướng đã đi hoặc đã đánh có trạng thái nhìn thấy được (Story 1.5, 2.1);
+- khi chọn tướng, các mục tiêu đánh được có viền màu riêng, khác ô đỏ của địch (Story 2.1, 2.3, 2.4);
+- nhiều đòn cùng nhắm một ô thì hiện đủ các số thứ tự (Story 2.7);
+- có dòng chữ báo pha hiện tại: "Lượt của bạn" / "Quân Nguyên đang ra đòn" (Story 2.11).
+Khi sang giai đoạn 1 nên chạy `gds-ux`.
 
 ### Bản đồ phủ FR
 
@@ -137,7 +142,7 @@ Không có tài liệu UX riêng. Các yêu cầu giao diện lấy từ GDD (Co
 | FR5–FR7 | E1 | Tướng, chọn tướng, tô sáng, đi xuyên quân mình |
 | FR8 | E3 | Đường đi ít hầm chông nhất |
 | FR9–FR11 | E1 | Đi rồi đánh, hủy nước đi gần nhất, kết thúc lượt |
-| FR12–FR16 | E2 | Đòn 3 tướng, xác nhận đòn, trúng mọi phe (phần rừng/kho lương chặn đòn: E3) |
+| FR12–FR16 | E2 | Đòn 3 tướng (Trần Khánh Dư thử trên trận thử, ra trận thật từ trận 3), xác nhận đòn, trúng mọi phe (phần rừng/kho lương chặn đòn: E3) |
 | FR17 | E2 | Đẩy/kéo từng ô, va chạm, sông (phần hầm chông: E3) |
 | FR18–FR19, FR21 | E2 | Bộ binh, Kỵ binh, đòn địch không đẩy |
 | FR20 | E2 (story cuối) | Cung kỵ, cắt được nếu trễ |
@@ -160,6 +165,18 @@ Không có tài liệu UX riêng. Các yêu cầu giao diện lấy từ GDD (Co
 
 ## Danh sách epic
 
+**Ngân sách giờ** (chia lại 2026-10-17, tổng ≈ 130 giờ, khoảng 10 giờ/tuần):
+
+| Epic | Giờ | Tuần (ước) | Số story |
+|---|---|---|---|
+| E0 Dựng nền | ~12 | 1–2 | 6 |
+| E1 Bàn cờ và di chuyển | ~18 | 2–3 | 6 |
+| E2 Combat cốt lõi | ~35 | 4–7 | 15 |
+| E3 Địa hình và mưu kế | ~35 | 7–10 | 11 |
+| E4 Năm trận và chơi thử | ~30 | 11–13 | 9 |
+
+**"Trễ" nghĩa là:** một epic dùng quá số giờ trên 25% (ví dụ E2 quá 44 giờ). Khi đó áp dụng phương án cắt: Cung kỵ (Story 2.15), trận 5 (Story 4.5), gợi ý luật (Story 4.8), trau chuốt xem trước (Story 4.6). Không cắt luật lõi.
+
 Thứ tự bắt buộc: E0 → E1 → E2 → E3 → E4. Epic sau dùng kết quả của epic trước, không epic nào cần epic sau mới chạy được. Mỗi story luật có một đợt duyệt kịch bản nhỏ bằng `tools/xem_kich_ban.sh`, trước khi viết code.
 
 ### E0: Dựng nền
@@ -171,8 +188,8 @@ Tác giả mở trận 1 từ file dữ liệu, chọn tướng, đi, hủy nư�
 **Phủ:** FR1–FR7, FR9–FR11, FR43 (bố cục trận 1). Công cụ dev F1, F5, `?tran=N`.
 
 ### E2: Combat cốt lõi ⚠️ rủi ro cao nhất
-Tác giả chơi trọn trận 1: địch báo đòn, đẩy địch xuống sông, kéo địch vào ô đỏ, thắng hoặc thua, thấy trước kết quả đòn.
-**Thứ tự trong epic:** luật (kịch bản xanh) → **mốc "bản xấu chơi được"** (chưa có hoạt ảnh) → hoạt ảnh và xem trước → hoàn thiện trận 1, có lời giải ghi lại → **Cung kỵ (story cuối, cắt được)**. Kết thúc bằng mốc tự chơi cuối tuần 8.
+Tác giả chơi trọn trận 1 (2 tướng): địch báo đòn, đẩy địch xuống sông, làm địch đánh trúng nhau, thắng hoặc thua, thấy trước kết quả đòn. Đòn kéo của Trần Khánh Dư làm xong ở E2 nhưng chỉ thử trên trận thử, ra trận thật từ trận 3.
+**Thứ tự trong epic:** luật (kịch bản xanh) → **mốc "bản xấu chơi được"** (chưa có hoạt ảnh) → hoạt ảnh và xem trước → hoàn thiện trận 1, có lời giải ghi lại → **Cung kỵ (story cuối, cắt được)**. Kết thúc bằng mốc tự chơi hết E2 (khoảng tuần 7).
 **Phủ:** FR12–FR26, FR28, FR36, FR38, FR40, FR41, FR43 (hoàn thiện trận 1). Công cụ dev F2, F3.
 
 ### E3: Địa hình và mưu kế
@@ -308,7 +325,7 @@ tôi muốn mở game qua một đường link,
 **Khi** game ghi một file thử vào `user://` rồi tải lại trang
 **Thì** file vẫn còn khi chạy trong iframe của itch.io (kiểm tra lúc bật `?dev=1`)
 
-**Và** dung lượng tải và thời gian tải lần đầu được ghi vào `NEXT-STEPS.md` (số đo NFR2 ban đầu)
+**Và** dung lượng tải và thời gian tải lần đầu được ghi vào `NEXT-STEPS.md` (số đo NFR2 ban đầu); thời gian tải đo bằng DevTools của Chrome, giới hạn mạng ở 20 Mbps, xóa bộ nhớ đệm trước khi đo
 **Và** preset export có filter `*.json`, loại trừ `tests/*` và `addons/gut/*`, xuất đơn luồng
 
 ### Story 0.6: Cài công cụ AI (MCP)
@@ -365,10 +382,12 @@ tôi muốn thấy trận 1 hiện ra đúng như file dữ liệu,
 
 **Tiêu chí nghiệm thu:**
 
-**Cho** `tran_01.json` bản đầu (sông, 3 tướng, 3 Bộ binh, nhiệm vụ Tiêu diệt)
+**Cho** `tran_01.json` bản đầu (sông, 2 tướng Nguyễn Khoái và Phạm Ngũ Lão, 3 Bộ binh, nhiệm vụ Tiêu diệt)
 **Khi** mở `--tran=1`
 **Thì** bàn 7×7 hiện đúng từng ô địa hình và từng quân ở đúng vị trí trong file (FR1, FR3)
 **Và** mỗi loại ô có màu hoặc ký hiệu riêng (đất trống, sông, rừng, hầm chông, kho lương, ô ải); mỗi quân là đồng tròn có chữ: Khoái, Lão, Dư; quân Nguyên là B, K, C
+**Và** mỗi đồng quân hiện số máu hiện tại (để test tay các story luật ở E2 mà không cần chờ Story 2.5)
+**Và** có thêm `data/tran/thu_ba_tuong.json` (đủ 3 tướng, chỉ mở được khi bật dev bằng `?tran=thu_ba_tuong`), dùng để thử Trần Khánh Dư trước trận 3
 
 **Khi** bật dev và bấm F1
 **Thì** mỗi ô hiện tọa độ `cot,hang` (gốc trên trái), mỗi quân hiện id (tướng 1–3, quân Nguyên từ 101); bấm lại thì ẩn
@@ -416,7 +435,7 @@ tôi muốn chọn một tướng và thấy ngay nó đi được tới đâu,
 **Thì** game vẽ đường đi tới ô đó
 
 **Khi** bấm phím `2` hoặc `3`
-**Thì** đổi sang tướng tương ứng
+**Thì** đổi sang tướng tương ứng; nếu tướng đó không có trong trận (ví dụ phím `3` ở trận 1) thì không có gì xảy ra
 
 **Và** `tools/test.sh` xanh, mọi kịch bản `di_chuyen/` đã duyệt đều đạt
 
@@ -438,7 +457,10 @@ tôi muốn đi, hủy nước vừa đi và kết thúc lượt,
 **Thì** không có gì xảy ra, game không lỗi
 
 **Khi** bấm Kết thúc lượt (hoặc phím `Space`)
-**Thì** số hiệp tăng thêm 1 và cả 3 tướng đi lại được (pha địch chèn vào đây ở E2) (FR11)
+**Thì** số hiệp tăng thêm 1 và mọi tướng đi lại được (pha địch chèn vào đây ở E2) (FR11)
+
+**Khi** một tướng đã đi
+**Thì** đồng quân của tướng đó có dấu hiệu "đã đi" (ví dụ viền mờ), khác với tướng chưa hành động
 
 **Và** sau mỗi lệnh, `BattleState.validate()` rỗng; có kịch bản cho hủy nước đi và kết thúc lượt
 **Và** mọi thao tác đều làm được chỉ bằng bấm chuột; phím tắt chỉ là lối tắt, khai báo trong InputMap (NFR8)
@@ -460,9 +482,9 @@ tôi muốn sửa file trận hoặc chỉ số rồi thấy kết quả ngay,
 
 ## Epic 2: Combat cốt lõi ⚠️
 
-Tác giả chơi trọn trận 1: địch báo đòn, đẩy địch xuống sông, kéo địch vào ô đỏ, thắng hoặc thua, thấy trước kết quả đòn.
+Tác giả chơi trọn trận 1 (2 tướng): địch báo đòn, đẩy địch xuống sông, làm địch đánh trúng nhau, thắng hoặc thua, thấy trước kết quả đòn.
 
-**Quy trình chung cho mọi story luật (2.1–2.7, 2.13):** AI viết kịch bản → tác giả duyệt bằng `tools/xem_kich_ban.sh` → kịch bản mới phải trượt → AI viết code tới khi `tools/test.sh` xanh. Phần 1 chưa có hoạt ảnh: bàn nhảy thẳng tới kết quả.
+**Quy trình chung cho mọi story luật (2.1–2.9, 2.15):** AI viết kịch bản → tác giả duyệt bằng `tools/xem_kich_ban.sh` → kịch bản mới phải trượt → AI viết code tới khi `tools/test.sh` xanh. Phần 1 chưa có hoạt ảnh: bàn nhảy thẳng tới kết quả.
 
 ### Story 2.1: Nguyễn Khoái đánh, đẩy và va chạm
 
@@ -487,6 +509,16 @@ tôi muốn Nguyễn Khoái đánh và đẩy địch vào mép bàn, vào vật
 **Khi** tướng đã đi rồi mới đánh
 **Thì** phải bấm vào mục tiêu thêm một lần để xác nhận (FR15)
 
+**Khi** chọn một tướng
+**Thì** các mục tiêu đánh được trong tầm có viền màu riêng, khác hẳn ô đỏ của địch; áp dụng cho mọi đòn tướng về sau
+
+**Khi** một tướng đã đánh
+**Thì** đồng quân của tướng đó mờ hẳn, không chọn để đi hay đánh được nữa
+
+**Cho** tướng A vừa đi, rồi tướng B đánh
+**Khi** bấm Hủy (`Z`)
+**Thì** không có gì xảy ra: đòn đánh đã xóa sạch lịch sử hủy (FR10); có kịch bản cho ca này
+
 **Và** đẩy đi từng ô qua `ForcedMove.run`, dùng chung cho mọi đòn đẩy/kéo về sau
 **Và** có kịch bản trong `day/`, `va_cham/`, đã duyệt và đạt
 
@@ -504,8 +536,12 @@ tôi muốn đẩy quân Nguyên xuống sông, và biết đòn của mình cũ
 **Khi** tướng bị đẩy vào sông
 **Thì** tướng mất 1 máu, đứng yên
 
-**Khi** ô bị Nguyễn Khoái đánh có tướng nhà Trần
-**Thì** tướng đó cũng mất máu và bị đẩy (FR16)
+**Cho** Nguyễn Khoái đang được chọn, đứng kề Phạm Ngũ Lão
+**Khi** bấm vào Phạm Ngũ Lão
+**Thì** game chuyển sang chọn Phạm Ngũ Lão, không có đòn đánh nào (không được chọn tướng mình làm mục tiêu) (FR16)
+
+**Khi** Nguyễn Khoái đẩy một quân Nguyên va vào tướng mình
+**Thì** cả quân Nguyên và tướng mình đều mất 1 máu
 
 **Và** có kịch bản trong `dia_hinh/` (sông) và `va_cham/` (trúng quân mình), đã duyệt và đạt
 
@@ -533,6 +569,8 @@ tôi muốn Phạm Ngũ Lão phóng lao từ xa,
 **Khi** không có vật nào ở ô thứ 2–4
 **Thì** không bấm đánh được về hướng đó
 
+**Và** chỉ quân Nguyên mới có viền "đánh được"; lao trúng tướng mình chỉ xảy ra khi tướng mình là vật đầu tiên trên đường tới quân Nguyên được chọn, và bản xem trước (Story 2.12) phải hiện rõ điều đó
+
 **Và** phần "rừng, kho lương chặn lao" làm ở E3
 
 ### Story 2.4: Trần Khánh Dư kéo
@@ -559,6 +597,8 @@ tôi muốn Trần Khánh Dư kéo địch,
 **Khi** đường kéo đi qua sông
 **Thì** quân Nguyên rơi xuống sông và chết đuối
 
+**Và** thử trong game bằng trận thử `thu_ba_tuong` (Story 1.2); trận 1–2 không có Trần Khánh Dư
+
 ### Story 2.5: Máu, gục, thắng và thua (Tiêu diệt)
 
 Là người chơi,
@@ -568,7 +608,7 @@ tôi muốn thấy rõ máu từng quân và biết khi nào thắng, thua,
 **Tiêu chí nghiệm thu:**
 
 **Cho** trận 1 đang chơi
-**Thì** mỗi đồng quân hiện số máu hiện tại
+**Thì** mỗi đồng quân hiện số máu hiện tại (đã có từ Story 1.2), máu tụt thì số đổi ngay
 
 **Khi** một quân còn 0 máu
 **Thì** quân đó bị nhấc khỏi bàn (FR38)
@@ -576,7 +616,7 @@ tôi muốn thấy rõ máu từng quân và biết khi nào thắng, thua,
 **Khi** quân Nguyên cuối cùng gục
 **Thì** hiện "Thắng" ngay lập tức (FR36)
 
-**Khi** cả 3 tướng gục
+**Khi** mọi tướng trên bàn đều gục (trận 1–2 là 2 tướng)
 **Thì** hiện "Thua"
 
 **Khi** quân Nguyên cuối cùng và tướng cuối cùng gục trong cùng một đòn
@@ -584,18 +624,17 @@ tôi muốn thấy rõ máu từng quân và biết khi nào thắng, thua,
 
 **Và** kiểm tra thắng/thua sau mỗi lần có quân gục, cả trong lượt người chơi lẫn trong pha địch
 
-### Story 2.6: Địch chuẩn bị: AI và báo đòn
+### Story 2.6: Địch chuẩn bị: AI đi và chọn mục tiêu
 
 Là người chơi,
-tôi muốn thấy trước quân Nguyên sẽ đánh ô nào và theo thứ tự nào,
-để tính trước được nước đi.
+tôi muốn quân Nguyên đi theo luật mà tôi đoán trước được,
+để tính được nước đi của chúng mà không cần xem code.
 
 **Tiêu chí nghiệm thu:**
 
 **Cho** đầu hiệp
 **Khi** pha địch chuẩn bị chạy
-**Thì** từng quân Nguyên (theo thứ tự trong file trận) đi rồi báo đòn (FR22, FR23)
-**Và** ô bị nhắm tô đỏ; Kỵ binh có mũi tên chỉ hướng; mỗi đòn có số thứ tự lớn trên bàn (FR24)
+**Thì** từng quân Nguyên (theo thứ tự trong file trận) chọn mục tiêu là tướng gần nhất theo số bước đi, rồi đi tới ô đứng mà từ đó đòn trúng được mục tiêu; không có ô như vậy thì đi tới ô gần mục tiêu nhất (FR22, FR23)
 
 **Khi** hai lựa chọn hòa điểm
 **Thì** AI chọn theo thứ tự hướng B→Đ→N→T
@@ -604,19 +643,59 @@ tôi muốn thấy trước quân Nguyên sẽ đánh ô nào và theo thứ t�
 **Thì** mỗi quân Nguyên hiện đang nhắm ai, chọn ô nào, vì sao
 
 **Và** Bộ binh (3 máu, đi 2, chém 1 ô kề) và Kỵ binh (2 máu, đi 3, xung phong thẳng hàng) đúng chỉ số trong `chi_so.json` (FR18, FR19)
-**Và** có kịch bản trong `ai/` và `don_dich/`
+**Và** có kịch bản trong `ai/`, đã duyệt và đạt
+**Và** ở story này đòn của địch đã được ghi vào `BattleState` nhưng chưa cần vẽ; tác giả kiểm bằng F3 và kịch bản
 
-### Story 2.7: Địch ra đòn và đòn dịch theo
+### Story 2.7: Hiển thị báo đòn
 
 Là người chơi,
-tôi muốn đòn địch đánh đúng như đã báo, và dịch theo khi tôi đẩy quân địch,
-để làm lệch đòn của chúng vào nhau.
+tôi muốn nhìn bàn là biết ngay ô nào sắp bị đánh và theo thứ tự nào,
+để tính trước được nước đi.
+
+**Tiêu chí nghiệm thu:**
+
+**Cho** pha địch chuẩn bị đã chạy (Story 2.6)
+**Thì** ô bị nhắm tô đỏ; Kỵ binh có mũi tên chỉ hướng; mỗi đòn có số thứ tự lớn trên bàn (FR24)
+
+**Khi** hai đòn cùng nhắm một ô
+**Thì** ô đó hiện đủ cả hai số thứ tự (ví dụ "1·3")
+
+**Khi** ô đỏ trùng với ô có quân
+**Thì** vẫn thấy rõ cả quân, máu và số thứ tự
+
+**Và** ô đỏ và số thứ tự là thứ nổi bật nhất trên màn hình (NFR9)
+**Và** có kịch bản trong `don_dich/` cho dữ liệu báo đòn (ô, hướng, thứ tự)
+
+### Story 2.8: Địch ra đòn theo thứ tự
+
+Là người chơi,
+tôi muốn đòn địch đánh đúng như đã báo,
+để tin vào những gì mình thấy trên bàn.
 
 **Tiêu chí nghiệm thu:**
 
 **Cho** các đòn đã báo
 **Khi** bấm Kết thúc lượt
 **Thì** các đòn đánh lần lượt theo đúng số thứ tự; đòn địch chỉ gây sát thương, không đẩy (FR21, FR26)
+
+**Khi** tướng đã rời khỏi ô đỏ
+**Thì** đòn đánh vào ô trống, không ai mất máu
+
+**Khi** quân Nguyên đứng trong ô đỏ của đồng đội
+**Thì** nó ăn đòn
+
+**Khi** Kỵ binh xung phong vào hàng trống tới mép
+**Thì** đòn trượt
+
+**Và** `test_determinism.gd` chạy mỗi kịch bản hai lần, kết quả giống hệt (NFR5)
+
+### Story 2.9: Đòn dịch theo và hủy đòn
+
+Là người chơi,
+tôi muốn đòn địch dịch theo khi tôi đẩy hoặc kéo quân địch,
+để làm lệch đòn của chúng vào nhau.
+
+**Tiêu chí nghiệm thu:**
 
 **Khi** người chơi đẩy hoặc kéo một quân đã báo đòn
 **Thì** ô đỏ của nó dịch theo, giữ nguyên hướng và khoảng cách (FR25)
@@ -627,17 +706,11 @@ tôi muốn đòn địch đánh đúng như đã báo, và dịch theo khi tôi
 **Khi** chủ đòn gục trước lượt ra đòn của mình
 **Thì** đòn bị hủy
 
-**Khi** quân Nguyên đứng trong ô đỏ của đồng đội
-**Thì** nó ăn đòn
+**Và** có kịch bản trong `don_dich/` cho dịch theo và hủy đòn, đã duyệt và đạt
 
-**Khi** Kỵ binh xung phong vào hàng trống tới mép
-**Thì** đòn trượt
+> 🎯 **Mốc "bản xấu chơi được":** sau Story 2.9, tác giả chơi được trận 1 từ đầu đến cuối (chưa có hoạt ảnh). Tác giả tự chơi, báo lỗi luật, rồi mới sang Phần 2.
 
-**Và** `test_determinism.gd` chạy mỗi kịch bản hai lần, kết quả giống hệt (NFR5)
-
-> 🎯 **Mốc "bản xấu chơi được":** sau Story 2.7, tác giả chơi được trận 1 từ đầu đến cuối (chưa có hoạt ảnh). Tác giả tự chơi, báo lỗi luật, rồi mới sang Phần 2.
-
-### Story 2.8: Rê chuột xem thông tin
+### Story 2.10: Rê chuột xem thông tin
 
 Là người chơi,
 tôi muốn rê chuột lên quân và ô để xem thông tin,
@@ -654,7 +727,7 @@ tôi muốn rê chuột lên quân và ô để xem thông tin,
 **Khi** rê chuột lên một ô
 **Thì** hiện tên loại địa hình và hiệu ứng (chữ lấy từ `text.csv`)
 
-### Story 2.9: Hoạt ảnh phát lại sự kiện
+### Story 2.11: Hoạt ảnh phát lại sự kiện
 
 Là người chơi,
 tôi muốn thấy từng bước đẩy, va chạm, ra đòn diễn ra,
@@ -671,10 +744,12 @@ tôi muốn thấy từng bước đẩy, va chạm, ra đòn diễn ra,
 **Khi** hoạt ảnh đang chạy
 **Thì** không bấm được lệnh mới
 
+**Và** màn hình luôn có dòng chữ báo pha: "Lượt của bạn" hoặc "Quân Nguyên đang ra đòn"
+
 **Và** ô đỏ và số thứ tự là thứ nổi bật nhất trên màn hình (NFR9)
 **Và** hoạt ảnh chỉ đọc sự kiện và bản chụp, không sửa trạng thái
 
-### Story 2.10: Xem trước kết quả đòn
+### Story 2.12: Xem trước kết quả đòn
 
 Là người chơi,
 tôi muốn thấy trước kết quả của đòn trước khi bấm,
@@ -694,7 +769,7 @@ tôi muốn thấy trước kết quả của đòn trước khi bấm,
 
 **Và** xem trước chỉ chạy lại khi đổi ô trỏ chuột, không chạy mỗi khung hình
 
-### Story 2.11: F2 sao chép báo lỗi
+### Story 2.13: F2 sao chép báo lỗi
 
 Là tester,
 tôi muốn báo lỗi bằng một phím,
@@ -710,7 +785,7 @@ tôi muốn báo lỗi bằng một phím,
 **Khi** dán nội dung đó cho AI
 **Thì** AI chuyển được thành một kịch bản tái hiện lỗi (thử trên một lỗi cố tình tạo ra)
 
-### Story 2.12: Hoàn thiện trận 1 và mốc tuần 8
+### Story 2.14: Hoàn thiện trận 1 và mốc tự chơi hết E2
 
 Là tác giả,
 tôi muốn trận 1 đã có lời giải được kiểm chứng,
@@ -718,7 +793,7 @@ tôi muốn trận 1 đã có lời giải được kiểm chứng,
 
 **Tiêu chí nghiệm thu:**
 
-**Cho** AI đề xuất bố cục cuối của trận 1 (dạy né ô đỏ và đẩy xuống sông)
+**Cho** AI đề xuất bố cục cuối của trận 1 (2 tướng; dạy né ô đỏ và đẩy xuống sông)
 **Thì** kèm theo một lời giải không mất tướng, ghi theo từng hiệp vào `data/tran/tran_01_loi_giai.md` (FR43)
 
 **Khi** tác giả đánh lại đúng lời giải đó
@@ -726,9 +801,9 @@ tôi muốn trận 1 đã có lời giải được kiểm chứng,
 **Và** lời giải được chuyển ngay thành kịch bản tự động trong `tests/kich_ban/tran/`; từ đó mỗi lần chạy `tools/test.sh` đều kiểm tra trận này còn giải được không mất tướng
 
 **Và** bản mới được deploy lên itch (riêng tư)
-**Và** mốc tự chơi cuối tuần 8: nếu tác giả thấy chán thì sửa luật trước khi sang E3
+**Và** mốc tự chơi hết E2 (khoảng tuần 7): nếu tác giả thấy chán thì sửa luật trước khi sang E3
 
-### Story 2.13: Cung kỵ (cắt được nếu trễ)
+### Story 2.15: Cung kỵ (cắt được nếu trễ)
 
 Là người chơi,
 tôi muốn có Cung kỵ yếu máu nhưng bắn xa,
@@ -744,7 +819,7 @@ tôi muốn có Cung kỵ yếu máu nhưng bắn xa,
 **Thì** tên bay qua, chỉ trúng ô đã báo
 
 **Và** có kịch bản và luật AI cho Cung kỵ
-**Và** tắt Cung kỵ bằng một cờ trong dữ liệu thì trận 1 vẫn chạy bình thường
+**Và** nếu story này bị cắt (E2 trễ), trận 3 và trận 5 dùng Bộ binh thay Cung kỵ (xem Story 3.5); không cần cờ bật/tắt trong code
 **Và** phần "rừng, kho lương chặn tên" làm ở E3
 
 ## Epic 3: Địa hình và mưu kế
@@ -769,8 +844,10 @@ tôi muốn rừng và kho lương che chắn được đòn đánh,
 **Khi** có rừng hoặc kho lương nằm giữa Cung kỵ và ô đã báo
 **Thì** tên bị chặn (FR20)
 
-**Khi** quân bị đẩy vào rừng
-**Thì** tính là va chạm: mất 1 máu, đứng yên (FR29)
+**Khi** vật đầu tiên trên hàng của Trần Khánh Dư là rừng hoặc kho lương
+**Thì** không kéo được, không có viền "đánh được" về hướng đó (FR14)
+
+(Va chạm khi bị đẩy vào rừng hoặc kho lương đã có từ Story 2.1; story này chỉ thêm phần chặn đòn.)
 
 **Và** có kịch bản trong `dia_hinh/` (rừng)
 
@@ -790,6 +867,10 @@ tôi muốn chơi lại hiệp một lần khi tính sai,
 **Thì** nút mờ đi, phím `R` không còn tác dụng
 **Và** giao diện hiện số lần còn lại
 
+**Cho** đã dùng một mưu kế trong lượt này
+**Khi** bấm Chơi lại
+**Thì** mưu kế đó được trả lại, dùng lại được trong lượt chơi lại (FR39)
+
 **Khi** đã chơi lại hiệp rồi bấm Hủy (`Z`)
 **Thì** không quay về được nước đi nào trước lúc chơi lại; ngăn xếp hủy nước đi đã bị xóa sạch
 
@@ -801,7 +882,7 @@ tôi muốn trận 2 dạy dùng rừng chặn Kỵ binh và cho địch đánh 
 
 **Tiêu chí nghiệm thu:**
 
-**Cho** AI đề xuất `tran_02.json` (2 Kỵ binh, 1 Bộ binh, rừng và sông, Tiêu diệt)
+**Cho** AI đề xuất `tran_02.json` (2 tướng: Nguyễn Khoái và Phạm Ngũ Lão; 2 Kỵ binh, 1 Bộ binh, rừng và sông, Tiêu diệt)
 **Thì** kèm lời giải không mất tướng trong `tran_02_loi_giai.md` (FR43)
 
 **Khi** tác giả đánh lại đúng lời giải
@@ -842,7 +923,7 @@ tôi muốn trận 3 dạy đòn kéo và hầm chông,
 
 **Tiêu chí nghiệm thu:**
 
-**Cho** AI đề xuất `tran_03.json` (2 Bộ binh, 2 Cung kỵ, hầm chông và rừng, Tiêu diệt)
+**Cho** AI đề xuất `tran_03.json` (3 tướng, Trần Khánh Dư ra trận lần đầu; 2 Bộ binh, 2 Cung kỵ, hầm chông và rừng, Tiêu diệt)
 **Thì** kèm lời giải không mất tướng trong `tran_03_loi_giai.md` (FR43)
 
 **Khi** tác giả đánh lại đúng lời giải
@@ -905,7 +986,7 @@ tôi muốn có kiểu trận phải cầm cự,
 **Khi** qua hết bước cuối hiệp của hiệp 5
 **Thì** thắng
 
-**Khi** cả 3 tướng gục
+**Khi** mọi tướng trên bàn đều gục
 **Thì** thua
 
 **Và** Kỵ binh và Bộ binh nhắm ô ải; Cung kỵ vẫn nhắm tướng gần nhất (FR23)
@@ -927,6 +1008,7 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
 **Thì** nút mờ đi, không dùng lại được (FR34)
 
 **Và** dùng mưu kế không tốn hành động của tướng
+**Và** dùng mưu kế xóa sạch lịch sử hủy: bấm `Z` ngay sau đó không có tác dụng (FR10); có kịch bản cho ca này
 **Và** file trận quy định mưu kế nào được dùng; mưu kế bị khóa thì không hiện nút
 
 ### Story 3.10: Mưu kế Sát Thát
@@ -1048,6 +1130,8 @@ Là tác giả,
 tôi muốn trận 5 tổng hợp mọi luật,
 để kết thúc prototype bằng một bài toán khó nhất.
 
+_Cắt được nếu trễ: khi cắt, `chien_dich.json` chỉ còn 4 trận và Sát Thát mở từ trận 4._
+
 **Tiêu chí nghiệm thu:**
 
 **Cho** AI đề xuất `tran_05.json` (5 quân khởi đầu, +1–2 mỗi hiệp, đủ loại địa hình, Giữ ải, mở Sát Thát)
@@ -1065,13 +1149,16 @@ tôi muốn cả 5 trận vẫn giải được sau mỗi lần tôi chỉnh ch�
 
 **Tiêu chí nghiệm thu:**
 
-**Cho** cả 5 lời giải đã là kịch bản tự động (từ các story trận 2.12, 3.3, 3.5, 3.11, 4.5)
+**Cho** cả 5 lời giải đã là kịch bản tự động (từ các story trận 2.14, 3.3, 3.5, 3.11, 4.5)
 
 **Khi** sửa `chi_so.json` rồi chạy `tools/test.sh`
 **Thì** cả 5 lời giải được chạy lại; lời giải nào không còn thắng mà không mất tướng thì báo trượt
 
-**Khi** tác giả chơi lại cả 5 trận từ đầu theo thứ tự
-**Thì** trận 1–3 thắng được mà không mất tướng ngay lần đầu nếu đọc kỹ ô đỏ
+**Và** "trận 1–3 thắng được không mất tướng ngay lần đầu" không kiểm ở đây (tác giả đã biết lời giải); chuyển thành mục quan sát trong Story 4.9
+
+**Trau chuốt xem trước kết quả đòn** (FR41, cắt được nếu trễ):
+**Khi** rê chuột lên mục tiêu
+**Thì** bản xem trước hiện cả chuỗi hệ quả: va chạm, chết đuối, đòn địch dịch theo hoặc bị hủy, đòn địch sẽ trúng đồng đội
 
 ### Story 4.7: Kiểm tra hiệu năng và trình duyệt
 
@@ -1081,10 +1168,10 @@ tôi muốn biết game chạy ổn trên máy người thân,
 
 **Tiêu chí nghiệm thu:**
 
-**Khi** chơi bản web trên laptop dùng card tích hợp
-**Thì** giữ 60 FPS trong suốt một trận (NFR1)
+**Khi** chơi bản web trên laptop dùng card tích hợp, ở trận 5, hiệp có nhiều quân nhất
+**Thì** giữ 60 FPS (NFR1); chế độ dev hiện bộ đếm FPS ở góc màn hình để đo
 
-**Và** bản nén ≤ 25MB, tải ≤ 10 giây ở mạng 20Mbps (NFR2)
+**Và** bản nén ≤ 25MB, tải ≤ 10 giây ở mạng 20Mbps, đo như Story 0.5 (NFR2)
 **Và** mỗi pha địch ra đòn ≤ 3 giây (NFR3)
 **Và** chạy đủ trên Chrome, Firefox, Edge (NFR4)
 **Và** chơi hết 5 trận không có lỗi kẹt trận (NFR6)
@@ -1095,6 +1182,8 @@ tôi muốn biết game chạy ổn trên máy người thân,
 Là người chơi lần đầu,
 tôi muốn được nhắc ngắn gọn luật của trận và các phím,
 để chơi được mà không cần ai giải thích.
+
+_Cắt được nếu trễ (không có trong GDD; thêm để buổi chơi thử không cần tác giả giải thích)._
 
 **Tiêu chí nghiệm thu:**
 
@@ -1121,5 +1210,6 @@ tôi muốn quan sát 3–5 người thân chơi,
 **Khi** tác giả xem từng người chơi
 **Thì** đánh dấu các dấu hiệu lên phiếu, không hỏi ý kiến
 
+**Và** phiếu có thêm một mục: người chơi có thắng trận 1–3 mà không mất tướng ngay lần đầu không (theo Difficulty Curve của GDD)
 **Và** ghi nhận xét cho các mục [KIỂM TRA KHI PLAYTEST E4]: tầm kéo Trần Khánh Dư, độ mạnh Vườn không nhà trống, luật tướng gục bị nhấc khỏi bàn
 **Và** đạt ≥ 3/5 dấu hiệu thì quyết định chuyển sang giai đoạn 1

@@ -52,3 +52,8 @@
 - 2026-10-16 (kiến trúc): CHỐT tính năng xem trước kết quả đòn, có từ E2 (bản tối giản), trau chuốt E4 (ADR-005).
 - 2026-10-16 (kiến trúc): Thêm vào GDD các luật MẶC ĐỊNH, chờ duyệt qua kịch bản luật: đòn dịch ra ngoài bàn thì hủy; tướng đi đường ít hầm chông nhất; rừng/kho lương ở ô kề chặn lao; Kỵ binh trượt nếu hàng trống; Cung kỵ chỉ bắn thẳng hàng; Trần Khánh Dư chỉ kéo vật đầu tiên trên hàng (phải là quân Nguyên); hủy nước đi chỉ áp dụng nước gần nhất; tướng gục bị nhấc khỏi bàn [KIỂM TRA E4]; thắng ưu tiên khi trùng thua; quân Nguyên vào ô ải bằng bất kỳ cách nào thì thua. Sát Thát làm rõ: "lượt người chơi", không cộng sát thương va chạm/hầm chông/mép bàn.
 - 2026-10-16 (kiến trúc): Đề xuất đổi E0 "Học Godot" thành "Dựng nền" (AI viết code). Để workflow chia epic xử lý.
+- 2026-10-17 (readiness): CHỐT hủy nước đi: mọi lệnh Đánh hoặc Dùng mưu kế xóa sạch ngăn xếp hủy. Lý do: tránh để `Z` thành "chơi lại hiệp" không giới hạn.
+- 2026-10-17 (readiness): CHỐT chơi lại hiệp trả lại cả mưu kế đã dùng trong lượt đó (bàn về đúng trạng thái đầu lượt người chơi).
+- 2026-10-17 (readiness): CHỐT không được chọn tướng mình làm mục tiêu (phương án A). Bấm vào tướng mình luôn là chọn. Tướng mình chỉ trúng đòn như hệ quả (lao trúng vật đầu tiên, va chạm). Có thể thêm phương án chọn bằng `Shift` sau playtest nếu thấy thiếu.
+- 2026-10-17 (readiness): CHỐT trận 1–2 chỉ có 2 tướng (Nguyễn Khoái, Phạm Ngũ Lão); Trần Khánh Dư ra trận từ trận 3, đúng với bảng dạy luật. Điều kiện thua đổi thành "mọi tướng trên bàn đều gục".
+- 2026-10-17 (readiness): Chia lại giờ prototype: E0 Dựng nền ~12, E1 ~18, E2 ~35, E3 ~35, E4 ~30 (tổng 130). Mốc tự chơi chuyển thành "hết E2 (khoảng tuần 7)". Đây là đề xuất của bước readiness, tác giả có thể chỉnh.

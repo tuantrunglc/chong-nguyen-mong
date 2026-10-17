@@ -116,7 +116,9 @@ _File này chứa các luật và mẫu mà mọi phiên AI phải theo khi vi�
 - **Đẩy/kéo đi từng ô:** mép bàn, rừng, kho lương hoặc quân khác thì dừng và mất 1 máu (va vào quân thì cả hai mất). Sông: quân Nguyên chết đuối, tướng tính như va chạm. **Hầm chông trừ máu cả khi chỉ đi ngang qua.**
 - **Thứ tự cố định B→Đ→N→T** cho mọi trường hợp hòa: BFS, chọn ô đứng, chọn đường. Không dùng số ngẫu nhiên trong combat.
 - **Kiểm tra thắng/thua sau mỗi sự kiện gây gục.** Thắng được ưu tiên khi thắng và thua xảy ra cùng lúc.
-- **Hủy nước đi** chỉ áp dụng cho nước gần nhất, khi tướng đó chưa đánh. **Chơi lại hiệp** mỗi trận chỉ được 1 lần.
+- **Hủy nước đi** chỉ áp dụng cho nước gần nhất, khi tướng đó chưa đánh. **Đánh hoặc dùng mưu kế thì xóa sạch ngăn xếp hủy.** **Chơi lại hiệp** mỗi trận chỉ được 1 lần, trả lại cả mưu kế đã dùng trong lượt.
+- **Không được chọn tướng mình làm mục tiêu.** Bấm vào tướng mình luôn là chọn tướng. Tướng mình chỉ trúng đòn như hệ quả (lao, va chạm).
+- **Số tướng do file trận quy định** (trận 1–2: 2 tướng). Thua khi *mọi tướng trên bàn* gục, không viết cứng số 3.
 - **Không để game kẹt:** `validate()` thất bại thì ghi log ERROR, khôi phục bản chụp trước và báo cho người chơi. Lỗi dữ liệu trả về `LoadResult` với câu lỗi tiếng Việt. Không dùng `assert()` cho lỗi dữ liệu.
 - **Git:** chỉ commit khi test xanh, lời commit viết tiếng Việt. Không `push --force`, không viết lại lịch sử.
 - **Nói với tác giả bằng tiếng Việt, theo cách người test hiểu được:** dùng bàn cờ chữ, tên luật, các bước để thử. Không bắt tác giả đọc code.

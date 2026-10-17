@@ -50,7 +50,7 @@ Tài liệu đã hoàn tất qua GDS Architecture Workflow. Đây là luật b�
 
 ### Tổng quan game
 
-**Chống Nguyên Mông (tên tạm)**: tactics roguelite 2D theo lượt. Người chơi là Trần Hưng Đạo, đứng ngoài bàn cờ, chỉ huy 3 tướng có thật trên bàn 7×7. Địch luôn báo trước đòn đánh vào ô. Người chơi dùng đẩy/kéo, va chạm, địa hình và mưu kế để phá thế trận. Combat hoàn toàn tất định.
+**Chống Nguyên Mông (tên tạm)**: tactics roguelite 2D theo lượt. Người chơi là Trần Hưng Đạo, đứng ngoài bàn cờ, chỉ huy 2–3 tướng có thật trên bàn 7×7 (file trận quy định tướng nào ra trận). Địch luôn báo trước đòn đánh vào ô. Người chơi dùng đẩy/kéo, va chạm, địa hình và mưu kế để phá thế trận. Combat hoàn toàn tất định.
 
 ### Phạm vi kỹ thuật
 
@@ -58,7 +58,7 @@ Tài liệu đã hoàn tất qua GDS Architecture Workflow. Đây là luật b�
 - **Engine:** Godot 4.7.2.stable (chi tiết ở phần Engine và framework).
 - **Thể loại:** turn-based tactics (lõi) + roguelite (khung, làm ở giai đoạn 1).
 - **Mô hình phát triển:** một người, khoảng 10 giờ/tuần. **Code do AI viết.** Tác giả là người quyết định spec (luật chơi) và người test. Tác giả không đọc và không review code.
-- **Quy mô:** prototype khoảng 130 giờ (E0–E4). E0 "Học Godot" có thể rút ngắn vì AI viết code; xem lại ở bước epics.
+- **Quy mô:** prototype khoảng 130 giờ (E0–E4). Đã chia lại 2026-10-17: E0 Dựng nền ~12, E1 ~18, E2 ~35, E3 ~35, E4 ~30.
 - **Mạng:** không có. Không multiplayer, không backend.
 
 ### Các hệ thống cốt lõi
@@ -277,7 +277,8 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
 - **Sự kiện** gồm một trường loại và dữ liệu đi kèm. Các loại dự kiến: đi, bị đẩy, bị kéo, va chạm, mất máu, gục, chết đuối, báo đòn, ra đòn, hủy đòn, đòn dịch theo, tiếp viện xuất hiện, tiếp viện bị chặn, hồi máu, đốt kho lương, dùng mưu kế, đổi pha, thắng, thua. Danh sách chính thức chốt ở bước Patterns.
 - **Hoàn tác:**
   - "Hủy nước đi" quay về bản chụp ngay trước khi tướng đó đi.
-  - "Chơi lại hiệp" quay về bản chụp đầu lượt người chơi.
+  - Lệnh `Attack` hoặc `UseStratagem` **xóa sạch ngăn xếp hủy** (chốt 2026-10-17). Ngăn xếp chỉ chứa các lệnh `Move` kể từ đòn đánh hoặc mưu kế gần nhất.
+  - "Chơi lại hiệp" quay về bản chụp đầu lượt người chơi, **kể cả cờ mưu kế** (mưu kế dùng trong lượt được trả lại), rồi xóa ngăn xếp hủy. Riêng cờ "đã dùng chơi lại hiệp" được đặt thành đã dùng sau khi khôi phục.
 - **Xem trước:** clone trạng thái, chạy lệnh trên bản sao, rồi hiển thị kết quả dạng mờ. Ở E2 chỉ hiện vị trí cuối và số máu.
 
 **Phần trình bày** (Node, Tween, HUD) chỉ đọc bản chụp để vẽ và phát lại sự kiện. Phần này **không bao giờ** sửa trạng thái và **không giữ tham chiếu** tới trạng thái đang sống.
@@ -804,9 +805,11 @@ Mọi luật đều đi qua đúng quy trình này. Không có ngoại lệ.
 
 | Tướng | Luật |
 |---|---|
-| Nguyễn Khoái | Đánh 1 ô kề, gây sát thương rồi đẩy 1 ô theo hướng đánh. Mục tiêu gục vì sát thương thì không đẩy. Đánh trúng cả tướng mình |
+| Nguyễn Khoái | Đánh 1 ô kề có quân Nguyên, gây sát thương rồi đẩy 1 ô theo hướng đánh. Mục tiêu gục vì sát thương thì không đẩy |
 | Phạm Ngũ Lão | Thẳng hàng. **Bay qua ô kề**, rồi trúng vật đầu tiên ở các ô từ thứ 2 đến thứ 4. Rừng hoặc kho lương **ở bất kỳ ô nào trên đường, kể cả ô kề**, đều chặn lao **(mặc định)**. Sông không chặn |
 | Trần Khánh Dư | Chỉ kéo **vật đầu tiên trên hàng** trong vòng 3 ô, và vật đó phải là quân Nguyên. Vật đầu tiên là tướng, rừng hoặc kho lương thì không kéo được **(mặc định)**. Kéo 2 ô theo bảng di chuyển cưỡng bức. 0 sát thương |
+
+**Chọn mục tiêu:** không được chọn tướng mình làm mục tiêu của đòn (chốt 2026-10-17). Bấm vào tướng mình luôn là lệnh chọn tướng. Tướng mình vẫn trúng đòn như hệ quả: lao trúng vật đầu tiên trên hàng, hoặc bị quân khác va vào.
 
 **Mưu kế:**
 - **Sát Thát:** trong **lượt người chơi** này, đòn **có sát thương > 0** của tướng được cộng 1. Sát thương do va chạm, hầm chông, mép bàn **không** được cộng.
@@ -955,7 +958,7 @@ Tác giả không dùng git trực tiếp. AI lo toàn bộ phần git:
 
 - **E0 đổi từ "Học Godot" thành "Dựng nền":** tạo project, cài GUT, viết các script trong `tools/`, cài MCP, xuất thử web lên itch.io.
   - **Xong khi:** `tools/test.sh` chạy được; link itch.io mở được bàn cờ trống trên trình duyệt; bản để **riêng tư** cho tới khi tác giả quyết công khai.
-- **E1 "Hủy nước đi":** theo luật đã chốt, chỉ hủy nước đi gần nhất của tướng chưa đánh.
+- **E1 "Hủy nước đi":** theo luật đã chốt, chỉ hủy nước đi gần nhất của tướng chưa đánh. Từ E2: đánh hoặc dùng mưu kế thì xóa ngăn xếp hủy.
 - **Còn treo, đã có chỗ xử lý:** các luật **(mặc định)** được duyệt qua `tools/xem_kich_ban.sh` ở đợt kịch bản E2–E3; "tướng gục bị nhấc khỏi bàn" kiểm tra khi playtest E4.
 
 ### Ngày kiểm tra
