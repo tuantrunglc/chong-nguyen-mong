@@ -242,7 +242,7 @@ tôi muốn mở game qua một đường link,
 
 1. **Tạo tài khoản:** vào `https://itch.io/register`, đăng ký (miễn phí).
 2. **Tạo trang game:** `https://itch.io/game/new`.
-   - Title: Chống Nguyên Mông. Project URL: tên trang (chữ không dấu, ví dụ `chong-nguyen-mong`).
+   - Title: Hào Khí Đông A. Project URL: tên trang (chữ không dấu, ví dụ `hao-khi-dong-a`).
    - Kind of project: **HTML**.
    - Visibility & access: **Draft**. Bấm Save.
 3. **Cài và đăng nhập:** gõ `tools/cai_dat.sh`, rồi `tools/dang_nhap_itch.sh`. Trình duyệt mở trang itch.io, bấm đồng ý. Chỉ làm một lần trên máy này.
@@ -338,7 +338,7 @@ Kèm các file `.uid` do Godot sinh.
 
 ### Câu hỏi cho tác giả (hỏi ở Task 0)
 
-1. **Tên tài khoản và tên trang itch.io** (ví dụ `trungnguyen/chong-nguyen-mong`)? Chưa có tài khoản thì tạo theo "Hướng dẫn cho tác giả" bước 1–2.
+1. **Tên tài khoản và tên trang itch.io** (ví dụ `trungnguyen/hao-khi-dong-a`)? Chưa có tài khoản thì tạo theo "Hướng dẫn cho tác giả" bước 1–2.
 2. **Chế độ riêng tư:** để **Draft** (đề xuất: chỉ tác giả xem được khi đăng nhập; khi cần cho người khác xem thì dùng Secret URL hoặc chuyển Restricted có mật khẩu) hay **Restricted** ngay từ đầu?
 3. **Hiện kết quả thử lưu `user://` ở đâu?** Đề xuất: chỉ khi bật dev, chữ DEV đổi thành `DEV · lần mở thứ N` và ghi một dòng log. Nếu trên itch.io không bật được dev trong iframe (Task 8.4), thì có cho phép ghi dòng log này cả khi không bật dev (xem bằng F12 → Console) không?
 4. **Tên game trong cài đặt project** (`config/name`, mục hoãn từ review 0.4): giữ viết cứng "Chống Nguyên Mông" (đề xuất; tên tab trình duyệt vẫn theo `text.csv` sau khi game chạy), hay muốn đồng bộ theo `text.csv`?
@@ -348,7 +348,7 @@ Kèm các file `.uid` do Godot sinh.
 1. **Chưa có tài khoản itch.io.** Làm Task 1–3, 5–7 trước. `tools/itch.cfg` để chữ mẫu `ITCH_TARGET=<tai-khoan>/<ten-trang>`; `deploy_itch.sh` thấy chữ mẫu thì báo "chưa điền tài khoản itch.io" và thoát 1. Khi tới Task 8, hướng dẫn tác giả đăng ký rồi hỏi lại tên.
 2. **Draft** (theo đề xuất). Cần cho người khác xem thì dùng Secret URL hoặc chuyển Restricted, việc đó để sau.
 3. **Theo đề xuất:** khi bật dev, chữ DEV thành `DEV · lần mở thứ N` kèm một dòng log. **Đồng ý thêm:** nếu trên itch.io không bật được dev trong iframe (Task 8.4) thì được ghi dòng log thử lưu ra Console cả khi không bật dev (và khi đó probe chạy cả khi không bật dev). Chữ trên màn hình vẫn chỉ hiện khi bật dev.
-4. **Tên game chưa chốt** ("Chống Nguyên Mông" vẫn là tên tạm, tác giả đang cân nhắc tên khác). Story này **giữ** `config/name` viết cứng, không đồng bộ với `text.csv`. Đổi tên sau này thì sửa cả `config/name` lẫn `app.title`.
+4. **Tên game chốt là "Hào Khí Đông A"** (đã đổi `config/name` và `app.title` ở commit đổi tên, trước khi làm story). Giữ `config/name` viết cứng, không đồng bộ với `text.csv`; đổi tên sau này thì sửa cả hai chỗ. Ghi chú kỹ thuật bên trên chụp lúc tên còn là "Chống Nguyên Mông". Repo và thư mục vẫn tên `chong-nguyen-mong`, không đổi.
 
 ### References
 
