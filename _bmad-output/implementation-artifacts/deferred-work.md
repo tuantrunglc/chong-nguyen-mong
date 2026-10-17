@@ -30,7 +30,7 @@
 ## Deferred from: code review of 0-4-chu-tieng-viet-va-font (2026-10-17)
 
 - Bước 3 của `tools/test.sh` (quét lại một lần khi lần đầu có lỗi oan trên repo mới clone) chưa có tự kiểm tự động. Cần hai ca: bản sao không có `game/.godot/` phải "đạt"; bản sao có script lỗi cú pháp thật phải "trượt" dù đã quét lại.
-- `config/name` trong `game/project.godot` vẫn viết cứng "Chống Nguyên Mông" (Task 4.2 của Story 0.4 bảo giữ). Sửa `app.title` trong CSV thì tên app trên Dock macOS và tiêu đề cửa sổ lúc mới mở (trước `_ready()`) vẫn là tên cũ. Story 0.5 kiểm thêm tên trang/tab trên trình duyệt; tác giả quyết có cần đồng bộ không.
+- `config/name` trong `game/project.godot` vẫn viết cứng "Chống Nguyên Mông" (Task 4.2 của Story 0.4 bảo giữ). Sửa `app.title` trong CSV thì tên app trên Dock macOS và tiêu đề cửa sổ lúc mới mở (trước `_ready()`) vẫn là tên cũ. Story 0.5 kiểm thêm tên trang/tab trên trình duyệt; tác giả quyết có cần đồng bộ không. → xong ở Story 0.5 (`config/name` = "Hào Khí Đông A", đồng bộ với `app.title`).
 
 ## Deferred from: Story 0.5 (2026-10-17)
 
@@ -40,3 +40,9 @@
 - Chưa thử F1/F5 trên web khi bật dev (không bật được dev trong iframe). Story 1.6 kiểm khi làm F5.
 - itch.io thêm `?v=<số>` vào URL của iframe, nên mỗi lần mở game Console có `[WARN][app] bỏ qua tham số lạ trên URL: "v"` (người chơi không thấy). Tác giả quyết có bỏ qua im lặng khóa `v` không.
 - `SaveProbe` (`user://thu_luu.json`) ghi file mỗi lần mở game với mọi người chơi. Gỡ hoặc thay bằng lưu game thật ở E4 (FR46).
+
+## Deferred from: code review of 0-5-ban-web-tren-itch-io-rieng-tu (2026-10-17)
+
+- Các chốt mới trong script `tools/` chưa có test tự động, chỉ kiểm tay trong Debug Log: chốt 25 MB của `build_web.sh`, chống xanh giả khi export (grep `ERROR` trong log), `cai_dat.sh` từ chối butler sai SHA-256, `deploy_itch.sh` chặn chữ mẫu `ITCH_TARGET`, và `ghi_build_info` (chuyển từ `chay.sh` sang `_godot.sh`) cho kết quả giống hệt. Làm cùng các mục test script `tools/` đã hoãn ở trên.
+- Ngoại lệ luật kiến trúc: `SaveProbe` nằm ở `src/debug/` nhưng chạy với mọi người chơi (luật 5 nói `src/debug/` luôn kiểm cờ dev). Tác giả chọn để nguyên tới khi gỡ ở E4. Lưu ý `Log` (cũng ở `src/debug/`) vốn đã chạy luôn; khi sửa tài liệu kiến trúc nên ghi rõ.
+- AC 4/6 của Story 0.5 còn hai phần chưa kiểm (tác giả hoãn): tiêu đề trên itch.io khi Chrome đặt ngôn ngữ tiếng Anh; cột Transferred trong DevTools (itch.io có nén `index.wasm` không). Đo cùng Firefox/Edge và thời gian tải ở E4.

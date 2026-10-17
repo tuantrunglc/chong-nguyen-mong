@@ -10,7 +10,10 @@ BUILD="$REPO_ROOT/build"
 WEB="$BUILD/web"
 ZIP="$BUILD/web.zip"
 IMPORT_LOG="$BUILD/web_import.log"
+IMPORT_LOG_LAN1="$BUILD/web_import.lan1.log"
 EXPORT_LOG="$BUILD/web_export.log"
+# Chỉ có khi lần build cuối đạt; tools/deploy_itch.sh đòi file này và đọc mã commit từ đây.
+DAU_BUILD="$BUILD/web_build_info.json"
 GIOI_HAN_BYTE=25000000
 LOI_SCRIPT='SCRIPT ERROR|Parse Error'
 
@@ -26,6 +29,7 @@ if [[ ! -f "$TEMPLATE" ]]; then
 fi
 
 mkdir -p "$BUILD"
+rm -f "$DAU_BUILD"
 ghi_build_info
 
 # Quét project trước khi export. Repo mới clone: lần quét đầu báo lỗi oan (Theme nạp trước font),
@@ -33,6 +37,7 @@ ghi_build_info
 echo "Đang quét project ..."
 "$GODOT" --headless --path "$GAME" --import >"$IMPORT_LOG" 2>&1 || true
 if grep -qE "$LOI_SCRIPT" "$IMPORT_LOG"; then
+	mv "$IMPORT_LOG" "$IMPORT_LOG_LAN1"
 	"$GODOT" --headless --path "$GAME" --import >"$IMPORT_LOG" 2>&1 || true
 fi
 if grep -qE "$LOI_SCRIPT" "$IMPORT_LOG"; then
@@ -65,12 +70,13 @@ cp "$GAME/assets/fonts/OFL.txt" "$WEB/OFL.txt"
 (cd "$WEB" && zip -qr -9 "$ZIP" .)
 nen=$(wc -c <"$ZIP" | tr -d ' ')
 chua_nen=$(find "$WEB" -type f -exec cat {} + | wc -c | tr -d ' ')
-echo "Dung lượng bản nén: $(mb "$nen") MB (giới hạn 25 MB); chưa nén: $(mb "$chua_nen") MB"
+echo "Dung lượng bản nén: $(mb "$nen") MB (giới hạn $(mb "$GIOI_HAN_BYTE") MB); chưa nén: $(mb "$chua_nen") MB"
 if (( nen > GIOI_HAN_BYTE )); then
-	echo "❌ trượt: bản nén vượt 25 MB" >&2
+	echo "❌ trượt: bản nén vượt $(mb "$GIOI_HAN_BYTE") MB" >&2
 	exit 1
 fi
 
 phien_ban="$(sed -n 's/^config\/version="\(.*\)"$/\1/p' "$GAME/project.godot")"
 commit="$(sed -n 's/.*"commit": "\(.*\)".*/\1/p' "$GAME/build_info.json")"
+cp "$GAME/build_info.json" "$DAU_BUILD"
 echo "✅ Đã build bản web vào build/web/ (v$phien_ban · $commit)"

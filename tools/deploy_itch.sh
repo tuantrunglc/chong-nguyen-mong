@@ -8,6 +8,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/_godot.sh"
 
 CFG="$REPO_ROOT/tools/itch.cfg"
 WEB="$REPO_ROOT/build/web"
+DAU_BUILD="$REPO_ROOT/build/web_build_info.json"
 KENH="html5"
 
 if [[ ! -x "$BUTLER" ]]; then
@@ -28,23 +29,33 @@ if [[ ! -f "$WEB/index.html" ]]; then
 	echo "Lỗi: chưa có bản build. Chạy tools/build_web.sh trước." >&2
 	exit 1
 fi
+# build_web.sh chỉ ghi file này khi build đạt: thiếu là lần build cuối bị trượt, không đẩy.
+if [[ ! -f "$DAU_BUILD" ]]; then
+	echo "Lỗi: lần build cuối bị trượt. Sửa lỗi rồi chạy lại tools/build_web.sh trước." >&2
+	exit 1
+fi
 
+DANG_NHAP_LAI="Chạy tools/dang_nhap_itch.sh (một lần) rồi chạy lại."
 # Khóa đăng nhập: butler lưu ở đường dẫn mặc định của --identity (khác nhau theo máy), hoặc biến BUTLER_API_KEY.
 khoa="$("$BUTLER" --help 2>&1 | sed -n 's/.*--identity="\([^"]*\)".*/\1/p' | head -1)"
 if [[ -z "${BUTLER_API_KEY:-}" && ( -z "$khoa" || ! -f "$khoa" ) ]]; then
-	echo "Lỗi: butler chưa đăng nhập itch.io. Chạy tools/dang_nhap_itch.sh (một lần) rồi chạy lại." >&2
+	echo "Lỗi: butler chưa đăng nhập itch.io. $DANG_NHAP_LAI" >&2
 	exit 1
 fi
 
 phien_ban="$(sed -n 's/^config\/version="\(.*\)"$/\1/p' "$REPO_ROOT/game/project.godot")"
-commit="$(sed -n 's/.*"commit": "\(.*\)".*/\1/p' "$REPO_ROOT/game/build_info.json" 2>/dev/null || true)"
+# Đọc từ dấu của lần build đạt, không từ game/build_info.json (tools/chay.sh ghi đè file đó mỗi lần chạy).
+commit="$(sed -n 's/.*"commit": "\(.*\)".*/\1/p' "$DAU_BUILD")"
 commit="${commit:-dev}"
 if [[ "$commit" == *-sua ]]; then
 	echo "⚠️  Bản build này có thay đổi chưa commit ($commit). Vẫn đẩy lên."
 fi
 
 echo "Đang đẩy bản v$phien_ban · $commit lên $target:$KENH ..."
-"$BUTLER" push "$WEB" "$target:$KENH" --userversion "$phien_ban-$commit"
+if ! "$BUTLER" push "$WEB" "$target:$KENH" --userversion "$phien_ban-$commit"; then
+	echo "Lỗi: butler không đẩy được (xem dòng lỗi ở trên). Nếu lỗi đăng nhập hoặc khóa hết hạn: $DANG_NHAP_LAI" >&2
+	exit 1
+fi
 
 # Kiểm riêng tư: trang Draft trả 404 cho người chưa đăng nhập.
 ma="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$link" || true)"

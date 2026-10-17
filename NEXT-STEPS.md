@@ -55,9 +55,11 @@ Không nhớ đang ở bước nào thì chạy `/bmad-help`.
 
 ### Số đo bản web (NFR2), lần đầu
 
-| Ngày | Commit | Bản nén (zip) | Chưa nén | butler đẩy lên | Thời gian tải ở 20 Mbps |
-|---|---|---|---|---|---|
-| 2026-10-17 | `4d60947` | 10.4 MB | 40.0 MB (`index.wasm` 39.5 MB) | 38.16 MiB | **chưa đo** (tác giả hoãn; đo ở E4) |
+Đơn vị: 1 MB = 1 000 000 byte. butler in theo MiB (1 MiB = 1 048 576 byte), đổi ra MB để so được.
+
+| Ngày | Commit | Bản nén (zip) | Chưa nén | butler đẩy lên | Tải thật (Transferred) | Thời gian tải ở 20 Mbps |
+|---|---|---|---|---|---|---|
+| 2026-10-17 | zip đo ở `4c39723-sua`; đẩy lên ở `c9cc5a6` | 10.4 MB | 40.0 MB (`index.wasm` 39.5 MB) | 38.16 MiB ≈ 40.0 MB | **chưa đo** (tác giả hoãn; đo ở E4) | **chưa đo** (tác giả hoãn; đo ở E4) |
 
 - Ước tính: nếu itch.io nén `index.wasm` khi gửi thì tải khoảng 10 MB → 4–5 giây; nếu không nén thì khoảng 40 MB → 16 giây, vượt mục tiêu 10 giây.
 

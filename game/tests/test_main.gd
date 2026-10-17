@@ -18,6 +18,10 @@ func before_each() -> void:
 
 func after_each() -> void:
 	get_window().title = _old_window_title
+	AppState.launch.dev = false
+	for i: int in range(DevTools.KEYS.size()):
+		if InputMap.has_action("dev_f%d" % (i + 1)):
+			InputMap.erase_action("dev_f%d" % (i + 1))
 	SaveProbe.path = SaveProbe.DEFAULT_PATH
 	if FileAccess.file_exists(PROBE_FILE):
 		DirAccess.remove_absolute(PROBE_FILE)
@@ -62,3 +66,16 @@ func test_counts_each_open_and_logs_even_without_dev() -> void:
 	_make_main()
 	assert_true(FileAccess.file_exists(PROBE_FILE), "có ghi file thử lưu")
 	assert_has(Log.get_lines(), "[INFO][luu_thu] lần mở thứ 2, user:// bền: true")
+
+
+func test_dev_badge_shows_open_count() -> void:
+	AppState.launch.dev = true
+	_make_main()
+	var main: Node2D = _make_main()
+	var badge_text: String = ""
+	for child: Node in main.get_children():
+		if child is DevTools:
+			for grandchild: Node in child.get_children():
+				if grandchild is Label:
+					badge_text = (grandchild as Label).text
+	assert_eq(badge_text, "DEV · lần mở thứ 2")

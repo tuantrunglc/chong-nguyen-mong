@@ -16,6 +16,7 @@ static func bump(file_path: String) -> int:
 	var count: int = _read(file_path) + 1
 	var file: FileAccess = FileAccess.open(file_path, FileAccess.WRITE)
 	if file == null:
+		Log.warn("luu_thu", "không ghi được %s (mã lỗi %d)" % [file_path, FileAccess.get_open_error()])
 		return count
 	file.store_string(JSON.stringify({KEY: count}))
 	file.close()

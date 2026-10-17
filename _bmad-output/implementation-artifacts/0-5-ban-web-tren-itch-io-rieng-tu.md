@@ -4,7 +4,7 @@ baseline_commit: 27b40d8
 
 # Story 0.5: Bản web trên itch.io (riêng tư)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -158,6 +158,38 @@ tôi muốn mở game qua một đường link,
   - [x] 8.6 **Hoãn sang Story 1.6** (không bật được dev trong iframe). Khi bật dev trên web, thử F1 và F5 (mục hoãn từ Story 0.3): trình duyệt có chiếm phím không (F1 mở trợ giúp, F5 tải lại trang). **Chỉ ghi lại**, không sửa; sửa ở Story 1.6 nếu cần.
   - [x] 8.7 **Đã ghi dung lượng; thời gian tải hoãn sang E4 (tác giả chốt).** AC 6: tác giả đo theo hướng dẫn, AI ghi vào `NEXT-STEPS.md` một mục mới "Số đo bản web (NFR2)": ngày, commit, dung lượng bản nén, dung lượng tải thật (cột Transferred của DevTools), thời gian tải tới khi hiện bàn cờ. Vượt 10 giây thì ghi rõ và báo tác giả; **không** tự tối ưu (E4 đo đủ).
   - [x] 8.8 Commit khi `tools/test.sh` xanh. Lời commit gợi ý: `Thêm build web, butler và đẩy lên itch.io riêng tư (Story 0.5)`. Chuyển story sang `review`.
+
+### Review Findings
+
+Code review 2026-10-17 (4 lớp: Blind Hunter, Edge Case Hunter, Verification Gap, Acceptance Auditor).
+
+- [x] [Review][Defer] (từ Decision) `SaveProbe` nằm ở `src/debug/` nhưng chạy với mọi người chơi — game-architecture luật 5 và project-context ghi `src/debug/` "chỉ chạy khi bật dev, luôn kiểm cờ dev". `main.gd` gọi `SaveProbe.bump()` không kiểm cờ (quyết định 3 cho phép hành vi, nhưng chưa quyết chỗ đặt). Task 5.4 đã sai. (Lưu ý: `Log` cũng ở `src/debug/` và cũng chạy luôn.) — deferred: tác giả chọn để nguyên, ngoại lệ tạm; SaveProbe sẽ bị gỡ hoặc thay bằng lưu game thật ở E4.
+- [x] [Review][Defer] (từ Decision) AC 4 và AC 6 còn hai phần chưa có trong danh sách tác giả đã cho hoãn — (a) AC 4 "kể cả trình duyệt đặt ngôn ngữ tiếng Anh" chưa kiểm trên itch.io (chỉ có Chrome headless chạy máy nhà); (b) AC 6 / Task 8.7 "dung lượng tải thật (cột Transferred của DevTools)" chưa ghi, bảng NEXT-STEPS chỉ có cỡ zip và cỡ butler đẩy. Firefox/Edge và thời gian tải đã được hoãn. — deferred: tác giả hoãn, đo cùng Firefox/Edge và thời gian tải ở E4.
+- [x] [Review][Patch] `deploy_itch.sh` có thể đẩy bản build trượt hoặc ghi sai commit — `build_web.sh` trượt 25 MB vẫn để nguyên `build/web/` đầy đủ, `deploy` không biết lần build cuối trượt nên vẫn đẩy; commit ghi lên itch.io lấy từ `game/build_info.json` mà `chay.sh` ghi đè mỗi lần chạy game. Sửa: `build_web.sh` xóa rồi chỉ ghi `build/web_build_info.json` khi build đạt; `deploy` đòi file này và đọc commit từ đó. [tools/deploy_itch.sh:27-41]
+- [x] [Review][Patch] `butler push` lỗi đăng nhập (khóa hết hạn) thì không có gợi ý tiếng Việt (Task 4.3 bước 5) — `set -e` thoát với lỗi tiếng Anh của butler. Bọc lệnh push, lỗi thì in gợi ý chạy `tools/dang_nhap_itch.sh`. [tools/deploy_itch.sh:47]
+- [x] [Review][Patch] `SaveProbe.bump` ghi file lỗi thì im lặng — trông giống hệt "user:// không bền" (luôn "lần mở thứ 1"). Thêm `Log.warn` kèm `FileAccess.get_open_error()`. [game/src/debug/save_probe.gd:18]
+- [x] [Review][Patch] Câu thông báo 25 MB viết cứng, không theo `GIOI_HAN_BYTE` (Debug Log: hạ giới hạn 5 MB vẫn in "vượt 25 MB"). [tools/build_web.sh:68-70]
+- [x] [Review][Patch] Không giữ log lần quét đầu như `test.sh` (`import.lan1.log`), Dev Notes yêu cầu cùng cách (Task 2.4). [tools/build_web.sh:34-37]
+- [x] [Review][Patch] Chưa có test cho việc `main.gd` đưa số lần mở vào chữ DEV — đổi `setup(AppState.launch.dev, opens)` về `setup(...dev)` thì `test.sh` vẫn xanh. Thêm test trong `test_main.gd`: bật dev, tạo main 2 lần, chữ DEV là `DEV · lần mở thứ 2`. [game/src/app/main.gd:45]
+- [x] [Review][Patch] Mục hoãn `config/name` (review 0.4) đã xong ở story này (đổi thành "Hào Khí Đông A") nhưng chưa đánh dấu xong. [_bmad-output/implementation-artifacts/deferred-work.md]
+- [x] [Review][Patch] Bảng số đo NFR2 ghi commit `4d60947` cho số 10.4 MB / 40.0 MB, nhưng Debug Log đo ở `4c39723-sua`; cột butler dùng MiB, các cột khác MB mà không ghi rõ. [NEXT-STEPS.md]
+- [x] [Review][Defer] Các chốt mới trong script `tools/` chưa có test tự động (chốt 25 MB, chống xanh giả khi export, butler sai SHA-256, chặn chữ mẫu `ITCH_TARGET`, `ghi_build_info` chuyển sang `_godot.sh`) [tools/build_web.sh, tools/cai_dat.sh, tools/deploy_itch.sh, tools/_godot.sh] — deferred: repo chưa test script `tools/` (giống các mục hoãn của 0.1, 0.2, 0.4); chỉ có kiểm tay trong Debug Log.
+
+**Bị loại (Rejected):**
+- Kiểm riêng tư chạy sau `butler push` — đúng thứ tự spec (bước 6 sau bước 4); trang chỉ công khai khi tác giả tự đổi, chặn trước sẽ cản lúc phát hành thật.
+- `curl` lỗi mạng → in "có thể CÔNG KHAI (mã 000)" — mất mạng thì `butler push` đã trượt trước; báo động thừa nhưng an toàn, hiếm gặp.
+- Đọc đường khóa butler từ `butler --help` dễ vỡ — butler được ghim phiên bản 15.32.0 bằng SHA-256, định dạng không đổi trừ khi nâng cấp.
+- Thiếu `tools/itch.cfg` / không đọc được `config/version` — file có trong repo; hiếm, thêm nhánh không đáng.
+- Thiếu lệnh `zip` — macOS có sẵn; hiếm.
+- Bỏ qua mã thoát của bước import — lỗi import thật sẽ làm bước export trượt, đã có chốt ở đó.
+- Export trượt xóa mất bản build cũ — trượt rõ ràng (mã 1), đúng hành vi.
+- `get_file_as_string` trên thư mục in ERROR — không có đường nào tạo thư mục `thu_luu.json`.
+- `test_dev_tools` dùng `get_child(0)` — nếu đổi thứ tự con thì test vẫn trượt (không xanh giả).
+- `test_main` viết cứng `user:// bền: true` — test chạy headless trên desktop, luôn `true`.
+- `test_export_preset` thiếu kiểm `OFL.txt`, `all_resources`, `extensions_support`, lỗi `load()` — OFL đã được `build_web.sh` chép cạnh `index.html`; test đầu đã kiểm file tồn tại; các mục kia ngoài spec Task 6.1.
+- Câu "Lỗi: chưa có bản build" khác chữ spec — chỉ thêm tiền tố `Lỗi:` theo kiểu chung.
+- Story đánh `[x]` cho việc hoãn, ghi chú cũ, dòng mẫu "Ultimate context engine…" — cách sửa là sửa chính file spec đang review.
+- Task 8.4 cách 2 (mở thẳng địa chỉ iframe + `?dev=1`) chưa thử — đã có trong deferred-work (Story 0.5).
 
 ## Dev Notes
 
