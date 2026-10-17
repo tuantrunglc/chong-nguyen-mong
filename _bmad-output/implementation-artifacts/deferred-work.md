@@ -31,3 +31,12 @@
 
 - Bước 3 của `tools/test.sh` (quét lại một lần khi lần đầu có lỗi oan trên repo mới clone) chưa có tự kiểm tự động. Cần hai ca: bản sao không có `game/.godot/` phải "đạt"; bản sao có script lỗi cú pháp thật phải "trượt" dù đã quét lại.
 - `config/name` trong `game/project.godot` vẫn viết cứng "Chống Nguyên Mông" (Task 4.2 của Story 0.4 bảo giữ). Sửa `app.title` trong CSV thì tên app trên Dock macOS và tiêu đề cửa sổ lúc mới mở (trước `_ready()`) vẫn là tên cũ. Story 0.5 kiểm thêm tên trang/tab trên trình duyệt; tác giả quyết có cần đồng bộ không.
+
+## Deferred from: Story 0.5 (2026-10-17)
+
+- Đã trả lời mục iframe itch.io của Story 0.3: link trang + `?dev=1` **không** bật được dev (iframe có địa chỉ riêng). Chưa thử mở thẳng địa chỉ iframe + `?dev=1`. Vì vậy `SaveProbe` luôn ghi log, cả khi không bật dev (tác giả chốt).
+- Chưa thử bản web trên Firefox và Edge (tác giả hoãn). Chỉ đã kiểm trên Chrome (macOS). Làm ở E4 khi đo đủ NFR4.
+- Chưa đo thời gian tải ở 20 Mbps (tác giả hoãn). Cần biết itch.io có nén `index.wasm` khi gửi không; không nén thì ~16 giây, vượt NFR2. Đo ở E4 (hoặc sớm hơn nếu tác giả muốn).
+- Chưa thử F1/F5 trên web khi bật dev (không bật được dev trong iframe). Story 1.6 kiểm khi làm F5.
+- itch.io thêm `?v=<số>` vào URL của iframe, nên mỗi lần mở game Console có `[WARN][app] bỏ qua tham số lạ trên URL: "v"` (người chơi không thấy). Tác giả quyết có bỏ qua im lặng khóa `v` không.
+- `SaveProbe` (`user://thu_luu.json`) ghi file mỗi lần mở game với mọi người chơi. Gỡ hoặc thay bằng lưu game thật ở E4 (FR46).

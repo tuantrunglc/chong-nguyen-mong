@@ -4,7 +4,7 @@ baseline_commit: 27b40d8
 
 # Story 0.5: Bản web trên itch.io (riêng tư)
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -146,18 +146,18 @@ tôi muốn mở game qua một đường link,
   - [x] 7.5 Mở bản build bằng Chrome headless trên máy (cách ở Ghi chú kỹ thuật), có `?dev=1`, `--lang=en-US`. Đọc ảnh: bàn cờ, tiêu đề tiếng Việt, DEV, phiên bản và commit.
   - [x] 7.6 Chạy lại `tools/cai_dat.sh` khi đã cài đủ: không tải lại gì. Trên bản sao `.tools/` tạm (hoặc xóa riêng thư mục butler) thì cài butler được và kiểm SHA đúng.
 
-- [ ] **Task 8: Cùng tác giả đưa lên itch.io** (AC: 1, 3, 4, 5, 6)
-  - [ ] 8.1 Hướng dẫn tác giả từng bước AC 1 (xem "Hướng dẫn cho tác giả" ở Dev Notes). Chờ tác giả làm xong.
-  - [ ] 8.2 Chạy `tools/deploy_itch.sh`. Lần đẩy **đầu tiên**, tác giả phải vào trang Edit game, ở file `html5` vừa đẩy, tích **"This file will be played in the browser"** và đặt Embed options (xem hướng dẫn). Sau đó các lần đẩy sau tự dùng lại.
-  - [ ] 8.3 Tác giả mở link trên Chrome, Firefox, Edge. Ghi kết quả từng trình duyệt vào Debug Log (AC 4). Ít nhất một trình duyệt đặt ngôn ngữ tiếng Anh.
-  - [ ] 8.4 Thử dev trên itch.io (mục hoãn từ Story 0.3), ghi cách nào chạy được:
+- [x] **Task 8: Cùng tác giả đưa lên itch.io** (AC: 1, 3, 4, 5, 6)
+  - [x] 8.1 Hướng dẫn tác giả từng bước AC 1 (xem "Hướng dẫn cho tác giả" ở Dev Notes). Chờ tác giả làm xong.
+  - [x] 8.2 Chạy `tools/deploy_itch.sh`. Lần đẩy **đầu tiên**, tác giả phải vào trang Edit game, ở file `html5` vừa đẩy, tích **"This file will be played in the browser"** và đặt Embed options (xem hướng dẫn). Sau đó các lần đẩy sau tự dùng lại.
+  - [x] 8.3 **Chỉ làm trên Chrome; Firefox/Edge hoãn (tác giả chốt, ghi trong deferred-work).** Tác giả mở link trên Chrome, Firefox, Edge. Ghi kết quả từng trình duyệt vào Debug Log (AC 4). Ít nhất một trình duyệt đặt ngôn ngữ tiếng Anh.
+  - [x] 8.4 Thử dev trên itch.io (mục hoãn từ Story 0.3), ghi cách nào chạy được:
     1. link trang + `?dev=1`;
     2. mở thẳng địa chỉ iframe (chuột phải vào game → mở khung trong tab mới, hoặc lấy `src` của iframe) + `?dev=1`.
     - Cách 2 chạy ngoài iframe của itch, nên **không** chứng minh được AC 5. Nếu chỉ cách 2 chạy được, báo tác giả và hỏi lại câu 3 (ghi probe ra console cả khi không bật dev).
-  - [ ] 8.5 AC 5: bật dev được trong iframe thì tải lại trang 2 lần, số "lần mở thứ N" phải tăng. Thử trên Chrome và Firefox. Ghi lại.
-  - [ ] 8.6 Khi bật dev trên web, thử F1 và F5 (mục hoãn từ Story 0.3): trình duyệt có chiếm phím không (F1 mở trợ giúp, F5 tải lại trang). **Chỉ ghi lại**, không sửa; sửa ở Story 1.6 nếu cần.
-  - [ ] 8.7 AC 6: tác giả đo theo hướng dẫn, AI ghi vào `NEXT-STEPS.md` một mục mới "Số đo bản web (NFR2)": ngày, commit, dung lượng bản nén, dung lượng tải thật (cột Transferred của DevTools), thời gian tải tới khi hiện bàn cờ. Vượt 10 giây thì ghi rõ và báo tác giả; **không** tự tối ưu (E4 đo đủ).
-  - [ ] 8.8 Commit khi `tools/test.sh` xanh. Lời commit gợi ý: `Thêm build web, butler và đẩy lên itch.io riêng tư (Story 0.5)`. Chuyển story sang `review`.
+  - [x] 8.5 AC 5: bật dev được trong iframe thì tải lại trang 2 lần, số "lần mở thứ N" phải tăng. Thử trên Chrome và Firefox. Ghi lại.
+  - [x] 8.6 **Hoãn sang Story 1.6** (không bật được dev trong iframe). Khi bật dev trên web, thử F1 và F5 (mục hoãn từ Story 0.3): trình duyệt có chiếm phím không (F1 mở trợ giúp, F5 tải lại trang). **Chỉ ghi lại**, không sửa; sửa ở Story 1.6 nếu cần.
+  - [x] 8.7 **Đã ghi dung lượng; thời gian tải hoãn sang E4 (tác giả chốt).** AC 6: tác giả đo theo hướng dẫn, AI ghi vào `NEXT-STEPS.md` một mục mới "Số đo bản web (NFR2)": ngày, commit, dung lượng bản nén, dung lượng tải thật (cột Transferred của DevTools), thời gian tải tới khi hiện bàn cờ. Vượt 10 giây thì ghi rõ và báo tác giả; **không** tự tối ưu (E4 đo đủ).
+  - [x] 8.8 Commit khi `tools/test.sh` xanh. Lời commit gợi ý: `Thêm build web, butler và đẩy lên itch.io riêng tư (Story 0.5)`. Chuyển story sang `review`.
 
 ## Dev Notes
 
@@ -376,15 +376,37 @@ Claude Opus 5.5 (claude-opus-5-5)
 - itch.io: trang không tồn tại (`leafo.itch.io/khong-co-trang-nay-xyz`) trả 404 cho người chưa đăng nhập. Trang Draft trả 404 hay không: **chưa kiểm** (chờ tài khoản, Task 8).
 - Chrome headless (`en-US`, `?dev=1`, cùng một hồ sơ trình duyệt, mở 3 lần): tiêu đề "Hào Khí Đông A" đủ dấu, `DEV · lần mở thứ 1` rồi `DEV · lần mở thứ 2` (lần mở giữa chụp lúc còn màn hình tải), nhãn `v0.1.0 · 4c39723-sua`. `user://` bền trên Chrome khi **không** có iframe.
 
+- itch.io: lần đẩy đầu bị chặn `itch.io API error (400): … Please verify your account's email address before uploading a build`. Tác giả xác nhận email rồi đẩy lại được: `Pushing 38.16 MiB (10 files)`, `Build is now processing`.
+- `butler login` không chạy được trong ô chat (`No credentials and stdin is not a terminal`). Tác giả chạy `tools/dang_nhap_itch.sh` trong app Terminal → có `~/Library/Application Support/itch/butler_creds`.
+- **Riêng tư đã kiểm:** trang Draft `https://tuantrunglc.itch.io/hao-khi-dong-a` trả HTTP 404 khi không đăng nhập; `deploy_itch.sh` in `🔒 Trang đang riêng tư`.
+- AC 4 (Chrome, macOS, tác giả chụp màn hình): tiêu đề "Hào Khí Đông A", bàn cờ trống, `v0.1.0 · c9cc5a6` đúng commit đã đẩy. Firefox/Edge chưa thử.
+- Task 8.4: link trang + `?dev=1` → **không** có chữ DEV (iframe có địa chỉ riêng). Theo quyết định 3: chuyển `SaveProbe` sang `main.gd`, luôn đếm và ghi `Log.info`, chữ DEV chỉ kèm số khi bật dev. Commit `4d60947`, 62/62 test.
+- AC 5 (Chrome, trong iframe itch.io, bản `4d60947`): Console có `[INFO][luu_thu] lần mở thứ 3, user:// bền: true` sau 2 lần tải lại → `user://` bền trong iframe.
+- Console trên itch.io còn có `[WARN][app] bỏ qua tham số lạ trên URL: "v"` (itch thêm `?v=…` vào URL iframe) và lỗi `screen.orientation.lock() is not available` (của itch/trình duyệt, không phải của game). Ghi vào deferred-work.
+
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
+- Preset Web đơn luồng (`game/export_presets.cfg`), có `*.json` và `OFL.txt`, loại `tests/*`, `addons/gut/*`. `tools/build_web.sh` xuất vào `build/web/`, kiểm 25 MB (hiện 10.4 MB), chép `OFL.txt` cạnh `index.html`.
+- butler 15.32.0 ghim SHA-256 trong `tools/cai_dat.sh`. `tools/dang_nhap_itch.sh` (chạy trong app Terminal), `tools/deploy_itch.sh` (đẩy kênh `html5`, kiểm trang còn Draft bằng mã 404), `tools/itch.cfg` = `tuantrunglc/hao-khi-dong-a`.
+- `SaveProbe` đếm số lần mở trong `user://thu_luu.json`. Luôn ghi log `[INFO][luu_thu]` (xem bằng F12); khi bật dev, chữ DEV kèm số lần mở.
+- Bản web đã lên itch.io ở chế độ Draft, chạy được trên Chrome, lưu `user://` bền trong iframe.
+- **Hoãn (tác giả chốt):** Firefox/Edge, đo thời gian tải ở 20 Mbps, thử F1/F5 trên web. Ghi trong `deferred-work.md` và `NEXT-STEPS.md`.
+- **Lệch so với story:** probe chạy ở `main.gd` cho mọi người chơi (không chỉ khi bật dev), theo quyết định 3 khi Task 8.4 cho thấy không bật được dev trong iframe. AC 4 chỉ kiểm trên Chrome; AC 6 chưa có thời gian tải.
+- **Hướng dẫn tác giả tự test:**
+  1. Gõ `tools/test.sh` → dòng cuối `✅ 62/62 test đạt`.
+  2. Gõ `tools/build_web.sh` → `Dung lượng bản nén: 10.4 MB (giới hạn 25 MB)` và `✅ Đã build bản web …`.
+  3. Gõ `tools/deploy_itch.sh` → `🔒 Trang đang riêng tư` và đường link.
+  4. Mở https://tuantrunglc.itch.io/hao-khi-dong-a (đã đăng nhập itch.io) → bàn cờ, tiêu đề "Hào Khí Đông A", góc dưới phải có phiên bản và mã commit giống dòng `✅ Đã build …`.
+  5. Bấm `⌘ + Option + J`, lọc `luu_thu`, tải lại trang → số "lần mở thứ" tăng.
 
 ### File List
 
 - `game/export_presets.cfg` (mới)
 - `game/src/debug/save_probe.gd`, `.uid` (mới)
-- `game/src/debug/dev_tools.gd` (sửa: thử lưu, chữ DEV kèm số lần mở)
+- `game/src/debug/dev_tools.gd` (sửa: chữ DEV kèm số lần mở)
+- `game/src/app/main.gd` (sửa: gọi `SaveProbe`, ghi log thử lưu)
+- `game/tests/test_main.gd` (sửa: đếm lần mở, dùng file thử)
 - `game/tests/test_export_preset.gd`, `.uid` (mới)
 - `game/tests/test_save_probe.gd`, `.uid` (mới)
 - `game/tests/test_dev_tools.gd` (sửa)
@@ -392,9 +414,12 @@ Claude Opus 5.5 (claude-opus-5-5)
 - `tools/cai_dat.sh` (sửa: cài butler 15.32.0)
 - `tools/chay.sh` (sửa: dùng `ghi_build_info`)
 - `tools/build_web.sh`, `tools/deploy_itch.sh`, `tools/dang_nhap_itch.sh`, `tools/itch.cfg` (mới)
+- `NEXT-STEPS.md` (sửa: mục "Bản web trên itch.io", số đo NFR2, tên game)
+- `_bmad-output/implementation-artifacts/deferred-work.md` (thêm mục Story 0.5)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` (trạng thái)
 - `_bmad-output/implementation-artifacts/0-5-ban-web-tren-itch-io-rieng-tu.md` (story này)
 
 ### Change Log
 
 - 2026-10-17: Phần làm trên máy (Task 0–7): preset Web đơn luồng, `build_web.sh` (kiểm 25 MB), butler 15.32.0 ghim SHA-256, `deploy_itch.sh` + `dang_nhap_itch.sh` + `itch.cfg`, thử lưu `user://` khi bật dev. 11 test mới (tổng 61). Còn Task 8 (cần tài khoản itch.io của tác giả).
+- 2026-10-17: Task 8 cùng tác giả: đẩy lên `tuantrunglc/hao-khi-dong-a` (Draft, kiểm 404), chạy được trên Chrome; `?dev=1` không tới được iframe nên `SaveProbe` chuyển sang `main.gd`, luôn ghi log; `user://` bền trong iframe (lần mở thứ 3). Firefox/Edge, thời gian tải, F1/F5 hoãn. Tổng 62 test.

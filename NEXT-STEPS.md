@@ -47,11 +47,25 @@ Mỗi bước chạy trong một **cửa sổ context mới** của Claude Code 
 
 Không nhớ đang ở bước nào thì chạy `/bmad-help`.
 
+## Bản web trên itch.io
+
+- Trang: https://tuantrunglc.itch.io/hao-khi-dong-a (Draft, chỉ xem được khi đăng nhập tài khoản `tuantrunglc`).
+- Build: `tools/build_web.sh`. Đẩy lên: `tools/deploy_itch.sh`. Đăng nhập butler (một lần mỗi máy): mở app Terminal, chạy `tools/dang_nhap_itch.sh` (không chạy được trong ô chat của Claude Code).
+- Bật dev trên itch.io: thêm `?dev=1` vào link trang **không** có tác dụng (game chạy trong iframe có địa chỉ riêng). Dòng thử lưu `[INFO][luu_thu]` luôn có trong Console (F12).
+
+### Số đo bản web (NFR2), lần đầu
+
+| Ngày | Commit | Bản nén (zip) | Chưa nén | butler đẩy lên | Thời gian tải ở 20 Mbps |
+|---|---|---|---|---|---|
+| 2026-10-17 | `4d60947` | 10.4 MB | 40.0 MB (`index.wasm` 39.5 MB) | 38.16 MiB | **chưa đo** (tác giả hoãn; đo ở E4) |
+
+- Ước tính: nếu itch.io nén `index.wasm` khi gửi thì tải khoảng 10 MB → 4–5 giây; nếu không nén thì khoảng 40 MB → 16 giây, vượt mục tiêu 10 giây.
+
 ## Lưu ý
 
 - Toàn bộ quyết định và lý do nằm trong `decision-log.md` của GDD và `.decision-log.md` của brief.
 - **Phạm Ngũ Lão không có tên trong *Toàn thư* các năm 1287–1288.** Thông tin về ông lấy theo *Việt Nam sử lược*, nên trong game phải ghi chú nguồn.
 - Chưa rõ Nghị định 147/2024 có áp dụng cho bản web miễn phí hay không. Cần tìm hiểu trước khi phát hành công khai.
-- **Việc tác giả tự làm ở Story 0.5:** tạo tài khoản itch.io (nếu chưa có), tạo trang game để riêng tư, chạy `butler login` một lần.
+- **Tên game đã chốt: "Hào Khí Đông A"** (2026-10-17). Repo vẫn tên `chong-nguyen-mong`.
 - **Còn treo, tác giả chưa quyết:** công cụ giải thử (để sau E4); có công khai bản web hay không (mặc định riêng tư).
 - Các luật gắn **[MẶC ĐỊNH]** trong GDD sẽ được duyệt qua kịch bản luật ở từng story.
