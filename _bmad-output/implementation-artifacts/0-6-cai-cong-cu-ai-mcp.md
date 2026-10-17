@@ -394,6 +394,7 @@ Claude Opus 5.5 (`claude-opus-5-5`)
 - Thử thật (trước 7.3): `tools/chay.sh --dev` nền → log `[INFO][app] dev=1`, `[INFO][luu_thu] lần mở thứ 1, user:// bền: true`, `[MCP Runtime] Server listening on port 7777`, `[INFO][mcp] mở cổng 7777 cho GoPeak (chỉ máy này)`. Gửi thẳng lệnh `capture_screenshot` qua TCP (Python, giống cách GoPeak gửi) → `{"type":"screenshot_file","width":1280,"height":720,...}`; ảnh đúng: tiêu đề "Hào Khí Đông A", bàn 7×7, "DEV · lần mở thứ 1" đỏ góc trên trái, `v0.1.0 · a557bd4-sua` góc dưới phải. `inject_mouse_click` với `position: [640, 380]` → `input_injected` (dạng `{"x","y"}` bị từ chối: "position must be Vector2 or [x, y]").
 - 7.6: khi `--dev`: `lsof -nP -iTCP:7777 -sTCP:LISTEN` → `TCP 127.0.0.1:7777 (LISTEN)`. Không `--dev`: không có cổng 7777, log không có dòng `[INFO][mcp]`.
 - 7.7: `tools/build_web.sh` đạt, bản nén 10.4 MB (không đổi). `strings build/web/index.pck | grep -c godot_mcp` → 0; chuỗi "MCP Runtime"/`_start_server`/`inject_mouse` → 0. Chỉ có `src/debug/mcp_runtime.gd` (file bọc, trên web `should_start` trả false). `addons/gut` → 0.
+- 7.2: đã commit `ce32126` (77/77 xanh). **Dừng ở đây chờ tác giả** mở lại Claude Code và duyệt 2 server. Phiên sau: làm 7.2 (kiểm `claude mcp list` ✔ Connected) → 7.3 → 7.4 → 7.5 → 7.8.
 
 ### Completion Notes List
 
