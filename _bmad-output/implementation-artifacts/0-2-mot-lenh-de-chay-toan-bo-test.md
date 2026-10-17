@@ -4,7 +4,7 @@ baseline_commit: 38ce3615abd4976b57869240811dcabfc5e8cd2f
 
 # Story 0.2: Một lệnh để chạy toàn bộ test
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -23,29 +23,29 @@ tôi muốn gõ một lệnh và biết ngay game có đang hỏng không,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 0: Giữ phần sửa của review Story 0.1** (tiền đề)
-  - [ ] 0.1 Lúc tạo story này, phần sửa theo code review Story 0.1 **chưa commit** (`tools/chay.sh`, `tools/_godot.sh`, `game/src/battle/board_view.gd`, `game/src/app/main.gd`, file story 0.1, `sprint-status.yaml`, `deferred-work.md`). Chạy `git status`. Nếu các file đó vẫn đang sửa dở thì **không được** `git checkout`/`git stash` làm mất chúng; hỏi tác giả có commit trước không (lời commit gợi ý: `Sửa theo code review Story 0.1`).
-- [ ] **Task 1: Cài GUT v9.7.1 vào `game/addons/gut/`** (AC: 5)
-  - [ ] 1.1 Bản release v9.7.1 trên GitHub **không có file đính kèm**; tải mã nguồn theo tag: `https://github.com/bitwes/Gut/archive/refs/tags/v9.7.1.tar.gz` (đã kiểm ngày 2026-10-17: SHA-256 `6da99c4e9228d9bec3fb4bd1730a487770a989f0f511dac82a2897a964613385`). Kiểm SHA-256 trước khi giải nén.
-  - [ ] 1.2 Chỉ chép thư mục `Gut-9.7.1/addons/gut/` vào `game/addons/gut/` (khoảng 3,2 MB, đã gồm sẵn các file `.uid`). **Chép nguyên bản**, không sửa file nào trong đó, không dùng submodule. Kiểm `game/addons/gut/plugin.cfg` có `version="9.7.1"`.
-  - [ ] 1.3 **Commit GUT vào repo** (kiến trúc: "chép nguyên bản release"). Không thêm bước tải GUT vào `cai_dat.sh`.
-  - [ ] 1.4 **Không** bật plugin GUT trong `project.godot` (`[editor_plugins]`). Chạy dòng lệnh không cần plugin; tác giả không mở editor.
-  - [ ] 1.5 Giữ `gdscript/warnings/exclude_addons=true` (đã có từ Story 0.1) để luật `untyped_declaration` = error không áp lên code của GUT. Đã kiểm: import và chạy GUT với cài đặt này không có `SCRIPT ERROR` nào.
-- [ ] **Task 2: Test mẫu đầu tiên (`game/tests/test_build_info.gd`)** (AC: 1, 2)
-  - [ ] 2.1 Tách logic đọc mã commit ra khỏi `main.gd` thành `game/src/app/build_info.gd`: `class_name BuildInfo`, `extends RefCounted`, hàm `static func read_commit(path: String) -> String`. Giữ **nguyên hành vi** hiện tại của `main.gd::_read_commit()` (xem Dev Notes "File sẽ sửa"). `main.gd` gọi `BuildInfo.read_commit(BUILD_INFO_PATH)` và xóa `_read_commit()`.
-  - [ ] 2.2 Viết `game/tests/test_build_info.gd` (`extends GutTest`, gõ kiểu tĩnh đầy đủ, mọi hàm có `-> void`). Ít nhất các ca:
+- [x] **Task 0: Giữ phần sửa của review Story 0.1** (tiền đề)
+  - [x] 0.1 Lúc tạo story này, phần sửa theo code review Story 0.1 **chưa commit** (`tools/chay.sh`, `tools/_godot.sh`, `game/src/battle/board_view.gd`, `game/src/app/main.gd`, file story 0.1, `sprint-status.yaml`, `deferred-work.md`). Chạy `git status`. Nếu các file đó vẫn đang sửa dở thì **không được** `git checkout`/`git stash` làm mất chúng; hỏi tác giả có commit trước không (lời commit gợi ý: `Sửa theo code review Story 0.1`).
+- [x] **Task 1: Cài GUT v9.7.1 vào `game/addons/gut/`** (AC: 5)
+  - [x] 1.1 Bản release v9.7.1 trên GitHub **không có file đính kèm**; tải mã nguồn theo tag: `https://github.com/bitwes/Gut/archive/refs/tags/v9.7.1.tar.gz` (đã kiểm ngày 2026-10-17: SHA-256 `6da99c4e9228d9bec3fb4bd1730a487770a989f0f511dac82a2897a964613385`). Kiểm SHA-256 trước khi giải nén.
+  - [x] 1.2 Chỉ chép thư mục `Gut-9.7.1/addons/gut/` vào `game/addons/gut/` (khoảng 3,2 MB, đã gồm sẵn các file `.uid`). **Chép nguyên bản**, không sửa file nào trong đó, không dùng submodule. Kiểm `game/addons/gut/plugin.cfg` có `version="9.7.1"`.
+  - [x] 1.3 **Commit GUT vào repo** (kiến trúc: "chép nguyên bản release"). Không thêm bước tải GUT vào `cai_dat.sh`.
+  - [x] 1.4 **Không** bật plugin GUT trong `project.godot` (`[editor_plugins]`). Chạy dòng lệnh không cần plugin; tác giả không mở editor.
+  - [x] 1.5 Giữ `gdscript/warnings/exclude_addons=true` (đã có từ Story 0.1) để luật `untyped_declaration` = error không áp lên code của GUT. Đã kiểm: import và chạy GUT với cài đặt này không có `SCRIPT ERROR` nào.
+- [x] **Task 2: Test mẫu đầu tiên (`game/tests/test_build_info.gd`)** (AC: 1, 2)
+  - [x] 2.1 Tách logic đọc mã commit ra khỏi `main.gd` thành `game/src/app/build_info.gd`: `class_name BuildInfo`, `extends RefCounted`, hàm `static func read_commit(path: String) -> String`. Giữ **nguyên hành vi** hiện tại của `main.gd::_read_commit()` (xem Dev Notes "File sẽ sửa"). `main.gd` gọi `BuildInfo.read_commit(BUILD_INFO_PATH)` và xóa `_read_commit()`.
+  - [x] 2.2 Viết `game/tests/test_build_info.gd` (`extends GutTest`, gõ kiểu tĩnh đầy đủ, mọi hàm có `-> void`). Ít nhất các ca:
     - file không tồn tại → `"dev"`;
     - JSON hỏng (ví dụ `{commit:`) → `"dev"`;
     - JSON là mảng (`[1, 2]`) → `"dev"`;
     - `{"commit": 123}` → `"dev"`;
     - `{"commit": ""}` → `"dev"`;
     - `{"commit": "abc1234-sua"}` → `"abc1234-sua"`.
-  - [ ] 2.3 File thử ghi vào `user://test_build_info/` trong `before_each`, xóa trong `after_each` (`DirAccess.remove_absolute`). Không ghi file thử vào `res://`.
-  - [ ] 2.4 Tên test viết tiếng Anh `snake_case` theo quy ước code (ví dụ `test_missing_file_returns_dev`). Thông điệp `assert_*` có thể viết tiếng Việt không dấu.
-  - [ ] 2.5 Việc này đóng 1 trong 4 mục defer từ review Story 0.1 (`deferred-work.md`). Đánh dấu mục đó đã xử lý (thêm "→ xong ở Story 0.2"); **không** xóa các mục khác.
-- [ ] **Task 3: `tools/check_boundaries.sh`** (AC: 3)
-  - [ ] 3.1 Script bash, `#!/usr/bin/env bash` + `set -euo pipefail`, `source "$(dirname "${BASH_SOURCE[0]}")/_godot.sh"` để lấy `REPO_ROOT` (đặt `GODOT_BO_QUA_KIEM_TRA=1` trước khi source, vì script này không cần Godot). Nhận tham số tùy chọn là thư mục `src` cần quét (mặc định `"$REPO_ROOT/game/src"`), để Task 3.5 thử được.
-  - [ ] 3.2 Quét **mọi `*.gd` trong `src/core/`** (đệ quy), bỏ qua phần chú thích sau `#` (cách đơn giản: cắt từ `#` đầu tiên của dòng; chấp nhận sai sót hiếm khi `#` nằm trong chuỗi). Báo vi phạm khi gặp:
+  - [x] 2.3 File thử ghi vào `user://test_build_info/` trong `before_each`, xóa trong `after_each` (`DirAccess.remove_absolute`). Không ghi file thử vào `res://`.
+  - [x] 2.4 Tên test viết tiếng Anh `snake_case` theo quy ước code (ví dụ `test_missing_file_returns_dev`). Thông điệp `assert_*` có thể viết tiếng Việt không dấu.
+  - [x] 2.5 Việc này đóng 1 trong 4 mục defer từ review Story 0.1 (`deferred-work.md`). Đánh dấu mục đó đã xử lý (thêm "→ xong ở Story 0.2"); **không** xóa các mục khác.
+- [x] **Task 3: `tools/check_boundaries.sh`** (AC: 3)
+  - [x] 3.1 Script bash, `#!/usr/bin/env bash` + `set -euo pipefail`, `source "$(dirname "${BASH_SOURCE[0]}")/_godot.sh"` để lấy `REPO_ROOT` (đặt `GODOT_BO_QUA_KIEM_TRA=1` trước khi source, vì script này không cần Godot). Nhận tham số tùy chọn là thư mục `src` cần quét (mặc định `"$REPO_ROOT/game/src"`), để Task 3.5 thử được.
+  - [x] 3.2 Quét **mọi `*.gd` trong `src/core/`** (đệ quy), bỏ qua phần chú thích sau `#` (cách đơn giản: cắt từ `#` đầu tiên của dòng; chấp nhận sai sót hiếm khi `#` nằm trong chuỗi). Báo vi phạm khi gặp:
     | Mẫu | Lý do in ra (tiếng Việt) |
     |---|---|
     | dòng `extends X` với X khác `RefCounted` | `lõi luật chỉ được extends RefCounted` |
@@ -56,26 +56,26 @@ tôi muốn gõ một lệnh và biết ngay game có đang hỏng không,
     | `\bTime\.` | `lõi luật không được dùng thời gian thực` |
     | `\brandi`, `\brandf`, `\brandomize\(`, `RandomNumberGenerator` | `lõi luật không được dùng số ngẫu nhiên` |
     | `\bprint(err|raw|t|_rich)?\(` | `lõi luật không được dùng print` |
-  - [ ] 3.3 Quét **mọi `*.gd` trong `src/data/`**: chỉ luật `Node` (`\bNode\w*\b`, `get_tree\(`, `\$[A-Za-z_"%]`) với lý do `src/data không được dùng Node`. `FileAccess` được phép ở đây.
-  - [ ] 3.4 Quét **mọi `*.gd` trong toàn bộ `src/`** trừ `src/core/effects.gd`: phép gán `\.(hp|cell)\s*(=|\+=|-=)` mà **không** phải so sánh `==` (ví dụ dùng regex `\.(hp|cell)[[:space:]]*(\+=|-=|=[^=])`). Lý do: `chỉ Effects được sửa máu và vị trí (.hp/.cell)`. Không bắt `unit.hp == 0`, `var hp = …`, `max_hp =`.
-  - [ ] 3.5 Định dạng mỗi vi phạm một dòng: `❌ src/core/foo.gd:12: lõi luật không được dùng Node`. Đường dẫn tính từ `game/`. Có vi phạm thì in tổng số và `exit 1`; không có thì in `Ranh giới: đạt` và `exit 0`. Thư mục `src/core/`, `src/data/` chưa tồn tại thì coi như không có vi phạm (hiện **chưa có** hai thư mục này; không tạo chúng ở story này).
-  - [ ] 3.6 Dùng `grep -nE` (có trên macOS và Linux). **Không** dùng `grep -P` (macOS không có). Đã kiểm trên grep của macOS ngày 2026-10-17: `\bNode\w*\b` bắt `Node`, `Node2D`, không bắt `get_node_x`; `\.(hp|cell)[[:space:]]*(\+=|-=|=[^=])` bắt `unit.hp = 0`, `u.cell=x`, không bắt `unit.hp == 0`.
-  - [ ] 3.7 **Tự kiểm công cụ:** tạo thư mục mẫu `tools/mau_ranh_gioi/vi_pham/` và `tools/mau_ranh_gioi/hop_le/`, mỗi cái có cấu trúc `core/…`, `data/…` (đóng vai `src/`). `vi_pham/` chứa ít nhất: một file `core/` dùng `Node`, một dùng `get_tree()`, một gán `.hp +=`, một gán `.cell =` trong `battle/` (ngoài `effects.gd`). `hop_le/` chứa: `core/effects.gd` có `.hp -=` và `.cell =`, một file có `if unit.hp == 0`, một chú thích `# Node` (không được bắt). Các file mẫu nằm **ngoài `game/`** nên Godot không import. Task 4 dùng chúng.
-- [ ] **Task 4: `tools/test.sh`, một lệnh chạy hết** (AC: 1, 2, 3, 4, 5, 6)
-  - [ ] 4.1 `#!/usr/bin/env bash`, `set -euo pipefail`, `source _godot.sh` (bắt buộc có Godot; chưa cài thì `_godot.sh` đã tự báo và thoát). `chmod +x`. Chạy được từ bất kỳ thư mục nào.
-  - [ ] 4.2 Chạy **đủ 4 bước theo thứ tự**, bước sau **vẫn chạy** dù bước trước trượt (để tác giả thấy hết lỗi một lần), rồi in tóm tắt cuối và thoát mã 1 nếu có bất kỳ bước nào trượt:
+  - [x] 3.3 Quét **mọi `*.gd` trong `src/data/`**: chỉ luật `Node` (`\bNode\w*\b`, `get_tree\(`, `\$[A-Za-z_"%]`) với lý do `src/data không được dùng Node`. `FileAccess` được phép ở đây.
+  - [x] 3.4 Quét **mọi `*.gd` trong toàn bộ `src/`** trừ `src/core/effects.gd`: phép gán `\.(hp|cell)\s*(=|\+=|-=)` mà **không** phải so sánh `==` (ví dụ dùng regex `\.(hp|cell)[[:space:]]*(\+=|-=|=[^=])`). Lý do: `chỉ Effects được sửa máu và vị trí (.hp/.cell)`. Không bắt `unit.hp == 0`, `var hp = …`, `max_hp =`.
+  - [x] 3.5 Định dạng mỗi vi phạm một dòng: `❌ src/core/foo.gd:12: lõi luật không được dùng Node`. Đường dẫn tính từ `game/`. Có vi phạm thì in tổng số và `exit 1`; không có thì in `Ranh giới: đạt` và `exit 0`. Thư mục `src/core/`, `src/data/` chưa tồn tại thì coi như không có vi phạm (hiện **chưa có** hai thư mục này; không tạo chúng ở story này).
+  - [x] 3.6 Dùng `grep -nE` (có trên macOS và Linux). **Không** dùng `grep -P` (macOS không có). Đã kiểm trên grep của macOS ngày 2026-10-17: `\bNode\w*\b` bắt `Node`, `Node2D`, không bắt `get_node_x`; `\.(hp|cell)[[:space:]]*(\+=|-=|=[^=])` bắt `unit.hp = 0`, `u.cell=x`, không bắt `unit.hp == 0`.
+  - [x] 3.7 **Tự kiểm công cụ:** tạo thư mục mẫu `tools/mau_ranh_gioi/vi_pham/` và `tools/mau_ranh_gioi/hop_le/`, mỗi cái có cấu trúc `core/…`, `data/…` (đóng vai `src/`). `vi_pham/` chứa ít nhất: một file `core/` dùng `Node`, một dùng `get_tree()`, một gán `.hp +=`, một gán `.cell =` trong `battle/` (ngoài `effects.gd`). `hop_le/` chứa: `core/effects.gd` có `.hp -=` và `.cell =`, một file có `if unit.hp == 0`, một chú thích `# Node` (không được bắt). Các file mẫu nằm **ngoài `game/`** nên Godot không import. Task 4 dùng chúng.
+- [x] **Task 4: `tools/test.sh`, một lệnh chạy hết** (AC: 1, 2, 3, 4, 5, 6)
+  - [x] 4.1 `#!/usr/bin/env bash`, `set -euo pipefail`, `source _godot.sh` (bắt buộc có Godot; chưa cài thì `_godot.sh` đã tự báo và thoát). `chmod +x`. Chạy được từ bất kỳ thư mục nào.
+  - [x] 4.2 Chạy **đủ 4 bước theo thứ tự**, bước sau **vẫn chạy** dù bước trước trượt (để tác giả thấy hết lỗi một lần), rồi in tóm tắt cuối và thoát mã 1 nếu có bất kỳ bước nào trượt:
     1. **Kiểm ranh giới:** tự kiểm công cụ trước (chạy `check_boundaries.sh` trên `tools/mau_ranh_gioi/vi_pham` phải thoát ≠ 0, trên `tools/mau_ranh_gioi/hop_le` phải thoát 0; sai thì báo `❌ công cụ kiểm ranh giới bị hỏng`), rồi chạy trên `game/src` thật.
     2. **Kiểm kịch bản đã duyệt** (Task 5).
     3. **Import project:** `"$GODOT" --headless --path "$REPO_ROOT/game" --import`. Thất bại thì báo trượt `không quét được project` và bỏ qua bước 4.
     4. **Chạy GUT:** `"$GODOT" --headless --path "$REPO_ROOT/game" -s res://addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit -gjunit_xml_file=<đường dẫn tuyệt đối>`. Ghi toàn bộ output vào `build/test/gut.log` (tạo `build/test/`; `build/` đã có trong `.gitignore`). JUnit XML ghi vào `build/test/ket_qua.xml`; xóa file cũ trước khi chạy.
-  - [ ] 4.3 **Đọc kết quả GUT từ JUnit XML** bằng `awk`/`sed`/`grep` (không thêm phụ thuộc như python hay xmllint). Thẻ gốc có dạng `<testsuites name="GutTests" failures="1" tests="2" >`; mỗi test có `<testcase name="test_x" ... status="pass|fail" classname="tests/test_y.gd" ...>`. Lấy tổng số test, số trượt, và danh sách `classname › name` của các test `status="fail"`, kèm dòng đầu của thông điệp trong `<failure ...><![CDATA[...]]>`.
-  - [ ] 4.4 **Chống xanh giả (AC 6)**, mỗi trường hợp là một lý do trượt riêng:
+  - [x] 4.3 **Đọc kết quả GUT từ JUnit XML** bằng `awk`/`sed`/`grep` (không thêm phụ thuộc như python hay xmllint). Thẻ gốc có dạng `<testsuites name="GutTests" failures="1" tests="2" >`; mỗi test có `<testcase name="test_x" ... status="pass|fail" classname="tests/test_y.gd" ...>`. Lấy tổng số test, số trượt, và danh sách `classname › name` của các test `status="fail"`, kèm dòng đầu của thông điệp trong `<failure ...><![CDATA[...]]>`.
+  - [x] 4.4 **Chống xanh giả (AC 6)**, mỗi trường hợp là một lý do trượt riêng:
     - không có file `ket_qua.xml` sau khi chạy → `GUT không chạy xong (xem build/test/gut.log)`;
     - `gut.log` có dòng `SCRIPT ERROR` hoặc `Parse Error` → `có file lỗi cú pháp, GUT đã bỏ qua nó` + in các dòng đó (đã kiểm: GUT **bỏ qua** file test lỗi cú pháp và vẫn thoát 0);
     - số file `game/tests/**/test_*.gd` khác số `<testsuite` trong XML → `có file test không được chạy`;
     - tổng số test = 0 → `không có test nào được chạy`;
     - mã thoát của Godot ≠ 0 mà XML báo 0 trượt → trượt, lý do `GUT thoát mã <n>`.
-  - [ ] 4.5 **Tóm tắt tiếng Việt** (mẫu, giữ đúng ý, có thể chỉnh chữ):
+  - [x] 4.5 **Tóm tắt tiếng Việt** (mẫu, giữ đúng ý, có thể chỉnh chữ):
     ```
     [1/4] Kiểm ranh giới ........ đạt
     [2/4] Kịch bản đã duyệt ..... đạt (0 file)
@@ -94,24 +94,24 @@ tôi muốn gõ một lệnh và biết ngay game có đang hỏng không,
     ❌ trượt: 1 test trượt, 1 lỗi ranh giới
     ```
     Dòng cuối luôn bắt đầu bằng `✅` hoặc `❌ trượt`. Không in toàn bộ log GUT ra terminal khi đạt; khi trượt chỉ in phần cần thiết và chỉ tới `build/test/gut.log`.
-  - [ ] 4.6 Mã thoát: `0` khi mọi bước đạt, `1` khi có bất kỳ bước nào trượt.
-- [ ] **Task 5: Khóa `da_duyet`** (AC: 4)
-  - [ ] 5.1 Trong `tools/test.sh` (hoặc hàm riêng trong cùng file): lấy danh sách file JSON **đang được git theo dõi ở HEAD** trong `game/` (`git -C "$REPO_ROOT" ls-tree -r --name-only HEAD -- game | grep '\.json$'`). Với mỗi file, đọc nội dung **ở HEAD** (`git show HEAD:<file>`); nếu có `"da_duyet"[[:space:]]*:[[:space:]]*true` thì file đó bị khóa.
-  - [ ] 5.2 File bị khóa mà khác HEAD (đã sửa, đã stage, hoặc đã xóa) → trượt, in `❌ <file>: kịch bản đã duyệt bị sửa so với commit gần nhất`. Cách kiểm: `git -C "$REPO_ROOT" diff --quiet HEAD -- "<file>"` (bắt cả sửa chưa stage, đã stage và xóa).
-  - [ ] 5.3 Không có git hoặc repo chưa có commit → trượt với lý do `không kiểm được khóa da_duyet (không có git)` (tác giả đã chốt, xem Quyết định của tác giả).
-  - [ ] 5.4 In số file đang bị khóa (`đạt (N file)`). Hiện repo **chưa có** file JSON nào có `da_duyet`, nên N = 0 là đúng.
-  - [ ] 5.5 Kiểm bằng tay (ghi vào Debug Log): tạo tạm một file `game/tests/kich_ban/thu/khoa_thu.json` có `"da_duyet": true`, commit tạm **trên một nhánh thử** (không phải `main`), sửa file → `tools/test.sh` trượt và ghi tên file; hoàn tác → đạt. Xóa nhánh thử sau khi kiểm. **Không** để lại file thử hay commit thử trên `main`.
-- [ ] **Task 6: Cập nhật tài liệu dự án**
-  - [ ] 6.1 `CLAUDE.md`: dòng `tools/test.sh` đổi từ "(có từ Story 0.2)" thành mô tả ngắn: "chạy toàn bộ test, in tóm tắt tiếng Việt; mã thoát khác 0 là trượt".
-  - [ ] 6.2 Không sửa `project-context.md` hay `game-architecture.md`. Nếu thấy cần bổ sung luật (ví dụ "luôn `--import` trước khi chạy GUT"), ghi vào Completion Notes làm đề xuất để tác giả duyệt.
-- [ ] **Task 7: Tự kiểm tra trước khi báo xong** (AC: 1–6)
-  - [ ] 7.1 `tools/test.sh` trên repo hiện tại → `✅ N/N test đạt`, mã 0 (`echo $?`).
-  - [ ] 7.2 Thêm tạm một test sai (`assert_eq(1, 2)`) → dòng cuối `❌ trượt`, có tên file và tên test, mã ≠ 0. Xóa test tạm.
-  - [ ] 7.3 Thêm tạm `game/src/core/thu.gd` có `extends Node` và một dòng `unit.hp += 1` → bước 1 báo trượt với file, dòng, lý do tiếng Việt; bước 1 chạy **trước** các bước khác. Xóa file tạm (và file `.uid` nếu Godot đã sinh).
-  - [ ] 7.4 Task 5.5 (khóa `da_duyet`).
-  - [ ] 7.5 Ba bẫy xanh giả: (a) clone repo sang thư mục tạm, symlink `.tools/godot-4.7.2`, chạy `tools/test.sh` → phải đạt (vì có bước import); (b) thêm tạm file test có `var x = 1` → trượt, lý do lỗi cú pháp; (c) tạm đổi tên `game/tests` → trượt, lý do không có test. Hoàn tác hết.
-  - [ ] 7.6 `tools/chay.sh` vẫn mở game bình thường (bàn cờ + nhãn phiên bản) sau khi tách `BuildInfo`.
-  - [ ] 7.7 `git status` sạch ngoài các file của story; các file `.uid` do Godot sinh cho `build_info.gd` và `test_build_info.gd` được commit. Commit bằng lời tiếng Việt, ví dụ `Thêm tools/test.sh, GUT 9.7.1 và kiểm ranh giới (Story 0.2)`.
+  - [x] 4.6 Mã thoát: `0` khi mọi bước đạt, `1` khi có bất kỳ bước nào trượt.
+- [x] **Task 5: Khóa `da_duyet`** (AC: 4)
+  - [x] 5.1 Trong `tools/test.sh` (hoặc hàm riêng trong cùng file): lấy danh sách file JSON **đang được git theo dõi ở HEAD** trong `game/` (`git -C "$REPO_ROOT" ls-tree -r --name-only HEAD -- game | grep '\.json$'`). Với mỗi file, đọc nội dung **ở HEAD** (`git show HEAD:<file>`); nếu có `"da_duyet"[[:space:]]*:[[:space:]]*true` thì file đó bị khóa.
+  - [x] 5.2 File bị khóa mà khác HEAD (đã sửa, đã stage, hoặc đã xóa) → trượt, in `❌ <file>: kịch bản đã duyệt bị sửa so với commit gần nhất`. Cách kiểm: `git -C "$REPO_ROOT" diff --quiet HEAD -- "<file>"` (bắt cả sửa chưa stage, đã stage và xóa).
+  - [x] 5.3 Không có git hoặc repo chưa có commit → trượt với lý do `không kiểm được khóa da_duyet (không có git)` (tác giả đã chốt, xem Quyết định của tác giả).
+  - [x] 5.4 In số file đang bị khóa (`đạt (N file)`). Hiện repo **chưa có** file JSON nào có `da_duyet`, nên N = 0 là đúng.
+  - [x] 5.5 Kiểm bằng tay (ghi vào Debug Log): tạo tạm một file `game/tests/kich_ban/thu/khoa_thu.json` có `"da_duyet": true`, commit tạm **trên một nhánh thử** (không phải `main`), sửa file → `tools/test.sh` trượt và ghi tên file; hoàn tác → đạt. Xóa nhánh thử sau khi kiểm. **Không** để lại file thử hay commit thử trên `main`.
+- [x] **Task 6: Cập nhật tài liệu dự án**
+  - [x] 6.1 `CLAUDE.md`: dòng `tools/test.sh` đổi từ "(có từ Story 0.2)" thành mô tả ngắn: "chạy toàn bộ test, in tóm tắt tiếng Việt; mã thoát khác 0 là trượt".
+  - [x] 6.2 Không sửa `project-context.md` hay `game-architecture.md`. Nếu thấy cần bổ sung luật (ví dụ "luôn `--import` trước khi chạy GUT"), ghi vào Completion Notes làm đề xuất để tác giả duyệt.
+- [x] **Task 7: Tự kiểm tra trước khi báo xong** (AC: 1–6)
+  - [x] 7.1 `tools/test.sh` trên repo hiện tại → `✅ N/N test đạt`, mã 0 (`echo $?`).
+  - [x] 7.2 Thêm tạm một test sai (`assert_eq(1, 2)`) → dòng cuối `❌ trượt`, có tên file và tên test, mã ≠ 0. Xóa test tạm.
+  - [x] 7.3 Thêm tạm `game/src/core/thu.gd` có `extends Node` và một dòng `unit.hp += 1` → bước 1 báo trượt với file, dòng, lý do tiếng Việt; bước 1 chạy **trước** các bước khác. Xóa file tạm (và file `.uid` nếu Godot đã sinh).
+  - [x] 7.4 Task 5.5 (khóa `da_duyet`).
+  - [x] 7.5 Ba bẫy xanh giả: (a) clone repo sang thư mục tạm, symlink `.tools/godot-4.7.2`, chạy `tools/test.sh` → phải đạt (vì có bước import); (b) thêm tạm file test có `var x = 1` → trượt, lý do lỗi cú pháp; (c) tạm đổi tên `game/tests` → trượt, lý do không có test. Hoàn tác hết.
+  - [x] 7.6 `tools/chay.sh` vẫn mở game bình thường (bàn cờ + nhãn phiên bản) sau khi tách `BuildInfo`.
+  - [x] 7.7 `git status` sạch ngoài các file của story; các file `.uid` do Godot sinh cho `build_info.gd` và `test_build_info.gd` được commit. Commit bằng lời tiếng Việt, ví dụ `Thêm tools/test.sh, GUT 9.7.1 và kiểm ranh giới (Story 0.2)`.
 
 ## Dev Notes
 
@@ -273,8 +273,58 @@ chong-nguyen-mong/
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5)
+
 ### Debug Log References
+
+- Đỏ trước khi viết code (Task 2): GUT báo `Parse Error: Identifier "BuildInfo" not declared` và **thoát mã 0**. Đây là bẫy xanh giả (b) xuất hiện trên code thật.
+- `tools/test.sh` trên repo: `✅ 6/6 test đạt`, mã 0. Chạy từ `/tmp` cũng ra kết quả như vậy.
+- Test sai tạm (`assert_eq(1, 2)`) cùng `src/core/thu.gd` (`extends Node`, `unit.hp += 1`): bước 1 báo 3 lỗi, mỗi lỗi có file, dòng và lý do; bước 4 `1/7 trượt` có `tests/test_tam_sai.gd › test_co_tinh_sai`; dòng cuối `❌ trượt: 3 lỗi ranh giới, 1 test trượt`, mã 1. Đã xóa file tạm và `.uid`.
+- Bẫy (a): bản chép repo không có `game/.godot/` → `✅ 6/6`, vì bước 3 đã quét project.
+- Bẫy (b): file test có `var x = 1` → `có file lỗi cú pháp…` cùng `có file test không được chạy (1/2 file)`, mã 1.
+- Bẫy (c): đổi tên `game/tests` → `không có test nào được chạy`, mã 1. Lần đầu chạy, script **dừng ngang và không in gì**, vì `find` trên thư mục không tồn tại gặp `pipefail`. Đã sửa, chạy lại đạt yêu cầu.
+- Bản chép không có `.git` → bước 2 `không kiểm được khóa da_duyet`, mã 1.
+- Khóa `da_duyet`: thử trên một bản clone tạm (xem Completion Notes). Lúc sạch ra `đạt (1 file)`. Sửa file thì trượt, ghi tên `game/tests/kich_ban/thu/khoa_thu.json`. `git rm` thì cũng trượt. `reset` thì đạt.
+- Bộ mẫu: `check_boundaries.sh tools/mau_ranh_gioi/vi_pham` cho 6 lỗi và mã 1; `hop_le` đạt, mã 0.
+- Khung hình `--write-movie` sau khi tách `BuildInfo`: bàn cờ 7×7 nằm giữa, nhãn `v0.1.0 · 0a8b7c8-sua`.
 
 ### Completion Notes List
 
+- GUT 9.7.1 lấy từ mã nguồn của tag (SHA-256 khớp với story), chép nguyên `addons/gut/` (259 file, đã có sẵn `.uid` và `source_code_pro.fnt.import`). Không bật plugin, không tạo `.gutconfig.json`.
+- `BuildInfo.read_commit(path)` (`src/app/build_info.gd`) chứa nguyên logic cũ của `main.gd::_read_commit()`. Có 6 test, và cả 6 đạt mà GUT không ghi nhận lỗi engine nào.
+- `check_boundaries.sh`: luật lõi (extends, Node, cây scene, Input, file, Time, ngẫu nhiên, print), luật `src/data` không Node, luật `.hp`/`.cell` ngoài `src/core/effects.gd` trên toàn `src/`. Nhận tham số thư mục để dùng với bộ mẫu. Thư mục chưa có thì coi là đạt.
+- `test.sh`: thêm bước 1 tự kiểm công cụ. Mỗi file trong `vi_pham/` phải xuất hiện trong kết quả, chứ không chỉ cần mã thoát khác 0.
+- **Lệch so với Task 4.5:** dòng bước in dạng `[1/4] Kiểm ranh giới: đạt`, không căn cột bằng dấu chấm. Lý do: `printf %-Ns` đếm theo byte nên chữ có dấu bị lệch cột.
+- **Lệch so với Task 5.5:** không tạo nhánh thử trong repo thật, mà thử trên một bản clone tạm trong scratchpad. Lý do: repo thật đang có phần làm dở chưa commit. Cách kiểm và kết quả giống hệt.
+- Dòng `Chi tiết: build/test/gut.log` chỉ hiện khi bước GUT có vấn đề.
+- **Đề xuất cho tác giả duyệt** (chưa ghi vào `project-context.md`): thêm luật "mọi lệnh chạy Godot trên repo phải `--import` trước, vì `game/.godot/` không có trong git".
+- **Việc cho E1:** kiến trúc nói `check_boundaries.sh` bắt "mọi chỗ sửa trực tiếp `units`". Story này chưa bắt, vì chưa có `BattleState`.
+- **Hướng dẫn tác giả tự test:**
+  1. Gõ `tools/test.sh` → thấy 4 dòng `[1/4]…[4/4]` và dòng cuối `✅ 6/6 test đạt`.
+  2. Gõ `echo $?` → thấy `0`.
+  3. Nhờ AI "đặt tạm một test sai rồi chạy test" → dòng cuối `❌ trượt: 1 test trượt`, có tên test; `echo $?` ra `1`. Nhờ AI gỡ test sai.
+
 ### File List
+
+- `CLAUDE.md` (sửa)
+- `game/addons/gut/` (mới, GUT 9.7.1 nguyên bản, 259 file)
+- `game/src/app/build_info.gd` (mới)
+- `game/src/app/build_info.gd.uid` (mới, Godot sinh)
+- `game/src/app/main.gd` (sửa)
+- `game/tests/test_build_info.gd` (mới)
+- `game/tests/test_build_info.gd.uid` (mới, Godot sinh)
+- `tools/check_boundaries.sh` (mới)
+- `tools/test.sh` (mới)
+- `tools/mau_ranh_gioi/README.md` (mới)
+- `tools/mau_ranh_gioi/vi_pham/core/dung_node.gd`, `goi_cay_scene.gd`, `sua_mau.gd` (mới)
+- `tools/mau_ranh_gioi/vi_pham/data/dung_node.gd` (mới)
+- `tools/mau_ranh_gioi/vi_pham/battle/sua_vi_tri.gd` (mới)
+- `tools/mau_ranh_gioi/hop_le/core/effects.gd`, `rules_thu.gd` (mới)
+- `tools/mau_ranh_gioi/hop_le/battle/xem.gd` (mới)
+- `_bmad-output/implementation-artifacts/deferred-work.md` (sửa: đánh dấu xong mục `_read_commit`)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (sửa trạng thái)
+- `_bmad-output/implementation-artifacts/0-2-mot-lenh-de-chay-toan-bo-test.md` (story này)
+
+### Change Log
+
+- 2026-10-17: Thêm `tools/test.sh` (4 bước, tóm tắt tiếng Việt, chặn 3 bẫy xanh giả), `tools/check_boundaries.sh` cùng bộ mẫu tự kiểm, khóa `da_duyet`, GUT 9.7.1; tách `BuildInfo` và viết 6 test đầu tiên.

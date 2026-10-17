@@ -14,7 +14,7 @@
 
 - `tools/cai_dat.sh`: cài Godot 4.7.2 vào `.tools/` (chỉ cần một lần).
 - `tools/chay.sh`: chạy game. Nhận thêm `--dev`, `--tran=N`.
-- `tools/test.sh`: chạy toàn bộ test (có từ Story 0.2).
+- `tools/test.sh`: chạy toàn bộ test, in tóm tắt tiếng Việt; mã thoát khác 0 là trượt.
 
 ## Tiến độ
 
