@@ -4,7 +4,7 @@ baseline_commit: 33634bdd90e446446a571a6ad919d9ba58537615
 
 # Story 2.2: Sông và đánh trúng quân mình
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 
@@ -32,9 +32,9 @@ _Story luật thứ hai của E2. Phần lớn luật đã có code từ Story 2
 
 - [x] **Task 0: Tác giả chốt 2 câu hỏi** ở "Quyết định của tác giả" (2026-10-18, cả 2 câu chọn (a)).
 - [ ] **Task 1: Viết đợt kịch bản 4, dừng chờ duyệt** (AC: 1)
-  - [ ] 1.1 Tạo thư mục `game/tests/kich_ban/dia_hinh/`. Viết 3 file đúng như Dev Notes "Đợt kịch bản 4", `"da_duyet": false`. Không đụng 25 kịch bản đã duyệt. Không cần sửa bộ nạp: `truoc.mau`, `sau.mau`, `sau.da_danh`, ô sông `~` đều đã đọc được.
-  - [ ] 1.2 `tools/xem_kich_ban.sh dia_hinh` và `tools/xem_kich_ban.sh va_cham`: đọc lại bàn trước/sau, khớp `mo_ta`; Lão 1 máu ở bàn trước của #3 hiện đúng. `tools/test.sh`: xanh, `25 đã duyệt · 3 chưa duyệt (0 chưa đạt)`. Ghi Debug Log.
-  - [ ] 1.3 Commit: `Kịch bản sông, trúng quân mình chờ duyệt (Story 2.2)`.
+  - [x] 1.1 Tạo thư mục `game/tests/kich_ban/dia_hinh/`. Viết 3 file đúng như Dev Notes "Đợt kịch bản 4", `"da_duyet": false`. Không đụng 25 kịch bản đã duyệt. Không cần sửa bộ nạp: `truoc.mau`, `sau.mau`, `sau.da_danh`, ô sông `~` đều đã đọc được.
+  - [x] 1.2 `tools/xem_kich_ban.sh dia_hinh` và `tools/xem_kich_ban.sh va_cham`: đọc lại bàn trước/sau, khớp `mo_ta`; Lão 1 máu ở bàn trước của #3 hiện đúng. `tools/test.sh`: xanh, `25 đã duyệt · 3 chưa duyệt (0 chưa đạt)`. Ghi Debug Log.
+  - [x] 1.3 Commit: `Kịch bản sông, trúng quân mình chờ duyệt (Story 2.2)`.
   - [ ] 1.4 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh dia_hinh` rồi `tools/xem_kich_ban.sh va_cham`, đọc 3 kịch bản mới (`day_xuong_song`, `day_trung_tuong_minh`, `tuong_minh_guc_vi_va`), trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ ba điều:
     - Bộ binh trúng đòn còn 1 máu, nên xuống sông hay va bờ đều biến khỏi bàn: **bàn sau giống nhau**. Kịch bản #1 bắt được lỗi "quân đứng trên sông"; còn "chết đuối hay gục" thì test GUT kiểm (sự kiện khác nhau, cần cho hoạt ảnh 2.11).
     - Kịch bản #3 chốt luật mặc định "tướng gục bị nhấc khỏi bàn, không chiếm ô" (GDD, [KIỂM TRA KHI PLAYTEST E4]).
@@ -224,7 +224,11 @@ _Tác giả chốt 2026-10-18: câu 1 chọn (a), câu 2 chọn (a)._
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5)
+
 ### Debug Log References
+
+- Task 1.1–1.2 (2026-10-18): viết 3 kịch bản đợt 4 (`dia_hinh/day_xuong_song.json`, `va_cham/day_trung_tuong_minh.json`, `va_cham/tuong_minh_guc_vi_va.json`), `da_duyet: false`. `tools/xem_kich_ban.sh dia_hinh` và `va_cham`: bàn trước/sau khớp `mo_ta`; #1 sông ở `4,3`, Khoái `2,3` đánh Đông; #2 Lão ở bàn sau hiện `3,2 Phạm Ngũ Lão 2/3`; #3 bàn trước hiện `Máu: 3,2 Phạm Ngũ Lão 1/3`, bàn sau không còn Lão. `tools/test.sh`: xanh 376/376, `Kịch bản luật: 25 đã duyệt · 3 chưa duyệt (0 chưa đạt)`.
 
 ### Completion Notes List
 
