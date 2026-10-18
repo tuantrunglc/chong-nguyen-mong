@@ -28,6 +28,8 @@ const NAME_KEYS: Dictionary = {
 }
 
 var unit_id: int = 0
+## UnitType. Đổi loại thì BoardView dựng đồng mới, không gọi update().
+var unit_type: int = -1
 var _faction: Unit.Faction = Unit.Faction.DAI_VIET
 var _name_label: Label
 var _hp_label: Label
@@ -35,6 +37,7 @@ var _hp_label: Label
 
 func setup(unit: Unit) -> void:
 	unit_id = unit.id
+	unit_type = unit.type
 	_faction = unit.faction
 	var text_color: Color = DAI_VIET_TEXT_COLOR if _faction == Unit.Faction.DAI_VIET else NGUYEN_TEXT_COLOR
 

@@ -30,6 +30,7 @@ func after_each() -> void:
 	get_window().title = _old_window_title
 	AppState.launch.dev = false
 	AppState.launch.tran = ""
+	AppState.launch.warnings.clear()
 	AppState.stats = null
 	if FileAccess.file_exists(BROKEN_LEVEL):
 		DirAccess.remove_absolute(BROKEN_LEVEL)
@@ -297,11 +298,13 @@ func test_three_generals_level_opens_by_name_in_dev() -> void:
 	assert_has(Log.get_lines(), "[INFO][battle] nạp trận thu_ba_tuong")
 	var tokens: Dictionary = _tokens(main)
 	assert_eq(tokens.keys(), [1, 2, 3, 101, 102, 103, 104])
-	if tokens.has(3):
-		assert_eq((tokens[3] as UnitToken).name_text(), tr("unit.tran_khanh_du"))
 	var texts: Array[String] = _label_texts(main._board_view)
 	for key: String in BoardView.TERRAIN_KEYS.values():
 		assert_has(texts, tr(key), "đủ chữ địa hình: " + key)
+	assert_true(tokens.has(3), "có tướng 3")
+	if not tokens.has(3):
+		return
+	assert_eq((tokens[3] as UnitToken).name_text(), tr("unit.tran_khanh_du"))
 
 
 func test_level_name_without_dev_opens_level_1() -> void:
@@ -318,6 +321,32 @@ func test_back_to_menu_leaves_empty_board() -> void:
 	_find_button(main._error_screen).pressed.emit()
 	assert_eq(_tokens(main).size(), 0, "về menu: bàn trống")
 	assert_true(main._board_view.visible)
+
+
+func test_back_to_menu_after_battle_clears_everything() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main()
+	assert_eq(_tokens(main).size(), 5)
+	assert_false(main._coord_overlay.texts().is_empty(), "trước đó có tọa độ F1")
+	main._show_menu()
+	assert_eq(_tokens(main).size(), 0, "không còn đồng quân")
+	assert_eq(_label_texts(main._board_view), [] as Array[String], "không còn chữ địa hình, tọa độ, chữ trên đồng quân")
+	assert_eq(main._coord_overlay.texts(), [] as Array[String], "không còn tọa độ F1")
+	assert_null(main._board_view._state, "không còn màu ô")
+
+
+func test_reload_rebuilds_token_when_id_changes_type() -> void:
+	var main: Node2D = _make_main()
+	var board: BoardView = main._board_view
+	var state: BattleState = main._controller.snapshot()
+	var index: int = state.units.find(state.unit_by_id(101))
+	state.units[index] = Unit.new(101, UnitType.KY_BINH, Vector2i(1, 0), 2)
+	board.show_state(state)
+	var token: UnitToken = _tokens(main)[101] as UnitToken
+	assert_eq(token.name_text(), tr("unit.ky_binh"), "chữ theo loại mới")
+	assert_eq(token.hp_text(), "2")
+	assert_eq(token.unit_type, UnitType.KY_BINH)
+	assert_eq(board._units.get_child_count(), 5, "đồng cũ đã gỡ khỏi bàn")
 
 
 func test_reload_with_error_clears_board() -> void:
@@ -352,6 +381,29 @@ func test_f1_toggles_coordinates_in_dev() -> void:
 	assert_has(Log.get_lines(), "[DEBUG][dev] f1: hiện tọa độ")
 	assert_has(Log.get_lines(), "[DEBUG][dev] f1: ẩn tọa độ")
 	Log.debug_enabled = false
+
+
+func test_f1_does_nothing_on_error_screen() -> void:
+	AppState.launch.dev = true
+	Log.debug_enabled = true
+	var main: Node2D = _make_main(_broken_level_dir())
+	_dev_tools(main).f1_pressed.emit()
+	assert_false(main._coord_overlay.visible)
+	assert_does_not_have(Log.get_lines(), "[DEBUG][dev] f1: hiện tọa độ")
+	_find_button(main._error_screen).pressed.emit()
+	_dev_tools(main).f1_pressed.emit()
+	assert_false(main._coord_overlay.visible, "menu: F1 cũng không làm gì")
+	assert_does_not_have(Log.get_lines(), "[DEBUG][dev] f1: hiện tọa độ")
+	Log.debug_enabled = false
+
+
+func test_f1_stays_on_after_reload() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main()
+	_dev_tools(main).f1_pressed.emit()
+	main._start_battle()
+	assert_true(main._coord_overlay.visible, "nạp lại vẫn hiện tọa độ")
+	assert_has(main._coord_overlay.texts(), "0,0")
 
 
 func test_no_coordinates_without_dev() -> void:

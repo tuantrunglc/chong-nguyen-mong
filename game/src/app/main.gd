@@ -135,7 +135,11 @@ func _show_board(snapshot: BattleState) -> void:
 		_coord_overlay.show_state(snapshot)
 
 
+## Chỉ khi đang có trận: màn hình lỗi và menu không có gì để hiện (tác giả chốt 2026-10-18).
+## Bật/tắt được giữ qua các lần nạp lại trận.
 func _toggle_coords() -> void:
+	if _screen != Screen.BATTLE:
+		return
 	var shown: bool = _coord_overlay.toggle()
 	Log.debug("dev", "f1: hiện tọa độ" if shown else "f1: ẩn tọa độ")
 

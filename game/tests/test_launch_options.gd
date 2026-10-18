@@ -49,7 +49,8 @@ func test_tran_name() -> void:
 
 
 func test_tran_invalid_values() -> void:
-	for value: String in ["Thu", "../x", "thu-ba", "tên", "1abc", "0", "-2", "3.5", "", "a b"]:
+	for value: String in ["Thu", "../x", "thu-ba", "tên", "1abc", "0", "-2", "3.5", "", "a b",
+			"thu_ba_tuong\n", "99999999999999999999", "00001"]:
 		_assert_options(_desktop(["--tran=" + value]), false, "", _bad("--tran", value))
 
 
@@ -80,6 +81,10 @@ func test_web_dev_and_tran() -> void:
 
 func test_web_tran_name() -> void:
 	_assert_options(_web("?dev=1&tran=thu_ba_tuong"), true, "thu_ba_tuong", [])
+
+
+func test_web_tran_name_with_encoded_newline_is_invalid() -> void:
+	_assert_options(_web("?dev=1&tran=thu_ba_tuong%0A"), true, "", _bad("?tran", "thu_ba_tuong\n"))
 
 
 func test_web_without_question_mark() -> void:

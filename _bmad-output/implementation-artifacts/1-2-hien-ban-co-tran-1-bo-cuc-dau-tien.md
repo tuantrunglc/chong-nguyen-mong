@@ -4,7 +4,7 @@ baseline_commit: 4285462
 
 # Story 1.2: Hiện bàn cờ trận 1 (bố cục đầu tiên)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -36,8 +36,8 @@ tôi muốn thấy trận 1 hiện ra đúng như file dữ liệu,
 
 - [x] **Task 1: Lõi trạng thái trận tối thiểu** (`src/core/`, AC: 1, 4, 6)
   - [x] 1.1 `unit.gd` (`class_name Unit extends RefCounted`):
-    - Thuộc tính: `enum Side { DAI_VIET, NGUYEN }`; `id: int`, `side: Side`, `type: int` (UnitType), `cell: Vector2i`, `hp: int`.
-    - Gán mọi thuộc tính **chỉ trong `_init(p_id, p_type, p_cell, p_hp)`**; `side` suy ra từ `UnitType.is_general`.
+    - Thuộc tính: `enum Faction { DAI_VIET, NGUYEN }` (không đặt `Side`: trùng enum có sẵn của Godot); `id: int`, `faction: Faction`, `type: int` (UnitType), `cell: Vector2i`, `hp: int`.
+    - Gán mọi thuộc tính **chỉ trong `_init(p_id, p_type, p_cell, p_hp)`**; `faction` suy ra từ `UnitType.is_general`.
     - `check_boundaries.sh` cấm `.hp =` / `.cell =` ở mọi nơi ngoài `core/effects.gd`, kể cả trong `clone()`. Muốn sao chép thì gọi `Unit.new(...)`.
   - [x] 1.2 `unit_factory.gd` (`class_name UnitFactory`): `static func create(id: int, type: int, cell: Vector2i, stats: Stats) -> Unit`, với `hp = stats.max_hp(type)`. Đây là nơi duy nhất tạo quân (luật kiến trúc).
   - [x] 1.3 `battle_state.gd` (`class_name BattleState extends RefCounted`):
@@ -160,6 +160,20 @@ tôi muốn thấy trận 1 hiện ra đúng như file dữ liệu,
     - Bấm F1 bằng `inject_key` rồi chụp lại: thấy tọa độ và id.
   - [x] 10.2 Chụp `--dev --tran=thu_ba_tuong`: thấy đủ 7 loại ô, 3 tướng, B/K/C. Chữ có dấu không vỡ, chữ không tràn khỏi ô.
   - [x] 10.3 Ghi hướng dẫn tác giả tự test vào Completion Notes (mẫu ở mục Testing).
+
+### Review Findings
+
+- [x] [Review][Decision] Chữ Chông/Ải bị đồng quân che: tác giả chốt 2026-10-18 giữ như hiện nay. Màu ô vẫn lộ ở các góc, tên địa hình đọc được khi rê chuột (Story 2.10, FR40).
+- [x] [Review][Patch] F1 chỉ chạy khi đang có trận (màn hình lỗi và menu thì không làm gì, không ghi log). Vẫn nhớ bật/tắt qua các lần nạp lại. Tác giả chốt 2026-10-18 [game/src/app/main.gd:138]
+- [x] [Review][Patch] Đồng quân dùng lại theo id không cập nhật tên, phe, màu khi nạp lại trận mà id đổi loại quân [game/src/battle/board_view.gd:114, game/src/battle/unit_token.gd:53]
+- [x] [Review][Patch] Regex tên trận để lọt "\n" ở cuối (`$` của PCRE), ví dụ `?tran=thu_ba_tuong%0A` [game/src/app/launch_options.gd:7]
+- [x] [Review][Patch] `--tran` là số rất lớn: engine in 2 dòng ERROR, kẹp về INT64_MAX, không có cảnh báo tiếng Việt [game/src/app/launch_options.gd:64]
+- [x] [Review][Patch] Chữ địa hình cũ chỉ được queue_free, không remove_child, nên còn trong cây node tới hết khung hình. Lệch với CoordOverlay [game/src/battle/board_view.gd:88]
+- [x] [Review][Patch] Test "Về menu" mở bằng trận lỗi nên đúng sẵn. Cần test mở trận hợp lệ ở dev rồi về menu: 0 đồng quân, 0 chữ địa hình, overlay F1 rỗng (AC8) [game/tests/test_main.gd:315]
+- [x] [Review][Patch] test_clone_is_deep chỉ kiểm phần tử đầu là object mới, cần kiểm mọi quân [game/tests/test_battle_state.gd:116]
+- [x] [Review][Patch] `if tokens.has(3)` bỏ qua phép kiểm mà không báo [game/tests/test_main.gd:300]
+- [x] [Review][Patch] after_each không xóa `AppState.launch.warnings`, cảnh báo rò sang test sau [game/tests/test_main.gd:29]
+- [x] [Review][Patch] Spec Task 1.1 còn ghi `Side`/`side`, code đã đổi thành `Faction`/`faction` [_bmad-output/implementation-artifacts/1-2-hien-ban-co-tran-1-bo-cuc-dau-tien.md:39]
 
 ## Dev Notes
 

@@ -4,7 +4,10 @@ extends RefCounted
 ## parse() là hàm thuần: tham số sai được trả trong warnings, người gọi tự ghi log.
 
 ## Tên file trận: chữ thường không dấu, số, dấu _, bắt đầu bằng chữ (chặn cả "../").
-const LEVEL_NAME_PATTERN: String = "^[a-z][a-z0-9_]*$"
+## \A…\z thay cho ^…$: $ của PCRE vẫn khớp trước dấu xuống dòng ở cuối ("abc\n").
+const LEVEL_NAME_PATTERN: String = "\\A[a-z][a-z0-9_]*\\z"
+## Số trận dài hơn thì coi là sai: to_int() với số quá int64 làm engine in ERROR.
+const MAX_TRAN_DIGITS: int = 4
 
 var dev: bool = false
 ## Số trận ("3", đã bỏ số 0 ở đầu) hoặc tên file trận ("thu_ba_tuong"). "" nghĩa là không chọn trận.
@@ -61,7 +64,7 @@ func level_id() -> String:
 
 
 func _set_tran(value: String, flag: String) -> void:
-	if value.is_valid_int() and value.to_int() >= 1:
+	if value.is_valid_int() and value.length() <= MAX_TRAN_DIGITS and value.to_int() >= 1:
 		tran = str(value.to_int())
 	elif RegEx.create_from_string(LEVEL_NAME_PATTERN).search(value) != null:
 		tran = value

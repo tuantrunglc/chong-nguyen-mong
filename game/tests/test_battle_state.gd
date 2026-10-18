@@ -113,7 +113,8 @@ func test_clone_is_deep() -> void:
 	var original: BattleState = _state()
 	var copy: BattleState = original.clone()
 	assert_eq(_describe(copy), _describe(original))
-	assert_ne(copy.units[0], original.units[0], "quân là object mới")
+	for i: int in range(original.units.size()):
+		assert_ne(copy.units[i], original.units[i], "quân %d là object mới" % original.units[i].id)
 	copy.units[0] = Unit.new(1, UnitType.NGUYEN_KHOAI, Vector2i(3, 3), 1)
 	copy.units.pop_back()
 	assert_eq(original.units.size(), 5, "bản gốc không mất quân")

@@ -85,6 +85,7 @@ func tokens() -> Dictionary:
 
 func _rebuild_terrain_labels() -> void:
 	for child: Node in _terrain_labels.get_children():
+		_terrain_labels.remove_child(child)
 		child.queue_free()
 	if _state == null:
 		return
@@ -106,22 +107,32 @@ func _rebuild_terrain_labels() -> void:
 
 
 ## Thêm đồng cho quân mới, bỏ đồng của quân không còn, cập nhật đồng còn lại.
+## Id cũ mà đổi loại quân (nạp lại trận đã sửa) thì dựng lại đồng: tên và màu phe chỉ đặt lúc setup.
 func _sync_tokens() -> void:
 	var alive: Dictionary = {}
 	if _state != null:
 		for unit: Unit in _state.units:
 			alive[unit.id] = true
 			if _tokens.has(unit.id):
-				(_tokens[unit.id] as UnitToken).update(unit)
-				continue
+				var old: UnitToken = _tokens[unit.id] as UnitToken
+				if old.unit_type == unit.type:
+					old.update(unit)
+					continue
+				_remove_token(unit.id)
 			var token: UnitToken = UnitToken.new()
 			token.setup(unit)
 			_units.add_child(token)
 			_tokens[unit.id] = token
 	for id: int in _tokens.keys():
 		if not alive.has(id):
-			(_tokens[id] as UnitToken).queue_free()
-			_tokens.erase(id)
+			_remove_token(id)
+
+
+func _remove_token(id: int) -> void:
+	var token: UnitToken = _tokens[id] as UnitToken
+	_units.remove_child(token)
+	token.queue_free()
+	_tokens.erase(id)
 
 
 func _draw() -> void:
