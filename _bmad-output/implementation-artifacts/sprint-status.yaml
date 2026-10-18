@@ -1,5 +1,5 @@
 # generated: 2026-10-17 10:21
-# last_updated: 2026-10-18 12:00
+# last_updated: 2026-10-18 13:00
 # project: GameTest
 # project_key: NOKEY
 # tracking_system: file-system
@@ -50,8 +50,8 @@ development_status:
   0-5-ban-web-tren-itch-io-rieng-tu: done
   0-6-cai-cong-cu-ai-mcp: done
   epic-0-retrospective: optional
-  epic-1: backlog
-  1-1-nap-chi-so-va-tran-tu-file-bao-loi-bang-tieng-viet: backlog
+  epic-1: in-progress
+  1-1-nap-chi-so-va-tran-tu-file-bao-loi-bang-tieng-viet: ready-for-dev
   1-2-hien-ban-co-tran-1-bo-cuc-dau-tien: backlog
   1-3-kich-ban-luat-va-cong-cu-duyet-tren-terminal: backlog
   1-4-chon-tuong-va-xem-cac-o-di-duoc: backlog
