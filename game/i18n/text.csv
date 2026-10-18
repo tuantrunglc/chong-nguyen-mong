@@ -46,10 +46,15 @@ scenario.viewer.reject_already_there,tướng đã đứng sẵn ở ô đó
 scenario.viewer.reject_unreachable,không đi tới được ô đó
 scenario.viewer.reject_already_moved,tướng đã đi rồi trong lượt này
 scenario.viewer.reject_nothing_to_undo,không còn nước đi nào để hủy
+scenario.viewer.reject_already_attacked,tướng đã đánh rồi trong lượt này
+scenario.viewer.reject_not_adjacent,ô đó không kề tướng
+scenario.viewer.reject_no_target,ô đó không có quân Nguyên để đánh
 scenario.viewer.after_state,Sau lệnh: %s
 scenario.viewer.after_round,hiệp %d
 scenario.viewer.after_moved,đã đi: %s
 scenario.viewer.after_moved_none,chưa tướng nào
+scenario.viewer.after_attacked,đã đánh: %s
+scenario.viewer.after_attacked_none,chưa tướng nào
 scenario.viewer.unknown_arg,"bỏ qua tham số lạ: ""%s"""
 scenario.viewer.unknown_group,"không có nhóm ""%s"". Các nhóm đang có: %s"
 scenario.viewer.no_groups,(chưa có nhóm nào)

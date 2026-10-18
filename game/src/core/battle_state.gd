@@ -42,7 +42,7 @@ func clone() -> BattleState:
 	copy.stats = stats
 	copy.round_number = round_number
 	for u: Unit in units:
-		copy.units.append(Unit.new(u.id, u.type, u.cell, u.hp, u.has_moved))
+		copy.units.append(Unit.new(u.id, u.type, u.cell, u.hp, u.has_moved, u.has_attacked))
 	return copy
 
 

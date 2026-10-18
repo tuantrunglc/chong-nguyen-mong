@@ -4,7 +4,7 @@ baseline_commit: 428d7432fa963a2a4be70e5de26904141f7d3a76
 
 # Story 2.1: Nguyễn Khoái đánh, đẩy và va chạm
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 
@@ -45,7 +45,7 @@ _Story luật đầu tiên của E2. Phần 1 chưa có hoạt ảnh: bàn nhả
 
 - [x] **Task 0: Tác giả chốt 4 câu hỏi** ở "Quyết định của tác giả" (2026-10-18, cả 4 câu chọn phương án (a)).
 - [ ] **Task 1: Khung cho kịch bản mới, viết đợt kịch bản 3, dừng chờ duyệt** (AC: 1, 2)
-  - [ ] 1.1 Khung (không phải code luật, làm trước để file kịch bản nạp được):
+  - [x] 1.1 Khung (không phải code luật, làm trước để file kịch bản nạp được):
     - `src/core/battle_event.gd`: thêm vào **cuối** enum `Reject`: `ALREADY_ATTACKED`, `NOT_ADJACENT`, `NO_TARGET`.
     - `src/data/scenario_loader.gd`:
       - `REJECT_CODES` thêm `"da_danh_roi": "scenario.viewer.reject_already_attacked"`, `"khong_ke": "scenario.viewer.reject_not_adjacent"`, `"khong_co_dich": "scenario.viewer.reject_no_target"`; sửa `REJECT_LIST` cho đủ 9 mã;
@@ -56,9 +56,9 @@ _Story luật đầu tiên của E2. Phần 1 chưa có hoạt ảnh: bàn nhả
     - `i18n/text.csv`: `scenario.viewer.reject_already_attacked` = `tướng đã đánh rồi trong lượt này`; `scenario.viewer.reject_not_adjacent` = `ô đó không kề tướng`; `scenario.viewer.reject_no_target` = `ô đó không có quân Nguyên để đánh`; `scenario.viewer.after_attacked` = `đã đánh: %s`; `scenario.viewer.after_attacked_none` = `chưa tướng nào đánh`.
     - `src/core/unit.gd`: thêm `var has_attacked: bool` (tham số cuối `_init`, mặc định `false`) để bộ chạy đọc được; `BattleState.clone()` chép thêm. Chưa có luật nào bật nó ở bước này.
     - `tests/test_scenario_loader.gd`: test cho `da_danh` (đọc được, ký hiệu lạ báo lỗi như `da_di`), mã `tu_choi` mới đúng lệnh (`di` + `khong_ke` bị báo lỗi, `danh` + `khong_con_nuoc_di` bị báo lỗi).
-  - [ ] 1.2 Viết 10 file đúng như Dev Notes "Đợt kịch bản 3", `"da_duyet": false`. Tạo thư mục `day/`, `va_cham/`, `danh/`. Không đụng 15 kịch bản đã duyệt.
-  - [ ] 1.3 `tools/xem_kich_ban.sh`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `tu_choi` hiện đúng câu tiếng Việt; dòng "Sau lệnh" hiện `đã đánh`. `tools/test.sh`: xanh, `15 đã duyệt · 10 chưa duyệt (10 chưa đạt)`, lý do khớp bảng.
-  - [ ] 1.4 Commit: `Kịch bản đánh, đẩy, va chạm chờ duyệt (Story 2.1)`.
+  - [x] 1.2 Viết 10 file đúng như Dev Notes "Đợt kịch bản 3", `"da_duyet": false`. Tạo thư mục `day/`, `va_cham/`, `danh/`. Không đụng 15 kịch bản đã duyệt.
+  - [x] 1.3 `tools/xem_kich_ban.sh`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `tu_choi` hiện đúng câu tiếng Việt; dòng "Sau lệnh" hiện `đã đánh`. `tools/test.sh`: xanh, `15 đã duyệt · 10 chưa duyệt (10 chưa đạt)`, lý do khớp bảng.
+  - [x] 1.4 Commit: `Kịch bản đánh, đẩy, va chạm chờ duyệt (Story 2.1)`.
   - [ ] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh`, đọc 10 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ: Bộ binh trúng 2 sát thương còn 1 máu, nên mọi va chạm trong đợt này đều làm nó gục (chưa có quân nào đủ máu để "đứng yên còn sống" sau va chạm, trừ quân bị va ở #6). Không làm Task 2 trở đi khi chưa có câu trả lời.
   - [ ] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" thì sửa, cho duyệt lại (lặp 1.3–1.6). `tools/test.sh` **phải trượt** (AC 2). Ghi Debug Log. **Không commit** khi đang đỏ.
 - [ ] **Task 2: Lõi luật: sự kiện, chỉ số, hướng** (AC: 4, 5, 13)
@@ -383,7 +383,12 @@ _Tác giả chốt 2026-10-18: cả 4 câu chọn phương án (a)._
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5)
+
 ### Debug Log References
+
+- Task 1 (khung + đợt kịch bản 3): `tools/test.sh` xanh 339/339, `Kịch bản luật: 15 đã duyệt · 10 chưa duyệt (10 chưa đạt)`; 10 lý do ⏳ khớp bảng "Lý do chưa đạt". `tools/xem_kich_ban.sh` in đúng bàn trước/sau, câu từ chối và dòng "Sau lệnh: … đã đánh: …".
+- Lệch so với Tasks: khóa `scenario.viewer.after_attacked_none` có chữ `chưa tướng nào` (giống `after_moved_none`) để dòng "Sau lệnh" đọc liền ("đã đánh: chưa tướng nào"). Danh sách mã `tu_choi` của lệnh `di` sắp theo thứ tự luật kiểm (`da_danh_roi` trước `da_di_roi`).
 
 ### Completion Notes List
 

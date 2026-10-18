@@ -359,7 +359,7 @@ func test_step_reject_code_errors() -> void:
 	]
 	var r: LoadResult = _parse(d)
 	var codes: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", ' \
-		+ '"da_di_roi", "khong_con_nuoc_di"'
+		+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich"'
 	assert_eq(r.errors, [
 		F + ': "hanh_dong" mục 1 (di): "tu_choi" là "bi_chan", chỉ được ' + codes,
 		F + ': "hanh_dong" mục 2 (di): "tu_choi" là true, chỉ được ' + codes,
@@ -413,6 +413,41 @@ func test_after_round_and_moved_errors() -> void:
 	] as Array[String])
 
 
+func test_after_attacked_is_read() -> void:
+	var s: ScenarioData = _scenario(_valid())
+	if s == null:
+		return
+	assert_false(s.checks_attacked, "không ghi da_danh thì không kiểm")
+	var d: Dictionary = _valid()
+	d["sau"]["da_danh"] = ["1"]
+	s = _scenario(d)
+	if s == null:
+		return
+	assert_true(s.checks_attacked)
+	assert_eq(s.after_attacked, [UnitType.NGUYEN_KHOAI] as Array[int])
+	d["sau"]["da_danh"] = []
+	s = _scenario(d)
+	if s == null:
+		return
+	assert_true(s.checks_attacked, "[] là kiểm: chưa tướng nào đánh")
+	assert_eq(s.after_attacked, [] as Array[int])
+
+
+func test_after_attacked_errors() -> void:
+	var d: Dictionary = _valid()
+	d["sau"]["da_danh"] = ["1", "1", "2", "B"]
+	assert_eq(_errors(d), [
+		F + ': "sau.da_danh" ghi tướng "1" hai lần',
+		F + ': "sau.da_danh" có tướng "2" không có trong "sau.quan"',
+		F + ': "sau.da_danh" có "B", chỉ được "1", "2", "3"',
+	] as Array[String])
+	d["sau"]["da_danh"] = "1"
+	assert_eq(_errors(d), [F + ': "sau.da_danh" phải là một danh sách, đang là "1"'] as Array[String])
+	d = _valid()
+	d["truoc"]["da_danh"] = []
+	assert_eq(_parse(d).warnings, [F + ': bỏ qua khóa lạ "truoc.da_danh"'] as Array[String])
+
+
 func test_before_ignores_round_and_moved() -> void:
 	var d: Dictionary = _valid()
 	d["truoc"]["hiep"] = 2
@@ -432,7 +467,33 @@ func test_step_reject_code_must_fit_command() -> void:
 		F + ': "hanh_dong" mục 1 (huy): "tu_choi" là "khong_toi_duoc", lệnh "huy" chỉ bị từ chối vì '
 			+ '"khong_con_nuoc_di"',
 		F + ': "hanh_dong" mục 2 (di): "tu_choi" là "khong_con_nuoc_di", lệnh "di" chỉ bị từ chối vì '
-			+ '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", "da_di_roi"',
+			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc"',
+	] as Array[String])
+
+
+## Lệnh đánh chỉ nhận mã của luật đánh; lệnh đi nhận thêm "da_danh_roi" (đã đánh thì không đi được).
+func test_attack_reject_codes_fit_command() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [
+		{"lenh": "danh", "tuong": "1", "o": "1,6", "tu_choi": "khong_co_dich"},
+		{"lenh": "danh", "tuong": "1", "o": "2,6", "tu_choi": "khong_ke"},
+		{"lenh": "danh", "tuong": "1", "o": "1,6", "tu_choi": "da_danh_roi"},
+		{"lenh": "di", "tuong": "1", "o": "1,6", "tu_choi": "da_danh_roi"},
+	]
+	var s: ScenarioData = _scenario(d)
+	if s == null:
+		return
+	assert_eq(s.steps[0].reject, "khong_co_dich")
+	assert_eq(s.steps[3].reject, "da_danh_roi")
+	d["hanh_dong"] = [
+		{"lenh": "danh", "tuong": "1", "o": "1,6", "tu_choi": "khong_con_nuoc_di"},
+		{"lenh": "di", "tuong": "1", "o": "1,6", "tu_choi": "khong_ke"},
+	]
+	assert_eq(_parse(d).errors, [
+		F + ': "hanh_dong" mục 1 (danh): "tu_choi" là "khong_con_nuoc_di", lệnh "danh" chỉ bị từ chối vì '
+			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "khong_ke", "khong_co_dich"',
+		F + ': "hanh_dong" mục 2 (di): "tu_choi" là "khong_ke", lệnh "di" chỉ bị từ chối vì '
+			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc"',
 	] as Array[String])
 
 
@@ -615,6 +676,14 @@ func test_runner_checks_round_and_moved() -> void:
 	] as Array[String])
 
 
+func test_runner_checks_attacked() -> void:
+	var d: Dictionary = _valid()
+	d["sau"]["da_danh"] = []
+	assert_eq(_run(d).problems, [] as Array[String])
+	d["sau"]["da_danh"] = ["1"]
+	assert_eq(_run(d).problems, ["sau: 1 (Nguyễn Khoái) mong đợi đã đánh, thực tế chưa đánh"] as Array[String])
+
+
 func test_runner_reports_general_moved_but_expected_not() -> void:
 	var d: Dictionary = _valid()
 	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "0,5"}]
@@ -744,6 +813,12 @@ func test_viewer_shows_after_round_and_moved() -> void:
 	d["sau"]["da_di"] = []
 	lines = ScenarioViewer.render(_scenario(d), _stats()).split("\n")
 	assert_has(lines, "  Sau lệnh: đã đi: chưa tướng nào")
+	d["sau"]["da_danh"] = ["1"]
+	lines = ScenarioViewer.render(_scenario(d), _stats()).split("\n")
+	assert_has(lines, "  Sau lệnh: đã đi: chưa tướng nào · đã đánh: %s" % tr("scenario.unit.nguyen_khoai"))
+	d["sau"]["da_danh"] = []
+	lines = ScenarioViewer.render(_scenario(d), _stats()).split("\n")
+	assert_has(lines, "  Sau lệnh: đã đi: chưa tướng nào · đã đánh: chưa tướng nào")
 
 
 func test_viewer_shows_expected_rejection() -> void:

@@ -8,8 +8,8 @@ const FORMAT_VERSION: int = 1
 
 const ROOT_KEYS: Array[String] = ["phien_ban_dinh_dang", "mo_ta", "da_duyet", "truoc", "hanh_dong", "sau"]
 const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich"]
-## "hiep", "da_di" không bắt buộc: không ghi thì không kiểm (review Story 1.5, tác giả chốt 2026-10-18).
-const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di"]
+## "hiep", "da_di", "da_danh" không bắt buộc: không ghi thì không kiểm (review Story 1.5, tác giả chốt 2026-10-18).
+const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh"]
 
 ## Lệnh -> khóa thêm. Lệnh mới thêm ở story của nó, kèm câu lỗi. "tu_choi" không bắt buộc.
 const COMMANDS: Dictionary = {
@@ -27,12 +27,16 @@ const REJECT_CODES: Dictionary = {
 	"khong_toi_duoc": "scenario.viewer.reject_unreachable",
 	"da_di_roi": "scenario.viewer.reject_already_moved",
 	"khong_con_nuoc_di": "scenario.viewer.reject_nothing_to_undo",
+	"da_danh_roi": "scenario.viewer.reject_already_attacked",
+	"khong_ke": "scenario.viewer.reject_not_adjacent",
+	"khong_co_dich": "scenario.viewer.reject_no_target",
 }
 const REJECT_LIST: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", ' \
-	+ '"da_di_roi", "khong_con_nuoc_di"'
-## Lệnh -> các mã "tu_choi" luật của lệnh đó trả được. Lệnh chưa có ở đây (danh) nhận mọi mã: thêm ở story của nó.
+	+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich"'
+## Lệnh -> các mã "tu_choi" luật của lệnh đó trả được. Lệnh mới thêm ở story của nó.
 const COMMAND_REJECTS: Dictionary = {
-	"di": ["khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", "da_di_roi"],
+	"di": ["khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc"],
+	"danh": ["khong_co_quan", "khong_phai_tuong", "da_danh_roi", "khong_ke", "khong_co_dich"],
 	"huy": ["khong_con_nuoc_di"],
 }
 
@@ -54,6 +58,8 @@ class Section:
 	var round_number: int = 0
 	## "da_di" (chỉ "sau"): UnitType các tướng đã đi, theo thứ tự ký hiệu; null là không ghi.
 	var moved: Variant = null
+	## "da_danh" (chỉ "sau"): như moved, các tướng đã đánh.
+	var attacked: Variant = null
 
 
 ## Mọi file .json trong root_dir và thư mục con, sắp theo đường dẫn. Thư mục không có thì [].
@@ -123,6 +129,9 @@ static func parse_scenario(text: String, path: String, root_dir: String, stats: 
 	if after.moved != null:
 		scenario.checks_moved = true
 		scenario.after_moved = after.moved as Array[int]
+	if after.attacked != null:
+		scenario.checks_attacked = true
+		scenario.after_attacked = after.attacked as Array[int]
 	for cell: Vector2i in BoardLayers.reading_order(after.unit_rows, _unit_symbols()):
 		var type: int = BoardText.UNIT_SYMBOLS[BoardLayers.symbol(after.unit_rows, cell)] as int
 		var hp: int = after.hp[cell] as int if after.hp.has(cell) else stats.max_hp(type)
@@ -210,13 +219,15 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 		if round_value != null:
 			side.round_number = round_value as int
 	if known.has("da_di") and section.has("da_di"):
-		side.moved = _read_moved(section["da_di"], name + ".da_di", name + ".quan", side, file, result)
+		side.moved = _read_generals(section["da_di"], name + ".da_di", name + ".quan", side, file, result)
+	if known.has("da_danh") and section.has("da_danh"):
+		side.attacked = _read_generals(section["da_danh"], name + ".da_danh", name + ".quan", side, file, result)
 	return side
 
 
-## "da_di": ["1", "2"] là các tướng đã đi trong lượt; [] là chưa tướng nào đi. Trả Array[int] UnitType theo
-## thứ tự ký hiệu, hoặc null nếu sai (đã thêm lỗi).
-static func _read_moved(value: Variant, shown: String, units_shown: String, side: Section,
+## "da_di": ["1", "2"] là các tướng đã đi trong lượt; [] là chưa tướng nào đi ("da_danh" cũng vậy). Trả Array[int]
+## UnitType theo thứ tự ký hiệu, hoặc null nếu sai (đã thêm lỗi).
+static func _read_generals(value: Variant, shown: String, units_shown: String, side: Section,
 		file: String, result: LoadResult) -> Variant:
 	if not value is Array:
 		result.add_error(JsonFile.type_error(file, shown, "một danh sách", value))

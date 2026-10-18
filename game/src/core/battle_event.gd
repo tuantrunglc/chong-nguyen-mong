@@ -16,7 +16,10 @@ enum Type {
 enum Cause { WALK }
 
 ## Vì sao lệnh bị từ chối (REJECTED). Kịch bản luật ghi bằng mã "tu_choi" (ScenarioRunner.REJECT_EVENTS).
-enum Reject { NONE, NO_UNIT, NOT_GENERAL, ALREADY_THERE, UNREACHABLE, ALREADY_MOVED, NOTHING_TO_UNDO }
+enum Reject {
+	NONE, NO_UNIT, NOT_GENERAL, ALREADY_THERE, UNREACHABLE, ALREADY_MOVED, NOTHING_TO_UNDO,
+	ALREADY_ATTACKED, NOT_ADJACENT, NO_TARGET,
+}
 
 var type: Type
 var unit_id: int = 0

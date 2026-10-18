@@ -14,9 +14,12 @@ var cell: Vector2i
 var hp: int
 ## Đã đi trong lượt người chơi này (không đi tiếp được nữa).
 var has_moved: bool
+## Đã đánh trong lượt người chơi này (không đi, không đánh được nữa).
+var has_attacked: bool
 
 
-func _init(p_id: int, p_type: int, p_cell: Vector2i, p_hp: int, p_has_moved: bool = false) -> void:
+func _init(p_id: int, p_type: int, p_cell: Vector2i, p_hp: int, p_has_moved: bool = false,
+		p_has_attacked: bool = false) -> void:
 	id = p_id
 	type = p_type
 	if UnitType.is_general(p_type):
@@ -26,3 +29,4 @@ func _init(p_id: int, p_type: int, p_cell: Vector2i, p_hp: int, p_has_moved: boo
 	cell = p_cell
 	hp = p_hp
 	has_moved = p_has_moved
+	has_attacked = p_has_attacked

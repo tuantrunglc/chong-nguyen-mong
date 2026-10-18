@@ -17,6 +17,9 @@ const REJECT_EVENTS: Dictionary = {
 	"khong_toi_duoc": BattleEvent.Reject.UNREACHABLE,
 	"da_di_roi": BattleEvent.Reject.ALREADY_MOVED,
 	"khong_con_nuoc_di": BattleEvent.Reject.NOTHING_TO_UNDO,
+	"da_danh_roi": BattleEvent.Reject.ALREADY_ATTACKED,
+	"khong_ke": BattleEvent.Reject.NOT_ADJACENT,
+	"khong_co_dich": BattleEvent.Reject.NO_TARGET,
 }
 
 ## Tên đầy đủ cho câu so sánh. Ký hiệu lấy ngược từ BoardText (unit_symbol, terrain_symbol).
@@ -131,7 +134,7 @@ static func _general(state: BattleState, type: int) -> Unit:
 	return null
 
 
-## So state với bàn sau: địa hình rồi quân theo thứ tự đọc bàn, rồi hiệp và dấu "đã đi" (nếu kịch bản ghi).
+## So state với bàn sau: địa hình rồi quân theo thứ tự đọc bàn, rồi hiệp, dấu "đã đi", "đã đánh" (nếu kịch bản ghi).
 ## Mỗi chỗ khác một câu.
 static func compare(state: BattleState, scenario: ScenarioData) -> Array[String]:
 	var problems: Array[String] = []
@@ -163,6 +166,15 @@ static func compare(state: BattleState, scenario: ScenarioData) -> Array[String]
 				continue
 			var want: String = "đã đi" if scenario.after_moved.has(type) else "chưa đi"
 			var got: String = "đã đi" if general.has_moved else "chưa đi"
+			problems.append("sau: %s (%s) mong đợi %s, thực tế %s"
+				% [unit_symbol(type), UNIT_NAMES.get(type, "?"), want, got])
+	if scenario.checks_attacked:
+		for type: int in UnitType.GENERALS:
+			var general: Unit = _general(state, type)
+			if general == null or general.has_attacked == scenario.after_attacked.has(type):
+				continue
+			var want: String = "đã đánh" if scenario.after_attacked.has(type) else "chưa đánh"
+			var got: String = "đã đánh" if general.has_attacked else "chưa đánh"
 			problems.append("sau: %s (%s) mong đợi %s, thực tế %s"
 				% [unit_symbol(type), UNIT_NAMES.get(type, "?"), want, got])
 	return problems

@@ -168,7 +168,8 @@ static func render(scenario: ScenarioData, stats: Stats) -> String:
 	return "\n".join(lines)
 
 
-## "Sau lệnh: hiệp 2 · đã đi: Nguyễn Khoái" từ "sau.hiep" và "sau.da_di"; "" nếu kịch bản không ghi cả hai.
+## "Sau lệnh: hiệp 2 · đã đi: Nguyễn Khoái · đã đánh: ..." từ "sau.hiep", "sau.da_di", "sau.da_danh"; "" nếu kịch
+## bản không ghi khóa nào.
 static func _after_state(scenario: ScenarioData) -> String:
 	var parts: PackedStringArray = PackedStringArray()
 	if scenario.after_round > 0:
@@ -179,6 +180,13 @@ static func _after_state(scenario: ScenarioData) -> String:
 			names.append(_unit_name(type))
 		var shown: String = ", ".join(names) if not names.is_empty() else _t("scenario.viewer.after_moved_none")
 		parts.append(_t("scenario.viewer.after_moved") % shown)
+	if scenario.checks_attacked:
+		var names: PackedStringArray = PackedStringArray()
+		for type: int in scenario.after_attacked:
+			names.append(_unit_name(type))
+		var shown: String = ", ".join(names) if not names.is_empty() \
+			else _t("scenario.viewer.after_attacked_none")
+		parts.append(_t("scenario.viewer.after_attacked") % shown)
 	if parts.is_empty():
 		return ""
 	return _t("scenario.viewer.after_state") % " · ".join(parts)

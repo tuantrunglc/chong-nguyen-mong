@@ -61,3 +61,7 @@ var after_round: int = 0
 var checks_moved: bool = false
 ## UnitType các tướng phải đã đi; tướng khác trên bàn phải chưa đi.
 var after_moved: Array[int] = []
+## Có kiểm dấu "đã đánh" không ("sau.da_danh" có ghi, kể cả []).
+var checks_attacked: bool = false
+## UnitType các tướng phải đã đánh; tướng khác trên bàn phải chưa đánh.
+var after_attacked: Array[int] = []
