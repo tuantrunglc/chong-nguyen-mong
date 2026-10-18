@@ -1,12 +1,14 @@
 class_name BattleView
 extends Node
-## Chọn tướng trên bàn cờ: nhận signal của BattleInput, hỏi BattleController ô đi được, nhờ BoardView vẽ.
-## Chỉ đọc bản chụp, không bao giờ sửa trạng thái trận. Bảng chọn/bỏ chọn: Story 1.4, tác giả chốt 2026-10-18.
+## Chọn tướng, đi, hủy, kết thúc lượt: nhận signal của BattleInput và Hud, gửi lệnh cho BattleController,
+## nhờ BoardView vẽ ô sáng. Chỉ đọc bản chụp, không bao giờ sửa trạng thái trận.
+## Bảng thao tác: Story 1.4 và 1.5, tác giả chốt 2026-10-18.
 
 const NONE: int = 0
 
 var _board: BoardView = null
 var _input: BattleInput = null
+var _hud: Hud = null
 var _controller: BattleController = null
 ## Id tướng đang chọn; NONE là không chọn.
 var _selected: int = NONE
@@ -14,24 +16,32 @@ var _selected: int = NONE
 var _cells: Array[Vector2i] = []
 
 
-func setup(board: BoardView, input: BattleInput) -> void:
+func setup(board: BoardView, input: BattleInput, hud: Hud) -> void:
 	_board = board
 	_input = input
+	_hud = hud
 	input.general_key_pressed.connect(_on_general_key)
 	input.cell_clicked.connect(_on_cell_clicked)
 	input.cell_hovered.connect(_on_cell_hovered)
+	input.undo_pressed.connect(_on_undo)
+	input.end_turn_pressed.connect(_on_end_turn)
+	hud.undo_pressed.connect(_on_undo)
+	hud.end_turn_pressed.connect(_on_end_turn)
 
 
-## Bắt đầu trận mới (kể cả nạp lại): bỏ chọn.
+## Bắt đầu trận mới (kể cả nạp lại): bỏ chọn, hiện bảng nút.
 func start(controller: BattleController) -> void:
 	_controller = controller
+	controller.events_resolved.connect(_on_events_resolved)
 	_deselect()
+	_update_hud()
 
 
-## Màn hình lỗi, menu: không còn trận, mọi thao tác không làm gì.
+## Màn hình lỗi, menu: không còn trận, mọi thao tác không làm gì, bảng nút ẩn.
 func stop() -> void:
 	_controller = null
 	_deselect()
+	_hud.visible = false
 
 
 func selected_id() -> int:
@@ -66,8 +76,37 @@ func _on_cell_clicked(cell: Vector2i) -> void:
 			_select(unit.id)
 		return
 	if _selected != NONE and _cells.has(cell):
-		return  # đi: Story 1.5
+		# Đi xong vẫn chọn tướng đó (tác giả chốt); vẽ lại ở _on_events_resolved.
+		_controller.submit(Command.move(_selected, cell))
+		return
 	_deselect()
+
+
+## Hủy nước đi gần nhất; vẫn giữ tướng đang chọn (tác giả chốt). Không có gì để hủy thì không gì.
+func _on_undo() -> void:
+	if _controller == null:
+		return
+	_controller.undo()
+
+
+## Kết thúc lượt rồi bỏ chọn (tác giả chốt).
+func _on_end_turn() -> void:
+	if _controller == null:
+		return
+	_controller.submit(Command.end_turn())
+	_deselect()
+
+
+## Sau mỗi lệnh chạy được và mỗi lần hủy: ô sáng, vòng chọn, đường đi của tướng đang chọn tính lại.
+func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) -> void:
+	if _controller == null:
+		return
+	if _selected != NONE:
+		if snapshot.unit_by_id(_selected) != null:
+			_select(_selected)
+		else:
+			_deselect()
+	_update_hud()
 
 
 func _on_cell_hovered(cell: Vector2i) -> void:
@@ -83,6 +122,10 @@ func _select(id: int) -> void:
 	_board.show_selection(_controller.snapshot().unit_by_id(id).cell, _cells)
 	# Chuột có thể đang nằm sẵn trên một ô vừa sáng: vẽ đường đi ngay, không chờ rê sang ô khác.
 	_on_cell_hovered(_input.hovered_cell())
+
+
+func _update_hud() -> void:
+	_hud.show_turn(_controller.snapshot().round_number, _controller.can_undo())
 
 
 func _deselect() -> void:

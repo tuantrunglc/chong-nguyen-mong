@@ -484,12 +484,53 @@ func test_every_board_symbol_has_a_name() -> void:
 
 func test_runner_stops_at_command_without_rule() -> void:
 	var d: Dictionary = _valid()
-	d["hanh_dong"] = [{"lenh": "huy"}, {"lenh": "ket_thuc_luot"}]
+	d["hanh_dong"] = [{"lenh": "danh", "tuong": "1", "o": "1,6"}, {"lenh": "ket_thuc_luot"}]
 	d["sau"]["mau"] = {"5,4": 1}
 	var result: ScenarioRunner.ScenarioResult = _run(d)
 	assert_false(result.passed)
-	assert_eq(result.problems, ['bước 1: lệnh "huy" chưa có luật (Story 1.5)'] as Array[String],
+	assert_eq(result.problems, ['bước 1: lệnh "danh" chưa có luật (Story 2.1)'] as Array[String],
 		"dừng ở bước 1, không so bàn sau")
+
+
+## Hủy chạy qua BattleController thật: đi rồi hủy thì bàn về như trước.
+func test_runner_undo_restores_board() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "2,5"}, {"lenh": "huy"}]
+	assert_eq(_run(d).problems, [] as Array[String])
+
+
+func test_runner_undo_with_nothing_to_undo_needs_reject_code() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [{"lenh": "huy"}]
+	assert_eq(_run(d).problems, [
+		'bước 1: luật từ chối ("khong_con_nuoc_di": không còn nước đi nào để hủy) mà kịch bản không ghi "tu_choi"',
+	] as Array[String])
+	d["hanh_dong"] = [{"lenh": "huy", "tu_choi": "khong_con_nuoc_di"}]
+	assert_eq(_run(d).problems, [] as Array[String])
+
+
+func test_runner_end_turn_lets_general_move_again() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [
+		{"lenh": "di", "tuong": "1", "o": "0,5"},
+		{"lenh": "ket_thuc_luot"},
+		{"lenh": "di", "tuong": "1", "o": "0,4"},
+	]
+	d["sau"]["quan"] = _units()
+	d["sau"]["quan"][6] = EMPTY_ROW
+	d["sau"]["quan"][4] = "1 . . . . B ."
+	assert_eq(_run(d).problems, [] as Array[String])
+
+
+func test_runner_second_move_in_turn_is_rejected() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "0,5"}, {"lenh": "di", "tuong": "1", "o": "0,4"}]
+	d["sau"]["quan"] = _units()
+	d["sau"]["quan"][6] = EMPTY_ROW
+	d["sau"]["quan"][5] = "1 . . . . . ."
+	assert_eq(_run(d).problems, [
+		'bước 2: luật từ chối ("da_di_roi": quân 1 đã đi rồi trong lượt này) mà kịch bản không ghi "tu_choi"',
+	] as Array[String])
 
 
 func test_runner_moves_general() -> void:

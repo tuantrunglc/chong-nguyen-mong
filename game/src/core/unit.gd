@@ -1,7 +1,7 @@
 class_name Unit
 extends RefCounted
 ## Một quân trên bàn: tướng hoặc quân Nguyên. Mọi thuộc tính gán trong _init (sao chép thì tạo Unit mới);
-## sau đó chỉ Effects được đổi vị trí và máu.
+## sau đó chỉ Effects được đổi vị trí và máu. Cờ has_moved: RulesMove đặt, RulesEnemyPhase xóa.
 
 ## Phe. Không đặt tên Side: trùng enum Side có sẵn của Godot (SIDE_LEFT…).
 enum Faction { DAI_VIET, NGUYEN }
@@ -12,9 +12,11 @@ var faction: Faction
 var type: int
 var cell: Vector2i
 var hp: int
+## Đã đi trong lượt người chơi này (không đi tiếp được nữa).
+var has_moved: bool
 
 
-func _init(p_id: int, p_type: int, p_cell: Vector2i, p_hp: int) -> void:
+func _init(p_id: int, p_type: int, p_cell: Vector2i, p_hp: int, p_has_moved: bool = false) -> void:
 	id = p_id
 	type = p_type
 	if UnitType.is_general(p_type):
@@ -23,3 +25,4 @@ func _init(p_id: int, p_type: int, p_cell: Vector2i, p_hp: int) -> void:
 		faction = Faction.NGUYEN
 	cell = p_cell
 	hp = p_hp
+	has_moved = p_has_moved

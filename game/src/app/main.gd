@@ -27,6 +27,7 @@ var _title_label: Label
 var _board_view: BoardView
 var _battle_input: BattleInput
 var _battle_view: BattleView
+var _hud: Hud
 var _version_label: Label
 
 
@@ -46,8 +47,10 @@ func _ready() -> void:
 	_battle_input = BattleInput.new()
 	_battle_input.setup(_board_view)
 	add_child(_battle_input)
+	_hud = Hud.new()
+	add_child(_hud)
 	_battle_view = BattleView.new()
-	_battle_view.setup(_board_view, _battle_input)
+	_battle_view.setup(_board_view, _battle_input, _hud)
 	add_child(_battle_view)
 
 	_version_label = Label.new()
@@ -106,10 +109,16 @@ func _start_battle() -> void:
 	Log.info("battle", "nạp trận %s" % level_id)
 	_controller = BattleController.new()
 	_controller.start(_level, AppState.stats)
+	# Nối trước BattleView: đồng quân và lớp F1 vẽ lại trước khi BattleView vẽ lại ô sáng.
+	_controller.events_resolved.connect(_on_events_resolved)
 	_show_board(_controller.snapshot())
 	_battle_view.start(_controller)
 	_hide_error()
 	_screen = Screen.BATTLE
+
+
+func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) -> void:
+	_show_board(snapshot)
 
 
 ## Thay bàn cờ bằng màn hình lỗi. Nhãn phiên bản và chữ DEV vẫn nằm trên nó.

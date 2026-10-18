@@ -66,6 +66,11 @@
 
 ## Deferred from: code review of 1-4-chon-tuong-va-xem-cac-o-di-duoc (2026-10-18)
 
-- `BattleView._cells` (ô sáng) tính một lần lúc chọn tướng, không làm mới khi trận đổi. Story 1.5 cho tướng đi thật thì phải chọn lại (hoặc bỏ chọn) sau mỗi lệnh, kẻo ô sáng và kiểm bấm dùng dữ liệu cũ.
+- `BattleView._cells` (ô sáng) tính một lần lúc chọn tướng, không làm mới khi trận đổi. Story 1.5 cho tướng đi thật thì phải chọn lại (hoặc bỏ chọn) sau mỗi lệnh, kẻo ô sáng và kiểm bấm dùng dữ liệu cũ. → xong ở Story 1.5 (`BattleView._on_events_resolved` chọn lại sau mỗi lệnh).
 - `BattleView` và `BattleInput` là anh em dưới `main`, không phải con của `BattleView` như "Mẫu giao tiếp" trong kiến trúc. Đúng theo Task 7.4 của Story 1.4; dọn khi E2 thêm view.
 - `BoardView.show_state(null)` tự xóa vòng chọn, còn `BattleView._selected` chỉ xóa khi gọi `stop()`. Hiện `main.gd` luôn gọi `stop()` trước; chỗ gọi mới mà quên thì hai bên lệch nhau và bấm vào ô "sáng" bị nuốt.
+
+## Deferred from: Story 1.5 (2026-10-18)
+
+- `BattleController.rolled_back` (lệnh làm hỏng bất biến, đã quay lại) chưa có chỗ hiện cho người chơi câu "Có lỗi, đã quay lại nước trước". Hiện chỉ ghi log ERROR. Làm cùng `src/ui/notice.gd` ở E2. Chỉ xảy ra khi có bug luật.
+- Kịch bản có `ket_thuc_luot` (`hiep/`, Story 1.5) không có quân Nguyên trên bàn, để pha địch E2 không làm hỏng bàn sau. Nếu E2 chốt luật "bàn không còn quân Nguyên thì thắng ngay ở cuối hiệp" thay vì "kiểm sau sự kiện gục", hai kịch bản này phải xét lại với tác giả.

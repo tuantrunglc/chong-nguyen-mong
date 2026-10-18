@@ -211,3 +211,48 @@ func test_blocked_by_terrain_is_rejected() -> void:
 	assert_eq(events[0].reject, BattleEvent.Reject.UNREACHABLE)
 	assert_eq(state.unit_by_id(1).cell, Vector2i(0, 6))
 	assert_eq(state.validate(), [] as Array[String])
+
+
+# ---------- Mỗi tướng đi một lần mỗi lượt (Story 1.5) ----------
+
+func test_move_sets_has_moved_and_empties_reachable() -> void:
+	var state: BattleState = _state(_rows({Vector2i(0, 6): "1", Vector2i(1, 6): "2"}))
+	assert_false(state.unit_by_id(1).has_moved)
+	Rules.resolve(state, Command.move(1, Vector2i(0, 4)))
+	assert_true(state.unit_by_id(1).has_moved)
+	assert_false(state.unit_by_id(2).has_moved, "Lão chưa đi")
+	assert_eq(_reachable(state, 1), [] as Array[Vector2i], "đã đi thì không còn ô sáng")
+	assert_eq(RulesMove.path_to(state, state.unit_by_id(1), Vector2i(0, 3)), [] as Array[Vector2i])
+	assert_eq(state.validate(), [] as Array[String])
+
+
+func test_second_move_in_turn_is_rejected() -> void:
+	var state: BattleState = _state(_rows({Vector2i(0, 6): "1"}))
+	Rules.resolve(state, Command.move(1, Vector2i(1, 6)))
+	var before: Array = _picture(state)
+	var events: Array[BattleEvent] = Rules.resolve(state, Command.move(1, Vector2i(2, 6)))
+	assert_eq(events.size(), 1)
+	assert_eq(events[0].type, BattleEvent.Type.REJECTED)
+	assert_eq(events[0].reject, BattleEvent.Reject.ALREADY_MOVED)
+	assert_eq(events[0].reason, "quân 1 đã đi rồi trong lượt này")
+	assert_eq(_picture(state), before, "state giữ nguyên")
+	assert_eq(state.validate(), [] as Array[String])
+
+
+func test_rejected_move_does_not_count_as_moved() -> void:
+	var state: BattleState = _state(_rows({Vector2i(0, 6): "1"}))
+	Rules.resolve(state, Command.move(1, Vector2i(4, 6)))
+	assert_false(state.unit_by_id(1).has_moved, "đi không được thì chưa tính là đã đi")
+	var events: Array[BattleEvent] = Rules.resolve(state, Command.move(1, Vector2i(3, 6)))
+	assert_eq(events[events.size() - 1].type, BattleEvent.Type.MOVED)
+	assert_eq(state.unit_by_id(1).cell, Vector2i(3, 6))
+	assert_eq(state.validate(), [] as Array[String])
+
+
+func test_other_general_still_moves_after_one_moved() -> void:
+	var state: BattleState = _state(_rows({Vector2i(0, 6): "1", Vector2i(1, 6): "2"}))
+	Rules.resolve(state, Command.move(1, Vector2i(0, 4)))
+	Rules.resolve(state, Command.move(2, Vector2i(1, 3)))
+	assert_eq(state.unit_by_id(2).cell, Vector2i(1, 3))
+	assert_true(state.unit_by_id(2).has_moved)
+	assert_eq(state.validate(), [] as Array[String])

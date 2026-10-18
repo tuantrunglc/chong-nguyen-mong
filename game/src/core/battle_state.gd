@@ -10,6 +10,8 @@ var size: Vector2i = Vector2i.ZERO
 ## Theo hàng: index = hang * size.x + cot (như LevelData).
 var terrain: PackedInt32Array = PackedInt32Array()
 var units: Array[Unit] = []
+## Hiệp hiện tại (cả 4 pha), bắt đầu từ 1.
+var round_number: int = 1
 ## Chỉ đọc, dùng chung giữa các bản sao.
 var stats: Stats = null
 
@@ -38,8 +40,9 @@ func clone() -> BattleState:
 	copy.size = size
 	copy.terrain = terrain.duplicate()
 	copy.stats = stats
+	copy.round_number = round_number
 	for u: Unit in units:
-		copy.units.append(Unit.new(u.id, u.type, u.cell, u.hp))
+		copy.units.append(Unit.new(u.id, u.type, u.cell, u.hp, u.has_moved))
 	return copy
 
 
@@ -48,6 +51,8 @@ func validate() -> Array[String]:
 	var problems: Array[String] = []
 	var seen_ids: Dictionary = {}
 	var by_cell: Dictionary = {}  # ô -> id quân đứng đó trước
+	if round_number < 1:
+		problems.append("hiệp %d, cần từ 1 trở lên" % round_number)
 	for u: Unit in units:
 		var where: String = "quân %d ở ô %d,%d" % [u.id, u.cell.x, u.cell.y]
 		if seen_ids.has(u.id):

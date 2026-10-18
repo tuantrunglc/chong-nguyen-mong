@@ -239,7 +239,7 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
 |---|---|---|---|---|
 | 1 | Trạng thái trận | `BattleState` thuần dữ liệu (RefCounted), có `clone()`, không tham chiếu tới Node | — | Hoàn tác, xem trước, test và tính tất định đều cần luật chạy được mà không cần màn hình |
 | 2 | Chủ giữ trạng thái | Chỉ `BattleController` giữ trạng thái đang sống. Phần trình bày chỉ nhận sự kiện và bản chụp | — | Tránh lỗi hoạt ảnh nhìn thấy dữ liệu bị đổi giữa lúc đang diễn |
-| 3 | Hoàn tác | Ngăn xếp bản chụp trạng thái | — | Bàn 7×7 nên chụp rất rẻ; đơn giản hơn lệnh đảo ngược |
+| 3 | Hoàn tác | Bản chụp trạng thái (hủy nước đi giữ một bản; chơi lại hiệp giữ bản đầu lượt) | — | Bàn 7×7 nên chụp rất rẻ; đơn giản hơn lệnh đảo ngược |
 | 4 | Bộ phân giải luật | Hàm thuần: nhận trạng thái và lệnh, áp dụng luật, trả về danh sách sự kiện | — | Một chỗ duy nhất chứa luật. Nhật ký sự kiện dùng chung cho hoạt ảnh, test và tua nhanh |
 | 5 | Trình tự hiệp | Biến pha nằm trong `BattleState`; chuyển pha bằng hàm của lõi luật | — | Không dùng StateMachine kiểu Node, để luật không lọt vào scene |
 | 6 | Enemy AI | Hàm thuần trong lõi luật, BFS tự viết, duyệt hướng cố định B→Đ→N→T | — | Tất định. Luật "đi xuyên quân mình" không khớp với AStarGrid2D |
@@ -272,13 +272,14 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
   - các ô tiếp viện đã báo;
   - cờ mưu kế, số hiệp, số hiệp tối đa (nếu có), Lòng dân hiện tại và tối đa (nếu có), pha hiện tại, cờ "đã dùng chơi lại hiệp".
 - **Lệnh của người chơi:** `Move`, `Attack`, `UseStratagem`, `EndTurn`.
-- **`BattleController` là nơi duy nhất giữ trạng thái đang sống.** Nó gọi bộ phân giải, đẩy bản chụp vào ngăn xếp hoàn tác, rồi gửi danh sách sự kiện và bản chụp sau cùng cho phần trình bày.
+- **`BattleController` là nơi duy nhất giữ trạng thái đang sống.** Nó chụp trạng thái trước lệnh, gọi bộ phân giải, giữ bản chụp để hủy nước đi, rồi gửi danh sách sự kiện và bản chụp sau cùng cho phần trình bày.
 - **Bộ phân giải** sửa trực tiếp trên trạng thái được truyền vào và trả về danh sách sự kiện. Muốn giữ bản gốc (hoàn tác, xem trước) thì phải `clone()` trước khi gọi.
 - **Sự kiện** gồm một trường loại và dữ liệu đi kèm. Các loại dự kiến: đi, bị đẩy, bị kéo, va chạm, mất máu, gục, chết đuối, báo đòn, ra đòn, hủy đòn, đòn dịch theo, tiếp viện xuất hiện, tiếp viện bị chặn, hồi máu, đốt kho lương, làng bị trúng (kèm Lòng dân còn lại), hết hiệp, dùng mưu kế, đổi pha, thắng, thua. Danh sách chính thức chốt ở bước Patterns.
 - **Hoàn tác:**
   - "Hủy nước đi" quay về bản chụp ngay trước khi tướng đó đi.
-  - Lệnh `Attack` hoặc `UseStratagem` **xóa sạch ngăn xếp hủy** (chốt 2026-10-17). Ngăn xếp chỉ chứa các lệnh `Move` kể từ đòn đánh hoặc mưu kế gần nhất.
-  - "Chơi lại hiệp" quay về bản chụp đầu lượt người chơi, **kể cả cờ mưu kế** (mưu kế dùng trong lượt được trả lại), rồi xóa ngăn xếp hủy. Riêng cờ "đã dùng chơi lại hiệp" được đặt thành đã dùng sau khi khôi phục.
+  - **Chỉ giữ một bản chụp**: hủy được đúng một nước (nước đi gần nhất); hủy xong phải đi nước mới mới hủy tiếp được (tác giả chốt 2026-10-18).
+  - Lệnh `Attack`, `UseStratagem` (chốt 2026-10-17) và `EndTurn` **xóa bản chụp hủy**.
+  - "Chơi lại hiệp" quay về bản chụp đầu lượt người chơi, **kể cả cờ mưu kế** (mưu kế dùng trong lượt được trả lại), rồi xóa bản chụp hủy. Riêng cờ "đã dùng chơi lại hiệp" được đặt thành đã dùng sau khi khôi phục.
 - **Xem trước:** clone trạng thái, chạy lệnh trên bản sao, rồi hiển thị kết quả dạng mờ. Ở E2 chỉ hiện vị trí cuối và số máu.
 
 **Phần trình bày** (Node, Tween, HUD) chỉ đọc bản chụp để vẽ và phát lại sự kiện. Phần này **không bao giờ** sửa trạng thái và **không giữ tham chiếu** tới trạng thái đang sống.
@@ -337,7 +338,7 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
 | Phần | Nội dung |
 |---|---|
 | `truoc` | Bàn cờ và máu ban đầu |
-| `hanh_dong` | Danh sách lệnh dạng object, ví dụ `{"tuong": "3", "lenh": "danh", "o": "4,2"}`. Lệnh `{"lenh": "ket_thuc_luot"}` chạy luôn pha địch. Lệnh luật phải từ chối thì ghi thêm `"tu_choi": "<mã lý do>"` (`khong_co_quan`, `khong_phai_tuong`, `da_dung_o_do`, `khong_toi_duoc`); lệnh bị từ chối mà không ghi, hoặc ghi mà không bị từ chối, là kịch bản trượt |
+| `hanh_dong` | Danh sách lệnh dạng object, ví dụ `{"tuong": "3", "lenh": "danh", "o": "4,2"}`. Lệnh `{"lenh": "ket_thuc_luot"}` chạy luôn pha địch. Lệnh luật phải từ chối thì ghi thêm `"tu_choi": "<mã lý do>"` (`khong_co_quan`, `khong_phai_tuong`, `da_dung_o_do`, `khong_toi_duoc`, `da_di_roi`, `khong_con_nuoc_di`; lệnh `huy` cũng nhận `tu_choi`); lệnh bị từ chối mà không ghi, hoặc ghi mà không bị từ chối, là kịch bản trượt |
 | `sau` | Bàn cờ và máu mong đợi. Có thể ghi thêm vài sự kiện chính (ví dụ `chet_duoi`) khi đó chính là điều cần kiểm |
 
 Mỗi khi chốt một luật, AI viết kịch bản, tác giả đọc rồi trả lời "đúng" hoặc "sai". Một lệnh chạy toàn bộ kịch bản và in kết quả đạt/trượt bằng tiếng Việt.
@@ -384,10 +385,10 @@ Mọi hệ thống phải tuân theo các mẫu dưới đây. Đây là luật 
 |---|---|---|---|
 | **Lỗi dữ liệu** | File trận sai ký hiệu, `chi_so.json` thiếu khóa, file lưu hỏng | Bộ nạp trả về `{ok, data, errors}`. Mỗi lỗi là một câu tiếng Việt, ghi rõ file, dòng và giá trị sai. Không làm sập game | Bật dev: màn hình lỗi liệt kê đủ các lỗi. Bản phát hành: chỉ thông báo ngắn kèm nút "Về menu"; chi tiết vẫn ghi vào log |
 | **Lệnh không hợp lệ** | Bấm đi vào ô bị chặn, đánh ngoài tầm | Bộ phân giải từ chối lệnh, trả về lý do. Đây **không phải lỗi**, không ghi log ERROR | Không có gì thay đổi; ô hoặc nút không sáng lên |
-| **Vi phạm bất biến** (bug) | Quân ra ngoài bàn, máu âm, hai quân chung một ô, đòn không có chủ | Sau mỗi lần phân giải, chạy `BattleState.validate()` (bắt buộc trong test và khi bật dev). Phát hiện thì ghi log ERROR và **khôi phục bản chụp gần nhất** từ ngăn xếp hoàn tác | Thông báo "Có lỗi, đã quay lại nước trước", game vẫn chạy tiếp |
+| **Vi phạm bất biến** (bug) | Quân ra ngoài bàn, máu âm, hai quân chung một ô, đòn không có chủ | Sau mỗi lần phân giải, chạy `BattleState.validate()` (bắt buộc trong test và khi bật dev). Phát hiện thì ghi log ERROR và **khôi phục bản chụp trước lệnh** | Thông báo "Có lỗi, đã quay lại nước trước", game vẫn chạy tiếp |
 
 **Luật:**
-- Không bao giờ để game kẹt. Ngăn xếp hoàn tác chính là cơ chế cứu trận.
+- Không bao giờ để game kẹt. Bản chụp trước mỗi lệnh chính là cơ chế cứu trận.
 - Không dùng `assert()` cho lỗi dữ liệu, vì `assert()` bị bỏ qua trong bản phát hành.
 
 **Ví dụ:**
@@ -567,7 +568,7 @@ chong-nguyen-mong/                    # repo
 │   │   │   ├── scenario_loader.gd
 │   │   │   └── save_system.gd        # user://save.json, có trường phien_ban
 │   │   ├── battle/                   # CẦU NỐI + TRÌNH BÀY TRẬN (Node)
-│   │   │   ├── battle_controller.gd  # giữ trạng thái sống, ngăn xếp hoàn tác, xem trước
+│   │   │   ├── battle_controller.gd  # giữ trạng thái sống, bản chụp hủy, xem trước
 │   │   │   ├── battle_view.gd        # gốc phần hiển thị trận
 │   │   │   ├── board_view.gd         # vẽ 49 ô thoi (isometric) bằng code; nơi duy nhất đổi ô ↔ điểm
 │   │   │   ├── unit_token.gd         # đồng quân tròn khắc chữ
@@ -640,7 +641,7 @@ chong-nguyen-mong/                    # repo
 | 8 | Địa hình | `src/core/rules_terrain.gd` | — |
 | 9 | Mưu kế | `src/core/rules_stratagem.gd` | — |
 | 10 | Tiếp viện | `src/core/rules_enemy_phase.gd` | — |
-| 11 | Hoàn tác, chơi lại hiệp | `src/battle/battle_controller.gd` | Ngăn xếp bản chụp |
+| 11 | Hoàn tác, chơi lại hiệp | `src/battle/battle_controller.gd` | Bản chụp trạng thái |
 | 12 | Dữ liệu trận | `data/tran/`, `src/data/level_loader.gd` | — |
 | 13 | Trình bày, hoạt ảnh | `src/battle/*_view.gd`, `event_player.gd` | Chỉ đọc bản chụp |
 | 14 | Input, HUD | `src/battle/battle_input.gd`, `src/ui/hud.gd` | Input → `Command` |
@@ -833,7 +834,7 @@ Mọi luật đều đi qua đúng quy trình này. Không có ngoại lệ.
 | 4. Cuối hiệp | Quân Nguyên kề **ít nhất một** kho lương hồi 1 máu (tối đa 1 mỗi hiệp, không vượt máu tối đa). Sau đó báo tiếp viện cho hiệp sau. Trận có `so_hiep_toi_da`: nếu đây là hiệp cuối mà còn quân Nguyên thì **thua** **(mặc định)** |
 
 **Hủy nước đi:**
-- Chỉ hủy được **nước đi gần nhất** (vào sau ra trước), và chỉ khi tướng đó **chưa đánh**. Muốn quay lại xa hơn thì dùng "Chơi lại hiệp". **(mặc định)**
+- Chỉ hủy được **nước đi gần nhất**, đúng **một** nước: hủy xong phải đi nước mới mới hủy tiếp được (tác giả chốt 2026-10-18). Chỉ khi tướng đó **chưa đánh**. Muốn quay lại xa hơn thì dùng "Chơi lại hiệp". Kết thúc lượt cũng xóa bản chụp hủy.
 
 **Gục, thắng, thua:**
 - Quân Nguyên gục thì bị nhấc khỏi bàn. **Tướng gục cũng bị nhấc khỏi bàn**, không chiếm ô. **(mặc định)** **[KIỂM TRA KHI PLAYTEST E4]**: phương án thay thế là để xác lại làm vật cản.
@@ -965,7 +966,7 @@ Tác giả không dùng git trực tiếp. AI lo toàn bộ phần git:
 
 - **E0 đổi từ "Học Godot" thành "Dựng nền":** tạo project, cài GUT, viết các script trong `tools/`, cài MCP, xuất thử web lên itch.io.
   - **Xong khi:** `tools/test.sh` chạy được; link itch.io mở được bàn cờ trống trên trình duyệt; bản để **riêng tư** cho tới khi tác giả quyết công khai.
-- **E1 "Hủy nước đi":** theo luật đã chốt, chỉ hủy nước đi gần nhất của tướng chưa đánh. Từ E2: đánh hoặc dùng mưu kế thì xóa ngăn xếp hủy.
+- **E1 "Hủy nước đi":** theo luật đã chốt, chỉ hủy nước đi gần nhất của tướng chưa đánh. Từ E2: đánh hoặc dùng mưu kế thì xóa bản chụp hủy.
 - **Còn treo, đã có chỗ xử lý:** các luật **(mặc định)** được duyệt qua `tools/xem_kich_ban.sh` ở đợt kịch bản E2–E3; "tướng gục bị nhấc khỏi bàn" kiểm tra khi playtest E4.
 
 ### Ngày kiểm tra

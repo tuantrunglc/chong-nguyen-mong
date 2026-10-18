@@ -1,10 +1,12 @@
 class_name BattleInput
 extends Node
 ## Chuột và phím tắt trên bàn cờ -> signal. Không biết luật, không giữ trạng thái trận.
-## Phím 1-2-3 khai báo trong InputMap bằng code (như DevTools). Dùng _unhandled_input để nút của
+## Phím 1-2-3, Z (hủy), Space (kết thúc lượt) khai báo trong InputMap bằng code (như DevTools). Dùng _unhandled_input để nút của
 ## màn hình lỗi (Control) nhận bấm trước.
 
 signal general_key_pressed(index: int)
+signal undo_pressed
+signal end_turn_pressed
 signal cell_clicked(cell: Vector2i)
 ## Chỉ phát khi ô dưới chuột đổi; ra ngoài bàn thì cell là BoardView.NO_CELL.
 signal cell_hovered(cell: Vector2i)
@@ -15,7 +17,16 @@ const GENERAL_ACTIONS: Dictionary = {
 	"select_general_2": 2,
 	"select_general_3": 3,
 }
-const GENERAL_KEYS: Array[Key] = [KEY_1, KEY_2, KEY_3]
+const UNDO_ACTION: String = "undo_move"
+const END_TURN_ACTION: String = "end_turn"
+## Action -> phím vật lý, cho mọi phím tắt của bàn cờ.
+const ACTION_KEYS: Dictionary = {
+	"select_general_1": KEY_1,
+	"select_general_2": KEY_2,
+	"select_general_3": KEY_3,
+	UNDO_ACTION: KEY_Z,
+	END_TURN_ACTION: KEY_SPACE,
+}
 
 var _board: BoardView = null
 var _hovered: Vector2i = BoardView.NO_CELL
@@ -32,14 +43,12 @@ func hovered_cell() -> Vector2i:
 
 func _ready() -> void:
 	get_window().mouse_exited.connect(_on_mouse_exited)
-	var actions: Array = GENERAL_ACTIONS.keys()
-	for i: int in range(actions.size()):
-		var action: String = actions[i] as String
+	for action: String in ACTION_KEYS:
 		if InputMap.has_action(action):
 			continue
 		InputMap.add_action(action)
 		var ev: InputEventKey = InputEventKey.new()
-		ev.physical_keycode = GENERAL_KEYS[i]
+		ev.physical_keycode = ACTION_KEYS[action] as Key
 		InputMap.action_add_event(action, ev)
 
 
@@ -55,6 +64,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed(action, false, true):
 			general_key_pressed.emit(GENERAL_ACTIONS[action] as int)
 			return
+	# Không nhận lặp phím: giữ Space không kết thúc nhiều lượt liền.
+	if event.is_action_pressed(UNDO_ACTION, false, true):
+		undo_pressed.emit()
+		return
+	if event.is_action_pressed(END_TURN_ACTION, false, true):
+		end_turn_pressed.emit()
+		return
 	if _board == null:
 		return
 	var mouse: InputEventMouse = event as InputEventMouse

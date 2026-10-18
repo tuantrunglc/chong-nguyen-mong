@@ -140,6 +140,26 @@ func test_clone_is_deep() -> void:
 	assert_eq(copy.stats, original.stats, "chỉ số dùng chung")
 
 
+func test_clone_copies_round_and_moved_flag() -> void:
+	var original: BattleState = _state()
+	original.round_number = 4
+	original.units[0] = Unit.new(1, UnitType.NGUYEN_KHOAI, Vector2i(2, 6), 4, true)
+	var copy: BattleState = original.clone()
+	assert_eq(copy.round_number, 4)
+	assert_true(copy.unit_by_id(1).has_moved, "bản sao giữ cờ đã đi")
+	assert_false(copy.unit_by_id(2).has_moved)
+	copy.round_number = 5
+	copy.unit_by_id(1).has_moved = false
+	assert_eq(original.round_number, 4, "bản gốc không đổi hiệp")
+	assert_true(original.unit_by_id(1).has_moved, "bản gốc không đổi cờ")
+
+
+func test_validate_round_number() -> void:
+	var s: BattleState = _manual([] as Array[Unit])
+	s.round_number = 0
+	assert_eq(s.validate(), ["hiệp 0, cần từ 1 trở lên"] as Array[String])
+
+
 func test_validate_duplicate_id() -> void:
 	var s: BattleState = _manual([
 		Unit.new(1, UnitType.NGUYEN_KHOAI, Vector2i(0, 0), 4),

@@ -1,5 +1,6 @@
 extends GutTest
-## Chọn tướng trên trận 1 thật (Story 1.4): phím 1-2-3, bấm, bỏ chọn, ô sáng, đường đi.
+## Trận 1 thật: chọn tướng (Story 1.4: phím 1-2-3, bấm, bỏ chọn, ô sáng, đường đi) và đi, hủy,
+## kết thúc lượt, bảng nút (Story 1.5).
 ## Trận 1 và chi_so.json thật: tướng ở 0,6 và 2,6, sông cột 3 (trừ hàng 3), tầm đi 3.
 
 const MAIN_SCENE: String = "res://scenes/main.tscn"
@@ -29,7 +30,7 @@ func after_each() -> void:
 	AppState.launch.tran = ""
 	AppState.launch.warnings.clear()
 	AppState.stats = null
-	for action: String in BattleInput.GENERAL_ACTIONS:
+	for action: String in BattleInput.ACTION_KEYS:
 		if InputMap.has_action(action):
 			InputMap.erase_action(action)
 	for i: int in range(DevTools.KEYS.size()):
@@ -182,12 +183,150 @@ func test_click_on_unlit_cell_deselects() -> void:
 		_assert_nothing_selected(main)
 
 
-func test_click_on_lit_cell_keeps_selection() -> void:
+# ---------- Đi, hủy, kết thúc lượt (Story 1.5) ----------
+
+const KHOAI_TARGET: Vector2i = Vector2i(0, 4)
+const LAO_TARGET: Vector2i = Vector2i(2, 4)
+
+
+func _controller(main: Node2D) -> BattleController:
+	return main._controller as BattleController
+
+
+func _hud(main: Node2D) -> Hud:
+	return main._hud as Hud
+
+
+func _unit_cell(main: Node2D, id: int) -> Vector2i:
+	return _controller(main).snapshot().unit_by_id(id).cell
+
+
+func _token(main: Node2D, id: int) -> UnitToken:
+	return _board(main).tokens()[id] as UnitToken
+
+
+## Bấm chuột thật vào tâm ô (qua BattleInput).
+func _click_by_mouse(main: Node2D, cell: Vector2i) -> void:
+	var click: InputEventMouseButton = InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = _board(main).get_global_transform_with_canvas() * BoardView.cell_center(cell)
+	_battle_input(main)._unhandled_input(click)
+
+
+## Phím thật trên bàn phím (phím vật lý).
+func _press_physical(main: Node2D, key: Key, echo: bool = false) -> void:
+	var ev: InputEventKey = InputEventKey.new()
+	ev.physical_keycode = key
+	ev.pressed = true
+	ev.echo = echo
+	_battle_input(main)._unhandled_input(ev)
+
+
+func test_click_on_lit_cell_moves_and_keeps_selection() -> void:
 	var main: Node2D = _make_main()
 	_press_key(main, 1)
-	_click(main, Vector2i(2, 5))
+	_click_by_mouse(main, KHOAI_TARGET)
+	assert_eq(_unit_cell(main, 1), KHOAI_TARGET)
+	assert_eq(_token(main, 1).position, BoardView.cell_center(KHOAI_TARGET), "đồng quân sang ô mới")
+	assert_true(_token(main, 1).is_moved(), "dấu đã đi")
+	assert_false(_token(main, 2).is_moved(), "Lão chưa đi")
+	_assert_selected(main, 1, [] as Array[Vector2i], KHOAI_TARGET)
+	assert_false(_hud(main).undo_button().disabled, "nút Hủy sáng")
+
+
+func test_selecting_moved_general_shows_no_lit_cells() -> void:
+	var main: Node2D = _make_main()
+	_press_key(main, 1)
+	_click(main, KHOAI_TARGET)
+	_press_key(main, 2)
+	_press_key(main, 1)
+	_assert_selected(main, 1, [] as Array[Vector2i], KHOAI_TARGET)
+
+
+func test_key_z_undoes_and_lights_cells_again() -> void:
+	var main: Node2D = _make_main()
+	_press_key(main, 1)
+	_click(main, KHOAI_TARGET)
+	_press_physical(main, KEY_Z)
+	assert_eq(_unit_cell(main, 1), KHOAI_CELL)
+	assert_false(_token(main, 1).is_moved())
 	_assert_selected(main, 1, KHOAI_CELLS, KHOAI_CELL)
-	assert_eq((main._controller as BattleController).snapshot().unit_by_id(1).cell, KHOAI_CELL, "chưa đi (Story 1.5)")
+	assert_true(_hud(main).undo_button().disabled, "đã hủy thì nút Hủy mờ")
+
+
+func test_undo_button_undoes_only_the_last_move() -> void:
+	var main: Node2D = _make_main()
+	_press_key(main, 1)
+	_click(main, KHOAI_TARGET)
+	_press_key(main, 2)
+	_click(main, LAO_TARGET)
+	_hud(main).undo_button().pressed.emit()
+	assert_eq(_unit_cell(main, 2), LAO_CELL, "Lão về chỗ cũ")
+	assert_eq(_unit_cell(main, 1), KHOAI_TARGET, "Khoái vẫn ở ô mới")
+	assert_true(_hud(main).undo_button().disabled)
+	_press_physical(main, KEY_Z)
+	assert_eq(_unit_cell(main, 1), KHOAI_TARGET, "hủy lần hai không làm gì")
+	assert_true(_token(main, 1).is_moved())
+
+
+func test_undo_with_nothing_to_undo_does_nothing() -> void:
+	var main: Node2D = _make_main()
+	assert_true(_hud(main).visible)
+	assert_true(_hud(main).undo_button().disabled, "chưa đi thì nút Hủy mờ")
+	_press_physical(main, KEY_Z)
+	assert_eq(_unit_cell(main, 1), KHOAI_CELL)
+	assert_eq(_unit_cell(main, 2), LAO_CELL)
+
+
+func test_space_ends_turn() -> void:
+	var main: Node2D = _make_main()
+	assert_eq(_hud(main).round_text(), "Hiệp 1")
+	_press_key(main, 1)
+	_click(main, KHOAI_TARGET)
+	_press_physical(main, KEY_SPACE)
+	assert_eq(_hud(main).round_text(), "Hiệp 2")
+	_assert_nothing_selected(main)
+	assert_false(_token(main, 1).is_moved(), "hết dấu đã đi")
+	assert_true(_hud(main).undo_button().disabled, "không hủy được nước của lượt trước")
+	_press_key(main, 1)
+	assert_gt(_view(main).lit_cells().size(), 0, "Khoái đi lại được")
+
+
+func test_end_turn_button_and_held_space() -> void:
+	var main: Node2D = _make_main()
+	_hud(main).end_turn_button().pressed.emit()
+	assert_eq(_hud(main).round_text(), "Hiệp 2")
+	_press_physical(main, KEY_SPACE, true)
+	assert_eq(_hud(main).round_text(), "Hiệp 2", "giữ phím (lặp) không kết thúc thêm lượt")
+
+
+## Nút nhận focus thì Space (ui_accept) bấm lại nút vừa bấm bằng chuột.
+func test_hud_buttons_never_take_focus() -> void:
+	var main: Node2D = _make_main()
+	for button: Button in [_hud(main).undo_button(), _hud(main).end_turn_button()]:
+		assert_eq(button.focus_mode, Control.FOCUS_NONE)
+	assert_eq(_hud(main).undo_button().text, "Hủy (Z)")
+	assert_eq(_hud(main).end_turn_button().text, "Kết thúc lượt (Space)")
+
+
+func test_coord_overlay_follows_moved_unit() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main()
+	_press_key(main, 1)
+	_click(main, KHOAI_TARGET)
+	var cell_origin: Vector2 = Vector2(KHOAI_TARGET) * BoardView.CELL_SIZE
+	var found: bool = false
+	for child: Node in (main._coord_overlay as CoordOverlay).get_children():
+		if child.is_queued_for_deletion() or child.get_child_count() == 0:
+			continue
+		var label: Label = child.get_child(0) as Label
+		if label != null and label.text == "1":
+			var at: Vector2 = (child as Control).position
+			assert_eq(at.y, cell_origin.y + CoordOverlay.MARGIN, "id 1 ở hàng của ô mới")
+			assert_between(at.x, cell_origin.x, cell_origin.x + BoardView.CELL_SIZE, "id 1 ở cột của ô mới")
+			found = true
+	assert_true(found, "lớp F1 có id 1")
 
 
 func test_hover_lit_cell_draws_path() -> void:
@@ -244,6 +383,10 @@ func test_keys_do_nothing_on_error_screen() -> void:
 	assert_eq(main._screen, main.Screen.ERROR)
 	_press_key(main, 1)
 	_click(main, KHOAI_CELL)
+	_assert_nothing_selected(main)
+	assert_false(_hud(main).visible, "màn hình lỗi không có bảng nút")
+	_press_physical(main, KEY_Z)
+	_press_physical(main, KEY_SPACE)
 	_assert_nothing_selected(main)
 
 

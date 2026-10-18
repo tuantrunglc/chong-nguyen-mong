@@ -4,7 +4,7 @@ baseline_commit: 02a300ccbeb8855bed37bfbb2fb980c46ec953c0
 
 # Story 1.5: Đi, hủy nước đi, kết thúc lượt
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -54,70 +54,70 @@ tôi muốn đi, hủy nước vừa đi và kết thúc lượt,
   - [x] 1.2 Viết 7 file đúng như Dev Notes "Đợt kịch bản 2", `"da_duyet": false`. Không đụng 8 kịch bản `di_chuyen/` đã duyệt.
   - [x] 1.3 `tools/xem_kich_ban.sh`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `tu_choi` hiện đúng câu tiếng Việt. `tools/test.sh`: xanh, `8 đã duyệt · 7 chưa duyệt (7 chưa đạt)`, lý do khớp bảng.
   - [x] 1.4 Commit: `Kịch bản hủy và kết thúc lượt chờ duyệt (Story 1.5)`.
-  - [ ] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh`, đọc 7 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ kịch bản `huy/huy_hai_lan.json` đã viết theo chốt "chỉ hủy được một nước". Không làm Task 2 trở đi khi chưa có câu trả lời.
-  - [ ] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" thì sửa, cho duyệt lại (lặp 1.3–1.6). `tools/test.sh` **phải trượt** (AC 2). Ghi Debug Log. **Không commit** khi đang đỏ.
-- [ ] **Task 2: Lõi luật: cờ "đã đi", số hiệp, lệnh kết thúc lượt** (AC: 3, 4, 7)
-  - [ ] 2.1 `src/core/unit.gd`: thêm `var has_moved: bool`, gán trong `_init` qua tham số cuối `p_has_moved: bool = false`. Sửa chú thích đầu file: vị trí và máu chỉ `Effects` đổi; cờ `has_moved` do `RulesMove` (đặt) và `RulesEnemyPhase` (xóa) đổi.
-  - [ ] 2.2 `src/core/battle_state.gd`: thêm `var round_number: int = 1` (hiệp hiện tại, bắt đầu từ 1). **`clone()` chép cả `round_number` và `has_moved` của từng quân** (`Unit.new(u.id, u.type, u.cell, u.hp, u.has_moved)`). `validate()` thêm: `round_number < 1` là sai.
-  - [ ] 2.3 `src/core/command.gd`: `enum Kind { MOVE, END_TURN }`; `static func end_turn() -> Command` (`unit_id` 0, `cell` `Vector2i(-1, -1)`).
-  - [ ] 2.4 `src/core/battle_event.gd`: `Type.ROUND_STARTED` (sang hiệp mới); trường `round_number: int = 0`, gán trong `_init` (tham số cuối, mặc định 0); hàm tạo `round_started(p_round: int)`.
-  - [ ] 2.5 `src/core/rules_move.gd`:
+  - [x] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh`, đọc 7 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ kịch bản `huy/huy_hai_lan.json` đã viết theo chốt "chỉ hủy được một nước". Không làm Task 2 trở đi khi chưa có câu trả lời.
+  - [x] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" thì sửa, cho duyệt lại (lặp 1.3–1.6). `tools/test.sh` **phải trượt** (AC 2). Ghi Debug Log. **Không commit** khi đang đỏ.
+- [x] **Task 2: Lõi luật: cờ "đã đi", số hiệp, lệnh kết thúc lượt** (AC: 3, 4, 7)
+  - [x] 2.1 `src/core/unit.gd`: thêm `var has_moved: bool`, gán trong `_init` qua tham số cuối `p_has_moved: bool = false`. Sửa chú thích đầu file: vị trí và máu chỉ `Effects` đổi; cờ `has_moved` do `RulesMove` (đặt) và `RulesEnemyPhase` (xóa) đổi.
+  - [x] 2.2 `src/core/battle_state.gd`: thêm `var round_number: int = 1` (hiệp hiện tại, bắt đầu từ 1). **`clone()` chép cả `round_number` và `has_moved` của từng quân** (`Unit.new(u.id, u.type, u.cell, u.hp, u.has_moved)`). `validate()` thêm: `round_number < 1` là sai.
+  - [x] 2.3 `src/core/command.gd`: `enum Kind { MOVE, END_TURN }`; `static func end_turn() -> Command` (`unit_id` 0, `cell` `Vector2i(-1, -1)`).
+  - [x] 2.4 `src/core/battle_event.gd`: `Type.ROUND_STARTED` (sang hiệp mới); trường `round_number: int = 0`, gán trong `_init` (tham số cuối, mặc định 0); hàm tạo `round_started(p_round: int)`.
+  - [x] 2.5 `src/core/rules_move.gd`:
     - `resolve`: sau bước kiểm `NOT_GENERAL`, nếu `unit.has_moved` thì từ chối `Reject.ALREADY_MOVED`, lý do `quân %d đã đi rồi trong lượt này`. Đi xong (sau vòng `Effects.move`) thì `unit.has_moved = true`.
     - `reachable`: tướng đã đi thì trả `[]`. `path_to` cũng trả `[]`.
     - Sửa chú thích đầu file (bỏ "Cờ đã đi thêm ở Story 1.5").
-  - [ ] 2.6 `src/core/rules_enemy_phase.gd` (MỚI, `class_name RulesEnemyPhase`): `static func end_player_turn(state, events)`. Story này chỉ làm phần cuối hiệp: `state.round_number += 1`, xóa `has_moved` của **mọi** quân (duyệt theo `state.units`), `events.append(BattleEvent.round_started(state.round_number))`. Chú thích: pha địch ra đòn, cuối hiệp (kho lương, tiếp viện), địch chuẩn bị chèn vào đây ở E2–E3, theo "Mẫu trạng thái" của kiến trúc. **Chưa** thêm `Phase` (Story 2.6 thêm khi có pha địch).
-  - [ ] 2.7 `src/core/rules.gd`: `Command.Kind.END_TURN` → `RulesEnemyPhase.end_player_turn(state, events)`.
-- [ ] **Task 3: BattleController: `submit`, bản chụp hủy, cứu trận** (AC: 3, 5, 6, 7)
-  - [ ] 3.1 `src/battle/battle_controller.gd`, theo Dev Notes "BattleController":
+  - [x] 2.6 `src/core/rules_enemy_phase.gd` (MỚI, `class_name RulesEnemyPhase`): `static func end_player_turn(state, events)`. Story này chỉ làm phần cuối hiệp: `state.round_number += 1`, xóa `has_moved` của **mọi** quân (duyệt theo `state.units`), `events.append(BattleEvent.round_started(state.round_number))`. Chú thích: pha địch ra đòn, cuối hiệp (kho lương, tiếp viện), địch chuẩn bị chèn vào đây ở E2–E3, theo "Mẫu trạng thái" của kiến trúc. **Chưa** thêm `Phase` (Story 2.6 thêm khi có pha địch).
+  - [x] 2.7 `src/core/rules.gd`: `Command.Kind.END_TURN` → `RulesEnemyPhase.end_player_turn(state, events)`.
+- [x] **Task 3: BattleController: `submit`, bản chụp hủy, cứu trận** (AC: 3, 5, 6, 7)
+  - [x] 3.1 `src/battle/battle_controller.gd`, theo Dev Notes "BattleController":
     - `signal events_resolved(events: Array[BattleEvent], snapshot: BattleState)` và `signal rolled_back(problems: Array[String])`;
     - `var _undo_snapshot: BattleState = null` (bản chụp trước nước đi gần nhất; chỉ giữ **một**, tác giả chốt); `start()` đặt lại `null`;
     - `submit(command: Command) -> Array[BattleEvent]`;
     - `undo() -> Array[BattleEvent]`;
     - `can_undo() -> bool`;
     - `_resolve(state, command) -> Array[BattleEvent]` (chỉ gọi `Rules.resolve`; tách ra để test thay được, Task 6.2).
-  - [ ] 3.2 Sửa chú thích đầu file. Giữ `reachable`, `path_to`, `snapshot` như cũ.
-- [ ] **Task 4: Bộ chạy kịch bản chạy qua BattleController** (AC: 1, 3)
-  - [ ] 4.1 `tests/scenario_runner.gd`: bỏ `"huy"`, `"ket_thuc_luot"` khỏi `PENDING_RULES` (chỉ còn `"danh": "2.1"`). `run()` dựng `BattleController` từ `scenario.before` (`start(scenario.before, stats)`), không gọi `Rules.resolve` trực tiếp nữa:
+  - [x] 3.2 Sửa chú thích đầu file. Giữ `reachable`, `path_to`, `snapshot` như cũ.
+- [x] **Task 4: Bộ chạy kịch bản chạy qua BattleController** (AC: 1, 3)
+  - [x] 4.1 `tests/scenario_runner.gd`: bỏ `"huy"`, `"ket_thuc_luot"` khỏi `PENDING_RULES` (chỉ còn `"danh": "2.1"`). `run()` dựng `BattleController` từ `scenario.before` (`start(scenario.before, stats)`), không gọi `Rules.resolve` trực tiếp nữa:
     - kiểm `controller.snapshot().validate()` ngay sau `start` (giữ câu `trước: ...`);
     - nối `rolled_back` vào một mảng; sau mỗi bước, mảng có câu thì bước đó trượt `vi phạm bất biến: <câu>` (controller đã quay lại, nên `validate()` trên bản chụp không còn thấy lỗi);
     - `di` → `controller.submit(Command.move(id, ô))`; `ket_thuc_luot` → `controller.submit(Command.end_turn())`; `huy` → `controller.undo()`. Cả ba đi qua `_check_reject(events, step.reject)`;
     - sau mỗi bước vẫn chạy `validate()` trên `controller.snapshot()`; cuối cùng `compare(controller.snapshot(), scenario)`.
-  - [ ] 4.2 `_general(state, type)` tìm trên `controller.snapshot()`.
-  - [ ] 4.3 `tests/test_scenario_loader.gd`: `test_runner_stops_at_command_without_rule` đổi sang lệnh `danh` (`lệnh "danh" chưa có luật (Story 2.1)`). Thêm test bộ chạy: `huy` sau `di` (bàn về như trước); `huy` không có gì để hủy mà kịch bản không ghi `tu_choi` thì trượt đúng câu; `ket_thuc_luot` rồi `di` lại được.
-- [ ] **Task 5: Test lõi luật và controller** (AC: 3)
-  - [ ] 5.1 `tests/test_rules_move.gd` thêm: đi xong thì `has_moved` bật; `reachable` rỗng; lệnh đi lần hai bị `REJECTED` với `Reject.ALREADY_MOVED`, state giữ nguyên (so từng quân); lệnh bị từ chối **không** bật `has_moved`; tướng khác vẫn đi được. Mỗi ca `validate()` rỗng.
-  - [ ] 5.2 `tests/test_rules_enemy_phase.gd` (MỚI): `end_player_turn` tăng `round_number` 1→2→3; xóa `has_moved` của mọi tướng; sinh đúng một `ROUND_STARTED` với `round_number` mới; không đổi ô, máu; `validate()` rỗng; gọi hai lần trên hai bản clone ra cùng sự kiện.
-  - [ ] 5.3 `tests/test_battle_state.gd`: `test_clone_is_deep` kiểm thêm `has_moved` và `round_number` (đổi trên bản sao không ảnh hưởng bản gốc, và bản sao chép đúng giá trị). Thêm ca `validate()` với `round_number = 0`.
-  - [ ] 5.4 Kiểm test bắt lỗi thật (như Story 1.4 Task 5.2), mỗi lần sửa tạm một chỗ rồi trả lại, ghi Debug Log:
+  - [x] 4.2 `_general(state, type)` tìm trên `controller.snapshot()`.
+  - [x] 4.3 `tests/test_scenario_loader.gd`: `test_runner_stops_at_command_without_rule` đổi sang lệnh `danh` (`lệnh "danh" chưa có luật (Story 2.1)`). Thêm test bộ chạy: `huy` sau `di` (bàn về như trước); `huy` không có gì để hủy mà kịch bản không ghi `tu_choi` thì trượt đúng câu; `ket_thuc_luot` rồi `di` lại được.
+- [x] **Task 5: Test lõi luật và controller** (AC: 3)
+  - [x] 5.1 `tests/test_rules_move.gd` thêm: đi xong thì `has_moved` bật; `reachable` rỗng; lệnh đi lần hai bị `REJECTED` với `Reject.ALREADY_MOVED`, state giữ nguyên (so từng quân); lệnh bị từ chối **không** bật `has_moved`; tướng khác vẫn đi được. Mỗi ca `validate()` rỗng.
+  - [x] 5.2 `tests/test_rules_enemy_phase.gd` (MỚI): `end_player_turn` tăng `round_number` 1→2→3; xóa `has_moved` của mọi tướng; sinh đúng một `ROUND_STARTED` với `round_number` mới; không đổi ô, máu; `validate()` rỗng; gọi hai lần trên hai bản clone ra cùng sự kiện.
+  - [x] 5.3 `tests/test_battle_state.gd`: `test_clone_is_deep` kiểm thêm `has_moved` và `round_number` (đổi trên bản sao không ảnh hưởng bản gốc, và bản sao chép đúng giá trị). Thêm ca `validate()` với `round_number = 0`.
+  - [x] 5.4 Kiểm test bắt lỗi thật (như Story 1.4 Task 5.2), mỗi lần sửa tạm một chỗ rồi trả lại, ghi Debug Log:
     - bỏ dòng xóa `_undo_snapshot` khi kết thúc lượt → kịch bản `hiep/ket_thuc_luot_xoa_huy.json` và test controller phải trượt;
     - bỏ dòng `unit.has_moved = true` → kịch bản `di_chuyen/di_hai_lan.json` và test luật phải trượt;
     - bỏ chép `has_moved` trong `clone()` → `test_clone_is_deep` phải trượt (kịch bản không bắt được ca này, vì bản chụp hủy luôn chụp lúc tướng chưa đi).
-- [ ] **Task 6: Test BattleController** (AC: 3, 5, 6, 7)
-  - [ ] 6.1 `tests/test_battle_controller.gd` (MỚI), dựng `LevelData` nhỏ bằng tay (như `test_rules_move.gd`, không phụ thuộc file trận):
+- [x] **Task 6: Test BattleController** (AC: 3, 5, 6, 7)
+  - [x] 6.1 `tests/test_battle_controller.gd` (MỚI), dựng `LevelData` nhỏ bằng tay (như `test_rules_move.gd`, không phụ thuộc file trận):
     - `submit(move)` hợp lệ: ô đổi, `can_undo()` true, `events_resolved` phát một lần, bản chụp kèm theo **không phải** state sống (sửa bản chụp không đổi `snapshot()` sau đó);
     - `submit` bị từ chối: không đổi bản chụp hủy (nước đi trước đó vẫn hủy được), không phát `events_resolved`;
     - `undo()`: về ô cũ, `has_moved` tắt; hai nước đi thì `undo()` chỉ trả nước thứ hai; `undo()` lần nữa trả một `REJECTED` `NOTHING_TO_UNDO`, không phát signal, tướng đi trước vẫn ở ô mới; đi thêm một nước thì `can_undo()` lại true;
     - `submit(end_turn)`: `round_number` tăng, `can_undo()` false;
     - `start()` lại thì `can_undo()` false.
-  - [ ] 6.2 Ca cứu trận: lớp con trong file test `extends BattleController`, ghi đè `_resolve` để làm hỏng state (ví dụ đặt hai quân chung ô, test không bị `check_boundaries.sh` quét). Kiểm: `rolled_back` phát kèm câu lỗi, `snapshot()` giống hệt trước lệnh, bản chụp hủy không đổi (`can_undo()` như trước lệnh), `events_resolved` không phát, log có dòng `[ERROR][battle]`.
-- [ ] **Task 7: Input, HUD, BattleView, đồng quân** (AC: 4–10)
-  - [ ] 7.1 `src/battle/battle_input.gd`: đăng ký thêm action `undo_move` (phím vật lý `KEY_Z`) và `end_turn` (`KEY_SPACE`) theo đúng mẫu `GENERAL_ACTIONS` (đã có thì bỏ qua). Signal `undo_pressed`, `end_turn_pressed`. Dùng `is_action_pressed(action, false, true)` (không nhận lặp phím) như phím 1-2-3.
-  - [ ] 7.2 `src/ui/hud.gd` (MỚI, `class_name Hud extends Control`), dựng hoàn toàn bằng code theo Dev Notes "HUD":
+  - [x] 6.2 Ca cứu trận: lớp con trong file test `extends BattleController`, ghi đè `_resolve` để làm hỏng state (ví dụ đặt hai quân chung ô, test không bị `check_boundaries.sh` quét). Kiểm: `rolled_back` phát kèm câu lỗi, `snapshot()` giống hệt trước lệnh, bản chụp hủy không đổi (`can_undo()` như trước lệnh), `events_resolved` không phát, log có dòng `[ERROR][battle]`.
+- [x] **Task 7: Input, HUD, BattleView, đồng quân** (AC: 4–10)
+  - [x] 7.1 `src/battle/battle_input.gd`: đăng ký thêm action `undo_move` (phím vật lý `KEY_Z`) và `end_turn` (`KEY_SPACE`) theo đúng mẫu `GENERAL_ACTIONS` (đã có thì bỏ qua). Signal `undo_pressed`, `end_turn_pressed`. Dùng `is_action_pressed(action, false, true)` (không nhận lặp phím) như phím 1-2-3.
+  - [x] 7.2 `src/ui/hud.gd` (MỚI, `class_name Hud extends Control`), dựng hoàn toàn bằng code theo Dev Notes "HUD":
     - nhãn hiệp `tr("hud.round") % n`, nút Hủy `tr("hud.undo")`, nút Kết thúc lượt `tr("hud.end_turn")`;
     - signal `undo_pressed`, `end_turn_pressed`;
     - `show_turn(round_number: int, can_undo: bool)`; ẩn khi không có trận (`visible = false`);
     - **mọi nút `focus_mode = Control.FOCUS_NONE`**; phần không phải nút `mouse_filter = MOUSE_FILTER_IGNORE`.
-  - [ ] 7.3 `src/battle/battle_view.gd`, theo bảng ở Dev Notes "Chọn, đi, hủy, kết thúc lượt":
+  - [x] 7.3 `src/battle/battle_view.gd`, theo bảng ở Dev Notes "Chọn, đi, hủy, kết thúc lượt":
     - `setup(board, input, hud)` nối thêm `undo_pressed`, `end_turn_pressed` của cả `BattleInput` và `Hud`;
     - `start(controller)` nối `controller.events_resolved` → `_on_events_resolved`; cập nhật HUD (`show_turn`), hiện HUD. `stop()` ẩn HUD;
     - bấm ô sáng → `_controller.submit(Command.move(_selected, ô))`;
     - `_on_events_resolved`: làm mới chọn (`_refresh_selection()`: tướng đang chọn còn trên bàn thì tính lại `_cells` từ `controller.reachable`, vẽ lại vòng chọn ở ô mới, vẽ lại đường đi theo ô chuột đang trỏ; không còn thì bỏ chọn), cập nhật HUD. Đây là chỗ xử lý mục hoãn "`_cells` tính một lần" của Story 1.4;
     - hủy → `_controller.undo()`; kết thúc lượt → `_controller.submit(Command.end_turn())` rồi bỏ chọn.
-  - [ ] 7.4 `src/battle/unit_token.gd`: `update(unit)` nhận `unit.has_moved`, `queue_redraw()` khi đổi; `_draw` dùng `DAI_VIET_MOVED_COLOR` cho tướng đã đi. Thêm `is_moved() -> bool` (chỉ đọc, cho test). Quân Nguyên không đổi màu.
-  - [ ] 7.5 `src/app/main.gd`: tạo `Hud` một lần trong `_ready` (sau bàn cờ, trước nhãn phiên bản), truyền vào `BattleView.setup`. `_start_battle` thành công: nối `_controller.events_resolved` → `_on_events_resolved(events, snapshot)` gọi `_show_board(snapshot)` (đồng quân **và** lớp F1), **trước** khi gọi `_battle_view.start(_controller)`. `_show_error` / `_show_menu` không đổi ngoài việc `stop()` đã ẩn HUD. `test_main.gd` phải xanh nguyên.
-  - [ ] 7.6 `i18n/text.csv`: `hud.round` = `Hiệp %d`; `hud.undo` = `Hủy (Z)`; `hud.end_turn` = `Kết thúc lượt (Space)`. `tools/test.sh` tự `--import` lại `text.vi.translation`; commit cả file đó.
-- [ ] **Task 8: Test giao diện trận** (AC: 4–10)
-  - [ ] 8.1 `tests/test_battle_view.gd` thêm (trận 1 thật, như các test sẵn có):
+  - [x] 7.4 `src/battle/unit_token.gd`: `update(unit)` nhận `unit.has_moved`, `queue_redraw()` khi đổi; `_draw` dùng `DAI_VIET_MOVED_COLOR` cho tướng đã đi. Thêm `is_moved() -> bool` (chỉ đọc, cho test). Quân Nguyên không đổi màu.
+  - [x] 7.5 `src/app/main.gd`: tạo `Hud` một lần trong `_ready` (sau bàn cờ, trước nhãn phiên bản), truyền vào `BattleView.setup`. `_start_battle` thành công: nối `_controller.events_resolved` → `_on_events_resolved(events, snapshot)` gọi `_show_board(snapshot)` (đồng quân **và** lớp F1), **trước** khi gọi `_battle_view.start(_controller)`. `_show_error` / `_show_menu` không đổi ngoài việc `stop()` đã ẩn HUD. `test_main.gd` phải xanh nguyên.
+  - [x] 7.6 `i18n/text.csv`: `hud.round` = `Hiệp %d`; `hud.undo` = `Hủy (Z)`; `hud.end_turn` = `Kết thúc lượt (Space)`. `tools/test.sh` tự `--import` lại `text.vi.translation`; commit cả file đó.
+- [x] **Task 8: Test giao diện trận** (AC: 4–10)
+  - [x] 8.1 `tests/test_battle_view.gd` thêm (trận 1 thật, như các test sẵn có):
     - chọn Khoái, bấm ô `0,4` (qua `_battle_input(main)._unhandled_input` với sự kiện chuột thật): đồng ở `0,4`, `is_moved()` true, vẫn chọn Khoái, `lit_cells()` rỗng, vòng chọn ở `0,4`;
     - phím `Z` (gửi **`InputEventKey` thật** với `physical_keycode = KEY_Z`, như ca `KEY_1` của review 1.4): Khoái về `0,6`, hết `is_moved()`, ô sáng hiện lại đúng `KHOAI_CELLS`;
     - đi Khoái rồi Lão, bấm nút Hủy (`hud.undo_pressed.emit()` hoặc `Button.pressed.emit()`): chỉ Lão về; nút Hủy `disabled`;
@@ -126,15 +126,15 @@ tôi muốn đi, hủy nước vừa đi và kết thúc lượt,
     - giữ `Space` (sự kiện `echo = true`): không kết thúc thêm lượt;
     - màn hình lỗi: HUD ẩn, `Z`/`Space` không làm gì;
     - bật dev, bật F1, đi Khoái: lớp F1 có id `1` ở ô mới.
-  - [ ] 8.2 `after_each` xóa thêm action `undo_move`, `end_turn`.
-  - [ ] 8.3 `tests/test_i18n.gd` (nếu có kiểm danh sách khóa) phải xanh với 5 khóa mới.
-- [ ] **Task 9: Tài liệu, kiểm bằng mắt, commit** (AC: 3–10)
-  - [ ] 9.1 `_bmad-output/planning-artifacts/game-architecture.md`:
+  - [x] 8.2 `after_each` xóa thêm action `undo_move`, `end_turn`.
+  - [x] 8.3 `tests/test_i18n.gd` (nếu có kiểm danh sách khóa) phải xanh với 5 khóa mới.
+- [x] **Task 9: Tài liệu, kiểm bằng mắt, commit** (AC: 3–10)
+  - [x] 9.1 `_bmad-output/planning-artifacts/game-architecture.md`:
     - mục "Dữ liệu trận, chỉ số và kịch bản luật", dòng `hanh_dong`: thêm mã `da_di_roi`, `khong_con_nuoc_di` vào danh sách mã `tu_choi`, ghi `huy` cũng nhận `tu_choi`;
     - mục "Quản lý trạng thái" (Hoàn tác) và "Bảng thứ tự phân giải" (Hủy nước đi): đổi "ngăn xếp… vào sau ra trước" thành "chỉ giữ một bản chụp: hủy được đúng một nước, hủy xong phải đi nước mới mới hủy tiếp được (tác giả chốt 2026-10-18)". Đánh, mưu kế, kết thúc lượt xóa bản chụp đó. `project-context.md` (mục "Những điều không được quên", câu Hủy nước đi) sửa theo cùng ý.
-  - [ ] 9.2 Chạy `tools/chay.sh --dev` ở chế độ nền, chờ ~5 giây. Dùng GoPeak: `inject_action` (`select_general_1`, `undo_move`, `end_turn`; `inject_key` không kích hoạt action theo phím vật lý, xem Debug Log 1.4), `inject_mouse_click` vào ô `0,4` (pixel = vị trí bàn `(332, 52)` + `cell_center`, tức `(376, 448)`), `capture_screenshot` sau mỗi bước. Xem: màu "đã đi" khác rõ màu tướng chưa đi, chữ và số máu còn đọc được; bảng bên phải không đè bàn cờ, không đè nhãn phiên bản; nút Hủy mờ khi không hủy được. Tắt game. Ghi Debug Log.
-  - [ ] 9.3 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, `.uid` mới, `text.vi.translation`. Ví dụ: `Đi, hủy nước đi, kết thúc lượt; kịch bản huy và hiep (Story 1.5)`.
-  - [ ] 9.4 Ghi hướng dẫn tác giả tự test vào Completion Notes theo mẫu ở mục Testing, dùng kết quả thật.
+  - [x] 9.2 Chạy `tools/chay.sh --dev` ở chế độ nền, chờ ~5 giây. Dùng GoPeak: `inject_action` (`select_general_1`, `undo_move`, `end_turn`; `inject_key` không kích hoạt action theo phím vật lý, xem Debug Log 1.4), `inject_mouse_click` vào ô `0,4` (pixel = vị trí bàn `(332, 52)` + `cell_center`, tức `(376, 448)`), `capture_screenshot` sau mỗi bước. Xem: màu "đã đi" khác rõ màu tướng chưa đi, chữ và số máu còn đọc được; bảng bên phải không đè bàn cờ, không đè nhãn phiên bản; nút Hủy mờ khi không hủy được. Tắt game. Ghi Debug Log.
+  - [x] 9.3 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, `.uid` mới, `text.vi.translation`. Ví dụ: `Đi, hủy nước đi, kết thúc lượt; kịch bản huy và hiep (Story 1.5)`.
+  - [x] 9.4 Ghi hướng dẫn tác giả tự test vào Completion Notes theo mẫu ở mục Testing, dùng kết quả thật.
 
 ## Dev Notes
 
@@ -440,13 +440,71 @@ Nhớ commit file `.uid` của mọi script mới.
 
 - Task 1: khung (2 mã từ chối mới, `huy` nhận `tu_choi`, chữ công cụ duyệt) + 7 kịch bản viết bằng script. `tools/xem_kich_ban.sh huy`/`hiep`: bàn trước/sau khớp `mo_ta`, dòng `→ bị từ chối: …` hiện đúng. `tools/test.sh`: 273/273 đạt, `Kịch bản luật: 8 đã duyệt · 7 chưa duyệt (7 chưa đạt)`, lý do từng file khớp bảng "Lý do chưa đạt".
 
+- Task 1.6: tác giả trả lời "đúng hết" (2026-10-18). Đổi `da_duyet: true` cho 7 file (mỗi file 1 dòng). `tools/test.sh` trượt đúng AC 2: `kịch bản đã duyệt di_chuyen/di_hai_lan.json: bước 2: kịch bản ghi "tu_choi": "da_di_roi" nhưng luật cho chạy`. Không commit lúc đỏ.
+- Task 2–4: lõi luật + controller + bộ chạy xong thì 15/15 kịch bản đạt ngay. Còn đúng một test cũ trượt (`test_runner_stops_at_command_without_rule` dùng `huy`), đã đổi sang `danh` (Story 2.1).
+- Task 5.4 (làm hỏng tạm, đã trả lại): bỏ xóa bản chụp hủy khi kết thúc lượt → trượt kịch bản `hiep/ket_thuc_luot_xoa_huy.json`; bỏ `unit.has_moved = true` → trượt 4 test luật/bộ chạy + kịch bản `di_chuyen/di_hai_lan.json`; bỏ chép `has_moved` trong `clone()` → trượt `test_clone_copies_round_and_moved_flag`. Thêm: bỏ nối `events_resolved` → `_show_board` trong `main.gd` → trượt 3 test giao diện (đồng quân, lớp F1).
+- Task 6: lần đầu `test_only_one_move_can_be_undone` trượt vì chính test chọn ô `2,3` (4 bước, quá tầm); sửa test sang `2,4`.
+- Task 8: `test_coord_overlay_follows_moved_unit` lần đầu không thấy id vì chữ F1 nằm trong `PanelContainer`; sửa cách tìm trong test.
+- Task 9.2 (GoPeak, `tools/chay.sh --dev`): bảng bên phải "Hiệp 1", nút Hủy mờ, không đè bàn cờ hay nhãn phiên bản. Bấm Khoái rồi ô `0,4` (pixel 376, 448): Khoái sang ô mới, đỏ xỉn khác rõ đỏ đậm của Lão, chữ và số máu đọc được, nút Hủy sáng. `inject_action undo_move`: Khoái về `0,6`, đỏ đậm lại, nút Hủy mờ. `select_general_2` + bấm `2,4`: Lão đi, vẫn có vòng vàng, không còn ô sáng. Bấm nút "Kết thúc lượt" (pixel 1100, 177): "Hiệp 2", bỏ chọn, Lão đỏ đậm lại, nút Hủy mờ. Log không có ERROR. Lưu ý khi thử bằng GoPeak: ảnh chụp ngay sau cú bấm có thể chưa kịp vẽ lại; lần đầu tưởng bấm không ăn nên bấm thêm, cú thứ ba trúng chính Khoái ở ô mới nên bỏ chọn (đúng luật).
+- `tools/test.sh` cuối cùng: 303/303 đạt, ranh giới đạt, `Kịch bản luật: 15 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
+
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Đã làm đủ Task 1–9. Thêm 30 test (273 → 303) và 7 kịch bản (8 → 15 đã duyệt).
+- **Lệch so với story (ghi để review):**
+  - `BattleInput` gom mọi phím vào một bảng `ACTION_KEYS` (thay `GENERAL_KEYS`); `GENERAL_ACTIONS` giữ nguyên.
+  - `Hud` có thêm hàm đọc `round_text()`, `undo_button()`, `end_turn_button()` cho test; `UnitToken.is_moved()`.
+  - Không viết test "bấm nút rồi gõ Space"; thay bằng test mọi nút `focus_mode = FOCUS_NONE` (`test_hud_buttons_never_take_focus`).
+  - Ngoài `game-architecture.md`, sửa luôn `project-context.md` (câu Hủy nước đi) theo Task 9.1.
+
+**Hướng dẫn tác giả tự test** (kết quả thật, đã chụp màn hình bằng GoPeak):
+1. Gõ `tools/test.sh`. Đúng là: `✅ 303/303 test đạt`, có dòng `Kịch bản luật: 15 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
+2. Gõ `tools/chay.sh`. Bên phải bàn cờ có "Hiệp 1", nút "Hủy (Z)" đang mờ, nút "Kết thúc lượt (Space)".
+3. Bấm "Khoái", bấm ô `0,4` (hai ô phía trên): Khoái sang đó, đồng đổi sang đỏ xỉn, vẫn có vòng vàng nhưng không còn ô sáng; nút Hủy sáng lên.
+4. Bấm "Lão", bấm ô `2,4` (hai ô phía trên Lão): Lão đi, cũng đỏ xỉn.
+5. Bấm Hủy: chỉ Lão về chỗ cũ, đỏ đậm lại; nút Hủy mờ. Gõ `Z`: không có gì, Khoái vẫn ở `0,4`.
+6. Gõ `Space`: "Hiệp 2", Khoái đỏ đậm lại, bỏ chọn; chọn lại Khoái thì có ô sáng; nút Hủy mờ.
+7. Chỉ dùng chuột, làm lại bước 3–6 bằng hai nút bên phải: kết quả giống hệt.
+
+(Nếu đang bật bộ gõ VNI/Telex thì tắt đi trước khi gõ phím. Trên bản web, bấm vào game một lần trước khi gõ.)
 
 ### File List
+
+- `game/src/core/unit.gd`
+- `game/src/core/battle_state.gd`
+- `game/src/core/command.gd`
+- `game/src/core/battle_event.gd`
+- `game/src/core/rules.gd`
+- `game/src/core/rules_move.gd`
+- `game/src/core/rules_enemy_phase.gd` (mới)
+- `game/src/battle/battle_controller.gd`
+- `game/src/battle/battle_input.gd`
+- `game/src/battle/battle_view.gd`
+- `game/src/battle/unit_token.gd`
+- `game/src/ui/hud.gd` (mới)
+- `game/src/app/main.gd`
+- `game/src/data/scenario_loader.gd`
+- `game/i18n/text.csv`, `game/i18n/text.vi.translation`
+- `game/tests/scenario_runner.gd`
+- `game/tests/test_scenario_loader.gd`
+- `game/tests/test_rules_move.gd`
+- `game/tests/test_rules_enemy_phase.gd` (mới)
+- `game/tests/test_battle_controller.gd` (mới)
+- `game/tests/test_battle_state.gd`
+- `game/tests/test_battle_view.gd`
+- `game/tests/kich_ban/di_chuyen/di_hai_lan.json` (mới)
+- `game/tests/kich_ban/huy/*.json` (4 mới)
+- `game/tests/kich_ban/hiep/*.json` (2 mới)
+- file `.uid` của mọi script mới
+- `_bmad-output/planning-artifacts/game-architecture.md`
+- `_bmad-output/project-context.md`
+- `_bmad-output/implementation-artifacts/deferred-work.md`
+- `_bmad-output/implementation-artifacts/1-5-di-huy-nuoc-di-ket-thuc-luot.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ### Change Log
 
 - 2026-10-18: Tạo story.
 - 2026-10-18: Tác giả chốt 5 câu hỏi: chỉ hủy được một nước (sửa AC 5–6, kịch bản `huy_hai_lan`, controller giữ một bản chụp, thêm việc sửa kiến trúc ở Task 9.1); giữ chọn khi đi và khi hủy; bỏ chọn khi kết thúc lượt; đỏ xỉn cho "đã đi".
+- 2026-10-18: Làm story: mỗi tướng đi một lần mỗi lượt, hủy một nước, kết thúc lượt (sang hiệp mới); `BattleController.submit/undo` có bản chụp hủy và quay lại khi hỏng bất biến; bảng nút HUD; đồng quân đỏ xỉn khi đã đi. 7 kịch bản mới tác giả đã duyệt, đều đạt. `tools/test.sh`: 303/303.

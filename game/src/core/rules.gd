@@ -9,4 +9,6 @@ static func resolve(state: BattleState, command: Command) -> Array[BattleEvent]:
 	match command.kind:
 		Command.Kind.MOVE:
 			RulesMove.resolve(state, command, events)
+		Command.Kind.END_TURN:
+			RulesEnemyPhase.end_player_turn(state, events)
 	return events

@@ -6,6 +6,8 @@ extends Node2D
 const RADIUS: float = 34.0
 const BORDER_WIDTH: float = 3.0
 const DAI_VIET_COLOR: Color = Color(0.70, 0.13, 0.13)
+## Tướng đã đi trong lượt: đỏ xỉn, không dùng độ trong suốt (bóng mờ dành cho xem trước ở E2).
+const DAI_VIET_MOVED_COLOR: Color = Color(0.55, 0.40, 0.38)
 const DAI_VIET_TEXT_COLOR: Color = Color(1.0, 0.95, 0.80)
 const NGUYEN_COLOR: Color = Color(0.17, 0.20, 0.28)
 const NGUYEN_TEXT_COLOR: Color = Color(1.0, 1.0, 1.0)
@@ -31,6 +33,7 @@ var unit_id: int = 0
 ## UnitType. Đổi loại thì BoardView dựng đồng mới, không gọi update().
 var unit_type: int = -1
 var _faction: Unit.Faction = Unit.Faction.DAI_VIET
+var _moved: bool = false
 var _name_label: Label
 var _hp_label: Label
 
@@ -56,6 +59,13 @@ func setup(unit: Unit) -> void:
 func update(unit: Unit) -> void:
 	position = BoardView.cell_center(unit.cell)
 	_hp_label.text = str(unit.hp)
+	if unit.has_moved != _moved:
+		_moved = unit.has_moved
+		queue_redraw()
+
+
+func is_moved() -> bool:
+	return _moved
 
 
 func name_text() -> String:
@@ -77,8 +87,14 @@ func _centered_label(box: Vector2, center: Vector2) -> Label:
 
 
 func _draw() -> void:
-	var fill: Color = DAI_VIET_COLOR if _faction == Unit.Faction.DAI_VIET else NGUYEN_COLOR
-	draw_circle(Vector2.ZERO, RADIUS, fill)
+	draw_circle(Vector2.ZERO, RADIUS, _fill_color())
 	draw_circle(Vector2.ZERO, RADIUS, BoardView.LINE_COLOR, false, BORDER_WIDTH, true)
 	draw_circle(HP_OFFSET, HP_RADIUS, HP_COLOR)
 	draw_circle(HP_OFFSET, HP_RADIUS, BoardView.LINE_COLOR, false, HP_BORDER_WIDTH, true)
+
+
+## Story 2.1 thêm màu "đã đánh" ở đây.
+func _fill_color() -> Color:
+	if _faction == Unit.Faction.NGUYEN:
+		return NGUYEN_COLOR
+	return DAI_VIET_MOVED_COLOR if _moved else DAI_VIET_COLOR

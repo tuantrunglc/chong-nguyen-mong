@@ -1,12 +1,11 @@
 class_name ScenarioRunner
 extends RefCounted
-## Chạy một kịch bản luật: dựng bàn trước, chạy từng lệnh, so kết quả với bàn sau (theo ô).
+## Chạy một kịch bản luật: dựng bàn trước, chạy từng lệnh qua BattleController (như game thật, kể cả hủy),
+## so kết quả với bàn sau (theo ô).
 ## Câu so sánh cho dev và log, không qua tr() (như câu lỗi của bộ nạp).
 
 ## Lệnh -> story sẽ viết luật cho lệnh đó. Lệnh có luật rồi thì bỏ khỏi bảng này và thêm nhánh trong _run_step.
 const PENDING_RULES: Dictionary = {
-	"huy": "1.5",
-	"ket_thuc_luot": "1.5",
 	"danh": "2.1",
 }
 
@@ -51,21 +50,29 @@ class ScenarioResult:
 
 static func run(scenario: ScenarioData, stats: Stats) -> ScenarioResult:
 	var result: ScenarioResult = ScenarioResult.new()
-	var state: BattleState = BattleState.from_level(scenario.before, stats)
-	for problem: String in state.validate():
+	var controller: BattleController = BattleController.new()
+	controller.start(scenario.before, stats)
+	for problem: String in controller.snapshot().validate():
 		result.problems.append("trước: %s" % problem)
 	if not result.passed:
 		return result
+	# Controller tự quay lại khi lệnh làm hỏng bất biến, nên validate() sau đó không thấy lỗi: nghe signal.
+	var rolled_back: Array[String] = []
+	controller.rolled_back.connect(func(problems: Array[String]) -> void: rolled_back.append_array(problems))
 	for i: int in range(scenario.steps.size()):
-		var problem: String = _run_step(state, scenario.steps[i])
+		var problem: String = _run_step(controller, scenario.steps[i])
+		for invariant: String in rolled_back:
+			result.problems.append("bước %d: vi phạm bất biến: %s" % [i + 1, invariant])
+		if not result.passed:
+			return result
 		if not problem.is_empty():
 			result.problems.append("bước %d: %s" % [i + 1, problem])
 			return result
-		for invariant: String in state.validate():
+		for invariant: String in controller.snapshot().validate():
 			result.problems.append("bước %d: %s" % [i + 1, invariant])
 		if not result.passed:
 			return result
-	result.problems.append_array(compare(state, scenario))
+	result.problems.append_array(compare(controller.snapshot(), scenario))
 	return result
 
 
@@ -84,13 +91,17 @@ static func terrain_symbol(terrain: int) -> String:
 ## Chạy một lệnh trên state. Trả "" nếu chạy được, hoặc câu báo vì sao không chạy được.
 ## Lệnh bị luật từ chối (REJECTED) đúng lý do kịch bản ghi ("tu_choi") vẫn là chạy được: không có gì đổi,
 ## bàn sau so như thường. Bị từ chối mà kịch bản không ghi, sai lý do, hay ghi mà không bị từ chối: trượt.
-static func _run_step(state: BattleState, step: ScenarioData.ScenarioStep) -> String:
+static func _run_step(controller: BattleController, step: ScenarioData.ScenarioStep) -> String:
 	match step.kind:
 		"di":
-			var general: Unit = _general(state, step.general)
+			var general: Unit = _general(controller.snapshot(), step.general)
 			if general == null:
 				return 'tướng "%s" không còn trên bàn' % unit_symbol(step.general)
-			return _check_reject(Rules.resolve(state, Command.move(general.id, step.cell)), step.reject)
+			return _check_reject(controller.submit(Command.move(general.id, step.cell)), step.reject)
+		"ket_thuc_luot":
+			return _check_reject(controller.submit(Command.end_turn()), step.reject)
+		"huy":
+			return _check_reject(controller.undo(), step.reject)
 		_:
 			return 'lệnh "%s" chưa có luật (Story %s)' % [step.kind, PENDING_RULES.get(step.kind, "?")]
 
