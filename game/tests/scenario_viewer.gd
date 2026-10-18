@@ -135,7 +135,11 @@ static func render(scenario: ScenarioData, stats: Stats) -> String:
 	else:
 		lines.append(_t("scenario.viewer.actions"))
 		for i: int in range(scenario.steps.size()):
-			lines.append("  %d. %s" % [i + 1, _step_text(scenario.steps[i])])
+			var step: ScenarioData.ScenarioStep = scenario.steps[i]
+			var text: String = _step_text(step)
+			if not step.reject.is_empty():
+				text += _t("scenario.viewer.rejected") % _t(ScenarioLoader.REJECT_CODES[step.reject] as String)
+			lines.append("  %d. %s" % [i + 1, text])
 	lines.append("")
 
 	var size: Vector2i = scenario.before.size

@@ -63,3 +63,9 @@
 
 - Khóa `da_duyet` trong `tools/test.sh` chỉ chặn sửa chưa commit: AI sửa kịch bản đã duyệt rồi commit luôn thì lọt. Grep theo dòng bỏ sót `"da_duyet":` và `true` nằm khác dòng; khóa trùng (`true` rồi `false`) thì grep coi là khóa còn Godot lấy giá trị sau. Cân nhắc so với commit lúc duyệt hoặc đọc JSON thật.
 - Định dạng kịch bản luôn dựng trận ELIMINATE, `tiep_vien`/`so_hiep_toi_da`/`long_dan`/`muu_ke_mo` để mặc định, chưa có khóa để đặt. Cần khi viết kịch bản kết thúc lượt, giữ ải, tiếp viện (Story 1.5 trở đi).
+
+## Deferred from: code review of 1-4-chon-tuong-va-xem-cac-o-di-duoc (2026-10-18)
+
+- `BattleView._cells` (ô sáng) tính một lần lúc chọn tướng, không làm mới khi trận đổi. Story 1.5 cho tướng đi thật thì phải chọn lại (hoặc bỏ chọn) sau mỗi lệnh, kẻo ô sáng và kiểm bấm dùng dữ liệu cũ.
+- `BattleView` và `BattleInput` là anh em dưới `main`, không phải con của `BattleView` như "Mẫu giao tiếp" trong kiến trúc. Đúng theo Task 7.4 của Story 1.4; dọn khi E2 thêm view.
+- `BoardView.show_state(null)` tự xóa vòng chọn, còn `BattleView._selected` chỉ xóa khi gọi `stop()`. Hiện `main.gd` luôn gọi `stop()` trước; chỗ gọi mới mà quên thì hai bên lệch nhau và bấm vào ô "sáng" bị nuốt.

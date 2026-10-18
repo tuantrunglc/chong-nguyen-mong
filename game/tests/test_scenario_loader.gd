@@ -337,6 +337,35 @@ func test_step_errors() -> void:
 	] as Array[String])
 
 
+func test_step_reject_code_is_read() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [
+		{"lenh": "di", "tuong": "1", "o": "4,6", "tu_choi": "khong_toi_duoc"},
+		{"lenh": "di", "tuong": "1", "o": "1,6"},
+	]
+	var s: ScenarioData = _scenario(d)
+	if s == null:
+		return
+	assert_eq(s.steps[0].reject, "khong_toi_duoc")
+	assert_eq(s.steps[1].reject, "", "không ghi là lệnh phải chạy được")
+
+
+func test_step_reject_code_errors() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [
+		{"lenh": "di", "tuong": "1", "o": "4,6", "tu_choi": "bi_chan"},
+		{"lenh": "di", "tuong": "1", "o": "4,6", "tu_choi": true},
+		{"lenh": "huy", "tu_choi": "khong_toi_duoc"},
+	]
+	var r: LoadResult = _parse(d)
+	var codes: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc"'
+	assert_eq(r.errors, [
+		F + ': "hanh_dong" mục 1 (di): "tu_choi" là "bi_chan", chỉ được ' + codes,
+		F + ': "hanh_dong" mục 2 (di): "tu_choi" là true, chỉ được ' + codes,
+	] as Array[String])
+	assert_eq(r.warnings, [F + ': "hanh_dong" mục 3 (huy): bỏ qua khóa lạ "tu_choi"'] as Array[String])
+
+
 func test_many_errors_are_listed_together() -> void:
 	var d: Dictionary = _valid()
 	d.erase("mo_ta")
@@ -506,6 +535,13 @@ func test_viewer_renders_boards_side_by_side_with_notes() -> void:
 	assert_has(lines, "   6  1 . . . . . .        6  ^ . . 1 . . .", "quân che hầm chông ở bàn trước")
 	assert_has(lines, "  Máu:  5,4 %s 1/3" % tr("scenario.unit.bo_binh"), "chỉ bàn trước có máu không đầy")
 	assert_has(lines, "  Dưới quân: 0,6 ^ (%s)" % tr("scenario.terrain.spikes"))
+
+
+func test_viewer_shows_expected_rejection() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "4,6", "tu_choi": "khong_toi_duoc"}]
+	var lines: PackedStringArray = ScenarioViewer.render(_scenario(d), _stats()).split("\n")
+	assert_has(lines, "  1. %s đi tới 4,6 → bị từ chối: không đi tới được ô đó" % tr("scenario.unit.nguyen_khoai"))
 
 
 ## Như mẫu "Cách in": Máu bên phải bắt đầu ở cột 28.

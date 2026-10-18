@@ -36,6 +36,11 @@ scenario.viewer.step_move,%s đi tới %s
 scenario.viewer.step_attack,%s đánh ô %s
 scenario.viewer.step_undo,Hủy nước đi gần nhất
 scenario.viewer.step_end_turn,Kết thúc lượt (chạy pha địch)
+scenario.viewer.rejected," → bị từ chối: %s"
+scenario.viewer.reject_no_unit,không có quân đó
+scenario.viewer.reject_not_general,quân đó không phải tướng
+scenario.viewer.reject_already_there,tướng đã đứng sẵn ở ô đó
+scenario.viewer.reject_unreachable,không đi tới được ô đó
 scenario.viewer.unknown_arg,"bỏ qua tham số lạ: ""%s"""
 scenario.viewer.unknown_group,"không có nhóm ""%s"". Các nhóm đang có: %s"
 scenario.viewer.no_groups,(chưa có nhóm nào)

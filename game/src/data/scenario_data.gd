@@ -16,11 +16,15 @@ class ScenarioStep:
 	## UnitType của tướng ra lệnh; -1 nếu lệnh không cần tướng.
 	var general: int
 	var cell: Vector2i
+	## Mã lý do luật phải từ chối lệnh ("tu_choi", một khóa của ScenarioLoader.REJECT_CODES);
+	## "" là lệnh phải chạy được.
+	var reject: String
 
-	func _init(p_kind: String, p_general: int = -1, p_cell: Vector2i = NO_CELL) -> void:
+	func _init(p_kind: String, p_general: int = -1, p_cell: Vector2i = NO_CELL, p_reject: String = "") -> void:
 		kind = p_kind
 		general = p_general
 		cell = p_cell
+		reject = p_reject
 
 
 ## Một quân mong đợi ở bàn sau. hp đã đổi "không ghi" thành máu đầy lúc nạp.

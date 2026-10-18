@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
-  "mo_ta": "Rừng, kho lương, làng chặn đường: đi vòng phải mất 4 bước nên ba lệnh đều không đi được, Nguyễn Khoái đứng yên.",
-  "da_duyet": true,
+  "mo_ta": "Rừng, kho lương, làng chặn ba phía; lối ra duy nhất là phía tây. Tới 3,1 và 3,5 mất 4 bước, tới 5,3 mất 8 bước, đều quá tầm 3, nên Nguyễn Khoái đứng yên.",
+  "da_duyet": false,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",
@@ -23,9 +23,9 @@
     ]
   },
   "hanh_dong": [
-    { "lenh": "di", "tuong": "1", "o": "3,1" },
-    { "lenh": "di", "tuong": "1", "o": "5,3" },
-    { "lenh": "di", "tuong": "1", "o": "3,5" }
+    { "lenh": "di", "tuong": "1", "o": "3,1", "tu_choi": "khong_toi_duoc" },
+    { "lenh": "di", "tuong": "1", "o": "5,3", "tu_choi": "khong_toi_duoc" },
+    { "lenh": "di", "tuong": "1", "o": "3,5", "tu_choi": "khong_toi_duoc" }
   ],
   "sau": {
     "dia_hinh": [

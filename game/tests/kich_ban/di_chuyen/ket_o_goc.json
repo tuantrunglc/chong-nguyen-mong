@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Nguyễn Khoái ở góc bàn, sông chặn hai phía, không đi đâu được.",
-  "da_duyet": true,
+  "da_duyet": false,
   "truoc": {
     "dia_hinh": [
       ". ~ . . . . .",
@@ -23,7 +23,7 @@
     ]
   },
   "hanh_dong": [
-    { "lenh": "di", "tuong": "1", "o": "0,2" }
+    { "lenh": "di", "tuong": "1", "o": "0,2", "tu_choi": "khong_toi_duoc" }
   ],
   "sau": {
     "dia_hinh": [

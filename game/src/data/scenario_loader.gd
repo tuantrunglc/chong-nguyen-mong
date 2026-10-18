@@ -10,14 +10,22 @@ const ROOT_KEYS: Array[String] = ["phien_ban_dinh_dang", "mo_ta", "da_duyet", "t
 const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich"]
 const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau"]
 
-## Lệnh -> khóa thêm. Lệnh mới thêm ở story của nó, kèm câu lỗi.
+## Lệnh -> khóa thêm. Lệnh mới thêm ở story của nó, kèm câu lỗi. "tu_choi" không bắt buộc.
 const COMMANDS: Dictionary = {
-	"di": ["tuong", "o"],
-	"danh": ["tuong", "o"],
+	"di": ["tuong", "o", "tu_choi"],
+	"danh": ["tuong", "o", "tu_choi"],
 	"huy": [],
 	"ket_thuc_luot": [],
 }
 const COMMAND_LIST: String = '"di", "danh", "huy", "ket_thuc_luot"'
+## Mã lý do luật từ chối lệnh (khóa "tu_choi") -> câu cho công cụ duyệt. Lý do mới thêm ở story của nó.
+const REJECT_CODES: Dictionary = {
+	"khong_co_quan": "scenario.viewer.reject_no_unit",
+	"khong_phai_tuong": "scenario.viewer.reject_not_general",
+	"da_dung_o_do": "scenario.viewer.reject_already_there",
+	"khong_toi_duoc": "scenario.viewer.reject_unreachable",
+}
+const REJECT_LIST: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc"'
 
 
 ## Một phần "truoc" hoặc "sau" đã đọc (chỉ dùng trong bộ nạp).
@@ -266,9 +274,16 @@ static func _read_step(item: Variant, number: int, before: Section, file: String
 		general = _read_general(d, where, before, result)
 	if fields.has("o"):
 		cell = _read_step_cell(d, where, result)
+	var reject: String = ""
+	if d.has("tu_choi") and fields.has("tu_choi"):
+		var value: Variant = d["tu_choi"]
+		if value is String and REJECT_CODES.has(value):
+			reject = value as String
+		else:
+			result.add_error('%s: "tu_choi" là %s, chỉ được %s' % [where, JsonFile.show(value), REJECT_LIST])
 	if result.errors.size() != errors_before:
 		return null
-	return ScenarioData.ScenarioStep.new(kind as String, general, cell)
+	return ScenarioData.ScenarioStep.new(kind as String, general, cell, reject)
 
 
 ## Trả UnitType của tướng, hoặc -1 nếu sai (đã thêm lỗi).
