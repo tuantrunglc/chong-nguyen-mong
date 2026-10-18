@@ -11,6 +11,9 @@ const BROKEN_LEVEL: String = BROKEN_DIR + "/tran_01.json"
 ## Trận thử cho đòn đánh (Story 2.1): trận 1 thật không có quân Nguyên nào kề tướng lúc đầu.
 const ATTACK_DIR: String = PROBE_DIR + "/tran_danh"
 const ATTACK_LEVEL: String = ATTACK_DIR + "/tran_01.json"
+## Trận thử cho tướng mình đứng kề (Story 2.2, FR16).
+const ALLY_DIR: String = PROBE_DIR + "/tran_dong_minh"
+const ALLY_LEVEL: String = ALLY_DIR + "/tran_01.json"
 
 ## Ô sáng mong đợi trên trận 1 (AC 4, AC 5), theo thứ tự đọc bàn.
 const KHOAI_CELLS: Array[Vector2i] = [
@@ -40,11 +43,12 @@ func after_each() -> void:
 		if InputMap.has_action("dev_f%d" % (i + 1)):
 			InputMap.erase_action("dev_f%d" % (i + 1))
 	SaveProbe.path = SaveProbe.DEFAULT_PATH
-	for path: String in [BROKEN_LEVEL, ATTACK_LEVEL, PROBE_FILE]:
+	for path: String in [BROKEN_LEVEL, ATTACK_LEVEL, ALLY_LEVEL, PROBE_FILE]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(BROKEN_DIR)
 	DirAccess.remove_absolute(ATTACK_DIR)
+	DirAccess.remove_absolute(ALLY_DIR)
 	DirAccess.remove_absolute(PROBE_DIR)
 	Log.clear()
 
@@ -523,8 +527,7 @@ func test_mouse_events_map_screen_pixels_to_cells() -> void:
 
 ## Khoái ở 3,4 kề Bộ binh 3,3 (Bắc) và Kỵ binh 4,4 (Đông); Lão ở 0,6; thêm Bộ binh 5,5.
 func _make_attack_main() -> Node2D:
-	DirAccess.make_dir_recursive_absolute(ATTACK_DIR)
-	var level: Dictionary = {
+	return _make_level_main(ATTACK_DIR, ATTACK_LEVEL, {
 		"phien_ban_dinh_dang": 1,
 		"ten": "Thử đánh",
 		"kieu": "tieu_diet",
@@ -535,11 +538,16 @@ func _make_attack_main() -> Node2D:
 		"thu_tu_dich": ["3,3", "4,4", "5,5"],
 		"tiep_vien": [],
 		"muu_ke_mo": [],
-	}
-	var file: FileAccess = FileAccess.open(ATTACK_LEVEL, FileAccess.WRITE)
+	})
+
+
+## Ghi trận thử vào user:// rồi mở game với trận đó (after_each xóa file).
+func _make_level_main(dir: String, path: String, level: Dictionary) -> Node2D:
+	DirAccess.make_dir_recursive_absolute(dir)
+	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 	file.store_string(JSON.stringify(level))
 	file.close()
-	return _make_main(ATTACK_DIR)
+	return _make_main(dir)
 
 
 func _unit_at(main: Node2D, cell: Vector2i) -> Unit:
@@ -634,3 +642,59 @@ func test_end_turn_lets_general_attack_again() -> void:
 	_press_physical(main, KEY_1)
 	assert_eq(_view(main).selected_id(), 1)
 	assert_eq(_view(main).target_cells(), [Vector2i(4, 4)] as Array[Vector2i], "Bộ binh đã bị đẩy ra xa")
+
+
+# ---------- Không chọn tướng mình làm mục tiêu (Story 2.2, FR16) ----------
+
+## Khoái ở 3,4, Lão kề Tây 2,4, Bộ binh kề Bắc 3,3; thêm Bộ binh 6,6.
+func _make_ally_main() -> Node2D:
+	return _make_level_main(ALLY_DIR, ALLY_LEVEL, {
+		"phien_ban_dinh_dang": 1,
+		"ten": "Thử tướng mình kề bên",
+		"kieu": "tieu_diet",
+		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . . . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"quan": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . B . . .",
+			". . 2 1 . . .", ". . . . . . .", ". . . . . . B"],
+		"thu_tu_dich": ["3,3", "6,6"],
+		"tiep_vien": [],
+		"muu_ke_mo": [],
+	})
+
+
+func test_ally_next_to_khoai_has_no_outline() -> void:
+	var main: Node2D = _make_ally_main()
+	_press_physical(main, KEY_1)
+	assert_eq(_view(main).selected_id(), 1)
+	var targets: Array[Vector2i] = [Vector2i(3, 3)]
+	assert_eq(_view(main).target_cells(), targets, "chỉ Bộ binh, không có Lão ở 2,4")
+	assert_eq(_board(main).target_cells(), targets)
+
+
+func test_click_adjacent_ally_switches_selection() -> void:
+	var main: Node2D = _make_ally_main()
+	_press_physical(main, KEY_1)
+	assert_true(_view(main).target_cells().has(Vector2i(3, 3)), "trước: Khoái đang chọn, Bộ binh có viền")
+	_click_by_mouse(main, Vector2i(2, 4))
+	assert_eq(_view(main).selected_id(), 2, "bấm Lão là chọn Lão")
+	assert_eq(_unit_at(main, Vector2i(3, 3)).hp, 3, "Bộ binh không mất máu")
+	assert_eq(_unit_at(main, Vector2i(2, 4)).hp, 3, "Lão không mất máu")
+	assert_false(_controller(main).snapshot().unit_by_id(1).has_attacked, "Khoái chưa đánh")
+	assert_eq(_board(main).target_cells(), [] as Array[Vector2i], "Lão chưa có đòn")
+
+
+func test_click_ally_while_confirming_cancels_confirm() -> void:
+	var main: Node2D = _make_ally_main()
+	_press_physical(main, KEY_1)
+	_click_by_mouse(main, Vector2i(4, 3))
+	assert_eq(_unit_cell(main, 1), Vector2i(4, 3), "trước: Khoái đã đi tới 4,3")
+	_click_by_mouse(main, Vector2i(3, 3))
+	assert_eq(_view(main).pending_cell(), Vector2i(3, 3), "trước: đang chờ xác nhận Bộ binh")
+	assert_eq(_hud(main).hint_text(), tr("hud.confirm_attack"))
+	_click_by_mouse(main, Vector2i(2, 4))
+	assert_eq(_view(main).selected_id(), 2, "bấm Lão là chọn Lão")
+	assert_eq(_view(main).pending_cell(), BoardView.NO_CELL, "bỏ chờ xác nhận")
+	assert_eq(_board(main).pending_cell(), BoardView.NO_CELL)
+	assert_eq(_hud(main).hint_text(), "", "dòng nhắc mất")
+	assert_eq(_unit_at(main, Vector2i(3, 3)).hp, 3, "Bộ binh không mất máu")
+	assert_false(_controller(main).snapshot().unit_by_id(1).has_attacked, "Khoái chưa đánh")

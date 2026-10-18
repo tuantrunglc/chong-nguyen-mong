@@ -220,7 +220,7 @@ AI phải tất định và đọc được: người chơi đoán được quâ
 | Ký hiệu | Địa hình | Đi vào được | Chặn đường đánh | Hiệu ứng |
 |---|---|---|---|---|
 | `.` | Đất trống | Có | Không | Không có |
-| `~` | **Sông** | Không | Không (lao và tên bay qua được) | Quân Nguyên bị đẩy hoặc kéo xuống sông thì **chết ngay**. Tướng nhà Trần bị đẩy vào sông (chỉ xảy ra khi trúng đòn của Nguyễn Khoái) thì tính như va chạm: mất 1 máu, đứng yên. |
+| `~` | **Sông** | Không | Không (lao và tên bay qua được) | Quân Nguyên bị đẩy hoặc kéo xuống sông thì **chết ngay**. Tướng nhà Trần bị đẩy vào sông thì tính như va chạm: mất 1 máu, đứng yên. Hiện chưa đòn nào đẩy được tướng (đòn địch không đẩy, không chọn được tướng mình làm mục tiêu); luật giữ sẵn trong code. Chốt 2026-10-18. |
 | `#` | **Rừng** | Không | **Có** (chặn lao, tên, xung phong) | Bị đẩy vào rừng là va chạm: mất 1 máu, đứng yên tại chỗ |
 | `^` | **Hầm chông** | Có | Không | Bất kỳ quân nào đi vào ô, **kể cả chỉ đi ngang qua** (tự đi, bị đẩy hoặc bị kéo), đều **mất 1 máu** mỗi ô hầm chông. Gục giữa đường thì dừng tại đó. Đứng yên trên ô thì không mất thêm. Quân Nguyên không tránh hầm chông. |
 | `L` | **Kho lương** | Không | Có | Cuối mỗi hiệp, mỗi quân Nguyên đứng kề (4 hướng) kho lương hồi **1 máu**, không vượt máu tối đa. Bị đốt bởi mưu kế *Vườn không nhà trống*. |

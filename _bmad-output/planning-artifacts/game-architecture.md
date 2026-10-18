@@ -600,7 +600,7 @@ chong-nguyen-mong/                    # repo
 │   │   ├── chi_so.json
 │   │   ├── chien_dich.json           # thứ tự 6 trận, mưu kế mở theo trận
 │   │   └── tran/
-│   │       ├── tran_01.json … tran_05.json
+│   │       ├── tran_01.json … tran_05.json, thu_day.json
 │   ├── assets/
 │   │   ├── fonts/
 │   │   ├── audio/sfx/  audio/music/

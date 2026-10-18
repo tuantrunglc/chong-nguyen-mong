@@ -613,3 +613,20 @@ func test_real_three_generals_level_loads() -> void:
 			generals += 1
 	assert_eq(generals, 3, "đủ 3 tướng")
 	assert_eq(level.units.size() - generals, 4, "4 quân Nguyên")
+
+
+func test_real_push_trial_level_loads() -> void:
+	var r: LoadResult = LevelLoader.load_level("res://data/tran/thu_day.json")
+	assert_eq(r.errors, [] as Array[String])
+	assert_eq(r.warnings, [] as Array[String])
+	var level: LevelData = r.data as LevelData
+	assert_not_null(level)
+	if level == null:
+		return
+	var generals: int = 0
+	for p: LevelData.UnitPlacement in level.units:
+		if UnitType.is_general(p.type):
+			generals += 1
+	assert_eq(generals, 3, "đủ 3 tướng")
+	assert_eq(level.units.size() - generals, 3, "3 quân Nguyên")
+	assert_eq(level.terrain_at(Vector2i(3, 2)), Terrain.RIVER, "Bộ binh 2,2 bị đẩy sang Đông thì xuống sông")

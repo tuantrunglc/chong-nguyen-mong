@@ -4,7 +4,7 @@ baseline_commit: 33634bdd90e446446a571a6ad919d9ba58537615
 
 # Story 2.2: Sông và đánh trúng quân mình
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -31,37 +31,37 @@ _Story luật thứ hai của E2. Phần lớn luật đã có code từ Story 2
 ## Tasks / Subtasks
 
 - [x] **Task 0: Tác giả chốt 2 câu hỏi** ở "Quyết định của tác giả" (2026-10-18, cả 2 câu chọn (a)).
-- [ ] **Task 1: Viết đợt kịch bản 4, dừng chờ duyệt** (AC: 1)
+- [x] **Task 1: Viết đợt kịch bản 4, dừng chờ duyệt** (AC: 1)
   - [x] 1.1 Tạo thư mục `game/tests/kich_ban/dia_hinh/`. Viết 3 file đúng như Dev Notes "Đợt kịch bản 4", `"da_duyet": false`. Không đụng 25 kịch bản đã duyệt. Không cần sửa bộ nạp: `truoc.mau`, `sau.mau`, `sau.da_danh`, ô sông `~` đều đã đọc được.
   - [x] 1.2 `tools/xem_kich_ban.sh dia_hinh` và `tools/xem_kich_ban.sh va_cham`: đọc lại bàn trước/sau, khớp `mo_ta`; Lão 1 máu ở bàn trước của #3 hiện đúng. `tools/test.sh`: xanh, `25 đã duyệt · 3 chưa duyệt (0 chưa đạt)`. Ghi Debug Log.
   - [x] 1.3 Commit: `Kịch bản sông, trúng quân mình chờ duyệt (Story 2.2)`.
-  - [ ] 1.4 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh dia_hinh` rồi `tools/xem_kich_ban.sh va_cham`, đọc 3 kịch bản mới (`day_xuong_song`, `day_trung_tuong_minh`, `tuong_minh_guc_vi_va`), trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ ba điều:
+  - [x] 1.4 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh dia_hinh` rồi `tools/xem_kich_ban.sh va_cham`, đọc 3 kịch bản mới (`day_xuong_song`, `day_trung_tuong_minh`, `tuong_minh_guc_vi_va`), trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ ba điều:
     - Bộ binh trúng đòn còn 1 máu, nên xuống sông hay va bờ đều biến khỏi bàn: **bàn sau giống nhau**. Kịch bản #1 bắt được lỗi "quân đứng trên sông"; còn "chết đuối hay gục" thì test GUT kiểm (sự kiện khác nhau, cần cho hoạt ảnh 2.11).
     - Kịch bản #3 chốt luật mặc định "tướng gục bị nhấc khỏi bàn, không chiếm ô" (GDD, [KIỂM TRA KHI PLAYTEST E4]).
     - Bộ binh ở góc `6,6` chỉ để trận chưa thắng khi Story 2.5 thêm luật thắng/thua.
-  - [ ] 1.5 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" thì xử lý theo AC 1. Ghi Debug Log.
-- [ ] **Task 2: Test giao diện FR16** (AC: 6)
-  - [ ] 2.1 `tests/test_battle_view.gd`: thêm trận thử `_make_ally_main()` viết vào `user://` theo mẫu `_make_attack_main()` (file khác trong `ATTACK_DIR`, hoặc thư mục riêng; xóa ở `after_each` như các trận thử hiện có). Bố cục: Khoái `3,4`, Lão `2,4` (kề Tây Khoái), Bộ binh `3,3` (kề Bắc Khoái), Bộ binh `6,6`; `thu_tu_dich` `["3,3", "6,6"]`. Ba ca:
+  - [x] 1.5 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" thì xử lý theo AC 1. Ghi Debug Log.
+- [x] **Task 2: Test giao diện FR16** (AC: 6)
+  - [x] 2.1 `tests/test_battle_view.gd`: thêm trận thử `_make_ally_main()` viết vào `user://` theo mẫu `_make_attack_main()` (file khác trong `ATTACK_DIR`, hoặc thư mục riêng; xóa ở `after_each` như các trận thử hiện có). Bố cục: Khoái `3,4`, Lão `2,4` (kề Tây Khoái), Bộ binh `3,3` (kề Bắc Khoái), Bộ binh `6,6`; `thu_tu_dich` `["3,3", "6,6"]`. Ba ca:
     - **Không có viền ở tướng mình:** phím `1` thật → `target_cells()` là `[3,3]`, không có `2,4`.
     - **Bấm tướng mình kề bên là chuyển chọn (chưa đi):** phím `1`, kiểm trước `target_cells()` có `3,3`; bấm Lão bằng `_click_by_mouse` → `selected_id()` là 2; Bộ binh `3,3` vẫn 3 máu; Lão vẫn 3 máu; Khoái `has_attacked` false; `_board(main).target_cells()` rỗng (Lão chưa có đòn).
     - **Đang chờ xác nhận mà bấm tướng mình:** phím `1`, bấm `4,3` (Khoái đi 2 bước `3,4` → `4,4` → `4,3`, lúc đó Bộ binh `3,3` kề Tây); bấm Bộ binh một lần → kiểm trước `pending_cell()` là `3,3` và dòng nhắc là `tr("hud.confirm_attack")`; bấm Lão → `selected_id()` là 2, `_view(main).pending_cell()` và `_board(main).pending_cell()` là `BoardView.NO_CELL`, `_hud(main).hint_text()` rỗng, Bộ binh vẫn 3 máu.
-  - [ ] 2.2 Phá thử (ghi Debug Log): cho `_on_cell_clicked` gửi lệnh đánh khi bấm vào tướng mình có trong `_targets`, hoặc đưa ô tướng mình vào `RulesAttack.targets` → ca thứ nhất và thứ hai phải trượt (và `danh/khong_danh_duoc.json` trượt); bỏ `_set_pending(NO_CELL)` trong `_select` → ca thứ ba phải trượt.
-- [ ] **Task 3: Phá thử luật cho kịch bản mới** (AC: 3). Mỗi lần sửa tạm **một** chỗ, chạy `tools/test.sh`, ghi tên kịch bản và test GUT trượt vào Debug Log, trả lại ngay:
-  - [ ] 3.1 `Effects.move` bỏ nhánh chết đuối (quân Nguyên vào sông như ô trống) → `dia_hinh/day_xuong_song.json` trượt (Bộ binh 1 máu đứng trên sông, `validate()` báo, lệnh bị quay lại) và `test_nguyen_unit_drowns_in_river` trượt.
-  - [ ] 3.2 `ForcedMove.run` coi sông như vật cản với mọi quân (gọi `_hit_obstacle` cho cả quân Nguyên) → **kịch bản không trượt** (bàn sau giống nhau, xem Task 1.4); `test_nguyen_unit_drowns_in_river` phải trượt. Ghi đúng như vậy vào Debug Log.
-  - [ ] 3.3 Va quân khác chỉ trừ máu quân bị va khi nó là quân Nguyên (bỏ máu tướng) → `va_cham/day_trung_tuong_minh.json`, `va_cham/tuong_minh_guc_vi_va.json` và `test_collision_with_general_hurts_general` trượt.
-  - [ ] 3.4 `Effects.damage` không nhấc tướng gục khỏi bàn (chỉ nhấc quân Nguyên) → `va_cham/tuong_minh_guc_vi_va.json` trượt (hoặc `validate()` báo máu < 1). Ghi lại kịch bản nào và câu lỗi nào.
-  - [ ] 3.5 Sau cùng `tools/test.sh` xanh như AC 2.
-- [ ] **Task 4: Trận thử `thu_day`** (AC: 8; tác giả chốt câu 2 (a))
-  - [ ] 4.1 `game/data/tran/thu_day.json` (MỚI) đúng bố cục ở Dev Notes "Trận thử `thu_day`". Không đổi `tran_01.json`, `thu_ba_tuong.json`.
-  - [ ] 4.2 `tests/test_loaders.gd`: thêm `test_real_push_trial_level_loads` theo mẫu `test_real_three_generals_level_loads` (không lỗi, không cảnh báo, 3 tướng, 3 quân Nguyên, ô `3,2` là sông).
-  - [ ] 4.3 Không cần sửa `launch_options.gd`: `--tran=<tên file>` đã mở được trận thử khi bật dev (Story 1.2). Kiểm `[INFO][battle] nạp trận thu_day` trong log.
-- [ ] **Task 5: Tài liệu, kiểm bằng mắt, commit** (AC: 2, 6–9)
-  - [ ] 5.1 Câu 1 (a): sửa `gdds/gdd-GameTest-2026-10-15/gdd.md` dòng 223, thay "(chỉ xảy ra khi trúng đòn của Nguyễn Khoái)" bằng ghi chú "hiện chưa đòn nào đẩy được tướng (đòn địch không đẩy, không chọn được tướng mình làm mục tiêu); luật giữ sẵn trong code" và thêm "Chốt 2026-10-18". Không sửa chỗ nào khác của GDD.
-  - [ ] 5.2 `game-architecture.md`: cây thư mục `data/tran/` thêm `thu_day.json`  cạnh `tran_01.json …`. Nhóm `dia_hinh/` đã có trong cây `kich_ban/`.
-  - [ ] 5.3 Kiểm bằng mắt : chạy `tools/chay.sh --dev --tran=thu_day` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím (`select_general_1`, `end_turn`…), `inject_mouse_click` theo pixel = vị trí bàn `(486, 141)` + `BoardView.cell_center` (cách tính như Debug Log 2.1). Làm theo "Hướng dẫn tác giả tự test" ở Dev Notes, `capture_screenshot` sau mỗi bước chính, lưu `_bmad-output/implementation-artifacts/anh/2-2-*.png` (ít nhất: chọn Khoái thấy viền ở Bộ binh, không có viền ở Lão; sau khi đẩy vào Dư; sau khi đẩy xuống sông). Tắt game. Log không có ERROR/WARN.
-  - [ ] 5.4 `tools/test.sh` xanh (AC 2). Commit một lần: kịch bản đã duyệt, test, trận thử, tài liệu. Ví dụ: `Sông và đánh trúng quân mình (Story 2.2)`.
-  - [ ] 5.5 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, dùng kết quả thật (số test thật).
+  - [x] 2.2 Phá thử (ghi Debug Log): cho `_on_cell_clicked` gửi lệnh đánh khi bấm vào tướng mình có trong `_targets`, hoặc đưa ô tướng mình vào `RulesAttack.targets` → ca thứ nhất và thứ hai phải trượt (và `danh/khong_danh_duoc.json` trượt); bỏ `_set_pending(NO_CELL)` trong `_select` → ca thứ ba phải trượt.
+- [x] **Task 3: Phá thử luật cho kịch bản mới** (AC: 3). Mỗi lần sửa tạm **một** chỗ, chạy `tools/test.sh`, ghi tên kịch bản và test GUT trượt vào Debug Log, trả lại ngay:
+  - [x] 3.1 `Effects.move` bỏ nhánh chết đuối (quân Nguyên vào sông như ô trống) → `dia_hinh/day_xuong_song.json` trượt (Bộ binh 1 máu đứng trên sông, `validate()` báo, lệnh bị quay lại) và `test_nguyen_unit_drowns_in_river` trượt.
+  - [x] 3.2 `ForcedMove.run` coi sông như vật cản với mọi quân (gọi `_hit_obstacle` cho cả quân Nguyên) → **kịch bản không trượt** (bàn sau giống nhau, xem Task 1.4); `test_nguyen_unit_drowns_in_river` phải trượt. Ghi đúng như vậy vào Debug Log.
+  - [x] 3.3 Va quân khác chỉ trừ máu quân bị va khi nó là quân Nguyên (bỏ máu tướng) → `va_cham/day_trung_tuong_minh.json`, `va_cham/tuong_minh_guc_vi_va.json` và `test_collision_with_general_hurts_general` trượt.
+  - [x] 3.4 `Effects.damage` không nhấc tướng gục khỏi bàn (chỉ nhấc quân Nguyên) → `va_cham/tuong_minh_guc_vi_va.json` trượt (hoặc `validate()` báo máu < 1). Ghi lại kịch bản nào và câu lỗi nào.
+  - [x] 3.5 Sau cùng `tools/test.sh` xanh như AC 2.
+- [x] **Task 4: Trận thử `thu_day`** (AC: 8; tác giả chốt câu 2 (a))
+  - [x] 4.1 `game/data/tran/thu_day.json` (MỚI) đúng bố cục ở Dev Notes "Trận thử `thu_day`". Không đổi `tran_01.json`, `thu_ba_tuong.json`.
+  - [x] 4.2 `tests/test_loaders.gd`: thêm `test_real_push_trial_level_loads` theo mẫu `test_real_three_generals_level_loads` (không lỗi, không cảnh báo, 3 tướng, 3 quân Nguyên, ô `3,2` là sông).
+  - [x] 4.3 Không cần sửa `launch_options.gd`: `--tran=<tên file>` đã mở được trận thử khi bật dev (Story 1.2). Kiểm `[INFO][battle] nạp trận thu_day` trong log.
+- [x] **Task 5: Tài liệu, kiểm bằng mắt, commit** (AC: 2, 6–9)
+  - [x] 5.1 Câu 1 (a): sửa `gdds/gdd-GameTest-2026-10-15/gdd.md` dòng 223, thay "(chỉ xảy ra khi trúng đòn của Nguyễn Khoái)" bằng ghi chú "hiện chưa đòn nào đẩy được tướng (đòn địch không đẩy, không chọn được tướng mình làm mục tiêu); luật giữ sẵn trong code" và thêm "Chốt 2026-10-18". Không sửa chỗ nào khác của GDD.
+  - [x] 5.2 `game-architecture.md`: cây thư mục `data/tran/` thêm `thu_day.json`  cạnh `tran_01.json …`. Nhóm `dia_hinh/` đã có trong cây `kich_ban/`.
+  - [x] 5.3 Kiểm bằng mắt : chạy `tools/chay.sh --dev --tran=thu_day` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím (`select_general_1`, `end_turn`…), `inject_mouse_click` theo pixel = vị trí bàn `(486, 141)` + `BoardView.cell_center` (cách tính như Debug Log 2.1). Làm theo "Hướng dẫn tác giả tự test" ở Dev Notes, `capture_screenshot` sau mỗi bước chính, lưu `_bmad-output/implementation-artifacts/anh/2-2-*.png` (ít nhất: chọn Khoái thấy viền ở Bộ binh, không có viền ở Lão; sau khi đẩy vào Dư; sau khi đẩy xuống sông). Tắt game. Log không có ERROR/WARN.
+  - [x] 5.4 `tools/test.sh` xanh (AC 2). Commit một lần: kịch bản đã duyệt, test, trận thử, tài liệu. Ví dụ: `Sông và đánh trúng quân mình (Story 2.2)`.
+  - [x] 5.5 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, dùng kết quả thật (số test thật).
 
 ## Dev Notes
 
@@ -230,12 +230,50 @@ Claude Opus 5.5 (claude-opus-5-5)
 
 - Task 1.1–1.2 (2026-10-18): viết 3 kịch bản đợt 4 (`dia_hinh/day_xuong_song.json`, `va_cham/day_trung_tuong_minh.json`, `va_cham/tuong_minh_guc_vi_va.json`), `da_duyet: false`. `tools/xem_kich_ban.sh dia_hinh` và `va_cham`: bàn trước/sau khớp `mo_ta`; #1 sông ở `4,3`, Khoái `2,3` đánh Đông; #2 Lão ở bàn sau hiện `3,2 Phạm Ngũ Lão 2/3`; #3 bàn trước hiện `Máu: 3,2 Phạm Ngũ Lão 1/3`, bàn sau không còn Lão. `tools/test.sh`: xanh 376/376, `Kịch bản luật: 25 đã duyệt · 3 chưa duyệt (0 chưa đạt)`.
 
+- Task 1.4–1.5 (2026-10-18): tác giả trả lời "đúng" cho cả 3 kịch bản. Đổi `da_duyet: true` (chỉ khóa đó). `tools/test.sh`: 376/376, `Kịch bản luật: 28 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
+- Task 2.1: thêm `_make_ally_main()` (thư mục riêng `ALLY_DIR = user://test_battle_view/tran_dong_minh`, xóa ở `after_each`) và 3 test: `test_ally_next_to_khoai_has_no_outline`, `test_click_adjacent_ally_switches_selection`, `test_click_ally_while_confirming_cancels_confirm`. Gom phần ghi file trận thử vào `_make_level_main(dir, path, level)`, `_make_attack_main()` dùng lại. `tools/test.sh`: 379/379.
+- Task 2.2 phá thử:
+  - (a) `RulesAttack.targets` lấy mọi quân kề (bỏ điều kiện phe) **và** `_on_cell_clicked` xét mục tiêu trước tướng mình → 5 trượt: `test_ally_next_to_khoai_has_no_outline`, `test_click_adjacent_ally_switches_selection` (Lão bị đánh, bị đẩy khỏi `2,4` nên có thêm SCRIPT ERROR `hp` trên Nil ở dòng kiểm máu Lão), `test_rules_attack.gd › test_rejections_keep_state`, `test_targets_are_adjacent_nguyen_units_in_direction_order`, và kịch bản `danh/khong_danh_duoc.json` ("kịch bản ghi tu_choi khong_co_dich nhưng luật cho chạy"). Trả lại.
+  - (b) Bỏ `_set_pending(BoardView.NO_CELL)` trong `_select` → chỉ `test_click_ally_while_confirming_cancels_confirm` trượt. Trả lại.
+- Task 3 phá thử luật (mỗi lần một chỗ, trả lại ngay, `git diff --quiet game/src` sau mỗi lần):
+  - 3.1 `Effects.move` bỏ nhánh chết đuối → 2 trượt: `test_nguyen_unit_drowns_in_river`; kịch bản `dia_hinh/day_xuong_song.json`: "vi phạm bất biến: quân 101 ở ô 4,3 đứng trên ô không đi vào được".
+  - 3.2 `ForcedMove.run` coi sông là vật cản với mọi quân → 1 trượt: `test_nguyen_unit_drowns_in_river`. Kịch bản **không** trượt (bàn sau giống nhau, đúng như Task 1.4 đã báo tác giả).
+  - 3.3 Chỉ trừ máu quân bị va khi nó là quân Nguyên → 2 trượt: `test_collision_with_general_hurts_general`; `test_approved_scenarios_pass` với cả hai kịch bản (`build/test/kich_ban.txt`): `va_cham/day_trung_tuong_minh.json` "ô 3,2 mong đợi 2 máu, thực tế 3 máu" và `va_cham/tuong_minh_guc_vi_va.json` "ô 3,2 mong đợi trống, thực tế 2 (Phạm Ngũ Lão, 1 máu)". Tóm tắt `tools/test.sh` chỉ in câu lỗi đầu tiên của test đó.
+  - 3.4 `Effects.damage` chỉ nhấc quân Nguyên gục → 1 trượt: kịch bản `va_cham/tuong_minh_guc_vi_va.json` "vi phạm bất biến: quân 2 ở ô 3,2 có máu 0, cần từ 1 tới 3".
+  - 3.5 Sau khi trả lại: 379/379 xanh.
+- Task 4: viết `test_real_push_trial_level_loads` trước → trượt (chưa có file). Tạo `game/data/tran/thu_day.json` đúng bố cục Dev Notes → 380/380.
+- Task 5.3 kiểm bằng mắt: `tools/chay.sh --dev --tran=thu_day` chạy nền; pixel = `(486 + (cột − hàng)·64, 141 + (cột + hàng)·32 + 32)`. Log: `[INFO][battle] nạp trận thu_day`, không ERROR/WARN. Ảnh `anh/2-2-1` … `2-2-5`: (1) phím 1: viền trắng chỉ ở Bộ binh `1,4`, Lão và Bộ binh `2,2` không viền; (2) bấm Lão: vòng vàng chuyển sang Lão, ô xanh của Lão, không ai mất máu; (3) phím 1, bấm Bộ binh `1,4`: Bộ binh biến mất, Dư 2 máu, Khoái xám; (4) Space, phím 1, đi `1,2`, bấm Bộ binh `2,2`: viền chờ xác nhận, dòng "Bấm lần nữa để đánh"; (5) bấm lần hai: Bộ binh xuống sông, biến khỏi bàn. Tắt game (mã thoát 143 do mình tắt).
+- Task 5.4: `tools/test.sh` 380/380, `Kịch bản luật: 28 đã duyệt · 0 chưa duyệt (0 chưa đạt)`, kiểm ranh giới đạt.
+
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
+- Story 2.2 không viết code luật mới: luật sông và va tướng mình đã có từ 2.1. Thêm 3 kịch bản (tác giả duyệt cả 3), 3 test giao diện FR16, 1 test nạp trận, trận thử `thu_day`, sửa GDD dòng 223 và cây thư mục kiến trúc.
+- Tổng test: 376 → 380 (3 test giao diện + 1 test nạp trận). Kịch bản: 25 → 28 đã duyệt.
+- Lệch so với Tasks: không có. Ghi thêm: Task 2.2 phá thử (a) làm trượt thêm 2 test của `test_rules_attack.gd` ngoài các ca đã nêu; Task 3.3 thấy cả hai kịch bản trượt trong `build/test/kich_ban.txt`, còn tóm tắt chỉ in câu đầu.
+- **Hướng dẫn tác giả tự test:**
+  1. `tools/test.sh`: thấy `Kịch bản luật: 28 đã duyệt · 0 chưa duyệt (0 chưa đạt)` và `✅ 380/380 test đạt`.
+  2. `tools/chay.sh --dev --tran=thu_day`. (Tắt bộ gõ VNI/Telex trước khi gõ phím.)
+  3. Gõ `1` chọn Khoái: viền trắng quanh Bộ binh ở dưới Khoái; Lão bên trái Khoái **không** có viền; Bộ binh chéo phía trên phải không có viền.
+  4. Bấm Lão: game chuyển sang chọn Lão (vòng vàng ở Lão, ô xanh của Lão), không ai mất máu.
+  5. Gõ `1`, bấm Bộ binh dưới Khoái: Bộ binh biến khỏi bàn; Dư (dưới Bộ binh) còn **2** máu.
+  6. Gõ `Space`. Gõ `1`, bấm ô ngay trên Khoái (Khoái đi lên). Bấm Bộ binh bên phải Khoái **hai lần** (lần đầu hiện "Bấm lần nữa để đánh"): Bộ binh bị đẩy xuống sông, biến khỏi bàn.
+  - Ảnh mẫu: `_bmad-output/implementation-artifacts/anh/2-2-1` … `2-2-5`.
 
 ### File List
+
+- `game/tests/kich_ban/dia_hinh/day_xuong_song.json` (mới)
+- `game/tests/kich_ban/va_cham/day_trung_tuong_minh.json` (mới)
+- `game/tests/kich_ban/va_cham/tuong_minh_guc_vi_va.json` (mới)
+- `game/tests/test_battle_view.gd` (sửa)
+- `game/tests/test_loaders.gd` (sửa)
+- `game/data/tran/thu_day.json` (mới)
+- `_bmad-output/planning-artifacts/gdds/gdd-GameTest-2026-10-15/gdd.md` (sửa dòng 223)
+- `_bmad-output/planning-artifacts/game-architecture.md` (sửa cây thư mục)
+- `_bmad-output/implementation-artifacts/anh/2-2-1-chon-khoai-vien-bo-binh.png`, `2-2-2-bam-lao-chuyen-chon.png`, `2-2-3-day-va-du.png`, `2-2-4-cho-xac-nhan-canh-song.png`, `2-2-5-day-xuong-song.png` (mới)
+- `_bmad-output/implementation-artifacts/2-2-song-va-danh-trung-quan-minh.md`, `sprint-status.yaml` (sửa)
 
 ### Change Log
 
 - 2026-10-18: Tạo story. Tác giả chốt: giữ luật "tướng bị đẩy vào sông" trong code, không kịch bản, sửa GDD dòng 223; thêm trận thử `thu_day`.
+- 2026-10-18: Kịch bản đợt 4 (3 cái) tác giả duyệt; test giao diện FR16, trận thử `thu_day`, sửa GDD dòng 223. Test 376 → 380, kịch bản 28 đã duyệt. Chuyển sang review.
