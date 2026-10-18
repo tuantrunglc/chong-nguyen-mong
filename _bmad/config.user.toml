@@ -11,7 +11,7 @@
 
 [core]
 user_name = "Trung.nguyen11"
-communication_language = "English"
+communication_language = "Vietnamese"
 
 [modules.bmm]
 user_skill_level = "intermediate"
