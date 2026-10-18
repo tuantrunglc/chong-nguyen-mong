@@ -3,3 +3,15 @@ app.title,Hào Khí Đông A
 error.data_title,Dữ liệu bị lỗi
 error.data_short,Không mở được trận vì file dữ liệu bị lỗi.
 error.back_to_menu,Về menu
+unit.nguyen_khoai,Khoái
+unit.pham_ngu_lao,Lão
+unit.tran_khanh_du,Dư
+unit.bo_binh,B
+unit.ky_binh,K
+unit.cung_ky,C
+terrain.river,Sông
+terrain.forest,Rừng
+terrain.spikes,Chông
+terrain.granary,Kho
+terrain.village,Làng
+terrain.pass,Ải

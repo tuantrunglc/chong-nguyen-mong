@@ -15,5 +15,5 @@ func _ready() -> void:
 		Log.warn("app", w)
 	if launch.dev:
 		Log.info("app", "dev=1")
-	if launch.tran > 0:
-		Log.info("app", "tran=%d" % launch.tran)
+	if not launch.tran.is_empty():
+		Log.info("app", "tran=%s" % launch.tran)

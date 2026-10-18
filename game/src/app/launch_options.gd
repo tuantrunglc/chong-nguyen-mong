@@ -1,11 +1,14 @@
 class_name LaunchOptions
 extends RefCounted
-## Tham số khởi động: --dev, --tran=N (desktop, sau dấu --) và ?dev=1&tran=N (web).
+## Tham số khởi động: --dev, --tran=N|tên (desktop, sau dấu --) và ?dev=1&tran=N|tên (web).
 ## parse() là hàm thuần: tham số sai được trả trong warnings, người gọi tự ghi log.
 
+## Tên file trận: chữ thường không dấu, số, dấu _, bắt đầu bằng chữ (chặn cả "../").
+const LEVEL_NAME_PATTERN: String = "^[a-z][a-z0-9_]*$"
+
 var dev: bool = false
-## 0 nghĩa là không chọn trận.
-var tran: int = 0
+## Số trận ("3", đã bỏ số 0 ở đầu) hoặc tên file trận ("thu_ba_tuong"). "" nghĩa là không chọn trận.
+var tran: String = ""
 var warnings: Array[String] = []
 
 
@@ -43,13 +46,25 @@ static func read_current() -> LaunchOptions:
 
 ## Tác giả chốt 2026-10-17: chọn trận chỉ dùng được khi bật dev. Không bật thì bỏ tran, kèm cảnh báo.
 func require_dev_for_tran() -> void:
-	if tran > 0 and not dev:
-		warnings.append("bỏ qua tran=%d vì chưa bật dev" % tran)
-		tran = 0
+	if not tran.is_empty() and not dev:
+		warnings.append("bỏ qua tran=%s vì chưa bật dev" % tran)
+		tran = ""
+
+
+## Tên file trận (không có .json): số N thành "tran_0N"; tên giữ nguyên; "" nếu không chọn trận.
+func level_id() -> String:
+	if tran.is_empty():
+		return ""
+	if tran.is_valid_int():
+		return "tran_%02d" % tran.to_int()
+	return tran
 
 
 func _set_tran(value: String, flag: String) -> void:
 	if value.is_valid_int() and value.to_int() >= 1:
-		tran = value.to_int()
+		tran = str(value.to_int())
+	elif RegEx.create_from_string(LEVEL_NAME_PATTERN).search(value) != null:
+		tran = value
 	else:
-		warnings.append('tham số %s không hợp lệ: "%s", cần số nguyên từ 1' % [flag, value])
+		warnings.append('tham số %s không hợp lệ: "%s", cần số từ 1 hoặc tên file trận (chữ thường không dấu, số, dấu _)'
+			% [flag, value])

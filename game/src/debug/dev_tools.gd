@@ -3,14 +3,18 @@ extends Node2D
 ## Công cụ dev: chữ "DEV" ở góc trên trái và phím F1–F5. Không bật dev thì không làm gì.
 ## Phím đăng ký vào InputMap bằng code, chỉ khi bật dev.
 ## Bật dev thì chữ DEV kèm số lần mở do main.gd đếm (SaveProbe): tải lại trang mà số tăng là user:// lưu được.
+## F1 phát f1_pressed (main.gd bật/tắt tọa độ); F2–F5 mới chỉ ghi log.
+
+signal f1_pressed
 
 const BADGE_MARGIN: int = 8
 const BADGE_FONT_SIZE: int = 20
 const BADGE_COLOR: Color = Color(0.85, 0.1, 0.1)
 const KEYS: Array[Key] = [KEY_F1, KEY_F2, KEY_F3, KEY_F4, KEY_F5]
 ## Câu log khi bấm phím, theo thứ tự F1–F5. Công cụ thật làm ở các story ghi trong ngoặc.
+## F1 đã có công cụ (f1_pressed) nên không có câu.
 const MESSAGES: Array[String] = [
-	"f1: chưa có công cụ tọa độ (story 1.2)",
+	"",
 	"f2: chưa có sao chép báo lỗi (story 2.13)",
 	"f3: chưa có xem ý định ai (story 2.6)",
 	"f4: không dùng",
@@ -52,7 +56,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	for i: int in range(KEYS.size()):
 		if event.is_action_pressed(_action(i), false, true):
-			Log.debug("dev", MESSAGES[i])
+			if i == 0:
+				f1_pressed.emit()
+			else:
+				Log.debug("dev", MESSAGES[i])
 			get_viewport().set_input_as_handled()
 			return
 

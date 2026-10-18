@@ -592,3 +592,19 @@ func test_enemy_order_too_long_number_is_not_a_cell() -> void:
 func test_stats_huge_number_is_rejected() -> void:
 	assert_eq(_stats(_with_stat("tuong", "nguyen_khoai", "mau", 1e20)).errors,
 		_stat_errors(['"tuong.nguyen_khoai.mau" phải là số nguyên từ 1 trở lên, đang là 100000000000000000000.0']))
+
+
+func test_real_three_generals_level_loads() -> void:
+	var r: LoadResult = LevelLoader.load_level("res://data/tran/thu_ba_tuong.json")
+	assert_eq(r.errors, [] as Array[String])
+	assert_eq(r.warnings, [] as Array[String])
+	var level: LevelData = r.data as LevelData
+	assert_not_null(level)
+	if level == null:
+		return
+	var generals: int = 0
+	for p: LevelData.UnitPlacement in level.units:
+		if UnitType.is_general(p.type):
+			generals += 1
+	assert_eq(generals, 3, "đủ 3 tướng")
+	assert_eq(level.units.size() - generals, 4, "4 quân Nguyên")

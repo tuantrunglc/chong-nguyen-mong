@@ -19,6 +19,9 @@ var level_dir: String = "res://data/tran"
 
 var _screen: Screen = Screen.MENU
 var _level: LevelData = null
+var _controller: BattleController = null
+## Chỉ có khi bật dev (F1).
+var _coord_overlay: CoordOverlay = null
 var _error_screen: ErrorScreen = null
 var _title_label: Label
 var _board_view: BoardView
@@ -56,6 +59,11 @@ func _ready() -> void:
 	var dev_tools: DevTools = DevTools.new()
 	dev_tools.setup(AppState.launch.dev, opens)
 	add_child(dev_tools)
+	if AppState.launch.dev:
+		# Con cuối của bàn cờ: nằm trên đồng quân, ẩn theo bàn cờ khi có màn hình lỗi.
+		_coord_overlay = CoordOverlay.new()
+		_board_view.add_child(_coord_overlay)
+		dev_tools.f1_pressed.connect(_toggle_coords)
 
 	# Công cụ AI (Story 0.6): chỉ khi bật dev trên desktop có cửa sổ.
 	McpRuntime.start_if_enabled(self, AppState.launch.dev)
@@ -65,8 +73,9 @@ func _ready() -> void:
 
 ## Nạp chỉ số và trận. Luôn nạp cả hai file để liệt kê đủ lỗi của cả hai. F5 (story 1.6) gọi lại hàm này.
 func _start_battle() -> void:
-	var tran: int = AppState.launch.tran if AppState.launch.tran > 0 else DEFAULT_TRAN
-	var level_id: String = "tran_%02d" % tran
+	var level_id: String = AppState.launch.level_id()
+	if level_id.is_empty():
+		level_id = "tran_%02d" % DEFAULT_TRAN
 	var stats_result: LoadResult = StatsLoader.load_stats(stats_path)
 	var level_result: LoadResult = LevelLoader.load_level("%s/%s.json" % [level_dir, level_id])
 
@@ -87,6 +96,9 @@ func _start_battle() -> void:
 	AppState.stats = stats_result.data as Stats
 	_level = level_result.data as LevelData
 	Log.info("battle", "nạp trận %s" % level_id)
+	_controller = BattleController.new()
+	_controller.start(_level, AppState.stats)
+	_show_board(_controller.snapshot())
 	_hide_error()
 	_screen = Screen.BATTLE
 
@@ -94,6 +106,8 @@ func _start_battle() -> void:
 ## Thay bàn cờ bằng màn hình lỗi. Nhãn phiên bản và chữ DEV vẫn nằm trên nó.
 func _show_error(errors: Array[String]) -> void:
 	_hide_error()
+	_controller = null
+	_show_board(null)
 	_board_view.visible = false
 	_error_screen = ErrorScreen.new()
 	_error_screen.position = _board_view.position
@@ -108,8 +122,22 @@ func _show_error(errors: Array[String]) -> void:
 ## Menu tạm cho tới story 4.1: bàn cờ trống.
 func _show_menu() -> void:
 	_hide_error()
+	_controller = null
+	_show_board(null)
 	_screen = Screen.MENU
 	Log.info("app", "về menu")
+
+
+## Vẽ bản chụp lên bàn cờ (và tọa độ F1 nếu bật dev); null là bàn trống.
+func _show_board(snapshot: BattleState) -> void:
+	_board_view.show_state(snapshot)
+	if _coord_overlay != null:
+		_coord_overlay.show_state(snapshot)
+
+
+func _toggle_coords() -> void:
+	var shown: bool = _coord_overlay.toggle()
+	Log.debug("dev", "f1: hiện tọa độ" if shown else "f1: ẩn tọa độ")
 
 
 ## Bỏ màn hình lỗi (nếu có) và hiện lại bàn cờ.
