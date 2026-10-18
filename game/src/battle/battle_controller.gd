@@ -2,7 +2,7 @@ class_name BattleController
 extends RefCounted
 ## Nơi duy nhất giữ trạng thái trận đang sống. Phần hiển thị chỉ nhận bản chụp (snapshot(), events_resolved).
 ## Lệnh của người chơi đi qua submit(); hủy nước đi khôi phục bản chụp (ADR-002), không phải lệnh luật.
-## UI hỏi ô đi được qua reachable/path_to (chỉ đọc).
+## UI hỏi ô đi được qua reachable/path_to, ô đánh được qua attack_targets (chỉ đọc).
 
 ## Sau mỗi lệnh chạy được và sau mỗi lần hủy. snapshot là bản sao, không phải state sống.
 signal events_resolved(events: Array[BattleEvent], snapshot: BattleState)
@@ -48,9 +48,11 @@ func submit(command: Command) -> Array[BattleEvent]:
 	match command.kind:
 		Command.Kind.MOVE:
 			_undo_snapshot = before  # thay bản cũ: chỉ hủy được nước gần nhất
+		Command.Kind.ATTACK:
+			_undo_snapshot = null  # đánh xóa lịch sử hủy (FR10); E3: mưu kế cũng xóa
 		Command.Kind.END_TURN:
 			Log.debug("battle", "sang hiệp %d" % _state.round_number)
-			_undo_snapshot = null  # Story 2.1: đánh cũng xóa; E3: mưu kế cũng xóa
+			_undo_snapshot = null
 	events_resolved.emit(events, _state.clone())
 	return events
 
@@ -89,16 +91,26 @@ func path_to(unit_id: int, cell: Vector2i) -> Array[Vector2i]:
 	return RulesMove.path_to(_state, unit, cell)
 
 
+## Các ô quân unit_id đánh được, theo thứ tự B→Đ→N→T. Không có quân đó thì [].
+func attack_targets(unit_id: int) -> Array[Vector2i]:
+	var unit: Unit = _state.unit_by_id(unit_id)
+	if unit == null:
+		return []
+	return RulesAttack.targets(_state, unit)
+
+
 ## Chỉ gọi Rules.resolve. Tách ra để test thay được (ca cứu trận).
 func _resolve(state: BattleState, command: Command) -> Array[BattleEvent]:
 	return Rules.resolve(state, command)
 
 
-## Câu cho log: "quân 1 đi tới 0,4", "kết thúc lượt".
+## Câu cho log: "quân 1 đi tới 0,4", "quân 1 đánh ô 3,3", "kết thúc lượt".
 static func _describe(command: Command) -> String:
 	match command.kind:
 		Command.Kind.MOVE:
 			return "quân %d đi tới %d,%d" % [command.unit_id, command.cell.x, command.cell.y]
+		Command.Kind.ATTACK:
+			return "quân %d đánh ô %d,%d" % [command.unit_id, command.cell.x, command.cell.y]
 		Command.Kind.END_TURN:
 			return "kết thúc lượt"
 	return str(command.kind)

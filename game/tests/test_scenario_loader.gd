@@ -619,14 +619,16 @@ func test_every_board_symbol_has_a_name() -> void:
 		assert_eq(ScenarioRunner.terrain_symbol(kind), symbol)
 
 
-func test_runner_stops_at_command_without_rule() -> void:
+## Mọi lệnh đã có luật từ Story 2.1 (PENDING_RULES rỗng): bước trượt thì dừng ở bước đó, không so bàn sau.
+func test_runner_stops_at_failed_step() -> void:
+	assert_eq(ScenarioRunner.PENDING_RULES, {}, "lệnh nào cũng có luật")
 	var d: Dictionary = _valid()
 	d["hanh_dong"] = [{"lenh": "danh", "tuong": "1", "o": "1,6"}, {"lenh": "ket_thuc_luot"}]
 	d["sau"]["mau"] = {"5,4": 1}
 	var result: ScenarioRunner.ScenarioResult = _run(d)
 	assert_false(result.passed)
-	assert_eq(result.problems, ['bước 1: lệnh "danh" chưa có luật (Story 2.1)'] as Array[String],
-		"dừng ở bước 1, không so bàn sau")
+	assert_eq(result.problems, ['bước 1: luật từ chối ("khong_co_dich": ô 1,6 không có quân Nguyên để đánh) '
+		+ 'mà kịch bản không ghi "tu_choi"'] as Array[String], "dừng ở bước 1, không so bàn sau")
 
 
 ## Hủy chạy qua BattleController thật: đi rồi hủy thì bàn về như trước.

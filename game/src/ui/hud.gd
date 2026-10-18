@@ -1,6 +1,6 @@
 class_name Hud
 extends Control
-## Bảng bên phải bàn cờ, dựng bằng code: số hiệp, nút Hủy, nút Kết thúc lượt. Ẩn khi không có trận.
+## Bảng bên phải bàn cờ, dựng bằng code: số hiệp, nút Hủy, nút Kết thúc lượt, dòng nhắc. Ẩn khi không có trận.
 ## Nút không nhận focus: nếu không, bấm nút bằng chuột rồi gõ Space thì ui_accept bấm lại nút đó.
 
 signal undo_pressed
@@ -15,6 +15,8 @@ const BUTTON_HEIGHT: float = 44.0
 var _round_label: Label
 var _undo_button: Button
 var _end_turn_button: Button
+## Dòng nhắc dưới các nút ("Bấm lần nữa để đánh"); rỗng thì ẩn.
+var _hint_label: Label
 
 
 func _ready() -> void:
@@ -37,6 +39,11 @@ func _ready() -> void:
 	_undo_button.pressed.connect(func() -> void: undo_pressed.emit())
 	_end_turn_button = _button(tr("hud.end_turn"), box)
 	_end_turn_button.pressed.connect(func() -> void: end_turn_pressed.emit())
+	_hint_label = Label.new()
+	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_hint_label.visible = false
+	box.add_child(_hint_label)
 
 
 ## Hiện bảng với số hiệp; nút Hủy mờ khi không có gì để hủy.
@@ -44,6 +51,16 @@ func show_turn(round_number: int, can_undo: bool) -> void:
 	_round_label.text = tr("hud.round") % round_number
 	_undo_button.disabled = not can_undo
 	visible = true
+
+
+## Dòng nhắc; chuỗi rỗng là ẩn.
+func show_hint(text: String) -> void:
+	_hint_label.text = text
+	_hint_label.visible = not text.is_empty()
+
+
+func hint_text() -> String:
+	return _hint_label.text if _hint_label.visible else ""
 
 
 func round_text() -> String:

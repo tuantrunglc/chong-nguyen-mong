@@ -4,7 +4,7 @@ baseline_commit: 428d7432fa963a2a4be70e5de26904141f7d3a76
 
 # Story 2.1: Nguyễn Khoái đánh, đẩy và va chạm
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -44,7 +44,7 @@ _Story luật đầu tiên của E2. Phần 1 chưa có hoạt ảnh: bàn nhả
 ## Tasks / Subtasks
 
 - [x] **Task 0: Tác giả chốt 4 câu hỏi** ở "Quyết định của tác giả" (2026-10-18, cả 4 câu chọn phương án (a)).
-- [ ] **Task 1: Khung cho kịch bản mới, viết đợt kịch bản 3, dừng chờ duyệt** (AC: 1, 2)
+- [x] **Task 1: Khung cho kịch bản mới, viết đợt kịch bản 3, dừng chờ duyệt** (AC: 1, 2)
   - [x] 1.1 Khung (không phải code luật, làm trước để file kịch bản nạp được):
     - `src/core/battle_event.gd`: thêm vào **cuối** enum `Reject`: `ALREADY_ATTACKED`, `NOT_ADJACENT`, `NO_TARGET`.
     - `src/data/scenario_loader.gd`:
@@ -59,38 +59,38 @@ _Story luật đầu tiên của E2. Phần 1 chưa có hoạt ảnh: bàn nhả
   - [x] 1.2 Viết 10 file đúng như Dev Notes "Đợt kịch bản 3", `"da_duyet": false`. Tạo thư mục `day/`, `va_cham/`, `danh/`. Không đụng 15 kịch bản đã duyệt.
   - [x] 1.3 `tools/xem_kich_ban.sh`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `tu_choi` hiện đúng câu tiếng Việt; dòng "Sau lệnh" hiện `đã đánh`. `tools/test.sh`: xanh, `15 đã duyệt · 10 chưa duyệt (10 chưa đạt)`, lý do khớp bảng.
   - [x] 1.4 Commit: `Kịch bản đánh, đẩy, va chạm chờ duyệt (Story 2.1)`.
-  - [ ] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh`, đọc 10 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ: Bộ binh trúng 2 sát thương còn 1 máu, nên mọi va chạm trong đợt này đều làm nó gục (chưa có quân nào đủ máu để "đứng yên còn sống" sau va chạm, trừ quân bị va ở #6). Không làm Task 2 trở đi khi chưa có câu trả lời.
-  - [ ] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" thì sửa, cho duyệt lại (lặp 1.3–1.6). `tools/test.sh` **phải trượt** (AC 2). Ghi Debug Log. **Không commit** khi đang đỏ.
-- [ ] **Task 2: Lõi luật: sự kiện, chỉ số, hướng** (AC: 4, 5, 13)
-  - [ ] 2.1 `src/core/battle_event.gd`:
+  - [x] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh`, đọc 10 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ: Bộ binh trúng 2 sát thương còn 1 máu, nên mọi va chạm trong đợt này đều làm nó gục (chưa có quân nào đủ máu để "đứng yên còn sống" sau va chạm, trừ quân bị va ở #6). Không làm Task 2 trở đi khi chưa có câu trả lời.
+  - [x] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" thì sửa, cho duyệt lại (lặp 1.3–1.6). `tools/test.sh` **phải trượt** (AC 2). Ghi Debug Log. **Không commit** khi đang đỏ.
+- [x] **Task 2: Lõi luật: sự kiện, chỉ số, hướng** (AC: 4, 5, 13)
+  - [x] 2.1 `src/core/battle_event.gd`:
     - `Type` thêm (cuối enum): `DAMAGED` (mất máu: `unit_id`, `amount`, `cause`), `DIED` (gục, bị nhấc khỏi bàn: `unit_id`, `from_cell` là ô lúc gục), `COLLIDED` (va: `unit_id` là quân bị đẩy, `other_id` là quân bị va, 0 nếu là mép bàn hoặc vật cản; `to_cell` là ô bị va), `DROWNED` (chết đuối: `unit_id`, `to_cell`), `ATTACKED` (tướng ra đòn: `unit_id` là tướng, `to_cell` là ô đánh).
     - `Cause` thêm: `STRIKE` (đòn của tướng), `PUSH` (bị đẩy), `COLLISION` (va chạm). Sửa chú thích "Đẩy, kéo thêm ở E2" thành "Kéo thêm ở Story 2.4".
     - Trường mới `amount: int = 0`, `other_id: int = 0`. Hàm tạo tĩnh cho từng loại (`damaged`, `died`, `collided`, `drowned`, `attacked`). `_init` dài ra thì vẫn giữ "trường chỉ gán trong _init".
-  - [ ] 2.2 `src/core/command.gd`: `Kind.ATTACK` (cuối enum); `static func attack(p_unit_id: int, p_cell: Vector2i) -> Command`. Sửa chú thích đầu file.
-  - [ ] 2.3 `src/core/stats.gd`: `damage(type)` (`sat_thuong`), `push_distance(type)` (`do_day`). Mục hoãn "`Stats.value` trả 0 khi gõ sai khóa": thêm `assert(unit.has(key), ...)` trong `value()` (lỗi lập trình, không phải lỗi dữ liệu: bộ nạp đã kiểm đủ khóa). Số 1 máu va chạm **không** vào `chi_so.json` (tác giả chốt, câu 3): hằng số `COLLISION_DAMAGE` ở `forced_move.gd`.
-  - [ ] 2.4 `src/core/grid.gd`: `static func dir_between(from: Vector2i, to: Vector2i) -> Vector2i` cho hai ô kề cạnh (trả `to - from`); `static func is_adjacent(a, b) -> bool` (khoảng cách Manhattan 1). Không đi chéo.
-  - [ ] 2.5 `src/core/unit.gd`: `func is_alive() -> bool` (`hp > 0`). Sửa chú thích đầu file: `has_attacked` do `RulesAttack` đặt, `RulesEnemyPhase` xóa.
-- [ ] **Task 3: Effects, ForcedMove, RulesAttack** (AC: 3–8, 13)
-  - [ ] 3.1 `src/core/effects.gd`:
+  - [x] 2.2 `src/core/command.gd`: `Kind.ATTACK` (cuối enum); `static func attack(p_unit_id: int, p_cell: Vector2i) -> Command`. Sửa chú thích đầu file.
+  - [x] 2.3 `src/core/stats.gd`: `damage(type)` (`sat_thuong`), `push_distance(type)` (`do_day`). Mục hoãn "`Stats.value` trả 0 khi gõ sai khóa": thêm `assert(unit.has(key), ...)` trong `value()` (lỗi lập trình, không phải lỗi dữ liệu: bộ nạp đã kiểm đủ khóa). Số 1 máu va chạm **không** vào `chi_so.json` (tác giả chốt, câu 3): hằng số `COLLISION_DAMAGE` ở `forced_move.gd`.
+  - [x] 2.4 `src/core/grid.gd`: `static func dir_between(from: Vector2i, to: Vector2i) -> Vector2i` cho hai ô kề cạnh (trả `to - from`); `static func is_adjacent(a, b) -> bool` (khoảng cách Manhattan 1). Không đi chéo.
+  - [x] 2.5 `src/core/unit.gd`: `func is_alive() -> bool` (`hp > 0`). Sửa chú thích đầu file: `has_attacked` do `RulesAttack` đặt, `RulesEnemyPhase` xóa.
+- [x] **Task 3: Effects, ForcedMove, RulesAttack** (AC: 3–8, 13)
+  - [x] 3.1 `src/core/effects.gd`:
     - `static func damage(state, unit, amount, cause, events)`: trừ máu, ghi `DAMAGED`; còn ≤ 0 thì **xóa quân khỏi `state.units`** và ghi `DIED`. Đây là nơi duy nhất sửa máu và xử lý gục (M2). Máu không âm dưới 0 trong sự kiện (`amount` là số đã trừ thật, không phải số yêu cầu: xem Dev Notes "Sự kiện").
     - `move()`: sau khi đổi ô, ô mới là **sông** mà quân là quân Nguyên thì xóa quân, ghi `DROWNED` (xem "Va chạm" ở Dev Notes: Khoái không bao giờ đẩy tướng mình, nhưng luật phải đúng cho 2.2–2.4). Tướng không bao giờ được `move` vào sông: `ForcedMove` chặn trước. Hầm chông vẫn để Story 3.4.
     - Sửa chú thích đầu file.
-  - [ ] 3.2 `src/core/forced_move.gd` (MỚI, `class_name ForcedMove extends RefCounted`): `static func run(state, unit, dir, distance, cause, events) -> void`. Lặp từng ô theo bảng ở Dev Notes "Di chuyển cưỡng bức". Mỗi bước kiểm theo đúng thứ tự trong bảng. Dừng ngay khi quân bị đẩy gục hoặc chết đuối. Kéo (2.4) gọi đúng hàm này với hướng ngược lại.
-  - [ ] 3.3 `src/core/rules_attack.gd` (MỚI, `class_name RulesAttack extends RefCounted`):
+  - [x] 3.2 `src/core/forced_move.gd` (MỚI, `class_name ForcedMove extends RefCounted`): `static func run(state, unit, dir, distance, cause, events) -> void`. Lặp từng ô theo bảng ở Dev Notes "Di chuyển cưỡng bức". Mỗi bước kiểm theo đúng thứ tự trong bảng. Dừng ngay khi quân bị đẩy gục hoặc chết đuối. Kéo (2.4) gọi đúng hàm này với hướng ngược lại.
+  - [x] 3.3 `src/core/rules_attack.gd` (MỚI, `class_name RulesAttack extends RefCounted`):
     - `static func targets(state, unit) -> Array[Vector2i]`: ô đánh được, theo thứ tự hướng B→Đ→N→T (`Grid.DIRECTIONS`). Rỗng nếu tướng đã đánh hoặc không phải Nguyễn Khoái (đòn Lão, Dư thêm ở 2.3, 2.4).
     - `static func resolve(state, command, events)`: kiểm theo "Bảng thứ tự kiểm của lệnh đánh"; **kiểm hết rồi mới sửa** (mục hoãn Story 1.5: lệnh bị từ chối không khôi phục `before`). Hợp lệ thì `ATTACKED` → `khoai_strike` → `unit.has_attacked = true`.
     - `static func khoai_strike(state, khoai, cell, events)` theo đoạn mẫu M2 của kiến trúc (bỏ `sat_that_bonus`, ghi chú Story 3.13 thêm).
-  - [ ] 3.4 `src/core/rules.gd`: `Command.Kind.ATTACK` → `RulesAttack.resolve(state, command, events)`.
-  - [ ] 3.5 `src/core/rules_move.gd`: tướng **đã đánh** thì `reachable`, `path_to` trả `[]`, và `resolve` từ chối `ALREADY_ATTACKED` (kiểm **trước** `ALREADY_MOVED`; xem bảng). Sửa chú thích đầu file.
-  - [ ] 3.6 `src/core/rules_enemy_phase.gd`: `end_player_turn` xóa cả `has_attacked` của mọi quân.
-  - [ ] 3.7 `tests/scenario_runner.gd`: bỏ `"danh"` khỏi `PENDING_RULES` (bảng rỗng, giữ cơ chế và chú thích cho lệnh mới về sau); `_run_step` thêm `"danh"` → `controller.submit(Command.attack(general.id, step.cell))` qua `_check_reject`. `test_runner_stops_at_command_without_rule` không còn lệnh nào để thử: đổi thành test bộ chạy với `PENDING_RULES` gán tạm (hoặc đổi tên thành test "danh chạy qua luật"). Không xóa ý của test; ghi vào "Lệch so với Tasks" nếu phải đổi.
-- [ ] **Task 4: BattleController** (AC: 8, 12)
-  - [ ] 4.1 `src/battle/battle_controller.gd`:
+  - [x] 3.4 `src/core/rules.gd`: `Command.Kind.ATTACK` → `RulesAttack.resolve(state, command, events)`.
+  - [x] 3.5 `src/core/rules_move.gd`: tướng **đã đánh** thì `reachable`, `path_to` trả `[]`, và `resolve` từ chối `ALREADY_ATTACKED` (kiểm **trước** `ALREADY_MOVED`; xem bảng). Sửa chú thích đầu file.
+  - [x] 3.6 `src/core/rules_enemy_phase.gd`: `end_player_turn` xóa cả `has_attacked` của mọi quân.
+  - [x] 3.7 `tests/scenario_runner.gd`: bỏ `"danh"` khỏi `PENDING_RULES` (bảng rỗng, giữ cơ chế và chú thích cho lệnh mới về sau); `_run_step` thêm `"danh"` → `controller.submit(Command.attack(general.id, step.cell))` qua `_check_reject`. `test_runner_stops_at_command_without_rule` không còn lệnh nào để thử: đổi thành test bộ chạy với `PENDING_RULES` gán tạm (hoặc đổi tên thành test "danh chạy qua luật"). Không xóa ý của test; ghi vào "Lệch so với Tasks" nếu phải đổi.
+- [x] **Task 4: BattleController** (AC: 8, 12)
+  - [x] 4.1 `src/battle/battle_controller.gd`:
     - `submit`: `Command.Kind.ATTACK` → `_undo_snapshot = null` (thay chú thích "Story 2.1: đánh cũng xóa"); `_describe` thêm `quân %d đánh ô c,h`;
     - `attack_targets(unit_id) -> Array[Vector2i]` (chỉ đọc, như `reachable`): `RulesAttack.targets`;
     - sửa chú thích đầu file.
-- [ ] **Task 5: Test lõi luật và controller** (AC: 3–8, 12, 13)
-  - [ ] 5.1 `tests/test_forced_move.gd` (MỚI), dựng state bằng tay như `test_rules_move.gd`. Mỗi ca kiểm ô, máu, danh sách quân, **đúng dãy sự kiện** (loại, id, ô, `amount`) và `validate()` rỗng:
+- [x] **Task 5: Test lõi luật và controller** (AC: 3–8, 12, 13)
+  - [x] 5.1 `tests/test_forced_move.gd` (MỚI), dựng state bằng tay như `test_rules_move.gd`. Mỗi ca kiểm ô, máu, danh sách quân, **đúng dãy sự kiện** (loại, id, ô, `amount`) và `validate()` rỗng:
     - đẩy 1 ô vào ô trống: một `MOVED` `Cause.PUSH`;
     - đẩy 2 ô (gọi thẳng `run` với `distance = 2`, cho Story 2.4): đi từng ô, hai `MOVED`;
     - mép bàn ở cả 4 hướng; rừng; kho lương; làng: đứng yên, `COLLIDED` (`other_id` 0) rồi `DAMAGED` 1;
@@ -99,7 +99,7 @@ _Story luật đầu tiên của E2. Phần 1 chưa có hoạt ảnh: bàn nhả
     - quân Nguyên vào sông: `MOVED` rồi `DROWNED`, bị xóa; tướng bị đẩy vào sông: đứng yên, `COLLIDED`, `DAMAGED` 1 (cho 2.2, 2.4);
     - đẩy qua hầm chông, ô ải: vào ô như ô trống (hầm chông mất máu ở 3.4);
     - đẩy 2 ô mà ô thứ nhất đã va: dừng ngay, không đi tiếp.
-  - [ ] 5.2 `tests/test_rules_attack.gd` (MỚI):
+  - [x] 5.2 `tests/test_rules_attack.gd` (MỚI):
     - đánh Bộ binh 3 máu: còn 1, đẩy đúng hướng (thử cả 4 hướng); `has_attacked` bật; dãy sự kiện `ATTACKED`, `DAMAGED` 2, `MOVED` `PUSH`;
     - đánh Kỵ binh 2 máu: `DIED`, không có sự kiện đẩy, quân đứng sau không bị gì;
     - từ chối theo đủ bảng (mỗi mã một ca), state giữ nguyên (so từng quân: ô, máu, `has_moved`, `has_attacked`), `has_attacked` **không** bật;
@@ -107,32 +107,32 @@ _Story luật đầu tiên của E2. Phần 1 chưa có hoạt ảnh: bàn nhả
     - `targets`: chỉ ô kề có quân Nguyên, đúng thứ tự B→Đ→N→T, không có ô tướng mình, rỗng khi đã đánh, rỗng với Lão và Dư;
     - Lão, Dư gửi lệnh đánh: bị từ chối, state giữ nguyên;
     - `end_player_turn` xóa `has_attacked` (thêm vào `test_rules_enemy_phase.gd`).
-  - [ ] 5.3 `tests/test_battle_state.gd`: `test_clone_is_deep` kiểm thêm `has_attacked`.
-  - [ ] 5.4 `tests/test_battle_controller.gd`: đi rồi đánh thì `can_undo()` false, `undo()` trả `NOTHING_TO_UNDO`; đánh bị từ chối thì bản chụp hủy giữ nguyên (nước đi trước vẫn hủy được); `attack_targets` đúng; lệnh đánh làm gục quân thì `validate()` rỗng (không bị quay lại).
-  - [ ] 5.5 `tests/test_core_types.gd` (nếu đang kiểm `Stats`): `damage`, `push_distance` đọc đúng `chi_so.json`.
-  - [ ] 5.6 Kiểm test bắt lỗi thật, mỗi lần sửa tạm một chỗ rồi trả lại, ghi Debug Log:
+  - [x] 5.3 `tests/test_battle_state.gd`: `test_clone_is_deep` kiểm thêm `has_attacked`.
+  - [x] 5.4 `tests/test_battle_controller.gd`: đi rồi đánh thì `can_undo()` false, `undo()` trả `NOTHING_TO_UNDO`; đánh bị từ chối thì bản chụp hủy giữ nguyên (nước đi trước vẫn hủy được); `attack_targets` đúng; lệnh đánh làm gục quân thì `validate()` rỗng (không bị quay lại).
+  - [x] 5.5 `tests/test_core_types.gd` (nếu đang kiểm `Stats`): `damage`, `push_distance` đọc đúng `chi_so.json`.
+  - [x] 5.6 Kiểm test bắt lỗi thật, mỗi lần sửa tạm một chỗ rồi trả lại, ghi Debug Log:
     - bỏ dòng `_undo_snapshot = null` của ATTACK → `huy/danh_xoa_huy.json` và test controller phải trượt;
     - đẩy trước khi trừ máu (đảo thứ tự trong `khoai_strike`) → `day/muc_tieu_guc_khong_day.json` phải trượt;
     - bỏ máu va chạm ở mép bàn → `va_cham/day_vao_mep.json` phải trượt;
     - va quân khác chỉ trừ máu quân bị đẩy → `va_cham/day_vao_quan_khac.json` phải trượt;
     - bỏ `unit.has_attacked = true` → `danh/da_danh_roi.json` phải trượt;
     - cho đánh ô chéo (dùng khoảng cách Chebyshev) → `danh/khong_danh_duoc.json` phải trượt.
-- [ ] **Task 6: Giao diện: viền mục tiêu, xác nhận, đồng đã đánh** (AC: 9–12)
-  - [ ] 6.1 `src/battle/board_view.gd`:
+- [x] **Task 6: Giao diện: viền mục tiêu, xác nhận, đồng đã đánh** (AC: 9–12)
+  - [x] 6.1 `src/battle/board_view.gd`:
     - `show_selection(unit_cell, cells, targets: Array[Vector2i] = [])` (giữ chữ ký cũ chạy được); `_target_cells`; `show_pending(cell)` (ô "chờ xác nhận", `NO_CELL` là bỏ); getter `target_cells()`, `pending_cell()` cho test; `clear_selection()` xóa cả hai;
     - vẽ viền mục tiêu trong **cùng vòng lặp theo độ sâu** với bệ ô ải, ô sáng, vòng chọn (Story 1.7), tại `_top_center(cell)`, là đường viền ô thoi (`draw_polyline` khép kín), không tô kín (ô đỏ báo đòn E2 sẽ tô kín). Ô chờ xác nhận vẽ viền dày gấp đôi. Màu **trắng** (tác giả chốt, câu 1): `TARGET_COLOR`, `TARGET_WIDTH`, `PENDING_WIDTH` đặt cạnh `REACH_COLOR`;
     - viền vẽ trên mặt đất, dưới đồng quân: đồng quân che phần giữa ô là đúng; viền phải thấy rõ quanh chân đồng (kiểm bằng mắt, Task 8).
-  - [ ] 6.2 `src/battle/unit_token.gd`: `update` nhận `unit.has_attacked`, `queue_redraw()` khi đổi; `is_attacked() -> bool`; `_fill_color()` (chỗ có chú thích "Story 2.1 thêm màu 'đã đánh' ở đây") trả màu "đã đánh": **xám nhạt**, chữ xám đậm (tác giả chốt, câu 1). **Không dùng độ trong suốt** (chú thích đầu file: bóng mờ dành cho xem trước 2.12); "mờ hẳn" làm bằng màu xám nhạt, chữ và vòng máu vẫn đọc được.
-  - [ ] 6.3 `src/battle/battle_view.gd`, theo bảng ở Dev Notes "Bấm chuột khi đang chọn tướng":
+  - [x] 6.2 `src/battle/unit_token.gd`: `update` nhận `unit.has_attacked`, `queue_redraw()` khi đổi; `is_attacked() -> bool`; `_fill_color()` (chỗ có chú thích "Story 2.1 thêm màu 'đã đánh' ở đây") trả màu "đã đánh": **xám nhạt**, chữ xám đậm (tác giả chốt, câu 1). **Không dùng độ trong suốt** (chú thích đầu file: bóng mờ dành cho xem trước 2.12); "mờ hẳn" làm bằng màu xám nhạt, chữ và vòng máu vẫn đọc được.
+  - [x] 6.3 `src/battle/battle_view.gd`, theo bảng ở Dev Notes "Bấm chuột khi đang chọn tướng":
     - `_targets: Array[Vector2i]`, `_pending: Vector2i = BoardView.NO_CELL`;
     - `_select`: `_targets = _controller.attack_targets(id)`, truyền cho `show_selection`; xóa `_pending`;
     - `_on_cell_clicked`: thêm nhánh mục tiêu **trước** nhánh ô sáng; tướng đã đánh không chọn được (cả chuột lẫn phím 1-2-3, `_on_general_key`);
     - `_on_events_resolved`: tướng đang chọn đã đánh (`has_attacked`) thì bỏ chọn; còn lại như cũ;
     - `_deselect`, `_on_undo`, `_on_end_turn`: xóa `_pending`;
     - `target_cells()`, `pending_cell()` cho test.
-  - [ ] 6.4 Dòng nhắc (tác giả chốt, câu 2): `src/ui/hud.gd` thêm `show_hint(text)` (chuỗi rỗng là ẩn), khóa `hud.confirm_attack` = `Bấm lần nữa để đánh` trong `i18n/text.csv`; `BattleView` gọi khi có/không có `_pending`.
-- [ ] **Task 7: Test giao diện** (AC: 9–12)
-  - [ ] 7.1 `tests/test_battle_view.gd` thêm. Trận 1 không có Bộ binh nào kề Khoái lúc đầu: viết trận thử vào `user://` như `test_board_view.gd` (`PASS_LEVEL`), ví dụ Khoái ở `3,4`, Lão ở `0,6`, Bộ binh ở `3,3`, Kỵ binh ở `4,4`. Các ca:
+  - [x] 6.4 Dòng nhắc (tác giả chốt, câu 2): `src/ui/hud.gd` thêm `show_hint(text)` (chuỗi rỗng là ẩn), khóa `hud.confirm_attack` = `Bấm lần nữa để đánh` trong `i18n/text.csv`; `BattleView` gọi khi có/không có `_pending`.
+- [x] **Task 7: Test giao diện** (AC: 9–12)
+  - [x] 7.1 `tests/test_battle_view.gd` thêm. Trận 1 không có Bộ binh nào kề Khoái lúc đầu: viết trận thử vào `user://` như `test_board_view.gd` (`PASS_LEVEL`), ví dụ Khoái ở `3,4`, Lão ở `0,6`, Bộ binh ở `3,3`, Kỵ binh ở `4,4`. Các ca:
     - chọn Khoái (phím `1` thật): `target_cells()` là `[3,3, 4,4]` theo thứ tự B→Đ→N→T (Bắc trước Đông), bàn cờ vẽ đúng các ô đó;
     - bấm chuột thật (qua `_unhandled_input`, như `_click_by_mouse`) vào Bộ binh: Bộ binh ở `3,2` còn 1 máu; đồng Khoái `is_attacked()`; Khoái bị bỏ chọn; nút Hủy mờ;
     - bấm Khoái hoặc phím `1` sau đó: không chọn được;
@@ -141,13 +141,13 @@ _Story luật đầu tiên của E2. Phần 1 chưa có hoạt ảnh: bàn nhả
     - Lão đi, Khoái đánh, `Z` (phím thật): không có gì đổi, Lão vẫn ở ô mới;
     - Space: Khoái hết `is_attacked()`, chọn và đánh lại được;
     - chọn Lão: `target_cells()` rỗng.
-  - [ ] 7.2 `tests/test_board_view.gd`: viền mục tiêu và ô chờ được xóa khi `clear_selection`, `show_state(null)`.
-  - [ ] 7.3 Kiểm test giao diện bắt lỗi thật (sửa tạm, trả lại, ghi Debug Log): bỏ bước "đã đi thì chờ xác nhận" → ca xác nhận trượt; bỏ chặn chọn tướng đã đánh → ca "không chọn được" trượt.
-- [ ] **Task 8: Tài liệu, kiểm bằng mắt, commit** (AC: 3–14)
-  - [ ] 8.1 `_bmad-output/planning-artifacts/game-architecture.md`: cây thư mục thêm `src/core/forced_move.gd`; mục "Dữ liệu trận, chỉ số và kịch bản luật" thêm mã `tu_choi` mới và khóa `sau.da_danh`; bảng di chuyển cưỡng bức ghi thứ tự sự kiện khi va quân (bị đẩy trước, bị va sau), số 1 máu va chạm là hằng số trong code, làng làm phần "dừng, mất 1 máu" từ Story 2.1 (Lòng dân −1 ở 3.7).
-  - [ ] 8.2 Chạy `tools/chay.sh --dev --tran=thu_ba_tuong` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím (`select_general_1`…; `inject_key` không kích hoạt action theo phím vật lý, xem Debug Log 1.4), `inject_mouse_click` theo pixel = vị trí bàn (`BoardView.position`, Story 1.7: `(486, 141)`) + `cell_center`. Cần một quân Nguyên kề tướng: đi Dư hoặc Khoái tới cạnh Bộ binh rồi đánh (bấm hai lần vì đã đi). `capture_screenshot`: viền mục tiêu thấy rõ quanh chân đồng; ô chờ xác nhận khác ô chưa chờ; đồng đã đánh khác đồng đã đi; máu đổi đúng. Lưu ảnh vào `_bmad-output/implementation-artifacts/anh/2-1-*.png`. Tắt game. Ghi Debug Log.
-  - [ ] 8.3 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, `.uid` mới, `text.vi.translation`. Ví dụ: `Nguyễn Khoái đánh, đẩy, va chạm (Story 2.1)`.
-  - [ ] 8.4 Ghi hướng dẫn tác giả tự test vào Completion Notes theo mẫu ở mục Testing, dùng kết quả thật.
+  - [x] 7.2 `tests/test_board_view.gd`: viền mục tiêu và ô chờ được xóa khi `clear_selection`, `show_state(null)`.
+  - [x] 7.3 Kiểm test giao diện bắt lỗi thật (sửa tạm, trả lại, ghi Debug Log): bỏ bước "đã đi thì chờ xác nhận" → ca xác nhận trượt; bỏ chặn chọn tướng đã đánh → ca "không chọn được" trượt.
+- [x] **Task 8: Tài liệu, kiểm bằng mắt, commit** (AC: 3–14)
+  - [x] 8.1 `_bmad-output/planning-artifacts/game-architecture.md`: cây thư mục thêm `src/core/forced_move.gd`; mục "Dữ liệu trận, chỉ số và kịch bản luật" thêm mã `tu_choi` mới và khóa `sau.da_danh`; bảng di chuyển cưỡng bức ghi thứ tự sự kiện khi va quân (bị đẩy trước, bị va sau), số 1 máu va chạm là hằng số trong code, làng làm phần "dừng, mất 1 máu" từ Story 2.1 (Lòng dân −1 ở 3.7).
+  - [x] 8.2 Chạy `tools/chay.sh --dev --tran=thu_ba_tuong` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím (`select_general_1`…; `inject_key` không kích hoạt action theo phím vật lý, xem Debug Log 1.4), `inject_mouse_click` theo pixel = vị trí bàn (`BoardView.position`, Story 1.7: `(486, 141)`) + `cell_center`. Cần một quân Nguyên kề tướng: đi Dư hoặc Khoái tới cạnh Bộ binh rồi đánh (bấm hai lần vì đã đi). `capture_screenshot`: viền mục tiêu thấy rõ quanh chân đồng; ô chờ xác nhận khác ô chưa chờ; đồng đã đánh khác đồng đã đi; máu đổi đúng. Lưu ảnh vào `_bmad-output/implementation-artifacts/anh/2-1-*.png`. Tắt game. Ghi Debug Log.
+  - [x] 8.3 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, `.uid` mới, `text.vi.translation`. Ví dụ: `Nguyễn Khoái đánh, đẩy, va chạm (Story 2.1)`.
+  - [x] 8.4 Ghi hướng dẫn tác giả tự test vào Completion Notes theo mẫu ở mục Testing, dùng kết quả thật.
 
 ## Dev Notes
 
@@ -388,14 +388,86 @@ Claude Opus 5.5 (claude-opus-5-5)
 ### Debug Log References
 
 - Task 1 (khung + đợt kịch bản 3): `tools/test.sh` xanh 339/339, `Kịch bản luật: 15 đã duyệt · 10 chưa duyệt (10 chưa đạt)`; 10 lý do ⏳ khớp bảng "Lý do chưa đạt". `tools/xem_kich_ban.sh` in đúng bàn trước/sau, câu từ chối và dòng "Sau lệnh: … đã đánh: …".
+- Task 1.6: tác giả trả lời "đúng" cho cả 10 kịch bản (2026-10-18). Đổi `da_duyet: true` (mỗi file một dòng); `tools/test.sh` trượt đúng như AC 2: `kịch bản đã duyệt danh/da_danh_roi.json: bước 1: lệnh "danh" chưa có luật (Story 2.1)`. Không commit lúc đỏ.
+- Đỏ trước: viết `test_forced_move.gd`, `test_rules_attack.gd` trước; `tools/test.sh` báo lỗi script (`Command.attack`, `ForcedMove` chưa có).
+- Lần chạy đầu sau khi code: 1 trượt, do test ghi nhầm id (Bộ binh ở hàng trên là 101, Kỵ binh 102); sửa test. Cả 25 kịch bản đạt ngay.
+- Phá thử (Task 5.6, trả lại ngay, sau đó 374/374 xanh):
+  - bỏ `_undo_snapshot = null` của ATTACK → `huy/danh_xoa_huy.json` và `test_attack_clears_undo` trượt;
+  - đẩy trước khi trừ máu → `day/muc_tieu_guc_khong_day.json` (Bộ binh 3,2 còn 2 máu) và 3 test luật trượt;
+  - mép bàn không trừ máu → `va_cham/day_vao_mep.json`, `test_edge_in_every_direction`, `test_lethal_attack_is_not_rolled_back` trượt;
+  - quân bị va không mất máu → `va_cham/day_vao_quan_khac.json` và 3 test đẩy trượt;
+  - bỏ `has_attacked = true` → `danh/da_danh_roi.json` và 4 test luật trượt;
+  - cho đánh chéo (Chebyshev) → `danh/khong_danh_duoc.json` và 2 test trượt.
+  - Thêm: chỉ bỏ câu `if target.is_alive()` trước `ForcedMove.run` thì **không** test nào trượt, vì `ForcedMove.run` tự dừng khi quân đã gục (lưới an toàn thứ hai). Giữ cả hai; ca "đảo thứ tự" ở trên mới là lỗi thật.
+- Phá thử giao diện (Task 7.3): bỏ bước chờ xác nhận → `test_moved_general_needs_confirm_click`, `test_click_elsewhere_cancels_confirm` trượt; cho bấm chọn tướng đã đánh → `test_click_target_attacks_and_general_is_spent` trượt; cho phím 1 chọn tướng đã đánh → cùng test đó trượt.
+- GoPeak (`tools/chay.sh --dev --tran=thu_ba_tuong`, bàn ở `(486, 141)`): `select_general_1`, bấm `0,3` (294, 269), `end_turn`; bấm `3,3` (486, 365), `end_turn`; bấm `5,3` (614, 429): Khoái kề Cung kỵ `5,2` và Bộ binh `5,4`, cả hai có viền trắng (ảnh `anh/2-1-vien-muc-tieu.png`). Bấm Bộ binh (550, 461) lần đầu: viền dày, bảng phải hiện "Bấm lần nữa để đánh" (`anh/2-1-cho-xac-nhan.png`). Bấm lần nữa: Bộ binh sang `5,5` còn 1 máu, đồng Khoái xám, bỏ chọn, nút Hủy mờ, dòng nhắc mất (`anh/2-1-sau-khi-danh.png`). Log có `[DEBUG][battle] nhận lệnh: quân 1 đánh ô 5,4`, không có ERROR/WARN.
 - Lệch so với Tasks: khóa `scenario.viewer.after_attacked_none` có chữ `chưa tướng nào` (giống `after_moved_none`) để dòng "Sau lệnh" đọc liền ("đã đánh: chưa tướng nào"). Danh sách mã `tu_choi` của lệnh `di` sắp theo thứ tự luật kiểm (`da_danh_roi` trước `da_di_roi`).
+  - Task 3.3: Lão, Dư gửi lệnh đánh bị từ chối `NO_TARGET` ngay sau bước "đã đánh" (trước bước kề), không ở cuối bảng: chưa có đòn thì không cần kiểm ô.
+  - Task 3.7: `test_runner_stops_at_command_without_rule` đổi thành `test_runner_stops_at_failed_step` (mọi lệnh đã có luật, `PENDING_RULES` rỗng; test vẫn giữ ý "bước trượt thì dừng, không so bàn sau", và kiểm bảng rỗng).
+  - Task 5.1, 5.2: hàm dựng bàn thử dùng chung ở `tests/board_fixture.gd` (MỚI, `class_name BoardFixture`), không chép vào hai file test.
+  - Task 5.5: không thêm vào `test_core_types.gd` (file đó không kiểm `Stats`). `Stats.damage`, `push_distance` kiểm ở `test_rules_attack.gd` với chỉ số tự đặt; không đọc `chi_so.json` thật (tác giả được sửa số).
+  - Task 7.1: thêm ca "Khoái chưa đi đánh ngay một cú bấm" (`test_unmoved_general_attacks_on_first_click`). Ca "Lão đi, Khoái đánh, Z" bấm qua `_click` (gọi thẳng BattleView), phím Z là phím thật.
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
+- Lõi luật: `RulesAttack` (đòn Nguyễn Khoái, `targets`, bảng từ chối "kiểm hết rồi mới sửa"), `ForcedMove.run` (đẩy từng ô; mép bàn, rừng, kho lương, làng, quân khác, sông), `Effects.damage` (trừ máu thật, gục thì nhấc khỏi bàn), `Effects.move` (quân Nguyên vào sông chết đuối). Sự kiện mới `DAMAGED`, `DIED`, `COLLIDED`, `DROWNED`, `ATTACKED`; lệnh `Command.attack`; cờ `has_attacked` (đánh rồi không đi, không đánh; kết thúc lượt xóa).
+- `BattleController`: đánh xóa lịch sử hủy; `attack_targets()`; log `quân %d đánh ô c,h`.
+- Giao diện: viền trắng quanh mục tiêu (vẽ cùng vòng lặp theo độ sâu), ô chờ xác nhận viền dày, dòng nhắc "Bấm lần nữa để đánh" ở bảng phải; tướng đã đánh đồng xám, tự bỏ chọn, không chọn lại được (chuột và phím).
+- Kịch bản: 10 mới (`day/`, `va_cham/`, `danh/`, `huy/danh_xoa_huy.json`), tác giả duyệt cả 10; khóa `sau.da_danh`; mã `da_danh_roi`, `khong_ke`, `khong_co_dich`.
+- Test: 3 file mới (`test_forced_move.gd` 13 test, `test_rules_attack.gd` 9 test, `board_fixture.gd` dùng chung), thêm ở `test_battle_view.gd` (7), `test_battle_controller.gd` (4), `test_scenario_loader.gd` (4 mới, 4 sửa), `test_battle_state.gd` (1), `test_board_view.gd` (1). `tools/test.sh`: 374/374, `Kịch bản luật: 25 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
+- `game-architecture.md`: cây thư mục có `forced_move.gd`; mã `tu_choi` mới, khóa `da_danh`; bảng đẩy ghi thứ tự sự kiện khi va quân, số 1 máu va chạm là hằng số, làng có phần "dừng, mất 1 máu" từ 2.1.
+- Mục hoãn đã xử lý: `Stats.value` gõ sai khóa thì `assert`; lệnh đánh "kiểm hết rồi mới sửa" (không cần khôi phục `before`).
+
+**Hướng dẫn tác giả tự test**
+
+1. `tools/test.sh`: thấy `Kịch bản luật: 25 đã duyệt · 0 chưa duyệt (0 chưa đạt)` và `✅ 374/374 test đạt`.
+2. `tools/chay.sh --dev --tran=thu_ba_tuong`. (Tắt bộ gõ VNI/Telex trước khi gõ phím.)
+3. Gõ `1` chọn Khoái, bấm ô `0,3` (ô trên Khoái 3 ô). Gõ `Space`. Gõ `1`, bấm ô `3,3` (khe giữa sông). Gõ `Space`. Gõ `1`, bấm ô `5,3` (ngay trên Bộ binh dưới, cạnh Cung kỵ).
+4. Thấy **viền trắng** quanh Cung kỵ và Bộ binh (hai quân kề Khoái), xem ảnh `_bmad-output/implementation-artifacts/anh/2-1-vien-muc-tieu.png`.
+5. Bấm Bộ binh **một lần**: chưa đánh, viền Bộ binh dày lên, bảng phải hiện "Bấm lần nữa để đánh" (vì Khoái đã đi). Bấm **lần nữa**: Bộ binh lùi 1 ô (ra xa Khoái), còn 1 máu; đồng Khoái chuyển **xám**; nút Hủy mờ.
+6. Bấm Khoái hoặc gõ `1`: không chọn được. Gõ `Z`: không có gì xảy ra.
+7. Gõ `Space`: Khoái hết xám. Gõ `1`, bấm Cung kỵ ở ô trên Khoái **một lần**: Khoái chưa đi trong lượt này nên đánh ngay, Cung kỵ (1 máu) gục, biến khỏi bàn, không bị đẩy.
+8. Muốn thử va chạm: đẩy một Bộ binh vào rừng, kho lương, quân khác hoặc mép bàn; Bộ binh mất thêm 1 máu và gục (biến khỏi bàn). Kịch bản `tools/xem_kich_ban.sh --tat_ca` có đủ các ca này.
 
 ### File List
+
+- `game/src/core/battle_event.gd` (sửa)
+- `game/src/core/command.gd` (sửa)
+- `game/src/core/effects.gd` (sửa)
+- `game/src/core/forced_move.gd` (mới), `game/src/core/forced_move.gd.uid` (mới)
+- `game/src/core/rules_attack.gd` (mới), `game/src/core/rules_attack.gd.uid` (mới)
+- `game/src/core/grid.gd` (sửa)
+- `game/src/core/rules.gd` (sửa)
+- `game/src/core/rules_move.gd` (sửa)
+- `game/src/core/rules_enemy_phase.gd` (sửa)
+- `game/src/core/stats.gd` (sửa)
+- `game/src/core/unit.gd` (sửa)
+- `game/src/core/battle_state.gd` (sửa)
+- `game/src/data/scenario_loader.gd` (sửa)
+- `game/src/data/scenario_data.gd` (sửa)
+- `game/src/battle/battle_controller.gd` (sửa)
+- `game/src/battle/battle_view.gd` (sửa)
+- `game/src/battle/board_view.gd` (sửa)
+- `game/src/battle/unit_token.gd` (sửa)
+- `game/src/ui/hud.gd` (sửa)
+- `game/i18n/text.csv`, `game/i18n/text.vi.translation` (sửa)
+- `game/tests/kich_ban/day/danh_day_1_o.json`, `day/muc_tieu_guc_khong_day.json` (mới)
+- `game/tests/kich_ban/va_cham/day_vao_mep.json`, `day_vao_rung.json`, `day_vao_kho_luong.json`, `day_vao_quan_khac.json` (mới)
+- `game/tests/kich_ban/danh/di_roi_danh.json`, `da_danh_roi.json`, `khong_danh_duoc.json` (mới)
+- `game/tests/kich_ban/huy/danh_xoa_huy.json` (mới)
+- `game/tests/scenario_runner.gd`, `game/tests/scenario_viewer.gd` (sửa)
+- `game/tests/board_fixture.gd` (mới), `.uid` (mới)
+- `game/tests/test_forced_move.gd` (mới), `.uid` (mới)
+- `game/tests/test_rules_attack.gd` (mới), `.uid` (mới)
+- `game/tests/test_scenario_loader.gd`, `test_battle_controller.gd`, `test_battle_state.gd`, `test_battle_view.gd`, `test_board_view.gd` (sửa)
+- `_bmad-output/planning-artifacts/game-architecture.md` (sửa)
+- `_bmad-output/implementation-artifacts/anh/2-1-vien-muc-tieu.png`, `2-1-cho-xac-nhan.png`, `2-1-sau-khi-danh.png` (mới)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (sửa)
+- `_bmad-output/implementation-artifacts/2-1-nguyen-khoai-danh-day-va-va-cham.md` (sửa)
 
 ### Change Log
 
 - 2026-10-18: Tạo story. Tác giả chốt: viền trắng, đồng đã đánh xám; xác nhận bằng viền dày và dòng chữ; số 1 máu va chạm để trong code; làng như rừng (Lòng dân ở 3.7).
+- 2026-10-18: Đợt kịch bản 3 (10 kịch bản), tác giả duyệt cả 10.
+- 2026-10-18: Làm story: đòn Nguyễn Khoái, đẩy và va chạm (`ForcedMove`), gục, đánh xóa hủy, viền mục tiêu, xác nhận khi đã đi, đồng đã đánh; 39 test mới, 4 test sửa; `tools/test.sh` 374/374, kịch bản 25/25.

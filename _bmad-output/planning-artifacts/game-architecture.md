@@ -338,8 +338,8 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
 | Phần | Nội dung |
 |---|---|
 | `truoc` | Bàn cờ và máu ban đầu |
-| `hanh_dong` | Danh sách lệnh dạng object, ví dụ `{"tuong": "3", "lenh": "danh", "o": "4,2"}`. Lệnh `{"lenh": "ket_thuc_luot"}` chạy luôn pha địch. Lệnh luật phải từ chối thì ghi thêm `"tu_choi": "<mã lý do>"` (`khong_co_quan`, `khong_phai_tuong`, `da_dung_o_do`, `khong_toi_duoc`, `da_di_roi`, `khong_con_nuoc_di`; lệnh `huy` cũng nhận `tu_choi`); lệnh bị từ chối mà không ghi, hoặc ghi mà không bị từ chối, là kịch bản trượt |
-| `sau` | Bàn cờ và máu mong đợi. Không bắt buộc: `"hiep": 2` (hiệp mong đợi) và `"da_di": ["1"]` (các tướng đã đi trong lượt; `[]` là chưa tướng nào đi, tướng không ghi phải chưa đi); không ghi thì không kiểm (tác giả chốt 2026-10-18). Có thể ghi thêm vài sự kiện chính (ví dụ `chet_duoi`) khi đó chính là điều cần kiểm |
+| `hanh_dong` | Danh sách lệnh dạng object, ví dụ `{"tuong": "3", "lenh": "danh", "o": "4,2"}`. Lệnh `{"lenh": "ket_thuc_luot"}` chạy luôn pha địch. Lệnh luật phải từ chối thì ghi thêm `"tu_choi": "<mã lý do>"` (`khong_co_quan`, `khong_phai_tuong`, `da_dung_o_do`, `khong_toi_duoc`, `da_di_roi`, `khong_con_nuoc_di`, `da_danh_roi`, `khong_ke`, `khong_co_dich`; lệnh `huy` cũng nhận `tu_choi`; mỗi lệnh chỉ nhận mã của luật lệnh đó); lệnh bị từ chối mà không ghi, hoặc ghi mà không bị từ chối, là kịch bản trượt |
+| `sau` | Bàn cờ và máu mong đợi. Không bắt buộc: `"hiep": 2` (hiệp mong đợi) và `"da_di": ["1"]` (các tướng đã đi trong lượt; `[]` là chưa tướng nào đi, tướng không ghi phải chưa đi), `"da_danh": ["1"]` (như `da_di`, các tướng đã đánh; Story 2.1); không ghi thì không kiểm (tác giả chốt 2026-10-18). Có thể ghi thêm vài sự kiện chính (ví dụ `chet_duoi`) khi đó chính là điều cần kiểm |
 
 Mỗi khi chốt một luật, AI viết kịch bản, tác giả đọc rồi trả lời "đúng" hoặc "sai". Một lệnh chạy toàn bộ kịch bản và in kết quả đạt/trượt bằng tiếng Việt.
 
@@ -551,7 +551,8 @@ chong-nguyen-mong/                    # repo
 │   │   │   ├── stats.gd              # chỉ số đã nạp từ chi_so.json (chỉ đọc)
 │   │   │   ├── rules.gd              # ĐIỂM VÀO DUY NHẤT: resolve(state, command) -> events
 │   │   │   ├── rules_move.gd         # đi, tầm đi, đi xuyên quân mình
-│   │   │   ├── rules_attack.gd       # đòn 3 tướng; đẩy, kéo, va chạm
+│   │   │   ├── rules_attack.gd       # đòn 3 tướng
+│   │   │   ├── forced_move.gd        # ForcedMove.run: đẩy, kéo từng ô, va chạm (Story 2.1)
 │   │   │   ├── rules_terrain.gd      # sông, rừng, hầm chông, kho lương, mép bàn
 │   │   │   ├── rules_enemy_phase.gd  # chuẩn bị, ra đòn theo thứ tự, cuối hiệp, tiếp viện
 │   │   │   ├── rules_stratagem.gd    # Sát Thát, Vườn không nhà trống
@@ -793,12 +794,13 @@ Mọi luật đều đi qua đúng quy trình này. Không có ngoại lệ.
 |---|---|
 | Ngoài bàn (mép) | Dừng. Quân bị đẩy **mất 1 máu** |
 | Rừng `#` hoặc kho lương `L` | Dừng. Quân bị đẩy **mất 1 máu** (vật cản không có máu) |
-| Làng `D` | Dừng. Quân bị đẩy **mất 1 máu**, và **Lòng dân −1** (kể cả khi người chơi gây ra) |
-| Có quân khác | Dừng. **Cả hai mất 1 máu** |
+| Làng `D` | Dừng. Quân bị đẩy **mất 1 máu**, và **Lòng dân −1** (kể cả khi người chơi gây ra). Phần "dừng, mất 1 máu" có từ Story 2.1; Lòng dân −1 thêm ở Story 3.7 |
+| Có quân khác (bất kể phe) | Dừng. **Cả hai mất 1 máu**: quân bị đẩy mất máu trước, quân bị va sau (thứ tự sự kiện) |
 | Sông `~` | Quân Nguyên: vào ô và **chết đuối**. Tướng: tính như va chạm, dừng, mất 1 máu |
 | Hầm chông `^` | Vào ô, **mất 1 máu** (kể cả khi chỉ đi ngang qua). Gục thì dừng tại đó |
 | Ô trống | Vào ô, đi tiếp |
 
+- "Mất 1 máu" khi va là luật cố định của GDD: hằng số `ForcedMove.COLLISION_DAMAGE`, không nằm trong `chi_so.json` (tác giả chốt 2026-10-18). Sát Thát không cộng vào.
 - Kéo một mục tiêu đã đứng kề Trần Khánh Dư: không có gì xảy ra (theo GDD).
 - Sau khi di chuyển xong, đòn của quân đó tự dịch theo (M1). Ô đích nằm ngoài bàn thì đòn bị hủy. **(mặc định)**
 

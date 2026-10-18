@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Nguyễn Khoái đánh Bộ binh kề trên: Bộ binh còn 1 máu, bị đẩy lùi 1 ô lên trên.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

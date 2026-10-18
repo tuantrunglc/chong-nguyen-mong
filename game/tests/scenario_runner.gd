@@ -5,9 +5,7 @@ extends RefCounted
 ## Câu so sánh cho dev và log, không qua tr() (như câu lỗi của bộ nạp).
 
 ## Lệnh -> story sẽ viết luật cho lệnh đó. Lệnh có luật rồi thì bỏ khỏi bảng này và thêm nhánh trong _run_step.
-const PENDING_RULES: Dictionary = {
-	"danh": "2.1",
-}
+const PENDING_RULES: Dictionary = {}
 
 ## Mã "tu_choi" của kịch bản -> lý do luật trả. Cùng khóa với ScenarioLoader.REJECT_CODES (test kiểm).
 const REJECT_EVENTS: Dictionary = {
@@ -101,6 +99,11 @@ static func _run_step(controller: BattleController, step: ScenarioData.ScenarioS
 			if general == null:
 				return 'tướng "%s" không còn trên bàn' % unit_symbol(step.general)
 			return _check_reject(controller.submit(Command.move(general.id, step.cell)), step.reject)
+		"danh":
+			var general: Unit = _general(controller.snapshot(), step.general)
+			if general == null:
+				return 'tướng "%s" không còn trên bàn' % unit_symbol(step.general)
+			return _check_reject(controller.submit(Command.attack(general.id, step.cell)), step.reject)
 		"ket_thuc_luot":
 			return _check_reject(controller.submit(Command.end_turn()), step.reject)
 		"huy":

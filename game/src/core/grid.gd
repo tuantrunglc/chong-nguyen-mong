@@ -4,3 +4,13 @@ extends RefCounted
 
 ## 4 hướng theo thứ tự B→Đ→N→T: thứ tự cố định cho mọi trường hợp hòa (BFS, chọn đường, chọn ô đứng).
 const DIRECTIONS: Array[Vector2i] = [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]
+
+
+## Kề cạnh (4 hướng, không chéo).
+static func is_adjacent(a: Vector2i, b: Vector2i) -> bool:
+	return absi(a.x - b.x) + absi(a.y - b.y) == 1
+
+
+## Hướng từ ô from sang ô kề to (một phần tử của DIRECTIONS).
+static func dir_between(from: Vector2i, to: Vector2i) -> Vector2i:
+	return to - from

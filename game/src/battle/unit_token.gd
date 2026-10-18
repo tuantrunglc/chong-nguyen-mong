@@ -15,6 +15,9 @@ const DAI_VIET_COLOR: Color = Color(0.70, 0.13, 0.13)
 ## Tướng đã đi trong lượt: đỏ xỉn, không dùng độ trong suốt (bóng mờ dành cho xem trước ở E2).
 const DAI_VIET_MOVED_COLOR: Color = Color(0.55, 0.40, 0.38)
 const DAI_VIET_TEXT_COLOR: Color = Color(1.0, 0.95, 0.80)
+## Tướng đã đánh: xám nhạt, chữ xám đậm (tác giả chốt 2026-10-18), khác hẳn đỏ xỉn "đã đi". Không dùng trong suốt.
+const ATTACKED_COLOR: Color = Color(0.72, 0.72, 0.70)
+const ATTACKED_TEXT_COLOR: Color = Color(0.25, 0.25, 0.25)
 const NGUYEN_COLOR: Color = Color(0.17, 0.20, 0.28)
 const NGUYEN_TEXT_COLOR: Color = Color(1.0, 1.0, 1.0)
 const NAME_FONT_SIZE: int = 16
@@ -43,6 +46,7 @@ var unit_type: int = -1
 var cell: Vector2i = Vector2i.ZERO
 var _faction: Unit.Faction = Unit.Faction.DAI_VIET
 var _moved: bool = false
+var _attacked: bool = false
 var _name_label: Label
 var _hp_label: Label
 
@@ -74,10 +78,18 @@ func update(unit: Unit, lift: float = 0.0) -> void:
 	if unit.has_moved != _moved:
 		_moved = unit.has_moved
 		queue_redraw()
+	if unit.has_attacked != _attacked:
+		_attacked = unit.has_attacked
+		_name_label.add_theme_color_override("font_color", ATTACKED_TEXT_COLOR if _attacked else DAI_VIET_TEXT_COLOR)
+		queue_redraw()
 
 
 func is_moved() -> bool:
 	return _moved
+
+
+func is_attacked() -> bool:
+	return _attacked
 
 
 func name_text() -> String:
@@ -116,8 +128,9 @@ func _draw() -> void:
 	draw_circle(coin + HP_OFFSET, HP_RADIUS, BoardView.LINE_COLOR, false, HP_BORDER_WIDTH, true)
 
 
-## Story 2.1 thêm màu "đã đánh" ở đây.
 func _fill_color() -> Color:
 	if _faction == Unit.Faction.NGUYEN:
 		return NGUYEN_COLOR
+	if _attacked:
+		return ATTACKED_COLOR
 	return DAI_VIET_MOVED_COLOR if _moved else DAI_VIET_COLOR

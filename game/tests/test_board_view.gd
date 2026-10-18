@@ -237,3 +237,23 @@ func test_board_rect_covers_every_cell_and_token() -> void:
 	for token: UnitToken in board.tokens().values():
 		var top: Vector2 = board.position + token.position + Vector2(0, -UnitToken.TOKEN_LIFT - UnitToken.RADIUS)
 		assert_true(rect.has_point(top), "đầu đồng %s" % token.cell)
+
+
+# ---------- Viền mục tiêu (Story 2.1) ----------
+
+func test_target_outline_and_pending_are_cleared() -> void:
+	var board: BoardView = _board(_make_main())
+	board.show_selection(Vector2i(0, 6), [] as Array[Vector2i], [Vector2i(0, 5)] as Array[Vector2i])
+	board.show_pending(Vector2i(0, 5))
+	assert_eq(board.target_cells(), [Vector2i(0, 5)] as Array[Vector2i])
+	assert_eq(board.pending_cell(), Vector2i(0, 5))
+	board.clear_selection()
+	assert_eq(board.target_cells(), [] as Array[Vector2i])
+	assert_eq(board.pending_cell(), BoardView.NO_CELL)
+	board.show_selection(Vector2i(0, 6), [] as Array[Vector2i], [Vector2i(0, 5)] as Array[Vector2i])
+	board.show_pending(Vector2i(0, 5))
+	board.show_state(null)
+	assert_eq(board.target_cells(), [] as Array[Vector2i], "bàn trống: hết viền")
+	assert_eq(board.pending_cell(), BoardView.NO_CELL)
+	board.show_selection(Vector2i(0, 6), [] as Array[Vector2i], [Vector2i(0, 5)] as Array[Vector2i])
+	assert_eq(board.pending_cell(), BoardView.NO_CELL, "chọn lại thì bỏ chờ")

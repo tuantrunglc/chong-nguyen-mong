@@ -8,6 +8,9 @@ const PROBE_DIR: String = "user://test_battle_view"
 const PROBE_FILE: String = PROBE_DIR + "/thu_luu.json"
 const BROKEN_DIR: String = PROBE_DIR + "/tran"
 const BROKEN_LEVEL: String = BROKEN_DIR + "/tran_01.json"
+## Trận thử cho đòn đánh (Story 2.1): trận 1 thật không có quân Nguyên nào kề tướng lúc đầu.
+const ATTACK_DIR: String = PROBE_DIR + "/tran_danh"
+const ATTACK_LEVEL: String = ATTACK_DIR + "/tran_01.json"
 
 ## Ô sáng mong đợi trên trận 1 (AC 4, AC 5), theo thứ tự đọc bàn.
 const KHOAI_CELLS: Array[Vector2i] = [
@@ -37,10 +40,11 @@ func after_each() -> void:
 		if InputMap.has_action("dev_f%d" % (i + 1)):
 			InputMap.erase_action("dev_f%d" % (i + 1))
 	SaveProbe.path = SaveProbe.DEFAULT_PATH
-	for path: String in [BROKEN_LEVEL, PROBE_FILE]:
+	for path: String in [BROKEN_LEVEL, ATTACK_LEVEL, PROBE_FILE]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(BROKEN_DIR)
+	DirAccess.remove_absolute(ATTACK_DIR)
 	DirAccess.remove_absolute(PROBE_DIR)
 	Log.clear()
 
@@ -513,3 +517,120 @@ func test_mouse_events_map_screen_pixels_to_cells() -> void:
 	motion.position = board.get_global_transform_with_canvas() * BoardView.cell_center(Vector2i(2, 5))
 	_battle_input(main)._unhandled_input(motion)
 	assert_eq(board.path(), [Vector2i(0, 5), Vector2i(1, 5), Vector2i(2, 5)] as Array[Vector2i])
+
+
+# ---------- Đánh (Story 2.1) ----------
+
+## Khoái ở 3,4 kề Bộ binh 3,3 (Bắc) và Kỵ binh 4,4 (Đông); Lão ở 0,6; thêm Bộ binh 5,5.
+func _make_attack_main() -> Node2D:
+	DirAccess.make_dir_recursive_absolute(ATTACK_DIR)
+	var level: Dictionary = {
+		"phien_ban_dinh_dang": 1,
+		"ten": "Thử đánh",
+		"kieu": "tieu_diet",
+		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . . . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"quan": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . B . . .",
+			". . . 1 K . .", ". . . . . B .", "2 . . . . . ."],
+		"thu_tu_dich": ["3,3", "4,4", "5,5"],
+		"tiep_vien": [],
+		"muu_ke_mo": [],
+	}
+	var file: FileAccess = FileAccess.open(ATTACK_LEVEL, FileAccess.WRITE)
+	file.store_string(JSON.stringify(level))
+	file.close()
+	return _make_main(ATTACK_DIR)
+
+
+func _unit_at(main: Node2D, cell: Vector2i) -> Unit:
+	return _controller(main).snapshot().unit_at(cell)
+
+
+func test_selecting_khoai_outlines_targets() -> void:
+	var main: Node2D = _make_attack_main()
+	_press_physical(main, KEY_1)
+	var targets: Array[Vector2i] = [Vector2i(3, 3), Vector2i(4, 4)]
+	assert_eq(_view(main).target_cells(), targets, "B→Đ→N→T: Bắc trước Đông")
+	assert_eq(_board(main).target_cells(), targets, "bàn cờ viền đúng các ô đó")
+	_press_physical(main, KEY_2)
+	assert_eq(_board(main).target_cells(), [] as Array[Vector2i], "Lão chưa có đòn")
+
+
+func test_click_target_attacks_and_general_is_spent() -> void:
+	var main: Node2D = _make_attack_main()
+	_press_physical(main, KEY_1)
+	_click_by_mouse(main, Vector2i(3, 3))
+	assert_null(_unit_at(main, Vector2i(3, 3)))
+	assert_eq(_unit_at(main, Vector2i(3, 2)).hp, 1, "Bộ binh còn 1 máu, lùi lên 1 ô")
+	assert_eq(_token(main, 101).hp_text(), "1")
+	assert_true(_token(main, 1).is_attacked(), "đồng Khoái đổi màu đã đánh")
+	assert_eq(_view(main).selected_id(), BattleView.NONE, "đánh xong tự bỏ chọn")
+	assert_eq(_board(main).target_cells(), [] as Array[Vector2i])
+	assert_true(_hud(main).undo_button().disabled)
+	_press_physical(main, KEY_1)
+	assert_eq(_view(main).selected_id(), BattleView.NONE, "phím 1 không chọn được tướng đã đánh")
+	_click_by_mouse(main, Vector2i(3, 4))
+	assert_eq(_view(main).selected_id(), BattleView.NONE, "bấm cũng không chọn được")
+
+
+func test_moved_general_needs_confirm_click() -> void:
+	var main: Node2D = _make_attack_main()
+	_press_physical(main, KEY_1)
+	_click(main, Vector2i(4, 5))
+	assert_eq(_view(main).target_cells(), [Vector2i(4, 4), Vector2i(5, 5)] as Array[Vector2i])
+	_click(main, Vector2i(4, 4))
+	assert_eq(_view(main).pending_cell(), Vector2i(4, 4), "lần đầu chỉ chờ xác nhận")
+	assert_eq(_board(main).pending_cell(), Vector2i(4, 4))
+	assert_eq(_hud(main).hint_text(), "Bấm lần nữa để đánh")
+	assert_eq(_unit_at(main, Vector2i(4, 4)).hp, 2, "chưa đánh")
+	_click(main, Vector2i(5, 5))
+	assert_eq(_view(main).pending_cell(), Vector2i(5, 5), "bấm mục tiêu khác: chuyển chờ sang đó")
+	assert_eq(_unit_at(main, Vector2i(5, 5)).hp, 3, "chưa đánh")
+	_click(main, Vector2i(5, 5))
+	assert_eq(_unit_at(main, Vector2i(6, 5)).hp, 1, "bấm lại đúng ô: đánh, Bộ binh lùi sang phải")
+	assert_true(_token(main, 1).is_attacked())
+	assert_eq(_view(main).pending_cell(), BoardView.NO_CELL)
+	assert_eq(_hud(main).hint_text(), "")
+
+
+func test_unmoved_general_attacks_on_first_click() -> void:
+	var main: Node2D = _make_attack_main()
+	_press_physical(main, KEY_1)
+	_click(main, Vector2i(4, 4))
+	assert_null(_unit_at(main, Vector2i(4, 4)), "Kỵ binh 2 máu gục ngay")
+	assert_eq(_hud(main).hint_text(), "")
+
+
+func test_click_elsewhere_cancels_confirm() -> void:
+	var main: Node2D = _make_attack_main()
+	_press_physical(main, KEY_1)
+	_click(main, Vector2i(4, 5))
+	_click(main, Vector2i(4, 4))
+	_click(main, Vector2i(1, 1))
+	assert_eq(_view(main).selected_id(), BattleView.NONE, "bấm ô trống ngoài tầm: bỏ chọn như cũ")
+	assert_eq(_view(main).pending_cell(), BoardView.NO_CELL)
+	assert_eq(_board(main).pending_cell(), BoardView.NO_CELL)
+	assert_eq(_hud(main).hint_text(), "")
+	assert_eq(_unit_at(main, Vector2i(4, 4)).hp, 2, "không đánh")
+
+
+func test_attack_clears_undo_in_game() -> void:
+	var main: Node2D = _make_attack_main()
+	_press_physical(main, KEY_2)
+	_click(main, Vector2i(0, 5))
+	_press_physical(main, KEY_1)
+	_click(main, Vector2i(3, 3))
+	_press_physical(main, KEY_Z)
+	assert_eq(_unit_cell(main, 2), Vector2i(0, 5), "Lão vẫn ở ô mới")
+	assert_eq(_unit_at(main, Vector2i(3, 2)).hp, 1, "đòn đánh không bị hủy")
+
+
+func test_end_turn_lets_general_attack_again() -> void:
+	var main: Node2D = _make_attack_main()
+	_press_physical(main, KEY_1)
+	_click(main, Vector2i(3, 3))
+	_press_physical(main, KEY_SPACE)
+	assert_false(_token(main, 1).is_attacked())
+	_press_physical(main, KEY_1)
+	assert_eq(_view(main).selected_id(), 1)
+	assert_eq(_view(main).target_cells(), [Vector2i(4, 4)] as Array[Vector2i], "Bộ binh đã bị đẩy ra xa")

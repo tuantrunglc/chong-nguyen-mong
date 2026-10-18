@@ -192,3 +192,65 @@ func _assert_same_state(got: BattleState, want: BattleState) -> void:
 		var w: Unit = want.units[i]
 		assert_eq([g.id, g.type, g.cell, g.hp, g.has_moved], [w.id, w.type, w.cell, w.hp, w.has_moved],
 			"quân %d giống trước lệnh" % w.id)
+
+
+# ---------- Đánh (Story 2.1) ----------
+
+## Khoái ở 3,4 kề Bộ binh 3,3; Lão ở 0,6; thêm một Bộ binh sát mép phải ở 6,4.
+func _attack_controller() -> BattleController:
+	var controller: BattleController = BattleController.new()
+	var state: BattleState = BoardFixture.state({Vector2i(3, 4): "1", Vector2i(0, 6): "2", Vector2i(3, 3): "B",
+		Vector2i(6, 4): "B"})
+	var level: LevelData = LevelData.new()
+	level.size = state.size
+	level.terrain = state.terrain
+	for u: Unit in state.units:
+		level.units.append(LevelData.UnitPlacement.new(u.type, u.cell))
+	controller.start(level, BoardFixture.stats())
+	controller.events_resolved.connect(func(events: Array[BattleEvent], snapshot: BattleState) -> void:
+		_events_seen.append([events, snapshot]))
+	return controller
+
+
+func test_attack_clears_undo() -> void:
+	var c: BattleController = _attack_controller()
+	c.submit(Command.move(2, Vector2i(0, 5)))
+	assert_true(c.can_undo())
+	c.submit(Command.attack(1, Vector2i(3, 3)))
+	assert_false(c.can_undo(), "đánh xóa lịch sử hủy")
+	var events: Array[BattleEvent] = c.undo()
+	assert_eq(events.size(), 1)
+	assert_eq(events[0].reject, BattleEvent.Reject.NOTHING_TO_UNDO)
+	assert_eq(_cell(c, 2), Vector2i(0, 5), "Lão vẫn ở ô mới")
+	assert_eq(c.snapshot().unit_at(Vector2i(3, 2)).hp, 1, "đòn đánh không bị hủy")
+
+
+func test_rejected_attack_keeps_undo() -> void:
+	var c: BattleController = _attack_controller()
+	c.submit(Command.move(2, Vector2i(0, 5)))
+	_events_seen = []
+	var events: Array[BattleEvent] = c.submit(Command.attack(1, Vector2i(2, 4)))
+	assert_eq(events[0].reject, BattleEvent.Reject.NO_TARGET)
+	assert_true(c.can_undo(), "nước đi trước vẫn hủy được")
+	assert_eq(_events_seen.size(), 0, "không phát signal")
+
+
+func test_attack_targets_query() -> void:
+	var c: BattleController = _attack_controller()
+	assert_eq(c.attack_targets(1), [Vector2i(3, 3)] as Array[Vector2i])
+	assert_eq(c.attack_targets(2), [] as Array[Vector2i], "Lão chưa có đòn")
+	assert_eq(c.attack_targets(99), [] as Array[Vector2i])
+	c.submit(Command.attack(1, Vector2i(3, 3)))
+	assert_eq(c.attack_targets(1), [] as Array[Vector2i], "đã đánh")
+
+
+## Đòn làm gục (va mép bàn): quân bị nhấc khỏi bàn, validate() rỗng nên không bị quay lại.
+func test_lethal_attack_is_not_rolled_back() -> void:
+	var c: BattleController = _attack_controller()
+	c.submit(Command.move(1, Vector2i(5, 4)))
+	var rolled: Array = []
+	c.rolled_back.connect(func(problems: Array[String]) -> void: rolled.append(problems))
+	c.submit(Command.attack(1, Vector2i(6, 4)))
+	assert_eq(rolled, [], "không quay lại")
+	assert_null(c.snapshot().unit_at(Vector2i(6, 4)), "Bộ binh va mép bàn, gục")
+	assert_eq(c.snapshot().units.size(), 3)

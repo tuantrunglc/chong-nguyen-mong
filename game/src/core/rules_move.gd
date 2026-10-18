@@ -1,13 +1,14 @@
 class_name RulesMove
 extends RefCounted
 ## Luật đi của tướng (FR5–FR7): tối đa tam_di bước, 4 hướng, đi xuyên quân mình, không dừng trên quân nào;
-## quân Nguyên, sông, rừng, kho lương, làng, mép bàn chặn. Mỗi tướng đi một lần mỗi lượt (has_moved).
+## quân Nguyên, sông, rừng, kho lương, làng, mép bàn chặn. Mỗi tướng đi một lần mỗi lượt (has_moved); đã đánh thì
+## không đi được nữa (has_attacked, FR9).
 
 
-## Các ô quân dừng được, theo thứ tự đọc bàn (hàng trên xuống, trái sang phải). Đã đi thì không còn ô nào.
+## Các ô quân dừng được, theo thứ tự đọc bàn (hàng trên xuống, trái sang phải). Đã đi, đã đánh thì không còn ô nào.
 static func reachable(state: BattleState, unit: Unit) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
-	if unit.has_moved:
+	if unit.has_moved or unit.has_attacked:
 		return cells
 	for cell: Variant in _paths(state, unit).keys():
 		cells.append(cell as Vector2i)
@@ -17,7 +18,7 @@ static func reachable(state: BattleState, unit: Unit) -> Array[Vector2i]:
 
 ## Đường đi tới cell (không gồm ô đang đứng); rỗng nếu không tới được.
 static func path_to(state: BattleState, unit: Unit, cell: Vector2i) -> Array[Vector2i]:
-	if unit.has_moved:
+	if unit.has_moved or unit.has_attacked:
 		return []
 	var paths: Dictionary = _paths(state, unit)
 	if not paths.has(cell):
@@ -35,6 +36,10 @@ static func resolve(state: BattleState, command: Command, events: Array[BattleEv
 		return
 	if not UnitType.is_general(unit.type):
 		events.append(BattleEvent.rejected(BattleEvent.Reject.NOT_GENERAL, "quân %d không phải tướng" % unit.id))
+		return
+	if unit.has_attacked:
+		events.append(BattleEvent.rejected(BattleEvent.Reject.ALREADY_ATTACKED,
+			"quân %d đã đánh rồi trong lượt này" % unit.id))
 		return
 	if unit.has_moved:
 		events.append(BattleEvent.rejected(BattleEvent.Reject.ALREADY_MOVED,

@@ -61,6 +61,13 @@ const SPIKE_OFFSETS: Array[Vector2] = [Vector2(-22, -2), Vector2(0, -8), Vector2
 const NO_CELL: Vector2i = Vector2i(-1, -1)
 ## Ô đi tới được: xanh lá nhạt, khác đỏ của ô báo đòn (E2) và khác màu sông.
 const REACH_COLOR: Color = Color(0.45, 0.78, 0.40, 0.55)
+## Viền quanh ô mục tiêu đánh được (tác giả chốt 2026-10-18: trắng), chỉ viền, không tô: ô đỏ báo đòn E2 tô kín.
+## Ô chờ xác nhận (tướng đã đi, bấm lần đầu) viền dày gấp đôi.
+const TARGET_COLOR: Color = Color(1.0, 1.0, 1.0)
+const TARGET_WIDTH: float = 3.0
+const PENDING_WIDTH: float = 6.0
+## Viền thụt vào trong ô một chút để không chồng lên nét lưới.
+const TARGET_INSET: float = 0.86
 ## Vòng elip trên mặt đất quanh chân tướng đang chọn.
 const SELECT_COLOR: Color = Color(0.95, 0.72, 0.10)
 const SELECT_RADIUS: Vector2 = Vector2(40, 20)
@@ -85,6 +92,9 @@ var _tokens: Dictionary = {}
 ## Tướng đang chọn: ô của nó (NO_CELL là không chọn), các ô sáng, đường đi đang vẽ (không gồm ô tướng).
 var _selected_cell: Vector2i = NO_CELL
 var _lit_cells: Array[Vector2i] = []
+## Ô mục tiêu đánh được của tướng đang chọn, và ô đang chờ xác nhận (NO_CELL là không có).
+var _target_cells: Array[Vector2i] = []
+var _pending_cell: Vector2i = NO_CELL
 var _path: Array[Vector2i] = []
 
 
@@ -171,9 +181,11 @@ func board_rect() -> Rect2:
 
 
 ## Vẽ vòng quanh tướng ở unit_cell và tô sáng cells. Xóa đường đi cũ.
-func show_selection(unit_cell: Vector2i, cells: Array[Vector2i]) -> void:
+func show_selection(unit_cell: Vector2i, cells: Array[Vector2i], targets: Array[Vector2i] = []) -> void:
 	_selected_cell = unit_cell
 	_lit_cells = cells.duplicate()
+	_target_cells = targets.duplicate()
+	_pending_cell = NO_CELL
 	_path = []
 	queue_redraw()
 
@@ -186,15 +198,33 @@ func show_path(path: Array[Vector2i]) -> void:
 	queue_redraw()
 
 
+## Ô mục tiêu đang chờ bấm lần nữa để đánh; NO_CELL là bỏ chờ.
+func show_pending(cell: Vector2i) -> void:
+	if cell == _pending_cell:
+		return
+	_pending_cell = cell
+	queue_redraw()
+
+
 func clear_selection() -> void:
 	_selected_cell = NO_CELL
 	_lit_cells = []
+	_target_cells = []
+	_pending_cell = NO_CELL
 	_path = []
 	queue_redraw()
 
 
 func lit_cells() -> Array[Vector2i]:
 	return _lit_cells.duplicate()
+
+
+func target_cells() -> Array[Vector2i]:
+	return _target_cells.duplicate()
+
+
+func pending_cell() -> Vector2i:
+	return _pending_cell
 
 
 func path() -> Array[Vector2i]:
@@ -358,7 +388,7 @@ func _draw() -> void:
 	var border: PackedVector2Array = big.duplicate()
 	border.append(big[0])
 	draw_polyline(border, LINE_COLOR, BORDER_WIDTH, true)
-	# Bệ ô ải, ô sáng và vòng chọn vẽ trên mặt đất, theo thứ tự sâu dần (quân đứng lên bệ được, xem
+	# Bệ ô ải, ô sáng, viền mục tiêu và vòng chọn vẽ trên mặt đất, theo thứ tự sâu dần (quân đứng lên bệ được, xem
 	# BLOCK_KINDS): bệ ô ải phía trước che ô sáng phía sau, ô sáng trên bệ nằm trên mặt bệ.
 	for depth: int in range(cols + rows - 1):
 		for c: int in range(cols):
@@ -370,6 +400,8 @@ func _draw() -> void:
 					EDGE_LEFT_SHADE, EDGE_RIGHT_SHADE)
 			if _lit_cells.has(cell):
 				draw_colored_polygon(diamond(_top_center(cell)), REACH_COLOR)
+			if _target_cells.has(cell):
+				_draw_target(cell)
 			if cell == _selected_cell:
 				draw_polyline(_ellipse(_top_center(cell), SELECT_RADIUS), SELECT_COLOR, SELECT_WIDTH, true)
 	if _selected_cell != NO_CELL and not _path.is_empty():
@@ -379,6 +411,17 @@ func _draw() -> void:
 		draw_polyline(points, PATH_COLOR, PATH_WIDTH, true)
 		# Bỏ điểm cuối trùng điểm đầu: đa giác không nhận điểm lặp.
 		draw_colored_polygon(_ellipse(_top_center(_path[_path.size() - 1]), PATH_END_RADIUS).slice(0, SELECT_POINTS), PATH_COLOR)
+
+
+## Viền ô thoi khép kín quanh mục tiêu, thụt vào trong ô; ô chờ xác nhận viền dày hơn.
+func _draw_target(cell: Vector2i) -> void:
+	var center: Vector2 = _top_center(cell)
+	var outline: PackedVector2Array = PackedVector2Array()
+	for corner: Vector2 in diamond(center):
+		outline.append(center + (corner - center) * TARGET_INSET)
+	outline.append(outline[0])
+	var width: float = PENDING_WIDTH if cell == _pending_cell else TARGET_WIDTH
+	draw_polyline(outline, TARGET_COLOR, width, true)
 
 
 ## Sông trũng: cả ô là thành sông tối, mặt nước hạ xuống RIVER_DEPTH, cắt theo mép ô.

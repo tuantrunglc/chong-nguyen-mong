@@ -154,6 +154,16 @@ func test_clone_copies_round_and_moved_flag() -> void:
 	assert_true(original.unit_by_id(1).has_moved, "bản gốc không đổi cờ")
 
 
+func test_clone_copies_attacked_flag() -> void:
+	var original: BattleState = _state()
+	original.units[0] = Unit.new(1, UnitType.NGUYEN_KHOAI, Vector2i(2, 6), 4, false, true)
+	var copy: BattleState = original.clone()
+	assert_true(copy.unit_by_id(1).has_attacked, "bản sao giữ cờ đã đánh")
+	assert_false(copy.unit_by_id(2).has_attacked)
+	copy.unit_by_id(1).has_attacked = false
+	assert_true(original.unit_by_id(1).has_attacked, "bản gốc không đổi cờ")
+
+
 func test_validate_round_number() -> void:
 	var s: BattleState = _manual([] as Array[Unit])
 	s.round_number = 0
