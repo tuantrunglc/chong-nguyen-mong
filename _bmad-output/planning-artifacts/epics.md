@@ -24,7 +24,7 @@ File này chia các yêu cầu trong GDD và tài liệu kiến trúc thành epi
 **Bàn cờ và dữ liệu trận**
 - FR1: Bàn 7×7 ô vuông, đi 4 hướng, không đi chéo; khoảng cách tính bằng số ô (Manhattan).
 - FR2: Mỗi trận nạp từ file dữ liệu: địa hình, vị trí quân, tướng nào ra trận, thứ tự hành động của quân Nguyên, lịch tiếp viện, kiểu nhiệm vụ, mưu kế được dùng. Thêm hoặc sửa trận không cần sửa code.
-- FR3: Hiển thị 5 loại ô (đất trống, sông, rừng, hầm chông, kho lương) và ô ải; quân là đồng tròn có chữ hoặc biểu tượng.
+- FR3: Hiển thị 6 loại ô (đất trống, sông, rừng, hầm chông, kho lương, làng) và ô ải; quân là đồng tròn có chữ hoặc biểu tượng.
 - FR4: Chỉ số (máu, tầm đi, tầm đánh, sát thương, độ đẩy, tầm kéo, tham số mưu kế) nạp từ `chi_so.json`; tác giả tự sửa được.
 
 **Tướng và di chuyển**
@@ -56,7 +56,7 @@ File này chia các yêu cầu trong GDD và tài liệu kiến trúc thành epi
 - FR22: Mỗi hiệp có 4 pha: địch chuẩn bị → lượt người chơi → địch ra đòn → cuối hiệp.
 - FR23: Enemy AI tất định:
   - quân hành động theo thứ tự trong file trận; quân tiếp viện hành động sau quân cũ;
-  - nhắm tướng gần nhất (Giữ ải: Kỵ binh và Bộ binh nhắm ô ải);
+  - nhắm tướng gần nhất (Giữ ải: Kỵ binh và Bộ binh nhắm ô ải; Tiêu diệt có làng: Kỵ binh và Bộ binh nhắm tướng hoặc làng gần nhất, hòa thì ưu tiên làng [MẶC ĐỊNH], Cung kỵ chỉ nhắm tướng);
   - ưu tiên ô đứng mà đòn trúng mục tiêu, không có thì đi tới ô gần mục tiêu nhất;
   - hòa thì theo B→Đ→N→T; không tránh hầm chông hay ô đỏ của đồng đội.
 - FR24: Đòn được báo trước bằng ô đỏ (Kỵ binh thì có mũi tên hướng), kèm số thứ tự ra đòn hiển thị lớn trên bàn.
@@ -73,13 +73,13 @@ File này chia các yêu cầu trong GDD và tài liệu kiến trúc thành epi
 **Mưu kế**
 - FR32: Sát Thát: trong lượt người chơi này, đòn có sát thương của tướng được +1. Sát thương do va chạm, hầm chông, mép bàn không được cộng.
 - FR33: Vườn không nhà trống: mọi kho lương thành đất trống; mọi quân Nguyên mất 1 máu theo thứ tự trong file trận; từ đó đến hết trận, quân Nguyên không hồi máu.
-- FR34: Mỗi mưu kế dùng 1 lần mỗi trận, bất cứ lúc nào trong lượt người chơi, không tốn hành động của tướng. Dùng bằng nút hoặc phím `Q` `W`. Mở theo trận: Vườn không nhà trống từ trận 4, Sát Thát từ trận 5.
+- FR34: Mỗi mưu kế dùng 1 lần mỗi trận, bất cứ lúc nào trong lượt người chơi, không tốn hành động của tướng. Dùng bằng nút hoặc phím `Q` `W`. Mở theo trận: Vườn không nhà trống từ trận 5, Sát Thát từ trận 6.
 
 **Quân tiếp viện**
 - FR35: Cuối hiệp, game báo trước ô tiếp viện của hiệp sau. Đầu hiệp sau, quân tiếp viện xuất hiện trước tiên, rồi báo đòn ngay trong hiệp đó. Nếu ô có quân đứng (bất kể phe nào), quân đứng đó mất 1 máu và quân tiếp viện bị hủy.
 
 **Thắng, thua**
-- FR36: Tiêu diệt: thắng khi hạ hết quân Nguyên; thua khi mọi tướng trên bàn đều gục.
+- FR36: Tiêu diệt: thắng khi hạ hết quân Nguyên; thua khi mọi tướng trên bàn đều gục, khi hết số hiệp tối đa (FR48) hoặc khi Lòng dân về 0 (FR47).
 - FR37: Giữ ải: thắng khi hết bước cuối hiệp của hiệp 5; thua khi mọi tướng trên bàn đều gục, hoặc khi quân Nguyên vào ô ải bằng bất kỳ cách nào [MẶC ĐỊNH].
 - FR38: Kiểm tra thắng/thua sau mỗi lần có quân gục; thắng và thua xảy ra cùng lúc thì thắng được ưu tiên [MẶC ĐỊNH]. Tướng gục bị nhấc khỏi bàn [MẶC ĐỊNH, KIỂM TRA KHI PLAYTEST E4].
 
@@ -90,10 +90,14 @@ File này chia các yêu cầu trong GDD và tài liệu kiến trúc thành epi
 - FR42: Tua nhanh hoạt ảnh pha địch.
 
 **Chiến dịch và lưu game**
-- FR43: Chuỗi 5 trận cố định theo bảng Campaign Structure; mỗi trận có ít nhất một cách thắng không mất tướng.
+- FR43: Chuỗi 6 trận cố định theo bảng Campaign Structure; mỗi trận có ít nhất một cách thắng không mất tướng.
 - FR44: Màn hình chuyển trận; tướng hồi đầy máu giữa các trận.
 - FR45: Màn hình chính: chơi tiếp (nếu có file lưu) hoặc chơi mới.
 - FR46: Tự lưu trong trình duyệt sau mỗi trận; mở lại thì chơi tiếp được.
+
+**Áp lực trong trận** (thêm 2026-10-18, theo `sprint-change-proposal-2026-10-18.md`)
+- FR47: Làng `D`: không đi vào được, chặn đường đi, lao, tên và xung phong như rừng [MẶC ĐỊNH]; không có máu, không bị phá. Lòng dân là điểm chung của trận (`long_dan` trong file trận). Mỗi lần làng bị trúng thì −1: Bộ binh chém ô làng, Kỵ binh xung phong trúng làng, lao hoặc tên bị làng chặn [MẶC ĐỊNH], quân bị đẩy/kéo va vào làng (quân đó mất 1 máu, kể cả khi người chơi gây ra). Trần Khánh Dư không kéo được nếu vật đầu tiên là làng [MẶC ĐỊNH]. Về 0 thì thua ngay. HUD hiện "Lòng dân 3/3".
+- FR48: Trận Tiêu diệt có thể có `so_hiep_toi_da`. Kết thúc bước cuối hiệp của hiệp cuối mà còn quân Nguyên thì thua [MẶC ĐỊNH]. Không có khóa này thì không giới hạn. HUD hiện "Hiệp 2/4". Trận 1–2 không giới hạn, có từ trận 3.
 
 ### Yêu cầu phi chức năng (NFR)
 
@@ -102,7 +106,7 @@ File này chia các yêu cầu trong GDD và tài liệu kiến trúc thành epi
 - NFR3: Hoạt ảnh mỗi pha địch ra đòn ≤ 3 giây.
 - NFR4: Chạy trên Chrome, Firefox, Edge bản desktop mới nhất. Safari và điện thoại không bắt buộc.
 - NFR5: Combat tất định: không ngẫu nhiên, cùng thao tác thì cùng kết quả.
-- NFR6: Không có lỗi làm kẹt trận trong cả 5 trận.
+- NFR6: Không có lỗi làm kẹt trận trong cả 6 trận.
 - NFR7: Toàn bộ chữ tiếng Việt, tách ra file dịch.
 - NFR8: Mọi thao tác làm được bằng bấm chuột, không có kéo thả.
 - NFR9: Ô đỏ báo đòn là thứ nổi bật nhất trên màn hình; số thứ tự ra đòn lớn, dễ đọc.
@@ -156,26 +160,28 @@ Khi sang giai đoạn 1 nên chạy `gds-ux`.
 | FR37 | E3 | Giữ ải |
 | FR38 | E2 | Kiểm tra thắng/thua, tướng gục |
 | FR39 | E3 | Chơi lại hiệp |
+| FR47 | E3 | Làng và Lòng dân |
+| FR48 | E3 | Giới hạn hiệp |
 | FR40–FR41 | E2 | Rê chuột xem thông tin, xem trước kết quả đòn |
 | FR42 | E4 | Tua nhanh |
-| FR43 | E1–E4 | Trận 1 (E1 bố cục, E2 hoàn thiện), trận 2–4 (E3), trận 5 và tinh chỉnh (E4) |
+| FR43 | E1–E4 | Trận 1 (E1 bố cục, E2 hoàn thiện), trận 2–5 (E3), trận 6 và tinh chỉnh (E4) |
 | FR44–FR46 | E4 | Màn chuyển trận, màn hình chính, tự lưu |
 | NFR1–NFR4 | E0 (đo lần đầu), E4 (đo đủ) | Hiệu năng, dung lượng, trình duyệt |
 | NFR5–NFR9 | Mọi epic | Tất định, không kẹt, tiếng Việt, chỉ bấm chuột, ô đỏ nổi bật |
 
 ## Danh sách epic
 
-**Ngân sách giờ** (chia lại 2026-10-17, tổng ≈ 130 giờ, khoảng 10 giờ/tuần):
+**Ngân sách giờ** (chia lại 2026-10-17; E3 thêm ~10 giờ ngày 2026-10-18; tổng ≈ 140 giờ, khoảng 10 giờ/tuần):
 
 | Epic | Giờ | Tuần (ước) | Số story |
 |---|---|---|---|
 | E0 Dựng nền | ~12 | 1–2 | 6 |
 | E1 Bàn cờ và di chuyển | ~18 | 2–3 | 6 |
 | E2 Combat cốt lõi | ~35 | 4–7 | 15 |
-| E3 Địa hình và mưu kế | ~35 | 7–10 | 11 |
-| E4 Năm trận và chơi thử | ~30 | 11–13 | 9 |
+| E3 Địa hình và mưu kế | ~45 | 7–11 | 14 |
+| E4 Sáu trận và chơi thử | ~30 | 12–14 | 9 |
 
-**"Trễ" nghĩa là:** một epic dùng quá số giờ trên 25% (ví dụ E2 quá 44 giờ). Khi đó áp dụng phương án cắt: Cung kỵ (Story 2.15), trận 5 (Story 4.5), gợi ý luật (Story 4.8), trau chuốt xem trước (Story 4.6). Không cắt luật lõi.
+**"Trễ" nghĩa là:** một epic dùng quá số giờ trên 25% (ví dụ E2 quá 44 giờ). Khi đó áp dụng phương án cắt: Cung kỵ (Story 2.15), trận 6 (Story 4.5), trau chuốt xem trước (Story 4.6), trận 4 "Bảo vệ làng" (Story 3.8; khi cắt thì đặt làng vào trận 3). Không cắt luật lõi. Gợi ý luật (Story 4.8) là phần hướng dẫn, không cắt (chốt 2026-10-18).
 
 Thứ tự bắt buộc: E0 → E1 → E2 → E3 → E4. Epic sau dùng kết quả của epic trước, không epic nào cần epic sau mới chạy được. Mỗi story luật có một đợt duyệt kịch bản nhỏ bằng `tools/xem_kich_ban.sh`, trước khi viết code.
 
@@ -193,12 +199,12 @@ Tác giả chơi trọn trận 1 (2 tướng): địch báo đòn, đẩy địc
 **Phủ:** FR12–FR26, FR28, FR36, FR38, FR40, FR41, FR43 (hoàn thiện trận 1). Công cụ dev F2, F3.
 
 ### E3: Địa hình và mưu kế
-Tác giả chơi được trận 2, 3 và 4 (Giữ ải), với rừng, hầm chông, kho lương, quân tiếp viện, 2 mưu kế và chơi lại hiệp.
-**Phủ:** FR8, FR27, FR29–FR35, FR37, FR39, FR43 (trận 2–4, mỗi trận có lời giải ghi lại).
+Tác giả chơi được trận 2, 3, 4 (Bảo vệ làng) và 5 (Giữ ải), với rừng, hầm chông, giới hạn hiệp, làng và Lòng dân, kho lương, quân tiếp viện, 2 mưu kế và chơi lại hiệp.
+**Phủ:** FR8, FR27, FR29–FR35, FR37, FR39, FR43 (trận 2–5, mỗi trận có lời giải ghi lại), FR47, FR48.
 
-### E4: Năm trận và chơi thử
-Tác giả chơi trọn chuỗi 5 trận trên web, có màn hình chính, màn chuyển trận, tự lưu, tua nhanh; rồi gửi link cho 3–5 người thân chơi thử.
-**Phủ:** FR42, FR43 (trận 5, tinh chỉnh cả 5 trận), FR44–FR46; NFR1–NFR3 đo đủ trên 3 trình duyệt.
+### E4: Sáu trận và chơi thử
+Tác giả chơi trọn chuỗi 6 trận trên web, có màn hình chính, màn chuyển trận, tự lưu, tua nhanh; rồi gửi link cho 3–5 người thân chơi thử.
+**Phủ:** FR42, FR43 (trận 6, tinh chỉnh cả 6 trận), FR44–FR46; NFR1–NFR3 đo đủ trên 3 trình duyệt.
 
 ### Ngoài phạm vi (ghi chú)
 - **Công cụ giải thử** (tự tìm lời giải không mất tướng cho mỗi trận): để sau E4. Đề xuất của phòng thảo luận, tác giả chưa quyết.
@@ -819,12 +825,12 @@ tôi muốn có Cung kỵ yếu máu nhưng bắn xa,
 **Thì** tên bay qua, chỉ trúng ô đã báo
 
 **Và** có kịch bản và luật AI cho Cung kỵ
-**Và** nếu story này bị cắt (E2 trễ), trận 3 và trận 5 dùng Bộ binh thay Cung kỵ (xem Story 3.5); không cần cờ bật/tắt trong code
+**Và** nếu story này bị cắt (E2 trễ), trận 3 và trận 6 dùng Bộ binh thay Cung kỵ (xem Story 3.6); không cần cờ bật/tắt trong code
 **Và** phần "rừng, kho lương chặn tên" làm ở E3
 
 ## Epic 3: Địa hình và mưu kế
 
-Tác giả chơi được trận 2, 3 và 4 (Giữ ải), với rừng, hầm chông, kho lương, quân tiếp viện, 2 mưu kế và chơi lại hiệp. Quy trình kịch bản luật như E2.
+Tác giả chơi được trận 2, 3, 4 (Bảo vệ làng) và 5 (Giữ ải), với rừng, hầm chông, giới hạn hiệp, làng và Lòng dân, kho lương, quân tiếp viện, 2 mưu kế và chơi lại hiệp. Quy trình kịch bản luật như E2.
 
 ### Story 3.1: Rừng và vật cản chặn đòn
 
@@ -915,16 +921,42 @@ tôi muốn hầm chông làm đau mọi quân đi qua,
 
 **Và** đứng yên trên ô hầm chông thì không mất thêm máu
 
-### Story 3.5: Trận 3
+### Story 3.5: Giới hạn hiệp (Tiêu diệt)
+
+Là người chơi,
+tôi muốn trận Tiêu diệt có số hiệp tối đa,
+để không thể chỉ né đòn mãi mà phải chủ động tính đường hạ địch.
+
+**Tiêu chí nghiệm thu:**
+
+**Cho** file trận Tiêu diệt có `so_hiep_toi_da: 4`
+**Thì** HUD hiện "Hiệp 1/4"; hiệp cuối có màu nổi bật (FR48)
+
+**Khi** kết thúc bước cuối hiệp của hiệp 4 mà còn quân Nguyên trên bàn
+**Thì** hiện "Thua: hết hiệp"
+
+**Khi** quân Nguyên cuối cùng gục trong pha ra đòn của hiệp 4 (địch đánh trúng nhau)
+**Thì** tính là thắng
+
+**Khi** file trận không có `so_hiep_toi_da`
+**Thì** không giới hạn hiệp, HUD chỉ hiện "Hiệp 3"
+
+**Khi** `so_hiep_toi_da` không phải số nguyên dương
+**Thì** bộ nạp báo lỗi tiếng Việt, ghi rõ file và giá trị sai
+
+**Và** chơi lại hiệp không làm đổi số hiệp
+**Và** có kịch bản trong `gioi_han_hiep/`, đã duyệt và đạt (gồm ca MẶC ĐỊNH: hết hiệp tính ở cuối hiệp cuối)
+
+### Story 3.6: Trận 3
 
 Là tác giả,
-tôi muốn trận 3 dạy đòn kéo và hầm chông,
+tôi muốn trận 3 dạy đòn kéo, hầm chông và giới hạn hiệp,
 để người chơi kéo địch vào bẫy.
 
 **Tiêu chí nghiệm thu:**
 
-**Cho** AI đề xuất `tran_03.json` (3 tướng, Trần Khánh Dư ra trận lần đầu; 2 Bộ binh, 2 Cung kỵ, hầm chông và rừng, Tiêu diệt)
-**Thì** kèm lời giải không mất tướng trong `tran_03_loi_giai.md` (FR43)
+**Cho** AI đề xuất `tran_03.json` (3 tướng, Trần Khánh Dư ra trận lần đầu; 2 Bộ binh, 2 Cung kỵ, hầm chông và rừng, Tiêu diệt, có `so_hiep_toi_da`)
+**Thì** kèm lời giải không mất tướng, thắng trong số hiệp cho phép, trong `tran_03_loi_giai.md` (FR43, FR48)
 
 **Khi** tác giả đánh lại đúng lời giải
 **Thì** thắng, không mất tướng
@@ -932,7 +964,60 @@ tôi muốn trận 3 dạy đòn kéo và hầm chông,
 
 **Và** nếu Cung kỵ đã bị cắt ở E2 thì thay bằng Bộ binh và viết lại lời giải
 
-### Story 3.6: Kho lương
+### Story 3.7: Làng và Lòng dân
+
+Là người chơi,
+tôi muốn có làng phải bảo vệ,
+để né đòn không còn là cách an toàn duy nhất: né thì làng có thể bị đánh.
+
+**Tiêu chí nghiệm thu:**
+
+**Cho** bàn có ô `D` và file trận có `long_dan: 3`
+**Thì** làng hiện như một loại ô riêng, HUD hiện "Lòng dân 3/3" (FR3, FR47)
+
+**Khi** Bộ binh chém vào ô làng, Kỵ binh xung phong trúng làng, hoặc lao/tên bị làng chặn
+**Thì** Lòng dân −1, có hoạt ảnh và dòng chữ báo
+
+**Khi** đẩy hoặc kéo quân Nguyên va vào làng
+**Thì** quân đó mất 1 máu như va chạm, và Lòng dân −1
+
+**Khi** Lòng dân về 0
+**Thì** thua ngay; nếu cùng lúc quân Nguyên cuối cùng gục thì tính là thắng
+
+**Khi** pha địch chuẩn bị trong trận Tiêu diệt có làng
+**Thì** Bộ binh và Kỵ binh nhắm tướng hoặc làng gần nhất (theo số bước đi), hòa thì ưu tiên làng; Cung kỵ chỉ nhắm tướng (FR23)
+**Và** bật dev, bấm F3 thì thấy rõ quân nào đang nhắm làng
+
+**Khi** chơi lại hiệp
+**Thì** Lòng dân về đúng như đầu lượt người chơi
+
+**Khi** rê chuột xem trước một đòn làm làng bị trúng
+**Thì** bản xem trước hiện "−1 Lòng dân"
+
+**Và** làng không đi vào được, chặn đường đi, lao, tên và xung phong; Trần Khánh Dư không kéo được nếu vật đầu tiên trên hàng là làng
+**Và** bộ nạp báo lỗi tiếng Việt nếu bàn có `D` mà thiếu `long_dan`
+**Và** có kịch bản trong `lang/`, đã duyệt và đạt (gồm các ca MẶC ĐỊNH: làng chặn lao/tên và bị trừ Lòng dân; hòa thì ưu tiên làng)
+
+### Story 3.8: Trận 4: Bảo vệ làng
+
+Là tác giả,
+tôi muốn trận 4 dạy bảo vệ làng,
+để người chơi lần đầu phải cân giữa né đòn và che chắn cho dân.
+
+_Cắt được nếu trễ: khi cắt, đặt làng vào trận 3 và chuỗi còn 5 trận._
+
+**Tiêu chí nghiệm thu:**
+
+**Cho** AI đề xuất `tran_04.json` (3 tướng; Tiêu diệt; có làng, `long_dan` và `so_hiep_toi_da`; gợi ý 2 Bộ binh, 1 Kỵ binh, 1 Cung kỵ; làng, sông, rừng)
+**Thì** kèm lời giải không mất tướng và không mất Lòng dân trong `tran_04_loi_giai.md` (FR43)
+
+**Khi** tác giả đánh lại đúng lời giải
+**Thì** thắng, không mất tướng, Lòng dân còn đầy
+**Và** lời giải được chuyển ngay thành kịch bản tự động trong `tests/kich_ban/tran/`; từ đó mỗi lần chạy `tools/test.sh` đều kiểm tra trận này còn giải được
+
+**Và** trận chỉ giới thiệu một luật mới (làng); nếu Cung kỵ đã bị cắt ở E2 thì thay bằng Bộ binh và viết lại lời giải
+
+### Story 3.9: Kho lương
 
 Là người chơi,
 tôi muốn quân Nguyên đứng gần kho lương được hồi máu,
@@ -949,7 +1034,7 @@ tôi muốn quân Nguyên đứng gần kho lương được hồi máu,
 
 **Và** kho lương không đi vào được; đẩy quân vào kho lương là va chạm
 
-### Story 3.7: Quân tiếp viện
+### Story 3.10: Quân tiếp viện
 
 Là người chơi,
 tôi muốn biết trước quân tiếp viện sẽ xuất hiện ở đâu,
@@ -969,7 +1054,7 @@ tôi muốn biết trước quân tiếp viện sẽ xuất hiện ở đâu,
 
 **Và** có kịch bản trong `tiep_vien/`
 
-### Story 3.8: Nhiệm vụ Giữ ải
+### Story 3.11: Nhiệm vụ Giữ ải
 
 Là người chơi,
 tôi muốn có kiểu trận phải cầm cự,
@@ -991,7 +1076,7 @@ tôi muốn có kiểu trận phải cầm cự,
 
 **Và** Kỵ binh và Bộ binh nhắm ô ải; Cung kỵ vẫn nhắm tướng gần nhất (FR23)
 
-### Story 3.9: Mưu kế Vườn không nhà trống và nút mưu kế
+### Story 3.12: Mưu kế Vườn không nhà trống và nút mưu kế
 
 Là người chơi,
 tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
@@ -1011,7 +1096,7 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
 **Và** dùng mưu kế xóa sạch lịch sử hủy: bấm `Z` ngay sau đó không có tác dụng (FR10); có kịch bản cho ca này
 **Và** file trận quy định mưu kế nào được dùng; mưu kế bị khóa thì không hiện nút
 
-### Story 3.10: Mưu kế Sát Thát
+### Story 3.13: Mưu kế Sát Thát
 
 Là người chơi,
 tôi muốn tăng sức đánh của cả ba tướng trong một lượt,
@@ -1032,16 +1117,16 @@ tôi muốn tăng sức đánh của cả ba tướng trong một lượt,
 **Và** xem trước kết quả đòn hiện đúng số sát thương đã cộng
 **Và** sang hiệp sau thì hết hiệu lực
 
-### Story 3.11: Trận 4 (Giữ ải)
+### Story 3.14: Trận 5 (Giữ ải)
 
 Là tác giả,
-tôi muốn trận 4 dạy kho lương, Vườn không nhà trống và quân tiếp viện,
+tôi muốn trận 5 dạy kho lương, Vườn không nhà trống và quân tiếp viện,
 để người chơi chịu áp lực Giữ ải lần đầu.
 
 **Tiêu chí nghiệm thu:**
 
-**Cho** AI đề xuất `tran_04.json` (4 quân khởi đầu, +1 mỗi hiệp, kho lương và sông, Giữ ải 5 hiệp, mở Vườn không nhà trống)
-**Thì** kèm lời giải không mất tướng trong `tran_04_loi_giai.md` (FR43)
+**Cho** AI đề xuất `tran_05.json` (4 quân khởi đầu, +1 mỗi hiệp, kho lương và sông, Giữ ải 5 hiệp, mở Vườn không nhà trống)
+**Thì** kèm lời giải không mất tướng trong `tran_05_loi_giai.md` (FR43)
 
 **Khi** tác giả đánh lại đúng lời giải
 **Thì** thắng, không mất tướng
@@ -1049,9 +1134,9 @@ tôi muốn trận 4 dạy kho lương, Vườn không nhà trống và quân ti
 
 **Và** bản mới được deploy lên itch (riêng tư)
 
-## Epic 4: Năm trận và chơi thử
+## Epic 4: Sáu trận và chơi thử
 
-Tác giả chơi trọn chuỗi 5 trận trên web, có màn hình chính, màn chuyển trận, tự lưu, tua nhanh; rồi gửi link cho 3–5 người thân chơi thử.
+Tác giả chơi trọn chuỗi 6 trận trên web, có màn hình chính, màn chuyển trận, tự lưu, tua nhanh; rồi gửi link cho 3–5 người thân chơi thử.
 
 ### Story 4.1: Màn hình chính
 
@@ -1069,15 +1154,15 @@ tôi muốn có màn hình chính để bắt đầu hoặc chơi tiếp,
 **Khi** chạy với `?tran=N` và đã bật dev
 **Thì** bỏ qua màn hình chính, vào thẳng trận N
 
-### Story 4.2: Chuỗi 5 trận và màn chuyển trận
+### Story 4.2: Chuỗi 6 trận và màn chuyển trận
 
 Là người chơi,
-tôi muốn đi qua 5 trận liên tiếp,
+tôi muốn đi qua 6 trận liên tiếp,
 để cảm nhận một chiến dịch trọn vẹn.
 
 **Tiêu chí nghiệm thu:**
 
-**Cho** `data/chien_dich.json` liệt kê 5 trận theo thứ tự
+**Cho** `data/chien_dich.json` liệt kê 6 trận theo thứ tự
 **Khi** thắng một trận
 **Thì** hiện màn chuyển trận: tên tạm "Trận N", mưu kế vừa mở (nếu có), nút "Tiếp" (FR44)
 
@@ -1087,7 +1172,7 @@ tôi muốn đi qua 5 trận liên tiếp,
 **Khi** thua
 **Thì** có nút "Đánh lại trận này" và "Về menu"
 
-**Và** mưu kế mở dần: Vườn không nhà trống từ trận 4, Sát Thát từ trận 5 (FR34)
+**Và** mưu kế mở dần: Vườn không nhà trống từ trận 5, Sát Thát từ trận 6 (FR34)
 
 ### Story 4.3: Tự lưu
 
@@ -1124,37 +1209,37 @@ tôi muốn tua nhanh hoạt ảnh của địch,
 
 **Và** tốc độ hoạt ảnh lưu trong `user://settings.cfg`, mở lại game vẫn giữ
 
-### Story 4.5: Trận 5
+### Story 4.5: Trận 6
 
 Là tác giả,
-tôi muốn trận 5 tổng hợp mọi luật,
+tôi muốn trận 6 tổng hợp mọi luật,
 để kết thúc prototype bằng một bài toán khó nhất.
 
-_Cắt được nếu trễ: khi cắt, `chien_dich.json` chỉ còn 4 trận và Sát Thát mở từ trận 4._
+_Cắt được nếu trễ: khi cắt, `chien_dich.json` chỉ còn 5 trận và Sát Thát mở từ trận 5._
 
 **Tiêu chí nghiệm thu:**
 
-**Cho** AI đề xuất `tran_05.json` (5 quân khởi đầu, +1–2 mỗi hiệp, đủ loại địa hình, Giữ ải, mở Sát Thát)
-**Thì** kèm lời giải không mất tướng trong `tran_05_loi_giai.md` (FR43)
+**Cho** AI đề xuất `tran_06.json` (5 quân khởi đầu, +1–2 mỗi hiệp, đủ loại địa hình, Giữ ải, mở Sát Thát)
+**Thì** kèm lời giải không mất tướng trong `tran_06_loi_giai.md` (FR43)
 
 **Khi** tác giả đánh lại đúng lời giải
 **Thì** thắng, không mất tướng
 **Và** lời giải được chuyển ngay thành kịch bản tự động trong `tests/kich_ban/tran/`; từ đó mỗi lần chạy `tools/test.sh` đều kiểm tra trận này còn giải được không mất tướng
 
-### Story 4.6: Tinh chỉnh 5 trận
+### Story 4.6: Tinh chỉnh 6 trận
 
 Là tác giả,
-tôi muốn cả 5 trận vẫn giải được sau mỗi lần tôi chỉnh chỉ số,
+tôi muốn cả 6 trận vẫn giải được sau mỗi lần tôi chỉnh chỉ số,
 để cân bằng game mà không phá trận.
 
 **Tiêu chí nghiệm thu:**
 
-**Cho** cả 5 lời giải đã là kịch bản tự động (từ các story trận 2.14, 3.3, 3.5, 3.11, 4.5)
+**Cho** cả 6 lời giải đã là kịch bản tự động (từ các story trận 2.14, 3.3, 3.6, 3.8, 3.14, 4.5)
 
 **Khi** sửa `chi_so.json` rồi chạy `tools/test.sh`
-**Thì** cả 5 lời giải được chạy lại; lời giải nào không còn thắng mà không mất tướng thì báo trượt
+**Thì** cả 6 lời giải được chạy lại; lời giải nào không còn thắng mà không mất tướng thì báo trượt
 
-**Và** "trận 1–3 thắng được không mất tướng ngay lần đầu" không kiểm ở đây (tác giả đã biết lời giải); chuyển thành mục quan sát trong Story 4.9
+**Và** "trận 1–2 thắng được không mất tướng ngay lần đầu" không kiểm ở đây (tác giả đã biết lời giải); chuyển thành mục quan sát trong Story 4.9
 
 **Trau chuốt xem trước kết quả đòn** (FR41, cắt được nếu trễ):
 **Khi** rê chuột lên mục tiêu
@@ -1168,13 +1253,13 @@ tôi muốn biết game chạy ổn trên máy người thân,
 
 **Tiêu chí nghiệm thu:**
 
-**Khi** chơi bản web trên laptop dùng card tích hợp, ở trận 5, hiệp có nhiều quân nhất
+**Khi** chơi bản web trên laptop dùng card tích hợp, ở trận 6, hiệp có nhiều quân nhất
 **Thì** giữ 60 FPS (NFR1); chế độ dev hiện bộ đếm FPS ở góc màn hình để đo
 
 **Và** bản nén ≤ 25MB, tải ≤ 10 giây ở mạng 20Mbps, đo như Story 0.5 (NFR2)
 **Và** mỗi pha địch ra đòn ≤ 3 giây (NFR3)
 **Và** chạy đủ trên Chrome, Firefox, Edge (NFR4)
-**Và** chơi hết 5 trận không có lỗi kẹt trận (NFR6)
+**Và** chơi hết 6 trận không có lỗi kẹt trận (NFR6)
 **Và** kết quả đo ghi vào `NEXT-STEPS.md`
 
 ### Story 4.8: Gợi ý luật đầu trận
@@ -1183,13 +1268,14 @@ Là người chơi lần đầu,
 tôi muốn được nhắc ngắn gọn luật của trận và các phím,
 để chơi được mà không cần ai giải thích.
 
-_Cắt được nếu trễ (không có trong GDD; thêm để buổi chơi thử không cần tác giả giải thích)._
+_Đây là phần hướng dẫn của prototype (chốt 2026-10-18): trận 1–2 là trận dạy chơi, luật mới của mỗi trận được giới thiệu bằng gợi ý này. Không cắt._
 
 **Tiêu chí nghiệm thu:**
 
 **Khi** bắt đầu mỗi trận
 **Thì** hiện 1–2 dòng gợi ý luật mới của trận đó (ví dụ trận 1: "Ô đỏ là nơi địch sắp đánh. Nguyễn Khoái đẩy được địch xuống sông.")
 **Và** bấm vào đâu cũng tắt được gợi ý; bấm nút "?" thì xem lại
+**Và** có gợi ý cho trận 3 (ví dụ "Phải hạ hết quân Nguyên trong 4 hiệp.") và trận 4 (ví dụ "Bảo vệ làng: mỗi lần làng bị đánh, Lòng dân giảm 1. Hết Lòng dân là thua.")
 
 **Khi** bấm phím `?` hoặc nút "?"
 **Thì** hiện bảng thao tác và phím tắt (theo bảng Controls của GDD)
@@ -1210,6 +1296,7 @@ tôi muốn quan sát 3–5 người thân chơi,
 **Khi** tác giả xem từng người chơi
 **Thì** đánh dấu các dấu hiệu lên phiếu, không hỏi ý kiến
 
-**Và** phiếu có thêm một mục: người chơi có thắng trận 1–3 mà không mất tướng ngay lần đầu không (theo Difficulty Curve của GDD)
+**Và** phiếu có thêm một mục: người chơi có thắng trận 1–2 mà không mất tướng ngay lần đầu không (theo Difficulty Curve của GDD)
+**Và** phiếu có thêm một mục: người chơi có thua vì hết hiệp hoặc mất Lòng dân không, và thua rồi có tự chơi lại không
 **Và** ghi nhận xét cho các mục [KIỂM TRA KHI PLAYTEST E4]: tầm kéo Trần Khánh Dư, độ mạnh Vườn không nhà trống, luật tướng gục bị nhấc khỏi bàn
 **Và** đạt ≥ 3/5 dấu hiệu thì quyết định chuyển sang giai đoạn 1

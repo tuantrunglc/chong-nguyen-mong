@@ -57,3 +57,12 @@
 - 2026-10-17 (readiness): CHỐT không được chọn tướng mình làm mục tiêu (phương án A). Bấm vào tướng mình luôn là chọn. Tướng mình chỉ trúng đòn như hệ quả (lao trúng vật đầu tiên, va chạm). Có thể thêm phương án chọn bằng `Shift` sau playtest nếu thấy thiếu.
 - 2026-10-17 (readiness): CHỐT trận 1–2 chỉ có 2 tướng (Nguyễn Khoái, Phạm Ngũ Lão); Trần Khánh Dư ra trận từ trận 3, đúng với bảng dạy luật. Điều kiện thua đổi thành "mọi tướng trên bàn đều gục".
 - 2026-10-17 (readiness): Chia lại giờ prototype: E0 Dựng nền ~12, E1 ~18, E2 ~35, E3 ~35, E4 ~30 (tổng 130). Mốc tự chơi chuyển thành "hết E2 (khoảng tuần 7)". Đây là đề xuất của bước readiness, tác giả có thể chỉnh.
+- 2026-10-17: Đánh giá bàn 7×7: kích thước hợp lý, nhưng trận Tiêu diệt thiếu áp lực (tướng đi 3 ô, đi xuyên quân mình, rời ô đỏ là né được, không giới hạn hiệp, không có gì phải bảo vệ).
+- 2026-10-17: CHỐT giới hạn hiệp cho trận Tiêu diệt: hết số hiệp mà còn quân Nguyên thì thua. Số hiệp ghi trong file trận.
+- 2026-10-17: CHỐT ô Làng và Lòng dân: thanh chung của trận (ví dụ 3 điểm, ghi trong file trận); làng bị trúng thì −1; hết thì thua. Đẩy/kéo quân va vào làng cũng trừ.
+- 2026-10-17: CHỐT AI: Bộ binh và Kỵ binh nhắm tướng hoặc làng gần nhất; Cung kỵ chỉ nhắm tướng.
+- 2026-10-17: CHỐT hướng dẫn bằng dòng gợi ý đầu trận (Story 4.8). Trận 1–2 là trận dạy chơi: không giới hạn hiệp, không có làng.
+- 2026-10-18: CHỐT thêm trận 4 "Bảo vệ làng", chuỗi thành 6 trận; giới hạn hiệp có từ trận 3. Mưu kế: Vườn không nhà trống từ trận 5, Sát Thát từ trận 6.
+- 2026-10-18: CHỐT chấp nhận thêm khoảng 10 giờ: E3 ~45 giờ, prototype ~140 giờ, 14 tuần. Story 4.8 (gợi ý luật) bỏ khỏi danh sách cắt được.
+- 2026-10-18: Tác giả duyệt 4 luật MẶC ĐỊNH (vẫn duyệt lại qua kịch bản luật): hết hiệp tính ở cuối hiệp cuối; làng chặn đường đi, lao, tên, xung phong như rừng và Trần Khánh Dư không kéo được nếu vật đầu tiên là làng; lao/tên bị làng chặn cũng trừ Lòng dân; hòa giữa tướng và làng thì ưu tiên làng.
+- 2026-10-18: Đề xuất thay đổi `sprint-change-proposal-2026-10-18.md` được duyệt; đã sửa GDD, kiến trúc, epics, sprint-status.

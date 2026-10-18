@@ -58,7 +58,7 @@ Tài liệu đã hoàn tất qua GDS Architecture Workflow. Đây là luật b�
 - **Engine:** Godot 4.7.2.stable (chi tiết ở phần Engine và framework).
 - **Thể loại:** turn-based tactics (lõi) + roguelite (khung, làm ở giai đoạn 1).
 - **Mô hình phát triển:** một người, khoảng 10 giờ/tuần. **Code do AI viết.** Tác giả là người quyết định spec (luật chơi) và người test. Tác giả không đọc và không review code.
-- **Quy mô:** prototype khoảng 130 giờ (E0–E4). Đã chia lại 2026-10-17: E0 Dựng nền ~12, E1 ~18, E2 ~35, E3 ~35, E4 ~30.
+- **Quy mô:** prototype khoảng 140 giờ (E0–E4). Đã chia lại 2026-10-17: E0 Dựng nền ~12, E1 ~18, E2 ~35, E3 ~35, E4 ~30. Ngày 2026-10-18 E3 tăng lên ~45 (giới hạn hiệp, làng, trận 4 mới).
 - **Mạng:** không có. Không multiplayer, không backend.
 
 ### Các hệ thống cốt lõi
@@ -69,19 +69,19 @@ Tài liệu đã hoàn tất qua GDS Architecture Workflow. Đây là luật b�
 | 2 | Bộ phân giải luật: đánh vào ô, đẩy/kéo, va chạm, đòn dịch theo, trúng mọi phe, hủy đòn của quân bị hạ | Cao | Action Economy, Terrain | E2 |
 | 3 | Nhật ký sự kiện: bộ phân giải trả về danh sách sự kiện, phần trình bày phát lại. Tua nhanh, test và chơi lại dùng chung danh sách này | Trung bình | (kiến trúc) | E2 |
 | 4 | Trình tự hiệp: máy trạng thái 4 pha (chuẩn bị → người chơi → địch ra đòn → cuối hiệp) | Trung bình | Action Economy | E2–E3 |
-| 5 | Enemy AI tất định: BFS theo số bước, chọn ô đứng, hòa điểm theo B→Đ→N→T, thứ tự lấy từ dữ liệu trận | Trung bình | Enemy AI | E2 |
+| 5 | Enemy AI tất định: BFS theo số bước, chọn ô đứng, hòa điểm theo B→Đ→N→T, thứ tự lấy từ dữ liệu trận; trận có làng thì mục tiêu gồm tướng và làng | Trung bình | Enemy AI | E2 |
 | 6 | Báo trước đòn: ô đỏ, số thứ tự, mũi tên xung phong; đòn gắn với ô hoặc với hướng | Trung bình | Primary Mechanics | E2 |
 | 7 | Xem trước kết quả đòn của tướng: chạy bộ phân giải trên bản sao **đã chốt: có từ E2, bản tối giản** (ADR-005) | Thấp–TB | (cần bổ sung vào GDD) | E2 |
-| 8 | Địa hình và hiệu ứng: sông, rừng, hầm chông, kho lương, ô ải | Trung bình | Terrain | E2–E3 |
+| 8 | Địa hình và hiệu ứng: sông, rừng, hầm chông, kho lương, ô ải, làng (Lòng dân) | Trung bình | Terrain | E2–E3 |
 | 9 | Mưu kế: Sát Thát, Vườn không nhà trống; 1 lần mỗi trận, mở dần theo trận | Thấp–TB | Primary Mechanics | E3–E4 |
 | 10 | Quân tiếp viện: báo trước; bị chặn ô thì người đứng chặn mất 1 máu | Trung bình | Action Economy | E3 |
 | 11 | Hoàn tác và chơi lại hiệp: chụp và khôi phục trạng thái | Trung bình | Action Economy | E1, E3 |
-| 12 | Dữ liệu trận: bố cục, quân, thứ tự hành động, lịch tiếp viện, kiểu nhiệm vụ. Sửa trận không cần code | Trung bình | Level Design Framework | E1, E4 |
+| 12 | Dữ liệu trận: bố cục, quân, thứ tự hành động, lịch tiếp viện, kiểu nhiệm vụ, số hiệp tối đa, Lòng dân. Sửa trận không cần code | Trung bình | Level Design Framework | E1, E4 |
 | 13 | Trình bày và hoạt ảnh: phát lại sự kiện; mỗi pha địch ≤ 3 giây; có tua nhanh | Trung bình | Performance, E4 | E2, E4 |
 | 14 | Input và HUD: bấm/rê chuột, phím tắt 1-2-3, Q/W, Z, Space, R; tooltip | Trung bình | Controls and Input | E1–E2 |
 | 15 | Kịch bản luật dạng bàn cờ chữ (trước → hành động → sau). Tác giả đọc và duyệt được; test tự động chạy chính các file này bằng một lệnh, in kết quả tiếng Việt | Trung bình | (kiến trúc) | E1 trở đi |
 | 16 | Công cụ dev cho tester: mở thẳng trận N, nạp lại file trận, overlay tọa độ ô | Thấp | (kiến trúc) | E1 |
-| 17 | Chuỗi chiến dịch: 5 trận, màn chuyển trận, hồi máu giữa các trận | Thấp | Campaign Structure | E4 |
+| 17 | Chuỗi chiến dịch: 6 trận, màn chuyển trận, hồi máu giữa các trận | Thấp | Campaign Structure | E4 |
 | 18 | Lưu game cục bộ trong trình duyệt, tự lưu sau mỗi trận | Thấp | Platform-Specific | E4 |
 | 19 | Bản địa hóa: mọi chữ để trong file riêng; tiếng Việt trước, tiếng Anh ở giai đoạn 2 | Thấp | Platform-Specific | E1 trở đi |
 
@@ -104,7 +104,7 @@ Tài liệu đã hoàn tất qua GDS Architecture Workflow. Đây là luật b�
 - **Kiểm chứng:** bộ phân giải luật có test tự động chạy không cần màn hình, dựa trên kịch bản luật. UI và hoạt ảnh không có test tự động; tác giả test bằng tay.
 - **Lưu trữ:** lưu cục bộ trong trình duyệt, không có server.
 - **Độ phân giải:** 1280×720, stretch `canvas_items` (quyết định #13).
-- **Chất lượng:** không có lỗi làm kẹt trận trong cả 5 trận.
+- **Chất lượng:** không có lỗi làm kẹt trận trong cả 6 trận.
 
 ### Ràng buộc thiết kế
 
@@ -270,11 +270,11 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
   - danh sách quân: id, phe, loại, vị trí, máu, đã đi hay đã đánh;
   - các đòn đã báo: ô hoặc hướng, kèm thứ tự;
   - các ô tiếp viện đã báo;
-  - cờ mưu kế, số hiệp, pha hiện tại, cờ "đã dùng chơi lại hiệp".
+  - cờ mưu kế, số hiệp, số hiệp tối đa (nếu có), Lòng dân hiện tại và tối đa (nếu có), pha hiện tại, cờ "đã dùng chơi lại hiệp".
 - **Lệnh của người chơi:** `Move`, `Attack`, `UseStratagem`, `EndTurn`.
 - **`BattleController` là nơi duy nhất giữ trạng thái đang sống.** Nó gọi bộ phân giải, đẩy bản chụp vào ngăn xếp hoàn tác, rồi gửi danh sách sự kiện và bản chụp sau cùng cho phần trình bày.
 - **Bộ phân giải** sửa trực tiếp trên trạng thái được truyền vào và trả về danh sách sự kiện. Muốn giữ bản gốc (hoàn tác, xem trước) thì phải `clone()` trước khi gọi.
-- **Sự kiện** gồm một trường loại và dữ liệu đi kèm. Các loại dự kiến: đi, bị đẩy, bị kéo, va chạm, mất máu, gục, chết đuối, báo đòn, ra đòn, hủy đòn, đòn dịch theo, tiếp viện xuất hiện, tiếp viện bị chặn, hồi máu, đốt kho lương, dùng mưu kế, đổi pha, thắng, thua. Danh sách chính thức chốt ở bước Patterns.
+- **Sự kiện** gồm một trường loại và dữ liệu đi kèm. Các loại dự kiến: đi, bị đẩy, bị kéo, va chạm, mất máu, gục, chết đuối, báo đòn, ra đòn, hủy đòn, đòn dịch theo, tiếp viện xuất hiện, tiếp viện bị chặn, hồi máu, đốt kho lương, làng bị trúng (kèm Lòng dân còn lại), hết hiệp, dùng mưu kế, đổi pha, thắng, thua. Danh sách chính thức chốt ở bước Patterns.
 - **Hoàn tác:**
   - "Hủy nước đi" quay về bản chụp ngay trước khi tướng đó đi.
   - Lệnh `Attack` hoặc `UseStratagem` **xóa sạch ngăn xếp hủy** (chốt 2026-10-17). Ngăn xếp chỉ chứa các lệnh `Move` kể từ đòn đánh hoặc mưu kế gần nhất.
@@ -316,14 +316,17 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
 }
 ```
 
-- **Ký hiệu địa hình** (theo GDD): `.` đất trống, `~` sông, `#` rừng, `^` hầm chông, `L` kho lương, `A` ô ải.
+- **Ký hiệu địa hình** (theo GDD): `.` đất trống, `~` sông, `#` rừng, `^` hầm chông, `L` kho lương, `D` làng, `A` ô ải.
 - **Ký hiệu quân:** `1` Nguyễn Khoái, `2` Phạm Ngũ Lão, `3` Trần Khánh Dư, `B` Bộ binh, `K` Kỵ binh, `C` Cung kỵ.
 - **Tọa độ:** `cột,hàng`, gốc `0,0` ở góc trên bên trái, hướng Bắc ở phía trên.
 - **`thu_tu_dich`:** chỉ ghi tọa độ. Bộ nạp đối chiếu với lớp `quan`; ô nào không có quân Nguyên thì báo lỗi.
 - **`tiep_vien`:** mỗi mục có dạng `{"hiep": 2, "o": "3,0", "loai": "K"}`.
+- **`so_hiep_toi_da`** (không bắt buộc, chỉ dùng cho `"kieu": "tieu_diet"`): số nguyên dương. Không có thì không giới hạn hiệp. (thêm 2026-10-18)
+- **`long_dan`** (bắt buộc khi lớp `dia_hinh` có ô `D`): số nguyên dương, là Lòng dân ban đầu và tối đa. (thêm 2026-10-18)
 - **Bộ nạp:**
   - chịu được dấu cách thừa;
   - kiểm tra kích thước dòng, ký hiệu lạ và tọa độ ngoài bàn;
+  - báo lỗi khi có ô `D` mà thiếu `long_dan`, hoặc khi `so_hiep_toi_da`, `long_dan` không phải số nguyên dương;
   - báo lỗi bằng tiếng Việt, chỉ rõ file, dòng và ký hiệu sai.
 - **Ngôn ngữ của khóa:** file dữ liệu dùng khóa tiếng Việt không dấu, vì tác giả là người đọc. Code dùng tên tiếng Anh. Quy ước chi tiết chốt ở bước Patterns.
 
@@ -593,7 +596,7 @@ chong-nguyen-mong/                    # repo
 │   │   └── level_transition.tscn
 │   ├── data/                         # ★ TÁC GIẢ SỬA
 │   │   ├── chi_so.json
-│   │   ├── chien_dich.json           # thứ tự 5 trận, mưu kế mở theo trận
+│   │   ├── chien_dich.json           # thứ tự 6 trận, mưu kế mở theo trận
 │   │   └── tran/
 │   │       ├── tran_01.json … tran_05.json
 │   ├── assets/
@@ -606,7 +609,7 @@ chong-nguyen-mong/                    # repo
 │   └── tests/
 │       ├── kich_ban/                 # ★ TÁC GIẢ DUYỆT: kịch bản luật
 │       │   ├── di_chuyen/  day/  keo/  va_cham/  dia_hinh/
-│       │   ├── don_dich/  ai/  tiep_vien/  muu_ke/  hiep/  thang_thua/
+│       │   ├── don_dich/  ai/  tiep_vien/  muu_ke/  hiep/  thang_thua/  lang/  gioi_han_hiep/
 │       ├── test_scenarios.gd         # chạy mọi file trong kich_ban/
 │       ├── test_loaders.gd           # dữ liệu sai -> báo lỗi đúng
 │       └── test_<khu_vuc>.gd         # test GUT bổ sung do AI viết
@@ -788,6 +791,7 @@ Mọi luật đều đi qua đúng quy trình này. Không có ngoại lệ.
 |---|---|
 | Ngoài bàn (mép) | Dừng. Quân bị đẩy **mất 1 máu** |
 | Rừng `#` hoặc kho lương `L` | Dừng. Quân bị đẩy **mất 1 máu** (vật cản không có máu) |
+| Làng `D` | Dừng. Quân bị đẩy **mất 1 máu**, và **Lòng dân −1** (kể cả khi người chơi gây ra) |
 | Có quân khác | Dừng. **Cả hai mất 1 máu** |
 | Sông `~` | Quân Nguyên: vào ô và **chết đuối**. Tướng: tính như va chạm, dừng, mất 1 máu |
 | Hầm chông `^` | Vào ô, **mất 1 máu** (kể cả khi chỉ đi ngang qua). Gục thì dừng tại đó |
@@ -806,8 +810,8 @@ Mọi luật đều đi qua đúng quy trình này. Không có ngoại lệ.
 | Tướng | Luật |
 |---|---|
 | Nguyễn Khoái | Đánh 1 ô kề có quân Nguyên, gây sát thương rồi đẩy 1 ô theo hướng đánh. Mục tiêu gục vì sát thương thì không đẩy |
-| Phạm Ngũ Lão | Thẳng hàng. **Bay qua ô kề**, rồi trúng vật đầu tiên ở các ô từ thứ 2 đến thứ 4. Rừng hoặc kho lương **ở bất kỳ ô nào trên đường, kể cả ô kề**, đều chặn lao **(mặc định)**. Sông không chặn |
-| Trần Khánh Dư | Chỉ kéo **vật đầu tiên trên hàng** trong vòng 3 ô, và vật đó phải là quân Nguyên. Vật đầu tiên là tướng, rừng hoặc kho lương thì không kéo được **(mặc định)**. Kéo 2 ô theo bảng di chuyển cưỡng bức. 0 sát thương |
+| Phạm Ngũ Lão | Thẳng hàng. **Bay qua ô kề**, rồi trúng vật đầu tiên ở các ô từ thứ 2 đến thứ 4. Rừng, kho lương hoặc làng **ở bất kỳ ô nào trên đường, kể cả ô kề**, đều chặn lao **(mặc định)**; lao bị làng chặn thì **Lòng dân −1** **(mặc định)**. Sông không chặn |
+| Trần Khánh Dư | Chỉ kéo **vật đầu tiên trên hàng** trong vòng 3 ô, và vật đó phải là quân Nguyên. Vật đầu tiên là tướng, rừng, kho lương hoặc làng thì không kéo được **(mặc định)**. Kéo 2 ô theo bảng di chuyển cưỡng bức. 0 sát thương |
 
 **Chọn mục tiêu:** không được chọn tướng mình làm mục tiêu của đòn (chốt 2026-10-17). Bấm vào tướng mình luôn là lệnh chọn tướng. Tướng mình vẫn trúng đòn như hệ quả: lao trúng vật đầu tiên trên hàng, hoặc bị quân khác va vào.
 
@@ -820,12 +824,12 @@ Mọi luật đều đi qua đúng quy trình này. Không có ngoại lệ.
 | Bước | Luật |
 |---|---|
 | 1a. Tiếp viện | Xử lý theo thứ tự trong file trận. Ô có quân đứng (**bất kể phe nào**): quân đó mất 1 máu, quân tiếp viện bị hủy |
-| 1b. Chuẩn bị | Từng quân theo thứ tự (quân cũ theo `thu_tu_dich`, rồi tới quân tiếp viện theo thứ tự xuất hiện): đi, rồi báo đòn. Gục trên hầm chông khi đang đi thì không báo đòn |
+| 1b. Chuẩn bị | Từng quân theo thứ tự (quân cũ theo `thu_tu_dich`, rồi tới quân tiếp viện theo thứ tự xuất hiện): đi, rồi báo đòn. Gục trên hầm chông khi đang đi thì không báo đòn. Trận Tiêu diệt có làng: Bộ binh và Kỵ binh nhắm tướng hoặc làng gần nhất, hòa thì ưu tiên làng **(mặc định)**; Cung kỵ chỉ nhắm tướng |
 | 3. Ra đòn | Theo số thứ tự đã báo. Chủ đòn đã gục thì đòn bị hủy. Đòn địch chỉ gây sát thương, không đẩy |
-| Kỵ binh | Đứng yên, trúng vật đầu tiên theo hướng đã báo. Rừng/kho lương chặn (trúng vật cản thì không ai mất máu). Sông không chặn. Hàng trống tới mép thì **trượt** **(mặc định)** |
-| Cung kỵ | Ô đích phải **thẳng hàng**, cách 2–3 ô **(mặc định)**. Tên bay qua quân; chỉ rừng hoặc kho lương nằm giữa mới chặn |
-| Bộ binh | Đánh 1 ô kề |
-| 4. Cuối hiệp | Quân Nguyên kề **ít nhất một** kho lương hồi 1 máu (tối đa 1 mỗi hiệp, không vượt máu tối đa). Sau đó báo tiếp viện cho hiệp sau |
+| Kỵ binh | Đứng yên, trúng vật đầu tiên theo hướng đã báo. Rừng/kho lương chặn (trúng vật cản thì không ai mất máu). Trúng làng thì **Lòng dân −1**. Sông không chặn. Hàng trống tới mép thì **trượt** **(mặc định)** |
+| Cung kỵ | Ô đích phải **thẳng hàng**, cách 2–3 ô **(mặc định)**. Tên bay qua quân; chỉ rừng, kho lương hoặc làng nằm giữa mới chặn. Bị làng chặn thì **Lòng dân −1** **(mặc định)** |
+| Bộ binh | Đánh 1 ô kề. Ô đó là làng thì **Lòng dân −1** |
+| 4. Cuối hiệp | Quân Nguyên kề **ít nhất một** kho lương hồi 1 máu (tối đa 1 mỗi hiệp, không vượt máu tối đa). Sau đó báo tiếp viện cho hiệp sau. Trận có `so_hiep_toi_da`: nếu đây là hiệp cuối mà còn quân Nguyên thì **thua** **(mặc định)** |
 
 **Hủy nước đi:**
 - Chỉ hủy được **nước đi gần nhất** (vào sau ra trước), và chỉ khi tướng đó **chưa đánh**. Muốn quay lại xa hơn thì dùng "Chơi lại hiệp". **(mặc định)**
@@ -836,6 +840,8 @@ Mọi luật đều đi qua đúng quy trình này. Không có ngoại lệ.
 - Thắng và thua xảy ra cùng lúc (ví dụ quân Nguyên cuối cùng và tướng cuối cùng cùng gục vì va chạm): **thắng được ưu tiên**. **(mặc định)**
 - Giữ ải: quân Nguyên vào ô ải **bằng bất kỳ cách nào**, kể cả do bị người chơi kéo vào, thì thua ngay. **(mặc định)**
 - Giữ ải: thắng khi kết thúc bước 4 của hiệp 5.
+- Lòng dân về 0 thì **thua ngay**. Kiểm tra **sau mỗi lần mất Lòng dân**, cả trong lượt người chơi lẫn pha địch; trùng với thắng thì thắng được ưu tiên.
+- Tiêu diệt có `so_hiep_toi_da`: kết thúc bước 4 của hiệp cuối mà còn quân Nguyên thì thua. Quân Nguyên chết vì đánh trúng nhau trong pha ra đòn của hiệp cuối vẫn tính. **(mặc định)**
 
 ### Mẫu giao tiếp
 
