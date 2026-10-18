@@ -36,9 +36,9 @@ func _remove_tree(dir_path: String) -> void:
 func _stats() -> Stats:
 	var values: Dictionary = {}
 	for type: int in [UnitType.NGUYEN_KHOAI, UnitType.PHAM_NGU_LAO, UnitType.TRAN_KHANH_DU, UnitType.BO_BINH]:
-		values[type] = {"mau": 3}
-	values[UnitType.KY_BINH] = {"mau": 2}
-	values[UnitType.CUNG_KY] = {"mau": 1}
+		values[type] = {"mau": 3, "tam_di": 3}
+	values[UnitType.KY_BINH] = {"mau": 2, "tam_di": 3}
+	values[UnitType.CUNG_KY] = {"mau": 1, "tam_di": 3}
 	return Stats.new(values)
 
 
@@ -441,12 +441,47 @@ func test_every_board_symbol_has_a_name() -> void:
 
 func test_runner_stops_at_command_without_rule() -> void:
 	var d: Dictionary = _valid()
-	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "3,6"}, {"lenh": "huy"}]
+	d["hanh_dong"] = [{"lenh": "huy"}, {"lenh": "ket_thuc_luot"}]
 	d["sau"]["mau"] = {"5,4": 1}
 	var result: ScenarioRunner.ScenarioResult = _run(d)
 	assert_false(result.passed)
-	assert_eq(result.problems, ['bước 1: lệnh "di" chưa có luật (Story 1.4)'] as Array[String],
+	assert_eq(result.problems, ['bước 1: lệnh "huy" chưa có luật (Story 1.5)'] as Array[String],
 		"dừng ở bước 1, không so bàn sau")
+
+
+func test_runner_moves_general() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "2,5"}]
+	d["sau"]["quan"] = _units()
+	d["sau"]["quan"][6] = EMPTY_ROW
+	d["sau"]["quan"][5] = ". . 1 . . . ."
+	var result: ScenarioRunner.ScenarioResult = _run(d)
+	assert_eq(result.problems, [] as Array[String])
+
+
+func test_runner_reports_wrong_destination() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "2,5"}]
+	var result: ScenarioRunner.ScenarioResult = _run(d)
+	assert_eq(result.problems, [
+		"sau: ô 2,5 mong đợi trống, thực tế 1 (Nguyễn Khoái, 3 máu)",
+		"sau: ô 0,6 mong đợi 1 (Nguyễn Khoái, 3 máu), thực tế trống",
+	] as Array[String], "đi được thì bàn đổi; bàn sau ghi giữ nguyên là sai")
+
+
+## Lệnh bị luật từ chối không phải lỗi của bước: bàn giữ nguyên, kịch bản ghi giữ nguyên thì đạt.
+func test_runner_rejected_move_keeps_board() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "4,6"}]
+	assert_eq(_run(d).problems, [] as Array[String])
+
+
+func test_runner_general_missing_from_board() -> void:
+	var d: Dictionary = _valid()
+	var scenario: ScenarioData = _scenario(d)
+	scenario.steps.append(ScenarioData.ScenarioStep.new("di", UnitType.PHAM_NGU_LAO, Vector2i(1, 1)))
+	var result: ScenarioRunner.ScenarioResult = ScenarioRunner.run(scenario, _stats())
+	assert_eq(result.problems, ['bước 1: tướng "2" không còn trên bàn'] as Array[String])
 
 
 # ---------- Công cụ duyệt ----------

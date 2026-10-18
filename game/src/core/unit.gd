@@ -1,7 +1,7 @@
 class_name Unit
 extends RefCounted
-## Một quân trên bàn: tướng hoặc quân Nguyên. Chỉ Effects được đổi máu và vị trí,
-## nên mọi thuộc tính chỉ gán trong _init (sao chép thì tạo Unit mới).
+## Một quân trên bàn: tướng hoặc quân Nguyên. Mọi thuộc tính gán trong _init (sao chép thì tạo Unit mới);
+## sau đó chỉ Effects được đổi vị trí và máu.
 
 ## Phe. Không đặt tên Side: trùng enum Side có sẵn của Godot (SIDE_LEFT…).
 enum Faction { DAI_VIET, NGUYEN }

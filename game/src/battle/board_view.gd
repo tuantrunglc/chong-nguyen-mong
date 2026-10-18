@@ -35,6 +35,18 @@ const TERRAIN_KEYS: Dictionary = {
 }
 const TERRAIN_FONT_SIZE: int = 12
 const TERRAIN_MARGIN: int = 4
+## Ô ngoài bàn (cell_at).
+const NO_CELL: Vector2i = Vector2i(-1, -1)
+## Ô đi tới được: xanh lá nhạt, khác đỏ của ô báo đòn (E2) và khác màu sông.
+const REACH_COLOR: Color = Color(0.45, 0.78, 0.40, 0.55)
+## Vòng quanh tướng đang chọn, nằm dưới đồng quân nên chỉ lộ viền ngoài.
+const SELECT_COLOR: Color = Color(0.95, 0.72, 0.10)
+const SELECT_RADIUS: float = 41.0
+const SELECT_WIDTH: float = 5.0
+## Đường đi khi rê chuột lên ô sáng.
+const PATH_COLOR: Color = Color(0.13, 0.35, 0.65)
+const PATH_WIDTH: float = 6.0
+const PATH_END_RADIUS: float = 10.0
 
 var cols: int = 7
 var rows: int = 7
@@ -45,11 +57,54 @@ var _terrain_labels: Node2D
 var _units: Node2D
 ## id quân -> UnitToken
 var _tokens: Dictionary = {}
+## Tướng đang chọn: ô của nó (NO_CELL là không chọn), các ô sáng, đường đi đang vẽ (không gồm ô tướng).
+var _selected_cell: Vector2i = NO_CELL
+var _lit_cells: Array[Vector2i] = []
+var _path: Array[Vector2i] = []
 
 
 ## Tâm ô, tính trong tọa độ của BoardView.
 static func cell_center(cell: Vector2i) -> Vector2:
 	return Vector2(cell) * CELL_SIZE + Vector2.ONE * CELL_SIZE / 2.0
+
+
+## Ô chứa điểm local_pos (tọa độ của BoardView); ngoài bàn thì NO_CELL.
+func cell_at(local_pos: Vector2) -> Vector2i:
+	var cell: Vector2i = Vector2i(floori(local_pos.x / CELL_SIZE), floori(local_pos.y / CELL_SIZE))
+	if cell.x < 0 or cell.y < 0 or cell.x >= cols or cell.y >= rows:
+		return NO_CELL
+	return cell
+
+
+## Vẽ vòng quanh tướng ở unit_cell và tô sáng cells. Xóa đường đi cũ.
+func show_selection(unit_cell: Vector2i, cells: Array[Vector2i]) -> void:
+	_selected_cell = unit_cell
+	_lit_cells = cells.duplicate()
+	_path = []
+	queue_redraw()
+
+
+## Đường đi từ tướng đang chọn qua path (không gồm ô tướng). [] là xóa.
+func show_path(path: Array[Vector2i]) -> void:
+	if path == _path:
+		return
+	_path = path.duplicate()
+	queue_redraw()
+
+
+func clear_selection() -> void:
+	_selected_cell = NO_CELL
+	_lit_cells = []
+	_path = []
+	queue_redraw()
+
+
+func lit_cells() -> Array[Vector2i]:
+	return _lit_cells.duplicate()
+
+
+func path() -> Array[Vector2i]:
+	return _path.duplicate()
 
 
 func setup(new_cols: int = 7, new_rows: int = 7) -> void:
@@ -73,6 +128,8 @@ func show_state(state: BattleState) -> void:
 	_state = state
 	if state != null:
 		setup(state.size.x, state.size.y)
+	else:
+		clear_selection()
 	_rebuild_terrain_labels()
 	_sync_tokens()
 	queue_redraw()
@@ -144,6 +201,8 @@ func _draw() -> void:
 				var kind: int = _state.terrain_at(Vector2i(c, r))
 				if kind != Terrain.PLAIN:
 					draw_rect(Rect2(Vector2(c, r) * CELL_SIZE, Vector2.ONE * CELL_SIZE), TERRAIN_COLORS[kind] as Color)
+	for cell: Vector2i in _lit_cells:
+		draw_rect(Rect2(Vector2(cell) * CELL_SIZE, Vector2.ONE * CELL_SIZE), REACH_COLOR)
 	for c: int in range(1, cols):
 		var x: float = c * CELL_SIZE
 		draw_line(Vector2(x, 0), Vector2(x, board_size.y), LINE_COLOR, LINE_WIDTH)
@@ -151,3 +210,11 @@ func _draw() -> void:
 		var y: float = r * CELL_SIZE
 		draw_line(Vector2(0, y), Vector2(board_size.x, y), LINE_COLOR, LINE_WIDTH)
 	draw_rect(Rect2(Vector2.ZERO, board_size), LINE_COLOR, false, BORDER_WIDTH)
+	if _selected_cell != NO_CELL:
+		draw_circle(cell_center(_selected_cell), SELECT_RADIUS, SELECT_COLOR, false, SELECT_WIDTH, true)
+		if not _path.is_empty():
+			var points: PackedVector2Array = PackedVector2Array([cell_center(_selected_cell)])
+			for cell: Vector2i in _path:
+				points.append(cell_center(cell))
+			draw_polyline(points, PATH_COLOR, PATH_WIDTH, true)
+			draw_circle(cell_center(_path[_path.size() - 1]), PATH_END_RADIUS, PATH_COLOR)

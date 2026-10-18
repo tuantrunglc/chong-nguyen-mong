@@ -5,7 +5,6 @@ extends RefCounted
 
 ## Lệnh -> story sẽ viết luật cho lệnh đó. Lệnh có luật rồi thì bỏ khỏi bảng này và thêm nhánh trong _run_step.
 const PENDING_RULES: Dictionary = {
-	"di": "1.4",
 	"huy": "1.5",
 	"ket_thuc_luot": "1.5",
 	"danh": "2.1",
@@ -73,10 +72,24 @@ static func terrain_symbol(terrain: int) -> String:
 
 
 ## Chạy một lệnh trên state. Trả "" nếu chạy được, hoặc câu báo vì sao không chạy được.
-static func _run_step(_state: BattleState, step: ScenarioData.ScenarioStep) -> String:
+## Lệnh bị luật từ chối (REJECTED) vẫn là chạy được: không có gì đổi, bàn sau so như thường.
+static func _run_step(state: BattleState, step: ScenarioData.ScenarioStep) -> String:
 	match step.kind:
+		"di":
+			var general: Unit = _general(state, step.general)
+			if general == null:
+				return 'tướng "%s" không còn trên bàn' % unit_symbol(step.general)
+			Rules.resolve(state, Command.move(general.id, step.cell))
+			return ""
 		_:
 			return 'lệnh "%s" chưa có luật (Story %s)' % [step.kind, PENDING_RULES.get(step.kind, "?")]
+
+
+static func _general(state: BattleState, type: int) -> Unit:
+	for unit: Unit in state.units:
+		if unit.type == type:
+			return unit
+	return null
 
 
 ## So state với bàn sau: địa hình rồi quân, theo thứ tự đọc bàn. Mỗi chỗ khác một câu.

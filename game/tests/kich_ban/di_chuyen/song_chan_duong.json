@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Sông chặn đường. Đi vòng lên hàng trên phải mất 4 bước, quá tầm 3, nên Nguyễn Khoái đứng yên.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

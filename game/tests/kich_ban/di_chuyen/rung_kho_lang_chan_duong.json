@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Rừng, kho lương, làng chặn đường: đi vòng phải mất 4 bước nên ba lệnh đều không đi được, Nguyễn Khoái đứng yên.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

@@ -25,6 +25,8 @@ var _coord_overlay: CoordOverlay = null
 var _error_screen: ErrorScreen = null
 var _title_label: Label
 var _board_view: BoardView
+var _battle_input: BattleInput
+var _battle_view: BattleView
 var _version_label: Label
 
 
@@ -41,6 +43,12 @@ func _ready() -> void:
 
 	_board_view = BoardView.new()
 	add_child(_board_view)
+	_battle_input = BattleInput.new()
+	_battle_input.setup(_board_view)
+	add_child(_battle_input)
+	_battle_view = BattleView.new()
+	_battle_view.setup(_board_view, _battle_input)
+	add_child(_battle_view)
 
 	_version_label = Label.new()
 	_version_label.text = "v%s · %s" % [_read_version(), BuildInfo.read_commit(BUILD_INFO_PATH)]
@@ -99,6 +107,7 @@ func _start_battle() -> void:
 	_controller = BattleController.new()
 	_controller.start(_level, AppState.stats)
 	_show_board(_controller.snapshot())
+	_battle_view.start(_controller)
 	_hide_error()
 	_screen = Screen.BATTLE
 
@@ -107,6 +116,7 @@ func _start_battle() -> void:
 func _show_error(errors: Array[String]) -> void:
 	_hide_error()
 	_controller = null
+	_battle_view.stop()
 	_show_board(null)
 	_board_view.visible = false
 	_error_screen = ErrorScreen.new()
@@ -123,6 +133,7 @@ func _show_error(errors: Array[String]) -> void:
 func _show_menu() -> void:
 	_hide_error()
 	_controller = null
+	_battle_view.stop()
 	_show_board(null)
 	_screen = Screen.MENU
 	Log.info("app", "về menu")

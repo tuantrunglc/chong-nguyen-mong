@@ -4,7 +4,7 @@ baseline_commit: 22d7228
 
 # Story 1.4: Chọn tướng và xem các ô đi được
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -40,32 +40,32 @@ tôi muốn chọn một tướng và thấy ngay nó đi được tới đâu,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Viết đợt kịch bản 1 và dừng chờ duyệt** (AC: 1, 2)
+- [x] **Task 1: Viết đợt kịch bản 1 và dừng chờ duyệt** (AC: 1, 2)
   - [x] 1.1 Viết 7 file mới trong `game/tests/kich_ban/di_chuyen/` đúng như Dev Notes "Đợt kịch bản 1" (bàn cờ, lệnh, `mo_ta`), `"da_duyet": false`. Giữ nguyên `di_thang_3_o.json` (không đổi gì).
   - [x] 1.2 Chạy `tools/xem_kich_ban.sh di_chuyen`: đọc lại từng bàn trước/sau, xem có khớp `mo_ta` không. Chạy `tools/test.sh`: xanh, `8 chưa duyệt (8 chưa đạt)`.
   - [x] 1.3 Commit: `Kịch bản di_chuyen đợt 1 chờ duyệt (Story 1.4)`.
-  - [ ] 1.4 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh`, đọc 8 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái (hoặc tự đổi `da_duyet`). Không làm Task 2 trở đi khi chưa có câu trả lời.
-  - [ ] 1.5 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản được nói "đúng" (chỉ đổi đúng khóa đó). Kịch bản bị nói "sai" thì sửa theo lý do, cho duyệt lại (lặp 1.2–1.5). Chạy `tools/test.sh`: **phải trượt** (AC 2). Ghi vào Debug Log. **Không commit** khi đang đỏ.
-- [ ] **Task 2: Lõi luật: lưới, lệnh, sự kiện, Effects** (AC: 3)
-  - [ ] 2.1 `src/core/grid.gd` (`class_name Grid`): `const DIRECTIONS: Array[Vector2i] = [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]` theo thứ tự **B→Đ→N→T**, kèm chú thích. Chỉ thêm thứ story này dùng.
-  - [ ] 2.2 `src/core/command.gd` (`class_name Command`): `enum Kind { MOVE }` (thêm `ATTACK`, `END_TURN`… ở story của nó); `kind`, `unit_id: int`, `cell: Vector2i`; hàm tạo `static func move(unit_id: int, cell: Vector2i) -> Command`.
-  - [ ] 2.3 `src/core/battle_event.gd` (`class_name BattleEvent`): `enum Type { MOVED, REJECTED }`, `enum Cause { WALK }`; trường `type`, `unit_id`, `from_cell`, `to_cell`, `cause`, `reason: String`. Hàm tạo `moved(...)`, `rejected(reason)`.
-  - [ ] 2.4 `src/core/effects.gd` (`class_name Effects`): `static func move(state: BattleState, unit: Unit, to_cell: Vector2i, cause: BattleEvent.Cause, events: Array[BattleEvent]) -> void`. Gán `unit.cell = to_cell` (**chỗ duy nhất** trong `src/` được gán `.cell`; `check_boundaries.sh` đã miễn đúng file này), rồi `events.append(BattleEvent.moved(...))`. Chú thích: hiệu ứng ô (hầm chông) thêm ở Story 3.4.
-  - [ ] 2.5 Sửa chú thích đầu `src/core/unit.gd`: chỉ `Effects` được đổi `cell`/`hp` sau `_init`.
-- [ ] **Task 3: Tìm đường và luật đi** (AC: 3, 4, 5, 7)
-  - [ ] 3.1 `src/core/pathfinding.gd` (`class_name Pathfinding`): BFS tự viết, đúng như Dev Notes "Tìm đường". Hàm `static func find_paths(state: BattleState, unit: Unit, max_steps: int) -> Dictionary`, trả `ô đích -> Array[Vector2i]` (đường đi, không gồm ô xuất phát, gồm ô đích). Chỉ trả ô **dừng được**. **Không** dùng `AStarGrid2D` (cấm).
-  - [ ] 3.2 `src/core/rules_move.gd` (`class_name RulesMove`):
+  - [x] 1.4 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh`, đọc 8 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái (hoặc tự đổi `da_duyet`). Không làm Task 2 trở đi khi chưa có câu trả lời.
+  - [x] 1.5 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản được nói "đúng" (chỉ đổi đúng khóa đó). Kịch bản bị nói "sai" thì sửa theo lý do, cho duyệt lại (lặp 1.2–1.5). Chạy `tools/test.sh`: **phải trượt** (AC 2). Ghi vào Debug Log. **Không commit** khi đang đỏ.
+- [x] **Task 2: Lõi luật: lưới, lệnh, sự kiện, Effects** (AC: 3)
+  - [x] 2.1 `src/core/grid.gd` (`class_name Grid`): `const DIRECTIONS: Array[Vector2i] = [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]` theo thứ tự **B→Đ→N→T**, kèm chú thích. Chỉ thêm thứ story này dùng.
+  - [x] 2.2 `src/core/command.gd` (`class_name Command`): `enum Kind { MOVE }` (thêm `ATTACK`, `END_TURN`… ở story của nó); `kind`, `unit_id: int`, `cell: Vector2i`; hàm tạo `static func move(unit_id: int, cell: Vector2i) -> Command`.
+  - [x] 2.3 `src/core/battle_event.gd` (`class_name BattleEvent`): `enum Type { MOVED, REJECTED }`, `enum Cause { WALK }`; trường `type`, `unit_id`, `from_cell`, `to_cell`, `cause`, `reason: String`. Hàm tạo `moved(...)`, `rejected(reason)`.
+  - [x] 2.4 `src/core/effects.gd` (`class_name Effects`): `static func move(state: BattleState, unit: Unit, to_cell: Vector2i, cause: BattleEvent.Cause, events: Array[BattleEvent]) -> void`. Gán `unit.cell = to_cell` (**chỗ duy nhất** trong `src/` được gán `.cell`; `check_boundaries.sh` đã miễn đúng file này), rồi `events.append(BattleEvent.moved(...))`. Chú thích: hiệu ứng ô (hầm chông) thêm ở Story 3.4.
+  - [x] 2.5 Sửa chú thích đầu `src/core/unit.gd`: chỉ `Effects` được đổi `cell`/`hp` sau `_init`.
+- [x] **Task 3: Tìm đường và luật đi** (AC: 3, 4, 5, 7)
+  - [x] 3.1 `src/core/pathfinding.gd` (`class_name Pathfinding`): BFS tự viết, đúng như Dev Notes "Tìm đường". Hàm `static func find_paths(state: BattleState, unit: Unit, max_steps: int) -> Dictionary`, trả `ô đích -> Array[Vector2i]` (đường đi, không gồm ô xuất phát, gồm ô đích). Chỉ trả ô **dừng được**. **Không** dùng `AStarGrid2D` (cấm).
+  - [x] 3.2 `src/core/rules_move.gd` (`class_name RulesMove`):
     - `reachable(state, unit) -> Array[Vector2i]`: các ô dừng được, sắp theo thứ tự đọc bàn (hàng rồi cột). Không duyệt theo khóa Dictionary khi thứ tự có nghĩa.
     - `path_to(state, unit, cell) -> Array[Vector2i]`: rỗng nếu không tới được.
     - `resolve(state, command, events)`: kiểm hợp lệ (Dev Notes "Lệnh đi"); sai thì `events.append(BattleEvent.rejected(lý do))`, **không đổi state**; đúng thì gọi `Effects.move` cho **từng ô** trên đường.
     - Tầm đi lấy từ `state.stats.move_range(unit.type)`, không viết số 3 trong code.
-  - [ ] 3.3 `src/core/rules.gd` (`class_name Rules`): `static func resolve(state: BattleState, command: Command) -> Array[BattleEvent]`, là **điểm vào duy nhất**. `match command.kind`: `MOVE` → `RulesMove.resolve`.
-- [ ] **Task 4: Bộ chạy kịch bản chạy lệnh `di`** (AC: 2, 3)
-  - [ ] 4.1 `game/tests/scenario_runner.gd`: bỏ `"di"` khỏi `PENDING_RULES`. Trong `_run_step`, lệnh `di`: tìm tướng theo loại (`step.general`) trong state. Không có thì trả `'tướng "<ký hiệu>" không còn trên bàn'`. Có thì `Rules.resolve(state, Command.move(id, step.cell))`.
-  - [ ] 4.2 Lệnh bị từ chối (`REJECTED`) **không phải lỗi của bước**: bộ chạy đi tiếp, bàn sau sẽ so như thường. Kịch bản "không đi được" kiểm bằng bàn sau giống bàn trước.
-  - [ ] 4.3 Sửa `test_runner_stops_at_command_without_rule` (đang dùng `di` làm lệnh chưa có luật) sang dùng `huy` (Story 1.5). Thêm test bộ chạy: đi được (bàn đổi), bị từ chối (bàn giữ nguyên, `passed`), tướng không có trên bàn.
-- [ ] **Task 5: Test lõi luật** (AC: 3)
-  - [ ] 5.1 `game/tests/test_rules_move.gd`, dùng `Stats` tự đặt như `test_scenario_loader.gd` (không phụ thuộc `chi_so.json`). Mỗi ca kiểm `state.validate()` rỗng sau khi phân giải. Các ca:
+  - [x] 3.3 `src/core/rules.gd` (`class_name Rules`): `static func resolve(state: BattleState, command: Command) -> Array[BattleEvent]`, là **điểm vào duy nhất**. `match command.kind`: `MOVE` → `RulesMove.resolve`.
+- [x] **Task 4: Bộ chạy kịch bản chạy lệnh `di`** (AC: 2, 3)
+  - [x] 4.1 `game/tests/scenario_runner.gd`: bỏ `"di"` khỏi `PENDING_RULES`. Trong `_run_step`, lệnh `di`: tìm tướng theo loại (`step.general`) trong state. Không có thì trả `'tướng "<ký hiệu>" không còn trên bàn'`. Có thì `Rules.resolve(state, Command.move(id, step.cell))`.
+  - [x] 4.2 Lệnh bị từ chối (`REJECTED`) **không phải lỗi của bước**: bộ chạy đi tiếp, bàn sau sẽ so như thường. Kịch bản "không đi được" kiểm bằng bàn sau giống bàn trước.
+  - [x] 4.3 Sửa `test_runner_stops_at_command_without_rule` (đang dùng `di` làm lệnh chưa có luật) sang dùng `huy` (Story 1.5). Thêm test bộ chạy: đi được (bàn đổi), bị từ chối (bàn giữ nguyên, `passed`), tướng không có trên bàn.
+- [x] **Task 5: Test lõi luật** (AC: 3)
+  - [x] 5.1 `game/tests/test_rules_move.gd`, dùng `Stats` tự đặt như `test_scenario_loader.gd` (không phụ thuộc `chi_so.json`). Mỗi ca kiểm `state.validate()` rỗng sau khi phân giải. Các ca:
     - tướng giữa bàn trống tới được 24 ô (25 ô kim cương, trừ ô đang đứng);
     - đổi `tam_di` thành 2 thì chỉ còn 12 ô;
     - tướng ở góc: không có ô nào ngoài bàn, không đọc nhầm sang hàng khác (mục hoãn `terrain_at` ở `deferred-work.md`);
@@ -74,36 +74,36 @@ tôi muốn chọn một tướng và thấy ngay nó đi được tới đâu,
     - `resolve` đi được: sự kiện `MOVED` theo từng ô, đúng thứ tự, ô cuối là ô đích;
     - `resolve` bị từ chối (ngoài tầm, ô có quân, ô bị chặn, ô đang đứng, id không có, quân Nguyên): đúng một sự kiện `REJECTED`, state giống hệt trước (so từng quân);
     - kết quả tất định: gọi hai lần ra cùng danh sách.
-  - [ ] 5.2 Kiểm test bắt lỗi thật (như Story 1.3): tạm bỏ luật "quân Nguyên chặn" thì phải có test và kịch bản trượt. Trả lại, ghi Debug Log.
-- [ ] **Task 6: BattleController hỏi ô đi được** (AC: 4, 5, 7)
-  - [ ] 6.1 `src/battle/battle_controller.gd`: thêm `reachable(unit_id: int) -> Array[Vector2i]` và `path_to(unit_id: int, cell: Vector2i) -> Array[Vector2i]`. Chỉ đọc state đang sống, trả mảng mới. Id không có thì trả `[]`. **Chưa** có `submit()` (Story 1.5).
-- [ ] **Task 7: Input và chọn tướng** (AC: 4–9)
-  - [ ] 7.1 `src/battle/battle_input.gd` (`class_name BattleInput extends Node`):
+  - [x] 5.2 Kiểm test bắt lỗi thật (như Story 1.3): tạm bỏ luật "quân Nguyên chặn" thì phải có test và kịch bản trượt. Trả lại, ghi Debug Log.
+- [x] **Task 6: BattleController hỏi ô đi được** (AC: 4, 5, 7)
+  - [x] 6.1 `src/battle/battle_controller.gd`: thêm `reachable(unit_id: int) -> Array[Vector2i]` và `path_to(unit_id: int, cell: Vector2i) -> Array[Vector2i]`. Chỉ đọc state đang sống, trả mảng mới. Id không có thì trả `[]`. **Chưa** có `submit()` (Story 1.5).
+- [x] **Task 7: Input và chọn tướng** (AC: 4–9)
+  - [x] 7.1 `src/battle/battle_input.gd` (`class_name BattleInput extends Node`):
     - Đăng ký 3 action `select_general_1..3` vào InputMap bằng code trong `_ready` (phím vật lý `KEY_1`..`KEY_3`; đã có thì bỏ qua), như `DevTools`. Không bắt phím trực tiếp.
     - `_unhandled_input`: action → `general_key_pressed(index: int)`; chuột trái nhấn → `cell_clicked(cell)`; chuột di → `cell_hovered(cell)`, **chỉ phát khi ô đổi**.
     - Ô lấy qua `BoardView.cell_at(...)`. Ngoài bàn thì là `BoardView.NO_CELL`.
-  - [ ] 7.2 `src/battle/battle_view.gd` (`class_name BattleView extends Node`): giữ tướng đang chọn (id, 0 = không chọn) và tham chiếu `BattleController`.
+  - [x] 7.2 `src/battle/battle_view.gd` (`class_name BattleView extends Node`): giữ tướng đang chọn (id, 0 = không chọn) và tham chiếu `BattleController`.
     - `start(controller)` / `stop()`.
     - Nhận signal của `BattleInput`, theo bảng ở Dev Notes "Chọn và bỏ chọn".
     - Gọi `BoardView.show_selection(...)` và `show_path(...)`.
     - Đọc bản chụp (`controller.snapshot()`), không bao giờ sửa state.
-  - [ ] 7.3 `src/battle/board_view.gd`:
+  - [x] 7.3 `src/battle/board_view.gd`:
     - `const NO_CELL`, `cell_at(local_pos: Vector2) -> Vector2i`;
     - `show_selection(unit_cell: Vector2i, cells: Array[Vector2i])`, `show_path(path: Array[Vector2i])`, `clear_selection()`;
     - vẽ trong `_draw`, theo Dev Notes "Hiển thị";
     - `show_state(null)` thì xóa luôn ô sáng và đường đi.
-  - [ ] 7.4 `src/app/main.gd`: tạo `BattleInput` và `BattleView` một lần trong `_ready`. `_start_battle` thành công thì gọi `start(_controller)`. `_show_error` và `_show_menu` gọi `stop()`. Giữ mọi hành vi cũ (`test_main.gd` phải xanh nguyên).
-- [ ] **Task 8: Test chọn tướng** (AC: 4–9)
-  - [ ] 8.1 `game/tests/test_battle_view.gd`, theo mẫu `test_main.gd` (dựng `main.tscn`, trận 1 thật). Gọi thẳng hàm xử lý của `BattleView`, hoặc phát `InputEventAction`.
+  - [x] 7.4 `src/app/main.gd`: tạo `BattleInput` và `BattleView` một lần trong `_ready`. `_start_battle` thành công thì gọi `start(_controller)`. `_show_error` và `_show_menu` gọi `stop()`. Giữ mọi hành vi cũ (`test_main.gd` phải xanh nguyên).
+- [x] **Task 8: Test chọn tướng** (AC: 4–9)
+  - [x] 8.1 `game/tests/test_battle_view.gd`, theo mẫu `test_main.gd` (dựng `main.tscn`, trận 1 thật). Gọi thẳng hàm xử lý của `BattleView`, hoặc phát `InputEventAction`.
     - Phím 1: 7 ô sáng đúng như AC 4. Phím 2: đúng như AC 5. Phím 3 ở trận 1: không đổi.
     - Bấm lại tướng đang chọn: bỏ chọn. Bấm ô không sáng: bỏ chọn. Rê ô `2,5`: đường đi như AC 7.
     - Màn hình lỗi: phím 1 không làm gì.
-  - [ ] 8.2 `after_each` xóa 3 action `select_general_*` khỏi InputMap (như cách `test_main.gd` dọn `dev_f*`).
-- [ ] **Task 9: Kiểm bằng mắt, kiểm khóa, commit** (AC: 3–9)
-  - [ ] 9.1 Chạy `tools/chay.sh --dev` ở chế độ nền, chờ ~5 giây, bơm phím `1` (`inject_key`), chụp màn hình bằng GoPeak (`capture_screenshot`). Xem ô sáng và vòng chọn có rõ không, có lẫn với màu sông không. Rê/bấm thử bằng `inject_mouse_click` (tọa độ pixel cửa sổ 1280×720: tâm ô = vị trí bàn + `cell_center`). Tắt game. Ghi Debug Log.
-  - [ ] 9.2 Thử khóa `da_duyet` trên **bản clone tạm** (mục hoãn của Story 0.2 ở `deferred-work.md`): sửa một kịch bản đã duyệt thì `test.sh` phải trượt, ghi rõ tên file. Ghi cách làm và kết quả vào Debug Log. Tự kiểm tự động vẫn để hoãn.
-  - [ ] 9.3 `tools/test.sh` xanh (AC 3). Commit một lần, gồm kịch bản đã duyệt, code, test và `.uid` mới. Lời commit tiếng Việt, ví dụ `Luật đi và chọn tướng, kịch bản di_chuyen/01–08 (Story 1.4)`.
-  - [ ] 9.4 Ghi hướng dẫn tác giả tự test vào Completion Notes, theo mẫu ở mục Testing, dùng kết quả thật.
+  - [x] 8.2 `after_each` xóa 3 action `select_general_*` khỏi InputMap (như cách `test_main.gd` dọn `dev_f*`).
+- [x] **Task 9: Kiểm bằng mắt, kiểm khóa, commit** (AC: 3–9)
+  - [x] 9.1 Chạy `tools/chay.sh --dev` ở chế độ nền, chờ ~5 giây, bơm phím `1` (`inject_key`), chụp màn hình bằng GoPeak (`capture_screenshot`). Xem ô sáng và vòng chọn có rõ không, có lẫn với màu sông không. Rê/bấm thử bằng `inject_mouse_click` (tọa độ pixel cửa sổ 1280×720: tâm ô = vị trí bàn + `cell_center`). Tắt game. Ghi Debug Log.
+  - [x] 9.2 Thử khóa `da_duyet` trên **bản clone tạm** (mục hoãn của Story 0.2 ở `deferred-work.md`): sửa một kịch bản đã duyệt thì `test.sh` phải trượt, ghi rõ tên file. Ghi cách làm và kết quả vào Debug Log. Tự kiểm tự động vẫn để hoãn.
+  - [x] 9.3 `tools/test.sh` xanh (AC 3). Commit một lần, gồm kịch bản đã duyệt, code, test và `.uid` mới. Lời commit tiếng Việt, ví dụ `Luật đi và chọn tướng, kịch bản di_chuyen/01–08 (Story 1.4)`.
+  - [x] 9.4 Ghi hướng dẫn tác giả tự test vào Completion Notes, theo mẫu ở mục Testing, dùng kết quả thật.
 
 ## Dev Notes
 
@@ -342,17 +342,67 @@ Nhớ commit file `.uid` của mọi script mới.
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5)
+
 ### Debug Log References
 
 - Task 1: viết 7 kịch bản mới bằng script (bàn 7×7, mỗi lệnh `di` một dòng như file mẫu). `tools/xem_kich_ban.sh di_chuyen` in đủ 8 kịch bản, từng bàn trước/sau khớp `mo_ta`. Số bước của đường vòng (kịch bản 5, 6, 7, 8) đã kiểm bằng BFS lúc tạo story. `tools/test.sh`: 226/226 đạt, `Kịch bản luật: 0 đã duyệt · 8 chưa duyệt (8 chưa đạt)`, mỗi kịch bản có lý do `bước 1: lệnh "di" chưa có luật (Story 1.4)`.
 
+- Task 1.5: tác giả trả lời "đúng hết" (2026-10-18). Đổi `da_duyet: true` cho cả 8 file (chỉ khóa đó, `git diff` mỗi file 1 dòng). `tools/test.sh` trượt đúng như AC 2: `kịch bản đã duyệt di_chuyen/di_thang_3_o.json: bước 1: lệnh "di" chưa có luật (Story 1.4)`. Không commit lúc đỏ.
+- Task 2–5: viết lõi luật xong, `tools/test.sh` xanh 245/245, `Kịch bản luật: 8 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
+- Task 5.2: tạm cho quân Nguyên không chặn đường (`_can_pass` luôn trả true) thì 2 test trượt: `test_enemy_blocks_the_way` và `test_approved_scenarios_pass` (kịch bản `quan_nguyen_chan_duong`). Đã trả code về như cũ.
+- Task 8: lần đầu GUT bỏ qua `test_battle_view.gd` vì hàm phụ tên `_input` trùng hàm có sẵn của Node (`test.sh` bắt được: "có file test không được chạy"). Đổi tên thành `_battle_input`.
+- Task 9.1 (GoPeak, `tools/chay.sh --dev`): lần đầu bấm chuột bơm vào không chọn được tướng. Nguyên nhân: `BattleInput` đọc vị trí con trỏ thật (`get_local_mouse_position()`), không đọc vị trí trong sự kiện. Đã đổi sang `make_input_local(event).position` (đúng cho cả bấm thật lẫn bơm), thêm test `test_mouse_events_map_screen_pixels_to_cells`. Chạy lại: bấm "Khoái" (pixel 376, 624) thì có vòng vàng, 7 ô xanh lá đúng AC 4; rê lên ô `2,5` (pixel 552, 536) thì có đường đi xanh dương `0,6 → 0,5 → 1,5 → 2,5`; action `select_general_2` đổi sang "Lão", 7 ô đúng AC 5. Màu ô sáng (xanh lá) khác rõ màu sông (xanh dương).
+- `inject_key` của GoPeak chỉ gửi `keycode`, không gửi phím vật lý, nên không kích hoạt action (action đăng ký theo phím vật lý, giống DevTools). Phím thật trên bàn phím có đủ cả hai. Khi thử bằng GoPeak thì dùng `inject_action` (`select_general_1..3`).
+- Task 9.2 (khóa, trên bản sao tạm có commit riêng, đã xóa): sửa ô đích của `qua_tam_di.json` (kịch bản đã duyệt) thì `tools/test.sh` trượt ở bước 2: `❌ game/tests/kich_ban/di_chuyen/qua_tam_di.json: kịch bản đã duyệt bị sửa so với commit gần nhất`. Repo chính không bị đụng. Tự kiểm tự động vẫn hoãn.
+- `tools/test.sh` cuối cùng: 261/261 đạt, ranh giới đạt, `Kịch bản luật: 8 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
+
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Đã làm đủ Task 1–9. Thêm 35 test (226 → 261).
+- **Lệch so với story (ghi để review):**
+  - `BattleInput` lấy ô từ vị trí trong sự kiện chuột (`make_input_local`), không dùng `get_local_mouse_position()` như Dev Notes "Hiển thị" gợi ý (lý do ở Debug Log).
+  - `BoardView` có thêm `lit_cells()` và `path()` (chỉ đọc) để test kiểm thứ đang vẽ; `BattleView` có `selected_id()` và `lit_cells()`.
+  - Test bộ chạy cũ trong `test_scenario_loader.gd` dùng chỉ số không có `tam_di` (tầm đi 0): đã thêm `tam_di: 3`.
+
+**Hướng dẫn tác giả tự test** (kết quả thật, đã chụp màn hình bằng GoPeak):
+1. Gõ `tools/test.sh`. Đúng là: `✅ 261/261 test đạt`, có dòng `Kịch bản luật: 8 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
+2. Gõ `tools/chay.sh`. Bấm vào đồng "Khoái": có vòng vàng quanh Khoái, 7 ô xanh lá (`0,3` `0,4` `1,4` `0,5` `1,5` `2,5` `1,6`). Ô của "Lão" không sáng.
+3. Rê chuột lên ô `2,5` (ô ngay trên "Lão"): thấy đường kẻ xanh dương `0,6 → 0,5 → 1,5 → 2,5`, chấm tròn ở ô đích. Rê ra ô sông: đường đi mất.
+4. Gõ `2`: vòng vàng sang "Lão", 7 ô sáng (`2,3` `1,4` `2,4` `0,5` `1,5` `2,5` `1,6`). Gõ `3`: không có gì đổi.
+5. Bấm lại "Lão": bỏ chọn, hết ô sáng. Chọn lại, bấm vào ô sông: bỏ chọn.
+6. Gõ `tools/chay.sh --dev --tran=thu_ba_tuong`, gõ `3`: chọn được "Dư".
+7. Bấm ô sáng: chưa đi (Story 1.5 mới có).
+
+Nếu đang bật bộ gõ VNI thì tắt đi trước khi gõ số.
 
 ### File List
+
+- `game/src/core/grid.gd` (mới)
+- `game/src/core/command.gd` (mới)
+- `game/src/core/battle_event.gd` (mới)
+- `game/src/core/effects.gd` (mới)
+- `game/src/core/pathfinding.gd` (mới)
+- `game/src/core/rules.gd` (mới)
+- `game/src/core/rules_move.gd` (mới)
+- `game/src/core/unit.gd`
+- `game/src/battle/battle_controller.gd`
+- `game/src/battle/battle_input.gd` (mới)
+- `game/src/battle/battle_view.gd` (mới)
+- `game/src/battle/board_view.gd`
+- `game/src/app/main.gd`
+- `game/tests/scenario_runner.gd`
+- `game/tests/test_scenario_loader.gd`
+- `game/tests/test_rules_move.gd` (mới)
+- `game/tests/test_battle_view.gd` (mới)
+- `game/tests/kich_ban/di_chuyen/*.json` (7 mới, 8 đổi `da_duyet: true`)
+- file `.uid` của mọi script mới
+- `_bmad-output/implementation-artifacts/1-4-chon-tuong-va-xem-cac-o-di-duoc.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ### Change Log
 
 - 2026-10-18: Tạo story.
 - 2026-10-18: Tác giả chốt 3 quyết định (bỏ chọn, lệnh đi không hợp lệ, hầm chông).
+- 2026-10-18: Làm story: lõi luật đi (`Rules`, `RulesMove`, `Pathfinding`, `Effects`, `Command`, `BattleEvent`, `Grid`), bộ chạy chạy lệnh `di`, chọn tướng bằng chuột và phím 1-2-3, ô sáng, đường đi. 8 kịch bản `di_chuyen/` tác giả đã duyệt và đều đạt.
