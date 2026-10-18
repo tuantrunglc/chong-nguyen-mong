@@ -1,7 +1,8 @@
 extends GutTest
 ## Chạy mọi kịch bản luật trong tests/kich_ban/ với chỉ số thật (data/chi_so.json).
 ## Đã duyệt mà trượt thì test trượt. Chưa duyệt thì chỉ chạy và ghi kết quả (Story 1.3, AC 4).
-## Có biến môi trường KET_QUA_KICH_BAN thì ghi kết quả từng kịch bản vào file đó cho tools/test.sh.
+## Có biến môi trường KET_QUA_KICH_BAN thì ghi kết quả từng kịch bản vào file đó cho tools/test.sh,
+## mỗi kịch bản một dòng: <da_duyet|chua_duyet|sai_dinh_dang>\t<dat|truot>\t<id>\t<lý do đầu tiên, nếu có>.
 
 const ROOT: String = "res://tests/kich_ban"
 const STATS_PATH: String = "res://data/chi_so.json"
@@ -22,7 +23,8 @@ func test_every_scenario_loads() -> void:
 	assert_gt(files.size(), 0, "có ít nhất một kịch bản trong tests/kich_ban")
 	for path: String in files:
 		var r: LoadResult = ScenarioLoader.load_scenario(path, ROOT, stats)
-		assert_eq(r.errors, [] as Array[String], "nạp được: " + path)
+		# Một dòng, đủ cả câu: assert_eq trên mảng bị GUT cắt giữa câu lỗi.
+		assert_true(r.ok, "; ".join(r.errors))
 
 
 func test_approved_scenarios_pass() -> void:
@@ -34,11 +36,16 @@ func test_approved_scenarios_pass() -> void:
 	for path: String in ScenarioLoader.list_files(ROOT):
 		var r: LoadResult = ScenarioLoader.load_scenario(path, ROOT, stats)
 		if not r.ok:
-			continue  # test_every_scenario_loads đã báo
+			# test_every_scenario_loads đã làm trượt; ở đây chỉ ghi để tóm tắt vẫn đếm file này.
+			var errors: Array[String] = []
+			for message: String in r.errors:
+				errors.append(message.trim_prefix(JsonFile.label(path) + ": "))  # tên file đã có ở cột id
+			lines.append(_result_line("sai_dinh_dang", false, path.trim_prefix(ROOT + "/"), errors))
+			continue
 		var scenario: ScenarioData = r.data as ScenarioData
 		var result: ScenarioRunner.ScenarioResult = ScenarioRunner.run(scenario, stats)
-		lines.append("%s\t%s\t%s" % ["da_duyet" if scenario.approved else "chua_duyet",
-			"dat" if result.passed else "truot", scenario.id])
+		lines.append(_result_line("da_duyet" if scenario.approved else "chua_duyet", result.passed,
+			scenario.id, result.problems))
 		if scenario.approved:
 			approved += 1
 			# Một dòng: tóm tắt của tools/test.sh chỉ in dòng đầu của thông điệp.
@@ -46,6 +53,13 @@ func test_approved_scenarios_pass() -> void:
 	if approved == 0:
 		pass_test("chưa có kịch bản đã duyệt")
 	_write_results(lines)
+
+
+## Lý do là câu đầu tiên, bỏ tab và xuống dòng để giữ đúng một dòng bốn cột.
+static func _result_line(status: String, passed: bool, id: String, problems: Array[String]) -> String:
+	var reason: String = problems[0] if not problems.is_empty() else ""
+	reason = reason.replace("\t", " ").replace("\n", " ")
+	return "%s\t%s\t%s\t%s" % [status, "dat" if passed else "truot", id, reason]
 
 
 func _write_results(lines: PackedStringArray) -> void:

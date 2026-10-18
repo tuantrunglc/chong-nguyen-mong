@@ -11,15 +11,7 @@ const PENDING_RULES: Dictionary = {
 	"danh": "2.1",
 }
 
-## UnitType -> ký hiệu trên bàn cờ chữ và tên đầy đủ.
-const UNIT_SYMBOLS: Dictionary = {
-	UnitType.NGUYEN_KHOAI: "1",
-	UnitType.PHAM_NGU_LAO: "2",
-	UnitType.TRAN_KHANH_DU: "3",
-	UnitType.BO_BINH: "B",
-	UnitType.KY_BINH: "K",
-	UnitType.CUNG_KY: "C",
-}
+## Tên đầy đủ cho câu so sánh. Ký hiệu lấy ngược từ BoardText (unit_symbol, terrain_symbol).
 const UNIT_NAMES: Dictionary = {
 	UnitType.NGUYEN_KHOAI: "Nguyễn Khoái",
 	UnitType.PHAM_NGU_LAO: "Phạm Ngũ Lão",
@@ -27,16 +19,6 @@ const UNIT_NAMES: Dictionary = {
 	UnitType.BO_BINH: "Bộ binh",
 	UnitType.KY_BINH: "Kỵ binh",
 	UnitType.CUNG_KY: "Cung kỵ",
-}
-## Terrain -> ký hiệu và tên.
-const TERRAIN_SYMBOLS: Dictionary = {
-	Terrain.PLAIN: ".",
-	Terrain.RIVER: "~",
-	Terrain.FOREST: "#",
-	Terrain.SPIKES: "^",
-	Terrain.GRANARY: "L",
-	Terrain.VILLAGE: "D",
-	Terrain.PASS: "A",
 }
 const TERRAIN_NAMES: Dictionary = {
 	Terrain.PLAIN: "đất trống",
@@ -78,6 +60,18 @@ static func run(scenario: ScenarioData, stats: Stats) -> ScenarioResult:
 	return result
 
 
+## Ký hiệu của UnitType trên bàn cờ chữ (bảng ngược của BoardText.UNIT_SYMBOLS).
+static func unit_symbol(type: int) -> String:
+	var symbol: Variant = BoardText.UNIT_SYMBOLS.find_key(type)
+	return symbol as String if symbol != null else "?"
+
+
+## Ký hiệu của Terrain trên bàn cờ chữ (bảng ngược của BoardText.TERRAIN_SYMBOLS).
+static func terrain_symbol(terrain: int) -> String:
+	var symbol: Variant = BoardText.TERRAIN_SYMBOLS.find_key(terrain)
+	return symbol as String if symbol != null else "?"
+
+
 ## Chạy một lệnh trên state. Trả "" nếu chạy được, hoặc câu báo vì sao không chạy được.
 static func _run_step(_state: BattleState, step: ScenarioData.ScenarioStep) -> String:
 	match step.kind:
@@ -98,8 +92,8 @@ static func compare(state: BattleState, scenario: ScenarioData) -> Array[String]
 			var got: int = state.terrain_at(cell)
 			if want != got:
 				problems.append('sau: ô %s mong đợi "%s" (%s), thực tế "%s" (%s)'
-					% [BoardText.cell_text(cell), TERRAIN_SYMBOLS[want], TERRAIN_NAMES[want],
-						TERRAIN_SYMBOLS[got], TERRAIN_NAMES[got]])
+					% [BoardText.cell_text(cell), terrain_symbol(want), TERRAIN_NAMES.get(want, "?"),
+						terrain_symbol(got), TERRAIN_NAMES.get(got, "?")])
 	for r: int in range(state.size.y):
 		for c: int in range(state.size.x):
 			var cell: Vector2i = Vector2i(c, r)
@@ -119,12 +113,12 @@ static func _compare_cell(cell: Vector2i, want: ScenarioData.ExpectedUnit, got: 
 	if got == null:
 		return "%s mong đợi %s, thực tế trống" % [where, _describe(want.type, want.hp)]
 	if want.type != got.type:
-		return "%s mong đợi %s, thực tế %s" % [where, UNIT_SYMBOLS[want.type], UNIT_SYMBOLS[got.type]]
+		return "%s mong đợi %s, thực tế %s" % [where, _describe(want.type, want.hp), _describe(got.type, got.hp)]
 	if want.hp != got.hp:
-		return "%s %s mong đợi %d máu, thực tế %d máu" % [where, UNIT_SYMBOLS[want.type], want.hp, got.hp]
+		return "%s %s mong đợi %d máu, thực tế %d máu" % [where, unit_symbol(want.type), want.hp, got.hp]
 	return ""
 
 
 ## "1 (Nguyễn Khoái, 3 máu)"
 static func _describe(type: int, hp: int) -> String:
-	return "%s (%s, %d máu)" % [UNIT_SYMBOLS[type], UNIT_NAMES[type], hp]
+	return "%s (%s, %d máu)" % [unit_symbol(type), UNIT_NAMES.get(type, "?"), hp]

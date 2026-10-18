@@ -76,6 +76,8 @@ func test_factory_takes_hp_from_stats() -> void:
 func test_factory_uses_given_hp_when_positive() -> void:
 	assert_eq(UnitFactory.create(7, UnitType.BO_BINH, Vector2i.ZERO, _stats(), 2).hp, 2)
 	assert_eq(UnitFactory.create(7, UnitType.BO_BINH, Vector2i.ZERO, _stats(), 0).hp, 5, "0 là máu đầy")
+	assert_eq(UnitFactory.create(7, UnitType.BO_BINH, Vector2i.ZERO, _stats(), -1).hp, 5, "số âm là máu đầy")
+	assert_eq(UnitFactory.create(7, UnitType.BO_BINH, Vector2i.ZERO, _stats(), 9).hp, 5, "không quá máu đầy")
 
 
 func test_from_level_keeps_placement_hp() -> void:

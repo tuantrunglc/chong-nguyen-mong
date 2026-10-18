@@ -244,26 +244,41 @@ fi
 # Đã duyệt mà trượt thì GUT đã trượt. Chưa duyệt mà chưa đạt thì chỉ liệt kê, không làm trượt (Story 1.3, AC 4).
 if (( da_quet )); then
 	if [[ ! -f "$KET_QUA_KICH_BAN" ]]; then
-		bao_cao+=("      Kịch bản luật: không đọc được kết quả")
-		ly_do_truot+=("không đọc được kết quả kịch bản luật")
+		if (( so_truot > 0 )); then
+			# Ví dụ chi_so.json lỗi: test kịch bản dừng trước khi ghi file, lỗi thật đã có ở trên.
+			bao_cao+=("      Kịch bản luật: chưa chạy được (xem test trượt ở trên)")
+		else
+			bao_cao+=("      Kịch bản luật: không đọc được kết quả")
+			ly_do_truot+=("không đọc được kết quả kịch bản luật")
+		fi
 	else
 		so_da_duyet=0
 		so_chua_duyet=0
 		so_chua_dat=0
+		so_sai=0
 		cho_duyet=()
-		while IFS=$'\t' read -r trang_thai ket_qua ten; do
+		# Dòng: trạng thái, đạt/trượt, tên, lý do đầu tiên (xem tests/test_scenarios.gd).
+		while IFS=$'\t' read -r trang_thai ket_qua ten ly_do; do
 			[[ -n "$trang_thai" ]] || continue
 			if [[ "$trang_thai" == "da_duyet" ]]; then
 				so_da_duyet=$((so_da_duyet + 1))
+			elif [[ "$trang_thai" == "sai_dinh_dang" ]]; then
+				# Đã làm GUT trượt; ở đây chỉ để không mất file này khỏi số đếm.
+				so_sai=$((so_sai + 1))
+				cho_duyet+=("  ❌ $ten: sai định dạng")
+				[[ -n "$ly_do" ]] && cho_duyet+=("     $ly_do")
 			else
 				so_chua_duyet=$((so_chua_duyet + 1))
 				if [[ "$ket_qua" != "dat" ]]; then
 					so_chua_dat=$((so_chua_dat + 1))
 					cho_duyet+=("  ⏳ $ten: chưa duyệt, chưa đạt")
+					[[ -n "$ly_do" ]] && cho_duyet+=("     $ly_do")
 				fi
 			fi
 		done <"$KET_QUA_KICH_BAN"
-		bao_cao+=("      Kịch bản luật: $so_da_duyet đã duyệt · $so_chua_duyet chưa duyệt ($so_chua_dat chưa đạt)")
+		dong_kich_ban="      Kịch bản luật: $so_da_duyet đã duyệt · $so_chua_duyet chưa duyệt ($so_chua_dat chưa đạt)"
+		(( so_sai == 0 )) || dong_kich_ban+=" · $so_sai sai định dạng"
+		bao_cao+=("$dong_kich_ban")
 		bao_cao+=("${cho_duyet[@]+"${cho_duyet[@]}"}")
 	fi
 fi

@@ -23,3 +23,24 @@ scenario.unit.ky_binh,Kỵ binh
 scenario.unit.cung_ky,Cung kỵ
 scenario.terrain.spikes,hầm chông
 scenario.terrain.pass,ô ải
+scenario.viewer.approved,đã duyệt
+scenario.viewer.pending,chưa duyệt
+scenario.viewer.invalid,sai định dạng
+scenario.viewer.before,TRƯỚC
+scenario.viewer.after,SAU
+scenario.viewer.actions,Hành động:
+scenario.viewer.no_actions,Hành động: (không có)
+scenario.viewer.hp,Máu:
+scenario.viewer.under,Dưới quân:
+scenario.viewer.step_move,%s đi tới %s
+scenario.viewer.step_attack,%s đánh ô %s
+scenario.viewer.step_undo,Hủy nước đi gần nhất
+scenario.viewer.step_end_turn,Kết thúc lượt (chạy pha địch)
+scenario.viewer.unknown_arg,"bỏ qua tham số lạ: ""%s"""
+scenario.viewer.unknown_group,"không có nhóm ""%s"". Các nhóm đang có: %s"
+scenario.viewer.no_groups,(chưa có nhóm nào)
+scenario.viewer.none,Chưa có kịch bản nào.
+scenario.viewer.none_pending,Không có kịch bản nào chờ duyệt.
+scenario.viewer.total_all,Tổng: %d kịch bản (%d chờ duyệt).
+scenario.viewer.total_pending,Tổng: %d kịch bản chờ duyệt.
+scenario.viewer.how_to_approve,"Duyệt: thấy đúng thì đổi ""da_duyet"": false thành true trong file, hoặc nhắn AI ""đúng""/""sai: <lý do>""."

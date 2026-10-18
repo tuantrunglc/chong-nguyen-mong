@@ -58,3 +58,8 @@
 
 - `LevelData.terrain_at` (`game/src/core/level_data.gd:30`) không kiểm ô ngoài bàn: x âm hoặc lớn hơn bề ngang thì đọc nhầm sang ô của dòng khác, y ngoài bàn thì engine báo lỗi. Thêm kiểm biên (hoặc `assert`) khi Story 1.2 dùng hàm này để tìm đường hay xét ô kề.
 - `Stats.value` (`game/src/core/stats.gd:15`) trả 0 khi gõ sai khóa hoặc khi lính không có chỉ số đó: đòn đánh thành 0 sát thương mà không báo gì. Thêm `assert` hoặc ghi log khi Story 2.x bắt đầu đọc chỉ số.
+
+## Deferred from: code review of 1-3-kich-ban-luat-va-cong-cu-duyet-tren-terminal (2026-10-18)
+
+- Khóa `da_duyet` trong `tools/test.sh` chỉ chặn sửa chưa commit: AI sửa kịch bản đã duyệt rồi commit luôn thì lọt. Grep theo dòng bỏ sót `"da_duyet":` và `true` nằm khác dòng; khóa trùng (`true` rồi `false`) thì grep coi là khóa còn Godot lấy giá trị sau. Cân nhắc so với commit lúc duyệt hoặc đọc JSON thật.
+- Định dạng kịch bản luôn dựng trận ELIMINATE, `tiep_vien`/`so_hiep_toi_da`/`long_dan`/`muu_ke_mo` để mặc định, chưa có khóa để đặt. Cần khi viết kịch bản kết thúc lượt, giữ ải, tiếp viện (Story 1.5 trở đi).

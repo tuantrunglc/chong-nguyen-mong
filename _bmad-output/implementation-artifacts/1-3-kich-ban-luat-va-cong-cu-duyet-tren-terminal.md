@@ -4,7 +4,7 @@ baseline_commit: b8b1b6d
 
 # Story 1.3: Kịch bản luật và công cụ duyệt trên terminal
 
-Status: review
+Status: done
 
 ## Story
 
@@ -19,7 +19,7 @@ tôi muốn đọc và duyệt luật dưới dạng bàn cờ trước và sau,
    - dòng mô tả tiếng Việt (`mo_ta`);
    - các bước hành động viết bằng chữ (ví dụ `1. Nguyễn Khoái đi tới 3,6`);
    - bàn **TRƯỚC** và bàn **SAU** đặt cạnh nhau, có số cột và số hàng;
-   - quân không đầy máu thì ghi thêm dưới bàn (ví dụ `5,4 Bộ binh: 1/3 máu`).
+   - quân không đầy máu thì ghi thêm dưới bàn (ví dụ `Máu:  5,4 Bộ binh 1/3`, xem Dev Notes "Cách in").
    Mặc định chỉ in kịch bản **chưa duyệt**. Bố cục chi tiết ở Dev Notes "Cách in". **[Tác giả chốt 2026-10-18]**
 2. **Khi** gõ `tools/xem_kich_ban.sh di_chuyen`, **thì** chỉ hiện kịch bản của nhóm `di_chuyen/`.
    - Gõ tên nhóm không có thì in `không có nhóm "xyz". Các nhóm đang có: di_chuyen` và thoát mã 1.
@@ -78,7 +78,7 @@ tôi muốn đọc và duyệt luật dưới dạng bàn cờ trước và sau,
   - [x] 6.2 `test_every_scenario_loads`: thư mục `res://tests/kich_ban` phải có ít nhất một file. Mọi file phải nạp không lỗi; lỗi thì `assert` kèm nguyên văn câu lỗi.
   - [x] 6.3 `test_approved_scenarios_pass`: mỗi kịch bản đã duyệt phải `passed`. Trượt thì thông điệp gồm `id` và mọi câu trong `problems`. Chưa có kịch bản đã duyệt thì gọi `pass_test("chưa có kịch bản đã duyệt")`, vì `test.sh` coi test không có assert là trượt.
   - [x] 6.4 Kịch bản chưa duyệt cũng chạy, nhưng **không** assert kết quả (AC 4).
-  - [x] 6.5 Ghi kết quả cho `test.sh`: nếu biến môi trường `KET_QUA_KICH_BAN` có giá trị (`OS.get_environment`) thì ghi file đó. Mỗi kịch bản một dòng `<da_duyet|chua_duyet>\t<dat|truot>\t<id>`, theo thứ tự `list_files`. Biến rỗng thì không ghi gì (chạy GUT tay vẫn được).
+  - [x] 6.5 Ghi kết quả cho `test.sh`: nếu biến môi trường `KET_QUA_KICH_BAN` có giá trị (`OS.get_environment`) thì ghi file đó. Mỗi kịch bản một dòng `<da_duyet|chua_duyet>\t<dat|truot>\t<id>` (sau code review: thêm `sai_dinh_dang` và cột lý do thứ tư), theo thứ tự `list_files`. Biến rỗng thì không ghi gì (chạy GUT tay vẫn được).
 - [x] **Task 7: Test cho bộ nạp và bộ chạy** (`tests/test_scenario_loader.gd`, AC: 3, 4)
   - [x] 7.1 Theo mẫu `test_main.gd`: viết file tạm vào `user://test_kich_ban/…`, xóa trong `after_each`.
   - [x] 7.2 Ca đúng: kịch bản tối thiểu nạp được; `id`, `group`, `approved`, `description` đúng; `truoc.mau` đổi máu đúng quân; thiếu `thu_tu_dich` thì id quân Nguyên theo thứ tự đọc (hàng trên xuống, trái sang phải).
@@ -112,6 +112,26 @@ tôi muốn đọc và duyệt luật dưới dạng bàn cờ trước và sau,
   - [x] 12.3 Thử khóa trên một **bản clone tạm** (không phải repo chính), theo cách của Story 0.2 Task 5.5: đổi mẫu thành `da_duyet: true`, commit trong bản clone, `tools/test.sh` phải **trượt** vì kịch bản đã duyệt chưa đạt (AC 4); sửa file thì có thêm dòng khóa. Ghi vào Debug Log. Không để lại gì trên `main`.
   - [x] 12.4 Commit kèm file `.uid` mới, lời commit tiếng Việt.
   - [x] 12.5 Ghi hướng dẫn tác giả tự test vào Completion Notes (mẫu ở mục Testing).
+
+### Review Findings
+
+- [x] [Review][Patch] Dòng máu in theo Dev Notes "Cách in": `Máu:` + hai dấu cách, `Máu:` bên phải thẳng dưới bàn SAU; sửa ví dụ ở AC 1 cho khớp. Tác giả chốt 2026-10-18 (trước đó AC 1 ghi `5,4 Bộ binh: 1/3 máu`, code in một dấu cách) [game/tests/scenario_viewer.gd]
+- [x] [Review][Patch] Công cụ duyệt treo mãi khi script lỗi lúc chạy, và thoát mã 0 khi script lỗi cú pháp; lỗi quét project bị giấu hết [tools/xem_kich_ban.sh:12-27, game/tests/scenario_viewer.gd:33]
+- [x] [Review][Patch] AC 6: lý do `bước 1: lệnh "di" chưa có luật (Story 1.4)` không hiện ở tóm tắt `tools/test.sh` cho kịch bản chưa duyệt (chỉ có `⏳ …: chưa duyệt, chưa đạt`) [game/tests/test_scenarios.gd, tools/test.sh]
+- [x] [Review][Patch] Câu lỗi định dạng bị GUT cắt giữa câu (mất `1 tới 3, đa`), không đúng AC 4 "kèm câu lỗi tiếng Việt" — `test_every_scenario_loads` dùng `assert_eq(r.errors, [])`, nên nối câu như test kịch bản đã duyệt [game/tests/test_scenarios.gd]
+- [x] [Review][Patch] Kịch bản sai định dạng biến mất khỏi số đếm và danh sách ⏳ trong tóm tắt; file kết quả không được ghi khi chi_so.json lỗi (thêm lý do trượt thừa) [game/tests/test_scenarios.gd:35-37, tools/test.sh]
+- [x] [Review][Patch] Ghi chú dưới bàn (Máu, Dưới quân) bên phải bị đẩy lệch khi ghi chú bên trái dài hơn 24 ký tự (ví dụ tướng mất máu, quân đứng trên hầm chông) [game/tests/scenario_viewer.gd:12,131]
+- [x] [Review][Patch] Hai khóa `mau` trỏ cùng một ô (`"0,6"` và `"00,6"`) được nhận im lặng, khóa sau đè khóa trước [game/src/data/scenario_loader.gd:190-210]
+- [x] [Review][Patch] Khóa `mau` ngoài bàn (`"9,9"`, `"-1,0"`) báo "không có quân" thay vì "nằm ngoài bàn" [game/src/data/scenario_loader.gd:198-202]
+- [x] [Review][Patch] Đầu ra công cụ duyệt mở đầu bằng một dòng trống (dòng trống sau banner Godot chưa bị lọc) [tools/xem_kich_ban.sh:24]
+- [x] [Review][Patch] Nhãn của công cụ duyệt (`TRƯỚC`, `SAU`, `Hành động:`, `Máu:`, `Dưới quân:`, `Tổng:`, `Duyệt:`) viết cứng, chưa qua `tr()` như Dev Notes yêu cầu ("Chữ hiển thị qua tr()") [game/tests/scenario_viewer.gd]
+- [x] [Review][Patch] `--tat_ca` khi không có kịch bản nào vẫn in "Không có kịch bản nào chờ duyệt."; file đặt thẳng trong `kich_ban/` tạo nhóm rỗng (`Các nhóm đang có: , di_chuyen`) [game/tests/scenario_viewer.gd:57-93]
+- [x] [Review][Patch] File kịch bản rỗng (0 byte) báo "không đọc được file" thay vì báo file rỗng [game/src/data/scenario_loader.gd:58-60]
+- [x] [Review][Patch] Bảng ký hiệu quân/địa hình trong bộ chạy chép tay ngược từ `BoardText`; thêm quân/địa hình mới mà quên sửa thì bộ chạy và công cụ duyệt lỗi lúc chạy (và công cụ duyệt treo). Nên lấy ngược tự động từ `BoardText` [game/tests/scenario_runner.gd:15-48]
+- [x] [Review][Patch] Câu so sánh "sai loại quân" không ghi tên và máu, nên lệch máu đi kèm bị giấu [game/tests/scenario_runner.gd]
+- [x] [Review][Patch] `UnitFactory` nhận máu âm thành đầy máu, máu quá tối đa thì giữ nguyên, không báo gì (chỉ bộ nạp kịch bản kiểm) [game/src/core/unit_factory.gd]
+- [x] [Review][Defer] Khóa `da_duyet` trong `tools/test.sh` lách được: sửa rồi commit luôn thì khóa không thấy; `"da_duyet":` và `true` khác dòng thì grep bỏ sót; khóa trùng thì grep và Godot hiểu khác nhau [tools/test.sh:80-95] — deferred, pre-existing
+- [x] [Review][Defer] Định dạng kịch bản luôn dựng trận kiểu ELIMINATE với mặc định của LevelData, chưa có khóa cho nhiệm vụ, số hiệp tối đa, tiếp viện [game/src/data/scenario_loader.gd `_build_level`] — deferred, chưa có kịch bản cần; làm khi viết kịch bản `ket_thuc_luot`/giữ ải (Story 1.5 trở đi)
 
 ## Dev Notes
 
@@ -544,3 +564,4 @@ Duyệt: thấy đúng thì đổi "da_duyet": false thành true trong file, ho�
 
 - 2026-10-18: Tạo story.
 - 2026-10-18: Làm story: định dạng kịch bản luật, bộ nạp, bộ chạy, công cụ duyệt `tools/xem_kich_ban.sh`, số kịch bản trong `tools/test.sh`, kịch bản mẫu `di_chuyen/di_thang_3_o.json`.
+- 2026-10-18: Sửa theo code review. Công cụ duyệt: không treo khi script lỗi, thoát mã 1 khi script lỗi, bỏ dòng trống đầu, chữ qua bản dịch (`scenario.viewer.*`), dòng `Máu:` theo mẫu "Cách in" (tác giả chốt), ghi chú bàn sau luôn thẳng cột và cùng loại cùng dòng, `--tat_ca` khi không có kịch bản in `Chưa có kịch bản nào.`, không còn nhóm rỗng. `tools/test.sh`: in lý do chưa đạt (AC 6), câu lỗi định dạng đủ câu, file sai định dạng vẫn được đếm. Bộ nạp: báo file rỗng, ô `mau` ngoài bàn, một ô ghi hai lần. Bộ chạy: ký hiệu lấy ngược từ `BoardText`, câu sai loại quân có tên và máu. `UnitFactory`: máu không quá máu đầy.

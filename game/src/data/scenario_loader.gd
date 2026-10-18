@@ -57,7 +57,11 @@ static func _collect(dir_path: String, files: Array[String]) -> void:
 static func load_scenario(path: String, root_dir: String, stats: Stats) -> LoadResult:
 	var text: String = JsonFile.read_text(path)
 	if text.is_empty():
-		return JsonFile.missing_file(path)
+		if not FileAccess.file_exists(path):
+			return JsonFile.missing_file(path)
+		var empty: LoadResult = LoadResult.new()
+		empty.add_error("%s: file rỗng" % JsonFile.label(path))
+		return empty
 	return parse_scenario(text, path, root_dir, stats)
 
 
@@ -187,6 +191,7 @@ static func _read_hp(value: Variant, shown: String, side: Section, stats: Stats,
 		return
 	var hp_map: Dictionary = value as Dictionary
 	var board: Rect2i = Rect2i(Vector2i.ZERO, BoardLayers.BOARD_SIZE)
+	var seen: Dictionary = {}  # ô -> khóa đầu tiên trỏ tới ô đó ("0,6" và "00,6" là một ô)
 	for key: Variant in hp_map.keys():
 		var parsed: Variant = BoardText.parse_cell(key as String) if key is String else null
 		if parsed == null:
@@ -195,7 +200,15 @@ static func _read_hp(value: Variant, shown: String, side: Section, stats: Stats,
 			continue
 		var cell: Vector2i = parsed as Vector2i
 		var cell_shown: String = BoardText.cell_text(cell)
-		var unit: String = BoardLayers.symbol(side.unit_rows, cell) if board.has_point(cell) else "."
+		if seen.has(cell):
+			result.add_error('%s: "%s" ghi ô %s hai lần (%s và %s)'
+				% [file, shown, cell_shown, JsonFile.show(seen[cell]), JsonFile.show(key)])
+			continue
+		seen[cell] = key
+		if not board.has_point(cell):
+			result.add_error('%s: "%s" ô %s nằm ngoài bàn' % [file, shown, cell_shown])
+			continue
+		var unit: String = BoardLayers.symbol(side.unit_rows, cell)
 		if unit == "":
 			continue  # ô hoặc dòng của lớp quân đã sai, đã có lỗi riêng
 		if unit == ".":

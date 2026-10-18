@@ -284,11 +284,17 @@ func test_hp_errors() -> void:
 	d["sau"]["mau"] = {"0,6": 0, "5,4": 4}
 	assert_eq(_errors(d), [
 		F + ': "truoc.mau" ô 4,4 không có quân',
-		F + ': "truoc.mau" ô 9,9 không có quân',
+		F + ': "truoc.mau" ô 9,9 nằm ngoài bàn',
 		F + ': "truoc.mau" có khóa "abc" không phải tọa độ "cot,hang"',
 		F + ': "sau.mau" ô 0,6: máu phải là số nguyên từ 1 tới 3, đang là 0',
 		F + ': "sau.mau" ô 5,4: máu phải là số nguyên từ 1 tới 3, đang là 4',
 	] as Array[String])
+
+
+func test_hp_same_cell_written_twice() -> void:
+	var d: Dictionary = _valid()
+	d["truoc"]["mau"] = {"0,6": 1, "00,6": 2}
+	assert_eq(_errors(d), [F + ': "truoc.mau" ghi ô 0,6 hai lần ("0,6" và "00,6")'] as Array[String])
 
 
 func test_hp_must_be_object() -> void:
@@ -350,6 +356,11 @@ func test_missing_file() -> void:
 	assert_eq(r.errors, ["user://test_kich_ban/khong_co.json: không đọc được file"] as Array[String])
 
 
+func test_empty_file() -> void:
+	_write(PATH, "")
+	assert_eq(ScenarioLoader.load_scenario(PATH, ROOT, _stats()).errors, [F + ": file rỗng"] as Array[String])
+
+
 # ---------- list_files ----------
 
 func test_list_files_sorted_recursive_json_only() -> void:
@@ -402,7 +413,7 @@ func test_runner_reports_wrong_type() -> void:
 	var units: Array[String] = _units()
 	units[4] = ". . . . . K ."
 	d["sau"]["quan"] = units
-	assert_eq(_run(d).problems, ["sau: ô 5,4 mong đợi K, thực tế B"] as Array[String])
+	assert_eq(_run(d).problems, ["sau: ô 5,4 mong đợi K (Kỵ binh, 2 máu), thực tế B (Bộ binh, 3 máu)"] as Array[String])
 
 
 func test_runner_reports_terrain_difference() -> void:
@@ -411,6 +422,21 @@ func test_runner_reports_terrain_difference() -> void:
 	terrain[2] = ". . . ~ . L ."
 	d["sau"]["dia_hinh"] = terrain
 	assert_eq(_run(d).problems, ['sau: ô 5,2 mong đợi "L" (kho lương), thực tế "." (đất trống)'] as Array[String])
+
+
+## Thêm quân hay địa hình vào BoardText thì phải thêm tên ở bộ chạy và công cụ duyệt.
+func test_every_board_symbol_has_a_name() -> void:
+	for symbol: String in BoardText.UNIT_SYMBOLS:
+		var type: int = BoardText.UNIT_SYMBOLS[symbol] as int
+		if type == BoardText.NO_UNIT:
+			continue
+		assert_true(ScenarioRunner.UNIT_NAMES.has(type), "bộ chạy có tên quân " + symbol)
+		assert_true(ScenarioViewer.UNIT_NAME_KEYS.has(type), "công cụ duyệt có tên quân " + symbol)
+		assert_eq(ScenarioRunner.unit_symbol(type), symbol)
+	for symbol: String in BoardText.TERRAIN_SYMBOLS:
+		var kind: int = BoardText.TERRAIN_SYMBOLS[symbol] as int
+		assert_true(ScenarioRunner.TERRAIN_NAMES.has(kind), "bộ chạy có tên địa hình " + symbol)
+		assert_eq(ScenarioRunner.terrain_symbol(kind), symbol)
 
 
 func test_runner_stops_at_command_without_rule() -> void:
@@ -443,5 +469,38 @@ func test_viewer_renders_boards_side_by_side_with_notes() -> void:
 	assert_has(lines, "  1. %s đi tới 3,6" % tr("scenario.unit.nguyen_khoai"))
 	assert_has(lines, "      TRƯỚC                   SAU")
 	assert_has(lines, "   6  1 . . . . . .        6  ^ . . 1 . . .", "quân che hầm chông ở bàn trước")
-	assert_has(lines, "  Máu: 5,4 %s 1/3" % tr("scenario.unit.bo_binh"), "chỉ bàn trước có máu không đầy")
+	assert_has(lines, "  Máu:  5,4 %s 1/3" % tr("scenario.unit.bo_binh"), "chỉ bàn trước có máu không đầy")
 	assert_has(lines, "  Dưới quân: 0,6 ^ (%s)" % tr("scenario.terrain.spikes"))
+
+
+## Như mẫu "Cách in": Máu bên phải bắt đầu ở cột 28.
+func test_viewer_puts_after_notes_under_after_board() -> void:
+	var d: Dictionary = _valid()
+	d["truoc"]["mau"] = {"5,4": 1}
+	d["sau"]["mau"] = {"5,4": 1}
+	var lines: PackedStringArray = ScenarioViewer.render(_scenario(d), _stats()).split("\n")
+	var bo_binh: String = tr("scenario.unit.bo_binh")
+	assert_has(lines, ("  Máu:  5,4 %s 1/3" % bo_binh).rpad(26) + "  Máu:  5,4 %s 1/3" % bo_binh)
+
+
+## Ghi chú bàn trước dài: ghi chú bàn sau cùng lùi ra, vẫn thẳng cột với nhau, và cùng loại cùng dòng.
+func test_viewer_keeps_after_notes_aligned_when_before_notes_are_long() -> void:
+	var d: Dictionary = _valid()
+	var terrain: Array[String] = RIVER_TERRAIN.duplicate()
+	terrain[6] = "^ . . . . . ."
+	d["truoc"]["dia_hinh"] = terrain
+	d["truoc"]["mau"] = {"0,6": 2}
+	d["sau"]["mau"] = {"5,4": 1}
+	var lines: PackedStringArray = ScenarioViewer.render(_scenario(d), _stats()).split("\n")
+	var hp_line: String = ""
+	var under_line: String = ""
+	for line: String in lines:
+		if line.begins_with("  Máu:"):
+			hp_line = line
+		elif line.begins_with("  Dưới quân:"):
+			under_line = line
+	var left_hp: String = "  Máu:  0,6 %s 2/3" % tr("scenario.unit.nguyen_khoai")
+	var left_under: String = "  Dưới quân: 0,6 ^ (%s)" % tr("scenario.terrain.spikes")
+	var width: int = maxi(26, maxi(left_hp.length(), left_under.length()) + 2)
+	assert_eq(hp_line, left_hp.rpad(width) + "  Máu:  5,4 %s 1/3" % tr("scenario.unit.bo_binh"))
+	assert_eq(under_line, left_under, "bàn sau không có quân trên hầm chông nên bên phải trống")
