@@ -53,3 +53,8 @@
 - `tools/mcp_context7.sh` source `_godot.sh` (theo mẫu Task 3.2) nên Context7 không chạy khi chưa cài Godot hoặc máy không hỗ trợ, dù Context7 không cần Godot.
 - Script MCP không kiểm `node` lúc Claude Code khởi động (PATH khác khi mở từ app, `node_modules` bị xóa một phần): chỉ thấy "failed", không có lời nhắc tiếng Việt.
 - `.mcp.json` dùng đường tương đối `tools/...`: phụ thuộc Claude Code khởi động ở gốc repo.
+
+## Deferred from: code review of 1-1-nap-chi-so-va-tran-tu-file-bao-loi-bang-tieng-viet (2026-10-18)
+
+- `LevelData.terrain_at` (`game/src/core/level_data.gd:30`) không kiểm ô ngoài bàn: x âm hoặc lớn hơn bề ngang thì đọc nhầm sang ô của dòng khác, y ngoài bàn thì engine báo lỗi. Thêm kiểm biên (hoặc `assert`) khi Story 1.2 dùng hàm này để tìm đường hay xét ô kề.
+- `Stats.value` (`game/src/core/stats.gd:15`) trả 0 khi gõ sai khóa hoặc khi lính không có chỉ số đó: đòn đánh thành 0 sát thương mà không báo gì. Thêm `assert` hoặc ghi log khi Story 2.x bắt đầu đọc chỉ số.

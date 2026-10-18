@@ -4,7 +4,7 @@ baseline_commit: 0994ad5
 
 # Story 1.1: Nạp chỉ số và trận từ file, báo lỗi bằng tiếng Việt
 
-Status: review
+Status: done
 
 ## Story
 
@@ -95,6 +95,23 @@ tôi muốn trận và chỉ số nằm trong file tôi tự sửa được, và
 - [x] **Task 7: Kiểm bằng mắt** (AC: 2, 5, 7)
   - [x] 7.1 Sửa tạm `tran_01.json` (ký hiệu `X` + một tọa độ sai trong `thu_tu_dich`), chạy `tools/chay.sh --dev` nền, chụp bằng GoPeak `capture_screenshot` (xem `CLAUDE.md`): thấy đủ 2 lỗi, chữ DEV, nhãn phiên bản. Chạy lại không `--dev`: chỉ có câu ngắn và nút. Bấm nút bằng `inject_mouse_click` (chỉ khi `--dev`) → về bàn cờ trống. **Trả `tran_01.json` về như cũ** rồi mới commit.
   - [x] 7.2 Ghi hướng dẫn tác giả tự test vào Completion Notes (mẫu ở mục Testing).
+
+### Review Findings
+
+Code review 2026-10-18, diff `0994ad5..58b6751`, gồm ba lớp: Blind Hunter, Edge Case Hunter và Acceptance Auditor.
+
+- [x] [Review][Patch] Trận `giu_ai` phải có ít nhất một ô ải `A` trong `dia_hinh`, thiếu thì báo lỗi (tác giả chốt ngày 2026-10-18, chọn phương án 1; được phép có nhiều ô `A`, Story 3.11 quyết). Thêm câu vào danh mục câu báo lỗi, kèm test [game/src/data/level_loader.gd]
+- [x] [Review][Patch] `_start_battle()` chưa gọi lại được: nạp thành công sau một lần lỗi thì màn hình lỗi vẫn còn, bàn cờ vẫn ẩn; nạp lỗi sau một lần thành công thì `AppState.stats` vẫn giữ chỉ số cũ (trái với chú thích "Null tới khi nạp xong") [game/src/app/main.gd:80]
+- [x] [Review][Patch] Số quá lớn (`1e20`) được nhận thành 9223372036854775807; câu lỗi in con số đó thay cho giá trị tác giả gõ [game/src/data/json_file.gd:47]
+- [x] [Review][Patch] Tọa độ quá dài trong `thu_tu_dich` (ví dụ `"99999999999999999999,0"`) in ERROR của engine ra console; giá trị trên 32 bit thì bị tràn khi đưa vào `Vector2i` và rơi đúng vào một ô hợp lệ [game/src/data/board_text.gd:44]
+- [x] [Review][Patch] `phien_ban_dinh_dang` bằng 0 hoặc số âm báo E-INT thay cho E-VER, trong khi luật ghi "phải bằng 1" [game/src/data/level_loader.gd:43]
+- [x] [Review][Patch] Chưa có test cho trường hợp `chi_so.json` và file trận cùng lỗi, màn hình phải liệt kê lỗi của cả hai (AC 3); `stats_path` chưa có test nào dùng [game/tests/test_main.gd]
+- [x] [Review][Patch] Dấu cách không ngắt (U+00A0, U+3000) trong dòng bàn cờ không được coi là dấu cách, nên báo "ký hiệu lạ" kèm một ký tự vô hình; ký hiệu lạ và khóa lạ được in thô, không qua `JsonFile.show()` [game/src/data/board_text.gd:32]
+- [x] [Review][Patch] Hằng `BOM` là một ký tự vô hình gõ thẳng vào code, trình soạn thảo có thể xóa mất; nên viết bằng `char(0xFEFF)` (trong test cũng vậy) [game/src/data/json_file.gd:6]
+- [x] [Review][Patch] `test_tran_option_picks_level_file` sẽ hỏng ngay khi có file `tran_09.json` thật; nên dùng thư mục tạm [game/tests/test_main.gd:147]
+- [x] [Review][Patch] `test_village_symbol_is_known` chỉ lặp lại `test_valid_level_loads`, không kiểm ô `D` thành `Terrain.VILLAGE` [game/tests/test_loaders.gd:208]
+- [x] [Review][Defer] `LevelData.terrain_at` không kiểm ô ngoài bàn: x âm hoặc quá lớn thì đọc nhầm sang dòng khác [game/src/core/level_data.gd:30] — deferred, chưa có chỗ gọi (Story 1.2)
+- [x] [Review][Defer] `Stats.value` trả 0 khi gõ sai khóa, không báo gì [game/src/core/stats.gd:15] — deferred, chưa có chỗ gọi (Story 2.x)
 
 ## Dev Notes
 
@@ -213,6 +230,7 @@ Bố cục chỉ để có dữ liệu chạy được; Story 2.14 thiết kế 
 - Một quân đứng trên ô không đi vào được (`~ # L D`) là lỗi E-BLOCKED. **[MẶC ĐỊNH, chờ tác giả xác nhận]** Chỉ kiểm khi cả hai lớp đều đọc được ở ô đó.
 - Mỗi tướng (`1`, `2`, `3`) có nhiều nhất một lần (E-DUPGEN). Phải có ít nhất một tướng (E-NOGEN). Tướng nào có mặt do file quyết (trận 1 có `1`, `2`).
 - Không bắt buộc có quân Nguyên.
+- Trận `giu_ai` phải có ít nhất một ô ải `A` trong `dia_hinh` (E-NOPASS; tác giả chốt ở code review 2026-10-18). Có nhiều ô `A` được không là việc của Story 3.11. Chỉ kiểm khi cả lớp `dia_hinh` đọc được.
 
 **`thu_tu_dich`:**
 - Mỗi mục là chuỗi tọa độ hợp lệ, trong bàn, ô đó có quân Nguyên (`B K C`), không lặp.
@@ -243,6 +261,7 @@ Bố cục chỉ để có dữ liệu chạy được; Story 2.14 thiết kế 
 | E-NAME | `ten` rỗng | `<f>: "ten" không được để trống` |
 | E-ROWS | Sai số dòng | `<f>: "<lớp>" có <n> dòng, cần 7` |
 | E-ROWTYPE | Dòng không phải chuỗi | `<f>: "<lớp>" dòng <r> phải là một chuỗi, đang là <giá trị>` |
+| E-NOPASS | Trận `giu_ai` không có ô `A` | `<f>: trận "giu_ai" phải có ít nhất một ô ải "A" trong "dia_hinh"` |
 | E-ROWLEN | Sai số ô trong dòng | `<f>: "<lớp>" dòng <r>: có <n> ô, cần 7` |
 | E-SYM | Ký hiệu lạ | `<f>: "<lớp>" dòng <r>, cột <c> (ô <x>,<y>): ký hiệu lạ "<k>"` |
 | E-BLOCKED | Quân trên ô chặn | `<f>: "quan" dòng <r>, cột <c> (ô <x>,<y>): quân "<k>" đứng trên ô không đi vào được "<địa hình>"` |
@@ -477,3 +496,4 @@ Claude Opus 5.5 (claude-opus-5-5)
 ### Change Log
 
 - 2026-10-18: Làm Story 1.1: nạp `chi_so.json` và file trận, báo lỗi tiếng Việt, màn hình lỗi; 152/152 test đạt.
+- 2026-10-18: Sửa theo code review: nạp lại sau lỗi dọn màn hình lỗi và bỏ dữ liệu cũ; chặn số quá lớn và tọa độ quá dài; phiên bản 0/âm báo E-VER; thêm E-NOPASS (trận `giu_ai` phải có ô `A`); chịu dấu cách không ngắt; BOM viết bằng `\uFEFF`; thêm test gộp lỗi hai file (AC 3); 161/161 test đạt.

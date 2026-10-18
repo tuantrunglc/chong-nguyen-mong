@@ -27,9 +27,14 @@ const UNIT_SYMBOLS: Dictionary = {
 }
 
 
-## Tách một dòng thành các ô. Chịu được dấu cách và tab thừa ở đầu, cuối, giữa.
+## Tách một dòng thành các ô. Chịu được dấu cách và tab thừa ở đầu, cuối, giữa,
+## kể cả dấu cách không ngắt (U+00A0, U+3000) hay lẫn vào khi gõ tiếng Việt hoặc chép từ chỗ khác.
 static func split_row(line: String) -> PackedStringArray:
-	return line.replace("\t", " ").split(" ", false)
+	return line.replace("\t", " ").replace("\u00A0", " ").replace("\u3000", " ").split(" ", false)
+
+
+## Số chữ số tối đa của một tọa độ; dài hơn thì to_int() in ERROR ra console hoặc tràn Vector2i.
+const MAX_CELL_DIGITS: int = 4
 
 
 ## "1,0" -> Vector2i(1, 0); chịu dấu cách quanh số. Không phải hai số nguyên thì trả null.
@@ -39,6 +44,8 @@ static func parse_cell(text: String) -> Variant:
 		return null
 	var col: String = parts[0].strip_edges()
 	var row: String = parts[1].strip_edges()
+	if col.length() > MAX_CELL_DIGITS or row.length() > MAX_CELL_DIGITS:
+		return null
 	if not col.is_valid_int() or not row.is_valid_int():
 		return null
 	return Vector2i(col.to_int(), row.to_int())

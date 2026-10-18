@@ -3,7 +3,9 @@ extends RefCounted
 ## Phần dùng chung của các bộ nạp: đọc file, parse JSON, đọc số nguyên, in giá trị trong câu lỗi.
 ## Câu lỗi theo danh mục của story 1.1; test so nguyên văn.
 
-const BOM: String = "﻿"
+const BOM: String = "\uFEFF"
+## Số float lớn hơn mức này không còn là số nguyên chính xác (2^53), và int() sẽ tràn.
+const MAX_WHOLE: float = 9007199254740992.0
 
 
 ## Đường dẫn hiện trong câu lỗi: bỏ "res://" (ví dụ data/tran/tran_01.json).
@@ -39,12 +41,13 @@ static func parse_object(text: String, file: String, result: LoadResult) -> Dict
 
 
 ## JSON của Godot 4.7 trả mọi số về float; nhận cả int (dữ liệu dựng trong code) nếu không có phần lẻ.
+## Số quá lớn (ví dụ 1e20) không tính là số nguyên.
 static func is_whole(value: Variant) -> bool:
 	if value is int:
 		return true
 	if value is float:
 		var f: float = value as float
-		return is_finite(f) and f == floorf(f)
+		return is_finite(f) and f == floorf(f) and absf(f) <= MAX_WHOLE
 	return false
 
 

@@ -8,6 +8,8 @@ const PROBE_DIR: String = "user://test_main"
 const PROBE_FILE: String = PROBE_DIR + "/thu_luu.json"
 const LEVEL_DIR: String = PROBE_DIR + "/tran"
 const BROKEN_LEVEL: String = LEVEL_DIR + "/tran_01.json"
+const BROKEN_STATS: String = PROBE_DIR + "/chi_so.json"
+const BROKEN_STATS_ERROR: String = "user://test_main/chi_so.json: nội dung phải là một object JSON"
 ## Hai lỗi: ký hiệu lạ ở dia_hinh và thiếu thu_tu_dich.
 const BROKEN_ERRORS: Array[String] = [
 	'user://test_main/tran/tran_01.json: "dia_hinh" dòng 1, cột 1 (ô 0,0): ký hiệu lạ "X"',
@@ -31,6 +33,8 @@ func after_each() -> void:
 	AppState.stats = null
 	if FileAccess.file_exists(BROKEN_LEVEL):
 		DirAccess.remove_absolute(BROKEN_LEVEL)
+	if FileAccess.file_exists(BROKEN_STATS):
+		DirAccess.remove_absolute(BROKEN_STATS)
 	DirAccess.remove_absolute(LEVEL_DIR)
 	for i: int in range(DevTools.KEYS.size()):
 		if InputMap.has_action("dev_f%d" % (i + 1)):
@@ -42,10 +46,12 @@ func after_each() -> void:
 	Log.clear()
 
 
-func _make_main(level_dir: String = "") -> Node2D:
+func _make_main(level_dir: String = "", stats_path: String = "") -> Node2D:
 	var main: Node2D = (load(MAIN_SCENE) as PackedScene).instantiate() as Node2D
 	if not level_dir.is_empty():
 		main.level_dir = level_dir
+	if not stats_path.is_empty():
+		main.stats_path = stats_path
 	add_child_autofree(main)
 	return main
 
@@ -66,6 +72,14 @@ func _broken_level_dir() -> String:
 	file.store_string(JSON.stringify(level))
 	file.close()
 	return LEVEL_DIR
+
+
+## chi_so.json lỗi đúng một chỗ (BROKEN_STATS_ERROR): gốc là danh sách.
+func _broken_stats_path() -> String:
+	var file: FileAccess = FileAccess.open(BROKEN_STATS, FileAccess.WRITE)
+	file.store_string("[]")
+	file.close()
+	return BROKEN_STATS
 
 
 ## Chữ của mọi Label nằm trong node (kể cả lồng nhau).
@@ -145,9 +159,50 @@ func test_loads_level_1_by_default() -> void:
 
 func test_tran_option_picks_level_file() -> void:
 	AppState.launch.tran = 9
-	var main: Node2D = _make_main()
+	DirAccess.make_dir_recursive_absolute(LEVEL_DIR)
+	var main: Node2D = _make_main(LEVEL_DIR)
 	assert_eq(main._screen, main.Screen.ERROR)
-	assert_has(Log.get_lines(), "[ERROR][data] data/tran/tran_09.json: không đọc được file")
+	assert_has(Log.get_lines(), "[ERROR][data] user://test_main/tran/tran_09.json: không đọc được file")
+
+
+func test_errors_of_stats_and_level_are_listed_together() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main(_broken_level_dir(), _broken_stats_path())
+	var screen: ErrorScreen = main._error_screen
+	assert_not_null(screen, "có màn hình lỗi")
+	if screen == null:
+		return
+	var expected: Array[String] = [BROKEN_STATS_ERROR]
+	expected.append_array(BROKEN_ERRORS)
+	var texts: Array[String] = _label_texts(screen)
+	var logged: Array[String] = []
+	for line: String in Log.get_lines():
+		if line.begins_with("[ERROR][data] "):
+			logged.append(line.trim_prefix("[ERROR][data] "))
+	assert_eq(logged, expected, "lỗi chi_so.json đứng trước lỗi file trận")
+	for message: String in expected:
+		assert_has(texts, message)
+
+
+func test_reload_after_fix_hides_error_screen() -> void:
+	var main: Node2D = _make_main(_broken_level_dir())
+	assert_eq(main._screen, main.Screen.ERROR)
+	main.level_dir = "res://data/tran"
+	main._start_battle()
+	assert_eq(main._screen, main.Screen.BATTLE)
+	assert_null(main._error_screen)
+	assert_true(main._board_view.visible, "bàn cờ hiện lại")
+	assert_not_null(AppState.stats, "đã có chỉ số")
+
+
+func test_reload_with_error_drops_old_data() -> void:
+	var main: Node2D = _make_main()
+	assert_not_null(AppState.stats)
+	main.level_dir = _broken_level_dir()
+	main._start_battle()
+	assert_eq(main._screen, main.Screen.ERROR)
+	assert_null(AppState.stats, "không giữ chỉ số cũ")
+	assert_null(main._level, "không giữ trận cũ")
 
 
 func test_broken_level_in_dev_lists_every_error() -> void:

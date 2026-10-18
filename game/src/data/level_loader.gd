@@ -1,7 +1,7 @@
 class_name LevelLoader
 extends RefCounted
 ## Nạp data/tran/*.json thành LevelData. Gom mọi lỗi rồi mới trả về; không ghi log (bên gọi ghi).
-## Thứ tự lỗi: file/JSON -> khóa (phien_ban, ten, kieu) -> lớp dia_hinh -> lớp quan
+## Thứ tự lỗi: file/JSON -> khóa (phien_ban, ten, kieu) -> lớp dia_hinh -> ô ải -> lớp quan
 ## -> kiểm từng ô của lớp quan -> thu_tu_dich -> quân thiếu trong thu_tu_dich.
 
 ## Quy cách định dạng của prototype (không phải số cân bằng). Giai đoạn 1 mới có bàn khác cỡ.
@@ -38,16 +38,26 @@ static func parse_level(text: String, file: String) -> LoadResult:
 
 	for key: Variant in root.keys():
 		if not KNOWN_KEYS.has(key):
-			result.add_warning('%s: bỏ qua khóa lạ "%s"' % [file, key])
+			result.add_warning("%s: bỏ qua khóa lạ %s" % [file, JsonFile.show(key)])
 
-	var version: Variant = JsonFile.get_int(root, "phien_ban_dinh_dang", "phien_ban_dinh_dang", 1, file, result)
+	# Số nguyên nào khác 1 (kể cả 0 và số âm) là sai phiên bản, không phải lỗi số nguyên.
+	var version: Variant = null
+	if root.has("phien_ban_dinh_dang") and JsonFile.is_whole(root["phien_ban_dinh_dang"]):
+		version = int(root["phien_ban_dinh_dang"])
+	else:
+		JsonFile.get_int(root, "phien_ban_dinh_dang", "phien_ban_dinh_dang", 1, file, result)
 	if version != null and int(version) != FORMAT_VERSION:
 		result.add_error('%s: "phien_ban_dinh_dang" là %d, game chỉ đọc được bản %d'
 			% [file, version, FORMAT_VERSION])
 	var level_name: String = _read_name(root, file, result)
 	var mission: Variant = _read_kind(root, file, result)
 
+	var errors_before_terrain: int = result.errors.size()
 	var terrain_rows: Array = _read_layer(root, "dia_hinh", BoardText.TERRAIN_SYMBOLS, file, result)
+	var terrain_clean: bool = result.errors.size() == errors_before_terrain and not terrain_rows.is_empty()
+	# Dòng hỏng có thể chứa ô ải: chỉ kiểm khi cả lớp dia_hinh đọc được.
+	if terrain_clean and mission == LevelData.Mission.HOLD_PASS and not _has_symbol(terrain_rows, "A"):
+		result.add_error('%s: trận "giu_ai" phải có ít nhất một ô ải "A" trong "dia_hinh"' % file)
 	var errors_before_units: int = result.errors.size()
 	var unit_rows: Array = _read_layer(root, "quan", BoardText.UNIT_SYMBOLS, file, result)
 	var units_clean: bool = result.errors.size() == errors_before_units and not unit_rows.is_empty()
@@ -132,14 +142,21 @@ static func _read_layer(root: Dictionary, layer: String, symbols: Dictionary,
 			continue
 		for c: int in range(tokens.size()):
 			if not symbols.has(tokens[c]):
-				result.add_error('%s: "%s" dòng %d, cột %d (ô %d,%d): ký hiệu lạ "%s"'
-					% [file, layer, r + 1, c + 1, c, r, tokens[c]])
+				result.add_error('%s: "%s" dòng %d, cột %d (ô %d,%d): ký hiệu lạ %s'
+					% [file, layer, r + 1, c + 1, c, r, JsonFile.show(tokens[c])])
 				tokens[c] = ""
 		rows.append(tokens)
 	if lines.size() != BOARD_SIZE.y:
 		result.add_error('%s: "%s" có %d dòng, cần %d' % [file, layer, lines.size(), BOARD_SIZE.y])
 		return []
 	return rows
+
+
+static func _has_symbol(rows: Array, symbol: String) -> bool:
+	for row: Variant in rows:
+		if row != null and (row as PackedStringArray).has(symbol):
+			return true
+	return false
 
 
 ## Ký hiệu ở ô; "" nếu ô hoặc dòng không đọc được.

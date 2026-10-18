@@ -78,19 +78,22 @@ func _start_battle() -> void:
 	for e: String in errors:
 		Log.error("data", e)
 	if not errors.is_empty():
+		# Nạp lại mà lỗi thì không giữ dữ liệu của lần nạp trước.
+		AppState.stats = null
+		_level = null
 		_show_error(errors)
 		return
 
 	AppState.stats = stats_result.data as Stats
 	_level = level_result.data as LevelData
 	Log.info("battle", "nạp trận %s" % level_id)
+	_hide_error()
 	_screen = Screen.BATTLE
 
 
 ## Thay bàn cờ bằng màn hình lỗi. Nhãn phiên bản và chữ DEV vẫn nằm trên nó.
 func _show_error(errors: Array[String]) -> void:
-	if _error_screen != null:
-		_error_screen.queue_free()
+	_hide_error()
 	_board_view.visible = false
 	_error_screen = ErrorScreen.new()
 	_error_screen.position = _board_view.position
@@ -104,12 +107,17 @@ func _show_error(errors: Array[String]) -> void:
 
 ## Menu tạm cho tới story 4.1: bàn cờ trống.
 func _show_menu() -> void:
+	_hide_error()
+	_screen = Screen.MENU
+	Log.info("app", "về menu")
+
+
+## Bỏ màn hình lỗi (nếu có) và hiện lại bàn cờ.
+func _hide_error() -> void:
 	if _error_screen != null:
 		_error_screen.queue_free()
 		_error_screen = null
 	_board_view.visible = true
-	_screen = Screen.MENU
-	Log.info("app", "về menu")
 
 
 func _read_version() -> String:

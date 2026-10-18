@@ -106,4 +106,4 @@ static func _unit_names(group: String) -> Array:
 static func _warn_unknown(d: Dictionary, known: Array, prefix: String, file: String, result: LoadResult) -> void:
 	for key: Variant in d.keys():
 		if not known.has(key):
-			result.add_warning('%s: bỏ qua khóa lạ "%s%s"' % [file, prefix, key])
+			result.add_warning("%s: bỏ qua khóa lạ %s" % [file, JsonFile.show(prefix + str(key))])

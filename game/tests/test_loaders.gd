@@ -183,7 +183,7 @@ func test_whole_float_version_is_accepted() -> void:
 
 
 func test_bom_at_start_is_ignored() -> void:
-	var text: String = "﻿" + JSON.stringify(_valid_level())
+	var text: String = "\uFEFF" + JSON.stringify(_valid_level())
 	assert_true(LevelLoader.parse_level(text, LEVEL_FILE).ok)
 
 
@@ -205,8 +205,27 @@ func test_enemy_order_tolerates_spaces() -> void:
 	assert_eq(r.errors, [] as Array[String])
 
 
-func test_village_symbol_is_known() -> void:
-	assert_true(_level(_valid_level()).ok, "mẫu có ô D")
+func test_non_breaking_spaces_in_rows() -> void:
+	var nbsp: String = "\u00A0"
+	var d: Dictionary = _with_row(_valid_level(), "dia_hinh", 2, ". . . ~ .%sL\u3000." % nbsp)
+	var r: LoadResult = _level(d)
+	assert_eq(r.errors, [] as Array[String])
+	assert_eq((r.data as LevelData).terrain_at(Vector2i(5, 2)), Terrain.GRANARY)
+
+
+func test_giu_ai_without_pass_cell() -> void:
+	var d: Dictionary = _with_row(_with(_valid_level(), "kieu", "giu_ai"), "dia_hinh", 3, "^ . . . . . .")
+	assert_eq(_level(d).errors, _errors(['trận "giu_ai" phải có ít nhất một ô ải "A" trong "dia_hinh"']))
+
+
+func test_tieu_diet_without_pass_cell_is_allowed() -> void:
+	var d: Dictionary = _with_row(_valid_level(), "dia_hinh", 3, "^ . . . . . .")
+	assert_eq(_level(d).errors, [] as Array[String])
+
+
+func test_giu_ai_pass_cell_not_checked_when_terrain_is_broken() -> void:
+	var d: Dictionary = _with_row(_with(_valid_level(), "kieu", "giu_ai"), "dia_hinh", 3, "^ . . . . .")
+	assert_eq(_level(d).errors, _errors(['"dia_hinh" dòng 4: có 6 ô, cần 7']))
 
 
 func test_no_enemy_is_allowed() -> void:
@@ -269,6 +288,15 @@ func test_version_not_integer() -> void:
 func test_version_unsupported() -> void:
 	assert_eq(_level(_with(_valid_level(), "phien_ban_dinh_dang", 2)).errors,
 		_errors(['"phien_ban_dinh_dang" là 2, game chỉ đọc được bản 1']))
+	assert_eq(_level(_with(_valid_level(), "phien_ban_dinh_dang", 0)).errors,
+		_errors(['"phien_ban_dinh_dang" là 0, game chỉ đọc được bản 1']))
+	assert_eq(_level(_with(_valid_level(), "phien_ban_dinh_dang", -1)).errors,
+		_errors(['"phien_ban_dinh_dang" là -1, game chỉ đọc được bản 1']))
+
+
+func test_huge_version_is_not_integer() -> void:
+	assert_eq(_level(_with(_valid_level(), "phien_ban_dinh_dang", 1e20)).errors,
+		_errors(['"phien_ban_dinh_dang" phải là số nguyên từ 1 trở lên, đang là 100000000000000000000.0']))
 
 
 func test_name_wrong_type() -> void:
@@ -551,3 +579,16 @@ func test_real_level_1_loads() -> void:
 	var r: LoadResult = LevelLoader.load_level("res://data/tran/tran_01.json")
 	assert_eq(r.errors, [] as Array[String], "data/tran/tran_01.json không có lỗi")
 	assert_true(r.ok)
+
+
+func test_enemy_order_too_long_number_is_not_a_cell() -> void:
+	var r: LoadResult = _level(_with(_valid_level(), "thu_tu_dich", ["99999999999999999999,4", "1,0", "5,0"]))
+	assert_eq(r.errors, _errors([
+		'"thu_tu_dich" mục 1: "99999999999999999999,4" không phải tọa độ "cot,hang"',
+		'quân Nguyên "C" ở ô 5,4 không có trong "thu_tu_dich"',
+	]))
+
+
+func test_stats_huge_number_is_rejected() -> void:
+	assert_eq(_stats(_with_stat("tuong", "nguyen_khoai", "mau", 1e20)).errors,
+		_stat_errors(['"tuong.nguyen_khoai.mau" phải là số nguyên từ 1 trở lên, đang là 100000000000000000000.0']))
