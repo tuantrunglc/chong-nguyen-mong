@@ -439,6 +439,8 @@ func test_f5_reads_edited_stats() -> void:
 	var old: BattleController = main._controller
 	assert_eq(old.reachable(1).size(), 7, "tầm đi 3: 7 ô")
 	old.submit(Command.move(1, Vector2i(0, 4)))
+	assert_eq(old.snapshot().unit_by_id(1).cell, Vector2i(0, 4), "trước F5 Khoái đã đi")
+	assert_true(old.can_undo(), "trước F5 có nước để hủy")
 	_write_stats(2)
 	_press_f5(main)
 	var controller: BattleController = main._controller
@@ -449,6 +451,7 @@ func test_f5_reads_edited_stats() -> void:
 	assert_eq(state.unit_by_id(1).cell, Vector2i(0, 6), "Khoái về chỗ đầu trận")
 	assert_eq(state.round_number, 1)
 	assert_false(controller.can_undo(), "không còn nước để hủy")
+	assert_true((main._hud as Hud).undo_button().disabled, "nút Hủy mờ")
 	assert_eq((main._battle_view as BattleView).selected_id(), BattleView.NONE)
 	assert_eq((main._hud as Hud).round_text(), "Hiệp 1")
 	var lines: PackedStringArray = Log.get_lines()
@@ -506,6 +509,7 @@ func test_f5_keeps_coordinates_and_open_count() -> void:
 
 
 func test_f5_needs_dev() -> void:
+	Log.debug_enabled = true
 	var main: Node2D = _make_main()
 	var tools: DevTools = _dev_tools(main)
 	assert_eq(tools.f5_pressed.get_connections(), [], "không bật dev thì không nối F5")
@@ -516,4 +520,5 @@ func test_f5_needs_dev() -> void:
 	tools._unhandled_input(ev)
 	assert_eq(main._controller, old, "không nạp lại")
 	for line: String in Log.get_lines():
-		assert_false(line.begins_with("[INFO][dev]"), line)
+		assert_false(line.contains("][dev]"), line)
+	Log.debug_enabled = false

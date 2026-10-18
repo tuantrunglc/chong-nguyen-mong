@@ -82,3 +82,7 @@
 - `BattleController.undo` phát `events_resolved` với danh sách sự kiện rỗng, chưa có loại sự kiện "đã hủy". Người nghe sau này (EventPlayer, hoạt ảnh) coi "không có sự kiện" là "không đổi gì" thì bỏ sót lần hủy.
 - Phím Z/Space/1-2-3 gán theo vị trí vật lý: bàn phím AZERTY thì nút ghi "(Z)" nhưng phím W mới hủy. Bàn phím Việt là QWERTY nên để sau.
 - `main.gd` nối `events_resolved` trước `BattleView.start` để đồng quân vẽ lại trước ô sáng. Đúng thứ tự là nhờ chú thích, chưa có test giữ.
+
+## Deferred from: code review of 1-6-f5-nap-lai-du-lieu (2026-10-18)
+
+- Phím dev F1–F5 (`game/src/debug/dev_tools.gd:14`) trên macOS mặc định là phím hệ thống (độ sáng, đọc chính tả…): bấm F5 trần có thể không tới game. Hướng dẫn test cho tác giả nên ghi "Fn+F5", hoặc bật "Dùng F1, F2… như phím chức năng chuẩn" trong Cài đặt bàn phím. Có từ Story 0.3, không phải lỗi code.

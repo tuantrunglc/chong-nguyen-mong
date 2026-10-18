@@ -4,7 +4,7 @@ baseline_commit: eb6c9c6df54bfd676e745531a04b6a03faab292e
 
 # Story 1.6: F5 nạp lại dữ liệu
 
-Status: review
+Status: done
 
 ## Story
 
@@ -61,6 +61,13 @@ tôi muốn sửa file trận hoặc chỉ số rồi thấy kết quả ngay,
   - [x] 6.1 `game-architecture.md` bảng phím dev (`F5`): ghi rõ "chạy ở mọi màn hình (trận, lỗi, menu); chỉ dùng trên desktop: bản web đọc lại dữ liệu đóng gói sẵn, trình duyệt có tải lại trang cũng chấp nhận (tác giả chốt 2026-10-18)".
   - [x] 6.2 `tools/test.sh` xanh. Commit một lần, lời commit tiếng Việt, ví dụ `F5 nạp lại chỉ số và file trận khi bật dev (Story 1.6)`.
   - [x] 6.3 Ghi hướng dẫn tác giả tự test vào Completion Notes theo mẫu ở mục Testing, dùng kết quả thật.
+
+### Review Findings
+
+- [x] [Review][Patch] Test F5 chưa kiểm nút Hủy mờ thật trên bảng (AC1), chỉ kiểm `controller.can_undo()` [game/tests/test_main.gd:436]
+- [x] [Review][Patch] Test F5 không kiểm nước đi trước F5 đã chạy được, nên "Khoái về 0,6" có thể đúng mà chẳng chứng minh gì [game/tests/test_main.gd:441]
+- [x] [Review][Patch] `test_f5_needs_dev` chỉ bắt dòng `[INFO][dev]` và không bật `Log.debug_enabled`, lọt dòng `[DEBUG][dev]` (AC6: không có dòng log nào) [game/tests/test_main.gd:519]
+- [x] [Review][Defer] Trên Mac, phím F1–F12 mặc định là phím hệ thống: bấm F5 trần có thể không tới game, phải Fn+F5 [game/src/debug/dev_tools.gd:14] — deferred, pre-existing (có từ Story 0.3, F1 cũng vậy)
 
 ## Dev Notes
 
@@ -215,3 +222,4 @@ Claude Opus 5.5 (claude-opus-5-5)
 - 2026-10-18: Tạo story.
 - 2026-10-18: Tác giả chốt: F5 chạy cả ở menu; F5 chỉ dùng trên desktop, không chặn phím trình duyệt.
 - 2026-10-18: Làm story: F5 nạp lại chỉ số và file trận (chỉ khi bật dev, mọi màn hình); 8 test; kiểm bằng mắt trên desktop; build web cho tác giả thử F5. `tools/test.sh`: 320/320.
+- 2026-10-18: Code review: siết 3 test F5 (nút Hủy mờ, nước đi trước F5 có chạy, tắt dev không có cả dòng DEBUG); ghi chú Fn+F5 trên Mac vào deferred-work. `tools/test.sh`: 320/320. Xong story.
