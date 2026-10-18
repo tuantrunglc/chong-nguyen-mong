@@ -66,3 +66,5 @@
 - 2026-10-18: CHỐT chấp nhận thêm khoảng 10 giờ: E3 ~45 giờ, prototype ~140 giờ, 14 tuần. Story 4.8 (gợi ý luật) bỏ khỏi danh sách cắt được.
 - 2026-10-18: Tác giả duyệt 4 luật MẶC ĐỊNH (vẫn duyệt lại qua kịch bản luật): hết hiệp tính ở cuối hiệp cuối; làng chặn đường đi, lao, tên, xung phong như rừng và Trần Khánh Dư không kéo được nếu vật đầu tiên là làng; lao/tên bị làng chặn cũng trừ Lòng dân; hòa giữa tướng và làng thì ưu tiên làng.
 - 2026-10-18: Đề xuất thay đổi `sprint-change-proposal-2026-10-18.md` được duyệt; đã sửa GDD, kiến trúc, epics, sprint-status.
+- 2026-10-18: GHI CHÚ hướng 2,5D: sau này làm isometric bằng tranh 2D ở E8; không làm 3D thật (chi phí, hiệu năng web, khó sửa trang phục). Luật không đổi. Chưa chèn story nào; chi tiết ở GDD mục Art Style.
+- 2026-10-18: CHỐT làm bàn cờ isometric tạm ở Story 1.7 (cuối E1): ô thoi, ô `0,0` ở đỉnh trên, địa hình bằng khối và màu tạm, quân vẫn là đồng tròn. Tranh vẫn ở E8. Luật không đổi. Thay cho ghi chú hoãn cùng ngày.

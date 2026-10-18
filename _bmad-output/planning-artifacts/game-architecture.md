@@ -569,7 +569,7 @@ chong-nguyen-mong/                    # repo
 │   │   ├── battle/                   # CẦU NỐI + TRÌNH BÀY TRẬN (Node)
 │   │   │   ├── battle_controller.gd  # giữ trạng thái sống, ngăn xếp hoàn tác, xem trước
 │   │   │   ├── battle_view.gd        # gốc phần hiển thị trận
-│   │   │   ├── board_view.gd         # vẽ 49 ô bằng code
+│   │   │   ├── board_view.gd         # vẽ 49 ô thoi (isometric) bằng code; nơi duy nhất đổi ô ↔ điểm
 │   │   │   ├── unit_token.gd         # đồng quân tròn khắc chữ
 │   │   │   ├── telegraph_view.gd     # ô đỏ, số thứ tự, mũi tên xung phong
 │   │   │   ├── preview_view.gd       # bóng mờ vị trí cuối + máu
@@ -672,6 +672,7 @@ chong-nguyen-mong/                    # repo
 | Signal | `snake_case`, thì quá khứ | `events_resolved` |
 | Tên riêng lịch sử trong code | Tiếng Việt không dấu, UPPER | `UnitType.NGUYEN_KHOAI`, `Stratagem.SAT_THAT` |
 | Tọa độ | `Vector2i(cot, hang)`; trong file dữ liệu là `"cot,hang"` | `Vector2i(4, 2)` ↔ `"4,2"` |
+| Ô ↔ điểm màn hình | Chỉ `BoardView.cell_center()` và `BoardView.cell_at()` (isometric 2:1, ô `0,0` ở đỉnh trên). View khác gọi hai hàm này, không tự tính. Thứ tự vẽ theo `cot + hang`, lớn hơn vẽ sau | `cell_at(cell_center(c)) == c` |
 | Khóa dịch | `<man>.<muc>` | `hud.end_turn`, `error.rolled_back` |
 | Khóa JSON dữ liệu | tiếng Việt không dấu, `snake_case` | `thu_tu_dich`, `tiep_vien` |
 
