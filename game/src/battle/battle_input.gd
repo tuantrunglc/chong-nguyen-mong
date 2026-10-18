@@ -77,8 +77,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if mouse == null:
 		return
 	# Vị trí lấy từ chính sự kiện (đổi sang tọa độ bàn cờ), không đọc con trỏ thật: đúng cả khi cửa sổ
-	# co giãn và khi input được bơm vào (GoPeak, test).
-	var cell: Vector2i = _board.cell_at((_board.make_input_local(mouse) as InputEventMouse).position)
+	# co giãn và khi input được bơm vào (GoPeak, test). Ô là ô nhìn thấy (đồng quân, khối che ô phía sau).
+	var cell: Vector2i = _board.pick_cell((_board.make_input_local(mouse) as InputEventMouse).position)
 	var button: InputEventMouseButton = mouse as InputEventMouseButton
 	if button != null and button.button_index == MOUSE_BUTTON_LEFT and button.pressed:
 		cell_clicked.emit(cell)

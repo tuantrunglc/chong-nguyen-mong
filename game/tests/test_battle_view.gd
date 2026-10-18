@@ -380,16 +380,15 @@ func test_coord_overlay_follows_moved_unit() -> void:
 	var main: Node2D = _make_main()
 	_press_key(main, 1)
 	_click(main, KHOAI_TARGET)
-	var cell_origin: Vector2 = Vector2(KHOAI_TARGET) * BoardView.CELL_SIZE
+	var expected: Vector2 = BoardView.cell_center(KHOAI_TARGET) \
+		+ Vector2(UnitToken.RADIUS, -UnitToken.TOKEN_LIFT - UnitToken.RADIUS)
 	var found: bool = false
 	for child: Node in (main._coord_overlay as CoordOverlay).get_children():
 		if child.is_queued_for_deletion() or child.get_child_count() == 0:
 			continue
 		var label: Label = child.get_child(0) as Label
 		if label != null and label.text == "1":
-			var at: Vector2 = (child as Control).position
-			assert_eq(at.y, cell_origin.y + CoordOverlay.MARGIN, "id 1 ở hàng của ô mới")
-			assert_between(at.x, cell_origin.x, cell_origin.x + BoardView.CELL_SIZE, "id 1 ở cột của ô mới")
+			assert_eq((child as Control).position, expected, "id 1 cạnh đầu đồng ở ô mới")
 			found = true
 	assert_true(found, "lớp F1 có id 1")
 
@@ -428,15 +427,6 @@ func test_hover_without_selection_draws_nothing() -> void:
 	var main: Node2D = _make_main()
 	_hover(main, Vector2i(0, 5))
 	assert_eq(_board(main).path(), [] as Array[Vector2i])
-
-
-func test_cell_at_maps_board_pixels() -> void:
-	var main: Node2D = _make_main()
-	var board: BoardView = _board(main)
-	assert_eq(board.cell_at(BoardView.cell_center(Vector2i(2, 5))), Vector2i(2, 5))
-	assert_eq(board.cell_at(Vector2(0, 0)), Vector2i(0, 0))
-	assert_eq(board.cell_at(Vector2(-1, 10)), BoardView.NO_CELL)
-	assert_eq(board.cell_at(Vector2(7 * BoardView.CELL_SIZE, 10)), BoardView.NO_CELL)
 
 
 func test_keys_do_nothing_on_error_screen() -> void:

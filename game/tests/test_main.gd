@@ -150,7 +150,7 @@ func test_title_label_sits_above_board() -> void:
 	var title: Label = main._title_label
 	var board: BoardView = main._board_view
 	assert_gt(title.position.y, 0.0, "tiêu đề không chạm mép trên")
-	assert_lte(title.position.y + title.size.y, board.position.y, "tiêu đề không đè lên bàn cờ")
+	assert_lte(title.position.y + title.size.y, board.board_rect().position.y, "tiêu đề không đè lên bàn cờ")
 
 
 func test_window_title_uses_translated_text() -> void:
@@ -283,6 +283,13 @@ func test_back_button_returns_to_menu() -> void:
 	assert_has(Log.get_lines(), "[INFO][app] về menu")
 
 
+## Bàn nghiêng (Story 1.7): màn hình lỗi phủ đúng khung bàn cờ.
+func test_error_screen_covers_board_rect() -> void:
+	var main: Node2D = _make_main(_broken_level_dir())
+	var screen: ErrorScreen = main._error_screen
+	assert_eq(Rect2(screen.position, screen.size), (main._board_view as BoardView).board_rect())
+
+
 func test_version_label_and_dev_badge_stay_above_error_screen() -> void:
 	AppState.launch.dev = true
 	var main: Node2D = _make_main(_broken_level_dir())
@@ -364,7 +371,11 @@ func test_reload_rebuilds_token_when_id_changes_type() -> void:
 	assert_eq(token.name_text(), tr("unit.ky_binh"), "chữ theo loại mới")
 	assert_eq(token.hp_text(), "2")
 	assert_eq(token.unit_type, UnitType.KY_BINH)
-	assert_eq(board._units.get_child_count(), 5, "đồng cũ đã gỡ khỏi bàn")
+	var on_board: int = 0
+	for child: Node in board._world.get_children():
+		if child is UnitToken:
+			on_board += 1
+	assert_eq(on_board, 5, "đồng cũ đã gỡ khỏi bàn")
 
 
 func test_reload_with_error_clears_board() -> void:

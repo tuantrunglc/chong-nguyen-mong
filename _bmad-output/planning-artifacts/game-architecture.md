@@ -673,7 +673,7 @@ chong-nguyen-mong/                    # repo
 | Signal | `snake_case`, thì quá khứ | `events_resolved` |
 | Tên riêng lịch sử trong code | Tiếng Việt không dấu, UPPER | `UnitType.NGUYEN_KHOAI`, `Stratagem.SAT_THAT` |
 | Tọa độ | `Vector2i(cot, hang)`; trong file dữ liệu là `"cot,hang"` | `Vector2i(4, 2)` ↔ `"4,2"` |
-| Ô ↔ điểm màn hình | Chỉ `BoardView.cell_center()` và `BoardView.cell_at()` (isometric 2:1, ô `0,0` ở đỉnh trên). View khác gọi hai hàm này, không tự tính. Thứ tự vẽ theo `cot + hang`, lớn hơn vẽ sau | `cell_at(cell_center(c)) == c` |
+| Ô ↔ điểm màn hình | Chỉ `BoardView.cell_center()` và `BoardView.cell_at()` (isometric 2:1, ô `0,0` ở đỉnh trên, gốc local là đỉnh trên ô `0,0`). View khác gọi hai hàm này, không tự tính. Chuột dùng `BoardView.pick_cell()`: ô **nhìn thấy** (đồng quân, khối nhô lên che ô phía sau), không trúng gì thì như `cell_at`. Thứ tự vẽ theo `cot + hang`, lớn hơn vẽ sau: khối địa hình và đồng quân là con của `BoardView._world` (`y_sort_enabled`); khối đặt cao hơn tâm ô `TILE_H / 4` để không bằng y với quân ô bên cạnh. Ô sáng, đường đi, vòng chọn, sông, hầm chông, bệ ô ải vẽ trên mặt đất (`_draw` của `BoardView`), luôn dưới khối và quân (Story 1.7) | `cell_at(cell_center(c)) == c`; `pick_cell(cell_center(c)) == c` |
 | Khóa dịch | `<man>.<muc>` | `hud.end_turn`, `error.rolled_back` |
 | Khóa JSON dữ liệu | tiếng Việt không dấu, `snake_case` | `thu_tu_dich`, `tiep_vien` |
 

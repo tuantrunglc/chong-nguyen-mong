@@ -1,11 +1,11 @@
 class_name CoordOverlay
 extends Node2D
-## F1 (chỉ khi bật dev): tọa độ "cot,hang" ở góc trên trái mỗi ô, id quân ở góc trên phải ô của nó.
+## F1 (chỉ khi bật dev): tọa độ "cot,hang" ở nửa trái mỗi ô thoi (không đè chữ trên đồng quân), id quân ở bên
+## phải đầu đồng quân.
 ## main.gd đặt node này làm con cuối của BoardView, nên nó nằm trên đồng quân và ẩn theo bàn cờ.
+## Vị trí chỉ tính qua BoardView.cell_center (bàn nghiêng, Story 1.7).
 
 const FONT_SIZE: int = 12
-const MARGIN: int = 3
-const LABEL_SIZE: Vector2 = Vector2(40, 18)
 const TEXT_COLOR: Color = Color(1.0, 1.0, 1.0)
 const BACKGROUND_COLOR: Color = Color(0.0, 0.0, 0.0, 0.55)
 
@@ -21,15 +21,14 @@ func show_state(state: BattleState) -> void:
 		child.queue_free()
 	if state == null:
 		return
-	var cell_size: Vector2 = Vector2.ONE * BoardView.CELL_SIZE
 	for r: int in range(state.size.y):
 		for c: int in range(state.size.x):
-			var origin: Vector2 = Vector2(c, r) * cell_size
-			_add_label("%d,%d" % [c, r], origin + Vector2(MARGIN, MARGIN), HORIZONTAL_ALIGNMENT_LEFT)
+			var cell: Vector2i = Vector2i(c, r)
+			var left: Vector2 = BoardView.cell_center(cell) - Vector2(BoardView.TILE_W / 4.0, _lift(state, cell))
+			_add_label("%d,%d" % [c, r], left, true)
 	for unit: Unit in state.units:
-		var origin: Vector2 = Vector2(unit.cell) * cell_size
-		var top_right: Vector2 = origin + Vector2(cell_size.x - MARGIN - LABEL_SIZE.x, MARGIN)
-		_add_label(str(unit.id), top_right, HORIZONTAL_ALIGNMENT_RIGHT)
+		var feet: Vector2 = BoardView.cell_center(unit.cell) - Vector2(0, _lift(state, unit.cell))
+		_add_label(str(unit.id), feet + Vector2(UnitToken.RADIUS, -UnitToken.TOKEN_LIFT - UnitToken.RADIUS), false)
 
 
 ## Bật/tắt; trả về trạng thái mới (true là đang hiện).
@@ -46,11 +45,16 @@ func texts() -> Array[String]:
 	return out
 
 
-func _add_label(text: String, at: Vector2, align: HorizontalAlignment) -> void:
+## Mặt ô cao hơn mặt đất bao nhiêu (bệ ô ải).
+func _lift(state: BattleState, cell: Vector2i) -> float:
+	return BoardView.surface_height(state.terrain_at(cell))
+
+
+## centered: tâm nhãn ở at; không thì góc trên trái nhãn ở at.
+func _add_label(text: String, at: Vector2, centered: bool) -> void:
 	var label: Label = Label.new()
 	label.text = text
 	label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
-	label.horizontal_alignment = align
 	label.add_theme_font_size_override("font_size", FONT_SIZE)
 	label.add_theme_color_override("font_color", TEXT_COLOR)
 	var panel: PanelContainer = PanelContainer.new()
@@ -62,6 +66,6 @@ func _add_label(text: String, at: Vector2, align: HorizontalAlignment) -> void:
 	panel.add_child(label)
 	panel.position = at
 	add_child(panel)
-	if align == HORIZONTAL_ALIGNMENT_RIGHT:
-		# PanelContainer co theo chữ: đẩy sang phải để mép phải thẳng hàng với góc ô.
-		panel.position.x = at.x + LABEL_SIZE.x - panel.get_combined_minimum_size().x
+	if centered:
+		# PanelContainer co theo chữ: biết cỡ rồi mới canh giữa được.
+		panel.position = at - panel.get_combined_minimum_size() / 2.0

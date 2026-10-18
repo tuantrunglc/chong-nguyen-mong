@@ -6,7 +6,7 @@ extends Control
 signal undo_pressed
 signal end_turn_pressed
 
-## Góc trên trái và bề rộng: bên phải bàn cờ (bàn chiếm x 332–948, y 52–668). Story 1.7 có thể dời.
+## Góc trên trái và bề rộng: bên phải bàn cờ (bàn nghiêng nằm trong BoardView.AREA, x 16–956).
 const PANEL_POSITION: Vector2 = Vector2(972, 52)
 const PANEL_WIDTH: float = 260.0
 const SEPARATION: int = 12

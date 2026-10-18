@@ -1,6 +1,10 @@
+---
+baseline_commit: f927e1d2b778a953038cfc05beed451b512eda7f
+---
+
 # Story 1.7: Bàn cờ nghiêng (isometric) tạm
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -26,58 +30,58 @@ _Thêm 2026-10-18 theo `sprint-change-proposal-2026-10-18-isometric.md`. Cắt �
 ## Tasks / Subtasks
 
 - [x] **Task 0: Tác giả chốt ô ải** (2026-10-18): phương án (a), xem "Quyết định của tác giả".
-- [ ] **Task 1: Phép đổi ô ↔ điểm trong `BoardView`** (AC: 1, 5, 8)
-  - [ ] 1.1 Thay `CELL_SIZE` bằng `TILE_W = 128`, `TILE_H = 64` (2:1). Giữ một nơi khai báo; mọi chỗ khác đọc từ đây (xem bảng "Ai đang dùng `CELL_SIZE`" bên dưới).
-  - [ ] 1.2 `static func cell_center(cell)`: gốc tọa độ local của `BoardView` là **đỉnh trên của ô `0,0`**. `x = (cot - hang) * TILE_W / 2`, `y = (cot + hang) * TILE_H / 2 + TILE_H / 2`. Vẫn là hàm `static`, không phụ thuộc kích thước bàn (đồng quân và test đang gọi `BoardView.cell_center` kiểu static).
-  - [ ] 1.3 `func cell_at(local_pos)`: phép ngược trên **mặt đất**. `a = x / TILE_W + y / TILE_H`, `b = y / TILE_H - x / TILE_W`, `cell = Vector2i(floori(a), floori(b))`. Ngoài `[0, cols) × [0, rows)` thì `NO_CELL`. Giữ đúng hợp đồng kiến trúc `cell_at(cell_center(c)) == c`.
-  - [ ] 1.4 `func board_rect() -> Rect2`: khung chữ nhật bao trọn mọi thứ bàn vẽ ra (hình thoi lớn, độ dày mép bàn, phần khối và đồng quân nhô lên ở hàng trên cùng), tính trong tọa độ của cha (`main`). Dùng cho canh giữa, cho màn hình lỗi, cho test bố cục.
-  - [ ] 1.5 `setup(cols, rows)`: đặt `position` (đỉnh trên của ô `0,0` trên màn hình) sao cho `board_rect()` nằm giữa vùng trống bên trái HUD: x trong `[16, 956]`, y trong `[52, 664]` (dưới tiêu đề, trên nhãn phiên bản). Bàn 7×7 với 128×64: hình thoi rộng 896, cao 448, còn dư chỗ.
-  - [ ] 1.6 `func pick_cell(local_pos) -> Vector2i`: ô mà người chơi **nhìn thấy** dưới chuột. Xét từ gần người xem ra xa (`cot + hang` giảm dần): trúng đồng quân (hình tròn đứng) hoặc trúng khối nhô lên (mặt trên và hai mặt bên) thì trả ô đó; không trúng gì thì trả `cell_at(local_pos)`. Lý do: đồng quân đứng và khối nhô lên chồng lên ô phía sau. Bấm vào đầu đồng quân mà lại chọn ô sau lưng nó thì sai với Story 1.4 ("bấm vào tướng mình luôn là chọn").
-- [ ] **Task 2: Vẽ mặt đất trong `BoardView._draw`** (AC: 1, 2, 6)
-  - [ ] 2.1 Mỗi ô là đa giác thoi 4 đỉnh quanh `cell_center` (`draw_colored_polygon`). Đất trống màu `CELL_COLOR`, hầm chông màu hiện có kèm ký hiệu vẽ bằng code (ví dụ 3 tam giác nhọn nhỏ), đường kẻ ô `LINE_COLOR`, viền hình thoi lớn `BORDER_WIDTH`.
-  - [ ] 2.2 Mép bàn có độ dày: hai mặt trước (cạnh dưới trái, cạnh dưới phải của hình thoi lớn) vẽ thêm một dải tối hơn cao khoảng 12px. Cho bàn cảm giác là một tấm.
-  - [ ] 2.3 Sông thấp hơn mặt đất: vẽ ô sông thành lòng trũng (mặt nước hạ xuống khoảng 6px, hai thành phía sau tối hơn lộ ra). Màu nước giữ `TERRAIN_COLORS[RIVER]`.
-  - [ ] 2.4 Ô sáng (`REACH_COLOR`) tô lên mặt thoi của ô. Vòng chọn thành **hình elip 2:1** trên mặt đất quanh chân đồng quân (tính các điểm rồi `draw_polyline`; `draw_circle` không méo được). Đường đi nối các `cell_center` như cũ.
-  - [ ] 2.5 Chữ ngắn của sông và hầm chông (`TERRAIN_KEYS`) đặt ở nửa dưới ô thoi, không bị đồng quân che hết. Chữ của khối nằm trên mặt trên khối (Task 3).
-- [ ] **Task 3: Lớp vật đứng: khối địa hình và đồng quân, sắp theo chiều sâu** (AC: 2, 3, 4)
-  - [ ] 3.1 Trong `BoardView`, thay `_units` bằng một `Node2D` `_world` có `y_sort_enabled = true`. Khối địa hình và đồng quân đều là con của `_world`. Thứ tự con của `BoardView` sau Story 1.7: chữ địa hình phẳng, `_world`, overlay F1 (do `main.gd` thêm cuối cùng).
-  - [ ] 3.2 File mới `game/src/battle/terrain_block.gd` (`class_name TerrainBlock extends Node2D`): vẽ một khối thoi nhô lên, mặt trên màu `TERRAIN_COLORS[kind]`, hai mặt bên tối hơn (ví dụ `darkened(0.25)` và `darkened(0.4)`), kèm chữ ngắn trên mặt trên. Chiều cao khối `BLOCK_HEIGHT = 16`.
-  - [ ] 3.3 Rừng, kho lương, làng: khối cao `BLOCK_HEIGHT`. **Ô ải** (tác giả chốt 2026-10-18): bệ đá thấp `PASS_HEIGHT = BLOCK_HEIGHT / 2`; quân đứng trên ô ải được nâng lên `PASS_HEIGHT` (BoardView đặt lại `position` của đồng sau `update`, hoặc truyền độ nâng vào đồng; `pick_cell` tính theo vị trí đã nâng).
-  - [ ] 3.4 **Thứ tự che khuất bằng y-sort:** đặt `position` của khối ở **đỉnh trên** ô thoi của nó (`cell_center - (0, TILE_H / 2)`), còn đồng quân ở `cell_center` (chân đồng). Như vậy y của khối ô `(c, r)` là `(c + r) * TILE_H / 2`, y của quân là `(c + r) * TILE_H / 2 + TILE_H / 2`: quân ở ô phía sau luôn vẽ trước khối, quân đứng trên chính ô đó (ô ải) vẽ sau khối, và không phụ thuộc thứ tự thêm node. Tự vẽ hình khối lệch xuống trong `_draw` của khối cho đúng chỗ.
-  - [ ] 3.5 `_rebuild_terrain_labels()` đổi thành dựng lại cả chữ phẳng lẫn khối (tên mới, ví dụ `_rebuild_terrain()`), gọi ở `show_state` như cũ. Bàn trống (`state == null`) thì không có khối nào.
-- [ ] **Task 4: Đồng quân đứng** (AC: 3)
-  - [ ] 4.1 `UnitToken`: `position` vẫn là `BoardView.cell_center(unit.cell)` (chân đồng). Trong `_draw`: bóng là elip mờ trên mặt đất tại `(0, 0)`, đồng tròn vẽ nâng lên `TOKEN_LIFT` (tâm đồng ở `(0, -TOKEN_LIFT)`). Nhãn tên và chấm máu dời lên theo.
-  - [ ] 4.2 Cỡ gợi ý: `RADIUS = 26`, `TOKEN_LIFT = 22`. Ràng buộc bắt buộc (có test ở Task 7): bấm vào `cell_center` của **mọi** ô, kể cả khi ô trước và sau đều có quân, vẫn ra đúng ô đó. Với 128×64 thì đồng không với tới tâm ô hàng xóm (khoảng cách gần nhất ≥ 32px theo chiều dọc, 64px theo chiều ngang).
-  - [ ] 4.3 Màu phe, màu "đã đi", chữ tên, số máu giữ nguyên ý nghĩa; `hp_text()`, `name_text()`, `is_moved()` giữ nguyên cho test.
-- [ ] **Task 5: Input và F1 theo bàn nghiêng** (AC: 5, 6, 7)
-  - [ ] 5.1 `BattleInput._unhandled_input`: đổi `_board.cell_at(...)` thành `_board.pick_cell(...)` cho cả bấm và rê chuột. Phần còn lại giữ nguyên (lấy vị trí từ sự kiện, `make_input_local`).
-  - [ ] 5.2 `CoordOverlay.show_state`: nhãn `cot,hang` canh giữa ở nửa trên ô thoi (quanh `cell_center - (0, TILE_H / 4)`), nhãn id quân đặt cạnh đồng quân (ví dụ góc trên phải của đồng đứng). Chỉ gọi `BoardView.cell_center`, không tự tính hình học [kiến trúc: "View khác gọi hai hàm này, không tự tính"]. Overlay vẫn là con cuối của `BoardView`, nằm trên mọi thứ.
-- [ ] **Task 6: `main.gd` và HUD** (AC: 1)
-  - [ ] 6.1 `_show_error`: màn hình lỗi lấy khung từ `_board_view.board_rect()` thay cho `position` + `cols * CELL_SIZE`.
-  - [ ] 6.2 `Hud.PANEL_POSITION` giữ `(972, 52)` nếu bàn không đè lên; sửa chú thích "bàn chiếm x 332–948" theo khung mới.
-- [ ] **Task 7: Test** (AC: 8; theo mẫu `test_battle_view.gd`, `test_main.gd`)
-  - [ ] 7.1 Sửa `test_cell_at_maps_board_pixels` thành bộ test bàn nghiêng:
+- [x] **Task 1: Phép đổi ô ↔ điểm trong `BoardView`** (AC: 1, 5, 8)
+  - [x] 1.1 Thay `CELL_SIZE` bằng `TILE_W = 128`, `TILE_H = 64` (2:1). Giữ một nơi khai báo; mọi chỗ khác đọc từ đây (xem bảng "Ai đang dùng `CELL_SIZE`" bên dưới).
+  - [x] 1.2 `static func cell_center(cell)`: gốc tọa độ local của `BoardView` là **đỉnh trên của ô `0,0`**. `x = (cot - hang) * TILE_W / 2`, `y = (cot + hang) * TILE_H / 2 + TILE_H / 2`. Vẫn là hàm `static`, không phụ thuộc kích thước bàn (đồng quân và test đang gọi `BoardView.cell_center` kiểu static).
+  - [x] 1.3 `func cell_at(local_pos)`: phép ngược trên **mặt đất**. `a = x / TILE_W + y / TILE_H`, `b = y / TILE_H - x / TILE_W`, `cell = Vector2i(floori(a), floori(b))`. Ngoài `[0, cols) × [0, rows)` thì `NO_CELL`. Giữ đúng hợp đồng kiến trúc `cell_at(cell_center(c)) == c`.
+  - [x] 1.4 `func board_rect() -> Rect2`: khung chữ nhật bao trọn mọi thứ bàn vẽ ra (hình thoi lớn, độ dày mép bàn, phần khối và đồng quân nhô lên ở hàng trên cùng), tính trong tọa độ của cha (`main`). Dùng cho canh giữa, cho màn hình lỗi, cho test bố cục.
+  - [x] 1.5 `setup(cols, rows)`: đặt `position` (đỉnh trên của ô `0,0` trên màn hình) sao cho `board_rect()` nằm giữa vùng trống bên trái HUD: x trong `[16, 956]`, y trong `[52, 664]` (dưới tiêu đề, trên nhãn phiên bản). Bàn 7×7 với 128×64: hình thoi rộng 896, cao 448, còn dư chỗ.
+  - [x] 1.6 `func pick_cell(local_pos) -> Vector2i`: ô mà người chơi **nhìn thấy** dưới chuột. Xét từ gần người xem ra xa (`cot + hang` giảm dần): trúng đồng quân (hình tròn đứng) hoặc trúng khối nhô lên (mặt trên và hai mặt bên) thì trả ô đó; không trúng gì thì trả `cell_at(local_pos)`. Lý do: đồng quân đứng và khối nhô lên chồng lên ô phía sau. Bấm vào đầu đồng quân mà lại chọn ô sau lưng nó thì sai với Story 1.4 ("bấm vào tướng mình luôn là chọn").
+- [x] **Task 2: Vẽ mặt đất trong `BoardView._draw`** (AC: 1, 2, 6)
+  - [x] 2.1 Mỗi ô là đa giác thoi 4 đỉnh quanh `cell_center` (`draw_colored_polygon`). Đất trống màu `CELL_COLOR`, hầm chông màu hiện có kèm ký hiệu vẽ bằng code (ví dụ 3 tam giác nhọn nhỏ), đường kẻ ô `LINE_COLOR`, viền hình thoi lớn `BORDER_WIDTH`.
+  - [x] 2.2 Mép bàn có độ dày: hai mặt trước (cạnh dưới trái, cạnh dưới phải của hình thoi lớn) vẽ thêm một dải tối hơn cao khoảng 12px. Cho bàn cảm giác là một tấm.
+  - [x] 2.3 Sông thấp hơn mặt đất: vẽ ô sông thành lòng trũng (mặt nước hạ xuống khoảng 6px, hai thành phía sau tối hơn lộ ra). Màu nước giữ `TERRAIN_COLORS[RIVER]`.
+  - [x] 2.4 Ô sáng (`REACH_COLOR`) tô lên mặt thoi của ô. Vòng chọn thành **hình elip 2:1** trên mặt đất quanh chân đồng quân (tính các điểm rồi `draw_polyline`; `draw_circle` không méo được). Đường đi nối các `cell_center` như cũ.
+  - [x] 2.5 Chữ ngắn của sông và hầm chông (`TERRAIN_KEYS`) đặt ở nửa dưới ô thoi, không bị đồng quân che hết. Chữ của khối nằm trên mặt trên khối (Task 3).
+- [x] **Task 3: Lớp vật đứng: khối địa hình và đồng quân, sắp theo chiều sâu** (AC: 2, 3, 4)
+  - [x] 3.1 Trong `BoardView`, thay `_units` bằng một `Node2D` `_world` có `y_sort_enabled = true`. Khối địa hình và đồng quân đều là con của `_world`. Thứ tự con của `BoardView` sau Story 1.7: chữ địa hình phẳng, `_world`, overlay F1 (do `main.gd` thêm cuối cùng).
+  - [x] 3.2 File mới `game/src/battle/terrain_block.gd` (`class_name TerrainBlock extends Node2D`): vẽ một khối thoi nhô lên, mặt trên màu `TERRAIN_COLORS[kind]`, hai mặt bên tối hơn (ví dụ `darkened(0.25)` và `darkened(0.4)`), kèm chữ ngắn trên mặt trên. Chiều cao khối `BLOCK_HEIGHT = 16`.
+  - [x] 3.3 Rừng, kho lương, làng: khối cao `BLOCK_HEIGHT`. **Ô ải** (tác giả chốt 2026-10-18): bệ đá thấp `PASS_HEIGHT = BLOCK_HEIGHT / 2`; quân đứng trên ô ải được nâng lên `PASS_HEIGHT` (BoardView đặt lại `position` của đồng sau `update`, hoặc truyền độ nâng vào đồng; `pick_cell` tính theo vị trí đã nâng).
+  - [x] 3.4 **Thứ tự che khuất bằng y-sort:** đặt `position` của khối ở **đỉnh trên** ô thoi của nó (`cell_center - (0, TILE_H / 2)`), còn đồng quân ở `cell_center` (chân đồng). Như vậy y của khối ô `(c, r)` là `(c + r) * TILE_H / 2`, y của quân là `(c + r) * TILE_H / 2 + TILE_H / 2`: quân ở ô phía sau luôn vẽ trước khối, quân đứng trên chính ô đó (ô ải) vẽ sau khối, và không phụ thuộc thứ tự thêm node. Tự vẽ hình khối lệch xuống trong `_draw` của khối cho đúng chỗ.
+  - [x] 3.5 `_rebuild_terrain_labels()` đổi thành dựng lại cả chữ phẳng lẫn khối (tên mới, ví dụ `_rebuild_terrain()`), gọi ở `show_state` như cũ. Bàn trống (`state == null`) thì không có khối nào.
+- [x] **Task 4: Đồng quân đứng** (AC: 3)
+  - [x] 4.1 `UnitToken`: `position` vẫn là `BoardView.cell_center(unit.cell)` (chân đồng). Trong `_draw`: bóng là elip mờ trên mặt đất tại `(0, 0)`, đồng tròn vẽ nâng lên `TOKEN_LIFT` (tâm đồng ở `(0, -TOKEN_LIFT)`). Nhãn tên và chấm máu dời lên theo.
+  - [x] 4.2 Cỡ gợi ý: `RADIUS = 26`, `TOKEN_LIFT = 22`. Ràng buộc bắt buộc (có test ở Task 7): bấm vào `cell_center` của **mọi** ô, kể cả khi ô trước và sau đều có quân, vẫn ra đúng ô đó. Với 128×64 thì đồng không với tới tâm ô hàng xóm (khoảng cách gần nhất ≥ 32px theo chiều dọc, 64px theo chiều ngang).
+  - [x] 4.3 Màu phe, màu "đã đi", chữ tên, số máu giữ nguyên ý nghĩa; `hp_text()`, `name_text()`, `is_moved()` giữ nguyên cho test.
+- [x] **Task 5: Input và F1 theo bàn nghiêng** (AC: 5, 6, 7)
+  - [x] 5.1 `BattleInput._unhandled_input`: đổi `_board.cell_at(...)` thành `_board.pick_cell(...)` cho cả bấm và rê chuột. Phần còn lại giữ nguyên (lấy vị trí từ sự kiện, `make_input_local`).
+  - [x] 5.2 `CoordOverlay.show_state`: nhãn `cot,hang` canh giữa ở nửa trên ô thoi (quanh `cell_center - (0, TILE_H / 4)`), nhãn id quân đặt cạnh đồng quân (ví dụ góc trên phải của đồng đứng). Chỉ gọi `BoardView.cell_center`, không tự tính hình học [kiến trúc: "View khác gọi hai hàm này, không tự tính"]. Overlay vẫn là con cuối của `BoardView`, nằm trên mọi thứ.
+- [x] **Task 6: `main.gd` và HUD** (AC: 1)
+  - [x] 6.1 `_show_error`: màn hình lỗi lấy khung từ `_board_view.board_rect()` thay cho `position` + `cols * CELL_SIZE`.
+  - [x] 6.2 `Hud.PANEL_POSITION` giữ `(972, 52)` nếu bàn không đè lên; sửa chú thích "bàn chiếm x 332–948" theo khung mới.
+- [x] **Task 7: Test** (AC: 8; theo mẫu `test_battle_view.gd`, `test_main.gd`)
+  - [x] 7.1 Sửa `test_cell_at_maps_board_pixels` thành bộ test bàn nghiêng:
     - đi rồi về: cả 49 ô, `cell_at(cell_center(c)) == c`;
     - sát mép: với mỗi ô, 4 điểm cách mỗi đỉnh thoi 2px vào phía tâm đều ra đúng ô;
     - ngoài bàn: điểm cách đỉnh trên của ô `0,0` 2px lên trên, điểm ngoài đỉnh trái, phải, dưới của hình thoi lớn đều là `NO_CELL`;
     - hướng: `cell_center(1,0)` ở dưới bên phải `cell_center(0,0)`, `cell_center(0,1)` ở dưới bên trái.
-  - [ ] 7.2 Test `pick_cell`: trên trận 1 có quân, `pick_cell(cell_center(c)) == c` cho cả 49 ô; điểm trên đầu đồng quân Khoái (`0,6`), nằm trong vùng đất của ô sau lưng, vẫn ra `0,6`. Trên `thu_ba_tuong`: điểm ở mặt trên khối rừng `1,1` (phần nhô vào ô sau) ra `1,1`.
-  - [ ] 7.3 Test che khuất: trong `_world`, `y_sort_enabled` bật; với khối rừng `1,1` và quân ở `1,0` (trận `thu_ba_tuong`: Bộ binh ở `1,0`), y của quân nhỏ hơn y của khối (vẽ trước). Quân đứng trên ô ải (nếu tác giả chốt quân đứng được trên khối ải) có y lớn hơn khối đó.
-  - [ ] 7.4 Sửa `test_coord_overlay_follows_moved_unit` (`test_battle_view.gd` dòng ~379): nhãn id 1 nằm quanh đồng ở ô mới (so với `cell_center(KHOAI_TARGET)`), không còn so với gốc ô vuông.
-  - [ ] 7.5 Test bố cục: `board_rect()` của trận 1 nằm trong `[16, 956] × [52, 664]`; không giao với khung tiêu đề, khung HUD (`Hud.PANEL_POSITION`, `PANEL_WIDTH`), khung nhãn phiên bản. Sửa `test_title_label_sits_above_board` dùng `board_rect()`.
-  - [ ] 7.6 Test màn hình lỗi: khung `ErrorScreen` bằng `board_rect()`.
-  - [ ] 7.7 Các test đang bấm qua `get_global_transform_with_canvas() * BoardView.cell_center(cell)` (`_hover_by_mouse`, test bấm chuột thật) phải xanh mà không sửa; nếu trượt là `pick_cell` sai.
-  - [ ] 7.8 "Làm hỏng tạm" để chứng minh test bắt được lỗi (như Story 1.5, 1.6): đảo dấu trong `cell_at` → 7.1 trượt; tắt `y_sort_enabled` hoặc đặt khối ở `cell_center` → 7.3 trượt; `BattleInput` quay về `cell_at` → 7.2 trượt. Ghi vào Debug Log.
-  - [ ] 7.9 `git diff --stat` không có file nào trong `game/src/core/`, `game/data/`, `game/tests/kich_ban/` (AC 10).
-- [ ] **Task 8: Nhìn bằng mắt (GoPeak) và bản web** (AC: 1–7, 9)
-  - [ ] 8.1 `tools/chay.sh --dev` chạy nền, chờ ~5 giây, `capture_screenshot`: bàn thoi, quân đứng, không đè tiêu đề và HUD. Bấm `1`, chụp: ô sáng và vòng chọn elip đúng chỗ. `inject_mouse_click` vào tâm vài ô sáng (tính từ `cell_center` + `position` của bàn), chụp: quân đi đúng ô. F1 (`inject_action dev_f1`), chụp: tọa độ đúng ô thoi.
-  - [ ] 8.2 `tools/chay.sh --dev --tran=thu_ba_tuong`, chụp: đủ 6 loại ô + ô ải, khối che đúng chiều.
-  - [ ] 8.3 `tools/build_web.sh` đạt (dung lượng trong giới hạn). Ghi vào hướng dẫn cho tác giả cách mở bản web để tự xem độ mượt (giống Task 5 Story 1.6). Không deploy.
-- [ ] **Task 9: Tài liệu, test, commit** (AC: 8)
-  - [ ] 9.1 `game-architecture.md` đã có quy ước ô ↔ điểm và thứ tự vẽ (dòng 573, 676). Bổ sung: `pick_cell` cho chuột (ô nhìn thấy), `cell_at` cho mặt đất; y-sort trong `_world`, khối đặt ở đỉnh trên ô.
-  - [ ] 9.2 `deferred-work.md` dòng 4 (chưa có test canh giữa `BoardView.setup`): đánh dấu đã làm bằng test 7.5.
-  - [ ] 9.3 `tools/test.sh` xanh. Commit một lần, lời commit tiếng Việt, ví dụ `Bàn cờ nghiêng isometric tạm (Story 1.7)`.
-  - [ ] 9.4 Ghi hướng dẫn tác giả tự test vào Completion Notes (mẫu ở mục Testing), kèm ảnh chụp đã xem.
+  - [x] 7.2 Test `pick_cell`: trên trận 1 có quân, `pick_cell(cell_center(c)) == c` cho cả 49 ô; điểm trên đầu đồng quân Khoái (`0,6`), nằm trong vùng đất của ô sau lưng, vẫn ra `0,6`. Trên `thu_ba_tuong`: điểm ở mặt trên khối rừng `1,1` (phần nhô vào ô sau) ra `1,1`.
+  - [x] 7.3 Test che khuất: trong `_world`, `y_sort_enabled` bật; với khối rừng `1,1` và quân ở `1,0` (trận `thu_ba_tuong`: Bộ binh ở `1,0`), y của quân nhỏ hơn y của khối (vẽ trước). Quân đứng trên ô ải (nếu tác giả chốt quân đứng được trên khối ải) có y lớn hơn khối đó.
+  - [x] 7.4 Sửa `test_coord_overlay_follows_moved_unit` (`test_battle_view.gd` dòng ~379): nhãn id 1 nằm quanh đồng ở ô mới (so với `cell_center(KHOAI_TARGET)`), không còn so với gốc ô vuông.
+  - [x] 7.5 Test bố cục: `board_rect()` của trận 1 nằm trong `[16, 956] × [52, 664]`; không giao với khung tiêu đề, khung HUD (`Hud.PANEL_POSITION`, `PANEL_WIDTH`), khung nhãn phiên bản. Sửa `test_title_label_sits_above_board` dùng `board_rect()`.
+  - [x] 7.6 Test màn hình lỗi: khung `ErrorScreen` bằng `board_rect()`.
+  - [x] 7.7 Các test đang bấm qua `get_global_transform_with_canvas() * BoardView.cell_center(cell)` (`_hover_by_mouse`, test bấm chuột thật) phải xanh mà không sửa; nếu trượt là `pick_cell` sai.
+  - [x] 7.8 "Làm hỏng tạm" để chứng minh test bắt được lỗi (như Story 1.5, 1.6): đảo dấu trong `cell_at` → 7.1 trượt; tắt `y_sort_enabled` hoặc đặt khối ở `cell_center` → 7.3 trượt; `BattleInput` quay về `cell_at` → 7.2 trượt. Ghi vào Debug Log.
+  - [x] 7.9 `git diff --stat` không có file nào trong `game/src/core/`, `game/data/`, `game/tests/kich_ban/` (AC 10).
+- [x] **Task 8: Nhìn bằng mắt (GoPeak) và bản web** (AC: 1–7, 9)
+  - [x] 8.1 `tools/chay.sh --dev` chạy nền, chờ ~5 giây, `capture_screenshot`: bàn thoi, quân đứng, không đè tiêu đề và HUD. Bấm `1`, chụp: ô sáng và vòng chọn elip đúng chỗ. `inject_mouse_click` vào tâm vài ô sáng (tính từ `cell_center` + `position` của bàn), chụp: quân đi đúng ô. F1 (`inject_action dev_f1`), chụp: tọa độ đúng ô thoi.
+  - [x] 8.2 `tools/chay.sh --dev --tran=thu_ba_tuong`, chụp: đủ 6 loại ô + ô ải, khối che đúng chiều.
+  - [x] 8.3 `tools/build_web.sh` đạt (dung lượng trong giới hạn). Ghi vào hướng dẫn cho tác giả cách mở bản web để tự xem độ mượt (giống Task 5 Story 1.6). Không deploy.
+- [x] **Task 9: Tài liệu, test, commit** (AC: 8)
+  - [x] 9.1 `game-architecture.md` đã có quy ước ô ↔ điểm và thứ tự vẽ (dòng 573, 676). Bổ sung: `pick_cell` cho chuột (ô nhìn thấy), `cell_at` cho mặt đất; y-sort trong `_world`, khối đặt ở đỉnh trên ô.
+  - [x] 9.2 `deferred-work.md` dòng 4 (chưa có test canh giữa `BoardView.setup`): đánh dấu đã làm bằng test 7.5.
+  - [x] 9.3 `tools/test.sh` xanh. Commit một lần, lời commit tiếng Việt, ví dụ `Bàn cờ nghiêng isometric tạm (Story 1.7)`.
+  - [x] 9.4 Ghi hướng dẫn tác giả tự test vào Completion Notes (mẫu ở mục Testing), kèm ảnh chụp đã xem.
 
 ## Dev Notes
 
@@ -223,15 +227,86 @@ Hình học (128×64, ô `0,0` ở đỉnh trên):
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5)
+
 ### Debug Log References
+
+- Đỏ trước: viết `game/tests/test_board_view.gd` trước, `tools/test.sh` báo lỗi script (`TILE_W`, `TerrainBlock` chưa có).
+- Lần chạy đầu sau khi code: 3 trượt.
+  - Khối đặt ở đỉnh trên ô (như Task 3.4 ghi) bằng đúng y với quân ở ô phía sau sát nó (`64 < 64` trượt). Đổi khối lên cao hơn tâm `TILE_H / 4`: quân phía sau nhỏ hơn 16px, quân cùng độ sâu lớn hơn 16px, quân trên bệ ô ải lớn hơn 8px.
+  - `board_rect` hụt đúng mép phải (Rect2 không tính mép cuối). Thêm nửa nét viền bàn vào khung.
+  - `test_reload_rebuilds_token_when_id_changes_type` còn đọc `_units`. Đổi sang đếm `UnitToken` trong `_world`.
+- Làm hỏng tạm (trả lại ngay, sau đó 332/332 xanh):
+  - đảo dấu `cell_at` → 9 trượt (2 test đổi ô ↔ điểm và 5 test chuột cũ);
+  - tắt `y_sort_enabled` → `test_blocks_and_tokens_sort_by_depth` trượt;
+  - `BattleInput` quay về `cell_at` → `test_mouse_click_on_token_head_selects_that_general` trượt;
+  - bỏ nâng quân trên ô ải → `test_token_on_pass_stands_on_platform` trượt.
+- Lệch so với Tasks (đã cân nhắc, cùng mục đích):
+  - Task 3.3: bệ ô ải vẽ trên mặt đất trong `BoardView._draw`, không phải node `TerrainBlock`. Ô sáng, vòng chọn, đường đi trên ô ải vẽ trên mặt bệ; nếu bệ là node trong `_world` thì nó che mất chúng. Bệ chỉ cao 8px nên không cần sắp theo chiều sâu với quân. Test 7.3 phần ô ải đổi thành kiểm quân đứng trên bệ (`cell_center - PASS_HEIGHT`) và bệ không nằm trong `_world`.
+  - Task 3.4: khối đặt cao hơn tâm `TILE_H / 4`, không phải ở đỉnh trên (xem trên).
+  - Task 5.2: nhãn tọa độ F1 đặt ở nửa trái ô. Ảnh chụp cho thấy đặt ở nửa trên thì đè lên tên quân.
+- GoPeak (`tools/chay.sh --dev`):
+  - Trận 1: bàn thoi, sông dải chéo có khe `3,3`, quân đứng có bóng, không đè tiêu đề và HUD.
+  - `select_general_1`: 7 ô sáng, vòng elip. Rê chuột (294, 334) = ô `1,4`: đường đi.
+  - Bấm (294, 334): Khoái sang `1,4`, đổi màu "đã đi", nút Hủy sáng.
+  - `dev_f1`: tọa độ đúng từng ô.
+  - `--tran=thu_ba_tuong`: rừng, kho, làng là khối; ô ải là bệ xám; hầm chông có 3 mũi; sông trũng. Cung kỵ ở `5,2` che lên kho `5,1` phía sau.
+- `tools/build_web.sh`: đạt, nén 10.4 MB / 25 MB.
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
+- `BoardView` vẽ bàn nghiêng 2:1 (ô 128×64), ô `0,0` ở đỉnh trên, bàn canh giữa vùng `AREA` (x 16–956, y 52–664), HUD giữ nguyên.
+  - `cell_center` (static), `cell_at` (mặt đất), `pick_cell` (thứ nhìn thấy: đồng quân, khối), `board_rect`.
+  - Mặt đất có mép bàn dày, sông trũng (mặt nước cắt theo mép ô), hầm chông 3 mũi, bệ ô ải, ô sáng, vòng chọn elip, đường đi.
+- `TerrainBlock` (mới): khối rừng, kho lương, làng, có mặt bên tối hơn và chữ trên mặt.
+  - Khối và đồng quân nằm chung `_world` (`y_sort_enabled`), che đúng chiều theo `cot + hang`.
+- `UnitToken`: đồng đứng (nâng 22px, bán kính 26), bóng elip dưới chân. Đứng trên ô ải thì nâng thêm 8px. Có `cell` và `hit()` cho `pick_cell`.
+- `BattleInput` dùng `pick_cell` cho cả bấm và rê.
+- `CoordOverlay` tính theo `cell_center`.
+- Khung màn hình lỗi lấy từ `board_rect()`.
+- Test: thêm `test_board_view.gd` (13 test).
+  - Đổi ô ↔ điểm: 49 ô đi rồi về, sát 4 đỉnh của mọi ô, ngoài 4 đỉnh bàn, hướng cột và hàng.
+  - Chọn ô: `pick_cell` tâm mọi ô trên 2 trận, đầu đồng Lão, mặt khối rừng, bấm chuột thật qua `BattleInput`.
+  - Che khuất, quân trên ô ải, bố cục.
+  - Thêm `test_error_screen_covers_board_rect`. Sửa 4 test cũ theo bàn nghiêng.
+- `tools/test.sh`: 333/333.
+- Không sửa `game/src/core/`, `game/data/`, `game/tests/kich_ban/` (`git diff --stat` rỗng).
+
+**Hướng dẫn tác giả tự test**
+
+1. `tools/chay.sh`. Thấy bàn thoi, ô `0,0` ở đỉnh trên. Khoái ở góc trái, Lão bên phải Khoái. Sông là dải chéo, có khe ở giữa. Quân là đồng tròn đứng, có bóng, có số máu.
+2. Bấm vào Khoái (hoặc phím `1`). Thấy 7 ô xanh và vòng vàng elip dưới chân Khoái. Rê chuột lên một ô xanh: thấy đường đi màu xanh dương. Bấm ô đó: Khoái đi tới, đổi màu đỏ xỉn, nút Hủy sáng.
+3. Thử bấm sát mép các ô thoi: luôn chọn đúng ô dưới chuột. Bấm vào đầu đồng Lão (phần trên đồng tròn): chọn Lão.
+4. `Z`, nút Hủy, `Space`, nút Kết thúc lượt chạy như trước.
+5. `tools/chay.sh --dev --tran=thu_ba_tuong`:
+   - Rừng (xanh lá), Kho (vàng), Làng (nâu) là khối nổi, mặt bên tối hơn.
+   - Ô ải là bệ đá xám thấp. Hầm chông có 3 mũi nhọn. Sông trũng xuống.
+   - Quân Cung kỵ (`C`) đứng trước kho nên che lên kho.
+6. Còn trong `--dev`: bấm F1 (trên Mac là Fn+F1), thấy tọa độ ở nửa trái mỗi ô, số id cạnh đầu mỗi quân. Bấm F5 (Fn+F5): trận nạp lại.
+7. (Web) Gõ `python3 -m http.server 8060 -d build/web`, mở `http://localhost:8060` trong Chrome, xem bàn nghiêng có mượt không. Xong thì bấm Ctrl+C để tắt server.
 
 ### File List
+
+- `game/src/battle/board_view.gd` (sửa)
+- `game/src/battle/terrain_block.gd` (mới)
+- `game/src/battle/terrain_block.gd.uid` (mới)
+- `game/src/battle/unit_token.gd` (sửa)
+- `game/src/battle/battle_input.gd` (sửa)
+- `game/src/debug/coord_overlay.gd` (sửa)
+- `game/src/app/main.gd` (sửa)
+- `game/src/ui/hud.gd` (sửa chú thích)
+- `game/tests/test_board_view.gd` (mới)
+- `game/tests/test_board_view.gd.uid` (mới)
+- `game/tests/test_battle_view.gd` (sửa)
+- `game/tests/test_main.gd` (sửa)
+- `_bmad-output/planning-artifacts/game-architecture.md` (sửa)
+- `_bmad-output/implementation-artifacts/deferred-work.md` (sửa)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (sửa)
+- `_bmad-output/implementation-artifacts/1-7-ban-co-nghieng-isometric-tam.md` (sửa)
 
 ### Change Log
 
 - 2026-10-18: Tạo story.
 - 2026-10-18: Tác giả chốt ô ải là bệ đá thấp, quân đứng trên được nâng lên (phương án a).
+- 2026-10-18: Làm story: bàn nghiêng isometric 2:1, khối địa hình, đồng quân đứng, chọn ô nhìn thấy dưới chuột, F1 theo ô thoi; 14 test mới/sửa; `tools/test.sh` 333/333; build web đạt.

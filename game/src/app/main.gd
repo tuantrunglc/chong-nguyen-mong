@@ -137,8 +137,9 @@ func _show_error(errors: Array[String]) -> void:
 	_show_board(null)
 	_board_view.visible = false
 	_error_screen = ErrorScreen.new()
-	_error_screen.position = _board_view.position
-	_error_screen.size = Vector2(_board_view.cols, _board_view.rows) * BoardView.CELL_SIZE
+	var rect: Rect2 = _board_view.board_rect()
+	_error_screen.position = rect.position
+	_error_screen.size = rect.size
 	add_child(_error_screen)
 	move_child(_error_screen, _board_view.get_index() + 1)
 	_error_screen.setup(errors, AppState.launch.dev)
