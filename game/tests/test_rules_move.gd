@@ -183,12 +183,12 @@ func test_move_walks_cell_by_cell() -> void:
 func test_rejected_moves_change_nothing() -> void:
 	var units: Array[String] = _rows({Vector2i(0, 6): "1", Vector2i(1, 6): "2", Vector2i(0, 4): "B"})
 	var cases: Array[Array] = [
-		[Command.move(1, Vector2i(4, 6)), "quân 1 không đi tới được ô 4,6"],
-		[Command.move(1, Vector2i(1, 6)), "quân 1 không đi tới được ô 1,6"],
-		[Command.move(1, Vector2i(0, 4)), "quân 1 không đi tới được ô 0,4"],
-		[Command.move(1, Vector2i(0, 6)), "quân 1 đã đứng ở ô 0,6"],
-		[Command.move(3, Vector2i(0, 5)), "không có quân 3"],
-		[Command.move(101, Vector2i(0, 3)), "quân 101 không phải tướng"],
+		[Command.move(1, Vector2i(4, 6)), "quân 1 không đi tới được ô 4,6", BattleEvent.Reject.UNREACHABLE],
+		[Command.move(1, Vector2i(1, 6)), "quân 1 không đi tới được ô 1,6", BattleEvent.Reject.UNREACHABLE],
+		[Command.move(1, Vector2i(0, 4)), "quân 1 không đi tới được ô 0,4", BattleEvent.Reject.UNREACHABLE],
+		[Command.move(1, Vector2i(0, 6)), "quân 1 đã đứng ở ô 0,6", BattleEvent.Reject.ALREADY_THERE],
+		[Command.move(3, Vector2i(0, 5)), "không có quân 3", BattleEvent.Reject.NO_UNIT],
+		[Command.move(101, Vector2i(0, 3)), "quân 101 không phải tướng", BattleEvent.Reject.NOT_GENERAL],
 	]
 	for item: Array in cases:
 		var state: BattleState = _state(units)
@@ -197,6 +197,7 @@ func test_rejected_moves_change_nothing() -> void:
 		assert_eq(events.size(), 1, item[1] as String)
 		assert_eq(events[0].type, BattleEvent.Type.REJECTED)
 		assert_eq(events[0].reason, item[1] as String)
+		assert_eq(events[0].reject, item[2] as BattleEvent.Reject, item[1] as String)
 		assert_eq(_picture(state), before, "state giữ nguyên: " + (item[1] as String))
 		assert_eq(state.validate(), [] as Array[String])
 
@@ -207,4 +208,6 @@ func test_blocked_by_terrain_is_rejected() -> void:
 	var events: Array[BattleEvent] = Rules.resolve(state, Command.move(1, Vector2i(2, 6)))
 	assert_eq(events.size(), 1)
 	assert_eq(events[0].type, BattleEvent.Type.REJECTED)
+	assert_eq(events[0].reject, BattleEvent.Reject.UNREACHABLE)
 	assert_eq(state.unit_by_id(1).cell, Vector2i(0, 6))
+	assert_eq(state.validate(), [] as Array[String])

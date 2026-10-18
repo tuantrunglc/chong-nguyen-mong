@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Rừng, kho lương, làng chặn ba phía; lối ra duy nhất là phía tây. Tới 3,1 và 3,5 mất 4 bước, tới 5,3 mất 8 bước, đều quá tầm 3, nên Nguyễn Khoái đứng yên.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

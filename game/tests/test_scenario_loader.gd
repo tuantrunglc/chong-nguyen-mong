@@ -498,11 +498,47 @@ func test_runner_reports_wrong_destination() -> void:
 	] as Array[String], "đi được thì bàn đổi; bàn sau ghi giữ nguyên là sai")
 
 
-## Lệnh bị luật từ chối không phải lỗi của bước: bàn giữ nguyên, kịch bản ghi giữ nguyên thì đạt.
+## Lệnh bị luật từ chối đúng lý do kịch bản ghi: bàn giữ nguyên, kịch bản ghi giữ nguyên thì đạt.
 func test_runner_rejected_move_keeps_board() -> void:
 	var d: Dictionary = _valid()
+	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "4,6", "tu_choi": "khong_toi_duoc"}]
+	var result: ScenarioRunner.ScenarioResult = _run(d)
+	assert_true(result.passed)
+	assert_eq(result.problems, [] as Array[String])
+
+
+func test_runner_rejection_not_written_fails() -> void:
+	var d: Dictionary = _valid()
 	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "4,6"}]
-	assert_eq(_run(d).problems, [] as Array[String])
+	var result: ScenarioRunner.ScenarioResult = _run(d)
+	assert_false(result.passed)
+	assert_eq(result.problems, [
+		'bước 1: luật từ chối ("khong_toi_duoc": quân 1 không đi tới được ô 4,6) mà kịch bản không ghi "tu_choi"',
+	] as Array[String])
+
+
+## Gõ nhầm ô đích thành ô tướng đang đứng: bàn vẫn giữ nguyên, nhưng sai lý do nên trượt.
+func test_runner_wrong_rejection_fails() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "0,6", "tu_choi": "khong_toi_duoc"}]
+	var result: ScenarioRunner.ScenarioResult = _run(d)
+	assert_false(result.passed)
+	assert_eq(result.problems, [
+		'bước 1: luật từ chối vì "da_dung_o_do" (quân 1 đã đứng ở ô 0,6), kịch bản ghi "tu_choi": "khong_toi_duoc"',
+	] as Array[String])
+
+
+func test_runner_expected_rejection_but_move_runs_fails() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "2,5", "tu_choi": "khong_toi_duoc"}]
+	var result: ScenarioRunner.ScenarioResult = _run(d)
+	assert_false(result.passed)
+	assert_eq(result.problems, ['bước 1: kịch bản ghi "tu_choi": "khong_toi_duoc" nhưng luật cho chạy'] as Array[String])
+
+
+func test_runner_and_loader_know_the_same_reject_codes() -> void:
+	assert_eq(ScenarioRunner.REJECT_EVENTS.keys(), ScenarioLoader.REJECT_CODES.keys())
+	assert_eq(ScenarioRunner.REJECT_EVENTS.size(), BattleEvent.Reject.size() - 1, "mọi lý do (trừ NONE) đều có mã")
 
 
 func test_runner_general_missing_from_board() -> void:

@@ -10,6 +10,14 @@ const PENDING_RULES: Dictionary = {
 	"danh": "2.1",
 }
 
+## Mã "tu_choi" của kịch bản -> lý do luật trả. Cùng khóa với ScenarioLoader.REJECT_CODES (test kiểm).
+const REJECT_EVENTS: Dictionary = {
+	"khong_co_quan": BattleEvent.Reject.NO_UNIT,
+	"khong_phai_tuong": BattleEvent.Reject.NOT_GENERAL,
+	"da_dung_o_do": BattleEvent.Reject.ALREADY_THERE,
+	"khong_toi_duoc": BattleEvent.Reject.UNREACHABLE,
+}
+
 ## Tên đầy đủ cho câu so sánh. Ký hiệu lấy ngược từ BoardText (unit_symbol, terrain_symbol).
 const UNIT_NAMES: Dictionary = {
 	UnitType.NGUYEN_KHOAI: "Nguyễn Khoái",
@@ -72,17 +80,35 @@ static func terrain_symbol(terrain: int) -> String:
 
 
 ## Chạy một lệnh trên state. Trả "" nếu chạy được, hoặc câu báo vì sao không chạy được.
-## Lệnh bị luật từ chối (REJECTED) vẫn là chạy được: không có gì đổi, bàn sau so như thường.
+## Lệnh bị luật từ chối (REJECTED) đúng lý do kịch bản ghi ("tu_choi") vẫn là chạy được: không có gì đổi,
+## bàn sau so như thường. Bị từ chối mà kịch bản không ghi, sai lý do, hay ghi mà không bị từ chối: trượt.
 static func _run_step(state: BattleState, step: ScenarioData.ScenarioStep) -> String:
 	match step.kind:
 		"di":
 			var general: Unit = _general(state, step.general)
 			if general == null:
 				return 'tướng "%s" không còn trên bàn' % unit_symbol(step.general)
-			Rules.resolve(state, Command.move(general.id, step.cell))
-			return ""
+			return _check_reject(Rules.resolve(state, Command.move(general.id, step.cell)), step.reject)
 		_:
 			return 'lệnh "%s" chưa có luật (Story %s)' % [step.kind, PENDING_RULES.get(step.kind, "?")]
+
+
+static func _check_reject(events: Array[BattleEvent], expected: String) -> String:
+	var rejected: BattleEvent = null
+	for event: BattleEvent in events:
+		if event.type == BattleEvent.Type.REJECTED:
+			rejected = event
+			break
+	if rejected == null:
+		if expected.is_empty():
+			return ""
+		return 'kịch bản ghi "tu_choi": "%s" nhưng luật cho chạy' % expected
+	var actual: Variant = REJECT_EVENTS.find_key(rejected.reject)
+	if actual == expected:
+		return ""
+	if expected.is_empty():
+		return 'luật từ chối ("%s": %s) mà kịch bản không ghi "tu_choi"' % [actual, rejected.reason]
+	return 'luật từ chối vì "%s" (%s), kịch bản ghi "tu_choi": "%s"' % [actual, rejected.reason, expected]
 
 
 static func _general(state: BattleState, type: int) -> Unit:

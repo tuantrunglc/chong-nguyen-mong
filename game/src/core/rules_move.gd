@@ -27,17 +27,18 @@ static func resolve(state: BattleState, command: Command, events: Array[BattleEv
 	var unit: Unit = state.unit_by_id(command.unit_id)
 	var where: String = "%d,%d" % [command.cell.x, command.cell.y]
 	if unit == null:
-		events.append(BattleEvent.rejected("không có quân %d" % command.unit_id))
+		events.append(BattleEvent.rejected(BattleEvent.Reject.NO_UNIT, "không có quân %d" % command.unit_id))
 		return
-	if unit.faction != Unit.Faction.DAI_VIET:
-		events.append(BattleEvent.rejected("quân %d không phải tướng" % unit.id))
+	if not UnitType.is_general(unit.type):
+		events.append(BattleEvent.rejected(BattleEvent.Reject.NOT_GENERAL, "quân %d không phải tướng" % unit.id))
 		return
 	if command.cell == unit.cell:
-		events.append(BattleEvent.rejected("quân %d đã đứng ở ô %s" % [unit.id, where]))
+		events.append(BattleEvent.rejected(BattleEvent.Reject.ALREADY_THERE, "quân %d đã đứng ở ô %s" % [unit.id, where]))
 		return
 	var path: Array[Vector2i] = path_to(state, unit, command.cell)
 	if path.is_empty():
-		events.append(BattleEvent.rejected("quân %d không đi tới được ô %s" % [unit.id, where]))
+		events.append(BattleEvent.rejected(BattleEvent.Reject.UNREACHABLE,
+			"quân %d không đi tới được ô %s" % [unit.id, where]))
 		return
 	for step: Vector2i in path:
 		Effects.move(state, unit, step, BattleEvent.Cause.WALK, events)

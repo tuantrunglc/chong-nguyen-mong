@@ -6,6 +6,7 @@ extends Node
 const NONE: int = 0
 
 var _board: BoardView = null
+var _input: BattleInput = null
 var _controller: BattleController = null
 ## Id tướng đang chọn; NONE là không chọn.
 var _selected: int = NONE
@@ -15,6 +16,7 @@ var _cells: Array[Vector2i] = []
 
 func setup(board: BoardView, input: BattleInput) -> void:
 	_board = board
+	_input = input
 	input.general_key_pressed.connect(_on_general_key)
 	input.cell_clicked.connect(_on_cell_clicked)
 	input.cell_hovered.connect(_on_cell_hovered)
@@ -47,7 +49,8 @@ func _on_general_key(id: int) -> void:
 	if id == _selected:
 		_deselect()
 		return
-	if _controller.snapshot().unit_by_id(id) != null:
+	var unit: Unit = _controller.snapshot().unit_by_id(id)
+	if unit != null and unit.faction == Unit.Faction.DAI_VIET:
 		_select(id)
 
 
@@ -78,6 +81,8 @@ func _select(id: int) -> void:
 	_selected = id
 	_cells = _controller.reachable(id)
 	_board.show_selection(_controller.snapshot().unit_by_id(id).cell, _cells)
+	# Chuột có thể đang nằm sẵn trên một ô vừa sáng: vẽ đường đi ngay, không chờ rê sang ô khác.
+	_on_cell_hovered(_input.hovered_cell())
 
 
 func _deselect() -> void:

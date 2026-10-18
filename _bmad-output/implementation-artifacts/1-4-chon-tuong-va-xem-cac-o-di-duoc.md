@@ -4,7 +4,7 @@ baseline_commit: 22d7228
 
 # Story 1.4: Chọn tướng và xem các ô đi được
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -110,14 +110,14 @@ tôi muốn chọn một tướng và thấy ngay nó đi được tới đâu,
 - [x] [Review][Decision] Bộ chạy kịch bản bỏ qua lý do bị từ chối — tác giả chốt 2026-10-18: thêm khóa `"tu_choi": "<mã>"` vào lệnh của `hanh_dong`; **bắt buộc** (lệnh bị từ chối mà không ghi, hoặc ghi mà không bị từ chối, là trượt); mã ngắn `khong_co_quan`, `khong_phai_tuong`, `da_dung_o_do`, `khong_toi_duoc`. Thành Patch bên dưới.
 - [x] [Review][Decision] Mô tả kịch bản 7 sai số bước — tác giả chốt 2026-10-18 câu mới: "Rừng, kho lương, làng chặn ba phía; lối ra duy nhất là phía tây. Tới 3,1 và 3,5 mất 4 bước, tới 5,3 mất 8 bước, đều quá tầm 3, nên Nguyễn Khoái đứng yên."
 - [x] [Review][Patch] Đợt duyệt lại (bước 1): bộ nạp đọc `tu_choi`, công cụ duyệt hiện lý do, 6 kịch bản "đứng yên" thêm `"tu_choi": "khong_toi_duoc"` và đặt `da_duyet: false`, sửa `mo_ta` kịch bản 7, cập nhật `game-architecture.md` và `project-context.md`. Chờ tác giả duyệt lại.
-- [ ] [Review][Patch] Bộ chạy kiểm `tu_choi` (bước 2, sau khi tác giả duyệt): `BattleEvent` mang mã lý do; lệnh bị từ chối phải khớp mã kịch bản ghi, không ghi thì trượt, ghi mà chạy được cũng trượt [game/tests/scenario_runner.gd:82]
-- [ ] [Review][Patch] Chọn tướng khi chuột đang nằm sẵn trên ô sáng thì không vẽ đường đi, tới khi rê sang ô khác (cả khi đổi 1→2 trên ô sáng chung) [game/src/battle/battle_view.gd:77]
-- [ ] [Review][Patch] Đường đi còn trên màn hình khi chuột ra khỏi cửa sổ; quay lại đúng ô cũ cũng không vẽ lại [game/src/battle/battle_input.gd:40]
-- [ ] [Review][Patch] Phím 1-2-3 không kiểm phe như khi bấm chuột (giờ an toàn nhờ id quân Nguyên từ 101) [game/src/battle/battle_view.gd:50]
-- [ ] [Review][Patch] Kiểm "không phải tướng" theo phe, không theo loại quân như spec (`UnitType.is_general`) [game/src/core/rules_move.gd:33]
-- [ ] [Review][Patch] `test_blocked_by_terrain_is_rejected` thiếu kiểm `state.validate()` rỗng (Task 5.1) [game/tests/test_rules_move.gd:204]
-- [ ] [Review][Patch] Chưa có test gửi phím thật (`InputEventKey` với `physical_keycode = KEY_1`); test chỉ gửi action nên gán sai phím ↔ action không bị bắt [game/tests/test_battle_view.gd:67]
-- [ ] [Review][Patch] Màn menu chưa test bấm chuột (AC 9), chỉ test phím 1 [game/tests/test_battle_view.gd]
+- [x] [Review][Patch] Bộ chạy kiểm `tu_choi` (bước 2, sau khi tác giả duyệt): `BattleEvent` mang mã lý do; lệnh bị từ chối phải khớp mã kịch bản ghi, không ghi thì trượt, ghi mà chạy được cũng trượt [game/tests/scenario_runner.gd:82]
+- [x] [Review][Patch] Chọn tướng khi chuột đang nằm sẵn trên ô sáng thì không vẽ đường đi, tới khi rê sang ô khác (cả khi đổi 1→2 trên ô sáng chung) [game/src/battle/battle_view.gd:77]
+- [x] [Review][Patch] Đường đi còn trên màn hình khi chuột ra khỏi cửa sổ; quay lại đúng ô cũ cũng không vẽ lại [game/src/battle/battle_input.gd:40]
+- [x] [Review][Patch] Phím 1-2-3 không kiểm phe như khi bấm chuột (giờ an toàn nhờ id quân Nguyên từ 101) [game/src/battle/battle_view.gd:50]
+- [x] [Review][Patch] Kiểm "không phải tướng" theo phe, không theo loại quân như spec (`UnitType.is_general`) [game/src/core/rules_move.gd:33]
+- [x] [Review][Patch] `test_blocked_by_terrain_is_rejected` thiếu kiểm `state.validate()` rỗng (Task 5.1) [game/tests/test_rules_move.gd:204]
+- [x] [Review][Patch] Chưa có test gửi phím thật (`InputEventKey` với `physical_keycode = KEY_1`); test chỉ gửi action nên gán sai phím ↔ action không bị bắt [game/tests/test_battle_view.gd:67]
+- [x] [Review][Patch] Màn menu chưa test bấm chuột (AC 9), chỉ test phím 1 [game/tests/test_battle_view.gd]
 - [x] [Review][Defer] `BattleView._cells` tính một lần lúc chọn, không làm mới khi trận đổi [game/src/battle/battle_view.gd:79] — deferred, chưa gặp được; cần xử lý khi Story 1.5 cho tướng đi thật
 - [x] [Review][Defer] `BattleView` và `BattleInput` là anh em dưới `main` thay vì con của `BattleView` như kiến trúc vẽ [game/src/app/main.gd:46] — deferred, đúng Task 7.4; dọn khi E2 thêm view
 - [x] [Review][Defer] `BoardView.show_state(null)` tự xóa vòng chọn, còn `BattleView._selected` chỉ xóa khi gọi `stop()` [game/src/battle/board_view.gd:131] — deferred, `main.gd` luôn gọi `stop()` trước nên chưa gặp được
@@ -423,3 +423,4 @@ Nếu đang bật bộ gõ VNI thì tắt đi trước khi gõ số.
 - 2026-10-18: Tạo story.
 - 2026-10-18: Tác giả chốt 3 quyết định (bỏ chọn, lệnh đi không hợp lệ, hầm chông).
 - 2026-10-18: Làm story: lõi luật đi (`Rules`, `RulesMove`, `Pathfinding`, `Effects`, `Command`, `BattleEvent`, `Grid`), bộ chạy chạy lệnh `di`, chọn tướng bằng chuột và phím 1-2-3, ô sáng, đường đi. 8 kịch bản `di_chuyen/` tác giả đã duyệt và đều đạt.
+- 2026-10-18: Code review: 2 quyết định, 9 sửa, 3 hoãn (`deferred-work.md`). Kịch bản ghi lý do từ chối (`tu_choi`, bắt buộc); 6 kịch bản đứng yên tác giả duyệt lại. Sửa đường đi khi chọn lúc chuột nằm sẵn trên ô sáng và khi chuột ra khỏi cửa sổ; phím 1-2-3 kiểm phe; luật kiểm "không phải tướng" theo loại quân. `tools/test.sh`: 272/272, 8 đã duyệt · 0 chưa duyệt.

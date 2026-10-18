@@ -25,7 +25,13 @@ func setup(board: BoardView) -> void:
 	_board = board
 
 
+## Ô dưới chuột lần cuối; NO_CELL nếu ngoài bàn hoặc chuột đã ra khỏi cửa sổ.
+func hovered_cell() -> Vector2i:
+	return _hovered
+
+
 func _ready() -> void:
+	get_window().mouse_exited.connect(_on_mouse_exited)
 	var actions: Array = GENERAL_ACTIONS.keys()
 	for i: int in range(actions.size()):
 		var action: String = actions[i] as String
@@ -35,6 +41,13 @@ func _ready() -> void:
 		var ev: InputEventKey = InputEventKey.new()
 		ev.physical_keycode = GENERAL_KEYS[i]
 		InputMap.action_add_event(action, ev)
+
+
+## Chuột ra khỏi cửa sổ (hay khung itch.io) không sinh sự kiện di chuột: coi như ra ngoài bàn.
+func _on_mouse_exited() -> void:
+	if _hovered != BoardView.NO_CELL:
+		_hovered = BoardView.NO_CELL
+		cell_hovered.emit(_hovered)
 
 
 func _unhandled_input(event: InputEvent) -> void:

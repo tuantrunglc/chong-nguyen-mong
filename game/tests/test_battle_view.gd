@@ -72,6 +72,13 @@ func _press_key(main: Node2D, index: int) -> void:
 	_battle_input(main)._unhandled_input(ev)
 
 
+## Di chuột thật tới tâm ô (qua BattleInput, như người chơi rê chuột).
+func _hover_by_mouse(main: Node2D, cell: Vector2i) -> void:
+	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+	motion.position = _board(main).get_global_transform_with_canvas() * BoardView.cell_center(cell)
+	_battle_input(main)._unhandled_input(motion)
+
+
 func _click(main: Node2D, cell: Vector2i) -> void:
 	_view(main)._on_cell_clicked(cell)
 
@@ -99,6 +106,23 @@ func test_key_1_selects_khoai_and_lights_7_cells() -> void:
 	_press_key(main, 1)
 	_assert_selected(main, 1, KHOAI_CELLS, KHOAI_CELL)
 	assert_does_not_have(_board(main).lit_cells(), LAO_CELL, "ô của Lão không sáng")
+
+
+## Phím 1 thật trên bàn phím (phím vật lý), không gửi thẳng action.
+func test_physical_keys_select_generals() -> void:
+	var main: Node2D = _make_main()
+	for item: Array in [[KEY_1, 1], [KEY_2, 2]]:
+		var ev: InputEventKey = InputEventKey.new()
+		ev.physical_keycode = item[0] as Key
+		ev.pressed = true
+		_battle_input(main)._unhandled_input(ev)
+		assert_eq(_view(main).selected_id(), item[1] as int)
+
+
+func test_key_never_selects_enemy() -> void:
+	var main: Node2D = _make_main()
+	_view(main)._on_general_key(101)
+	_assert_nothing_selected(main)
 
 
 func test_click_on_khoai_selects_him() -> void:
@@ -175,6 +199,27 @@ func test_hover_lit_cell_draws_path() -> void:
 	assert_eq(_board(main).path(), [] as Array[Vector2i], "rê ra ô sông: hết đường đi")
 
 
+## Chuột nằm sẵn trên ô sẽ sáng, rồi mới gõ phím: đường đi hiện ngay, không cần rê đi rê lại.
+func test_selecting_under_resting_mouse_draws_path_at_once() -> void:
+	var main: Node2D = _make_main()
+	_hover_by_mouse(main, Vector2i(1, 5))
+	_press_key(main, 1)
+	assert_eq(_board(main).path(), [Vector2i(0, 5), Vector2i(1, 5)] as Array[Vector2i])
+	_press_key(main, 2)
+	assert_eq(_board(main).path(), [Vector2i(2, 5), Vector2i(1, 5)] as Array[Vector2i], "đổi tướng: đường của Lão")
+
+
+func test_mouse_leaving_window_clears_path() -> void:
+	var main: Node2D = _make_main()
+	_press_key(main, 1)
+	_hover_by_mouse(main, Vector2i(2, 5))
+	assert_false(_board(main).path().is_empty())
+	main.get_window().mouse_exited.emit()
+	assert_eq(_board(main).path(), [] as Array[Vector2i])
+	_hover_by_mouse(main, Vector2i(2, 5))
+	assert_false(_board(main).path().is_empty(), "quay lại đúng ô cũ: vẽ lại")
+
+
 func test_hover_without_selection_draws_nothing() -> void:
 	var main: Node2D = _make_main()
 	_hover(main, Vector2i(0, 5))
@@ -208,6 +253,7 @@ func test_back_to_menu_clears_selection() -> void:
 	main._show_menu()
 	_assert_nothing_selected(main)
 	_press_key(main, 1)
+	_click(main, KHOAI_CELL)
 	_assert_nothing_selected(main)
 
 
