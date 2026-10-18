@@ -20,7 +20,7 @@
 
 - `LaunchOptions.read_current()` chưa có test: cả đường web (`JavaScriptBridge.eval("window.location.search")`) lẫn đường desktop. Story 0.5 kiểm cùng mục iframe itch.io ở trên. Nếu itch.io thêm khóa lạ vào URL của iframe thì mỗi lần mở game sẽ in một dòng WARN; khi đó cần quyết có bỏ qua các khóa đó không.
 - Luật mới "lõi luật không được gọi `Log.`" (`check_boundaries.sh`) chưa ghi vào danh sách cấm của `src/core/` trong `project-context.md` và `game-architecture.md` (hai nơi vẫn chỉ ghi `print`). Cần tác giả duyệt rồi mới sửa tài liệu.
-- Rủi ro cho Story 0.5 / 1.6: trên trình duyệt, F1 mở trợ giúp và F5 tải lại trang. Phím dev F1/F5 có thể không tới được game. Khi có bản web phải thử; nếu bị chiếm thì chặn mặc định của trình duyệt (qua `JavaScriptBridge`) hoặc hỏi tác giả đổi phím.
+- Rủi ro cho Story 0.5 / 1.6: trên trình duyệt, F1 mở trợ giúp và F5 tải lại trang. Phím dev F1/F5 có thể không tới được game. Khi có bản web phải thử; nếu bị chiếm thì chặn mặc định của trình duyệt (qua `JavaScriptBridge`) hoặc hỏi tác giả đổi phím. → Story 1.6: tác giả chốt F5 chỉ dùng trên desktop, trình duyệt tải lại trang cũng chấp nhận, không chặn phím.
 
 ## Deferred from: Story 0.4 (2026-10-17)
 
@@ -37,7 +37,7 @@
 - Đã trả lời mục iframe itch.io của Story 0.3: link trang + `?dev=1` **không** bật được dev (iframe có địa chỉ riêng). Chưa thử mở thẳng địa chỉ iframe + `?dev=1`. Vì vậy `SaveProbe` luôn ghi log, cả khi không bật dev (tác giả chốt).
 - Chưa thử bản web trên Firefox và Edge (tác giả hoãn). Chỉ đã kiểm trên Chrome (macOS). Làm ở E4 khi đo đủ NFR4.
 - Chưa đo thời gian tải ở 20 Mbps (tác giả hoãn). Cần biết itch.io có nén `index.wasm` khi gửi không; không nén thì ~16 giây, vượt NFR2. Đo ở E4 (hoặc sớm hơn nếu tác giả muốn).
-- Chưa thử F1/F5 trên web khi bật dev (không bật được dev trong iframe). Story 1.6 kiểm khi làm F5.
+- Chưa thử F1/F5 trên web khi bật dev (không bật được dev trong iframe). Story 1.6 kiểm khi làm F5. → Story 1.6: F5 trên desktop xong; web chờ tác giả thử trên bản build chạy ở máy (`http://localhost:8060/?dev=1`), chỉ để ghi lại kết quả.
 - itch.io thêm `?v=<số>` vào URL của iframe, nên mỗi lần mở game Console có `[WARN][app] bỏ qua tham số lạ trên URL: "v"` (người chơi không thấy). Tác giả quyết có bỏ qua im lặng khóa `v` không.
 - `SaveProbe` (`user://thu_luu.json`) ghi file mỗi lần mở game với mọi người chơi. Gỡ hoặc thay bằng lưu game thật ở E4 (FR46).
 

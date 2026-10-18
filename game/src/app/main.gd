@@ -75,6 +75,7 @@ func _ready() -> void:
 		_coord_overlay = CoordOverlay.new()
 		_board_view.add_child(_coord_overlay)
 		dev_tools.f1_pressed.connect(_toggle_coords)
+		dev_tools.f5_pressed.connect(_reload_data)
 
 	# Công cụ AI (Story 0.6): chỉ khi bật dev trên desktop có cửa sổ.
 	McpRuntime.start_if_enabled(self, AppState.launch.dev)
@@ -82,7 +83,7 @@ func _ready() -> void:
 	_start_battle()
 
 
-## Nạp chỉ số và trận. Luôn nạp cả hai file để liệt kê đủ lỗi của cả hai. F5 (story 1.6) gọi lại hàm này.
+## Nạp chỉ số và trận. Luôn nạp cả hai file để liệt kê đủ lỗi của cả hai. F5 gọi lại hàm này (_reload_data).
 func _start_battle() -> void:
 	var level_id: String = AppState.launch.level_id()
 	if level_id.is_empty():
@@ -115,6 +116,13 @@ func _start_battle() -> void:
 	_battle_view.start(_controller)
 	_hide_error()
 	_screen = Screen.BATTLE
+
+
+## F5 (chỉ khi bật dev): đọc lại chi_so.json và file trận từ đĩa rồi mở lại trận từ đầu, ở mọi màn hình
+## (trận, lỗi, menu; tác giả chốt 2026-10-18). Không đếm lại lần mở, không khởi động lại MCP.
+func _reload_data() -> void:
+	Log.info("dev", "f5: nạp lại chi_so.json và file trận")
+	_start_battle()
 
 
 func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) -> void:

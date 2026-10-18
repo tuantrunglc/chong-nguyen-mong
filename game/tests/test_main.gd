@@ -9,6 +9,9 @@ const PROBE_FILE: String = PROBE_DIR + "/thu_luu.json"
 const LEVEL_DIR: String = PROBE_DIR + "/tran"
 const BROKEN_LEVEL: String = LEVEL_DIR + "/tran_01.json"
 const BROKEN_STATS: String = PROBE_DIR + "/chi_so.json"
+## Bản sao chi_so.json thật, sửa tầm đi của Khoái (F5, Story 1.6).
+const F5_STATS: String = PROBE_DIR + "/chi_so_f5.json"
+const F5_LOG: String = "[INFO][dev] f5: nạp lại chi_so.json và file trận"
 const BROKEN_STATS_ERROR: String = "user://test_main/chi_so.json: nội dung phải là một object JSON"
 ## Hai lỗi: ký hiệu lạ ở dia_hinh và thiếu thu_tu_dich.
 const BROKEN_ERRORS: Array[String] = [
@@ -34,8 +37,9 @@ func after_each() -> void:
 	AppState.stats = null
 	if FileAccess.file_exists(BROKEN_LEVEL):
 		DirAccess.remove_absolute(BROKEN_LEVEL)
-	if FileAccess.file_exists(BROKEN_STATS):
-		DirAccess.remove_absolute(BROKEN_STATS)
+	for path: String in [BROKEN_STATS, F5_STATS]:
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(LEVEL_DIR)
 	for i: int in range(DevTools.KEYS.size()):
 		if InputMap.has_action("dev_f%d" % (i + 1)):
@@ -106,6 +110,20 @@ func _find_button(node: Node) -> Button:
 ## Đồng quân đang hiện trên bàn cờ, theo id.
 func _tokens(main: Node2D) -> Dictionary:
 	return (main._board_view as BoardView).tokens()
+
+
+## Chép res://data/chi_so.json thật sang user://, đổi tầm đi của Nguyễn Khoái. Không bao giờ ghi vào res://data/.
+func _write_stats(tam_di_khoai: int) -> String:
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/chi_so.json")) as Dictionary
+	((data["tuong"] as Dictionary)["nguyen_khoai"] as Dictionary)["tam_di"] = tam_di_khoai
+	var file: FileAccess = FileAccess.open(F5_STATS, FileAccess.WRITE)
+	file.store_string(JSON.stringify(data))
+	file.close()
+	return F5_STATS
+
+
+func _press_f5(main: Node2D) -> void:
+	_dev_tools(main).f5_pressed.emit()
 
 
 func _dev_tools(main: Node2D) -> DevTools:
@@ -411,3 +429,91 @@ func test_no_coordinates_without_dev() -> void:
 	assert_null(main._coord_overlay)
 	for child: Node in main._board_view.get_children():
 		assert_false(child is CoordOverlay)
+
+
+# ---------- F5 nạp lại dữ liệu (Story 1.6) ----------
+
+func test_f5_reads_edited_stats() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main("", _write_stats(3))
+	var old: BattleController = main._controller
+	assert_eq(old.reachable(1).size(), 7, "tầm đi 3: 7 ô")
+	old.submit(Command.move(1, Vector2i(0, 4)))
+	_write_stats(2)
+	_press_f5(main)
+	var controller: BattleController = main._controller
+	assert_ne(controller, old, "controller mới")
+	assert_eq(controller.reachable(1),
+		[Vector2i(0, 4), Vector2i(0, 5), Vector2i(1, 5), Vector2i(1, 6)] as Array[Vector2i], "tầm đi 2: 4 ô")
+	var state: BattleState = controller.snapshot()
+	assert_eq(state.unit_by_id(1).cell, Vector2i(0, 6), "Khoái về chỗ đầu trận")
+	assert_eq(state.round_number, 1)
+	assert_false(controller.can_undo(), "không còn nước để hủy")
+	assert_eq((main._battle_view as BattleView).selected_id(), BattleView.NONE)
+	assert_eq((main._hud as Hud).round_text(), "Hiệp 1")
+	var lines: PackedStringArray = Log.get_lines()
+	var at: int = lines.find(F5_LOG)
+	assert_gt(at, -1, "có dòng log F5")
+	assert_eq(lines.find("[INFO][battle] nạp trận tran_01", at), at + 1, "rồi nạp trận")
+
+
+func test_f5_shows_error_then_recovers() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main()
+	main.level_dir = _broken_level_dir()
+	_press_f5(main)
+	assert_eq(main._screen, main.Screen.ERROR)
+	var texts: Array[String] = _label_texts(main._error_screen)
+	for message: String in BROKEN_ERRORS:
+		assert_has(texts, message)
+	main.level_dir = "res://data/tran"
+	_press_f5(main)
+	assert_eq(main._screen, main.Screen.BATTLE)
+	assert_null(main._error_screen)
+	assert_true(main._board_view.visible)
+	assert_eq(_tokens(main).size(), 5)
+
+
+func test_f5_keeps_chosen_level() -> void:
+	AppState.launch.dev = true
+	AppState.launch.tran = "thu_ba_tuong"
+	var main: Node2D = _make_main()
+	_press_f5(main)
+	assert_not_null(main._controller.snapshot().unit_by_id(3), "vẫn có Trần Khánh Dư")
+	assert_eq(Array(Log.get_lines()).count("[INFO][battle] nạp trận thu_ba_tuong"), 2)
+
+
+func test_f5_on_menu_opens_battle() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main(_broken_level_dir())
+	_find_button(main._error_screen).pressed.emit()
+	assert_eq(main._screen, main.Screen.MENU)
+	main.level_dir = "res://data/tran"
+	_press_f5(main)
+	assert_eq(main._screen, main.Screen.BATTLE)
+	assert_eq(_tokens(main).size(), 5)
+
+
+func test_f5_keeps_coordinates_and_open_count() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main()
+	var opens: int = SaveProbe._read(PROBE_FILE)
+	_dev_tools(main).f1_pressed.emit()
+	_press_f5(main)
+	assert_true(main._coord_overlay.visible, "tọa độ vẫn hiện")
+	assert_has(_label_texts(_dev_tools(main)), "DEV · lần mở thứ %d" % opens)
+	assert_eq(SaveProbe._read(PROBE_FILE), opens, "F5 không đếm thêm lần mở")
+
+
+func test_f5_needs_dev() -> void:
+	var main: Node2D = _make_main()
+	var tools: DevTools = _dev_tools(main)
+	assert_eq(tools.f5_pressed.get_connections(), [], "không bật dev thì không nối F5")
+	var old: BattleController = main._controller
+	var ev: InputEventKey = InputEventKey.new()
+	ev.physical_keycode = KEY_F5
+	ev.pressed = true
+	tools._unhandled_input(ev)
+	assert_eq(main._controller, old, "không nạp lại")
+	for line: String in Log.get_lines():
+		assert_false(line.begins_with("[INFO][dev]"), line)

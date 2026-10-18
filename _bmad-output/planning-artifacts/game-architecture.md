@@ -513,7 +513,7 @@ Khi không bật dev, mọi phím debug đều không có tác dụng. **Code de
 | `F1` | Overlay tọa độ ô và id quân | Báo lỗi chính xác ("trận 3, ô 4,2") |
 | `F2` | **Sao chép báo lỗi:** trạng thái trận hiện tại (theo dạng `truoc` của kịch bản luật), các lệnh trong hiệp, 200 dòng log, phiên bản build | Dán thẳng cho AI. Lỗi trở thành **kịch bản luật mới**, nên không quay lại được nữa |
 | `F3` | Overlay ý định AI: mỗi quân Nguyên nhắm ai, chọn ô nào, vì sao | Kiểm tra Enemy AI có đúng spec không |
-| `F5` | Nạp lại file trận và `chi_so.json` | Sửa số rồi thử ngay, không cần build lại |
+| `F5` | Nạp lại file trận và `chi_so.json`, mở lại trận từ đầu. Chạy ở mọi màn hình (trận, lỗi, menu) | Sửa số rồi thử ngay, không cần build lại. Chỉ dùng trên desktop: bản web đọc lại dữ liệu đóng gói sẵn, trình duyệt có tải lại trang cũng chấp nhận (tác giả chốt 2026-10-18) |
 | `?tran=N` | Mở thẳng trận N | Không phải chơi lại từ trận 1 |
 
 **Hiển thị phiên bản build:** góc màn hình luôn hiện số phiên bản và mã commit ngắn, kể cả khi không bật dev. Khi báo lỗi, tester luôn biết mình đang chơi bản nào.
