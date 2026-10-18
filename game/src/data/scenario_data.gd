@@ -1,0 +1,53 @@
+class_name ScenarioData
+extends RefCounted
+## Một kịch bản luật đã nạp từ tests/kich_ban/<nhóm>/*.json. Chỉ đọc: ScenarioLoader tạo.
+## Bàn trước là LevelData (dựng BattleState như trận thật); bàn sau so theo ô, không theo id.
+
+## Ô của lệnh không cần ô (huy, ket_thuc_luot).
+const NO_CELL: Vector2i = Vector2i(-1, -1)
+
+
+## Một lệnh trong "hanh_dong". Story 1.4 đổi thành Command.
+class ScenarioStep:
+	extends RefCounted
+
+	## "di", "danh", "huy", "ket_thuc_luot"
+	var kind: String
+	## UnitType của tướng ra lệnh; -1 nếu lệnh không cần tướng.
+	var general: int
+	var cell: Vector2i
+
+	func _init(p_kind: String, p_general: int = -1, p_cell: Vector2i = NO_CELL) -> void:
+		kind = p_kind
+		general = p_general
+		cell = p_cell
+
+
+## Một quân mong đợi ở bàn sau. hp đã đổi "không ghi" thành máu đầy lúc nạp.
+class ExpectedUnit:
+	extends RefCounted
+
+	var type: int
+	var cell: Vector2i
+	var hp: int
+
+	func _init(p_type: int, p_cell: Vector2i, p_hp: int) -> void:
+		type = p_type
+		cell = p_cell
+		hp = p_hp
+
+
+## Đường res:// (hoặc user:// trong test).
+var path: String = ""
+## Tính từ thư mục kich_ban, ví dụ "di_chuyen/di_thang_3_o.json".
+var id: String = ""
+## Thư mục con đầu tiên ("di_chuyen"); "" nếu file nằm ngay trong kich_ban.
+var group: String = ""
+var description: String = ""
+var approved: bool = false
+var before: LevelData = null
+var steps: Array[ScenarioStep] = []
+## Theo hàng: index = hang * size.x + cot (như LevelData).
+var after_terrain: PackedInt32Array = PackedInt32Array()
+## Theo thứ tự đọc bàn: hàng trên xuống, trái sang phải.
+var after_units: Array[ExpectedUnit] = []

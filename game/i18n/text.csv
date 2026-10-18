@@ -15,3 +15,11 @@ terrain.spikes,Chông
 terrain.granary,Kho
 terrain.village,Làng
 terrain.pass,Ải
+scenario.unit.nguyen_khoai,Nguyễn Khoái
+scenario.unit.pham_ngu_lao,Phạm Ngũ Lão
+scenario.unit.tran_khanh_du,Trần Khánh Dư
+scenario.unit.bo_binh,Bộ binh
+scenario.unit.ky_binh,Kỵ binh
+scenario.unit.cung_ky,Cung kỵ
+scenario.terrain.spikes,hầm chông
+scenario.terrain.pass,ô ải

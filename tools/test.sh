@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Một lệnh chạy toàn bộ test. Ví dụ: tools/test.sh
-# Bốn bước: kiểm ranh giới, kiểm kịch bản đã duyệt, quét project, chạy test GUT.
+# Bốn bước: kiểm ranh giới, kiểm kịch bản đã duyệt, quét project, chạy test GUT (kèm số kịch bản luật).
 # Bước nào trượt thì các bước sau vẫn chạy. Mã thoát 0 là đạt, 1 là trượt.
 set -euo pipefail
 
@@ -138,6 +138,9 @@ if (( da_quet_lai )); then
 fi
 
 # ---------- Bước 4: chạy test GUT ----------
+# tests/test_scenarios.gd ghi kết quả từng kịch bản luật vào file này (dòng: trạng thái duyệt, đạt/trượt, tên).
+export KET_QUA_KICH_BAN="$KET_QUA_DIR/kich_ban.txt"
+rm -f "$KET_QUA_KICH_BAN"
 chi_tiet_4=()
 tong=0
 so_truot=0
@@ -235,6 +238,34 @@ else
 		ghi_buoc 4 "Test GUT" "trượt"
 	fi
 	bao_cao+=("${chi_tiet_4[@]+"${chi_tiet_4[@]}"}")
+fi
+
+# ---------- Kịch bản luật ----------
+# Đã duyệt mà trượt thì GUT đã trượt. Chưa duyệt mà chưa đạt thì chỉ liệt kê, không làm trượt (Story 1.3, AC 4).
+if (( da_quet )); then
+	if [[ ! -f "$KET_QUA_KICH_BAN" ]]; then
+		bao_cao+=("      Kịch bản luật: không đọc được kết quả")
+		ly_do_truot+=("không đọc được kết quả kịch bản luật")
+	else
+		so_da_duyet=0
+		so_chua_duyet=0
+		so_chua_dat=0
+		cho_duyet=()
+		while IFS=$'\t' read -r trang_thai ket_qua ten; do
+			[[ -n "$trang_thai" ]] || continue
+			if [[ "$trang_thai" == "da_duyet" ]]; then
+				so_da_duyet=$((so_da_duyet + 1))
+			else
+				so_chua_duyet=$((so_chua_duyet + 1))
+				if [[ "$ket_qua" != "dat" ]]; then
+					so_chua_dat=$((so_chua_dat + 1))
+					cho_duyet+=("  ⏳ $ten: chưa duyệt, chưa đạt")
+				fi
+			fi
+		done <"$KET_QUA_KICH_BAN"
+		bao_cao+=("      Kịch bản luật: $so_da_duyet đã duyệt · $so_chua_duyet chưa duyệt ($so_chua_dat chưa đạt)")
+		bao_cao+=("${cho_duyet[@]+"${cho_duyet[@]}"}")
+	fi
 fi
 
 # ---------- Tóm tắt ----------

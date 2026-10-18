@@ -29,7 +29,7 @@ static func from_level(level: LevelData, p_stats: Stats) -> BattleState:
 		else:
 			id = next_enemy_id
 			next_enemy_id += 1
-		state.units.append(UnitFactory.create(id, p.type, p.cell, p_stats))
+		state.units.append(UnitFactory.create(id, p.type, p.cell, p_stats, p.hp))
 	return state
 
 

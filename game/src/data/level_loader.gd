@@ -4,8 +4,7 @@ extends RefCounted
 ## Thứ tự lỗi: file/JSON -> khóa (phien_ban, ten, kieu) -> lớp dia_hinh -> ô ải -> lớp quan
 ## -> kiểm từng ô của lớp quan -> thu_tu_dich -> quân thiếu trong thu_tu_dich.
 
-## Quy cách định dạng của prototype (không phải số cân bằng). Giai đoạn 1 mới có bàn khác cỡ.
-const BOARD_SIZE: Vector2i = Vector2i(7, 7)
+const BOARD_SIZE: Vector2i = BoardLayers.BOARD_SIZE
 const FORMAT_VERSION: int = 1
 
 const KINDS: Dictionary = {
@@ -19,8 +18,7 @@ const KNOWN_KEYS: Array[String] = [
 	"tiep_vien", "muu_ke_mo", "so_hiep_toi_da", "long_dan",
 ]
 
-const GENERAL_SYMBOLS: Array[String] = ["1", "2", "3"]
-const ENEMY_SYMBOLS: Array[String] = ["B", "K", "C"]
+const GENERAL_SYMBOLS: Array[String] = BoardLayers.GENERAL_SYMBOLS
 
 
 static func load_level(path: String) -> LoadResult:
@@ -53,20 +51,20 @@ static func parse_level(text: String, file: String) -> LoadResult:
 	var mission: Variant = _read_kind(root, file, result)
 
 	var errors_before_terrain: int = result.errors.size()
-	var terrain_rows: Array = _read_layer(root, "dia_hinh", BoardText.TERRAIN_SYMBOLS, file, result)
+	var terrain_rows: Array = BoardLayers.read_layer(root, "dia_hinh", "dia_hinh", BoardText.TERRAIN_SYMBOLS, file, result)
 	var terrain_clean: bool = result.errors.size() == errors_before_terrain and not terrain_rows.is_empty()
 	# Dòng hỏng có thể chứa ô ải: chỉ kiểm khi cả lớp dia_hinh đọc được.
-	if terrain_clean and mission == LevelData.Mission.HOLD_PASS and not _has_symbol(terrain_rows, "A"):
+	if terrain_clean and mission == LevelData.Mission.HOLD_PASS and not BoardLayers.has_symbol(terrain_rows, "A"):
 		result.add_error('%s: trận "giu_ai" phải có ít nhất một ô ải "A" trong "dia_hinh"' % file)
 	var errors_before_units: int = result.errors.size()
-	var unit_rows: Array = _read_layer(root, "quan", BoardText.UNIT_SYMBOLS, file, result)
+	var unit_rows: Array = BoardLayers.read_layer(root, "quan", "quan", BoardText.UNIT_SYMBOLS, file, result)
 	var units_clean: bool = result.errors.size() == errors_before_units and not unit_rows.is_empty()
 
-	var generals: Dictionary = _check_unit_cells(terrain_rows, unit_rows, file, result)
+	var generals: Dictionary = BoardLayers.check_unit_cells(terrain_rows, unit_rows, "quan", file, result)
 	if units_clean and generals.is_empty():
 		result.add_error('%s: "quan" không có tướng nào (cần ít nhất một trong 1, 2, 3)' % file)
 
-	var order: Variant = _read_enemy_order(root, unit_rows, units_clean, file, result)
+	var order: Variant = BoardLayers.read_enemy_order(root, "thu_tu_dich", "thu_tu_dich", unit_rows, units_clean, file, result)
 
 	if not result.ok:
 		return result
@@ -75,7 +73,7 @@ static func parse_level(text: String, file: String) -> LoadResult:
 	level.name = level_name
 	level.mission = mission as LevelData.Mission
 	level.size = BOARD_SIZE
-	level.terrain = _terrain_values(terrain_rows)
+	level.terrain = BoardLayers.terrain_values(terrain_rows)
 	for symbol: String in GENERAL_SYMBOLS:
 		if generals.has(symbol):
 			level.units.append(LevelData.UnitPlacement.new(BoardText.UNIT_SYMBOLS[symbol] as int, generals[symbol] as Vector2i))
@@ -112,135 +110,3 @@ static func _read_kind(root: Dictionary, file: String, result: LoadResult) -> Va
 		result.add_error('%s: "kieu" là %s, chỉ được "tieu_diet" hoặc "giu_ai"' % [file, JsonFile.show(kind)])
 		return null
 	return KINDS[kind]
-
-
-## Đọc một lớp bàn cờ chữ. Trả mảng BOARD_SIZE.y phần tử: mỗi phần tử là PackedStringArray
-## các ký hiệu của dòng (ô có ký hiệu lạ thành ""), hoặc null nếu cả dòng không đọc được.
-## Lớp thiếu, sai kiểu hoặc sai số dòng thì trả [] (không kiểm chéo với lớp khác).
-static func _read_layer(root: Dictionary, layer: String, symbols: Dictionary,
-		file: String, result: LoadResult) -> Array:
-	if not root.has(layer):
-		result.add_error('%s: thiếu khóa "%s"' % [file, layer])
-		return []
-	if not root[layer] is Array:
-		result.add_error(JsonFile.type_error(file, layer, "một danh sách", root[layer]))
-		return []
-	var lines: Array = root[layer] as Array
-	var rows: Array = []
-	for r: int in range(lines.size()):
-		var line: Variant = lines[r]
-		if not line is String:
-			result.add_error('%s: "%s" dòng %d phải là một chuỗi, đang là %s'
-				% [file, layer, r + 1, JsonFile.show(line)])
-			rows.append(null)
-			continue
-		var tokens: PackedStringArray = BoardText.split_row(line as String)
-		if tokens.size() != BOARD_SIZE.x:
-			result.add_error('%s: "%s" dòng %d: có %d ô, cần %d'
-				% [file, layer, r + 1, tokens.size(), BOARD_SIZE.x])
-			rows.append(null)
-			continue
-		for c: int in range(tokens.size()):
-			if not symbols.has(tokens[c]):
-				result.add_error('%s: "%s" dòng %d, cột %d (ô %d,%d): ký hiệu lạ %s'
-					% [file, layer, r + 1, c + 1, c, r, JsonFile.show(tokens[c])])
-				tokens[c] = ""
-		rows.append(tokens)
-	if lines.size() != BOARD_SIZE.y:
-		result.add_error('%s: "%s" có %d dòng, cần %d' % [file, layer, lines.size(), BOARD_SIZE.y])
-		return []
-	return rows
-
-
-static func _has_symbol(rows: Array, symbol: String) -> bool:
-	for row: Variant in rows:
-		if row != null and (row as PackedStringArray).has(symbol):
-			return true
-	return false
-
-
-## Ký hiệu ở ô; "" nếu ô hoặc dòng không đọc được.
-static func _symbol(rows: Array, cell: Vector2i) -> String:
-	if rows.is_empty() or rows[cell.y] == null:
-		return ""
-	return (rows[cell.y] as PackedStringArray)[cell.x]
-
-
-## Kiểm từng ô của lớp quan: quân đứng trên ô chặn, tướng lặp. Trả { ký hiệu tướng: ô }.
-static func _check_unit_cells(terrain_rows: Array, unit_rows: Array, file: String, result: LoadResult) -> Dictionary:
-	var generals: Dictionary = {}
-	if unit_rows.is_empty():
-		return generals
-	for r: int in range(BOARD_SIZE.y):
-		for c: int in range(BOARD_SIZE.x):
-			var cell: Vector2i = Vector2i(c, r)
-			var unit: String = _symbol(unit_rows, cell)
-			if unit == "" or unit == ".":
-				continue
-			var where: String = '%s: "quan" dòng %d, cột %d (ô %d,%d)' % [file, r + 1, c + 1, c, r]
-			var ground: String = _symbol(terrain_rows, cell)
-			if ground != "" and not Terrain.is_walkable(BoardText.TERRAIN_SYMBOLS[ground] as int):
-				result.add_error('%s: quân "%s" đứng trên ô không đi vào được "%s"' % [where, unit, ground])
-			if GENERAL_SYMBOLS.has(unit):
-				if generals.has(unit):
-					result.add_error('%s: tướng "%s" đã có ở ô %s'
-						% [where, unit, BoardText.cell_text(generals[unit] as Vector2i)])
-				else:
-					generals[unit] = cell
-	return generals
-
-
-## Đọc thu_tu_dich và đối chiếu với lớp quan. Trả Array[Vector2i], hoặc null nếu thiếu/sai kiểu.
-static func _read_enemy_order(root: Dictionary, unit_rows: Array, units_clean: bool,
-		file: String, result: LoadResult) -> Variant:
-	if not root.has("thu_tu_dich"):
-		result.add_error('%s: thiếu khóa "thu_tu_dich"' % file)
-		return null
-	if not root["thu_tu_dich"] is Array:
-		result.add_error(JsonFile.type_error(file, "thu_tu_dich", "một danh sách", root["thu_tu_dich"]))
-		return null
-	var items: Array = root["thu_tu_dich"] as Array
-	var order: Array[Vector2i] = []
-	var seen: Dictionary = {}  # ô -> số mục (đếm từ 1)
-	var board: Rect2i = Rect2i(Vector2i.ZERO, BOARD_SIZE)
-	for i: int in range(items.size()):
-		var item: Variant = items[i]
-		var where: String = '%s: "thu_tu_dich" mục %d' % [file, i + 1]
-		var parsed: Variant = BoardText.parse_cell(item as String) if item is String else null
-		if parsed == null:
-			result.add_error('%s: %s không phải tọa độ "cot,hang"' % [where, JsonFile.show(item)])
-			continue
-		var cell: Vector2i = parsed as Vector2i
-		var shown: String = BoardText.cell_text(cell)
-		if not board.has_point(cell):
-			result.add_error("%s: ô %s nằm ngoài bàn" % [where, shown])
-			continue
-		if seen.has(cell):
-			result.add_error("%s: ô %s đã ghi ở mục %d" % [where, shown, seen[cell]])
-			continue
-		seen[cell] = i + 1
-		var unit: String = _symbol(unit_rows, cell)
-		if unit == "":
-			continue
-		if not ENEMY_SYMBOLS.has(unit):
-			result.add_error("%s: ô %s không có quân Nguyên" % [where, shown])
-			continue
-		order.append(cell)
-
-	if units_clean:
-		for r: int in range(BOARD_SIZE.y):
-			for c: int in range(BOARD_SIZE.x):
-				var cell: Vector2i = Vector2i(c, r)
-				var unit: String = _symbol(unit_rows, cell)
-				if ENEMY_SYMBOLS.has(unit) and not seen.has(cell):
-					result.add_error('%s: quân Nguyên "%s" ở ô %s không có trong "thu_tu_dich"'
-						% [file, unit, BoardText.cell_text(cell)])
-	return order
-
-
-static func _terrain_values(rows: Array) -> PackedInt32Array:
-	var values: PackedInt32Array = PackedInt32Array()
-	for row: Variant in rows:
-		for symbol: String in row as PackedStringArray:
-			values.append(BoardText.TERRAIN_SYMBOLS[symbol] as int)
-	return values

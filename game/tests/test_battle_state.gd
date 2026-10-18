@@ -73,6 +73,22 @@ func test_factory_takes_hp_from_stats() -> void:
 	assert_eq(UnitFactory.create(1, UnitType.NGUYEN_KHOAI, Vector2i.ZERO, _stats()).faction, Unit.Faction.DAI_VIET)
 
 
+func test_factory_uses_given_hp_when_positive() -> void:
+	assert_eq(UnitFactory.create(7, UnitType.BO_BINH, Vector2i.ZERO, _stats(), 2).hp, 2)
+	assert_eq(UnitFactory.create(7, UnitType.BO_BINH, Vector2i.ZERO, _stats(), 0).hp, 5, "0 là máu đầy")
+
+
+func test_from_level_keeps_placement_hp() -> void:
+	var level: LevelData = _level()
+	level.units = [
+		LevelData.UnitPlacement.new(UnitType.NGUYEN_KHOAI, Vector2i(2, 6), 1),
+		LevelData.UnitPlacement.new(UnitType.BO_BINH, Vector2i(1, 0)),
+	]
+	var s: BattleState = BattleState.from_level(level, _stats())
+	assert_eq(s.unit_by_id(1).hp, 1, "máu riêng")
+	assert_eq(s.unit_by_id(101).hp, 5, "không ghi máu thì đầy")
+
+
 func test_from_level_ids_factions_cells_and_hp() -> void:
 	var s: BattleState = _state()
 	var dv: int = Unit.Faction.DAI_VIET

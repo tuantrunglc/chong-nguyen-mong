@@ -1,6 +1,10 @@
+---
+baseline_commit: b8b1b6d
+---
+
 # Story 1.3: Kịch bản luật và công cụ duyệt trên terminal
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -16,16 +20,16 @@ tôi muốn đọc và duyệt luật dưới dạng bàn cờ trước và sau,
    - các bước hành động viết bằng chữ (ví dụ `1. Nguyễn Khoái đi tới 3,6`);
    - bàn **TRƯỚC** và bàn **SAU** đặt cạnh nhau, có số cột và số hàng;
    - quân không đầy máu thì ghi thêm dưới bàn (ví dụ `5,4 Bộ binh: 1/3 máu`).
-   Mặc định chỉ in kịch bản **chưa duyệt**. Bố cục chi tiết ở Dev Notes "Cách in". **[MẶC ĐỊNH, chờ tác giả xác nhận]**
+   Mặc định chỉ in kịch bản **chưa duyệt**. Bố cục chi tiết ở Dev Notes "Cách in". **[Tác giả chốt 2026-10-18]**
 2. **Khi** gõ `tools/xem_kich_ban.sh di_chuyen`, **thì** chỉ hiện kịch bản của nhóm `di_chuyen/`.
    - Gõ tên nhóm không có thì in `không có nhóm "xyz". Các nhóm đang có: di_chuyen` và thoát mã 1.
    - Thêm `--tat_ca` thì in cả kịch bản đã duyệt (ghi `[đã duyệt]`).
    - Không còn kịch bản nào chưa duyệt thì in `Không có kịch bản nào chờ duyệt.`
-   **[MẶC ĐỊNH, chờ tác giả xác nhận]**
+   **[Tác giả chốt 2026-10-18]**
 3. **Khi** gõ `tools/test.sh`, **thì**:
    - mọi file `.json` trong `game/tests/kich_ban/` (mọi nhóm con) đều được nạp và chạy;
    - tóm tắt ghi riêng số kịch bản đã duyệt và chưa duyệt, ví dụ `Kịch bản luật: 0 đã duyệt · 1 chưa duyệt (1 chưa đạt)`.
-4. **Và** luật đỏ/xanh của `tools/test.sh`: **[MẶC ĐỊNH, chờ tác giả xác nhận]**
+4. **Và** luật đỏ/xanh của `tools/test.sh`: **[Tác giả chốt 2026-10-18]**
    - kịch bản **đã duyệt** mà trượt thì `tools/test.sh` **trượt**, ghi tên file và chỗ sai;
    - kịch bản **chưa duyệt** mà chưa đạt (luật chưa có code, hoặc kết quả khác `sau`) thì **không** làm `tools/test.sh` trượt. Nó chỉ được đếm và liệt kê (`⏳ di_chuyen/di_thang_3_o.json: chưa duyệt, chưa đạt`). Nhờ vậy AI commit được kịch bản để tác giả duyệt;
    - file kịch bản **sai định dạng** (thiếu khóa, ký hiệu lạ…) thì luôn trượt, dù đã duyệt hay chưa, kèm câu lỗi tiếng Việt có file, khóa, dòng, cột.
@@ -35,79 +39,79 @@ tôi muốn đọc và duyệt luật dưới dạng bàn cờ trước và sau,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Tách phần đọc bàn cờ chữ dùng chung** (`src/data/`, AC: 3, 4, 7)
-  - [ ] 1.1 Tạo `src/data/board_layers.gd` (`class_name BoardLayers`, `extends RefCounted`). Chuyển **nguyên văn** các hàm sau từ `LevelLoader` sang đây, đổi thành hàm công khai:
+- [x] **Task 1: Tách phần đọc bàn cờ chữ dùng chung** (`src/data/`, AC: 3, 4, 7)
+  - [x] 1.1 Tạo `src/data/board_layers.gd` (`class_name BoardLayers`, `extends RefCounted`). Chuyển **nguyên văn** các hàm sau từ `LevelLoader` sang đây, đổi thành hàm công khai:
     - `_read_layer` → `read_layer(root, key, shown, symbols, file, result)`. `key` là khóa trong object, `shown` là tên in trong câu lỗi (`"dia_hinh"` với file trận, `"truoc.dia_hinh"` với kịch bản);
     - `_symbol` → `symbol(rows, cell)`;
     - `_has_symbol` → `has_symbol(rows, symbol)`;
     - `_check_unit_cells` → `check_unit_cells(terrain_rows, unit_rows, shown, file, result)`, với `shown` là tên lớp quân trong câu lỗi;
     - `_read_enemy_order` → `read_enemy_order(root, key, shown, unit_rows, units_clean, file, result)`;
     - `_terrain_values` → `terrain_values(rows)`.
-  - [ ] 1.2 `BOARD_SIZE` chuyển sang `BoardLayers.BOARD_SIZE` (hôm nay chỉ `level_loader.gd` dùng hằng này). `LevelLoader` dùng `BoardLayers.BOARD_SIZE`.
-  - [ ] 1.3 `LevelLoader` gọi các hàm mới với `shown` = đúng tên cũ (`"dia_hinh"`, `"quan"`, `"thu_tu_dich"`). **Không đổi một chữ nào** trong câu lỗi: `test_loaders.gd` phải xanh mà không sửa test nào.
-- [ ] **Task 2: Máu ban đầu khác máu đầy** (`src/core/`, AC: 1, 3)
-  - [ ] 2.1 `LevelData.UnitPlacement` thêm `var hp: int` và tham số `p_hp: int = 0` trong `_init`. `0` nghĩa là máu đầy theo `chi_so.json`. File trận không có máu riêng, nên `LevelLoader` không đổi.
-  - [ ] 2.2 `UnitFactory.create(id, type, cell, stats, hp: int = 0)`: `hp` > 0 thì dùng `hp`, còn lại dùng `stats.max_hp(type)`. `BattleState.from_level` truyền `p.hp`.
-  - [ ] 2.3 Chỉ gán `hp` trong `_init` (dạng `hp = p_hp`). **Cấm** `placement.hp = …` ở chỗ khác: `check_boundaries.sh` bắt mọi `.hp =` trong `src/` ngoài `effects.gd`.
-- [ ] **Task 3: Dữ liệu kịch bản** (`src/data/scenario_data.gd`, AC: 1, 3)
-  - [ ] 3.1 `class_name ScenarioData extends RefCounted`, chỉ đọc. Thuộc tính:
+  - [x] 1.2 `BOARD_SIZE` chuyển sang `BoardLayers.BOARD_SIZE` (hôm nay chỉ `level_loader.gd` dùng hằng này). `LevelLoader` dùng `BoardLayers.BOARD_SIZE`.
+  - [x] 1.3 `LevelLoader` gọi các hàm mới với `shown` = đúng tên cũ (`"dia_hinh"`, `"quan"`, `"thu_tu_dich"`). **Không đổi một chữ nào** trong câu lỗi: `test_loaders.gd` phải xanh mà không sửa test nào.
+- [x] **Task 2: Máu ban đầu khác máu đầy** (`src/core/`, AC: 1, 3)
+  - [x] 2.1 `LevelData.UnitPlacement` thêm `var hp: int` và tham số `p_hp: int = 0` trong `_init`. `0` nghĩa là máu đầy theo `chi_so.json`. File trận không có máu riêng, nên `LevelLoader` không đổi.
+  - [x] 2.2 `UnitFactory.create(id, type, cell, stats, hp: int = 0)`: `hp` > 0 thì dùng `hp`, còn lại dùng `stats.max_hp(type)`. `BattleState.from_level` truyền `p.hp`.
+  - [x] 2.3 Chỉ gán `hp` trong `_init` (dạng `hp = p_hp`). **Cấm** `placement.hp = …` ở chỗ khác: `check_boundaries.sh` bắt mọi `.hp =` trong `src/` ngoài `effects.gd`.
+- [x] **Task 3: Dữ liệu kịch bản** (`src/data/scenario_data.gd`, AC: 1, 3)
+  - [x] 3.1 `class_name ScenarioData extends RefCounted`, chỉ đọc. Thuộc tính:
     - `path: String` (đường `res://`), `id: String` (tính từ `kich_ban/`, ví dụ `di_chuyen/di_thang_3_o.json`), `group: String` (`di_chuyen`);
     - `description: String` (`mo_ta`), `approved: bool` (`da_duyet`);
     - `before: LevelData` (bàn trước; `mission` = `ELIMINATE`, `name` = `id`);
     - `steps: Array[ScenarioStep]`;
     - `after_terrain: PackedInt32Array`, `after_units: Array[ExpectedUnit]`.
-  - [ ] 3.2 Lớp con `ScenarioStep`: `kind: String` (`"di"`, `"danh"`, `"huy"`, `"ket_thuc_luot"`), `general: int` (UnitType, `-1` nếu lệnh không cần tướng), `cell: Vector2i` (`Vector2i(-1, -1)` nếu không cần ô). Story 1.4 đổi bước này thành `Command`.
-  - [ ] 3.3 Lớp con `ExpectedUnit`: `type: int`, `cell: Vector2i`, `hp: int` (đã đổi `0` thành máu đầy lúc nạp).
-- [ ] **Task 4: Bộ nạp kịch bản** (`src/data/scenario_loader.gd`, AC: 3, 4)
-  - [ ] 4.1 `static func load_scenario(path: String, root_dir: String, stats: Stats) -> LoadResult`: đọc file như `LevelLoader.load_level` (dùng `JsonFile`), `id` = `path` bỏ tiền tố `root_dir + "/"`. Trả `LoadResult` có `data` là `ScenarioData`.
-  - [ ] 4.2 `static func list_files(root_dir: String) -> Array[String]`: mọi file `.json` trong `root_dir` và các thư mục con (đệ quy, dùng `DirAccess`), **sắp theo đường dẫn** để thứ tự chạy luôn giống nhau. Thư mục không có thì trả `[]`.
-  - [ ] 4.3 Định dạng và câu lỗi theo Dev Notes "Định dạng kịch bản". Gom mọi lỗi rồi mới trả, như `LevelLoader`. Khóa lạ là cảnh báo, không phải lỗi.
-  - [ ] 4.4 Không ghi log trong bộ nạp (bên gọi ghi), giống `LevelLoader`.
-- [ ] **Task 5: Chạy một kịch bản** (`tests/scenario_runner.gd`, AC: 3, 4, 6)
-  - [ ] 5.1 `class_name ScenarioRunner extends RefCounted`. `static func run(scenario: ScenarioData, stats: Stats) -> ScenarioResult`. `ScenarioResult` (lớp con): `passed: bool`, `problems: Array[String]`.
-  - [ ] 5.2 Dựng `BattleState.from_level(scenario.before, stats)`. Gọi `validate()`: có lỗi thì ghi vào `problems` (`trước: <lỗi>`) và dừng.
-  - [ ] 5.3 Chạy từng bước. Story này **chưa có luật nào**, nên mọi bước đều ra `bước N: lệnh "<kind>" chưa có luật (Story X)` rồi dừng. Bảng story theo lệnh: `di` → 1.4, `huy` và `ket_thuc_luot` → 1.5, `danh` → 2.1. Viết thành một `match` để Story 1.4 thay nhánh `"di"` bằng lệnh thật. Sau mỗi bước (khi đã có luật) gọi `validate()` (luật dự án).
-  - [ ] 5.4 Chạy hết các bước thì so với `sau`, theo Dev Notes "So kết quả". Mỗi chỗ khác là một câu trong `problems`.
-  - [ ] 5.5 File nằm trong `game/tests/` (không vào bản export). Không phải file test GUT nên **không** đặt tên `test_*`.
-- [ ] **Task 6: Test GUT chạy mọi kịch bản** (`tests/test_scenarios.gd`, AC: 3, 4)
-  - [ ] 6.1 Nạp `chi_so.json` thật (`StatsLoader.load_stats("res://data/chi_so.json")`). Kịch bản dùng chỉ số thật: sửa `chi_so.json` thì kịch bản chạy lại theo số mới (kiến trúc, mục "Chỉ số").
-  - [ ] 6.2 `test_every_scenario_loads`: thư mục `res://tests/kich_ban` phải có ít nhất một file. Mọi file phải nạp không lỗi; lỗi thì `assert` kèm nguyên văn câu lỗi.
-  - [ ] 6.3 `test_approved_scenarios_pass`: mỗi kịch bản đã duyệt phải `passed`. Trượt thì thông điệp gồm `id` và mọi câu trong `problems`. Chưa có kịch bản đã duyệt thì gọi `pass_test("chưa có kịch bản đã duyệt")`, vì `test.sh` coi test không có assert là trượt.
-  - [ ] 6.4 Kịch bản chưa duyệt cũng chạy, nhưng **không** assert kết quả (AC 4).
-  - [ ] 6.5 Ghi kết quả cho `test.sh`: nếu biến môi trường `KET_QUA_KICH_BAN` có giá trị (`OS.get_environment`) thì ghi file đó. Mỗi kịch bản một dòng `<da_duyet|chua_duyet>\t<dat|truot>\t<id>`, theo thứ tự `list_files`. Biến rỗng thì không ghi gì (chạy GUT tay vẫn được).
-- [ ] **Task 7: Test cho bộ nạp và bộ chạy** (`tests/test_scenario_loader.gd`, AC: 3, 4)
-  - [ ] 7.1 Theo mẫu `test_main.gd`: viết file tạm vào `user://test_kich_ban/…`, xóa trong `after_each`.
-  - [ ] 7.2 Ca đúng: kịch bản tối thiểu nạp được; `id`, `group`, `approved`, `description` đúng; `truoc.mau` đổi máu đúng quân; thiếu `thu_tu_dich` thì id quân Nguyên theo thứ tự đọc (hàng trên xuống, trái sang phải).
-  - [ ] 7.3 Mỗi câu lỗi trong bảng Dev Notes có một ca, so **nguyên văn**. Thêm một ca có nhiều lỗi cùng lúc: phải liệt kê đủ.
-  - [ ] 7.4 Bộ chạy: (a) `hanh_dong: []` và `sau` giống `truoc` thì đạt; (b) `sau` khác máu, khác ô, thiếu quân, thừa quân, khác địa hình: mỗi ca ra đúng câu so sánh; (c) có lệnh `di` thì ra câu "chưa có luật (Story 1.4)" và không so `sau`.
-  - [ ] 7.5 `list_files`: sắp theo đường dẫn, đi vào thư mục con, bỏ qua file không phải `.json`.
-  - [ ] 7.6 Tách phần đọc file kết quả ở 6.5 nếu cần để test được; không bắt buộc test `test.sh`.
-- [ ] **Task 8: `tools/test.sh` in số kịch bản** (AC: 3, 4)
-  - [ ] 8.1 Trước bước 4, đặt `KET_QUA_KICH_BAN="$KET_QUA_DIR/kich_ban.txt"`, xóa file cũ, `export` cho Godot. Godot thừa hưởng biến môi trường của shell.
-  - [ ] 8.2 Sau dòng `[4/4] Test GUT: …`, đọc file đó và in `      Kịch bản luật: <a> đã duyệt · <b> chưa duyệt (<c> chưa đạt)`. Kịch bản chưa duyệt mà chưa đạt thì in thêm từng dòng `  ⏳ <id>: chưa duyệt, chưa đạt`. Kịch bản đã duyệt mà trượt đã làm GUT trượt, nên không cần đếm thêm.
-  - [ ] 8.3 GUT chạy xong mà không có file kết quả (ví dụ `test_scenarios.gd` lỗi) thì in `      Kịch bản luật: không đọc được kết quả` và **trượt**.
-  - [ ] 8.4 Giữ nguyên 4 bước và mọi chốt chống xanh giả. `set -euo pipefail`: mọi `grep` không khớp phải bọc (`|| true`), như phần còn lại của file.
-- [ ] **Task 9: Công cụ duyệt** (`tools/xem_kich_ban.sh` + `game/tests/scenario_viewer.gd`, AC: 1, 2)
-  - [ ] 9.1 `tools/xem_kich_ban.sh [nhom] [--tat_ca]`: `source tools/_godot.sh`, rồi chạy `"$GODOT" --headless --path "$REPO_ROOT/game" -s res://tests/scenario_viewer.gd -- "$@"`. Bỏ dòng banner của Godot (`Godot Engine v…`) khỏi đầu ra. Giữ mã thoát của Godot.
-  - [ ] 9.2 `scenario_viewer.gd` `extends SceneTree`, làm việc trong `_initialize()`, xong thì `quit(ma)`. Đọc tham số bằng `OS.get_cmdline_user_args()`. Tham số lạ (không phải tên nhóm, không phải `--tat_ca`) thì in `bỏ qua tham số lạ: "<x>"`.
-  - [ ] 9.3 Nạp `chi_so.json` và mọi kịch bản qua `ScenarioLoader`. File sai định dạng thì in câu lỗi (kèm `id`) thay cho bàn cờ, rồi in tiếp file khác. Cuối cùng thoát mã 1 nếu có file sai.
-  - [ ] 9.4 In theo Dev Notes "Cách in". Chữ tên quân lấy qua `tr()` (khóa `unit.*` đã có từ Story 1.2), riêng tên đầy đủ của tướng dùng khóa mới (Task 10).
-  - [ ] 9.5 Đây là công cụ dòng lệnh: in bằng `print()` là đúng. Luật "chỉ Log được in" chỉ áp cho `src/` (`check_boundaries.sh` không quét `tests/`).
-  - [ ] 9.6 Không chạy luật trong công cụ duyệt. Tác giả duyệt **spec** (bàn sau mong đợi), không duyệt kết quả code.
-- [ ] **Task 10: Chữ hiển thị** (`i18n/text.csv`, AC: 1)
-  - [ ] 10.1 Thêm khóa cho tên đầy đủ dùng trong công cụ duyệt: `scenario.unit.nguyen_khoai` = `Nguyễn Khoái`, `scenario.unit.pham_ngu_lao` = `Phạm Ngũ Lão`, `scenario.unit.tran_khanh_du` = `Trần Khánh Dư`, `scenario.unit.bo_binh` = `Bộ binh`, `scenario.unit.ky_binh` = `Kỵ binh`, `scenario.unit.cung_ky` = `Cung kỵ`.
-  - [ ] 10.2 Chạy `--import` (bước 3 của `tools/test.sh` tự chạy) để sinh lại `text.vi.translation`, rồi commit file đó, như Story 1.2 Task 4.2. `test_i18n.gd` phải xanh.
-  - [ ] 10.3 Câu lỗi của bộ nạp và câu so sánh **không** đi qua `tr()`, giống câu lỗi của `LevelLoader` (test so nguyên văn, xem Story 1.1).
-- [ ] **Task 11: Kịch bản mẫu** (AC: 1, 6)
-  - [ ] 11.1 Tạo `game/tests/kich_ban/di_chuyen/di_thang_3_o.json` theo Dev Notes "Kịch bản mẫu", `"da_duyet": false`.
-  - [ ] 11.2 **Không** tạo kịch bản nào khác. Đợt `di_chuyen/` đầy đủ (5–8 kịch bản) là việc của Story 1.4.
-  - [ ] 11.3 Kiểm preset export: `tests/*` đã bị loại (Story 0.5), nên kịch bản không vào bản web. `test_export_preset.gd` phải xanh.
-- [ ] **Task 12: Kiểm và commit** (AC: 1–7)
-  - [ ] 12.1 `tools/test.sh` xanh, có dòng `Kịch bản luật: 0 đã duyệt · 1 chưa duyệt (1 chưa đạt)` và dòng `⏳ di_chuyen/di_thang_3_o.json`.
-  - [ ] 12.2 Chạy `tools/xem_kich_ban.sh`, `tools/xem_kich_ban.sh di_chuyen`, `tools/xem_kich_ban.sh xyz`, `tools/xem_kich_ban.sh --tat_ca`. Chép đầu ra thật vào Completion Notes để tác giả xem.
-  - [ ] 12.3 Thử khóa trên một **bản clone tạm** (không phải repo chính), theo cách của Story 0.2 Task 5.5: đổi mẫu thành `da_duyet: true`, commit trong bản clone, `tools/test.sh` phải **trượt** vì kịch bản đã duyệt chưa đạt (AC 4); sửa file thì có thêm dòng khóa. Ghi vào Debug Log. Không để lại gì trên `main`.
-  - [ ] 12.4 Commit kèm file `.uid` mới, lời commit tiếng Việt.
-  - [ ] 12.5 Ghi hướng dẫn tác giả tự test vào Completion Notes (mẫu ở mục Testing).
+  - [x] 3.2 Lớp con `ScenarioStep`: `kind: String` (`"di"`, `"danh"`, `"huy"`, `"ket_thuc_luot"`), `general: int` (UnitType, `-1` nếu lệnh không cần tướng), `cell: Vector2i` (`Vector2i(-1, -1)` nếu không cần ô). Story 1.4 đổi bước này thành `Command`.
+  - [x] 3.3 Lớp con `ExpectedUnit`: `type: int`, `cell: Vector2i`, `hp: int` (đã đổi `0` thành máu đầy lúc nạp).
+- [x] **Task 4: Bộ nạp kịch bản** (`src/data/scenario_loader.gd`, AC: 3, 4)
+  - [x] 4.1 `static func load_scenario(path: String, root_dir: String, stats: Stats) -> LoadResult`: đọc file như `LevelLoader.load_level` (dùng `JsonFile`), `id` = `path` bỏ tiền tố `root_dir + "/"`. Trả `LoadResult` có `data` là `ScenarioData`.
+  - [x] 4.2 `static func list_files(root_dir: String) -> Array[String]`: mọi file `.json` trong `root_dir` và các thư mục con (đệ quy, dùng `DirAccess`), **sắp theo đường dẫn** để thứ tự chạy luôn giống nhau. Thư mục không có thì trả `[]`.
+  - [x] 4.3 Định dạng và câu lỗi theo Dev Notes "Định dạng kịch bản". Gom mọi lỗi rồi mới trả, như `LevelLoader`. Khóa lạ là cảnh báo, không phải lỗi.
+  - [x] 4.4 Không ghi log trong bộ nạp (bên gọi ghi), giống `LevelLoader`.
+- [x] **Task 5: Chạy một kịch bản** (`tests/scenario_runner.gd`, AC: 3, 4, 6)
+  - [x] 5.1 `class_name ScenarioRunner extends RefCounted`. `static func run(scenario: ScenarioData, stats: Stats) -> ScenarioResult`. `ScenarioResult` (lớp con): `passed: bool`, `problems: Array[String]`.
+  - [x] 5.2 Dựng `BattleState.from_level(scenario.before, stats)`. Gọi `validate()`: có lỗi thì ghi vào `problems` (`trước: <lỗi>`) và dừng.
+  - [x] 5.3 Chạy từng bước. Story này **chưa có luật nào**, nên mọi bước đều ra `bước N: lệnh "<kind>" chưa có luật (Story X)` rồi dừng. Bảng story theo lệnh: `di` → 1.4, `huy` và `ket_thuc_luot` → 1.5, `danh` → 2.1. Viết thành một `match` để Story 1.4 thay nhánh `"di"` bằng lệnh thật. Sau mỗi bước (khi đã có luật) gọi `validate()` (luật dự án).
+  - [x] 5.4 Chạy hết các bước thì so với `sau`, theo Dev Notes "So kết quả". Mỗi chỗ khác là một câu trong `problems`.
+  - [x] 5.5 File nằm trong `game/tests/` (không vào bản export). Không phải file test GUT nên **không** đặt tên `test_*`.
+- [x] **Task 6: Test GUT chạy mọi kịch bản** (`tests/test_scenarios.gd`, AC: 3, 4)
+  - [x] 6.1 Nạp `chi_so.json` thật (`StatsLoader.load_stats("res://data/chi_so.json")`). Kịch bản dùng chỉ số thật: sửa `chi_so.json` thì kịch bản chạy lại theo số mới (kiến trúc, mục "Chỉ số").
+  - [x] 6.2 `test_every_scenario_loads`: thư mục `res://tests/kich_ban` phải có ít nhất một file. Mọi file phải nạp không lỗi; lỗi thì `assert` kèm nguyên văn câu lỗi.
+  - [x] 6.3 `test_approved_scenarios_pass`: mỗi kịch bản đã duyệt phải `passed`. Trượt thì thông điệp gồm `id` và mọi câu trong `problems`. Chưa có kịch bản đã duyệt thì gọi `pass_test("chưa có kịch bản đã duyệt")`, vì `test.sh` coi test không có assert là trượt.
+  - [x] 6.4 Kịch bản chưa duyệt cũng chạy, nhưng **không** assert kết quả (AC 4).
+  - [x] 6.5 Ghi kết quả cho `test.sh`: nếu biến môi trường `KET_QUA_KICH_BAN` có giá trị (`OS.get_environment`) thì ghi file đó. Mỗi kịch bản một dòng `<da_duyet|chua_duyet>\t<dat|truot>\t<id>`, theo thứ tự `list_files`. Biến rỗng thì không ghi gì (chạy GUT tay vẫn được).
+- [x] **Task 7: Test cho bộ nạp và bộ chạy** (`tests/test_scenario_loader.gd`, AC: 3, 4)
+  - [x] 7.1 Theo mẫu `test_main.gd`: viết file tạm vào `user://test_kich_ban/…`, xóa trong `after_each`.
+  - [x] 7.2 Ca đúng: kịch bản tối thiểu nạp được; `id`, `group`, `approved`, `description` đúng; `truoc.mau` đổi máu đúng quân; thiếu `thu_tu_dich` thì id quân Nguyên theo thứ tự đọc (hàng trên xuống, trái sang phải).
+  - [x] 7.3 Mỗi câu lỗi trong bảng Dev Notes có một ca, so **nguyên văn**. Thêm một ca có nhiều lỗi cùng lúc: phải liệt kê đủ.
+  - [x] 7.4 Bộ chạy: (a) `hanh_dong: []` và `sau` giống `truoc` thì đạt; (b) `sau` khác máu, khác ô, thiếu quân, thừa quân, khác địa hình: mỗi ca ra đúng câu so sánh; (c) có lệnh `di` thì ra câu "chưa có luật (Story 1.4)" và không so `sau`.
+  - [x] 7.5 `list_files`: sắp theo đường dẫn, đi vào thư mục con, bỏ qua file không phải `.json`.
+  - [x] 7.6 Tách phần đọc file kết quả ở 6.5 nếu cần để test được; không bắt buộc test `test.sh`.
+- [x] **Task 8: `tools/test.sh` in số kịch bản** (AC: 3, 4)
+  - [x] 8.1 Trước bước 4, đặt `KET_QUA_KICH_BAN="$KET_QUA_DIR/kich_ban.txt"`, xóa file cũ, `export` cho Godot. Godot thừa hưởng biến môi trường của shell.
+  - [x] 8.2 Sau dòng `[4/4] Test GUT: …`, đọc file đó và in `      Kịch bản luật: <a> đã duyệt · <b> chưa duyệt (<c> chưa đạt)`. Kịch bản chưa duyệt mà chưa đạt thì in thêm từng dòng `  ⏳ <id>: chưa duyệt, chưa đạt`. Kịch bản đã duyệt mà trượt đã làm GUT trượt, nên không cần đếm thêm.
+  - [x] 8.3 GUT chạy xong mà không có file kết quả (ví dụ `test_scenarios.gd` lỗi) thì in `      Kịch bản luật: không đọc được kết quả` và **trượt**.
+  - [x] 8.4 Giữ nguyên 4 bước và mọi chốt chống xanh giả. `set -euo pipefail`: mọi `grep` không khớp phải bọc (`|| true`), như phần còn lại của file.
+- [x] **Task 9: Công cụ duyệt** (`tools/xem_kich_ban.sh` + `game/tests/scenario_viewer.gd`, AC: 1, 2)
+  - [x] 9.1 `tools/xem_kich_ban.sh [nhom] [--tat_ca]`: `source tools/_godot.sh`, rồi chạy `"$GODOT" --headless --path "$REPO_ROOT/game" -s res://tests/scenario_viewer.gd -- "$@"`. Bỏ dòng banner của Godot (`Godot Engine v…`) khỏi đầu ra. Giữ mã thoát của Godot.
+  - [x] 9.2 `scenario_viewer.gd` `extends SceneTree`, làm việc trong `_initialize()`, xong thì `quit(ma)`. Đọc tham số bằng `OS.get_cmdline_user_args()`. Tham số lạ (không phải tên nhóm, không phải `--tat_ca`) thì in `bỏ qua tham số lạ: "<x>"`.
+  - [x] 9.3 Nạp `chi_so.json` và mọi kịch bản qua `ScenarioLoader`. File sai định dạng thì in câu lỗi (kèm `id`) thay cho bàn cờ, rồi in tiếp file khác. Cuối cùng thoát mã 1 nếu có file sai.
+  - [x] 9.4 In theo Dev Notes "Cách in". Chữ tên quân lấy qua `tr()` (khóa `unit.*` đã có từ Story 1.2), riêng tên đầy đủ của tướng dùng khóa mới (Task 10).
+  - [x] 9.5 Đây là công cụ dòng lệnh: in bằng `print()` là đúng. Luật "chỉ Log được in" chỉ áp cho `src/` (`check_boundaries.sh` không quét `tests/`).
+  - [x] 9.6 Không chạy luật trong công cụ duyệt. Tác giả duyệt **spec** (bàn sau mong đợi), không duyệt kết quả code.
+- [x] **Task 10: Chữ hiển thị** (`i18n/text.csv`, AC: 1)
+  - [x] 10.1 Thêm khóa cho tên đầy đủ dùng trong công cụ duyệt: `scenario.unit.nguyen_khoai` = `Nguyễn Khoái`, `scenario.unit.pham_ngu_lao` = `Phạm Ngũ Lão`, `scenario.unit.tran_khanh_du` = `Trần Khánh Dư`, `scenario.unit.bo_binh` = `Bộ binh`, `scenario.unit.ky_binh` = `Kỵ binh`, `scenario.unit.cung_ky` = `Cung kỵ`.
+  - [x] 10.2 Chạy `--import` (bước 3 của `tools/test.sh` tự chạy) để sinh lại `text.vi.translation`, rồi commit file đó, như Story 1.2 Task 4.2. `test_i18n.gd` phải xanh.
+  - [x] 10.3 Câu lỗi của bộ nạp và câu so sánh **không** đi qua `tr()`, giống câu lỗi của `LevelLoader` (test so nguyên văn, xem Story 1.1).
+- [x] **Task 11: Kịch bản mẫu** (AC: 1, 6)
+  - [x] 11.1 Tạo `game/tests/kich_ban/di_chuyen/di_thang_3_o.json` theo Dev Notes "Kịch bản mẫu", `"da_duyet": false`.
+  - [x] 11.2 **Không** tạo kịch bản nào khác. Đợt `di_chuyen/` đầy đủ (5–8 kịch bản) là việc của Story 1.4.
+  - [x] 11.3 Kiểm preset export: `tests/*` đã bị loại (Story 0.5), nên kịch bản không vào bản web. `test_export_preset.gd` phải xanh.
+- [x] **Task 12: Kiểm và commit** (AC: 1–7)
+  - [x] 12.1 `tools/test.sh` xanh, có dòng `Kịch bản luật: 0 đã duyệt · 1 chưa duyệt (1 chưa đạt)` và dòng `⏳ di_chuyen/di_thang_3_o.json`.
+  - [x] 12.2 Chạy `tools/xem_kich_ban.sh`, `tools/xem_kich_ban.sh di_chuyen`, `tools/xem_kich_ban.sh xyz`, `tools/xem_kich_ban.sh --tat_ca`. Chép đầu ra thật vào Completion Notes để tác giả xem.
+  - [x] 12.3 Thử khóa trên một **bản clone tạm** (không phải repo chính), theo cách của Story 0.2 Task 5.5: đổi mẫu thành `da_duyet: true`, commit trong bản clone, `tools/test.sh` phải **trượt** vì kịch bản đã duyệt chưa đạt (AC 4); sửa file thì có thêm dòng khóa. Ghi vào Debug Log. Không để lại gì trên `main`.
+  - [x] 12.4 Commit kèm file `.uid` mới, lời commit tiếng Việt.
+  - [x] 12.5 Ghi hướng dẫn tác giả tự test vào Completion Notes (mẫu ở mục Testing).
 
 ## Dev Notes
 
@@ -168,8 +172,8 @@ tôi muốn đọc và duyệt luật dưới dạng bàn cờ trước và sau,
 **Trong `truoc` và `sau`:**
 - `dia_hinh`, `quan`: kiểm như file trận (số dòng, số ô, ký hiệu lạ, quân trên ô không đi vào được, tướng lặp), qua `BoardLayers`. Tên trong câu lỗi có tiền tố: `"truoc.dia_hinh"`, `"sau.quan"`.
 - `truoc` phải có ít nhất một quân (tướng hoặc Nguyên). `sau` được phép trống (mọi quân gục). **[MẶC ĐỊNH]**
-- `mau`: object `{"cot,hang": số máu}`. Chỉ ghi quân **không đầy máu**; quân không có trong `mau` là đầy máu theo `chi_so.json`. Ô phải có quân ở lớp `quan` cùng phần; số máu là số nguyên từ 1 tới máu tối đa của loại quân đó. **[MẶC ĐỊNH]**
-- `truoc.thu_tu_dich`: không bắt buộc. Có thì kiểm như file trận. Không có thì thứ tự quân Nguyên là **thứ tự đọc bàn**: hàng trên xuống dưới, mỗi hàng trái sang phải. **[MẶC ĐỊNH]**
+- `mau`: object `{"cot,hang": số máu}`. Chỉ ghi quân **không đầy máu**; quân không có trong `mau` là đầy máu theo `chi_so.json`. Ô phải có quân ở lớp `quan` cùng phần; số máu là số nguyên từ 1 tới máu tối đa của loại quân đó. **[Tác giả chốt 2026-10-18]**
+- `truoc.thu_tu_dich`: không bắt buộc. Có thì kiểm như file trận. Không có thì thứ tự quân Nguyên là **thứ tự đọc bàn**: hàng trên xuống dưới, mỗi hàng trái sang phải. **[Tác giả chốt 2026-10-18]**
 - `sau` so theo **ô**, không theo id: ô nào có loại quân gì, bao nhiêu máu. Vì vậy `sau` không cần `thu_tu_dich`.
 
 **Lệnh trong `hanh_dong`** (`lenh` bắt buộc; lệnh khác thêm ở story của nó):
@@ -220,7 +224,7 @@ So `BattleState` sau khi chạy với `sau`, theo thứ tự cố định: đị
 
 Tên đầy đủ trong câu so sánh lấy từ bảng hằng trong `scenario_runner.gd`, không qua `tr()` (câu cho dev và log, giống câu lỗi). Công cụ duyệt dùng `tr()` vì đó là chữ cho tác giả đọc.
 
-### Cách in (công cụ duyệt) **[MẶC ĐỊNH, chờ tác giả xác nhận]**
+### Cách in (công cụ duyệt) **[Tác giả chốt 2026-10-18]**
 
 ```
 ━━━ di_chuyen/di_thang_3_o.json  [chưa duyệt]
@@ -418,7 +422,7 @@ Nhớ commit file `.uid` của mọi script mới.
 - Commit chỉ khi `tools/test.sh` xanh.
 - Lệnh cho tác giả nằm trong `tools/`, chạy từ gốc repo.
 
-### Quyết định mặc định trong story này (chờ tác giả xác nhận, không chặn việc làm)
+### Quyết định trong story này (tác giả đồng ý cả 6 mục, 2026-10-18)
 
 1. **Kịch bản chưa duyệt mà chưa đạt không làm `test.sh` đỏ** (AC 4). Lý do ở mục "Vì sao chọn luật đỏ/xanh".
 2. **Cách in của công cụ duyệt** (AC 1): một ký hiệu mỗi ô, quân che địa hình, chú thích "Dưới quân" và "Máu" dưới bàn.
@@ -444,14 +448,99 @@ Nhớ commit file `.uid` của mọi script mới.
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5)
+
 ### Debug Log References
+
+- Task 1: tách hàm sang `BoardLayers`, chạy `tools/test.sh` ngay sau đó: 188/188 xanh, `test_loaders.gd` không sửa dòng nào.
+- Kiểm test bắt lỗi thật: cố ý làm hỏng hai chỗ (bộ chạy bỏ so máu, bộ nạp bỏ ghi `mau`) thì đúng 2 test trượt (`test_hp_overrides_one_unit_and_others_are_full`, `test_runner_reports_hp_difference`). Đã trả code về như cũ.
+- Task 8.3: tạm đổi tên biến môi trường trong `test_scenarios.gd` thì `test.sh` in `Kịch bản luật: không đọc được kết quả` và trượt. Đã trả lại.
+- Task 12.3 (khóa, trên bản clone tạm, nhánh `thu_khoa`, đã xóa): đổi mẫu thành `da_duyet: true` rồi commit thì `test.sh` trượt với `kịch bản đã duyệt di_chuyen/di_thang_3_o.json: bước 1: lệnh "di" chưa có luật (Story 1.4)`. Sửa file thì thêm dòng `❌ game/tests/kich_ban/di_chuyen/di_thang_3_o.json: kịch bản đã duyệt bị sửa so với commit gần nhất`. Repo chính không bị đụng.
+- Lần đầu chạy, thông điệp trượt của kịch bản đã duyệt có nhiều dòng nên tóm tắt `test.sh` chỉ hiện dòng đầu, không thấy lý do. Đã gộp lý do vào một dòng (nối bằng `; `).
+- Công cụ duyệt in thêm `[WARN][app] bỏ qua tham số lạ: "di_chuyen"`, vì `AppState` (autoload) đọc mọi tham số sau `--`. Đã đổi sang truyền tham số qua biến môi trường `XEM_KICH_BAN_THAM_SO`.
+- Thử tay công cụ duyệt: không tham số, `di_chuyen`, `xyz` (mã 1), `--tat_ca`, `--abc` (in `bỏ qua tham số lạ`). Tạm đổi mẫu thành đã duyệt thì in `Không có kịch bản nào chờ duyệt.`. Tạm sửa máu thành 5 thì in `[sai định dạng]` kèm 2 câu lỗi và thoát mã 1. Mọi thay đổi tạm đã trả lại.
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Đã làm đủ Task 1–12. `tools/test.sh`: 221/221 đạt (thêm 33 test), ranh giới đạt.
+- **Lệch so với story (ghi để review):**
+  - Tham số của công cụ duyệt đi qua biến môi trường `XEM_KICH_BAN_THAM_SO`, không qua `OS.get_cmdline_user_args()` như Task 9.2 (lý do ở Debug Log).
+  - Lớp con trong bộ nạp tên `Section`, không đặt `Side` (trùng enum có sẵn của Godot, như bài học Story 1.2).
+  - Thêm 2 khóa dịch ngoài Task 10.1: `scenario.terrain.spikes` (hầm chông), `scenario.terrain.pass` (ô ải), dùng cho dòng "Dưới quân".
+  - Thêm `BoardLayers.reading_order()` (thứ tự đọc bàn), dùng chung cho `thu_tu_dich` mặc định của kịch bản và cho việc tìm quân Nguyên thiếu trong `thu_tu_dich` của file trận (cùng thứ tự như code cũ).
+  - Khóa lạ lồng nhau được cảnh báo kèm tiền tố cho dễ tìm: `bỏ qua khóa lạ "truoc.ghi_chu"`; trong lệnh: `"hanh_dong" mục 1 (huy): bỏ qua khóa lạ "tuong"`.
+  - `JSON.stringify` (chỉ dùng trong test) sắp khóa theo chữ cái, nên trong test lỗi `mau` ra theo thứ tự chữ cái. File thật giữ thứ tự như trong file.
+- **Câu lỗi cuối cùng:** đúng như bảng ở Dev Notes "Định dạng kịch bản". Từng câu có test so nguyên văn trong `game/tests/test_scenario_loader.gd`.
+- Tự kiểm tự động cho khóa `da_duyet` (mục hoãn của Story 0.2) **vẫn hoãn**. Task 12.3 cho thấy cách làm: clone tạm, commit file khóa, sửa, đòi trượt. Nên làm khi có kịch bản đã duyệt đầu tiên (Story 1.4).
+
+**Đầu ra thật của `tools/xem_kich_ban.sh`:**
+
+```
+━━━ di_chuyen/di_thang_3_o.json  [chưa duyệt]
+Nguyễn Khoái đi thẳng 3 ô sang phải trên đất trống. Bộ binh 1 máu đứng yên.
+
+Hành động:
+  1. Nguyễn Khoái đi tới 3,6
+
+      TRƯỚC                   SAU
+      0 1 2 3 4 5 6           0 1 2 3 4 5 6
+   0  . . . ~ . . .        0  . . . ~ . . .
+   1  . . . ~ . . .        1  . . . ~ . . .
+   2  . . . ~ . . .        2  . . . ~ . . .
+   3  . . . . . . .        3  . . . . . . .
+   4  . . . ~ . B .        4  . . . ~ . B .
+   5  . . . ~ . . .        5  . . . ~ . . .
+   6  1 . . . . . .        6  . . . 1 . . .
+
+  Máu: 5,4 Bộ binh 1/3    Máu: 5,4 Bộ binh 1/3
+
+Tổng: 1 kịch bản chờ duyệt.
+Duyệt: thấy đúng thì đổi "da_duyet": false thành true trong file, hoặc nhắn AI "đúng"/"sai: <lý do>".
+```
+
+`tools/xem_kich_ban.sh xyz` → `không có nhóm "xyz". Các nhóm đang có: di_chuyen` (mã thoát 1).
+
+**Tóm tắt của `tools/test.sh`:**
+
+```
+[4/4] Test GUT: 221/221 đạt
+      Kịch bản luật: 0 đã duyệt · 1 chưa duyệt (1 chưa đạt)
+  ⏳ di_chuyen/di_thang_3_o.json: chưa duyệt, chưa đạt
+
+✅ 221/221 test đạt
+```
+
+**Hướng dẫn tác giả tự test:**
+1. Gõ `tools/test.sh`. Đúng là: `✅ 221/221 test đạt`, có dòng `Kịch bản luật: 0 đã duyệt · 1 chưa duyệt (1 chưa đạt)` và dòng `⏳ di_chuyen/di_thang_3_o.json`.
+2. Gõ `tools/xem_kich_ban.sh`. Đúng là: thấy kịch bản mẫu như khung trên, Nguyễn Khoái từ `0,6` sang `3,6`.
+3. Gõ `tools/xem_kich_ban.sh di_chuyen`: thấy giống bước 2. Gõ `tools/xem_kich_ban.sh xyz`: thấy câu "không có nhóm".
+4. Mở `game/tests/kich_ban/di_chuyen/di_thang_3_o.json`, đổi `"5,4": 1` (trong `truoc`) thành `5`, gõ `tools/test.sh`. Đúng là: trượt, có câu `"truoc.mau" ô 5,4: máu phải là số nguyên từ 1 tới 3, đang là 5`. Sửa lại như cũ.
+5. **Không** đổi `da_duyet` của kịch bản mẫu: luật đi chưa có, nên đổi là `test.sh` đỏ. Đợt duyệt thật đầu tiên ở Story 1.4.
 
 ### File List
+
+- `_bmad-output/implementation-artifacts/1-3-kich-ban-luat-va-cong-cu-duyet-tren-terminal.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `game/i18n/text.csv`
+- `game/i18n/text.vi.translation`
+- `game/src/core/battle_state.gd`
+- `game/src/core/level_data.gd`
+- `game/src/core/unit_factory.gd`
+- `game/src/data/board_layers.gd` (mới) + `.uid`
+- `game/src/data/level_loader.gd`
+- `game/src/data/scenario_data.gd` (mới) + `.uid`
+- `game/src/data/scenario_loader.gd` (mới) + `.uid`
+- `game/tests/kich_ban/di_chuyen/di_thang_3_o.json` (mới)
+- `game/tests/scenario_runner.gd` (mới) + `.uid`
+- `game/tests/scenario_viewer.gd` (mới) + `.uid`
+- `game/tests/test_battle_state.gd`
+- `game/tests/test_scenario_loader.gd` (mới) + `.uid`
+- `game/tests/test_scenarios.gd` (mới) + `.uid`
+- `tools/test.sh`
+- `tools/xem_kich_ban.sh` (mới)
 
 ### Change Log
 
 - 2026-10-18: Tạo story.
+- 2026-10-18: Làm story: định dạng kịch bản luật, bộ nạp, bộ chạy, công cụ duyệt `tools/xem_kich_ban.sh`, số kịch bản trong `tools/test.sh`, kịch bản mẫu `di_chuyen/di_thang_3_o.json`.

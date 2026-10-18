@@ -11,10 +11,13 @@ class UnitPlacement:
 
 	var type: int
 	var cell: Vector2i
+	## Máu lúc bắt đầu; 0 là máu đầy theo chi_so.json (file trận luôn 0, kịch bản luật ghi được máu riêng).
+	var hp: int
 
-	func _init(p_type: int, p_cell: Vector2i) -> void:
+	func _init(p_type: int, p_cell: Vector2i, p_hp: int = 0) -> void:
 		type = p_type
 		cell = p_cell
+		hp = p_hp
 
 
 var format_version: int = 0
