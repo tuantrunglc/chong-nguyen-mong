@@ -4,7 +4,7 @@ baseline_commit: 0994ad5
 
 # Story 1.1: Nạp chỉ số và trận từ file, báo lỗi bằng tiếng Việt
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -29,72 +29,72 @@ tôi muốn trận và chỉ số nằm trong file tôi tự sửa được, và
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Kiểu dữ liệu trong lõi** (AC: 1, 6)
-  - [ ] 1.1 `game/src/core/unit_type.gd`: `class_name UnitType extends RefCounted`, enum không tên `enum { NGUYEN_KHOAI, PHAM_NGU_LAO, TRAN_KHANH_DU, BO_BINH, KY_BINH, CUNG_KY }` để viết được `UnitType.NGUYEN_KHOAI` đúng như bảng đặt tên của kiến trúc. Thêm `static func is_general(type: int) -> bool`.
-  - [ ] 1.2 `game/src/core/terrain.gd`: `class_name Terrain extends RefCounted`, `enum { PLAIN, RIVER, FOREST, SPIKES, GRANARY, VILLAGE, PASS }` (`.` `~` `#` `^` `L` `D` `A`). Thêm `static func is_walkable(t: int) -> bool` (PLAIN, SPIKES, PASS đi vào được; RIVER, FOREST, GRANARY, VILLAGE không).
-  - [ ] 1.3 `game/src/core/stats.gd`: `class_name Stats extends RefCounted`, chỉ đọc sau khi tạo. Giữ `Dictionary` (UnitType → Dictionary khóa → int). Hàm: `value(type: int, key: String) -> int`, `max_hp(type: int) -> int`, `move_range(type: int) -> int`. Hàm đòn (`damage`, `push_distance`…) để story E2 thêm khi dùng.
-  - [ ] 1.4 `game/src/core/level_data.gd`: `class_name LevelData extends RefCounted`. Trường: `format_version: int`, `name: String`, `mission: Mission` (`enum Mission { ELIMINATE, HOLD_PASS }`), `size: Vector2i`, `terrain: PackedInt32Array` (theo hàng, `index = hang * size.x + cot`), `units: Array[UnitPlacement]`. Hàm `terrain_at(cell: Vector2i) -> int`.
+- [x] **Task 1: Kiểu dữ liệu trong lõi** (AC: 1, 6)
+  - [x] 1.1 `game/src/core/unit_type.gd`: `class_name UnitType extends RefCounted`, enum không tên `enum { NGUYEN_KHOAI, PHAM_NGU_LAO, TRAN_KHANH_DU, BO_BINH, KY_BINH, CUNG_KY }` để viết được `UnitType.NGUYEN_KHOAI` đúng như bảng đặt tên của kiến trúc. Thêm `static func is_general(type: int) -> bool`.
+  - [x] 1.2 `game/src/core/terrain.gd`: `class_name Terrain extends RefCounted`, `enum { PLAIN, RIVER, FOREST, SPIKES, GRANARY, VILLAGE, PASS }` (`.` `~` `#` `^` `L` `D` `A`). Thêm `static func is_walkable(t: int) -> bool` (PLAIN, SPIKES, PASS đi vào được; RIVER, FOREST, GRANARY, VILLAGE không).
+  - [x] 1.3 `game/src/core/stats.gd`: `class_name Stats extends RefCounted`, chỉ đọc sau khi tạo. Giữ `Dictionary` (UnitType → Dictionary khóa → int). Hàm: `value(type: int, key: String) -> int`, `max_hp(type: int) -> int`, `move_range(type: int) -> int`. Hàm đòn (`damage`, `push_distance`…) để story E2 thêm khi dùng.
+  - [x] 1.4 `game/src/core/level_data.gd`: `class_name LevelData extends RefCounted`. Trường: `format_version: int`, `name: String`, `mission: Mission` (`enum Mission { ELIMINATE, HOLD_PASS }`), `size: Vector2i`, `terrain: PackedInt32Array` (theo hàng, `index = hang * size.x + cot`), `units: Array[UnitPlacement]`. Hàm `terrain_at(cell: Vector2i) -> int`.
     - Lớp con `class UnitPlacement extends RefCounted` có `type: int`, `cell: Vector2i`, gán **chỉ trong `_init(p_type, p_cell)` và không có dấu chấm** (`cell = p_cell`), vì `check_boundaries.sh` bắt mọi `.cell =` ngoài `effects.gd`.
     - Thứ tự `units` cố định: tướng theo ký hiệu `1`, `2`, `3`; rồi quân Nguyên **theo `thu_tu_dich`**. Story 1.2/2.x cấp id (tướng 1–3, quân Nguyên từ 101) dựa trên thứ tự này.
-  - [ ] 1.5 Không file nào ở trên dùng `FileAccess`, `Log`, `Node`, `print`. Chỉ phụ thuộc file khác trong `src/core/`.
+  - [x] 1.5 Không file nào ở trên dùng `FileAccess`, `Log`, `Node`, `print`. Chỉ phụ thuộc file khác trong `src/core/`.
 
-- [ ] **Task 2: Bộ nạp trong `src/data/`** (AC: 1–4, 6)
-  - [ ] 2.1 `game/src/data/load_result.gd`: `class_name LoadResult extends RefCounted`. `var data: RefCounted` (Stats hoặc LevelData), `var errors: Array[String]`, `var warnings: Array[String]`, thuộc tính chỉ đọc `ok` (`get: return errors.is_empty()`), `add_error(msg)`, `add_warning(msg)`. `data` là `null` khi `ok` là false.
-  - [ ] 2.2 `game/src/data/json_file.gd` (hoặc hàm static trong `load_result.gd`, tùy dev; đừng chép mã đọc JSON hai lần): đọc file → bỏ BOM `﻿` ở đầu nếu có → `JSON.new().parse()` (**không** dùng `JSON.parse_string()`, nó tự in ERROR) → kiểm gốc là `Dictionary`. Trả lỗi theo danh mục (E-DOC, E-JSON, E-ROOT). Có hàm đọc số nguyên chung (`int` hoặc `float` không có phần lẻ đều nhận, rồi `int()`), dùng cho cả hai bộ nạp.
-  - [ ] 2.3 `game/src/data/board_text.gd`: `class_name BoardText extends RefCounted`, hàm static dùng chung (Story 1.3 kịch bản luật và Story 2.13 F2 sẽ dùng lại):
+- [x] **Task 2: Bộ nạp trong `src/data/`** (AC: 1–4, 6)
+  - [x] 2.1 `game/src/data/load_result.gd`: `class_name LoadResult extends RefCounted`. `var data: RefCounted` (Stats hoặc LevelData), `var errors: Array[String]`, `var warnings: Array[String]`, thuộc tính chỉ đọc `ok` (`get: return errors.is_empty()`), `add_error(msg)`, `add_warning(msg)`. `data` là `null` khi `ok` là false.
+  - [x] 2.2 `game/src/data/json_file.gd` (hoặc hàm static trong `load_result.gd`, tùy dev; đừng chép mã đọc JSON hai lần): đọc file → bỏ BOM `﻿` ở đầu nếu có → `JSON.new().parse()` (**không** dùng `JSON.parse_string()`, nó tự in ERROR) → kiểm gốc là `Dictionary`. Trả lỗi theo danh mục (E-DOC, E-JSON, E-ROOT). Có hàm đọc số nguyên chung (`int` hoặc `float` không có phần lẻ đều nhận, rồi `int()`), dùng cho cả hai bộ nạp.
+  - [x] 2.3 `game/src/data/board_text.gd`: `class_name BoardText extends RefCounted`, hàm static dùng chung (Story 1.3 kịch bản luật và Story 2.13 F2 sẽ dùng lại):
     - bảng ký hiệu `TERRAIN_SYMBOLS` (`.`→PLAIN … `A`→PASS) và `UNIT_SYMBOLS` (`1`,`2`,`3`,`B`,`K`,`C`; `.` là ô trống);
     - tách một dòng bàn cờ thành các ô: **đổi tab thành dấu cách**, rồi `split(" ", false)` (chịu được dấu cách thừa ở đầu, cuối, giữa);
     - `parse_cell("1,0") -> Vector2i` (chịu dấu cách quanh số, ví dụ `" 1 , 0 "`), báo không hợp lệ nếu không phải hai số nguyên.
-  - [ ] 2.4 `game/src/data/stats_loader.gd`: `class_name StatsLoader`. `static func load_stats(path: String) -> LoadResult` (đọc file rồi gọi hàm dưới) và `static func parse_stats(text: String, file_label: String) -> LoadResult` (thuần, để test). Kiểm đủ khóa theo bảng "Định dạng `chi_so.json`", mỗi giá trị là số nguyên đủ nhỏ nhất, `_gan` ≤ `_xa`. Gom **mọi** lỗi rồi mới trả về.
-  - [ ] 2.5 `game/src/data/level_loader.gd`: `class_name LevelLoader`. `static func load_level(path: String) -> LoadResult` và `static func parse_level(text: String, file_label: String) -> LoadResult`. Kiểm theo mục "Luật kiểm file trận". Gom **mọi** lỗi. Khóa lạ thì thêm cảnh báo (E-EXTRA), không phải lỗi.
-  - [ ] 2.6 `file_label` = đường dẫn bỏ `res://` (ví dụ `data/tran/tran_01.json`). Bộ nạp **không** gọi `Log`; bên gọi (main.gd) ghi log. Như vậy test không in hàng loạt dòng ERROR.
+  - [x] 2.4 `game/src/data/stats_loader.gd`: `class_name StatsLoader`. `static func load_stats(path: String) -> LoadResult` (đọc file rồi gọi hàm dưới) và `static func parse_stats(text: String, file_label: String) -> LoadResult` (thuần, để test). Kiểm đủ khóa theo bảng "Định dạng `chi_so.json`", mỗi giá trị là số nguyên đủ nhỏ nhất, `_gan` ≤ `_xa`. Gom **mọi** lỗi rồi mới trả về.
+  - [x] 2.5 `game/src/data/level_loader.gd`: `class_name LevelLoader`. `static func load_level(path: String) -> LoadResult` và `static func parse_level(text: String, file_label: String) -> LoadResult`. Kiểm theo mục "Luật kiểm file trận". Gom **mọi** lỗi. Khóa lạ thì thêm cảnh báo (E-EXTRA), không phải lỗi.
+  - [x] 2.6 `file_label` = đường dẫn bỏ `res://` (ví dụ `data/tran/tran_01.json`). Bộ nạp **không** gọi `Log`; bên gọi (main.gd) ghi log. Như vậy test không in hàng loạt dòng ERROR.
 
-- [ ] **Task 3: File dữ liệu** (AC: 1, 6)
-  - [ ] 3.1 `game/data/chi_so.json` đúng nội dung ở mục "Định dạng `chi_so.json`" (số lấy từ GDD, bảng Unit Types).
-  - [ ] 3.2 `game/data/tran/tran_01.json` bản đầu (Story 1.2 hiển thị, Story 2.14 hoàn thiện): Tiêu diệt, sông, 2 tướng Nguyễn Khoái và Phạm Ngũ Lão, 3 Bộ binh. Dùng nội dung ở mục "Nội dung `tran_01.json` bản đầu".
-  - [ ] 3.3 Không cần sửa `export_presets.cfg`: `include_filter` đã có `*.json` (Story 0.5). Không thêm `"da_duyet"` vào file dữ liệu.
+- [x] **Task 3: File dữ liệu** (AC: 1, 6)
+  - [x] 3.1 `game/data/chi_so.json` đúng nội dung ở mục "Định dạng `chi_so.json`" (số lấy từ GDD, bảng Unit Types).
+  - [x] 3.2 `game/data/tran/tran_01.json` bản đầu (Story 1.2 hiển thị, Story 2.14 hoàn thiện): Tiêu diệt, sông, 2 tướng Nguyễn Khoái và Phạm Ngũ Lão, 3 Bộ binh. Dùng nội dung ở mục "Nội dung `tran_01.json` bản đầu".
+  - [x] 3.3 Không cần sửa `export_presets.cfg`: `include_filter` đã có `*.json` (Story 0.5). Không thêm `"da_duyet"` vào file dữ liệu.
 
-- [ ] **Task 4: Màn hình lỗi** (AC: 2, 3, 5, 7)
-  - [ ] 4.1 `game/src/ui/error_screen.gd`: `class_name ErrorScreen extends Control`, dựng toàn bộ bằng code (không `.tscn`). `setup(errors: Array[String], dev: bool)`. Signal `back_pressed` (thì quá khứ theo quy ước đặt tên signal), phát khi bấm nút.
+- [x] **Task 4: Màn hình lỗi** (AC: 2, 3, 5, 7)
+  - [x] 4.1 `game/src/ui/error_screen.gd`: `class_name ErrorScreen extends Control`, dựng toàn bộ bằng code (không `.tscn`). `setup(errors: Array[String], dev: bool)`. Signal `back_pressed` (thì quá khứ theo quy ước đặt tên signal), phát khi bấm nút.
     - Bật dev: tiêu đề `tr("error.data_title")`, rồi **mọi** lỗi, mỗi lỗi một dòng (Label `autowrap_mode` bật) trong `ScrollContainer` + `VBoxContainer` (nhiều lỗi vẫn cuộn được, không tràn màn hình), rồi nút "Về menu".
     - Không bật dev: tiêu đề, một dòng `tr("error.data_short")`, nút "Về menu". **Không** có chi tiết lỗi.
     - Đặt trong vùng bàn cờ (rộng ~616, giữa khung 1280×720, dưới tiêu đề game), không che nhãn phiên bản ở góc dưới phải và chữ DEV ở góc trên trái.
-  - [ ] 4.2 Thêm khóa vào `game/i18n/text.csv` (giữ dòng `app.title`):
+  - [x] 4.2 Thêm khóa vào `game/i18n/text.csv` (giữ dòng `app.title`):
     - `error.data_title` = `Dữ liệu bị lỗi`
     - `error.data_short` = `Không mở được trận vì file dữ liệu bị lỗi.`
     - `error.back_to_menu` = `Về menu`
     - Chạy `--import` (bước 3 của `tools/test.sh` tự chạy) để sinh lại `text.vi.translation`; commit cả file đó.
-  - [ ] 4.3 Câu báo lỗi của bộ nạp **không** đi qua `tr()`: đây là chi tiết cho tester và log, giống ví dụ `LevelLoader` trong kiến trúc. Chữ cố định của giao diện (tiêu đề, câu ngắn, nút) đi qua `tr()`.
+  - [x] 4.3 Câu báo lỗi của bộ nạp **không** đi qua `tr()`: đây là chi tiết cho tester và log, giống ví dụ `LevelLoader` trong kiến trúc. Chữ cố định của giao diện (tiêu đề, câu ngắn, nút) đi qua `tr()`.
 
-- [ ] **Task 5: Nối vào `main.gd`** (AC: 1, 3, 5, 7)
-  - [ ] 5.1 Thêm `enum Screen { MENU, BATTLE, TRANSITION, ERROR }` (đúng tên ở kiến trúc, mục Mẫu trạng thái) và `var _screen: Screen`.
-  - [ ] 5.2 Thêm biến thường (không static) `stats_path: String = "res://data/chi_so.json"` và `level_dir: String = "res://data/tran"`, để test đổi được **trước khi** `add_child` (sau `instantiate()`).
-  - [ ] 5.3 Hàm `_start_battle() -> void` (Story 1.6 F5 sẽ gọi lại hàm này): nạp `chi_so.json` **và** file trận (luôn nạp cả hai, gộp lỗi của cả hai) → ghi `Log.warn("data", w)` cho mỗi cảnh báo, `Log.error("data", e)` cho mỗi lỗi → có lỗi thì `_show_error(errors)`; không lỗi thì `AppState.stats = stats`, `Log.info("battle", "nạp trận %s" % level_id)`, `_screen = Screen.BATTLE`.
+- [x] **Task 5: Nối vào `main.gd`** (AC: 1, 3, 5, 7)
+  - [x] 5.1 Thêm `enum Screen { MENU, BATTLE, TRANSITION, ERROR }` (đúng tên ở kiến trúc, mục Mẫu trạng thái) và `var _screen: Screen`.
+  - [x] 5.2 Thêm biến thường (không static) `stats_path: String = "res://data/chi_so.json"` và `level_dir: String = "res://data/tran"`, để test đổi được **trước khi** `add_child` (sau `instantiate()`).
+  - [x] 5.3 Hàm `_start_battle() -> void` (Story 1.6 F5 sẽ gọi lại hàm này): nạp `chi_so.json` **và** file trận (luôn nạp cả hai, gộp lỗi của cả hai) → ghi `Log.warn("data", w)` cho mỗi cảnh báo, `Log.error("data", e)` cho mỗi lỗi → có lỗi thì `_show_error(errors)`; không lỗi thì `AppState.stats = stats`, `Log.info("battle", "nạp trận %s" % level_id)`, `_screen = Screen.BATTLE`.
     - Số trận: `AppState.launch.tran` nếu > 0, ngược lại 1. Tên file `tran_%02d.json`; `level_id` là tên file bỏ `.json` (`tran_01`).
     - Ở story này màn BATTLE nhìn giống MENU (bàn cờ trống). Vẽ địa hình và quân là Story 1.2; **không** vẽ trước.
-  - [ ] 5.4 `_show_error(errors)`: ẩn `_board_view`, tạo `ErrorScreen`, `setup(errors, AppState.launch.dev)`, nối `back_pressed` trong code → `_show_menu()`. Thêm sao cho nhãn phiên bản và DevTools vẫn nằm **trên** màn hình lỗi (ví dụ `add_child` rồi `move_child` ngay sau `_board_view`).
-  - [ ] 5.5 `_show_menu()`: bỏ `ErrorScreen` (`queue_free`), hiện lại `_board_view` (7×7 trống), `_screen = Screen.MENU`, `Log.info("app", "về menu")`.
-  - [ ] 5.6 Gọi `_start_battle()` ở cuối `_ready()`, **sau** khi đã tạo DevTools và McpRuntime (để chữ DEV và MCP vẫn chạy khi dữ liệu lỗi). Giữ nguyên mọi thứ khác của `_ready()` (tiêu đề, `SaveProbe`, nhãn phiên bản).
-  - [ ] 5.7 `game/src/app/app_state.gd`: thêm `var stats: Stats` (null tới khi nạp xong). Sửa chú thích đầu file. Không nạp file trong `AppState._ready()` (autoload chạy cả khi GUT chạy).
+  - [x] 5.4 `_show_error(errors)`: ẩn `_board_view`, tạo `ErrorScreen`, `setup(errors, AppState.launch.dev)`, nối `back_pressed` trong code → `_show_menu()`. Thêm sao cho nhãn phiên bản và DevTools vẫn nằm **trên** màn hình lỗi (ví dụ `add_child` rồi `move_child` ngay sau `_board_view`).
+  - [x] 5.5 `_show_menu()`: bỏ `ErrorScreen` (`queue_free`), hiện lại `_board_view` (7×7 trống), `_screen = Screen.MENU`, `Log.info("app", "về menu")`.
+  - [x] 5.6 Gọi `_start_battle()` ở cuối `_ready()`, **sau** khi đã tạo DevTools và McpRuntime (để chữ DEV và MCP vẫn chạy khi dữ liệu lỗi). Giữ nguyên mọi thứ khác của `_ready()` (tiêu đề, `SaveProbe`, nhãn phiên bản).
+  - [x] 5.7 `game/src/app/app_state.gd`: thêm `var stats: Stats` (null tới khi nạp xong). Sửa chú thích đầu file. Không nạp file trong `AppState._ready()` (autoload chạy cả khi GUT chạy).
 
-- [ ] **Task 6: Test** (AC: 6, 7)
-  - [ ] 6.1 `game/tests/test_loaders.gd`: mỗi mục trong "Danh mục câu báo lỗi" có ít nhất một test, so **nguyên văn** bằng `assert_eq(r.errors, [...])` (so cả mảng để bắt lỗi thừa). Dựng nội dung bằng `JSON.stringify()` từ một Dictionary hợp lệ mẫu rồi sửa một chỗ; ca cú pháp JSON thì viết chuỗi tay.
-  - [ ] 6.2 Test ca hợp lệ trên dữ liệu mẫu trong test (không dựa vào số trong file thật, vì tác giả được sửa): đúng `size`, `terrain_at`, thứ tự `units` (tướng 1, 2 rồi Bộ binh theo `thu_tu_dich`, **khác** thứ tự đọc từ trái sang phải), giá trị `Stats`.
-  - [ ] 6.3 Test file thật: `StatsLoader.load_stats("res://data/chi_so.json").ok` và `LevelLoader.load_level("res://data/tran/tran_01.json").ok` đều true, `errors` rỗng. Tác giả sửa sai file thật thì `tools/test.sh` báo đỏ, kèm câu lỗi.
-  - [ ] 6.4 Test biên: nhiều lỗi cùng lúc ra đủ, đúng thứ tự (AC 3); số dạng `3.0` được nhận; `2.5` bị từ chối; BOM đầu file; tab và dấu cách thừa trong dòng bàn cờ; `" 1 , 0 "` trong `thu_tu_dich`; khóa lạ ra cảnh báo chứ không ra lỗi; dấu phẩy thừa cuối object vẫn nạp được (Godot 4.7.2 cho phép).
-  - [ ] 6.5 `game/tests/test_main.gd` (thêm, giữ test cũ đạt):
+- [x] **Task 6: Test** (AC: 6, 7)
+  - [x] 6.1 `game/tests/test_loaders.gd`: mỗi mục trong "Danh mục câu báo lỗi" có ít nhất một test, so **nguyên văn** bằng `assert_eq(r.errors, [...])` (so cả mảng để bắt lỗi thừa). Dựng nội dung bằng `JSON.stringify()` từ một Dictionary hợp lệ mẫu rồi sửa một chỗ; ca cú pháp JSON thì viết chuỗi tay.
+  - [x] 6.2 Test ca hợp lệ trên dữ liệu mẫu trong test (không dựa vào số trong file thật, vì tác giả được sửa): đúng `size`, `terrain_at`, thứ tự `units` (tướng 1, 2 rồi Bộ binh theo `thu_tu_dich`, **khác** thứ tự đọc từ trái sang phải), giá trị `Stats`.
+  - [x] 6.3 Test file thật: `StatsLoader.load_stats("res://data/chi_so.json").ok` và `LevelLoader.load_level("res://data/tran/tran_01.json").ok` đều true, `errors` rỗng. Tác giả sửa sai file thật thì `tools/test.sh` báo đỏ, kèm câu lỗi.
+  - [x] 6.4 Test biên: nhiều lỗi cùng lúc ra đủ, đúng thứ tự (AC 3); số dạng `3.0` được nhận; `2.5` bị từ chối; BOM đầu file; tab và dấu cách thừa trong dòng bàn cờ; `" 1 , 0 "` trong `thu_tu_dich`; khóa lạ ra cảnh báo chứ không ra lỗi; dấu phẩy thừa cuối object vẫn nạp được (Godot 4.7.2 cho phép).
+  - [x] 6.5 `game/tests/test_main.gd` (thêm, giữ test cũ đạt):
     - mặc định nạp trận 1 và log có `[INFO][battle] nạp trận tran_01`; `AppState.stats` khác null;
     - `level_dir` trỏ tới thư mục tạm trong `user://` có file trận lỗi 2 chỗ, bật dev → có `ErrorScreen`, liệt kê đủ 2 lỗi, `_board_view` ẩn;
     - không bật dev → `ErrorScreen` không chứa câu lỗi chi tiết nào, có nút;
     - bấm nút (`emit_signal` hoặc `pressed.emit()` trên Button) → `ErrorScreen` bị bỏ, `_board_view` hiện, `_screen == MENU`;
     - `AppState.launch.tran = 9` → lỗi `không đọc được file`.
     - Nhớ trả `AppState.launch.tran`, `AppState.stats` về như cũ trong `after_each`; xóa file tạm.
-  - [ ] 6.6 Mỗi test có ít nhất một assert (`tools/test.sh` trượt nếu không). Không tạo file `test_*.gd` rỗng.
-  - [ ] 6.7 Chạy `tools/test.sh` → xanh. Commit kèm các file `.uid` mới, lời commit tiếng Việt.
+  - [x] 6.6 Mỗi test có ít nhất một assert (`tools/test.sh` trượt nếu không). Không tạo file `test_*.gd` rỗng.
+  - [x] 6.7 Chạy `tools/test.sh` → xanh. Commit kèm các file `.uid` mới, lời commit tiếng Việt.
 
-- [ ] **Task 7: Kiểm bằng mắt** (AC: 2, 5, 7)
-  - [ ] 7.1 Sửa tạm `tran_01.json` (ký hiệu `X` + một tọa độ sai trong `thu_tu_dich`), chạy `tools/chay.sh --dev` nền, chụp bằng GoPeak `capture_screenshot` (xem `CLAUDE.md`): thấy đủ 2 lỗi, chữ DEV, nhãn phiên bản. Chạy lại không `--dev`: chỉ có câu ngắn và nút. Bấm nút bằng `inject_mouse_click` (chỉ khi `--dev`) → về bàn cờ trống. **Trả `tran_01.json` về như cũ** rồi mới commit.
-  - [ ] 7.2 Ghi hướng dẫn tác giả tự test vào Completion Notes (mẫu ở mục Testing).
+- [x] **Task 7: Kiểm bằng mắt** (AC: 2, 5, 7)
+  - [x] 7.1 Sửa tạm `tran_01.json` (ký hiệu `X` + một tọa độ sai trong `thu_tu_dich`), chạy `tools/chay.sh --dev` nền, chụp bằng GoPeak `capture_screenshot` (xem `CLAUDE.md`): thấy đủ 2 lỗi, chữ DEV, nhãn phiên bản. Chạy lại không `--dev`: chỉ có câu ngắn và nút. Bấm nút bằng `inject_mouse_click` (chỉ khi `--dev`) → về bàn cờ trống. **Trả `tran_01.json` về như cũ** rồi mới commit.
+  - [x] 7.2 Ghi hướng dẫn tác giả tự test vào Completion Notes (mẫu ở mục Testing).
 
 ## Dev Notes
 
@@ -416,10 +416,64 @@ Nếu tác giả đổi ý trước khi dev bắt đầu, sửa story; nếu sau
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5)
+
 ### Debug Log References
+
+- Bước đỏ: viết `test_loaders.gd`, `test_core_types.gd` trước; `tools/test.sh` trượt vì `UnitType` chưa có (`Parse Error`, 11/13 file chạy).
+- **Sửa ghi chú kỹ thuật của story:** Godot 4.7.2 **vẫn trả mọi số JSON về `float`** (lần thử lúc tạo story đọc nhầm mã kiểu 3 = TYPE_FLOAT thành int). `project-context.md` ("JSON trả mọi số về float") là **đúng**, không cần sửa. Hệ quả: câu lỗi in giá trị qua `JsonFile.show()`, đổi số không phần lẻ về int để in `5` chứ không `5.0` (9 test trượt trước khi sửa).
+- Thông điệp Godot cho `'{\n"ten" "a"\n}'` là `Expected ':'`, dòng 2 (sau `+ 1`).
+- Kiểm bằng mắt (Task 7.1): sửa tạm `tran_01.json` (`X` ở dòng 3 cột 4, `"5,4"` thành `"9,9"`).
+  - `chay.sh --dev` + GoPeak `capture_screenshot`: màn hình "Dữ liệu bị lỗi" liệt kê đủ 3 lỗi; chữ DEV góc trên trái và nhãn `v0.1.0 · ac98e37-sua` vẫn hiện.
+  - `inject_mouse_click` vào nút (640, 629) → về bàn cờ trống.
+  - Không `--dev` (chụp bằng `--write-movie`): chỉ có "Không mở được trận vì file dữ liệu bị lỗi." và nút "Về menu"; terminal vẫn có 3 dòng `[ERROR][data]`.
+  - Trả `tran_01.json` về như cũ; `--dev --tran=1` in `[INFO][battle] nạp trận tran_01`.
+- `tools/test.sh` cuối: ✅ 152/152 (trước story 80 + các test của đề xuất; thêm 64 test bộ nạp, 2 test kiểu lõi, 6 test main).
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
+- Lõi (`src/core/`): `UnitType`, `Terrain` (enum không tên, `is_general`, `is_walkable`), `Stats` (chỉ đọc; `value`, `max_hp`, `move_range`), `LevelData` (+ `UnitPlacement`, `terrain_at`). Không Node, không I/O, không log.
+- Dữ liệu (`src/data/`): `LoadResult` (`ok`, `data`, `errors`, `warnings`), `JsonFile` (đọc file, bỏ BOM, parse, đọc số nguyên, in giá trị), `BoardText` (ký hiệu, tách dòng chịu dấu cách/tab, `parse_cell`), `StatsLoader`, `LevelLoader`. Gom mọi lỗi, đúng nguyên văn danh mục trong story; bộ nạp không ghi log.
+- `ErrorScreen` (`src/ui/`): dev liệt kê mọi lỗi (cuộn được); không dev chỉ câu ngắn; luôn có nút "Về menu" phát `back_pressed`. Câu lỗi tắt tự dịch (`auto_translate_mode`).
+- `main.gd`: `enum Screen`, `stats_path`/`level_dir`, `_start_battle()` (nạp cả hai file, gộp lỗi, log), `_show_error()`, `_show_menu()`. `AppState.stats`.
+- Dữ liệu: `game/data/chi_so.json`, `game/data/tran/tran_01.json` (bản đầu). 3 khóa dịch `error.*`.
+- **Thứ tự lỗi đã chốt trong code** (khớp danh mục, chi tiết hơn story): file/JSON → `phien_ban_dinh_dang`, `ten`, `kieu` → lớp `dia_hinh` (lỗi từng dòng rồi E-ROWS) → lớp `quan` → kiểm từng ô của `quan` (E-BLOCKED rồi E-DUPGEN) → E-NOGEN → `thu_tu_dich` → E-ORDMISS. Cảnh báo khóa lạ đứng riêng trong `warnings`.
+- **Lệch nhỏ so với cây thư mục kiến trúc:** thêm `src/core/unit_type.gd`, `terrain.gd`, `level_data.gd` (LevelData phải ở core vì BattleState sẽ dựng từ nó) và `src/data/json_file.gd` (phần dùng chung của hai bộ nạp). `ErrorScreen` có nút ở cả chế độ dev.
+- **Còn chờ tác giả xác nhận** (5 mặc định ghi trong Dev Notes): mở trận 1 khi không chọn trận; "Về menu" về bàn cờ trống; cách ghi dòng/cột/ô; quân đứng trên ô chặn là lỗi; tên khóa `chi_so.json`.
+- **Hướng dẫn tác giả tự test:**
+  1. Gõ `tools/test.sh` → dòng cuối `✅ 152/152 test đạt`.
+  2. Gõ `tools/chay.sh --dev --tran=1` → bàn cờ trống như cũ, terminal có dòng `[INFO][battle] nạp trận tran_01`. Đóng game.
+  3. Mở `game/data/tran/tran_01.json`, ở dòng thứ 3 của `"dia_hinh"` đổi dấu `~` thành `X`, lưu. Gõ lại lệnh bước 2 → màn hình "Dữ liệu bị lỗi" ghi `"dia_hinh" dòng 3, cột 4 (ô 3,2): ký hiệu lạ "X"`. Game không tắt.
+  4. Sửa thêm `"5,4"` trong `"thu_tu_dich"` thành `"9,9"`, lưu, chạy lại → màn hình liệt kê cả ba lỗi: ký hiệu lạ `X`; `mục 3: ô 9,9 nằm ngoài bàn`; `quân Nguyên "B" ở ô 5,4 không có trong "thu_tu_dich"`.
+  5. Gõ `tools/chay.sh` (không `--dev`) → chỉ thấy "Không mở được trận vì file dữ liệu bị lỗi." và nút **Về menu**. Bấm nút → về bàn cờ trống.
+  6. Trả `tran_01.json` về như cũ (hoặc nhờ AI). Trong `game/data/chi_so.json` đổi chữ `"tam_di"` của Nguyễn Khoái thành `"tam_dii"`, lưu, chạy `tools/chay.sh --dev` → màn hình lỗi có `thiếu khóa "tuong.nguyen_khoai.tam_di"`. Trả lại như cũ.
+  7. Gõ `tools/test.sh` lần nữa → xanh. (Nếu quên trả file về như cũ, test `test_real_level_1_loads` / `test_real_stats_file_loads` sẽ báo đỏ kèm câu lỗi.)
 
 ### File List
+
+- game/data/chi_so.json (mới)
+- game/data/tran/tran_01.json (mới)
+- game/i18n/text.csv
+- game/i18n/text.vi.translation
+- game/src/app/app_state.gd
+- game/src/app/main.gd
+- game/src/core/unit_type.gd (mới) + .uid
+- game/src/core/terrain.gd (mới) + .uid
+- game/src/core/stats.gd (mới) + .uid
+- game/src/core/level_data.gd (mới) + .uid
+- game/src/data/load_result.gd (mới) + .uid
+- game/src/data/json_file.gd (mới) + .uid
+- game/src/data/board_text.gd (mới) + .uid
+- game/src/data/stats_loader.gd (mới) + .uid
+- game/src/data/level_loader.gd (mới) + .uid
+- game/src/ui/error_screen.gd (mới) + .uid
+- game/tests/test_loaders.gd (mới) + .uid
+- game/tests/test_core_types.gd (mới) + .uid
+- game/tests/test_main.gd
+- _bmad-output/implementation-artifacts/1-1-nap-chi-so-va-tran-tu-file-bao-loi-bang-tieng-viet.md
+- _bmad-output/implementation-artifacts/sprint-status.yaml
+
+### Change Log
+
+- 2026-10-18: Làm Story 1.1: nạp `chi_so.json` và file trận, báo lỗi tiếng Việt, màn hình lỗi; 152/152 test đạt.

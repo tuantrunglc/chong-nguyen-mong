@@ -1,0 +1,12 @@
+{
+  "tuong": {
+    "nguyen_khoai": { "mau": 3, "tam_di": 3, "sat_thuong": 2, "do_day": 1 },
+    "pham_ngu_lao": { "mau": 3, "tam_di": 3, "sat_thuong": 1, "tam_danh_gan": 2, "tam_danh_xa": 4 },
+    "tran_khanh_du": { "mau": 3, "tam_di": 3, "tam_danh": 3, "tam_keo": 2 }
+  },
+  "quan_nguyen": {
+    "bo_binh": { "mau": 3, "tam_di": 2, "sat_thuong": 1 },
+    "ky_binh": { "mau": 2, "tam_di": 3, "sat_thuong": 1 },
+    "cung_ky": { "mau": 1, "tam_di": 3, "sat_thuong": 1, "tam_ban_gan": 2, "tam_ban_xa": 3 }
+  }
+}

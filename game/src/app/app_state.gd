@@ -1,8 +1,10 @@
 extends Node
 ## Autoload duy nhất (không có class_name, vì trùng tên autoload là lỗi).
-## Hiện chỉ giữ tham số khởi động; E1 thêm chỉ số, tiến độ, cài đặt.
+## Giữ tham số khởi động và chỉ số đã nạp (main.gd nạp); E4 thêm tiến độ, cài đặt.
 
 var launch: LaunchOptions
+## Null tới khi nạp xong data/chi_so.json không lỗi.
+var stats: Stats = null
 
 
 func _ready() -> void:

@@ -1,5 +1,8 @@
 extends Node2D
-## Màn hình gốc: tiêu đề, bàn cờ trống và nhãn phiên bản ở góc dưới phải.
+## Màn hình gốc: tiêu đề, bàn cờ và nhãn phiên bản ở góc dưới phải.
+## Lúc mở game nạp chi_so.json và file trận; dữ liệu lỗi thì hiện màn hình lỗi thay cho bàn cờ.
+
+enum Screen { MENU, BATTLE, TRANSITION, ERROR }
 
 const BUILD_INFO_PATH: String = "res://build_info.json"
 const VERSION_FONT_SIZE: int = 14
@@ -7,7 +10,16 @@ const VERSION_MARGIN: int = 8
 ## Tiêu đề nằm phía trên bàn cờ (bàn cờ bắt đầu ở y = 52).
 const TITLE_TOP: int = 4
 const TITLE_HEIGHT: int = 44
+## Chưa có màn hình chính (story 4.1): không chọn trận thì mở trận 1.
+const DEFAULT_TRAN: int = 1
 
+## Test đổi được trước khi add_child.
+var stats_path: String = "res://data/chi_so.json"
+var level_dir: String = "res://data/tran"
+
+var _screen: Screen = Screen.MENU
+var _level: LevelData = null
+var _error_screen: ErrorScreen = null
 var _title_label: Label
 var _board_view: BoardView
 var _version_label: Label
@@ -47,6 +59,57 @@ func _ready() -> void:
 
 	# Công cụ AI (Story 0.6): chỉ khi bật dev trên desktop có cửa sổ.
 	McpRuntime.start_if_enabled(self, AppState.launch.dev)
+
+	_start_battle()
+
+
+## Nạp chỉ số và trận. Luôn nạp cả hai file để liệt kê đủ lỗi của cả hai. F5 (story 1.6) gọi lại hàm này.
+func _start_battle() -> void:
+	var tran: int = AppState.launch.tran if AppState.launch.tran > 0 else DEFAULT_TRAN
+	var level_id: String = "tran_%02d" % tran
+	var stats_result: LoadResult = StatsLoader.load_stats(stats_path)
+	var level_result: LoadResult = LevelLoader.load_level("%s/%s.json" % [level_dir, level_id])
+
+	var errors: Array[String] = []
+	for r: LoadResult in [stats_result, level_result]:
+		for w: String in r.warnings:
+			Log.warn("data", w)
+		errors.append_array(r.errors)
+	for e: String in errors:
+		Log.error("data", e)
+	if not errors.is_empty():
+		_show_error(errors)
+		return
+
+	AppState.stats = stats_result.data as Stats
+	_level = level_result.data as LevelData
+	Log.info("battle", "nạp trận %s" % level_id)
+	_screen = Screen.BATTLE
+
+
+## Thay bàn cờ bằng màn hình lỗi. Nhãn phiên bản và chữ DEV vẫn nằm trên nó.
+func _show_error(errors: Array[String]) -> void:
+	if _error_screen != null:
+		_error_screen.queue_free()
+	_board_view.visible = false
+	_error_screen = ErrorScreen.new()
+	_error_screen.position = _board_view.position
+	_error_screen.size = Vector2(_board_view.cols, _board_view.rows) * BoardView.CELL_SIZE
+	add_child(_error_screen)
+	move_child(_error_screen, _board_view.get_index() + 1)
+	_error_screen.setup(errors, AppState.launch.dev)
+	_error_screen.back_pressed.connect(_show_menu)
+	_screen = Screen.ERROR
+
+
+## Menu tạm cho tới story 4.1: bàn cờ trống.
+func _show_menu() -> void:
+	if _error_screen != null:
+		_error_screen.queue_free()
+		_error_screen = null
+	_board_view.visible = true
+	_screen = Screen.MENU
+	Log.info("app", "về menu")
 
 
 func _read_version() -> String:
