@@ -4,7 +4,7 @@ baseline_commit: 22d7228
 
 # Story 1.4: Chọn tướng và xem các ô đi được
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 
@@ -41,9 +41,9 @@ tôi muốn chọn một tướng và thấy ngay nó đi được tới đâu,
 ## Tasks / Subtasks
 
 - [ ] **Task 1: Viết đợt kịch bản 1 và dừng chờ duyệt** (AC: 1, 2)
-  - [ ] 1.1 Viết 7 file mới trong `game/tests/kich_ban/di_chuyen/` đúng như Dev Notes "Đợt kịch bản 1" (bàn cờ, lệnh, `mo_ta`), `"da_duyet": false`. Giữ nguyên `di_thang_3_o.json` (không đổi gì).
-  - [ ] 1.2 Chạy `tools/xem_kich_ban.sh di_chuyen`: đọc lại từng bàn trước/sau, xem có khớp `mo_ta` không. Chạy `tools/test.sh`: xanh, `8 chưa duyệt (8 chưa đạt)`.
-  - [ ] 1.3 Commit: `Kịch bản di_chuyen đợt 1 chờ duyệt (Story 1.4)`.
+  - [x] 1.1 Viết 7 file mới trong `game/tests/kich_ban/di_chuyen/` đúng như Dev Notes "Đợt kịch bản 1" (bàn cờ, lệnh, `mo_ta`), `"da_duyet": false`. Giữ nguyên `di_thang_3_o.json` (không đổi gì).
+  - [x] 1.2 Chạy `tools/xem_kich_ban.sh di_chuyen`: đọc lại từng bàn trước/sau, xem có khớp `mo_ta` không. Chạy `tools/test.sh`: xanh, `8 chưa duyệt (8 chưa đạt)`.
+  - [x] 1.3 Commit: `Kịch bản di_chuyen đợt 1 chờ duyệt (Story 1.4)`.
   - [ ] 1.4 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh`, đọc 8 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái (hoặc tự đổi `da_duyet`). Không làm Task 2 trở đi khi chưa có câu trả lời.
   - [ ] 1.5 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản được nói "đúng" (chỉ đổi đúng khóa đó). Kịch bản bị nói "sai" thì sửa theo lý do, cho duyệt lại (lặp 1.2–1.5). Chạy `tools/test.sh`: **phải trượt** (AC 2). Ghi vào Debug Log. **Không commit** khi đang đỏ.
 - [ ] **Task 2: Lõi luật: lưới, lệnh, sự kiện, Effects** (AC: 3)
@@ -343,6 +343,8 @@ Nhớ commit file `.uid` của mọi script mới.
 ### Agent Model Used
 
 ### Debug Log References
+
+- Task 1: viết 7 kịch bản mới bằng script (bàn 7×7, mỗi lệnh `di` một dòng như file mẫu). `tools/xem_kich_ban.sh di_chuyen` in đủ 8 kịch bản, từng bàn trước/sau khớp `mo_ta`. Số bước của đường vòng (kịch bản 5, 6, 7, 8) đã kiểm bằng BFS lúc tạo story. `tools/test.sh`: 226/226 đạt, `Kịch bản luật: 0 đã duyệt · 8 chưa duyệt (8 chưa đạt)`, mỗi kịch bản có lý do `bước 1: lệnh "di" chưa có luật (Story 1.4)`.
 
 ### Completion Notes List
 
