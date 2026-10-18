@@ -4,7 +4,7 @@ baseline_commit: 428d7432fa963a2a4be70e5de26904141f7d3a76
 
 # Story 2.1: Nguyễn Khoái đánh, đẩy và va chạm
 
-Status: review
+Status: done
 
 ## Story
 
@@ -149,6 +149,24 @@ _Story luật đầu tiên của E2. Phần 1 chưa có hoạt ảnh: bàn nhả
   - [x] 8.3 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, `.uid` mới, `text.vi.translation`. Ví dụ: `Nguyễn Khoái đánh, đẩy, va chạm (Story 2.1)`.
   - [x] 8.4 Ghi hướng dẫn tác giả tự test vào Completion Notes theo mẫu ở mục Testing, dùng kết quả thật.
 
+### Review Findings
+
+_Code review 2026-10-18 (Blind Hunter, Edge Case Hunter, Acceptance Auditor)._
+
+- [x] [Review][Decision] Lão, Dư bị từ chối trước bước kiểm ô kề — Bảng thứ tự kiểm đặt dòng "tướng chưa có đòn" cuối bảng, code đặt ngay sau "đã đánh" (đã ghi ở "Lệch so với Tasks", Task 3.3). Hệ quả: Lão đánh ô xa 3 ô báo `NO_TARGET` "chưa có đòn" thay vì `NOT_ADJACENT`. Tác giả chọn giữ như code, sửa bảng cho khớp [game/src/core/rules_attack.gd:35]
+- [x] [Review][Decision] `sat_thuong` = 0 được bộ nạp chấp nhận (`MIN_VALUE` 0): đòn vẫn ghi `DAMAGED` 0 rồi đẩy; `Effects.damage` cũng không chặn số âm (âm thì hồi máu). Tác giả chọn tối thiểu 1: bộ nạp chặn `sat_thuong` 0, `Effects.damage` assert `amount > 0` [game/src/core/effects.gd:22]
+- [x] [Review][Patch] Ô kề nhưng ngoài bàn (Khoái ở 0,3 đánh -1,3) báo `NO_TARGET`, bảng yêu cầu `NOT_ADJACENT` ("kể cả ô chéo, ngoài bàn"); thêm ca test ô kề ngoài bàn [game/src/core/rules_attack.gd:39]
+- [x] [Review][Patch] Task 5.2 đòi test Lão và Dư; test chỉ có Lão (targets rỗng, lệnh đánh bị từ chối), thiếu Dư [game/tests/test_rules_attack.gd]
+- [x] [Review][Patch] `_assert_same_state` không so `has_attacked`: hủy/quay lại mà quên khôi phục cờ đánh thì không test nào bắt [game/tests/test_battle_controller.gd:193]
+- [x] [Review][Patch] `Grid.dir_between` trả `to - from`, không bảo đảm là một bước của DIRECTIONS như chú thích; người gọi sau (Sát Thát, 2.3) đưa ô không kề thì `ForcedMove` nhảy cóc qua vật cản. Thêm assert kề [game/src/core/grid.gd:15]
+- [x] [Review][Patch] Test ghi cứng chữ "Bấm lần nữa để đánh" thay vì `tr("hud.confirm_attack")` [game/tests/test_battle_view.gd:584]
+- [x] [Review][Patch] Test `end_player_turn` xóa `has_attacked` nằm ở `test_rules_attack.gd`, Task 5.2 ghi `test_rules_enemy_phase.gd`; chưa ghi vào "Lệch so với Tasks" [_bmad-output/implementation-artifacts/2-1-nguyen-khoai-danh-day-va-va-cham.md]
+- [x] [Review][Defer] Đang chờ xác nhận mà bấm (hoặc gõ phím) vào tướng đã đánh thì không bỏ chờ, gợi ý "Bấm lần nữa" vẫn còn (AC 10) [game/src/battle/battle_view.gd:83] — deferred, chưa gặp được: chỉ Khoái có đòn; xem lại ở Story 2.3/2.4
+- [x] [Review][Defer] `UnitToken.update` trả màu chữ tên về màu Đại Việt khi bỏ cờ đã đánh, kể cả quân Nguyên [game/src/battle/unit_token.gd:82] — deferred, quân Nguyên chưa đánh tới 2.6+
+- [x] [Review][Defer] Danh sách vật cản của `ForcedMove.OBSTACLES` tách khỏi `Terrain.WALKABLE`: thêm loại ô không đi được mà quên thêm vào đây thì quân bị đẩy lên ô đó, `validate` quay lại cả đòn [game/src/core/forced_move.gd:10] — deferred, hai danh sách hiện khớp
+- [x] [Review][Defer] Bộ chạy kịch bản bỏ qua tướng đã gục khi so `da_danh` [game/tests/scenario_runner.gd:177] — deferred, tướng chưa gục được trong kịch bản 2.1; bàn sau vẫn bắt phần lớn
+- [x] [Review][Defer] `_on_target_clicked` không kiểm tướng đang chọn còn trên bàn [game/src/battle/battle_view.gd] — deferred, tướng chưa gục được giữa hai cú bấm
+
 ## Dev Notes
 
 ### Bối cảnh
@@ -241,9 +259,11 @@ Câu chính xác lấy từ `PENDING_RULES` hiện có (`tests/scenario_runner.g
 | Không có quân id đó | `NO_UNIT` | `khong_co_quan` | `không có quân %d` |
 | Quân không phải tướng | `NOT_GENERAL` | `khong_phai_tuong` | `quân %d không phải tướng` |
 | Tướng đã đánh trong lượt này | `ALREADY_ATTACKED` | `da_danh_roi` | `quân %d đã đánh rồi trong lượt này` |
+| Tướng chưa có đòn (Lão, Dư) | `NO_TARGET` | — (không có kịch bản) | `quân %d chưa có đòn (Story 2.3, 2.4)` |
 | Ô không kề cạnh tướng (kể cả ô chéo, ngoài bàn) | `NOT_ADJACENT` | `khong_ke` | `ô c,h không kề quân %d` |
 | Ô không có quân Nguyên (trống, tướng mình) | `NO_TARGET` | `khong_co_dich` | `ô c,h không có quân Nguyên để đánh` |
-| Tướng chưa có đòn (Lão, Dư) | `NO_TARGET` | — (không có kịch bản) | `quân %d chưa có đòn (Story 2.3, 2.4)` |
+
+_Code review 2026-10-18: tác giả chốt "chưa có đòn" kiểm ngay sau "đã đánh" (chưa có đòn thì không cần kiểm ô). Story 2.3, 2.4 thêm đòn thì Lão, Dư đi tiếp xuống các dòng dưới._
 
 Lệnh đi, thêm **trước** `ALREADY_MOVED`: tướng đã đánh → `ALREADY_ATTACKED`, mã `da_danh_roi`, lý do `quân %d đã đánh rồi trong lượt này`. (Tướng vừa đi vừa đánh thì báo "đã đánh", rõ hơn cho người đọc log.)
 
@@ -405,6 +425,7 @@ Claude Opus 5.5 (claude-opus-5-5)
   - Task 3.3: Lão, Dư gửi lệnh đánh bị từ chối `NO_TARGET` ngay sau bước "đã đánh" (trước bước kề), không ở cuối bảng: chưa có đòn thì không cần kiểm ô.
   - Task 3.7: `test_runner_stops_at_command_without_rule` đổi thành `test_runner_stops_at_failed_step` (mọi lệnh đã có luật, `PENDING_RULES` rỗng; test vẫn giữ ý "bước trượt thì dừng, không so bàn sau", và kiểm bảng rỗng).
   - Task 5.1, 5.2: hàm dựng bàn thử dùng chung ở `tests/board_fixture.gd` (MỚI, `class_name BoardFixture`), không chép vào hai file test.
+  - Task 5.2: test `end_player_turn` xóa `has_attacked` ở `test_rules_attack.gd` (`test_end_turn_clears_attacked`), không ở `test_rules_enemy_phase.gd`: cùng chỗ với các test đòn đánh, dựng bàn bằng `BoardFixture`.
   - Task 5.5: không thêm vào `test_core_types.gd` (file đó không kiểm `Stats`). `Stats.damage`, `push_distance` kiểm ở `test_rules_attack.gd` với chỉ số tự đặt; không đọc `chi_so.json` thật (tác giả được sửa số).
   - Task 7.1: thêm ca "Khoái chưa đi đánh ngay một cú bấm" (`test_unmoved_general_attacks_on_first_click`). Ca "Lão đi, Khoái đánh, Z" bấm qua `_click` (gọi thẳng BattleView), phím Z là phím thật.
 
@@ -471,3 +492,4 @@ Claude Opus 5.5 (claude-opus-5-5)
 - 2026-10-18: Tạo story. Tác giả chốt: viền trắng, đồng đã đánh xám; xác nhận bằng viền dày và dòng chữ; số 1 máu va chạm để trong code; làng như rừng (Lòng dân ở 3.7).
 - 2026-10-18: Đợt kịch bản 3 (10 kịch bản), tác giả duyệt cả 10.
 - 2026-10-18: Làm story: đòn Nguyễn Khoái, đẩy và va chạm (`ForcedMove`), gục, đánh xóa hủy, viền mục tiêu, xác nhận khi đã đi, đồng đã đánh; 39 test mới, 4 test sửa; `tools/test.sh` 374/374, kịch bản 25/25.
+- 2026-10-18: Sửa theo code review: ô kề ngoài bàn báo `NOT_ADJACENT`; `sat_thuong` tối thiểu 1 (bộ nạp) và `Effects.damage` assert `amount > 0`; `Grid.dir_between` assert ô kề; test thêm Dư, so `has_attacked` khi hủy, gợi ý xác nhận qua `tr()`; bảng thứ tự kiểm khớp code (tác giả chốt). 2 test mới, 4 test sửa; `tools/test.sh` 376/376, kịch bản 25/25. Phá thử: bỏ kiểm `in_bounds` thì ca ngoài bàn trượt.

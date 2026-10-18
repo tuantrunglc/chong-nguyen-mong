@@ -581,7 +581,7 @@ func test_moved_general_needs_confirm_click() -> void:
 	_click(main, Vector2i(4, 4))
 	assert_eq(_view(main).pending_cell(), Vector2i(4, 4), "lần đầu chỉ chờ xác nhận")
 	assert_eq(_board(main).pending_cell(), Vector2i(4, 4))
-	assert_eq(_hud(main).hint_text(), "Bấm lần nữa để đánh")
+	assert_eq(_hud(main).hint_text(), tr("hud.confirm_attack"))
 	assert_eq(_unit_at(main, Vector2i(4, 4)).hp, 2, "chưa đánh")
 	_click(main, Vector2i(5, 5))
 	assert_eq(_view(main).pending_cell(), Vector2i(5, 5), "bấm mục tiêu khác: chuyển chờ sang đó")

@@ -190,7 +190,8 @@ func _assert_same_state(got: BattleState, want: BattleState) -> void:
 	for i: int in range(mini(got.units.size(), want.units.size())):
 		var g: Unit = got.units[i]
 		var w: Unit = want.units[i]
-		assert_eq([g.id, g.type, g.cell, g.hp, g.has_moved], [w.id, w.type, w.cell, w.hp, w.has_moved],
+		assert_eq([g.id, g.type, g.cell, g.hp, g.has_moved, g.has_attacked],
+			[w.id, w.type, w.cell, w.hp, w.has_moved, w.has_attacked],
 			"quân %d giống trước lệnh" % w.id)
 
 

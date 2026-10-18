@@ -510,11 +510,16 @@ func test_stats_move_may_be_zero_not_negative() -> void:
 		_stat_errors(['"quan_nguyen.bo_binh.tam_di" phải là số nguyên từ 0 trở lên, đang là -1']))
 
 
+func test_stats_damage_at_least_one() -> void:
+	assert_eq(_stats(_with_stat("quan_nguyen", "bo_binh", "sat_thuong", 0)).errors,
+		_stat_errors(['"quan_nguyen.bo_binh.sat_thuong" phải là số nguyên từ 1 trở lên, đang là 0']))
+
+
 func test_stats_value_not_integer() -> void:
 	assert_eq(_stats(_with_stat("tuong", "pham_ngu_lao", "sat_thuong", "1")).errors,
-		_stat_errors(['"tuong.pham_ngu_lao.sat_thuong" phải là số nguyên từ 0 trở lên, đang là "1"']))
+		_stat_errors(['"tuong.pham_ngu_lao.sat_thuong" phải là số nguyên từ 1 trở lên, đang là "1"']))
 	assert_eq(_stats(_with_stat("tuong", "pham_ngu_lao", "sat_thuong", 1.5)).errors,
-		_stat_errors(['"tuong.pham_ngu_lao.sat_thuong" phải là số nguyên từ 0 trở lên, đang là 1.5']))
+		_stat_errors(['"tuong.pham_ngu_lao.sat_thuong" phải là số nguyên từ 1 trở lên, đang là 1.5']))
 
 
 func test_stats_range_order() -> void:
@@ -550,7 +555,7 @@ func test_stats_many_errors_in_order() -> void:
 	assert_eq(_stats(d).errors, _stat_errors([
 		'"tuong.nguyen_khoai.mau" phải là số nguyên từ 1 trở lên, đang là 0',
 		'thiếu khóa "tuong.pham_ngu_lao.tam_di"',
-		'"quan_nguyen.cung_ky.sat_thuong" phải là số nguyên từ 0 trở lên, đang là "mot"',
+		'"quan_nguyen.cung_ky.sat_thuong" phải là số nguyên từ 1 trở lên, đang là "mot"',
 	]))
 
 

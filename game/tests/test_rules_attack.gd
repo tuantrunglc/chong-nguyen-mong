@@ -33,7 +33,8 @@ func test_killed_target_is_not_pushed() -> void:
 
 
 func test_rejections_keep_state() -> void:
-	var units: Dictionary = {Vector2i(3, 4): "1", Vector2i(4, 4): "2", Vector2i(4, 3): "B", Vector2i(3, 2): "K"}
+	var units: Dictionary = {Vector2i(3, 4): "1", Vector2i(4, 4): "2", Vector2i(4, 3): "B", Vector2i(3, 2): "K",
+		Vector2i(5, 3): "3"}
 	var cases: Array = [
 		[9, Vector2i(3, 3), "NO_UNIT"],
 		[101, Vector2i(3, 4), "NOT_GENERAL"],
@@ -43,12 +44,19 @@ func test_rejections_keep_state() -> void:
 		[1, Vector2i(2, 4), "NO_TARGET"],
 		[1, Vector2i(4, 4), "NO_TARGET"],
 		[2, Vector2i(4, 3), "NO_TARGET"],
+		[3, Vector2i(4, 3), "NO_TARGET"],
 	]
 	for c: Array in cases:
 		var state: BattleState = BoardFixture.state(units)
 		var before: Array[String] = BoardFixture.picture(state)
 		assert_eq(_attack(state, c[0] as int, c[1] as Vector2i), ["REJECTED %s" % c[2]] as Array[String], str(c))
 		assert_eq(BoardFixture.picture(state), before, "state giữ nguyên: %s" % str(c))
+
+
+func test_adjacent_cell_off_board_is_not_adjacent() -> void:
+	for c: Array in [[Vector2i(0, 3), Vector2i(-1, 3)], [Vector2i(3, 6), Vector2i(3, 7)], [Vector2i(6, 0), Vector2i(6, -1)]]:
+		var state: BattleState = BoardFixture.state({c[0] as Vector2i: "1"})
+		assert_eq(_attack(state, 1, c[1] as Vector2i), ["REJECTED NOT_ADJACENT"] as Array[String], str(c))
 
 
 func test_attack_once_per_turn() -> void:
@@ -79,6 +87,8 @@ func test_targets_are_adjacent_nguyen_units_in_direction_order() -> void:
 	assert_eq(RulesAttack.targets(state, khoai), [Vector2i(3, 2), Vector2i(3, 4), Vector2i(2, 3)] as Array[Vector2i],
 		"B→Đ→N→T, không có tướng mình, không có ô chéo")
 	assert_eq(RulesAttack.targets(state, state.unit_by_id(2)), [] as Array[Vector2i], "Lão chưa có đòn (2.3)")
+	var du_state: BattleState = BoardFixture.state({Vector2i(3, 3): "3", Vector2i(3, 2): "B"})
+	assert_eq(RulesAttack.targets(du_state, du_state.unit_by_id(3)), [] as Array[Vector2i], "Dư chưa có đòn (2.4)")
 	_attack(state, 1, Vector2i(3, 2))
 	assert_eq(RulesAttack.targets(state, khoai), [] as Array[Vector2i], "đã đánh")
 

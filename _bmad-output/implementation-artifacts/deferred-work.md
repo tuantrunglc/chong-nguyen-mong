@@ -91,3 +91,11 @@
 
 - `BoardView.setup` (`game/src/battle/board_view.gd`) canh giữa bàn trong `AREA` nhưng không co giãn: bàn lớn hơn 7×7 (cot + hang > ~14) sẽ tràn dưới HUD và ra ngoài màn hình, màn hình lỗi tràn theo. File trận hiện khóa 7×7 nên chưa gặp; khi cho phép bàn khác cỡ thì thêm `scale` hoặc báo lỗi.
 - Bệ ô ải vẽ trên mặt đất (`BoardView._draw`), không nằm trong lớp y-sort: khối rừng, kho lương, làng đứng ngay sau ô ải che dải 8px của bệ, nhưng `pick_cell` lại chọn ô ải; chữ "sông", "chông" của ô phía sau đè lên bệ ô ải. Trận hiện có chưa gặp. Tác giả chọn giữ cách vẽ này (2026-10-18); xem lại khi làm trận "Giữ ải" hoặc khi E8 thay tranh.
+
+## Deferred from: code review of 2-1-nguyen-khoai-danh-day-va-va-cham (2026-10-18)
+
+- `BattleView` (`game/src/battle/battle_view.gd:83`): đang chờ xác nhận đòn mà bấm hoặc gõ phím vào tướng đã đánh thì không bỏ chờ, gợi ý "Bấm lần nữa để đánh" vẫn còn (AC 10 của 2.1). Chưa gặp được vì chỉ Khoái có đòn; xem lại ở Story 2.3/2.4.
+- `UnitToken.update` (`game/src/battle/unit_token.gd:82`): bỏ cờ đã đánh thì màu chữ tên về màu Đại Việt, không theo phe. Quân Nguyên chưa đánh tới 2.6+.
+- `ForcedMove.OBSTACLES` (`game/src/core/forced_move.gd:10`) tách khỏi `Terrain.WALKABLE`: thêm loại ô không đi được mà quên thêm vào đây thì quân bị đẩy lên ô đó, `validate` quay lại cả đòn. Hiện hai danh sách khớp.
+- Bộ chạy kịch bản (`game/tests/scenario_runner.gd:177`) bỏ qua tướng đã gục khi so `sau.da_danh`. Tướng chưa gục được trong kịch bản 2.1; xem lại khi va chạm làm tướng gục (2.2).
+- `BattleView._on_target_clicked` không kiểm tướng đang chọn còn trên bàn. Tướng chưa gục được giữa hai cú bấm; xem lại khi pha địch có đòn.

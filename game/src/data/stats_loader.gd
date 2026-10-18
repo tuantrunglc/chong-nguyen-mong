@@ -21,7 +21,7 @@ const UNITS: Array = [
 const MIN_VALUE: Dictionary = {
 	"mau": 1,
 	"tam_di": 0,
-	"sat_thuong": 0,
+	"sat_thuong": 1,
 	"do_day": 0,
 	"tam_danh_gan": 1,
 	"tam_danh_xa": 1,

@@ -11,6 +11,8 @@ static func is_adjacent(a: Vector2i, b: Vector2i) -> bool:
 	return absi(a.x - b.x) + absi(a.y - b.y) == 1
 
 
-## Hướng từ ô from sang ô kề to (một phần tử của DIRECTIONS).
+## Hướng từ ô from sang ô kề to (một phần tử của DIRECTIONS). Ô không kề là lỗi của người gọi: ForcedMove sẽ
+## nhảy cóc qua vật cản.
 static func dir_between(from: Vector2i, to: Vector2i) -> Vector2i:
+	assert(is_adjacent(from, to), "dir_between: %s và %s không kề" % [from, to])
 	return to - from

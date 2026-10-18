@@ -36,7 +36,7 @@ static func resolve(state: BattleState, command: Command, events: Array[BattleEv
 		events.append(BattleEvent.rejected(BattleEvent.Reject.NO_TARGET,
 			"quân %d chưa có đòn (Story 2.3, 2.4)" % unit.id))
 		return
-	if not Grid.is_adjacent(unit.cell, command.cell):
+	if not Grid.is_adjacent(unit.cell, command.cell) or not state.in_bounds(command.cell):
 		events.append(BattleEvent.rejected(BattleEvent.Reject.NOT_ADJACENT, "ô %s không kề quân %d" % [where, unit.id]))
 		return
 	if not targets(state, unit).has(command.cell):
