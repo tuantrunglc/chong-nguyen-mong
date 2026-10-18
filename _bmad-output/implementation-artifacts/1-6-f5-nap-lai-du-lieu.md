@@ -17,7 +17,7 @@ tôi muốn sửa file trận hoặc chỉ số rồi thấy kết quả ngay,
 2. **File trận sai rồi sửa lại.** **Khi** sửa `game/data/tran/tran_01.json` cho sai (ví dụ đổi một ô `.` của `dia_hinh` thành `X`), lưu file, bấm F5, **thì** màn hình lỗi hiện ra như Story 1.1 (bật dev nên liệt kê đủ lỗi, có file, dòng, cột). **Khi** sửa lại cho đúng rồi bấm F5 lần nữa, **thì** màn hình lỗi biến mất, trận 1 chạy lại bình thường.
 3. **Nạp lại trận đang chọn.** **Cho** game mở bằng `--dev --tran=thu_ba_tuong`. **Khi** bấm F5, **thì** nạp lại `thu_ba_tuong.json` (không quay về trận 1).
 4. **Giữ những gì không thuộc trận.** Sau F5: tọa độ F1 đang bật thì vẫn bật; chữ "DEV · lần mở thứ N" **không** tăng số (F5 không phải mở game lại).
-5. **F5 ở menu** **[Cần tác giả chốt, xem Câu hỏi 1; mặc định đề xuất]**. **Cho** đang ở menu tạm (bấm "Về menu" trên màn hình lỗi). **Khi** bấm F5, **thì** nạp lại dữ liệu và mở trận như lúc mở game.
+5. **F5 ở menu** **[Tác giả chốt 2026-10-18]**. **Cho** đang ở menu tạm (bấm "Về menu" trên màn hình lỗi). **Khi** bấm F5, **thì** nạp lại dữ liệu và mở trận như lúc mở game.
 6. **Không bật dev thì F5 không làm gì** (giữ luật Story 0.3): không nạp lại, không có dòng log nào.
 7. **Khi** code xong, **thì** `tools/test.sh` xanh, có test cho: F5 đọc lại chỉ số đã sửa; F5 từ trận sang màn hình lỗi và ngược lại; F5 giữ trận đang chọn; F5 ở menu; F5 không làm gì khi tắt dev.
 
@@ -31,7 +31,7 @@ tôi muốn sửa file trận hoặc chỉ số rồi thấy kết quả ngay,
     - Sửa chú thích đầu file (dòng 3) cho khớp.
 - [ ] **Task 2: `main.gd` nối F5 với `_start_battle()`** (AC: 1–5)
   - [ ] 2.1 Trong `_ready()`, khối `if AppState.launch.dev:` (cạnh dòng nối `f1_pressed`), nối `dev_tools.f5_pressed.connect(_reload_data)`. Chỉ nối khi bật dev, như F1.
-  - [ ] 2.2 Thêm hàm `_reload_data()`: `Log.info("dev", "f5: nạp lại chi_so.json và file trận")` rồi gọi `_start_battle()`. Theo Câu hỏi 1, mặc định chạy ở **mọi màn hình** (trận, lỗi, menu). Tác giả chọn khác thì thêm điều kiện theo `_screen`.
+  - [ ] 2.2 Thêm hàm `_reload_data()`: `Log.info("dev", "f5: nạp lại chi_so.json và file trận")` rồi gọi `_start_battle()`. Chạy ở **mọi màn hình** (trận, lỗi, menu; tác giả chốt 2026-10-18), không kiểm `_screen`.
   - [ ] 2.3 **Không** viết lại đường nạp. `_start_battle()` đã làm đủ (đọc từ Story 1.1–1.5, xem Dev Notes "Hiện trạng"): luôn đọc cả hai file, tạo `Stats`, `LevelData`, `BattleController` **mới**, lỗi thì xóa `AppState.stats`, `_level` và hiện màn hình lỗi, đúng thì bỏ màn hình lỗi. Sửa chú thích `## ... F5 (story 1.6) gọi lại hàm này.` thành câu hiện tại: `F5 gọi lại hàm này (_reload_data).`
   - [ ] 2.4 Không gọi lại `SaveProbe.bump` hay `McpRuntime.start_if_enabled` (chỉ chạy một lần lúc mở game, AC 4).
 - [ ] **Task 3: Test trong `game/tests/test_main.gd`** (AC: 1–7)
@@ -40,7 +40,7 @@ tôi muốn sửa file trận hoặc chỉ số rồi thấy kết quả ngay,
   - [ ] 3.3 `test_f5_reads_edited_stats`: bật dev; `_make_main("", _write_stats(3))`; Khoái có 7 ô (`main._controller.reachable(1).size()`); đi một nước (`main._controller.submit(Command.move(1, Vector2i(0, 4)))`); `_write_stats(2)`; `_press_f5`; mong đợi: `reachable(1)` = `[Vector2i(0, 4), Vector2i(0, 5), Vector2i(1, 5), Vector2i(1, 6)]`, Khoái về `0,6`, `round_number == 1`, `can_undo()` false, controller là đối tượng mới (`assert_ne` với controller cũ), `_battle_view.selected_id() == BattleView.NONE`, có dòng log `[INFO][dev] f5: nạp lại chi_so.json và file trận`. Danh sách 4 ô tính tay theo luật đi Story 1.4 (đi xuyên Lão ở `2,6` nhưng không dừng trên đó); nếu code ra khác thì xem lại luật, **không** sửa test cho khớp mà chưa hỏi.
   - [ ] 3.4 `test_f5_shows_error_then_recovers`: bật dev; `_make_main()`; `main.level_dir = _broken_level_dir()`; `_press_f5` → `_screen == Screen.ERROR`, màn hình lỗi có đủ `BROKEN_ERRORS`; `main.level_dir = "res://data/tran"`; `_press_f5` → `_screen == Screen.BATTLE`, `_error_screen == null`, bàn cờ hiện, có 5 đồng quân.
   - [ ] 3.5 `test_f5_keeps_chosen_level`: bật dev, `AppState.launch.tran = "thu_ba_tuong"`; `_make_main()`; `_press_f5`; vẫn có quân id 3 (Trần Khánh Dư) và log `nạp trận thu_ba_tuong` xuất hiện hai lần.
-  - [ ] 3.6 `test_f5_on_menu_opens_battle` (theo Câu hỏi 1): màn hình lỗi → bấm nút "Về menu" (`_find_button(main._error_screen).pressed.emit()`) → `level_dir` về đúng → `_press_f5` → `_screen == Screen.BATTLE`.
+  - [ ] 3.6 `test_f5_on_menu_opens_battle`: màn hình lỗi → bấm nút "Về menu" (`_find_button(main._error_screen).pressed.emit()`) → `level_dir` về đúng → `_press_f5` → `_screen == Screen.BATTLE`.
   - [ ] 3.7 `test_f5_keeps_coordinates_and_open_count`: bật dev; bấm F1; `_press_f5`; tọa độ vẫn hiện; chữ DEV vẫn đúng câu cũ (số lần mở không đổi); `SaveProbe` không ghi thêm lần nào (`SaveProbe._read(PROBE_FILE)` trước và sau F5 bằng nhau).
   - [ ] 3.8 `test_f5_needs_dev`: không bật dev; `_make_main()`; tìm `DevTools` (`_dev_tools`) và kiểm `f5_pressed` **không** có kết nối nào (`get_connections()` rỗng); gửi phím F5 thật (`InputEventKey`, `physical_keycode = KEY_F5`) vào `DevTools._unhandled_input` → controller không đổi (cùng đối tượng), không có dòng log `[INFO][dev]`.
   - [ ] 3.9 Xem `after_each` của `test_main.gd`: đã dọn `dev_f1`…`dev_f5` và `AppState.launch.tran`; thêm dọn `chi_so_f5.json`.
@@ -49,12 +49,12 @@ tôi muốn sửa file trận hoặc chỉ số rồi thấy kết quả ngay,
   - [ ] 4.2 Sửa **tạm** `game/data/chi_so.json` (`nguyen_khoai.tam_di` = 2), `inject_action dev_f5`, `inject_action select_general_1`, chụp màn hình: 4 ô sáng, "Hiệp 1". Phải dùng `inject_action`, không dùng `inject_key` (`inject_key` không kích hoạt action gán theo phím vật lý, Debug Log Story 1.4).
   - [ ] 4.3 Sửa **tạm** `tran_01.json` (một ô thành `X`), `inject_action dev_f5`, chụp: màn hình lỗi. Trả `tran_01.json` về như cũ, `inject_action dev_f5`, chụp: trận chạy lại.
   - [ ] 4.4 **Trả cả hai file dữ liệu về như cũ** (`git checkout game/data/`), kiểm `git status` không còn thay đổi trong `game/data/`. Tắt game. Ghi Debug Log (kèm các dòng `[INFO][dev]`, `[INFO][battle]` trong log của `chay.sh`).
-- [ ] **Task 5: Thử F5 trên bản web** (mục hoãn của Story 0.3 và 0.5 ở `deferred-work.md`) (AC: 6, Câu hỏi 2)
+- [ ] **Task 5: Thử F5 trên bản web** (mục hoãn của Story 0.3 và 0.5 ở `deferred-work.md`) (AC: 6)
   - [ ] 5.1 `tools/build_web.sh`. Chạy server tạm: `python3 -m http.server 8060 -d build/web` (chế độ nền). AI không mở được trình duyệt: ghi vào hướng dẫn cho tác giả mở `http://localhost:8060/?dev=1` trong Chrome, bấm vào game rồi bấm F1, F5. Ghi rõ điều cần nhìn: trang có tải lại không (chữ "DEV · lần mở thứ N" tăng số là trang đã tải lại), hay game nhận phím (DevTools Console có `[INFO][dev] f5: ...`).
-  - [ ] 5.2 Tắt server. **Không** chặn phím của trình duyệt bằng `JavaScriptBridge` trong story này trừ khi tác giả trả lời Câu hỏi 2 là "phải chặn".
+  - [ ] 5.2 Tắt server. **Không** chặn phím của trình duyệt bằng `JavaScriptBridge`: tác giả chốt 2026-10-18 F5 chỉ dùng trên desktop, trình duyệt tải lại trang cũng chấp nhận.
   - [ ] 5.3 Cập nhật `deferred-work.md`: hai mục "F1/F5 trên web" (Story 0.3, 0.5) ghi "→ desktop xong ở Story 1.6; web chờ tác giả thử" hoặc kết quả tác giả báo.
 - [ ] **Task 6: Tài liệu, test, commit** (AC: 7)
-  - [ ] 6.1 `game-architecture.md` bảng phím dev (`F5`): ghi rõ "chạy ở mọi màn hình (trận, lỗi, menu); bản web đọc lại dữ liệu đóng gói sẵn nên không thấy file đã sửa" (sửa theo câu trả lời của tác giả).
+  - [ ] 6.1 `game-architecture.md` bảng phím dev (`F5`): ghi rõ "chạy ở mọi màn hình (trận, lỗi, menu); chỉ dùng trên desktop: bản web đọc lại dữ liệu đóng gói sẵn, trình duyệt có tải lại trang cũng chấp nhận (tác giả chốt 2026-10-18)".
   - [ ] 6.2 `tools/test.sh` xanh. Commit một lần, lời commit tiếng Việt, ví dụ `F5 nạp lại chỉ số và file trận khi bật dev (Story 1.6)`.
   - [ ] 6.3 Ghi hướng dẫn tác giả tự test vào Completion Notes theo mẫu ở mục Testing, dùng kết quả thật.
 
@@ -141,12 +141,12 @@ Theo thứ tự đọc bàn: `0,4`, `0,5`, `1,5`, `1,6`. `2,6` là Lão (không 
 - `app_state.gd` là autoload duy nhất; `Log` là lớp static.
 - Chữ hiển thị qua `tr()`. Story này không thêm chữ trên màn hình (chỉ log), nên không thêm khóa dịch.
 - Xong một việc = `tools/test.sh` xanh rồi commit. Nói với tác giả bằng tiếng Việt, theo bước thử.
-- Luật chưa có trong tài liệu thì hỏi tác giả: hai câu hỏi dưới đây.
+- Luật chưa có trong tài liệu thì hỏi tác giả (hai câu của story này đã chốt, xem bên dưới).
 
-### Câu hỏi cho tác giả
+### Quyết định của tác giả (2026-10-18)
 
-1. **F5 ở menu tạm** (sau khi bấm "Về menu" trên màn hình lỗi): (a) nạp lại và mở trận như lúc mở game **(đề xuất: menu này chỉ tạm tới Story 4.1)**, hay (b) không làm gì như F1?
-2. **F5 trên bản web**: dữ liệu web đóng gói sẵn nên F5 không thấy file đã sửa. Nếu thử thấy trình duyệt tải lại trang khi bấm F5: (a) chấp nhận, F5 chỉ dùng trên desktop **(đề xuất)**, hay (b) phải chặn để F5 tới game?
+1. F5 ở menu tạm: nạp lại dữ liệu và mở trận như lúc mở game (F5 chạy ở mọi màn hình).
+2. F5 chỉ dùng trên desktop. Trên web, trình duyệt có tải lại trang cũng chấp nhận; không chặn phím.
 
 ### References
 
@@ -172,3 +172,4 @@ Theo thứ tự đọc bàn: `0,4`, `0,5`, `1,5`, `1,6`. `2,6` là Lão (không 
 ### Change Log
 
 - 2026-10-18: Tạo story.
+- 2026-10-18: Tác giả chốt: F5 chạy cả ở menu; F5 chỉ dùng trên desktop, không chặn phím trình duyệt.
