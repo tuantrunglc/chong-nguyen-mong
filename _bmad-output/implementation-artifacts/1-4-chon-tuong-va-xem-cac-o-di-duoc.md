@@ -32,7 +32,7 @@ tôi muốn chọn một tướng và thấy ngay nó đi được tới đâu,
 5. **Khi** gõ phím `2` (hoặc bấm vào Phạm Ngũ Lão), **thì** đổi sang Phạm Ngũ Lão: dấu "đang chọn" chuyển sang Lão, và đúng 7 ô sáng: `2,3` `1,4` `2,4` `0,5` `1,5` `2,5` `1,6`. Ô `0,6` (Nguyễn Khoái) không sáng.
 6. **Khi** gõ phím `3` ở trận 1 (không có Trần Khánh Dư), **thì** không có gì thay đổi: tướng đang chọn vẫn giữ, game không lỗi. Mở `tools/chay.sh --dev --tran=thu_ba_tuong` rồi gõ `3` thì chọn được Trần Khánh Dư.
 7. **Khi** đang chọn Nguyễn Khoái mà rê chuột lên ô sáng `2,5`, **thì** game vẽ đường đi theo từng ô: `0,6` → `0,5` → `1,5` → `2,5`. Rê sang ô không sáng thì đường đi biến mất. Đường đi chọn theo luật ở Dev Notes "Chọn đường" (ngắn nhất, hòa thì B→Đ→N→T).
-8. **Bỏ chọn** **[MẶC ĐỊNH, chờ tác giả chốt]**:
+8. **Bỏ chọn** **[Tác giả chốt 2026-10-18]**:
    - bấm lại vào tướng đang chọn (hoặc gõ lại phím của nó) thì bỏ chọn, ô sáng tắt;
    - bấm vào ô không sáng mà không có tướng mình thì cũng bỏ chọn;
    - bấm vào ô sáng thì chưa làm gì (đi là việc của Story 1.5).
@@ -114,7 +114,7 @@ tôi muốn chọn một tướng và thấy ngay nó đi được tới đâu,
 - Phạm vi của lệnh `di` ở story này: kiểm hợp lệ và dời tướng. **Chưa có:** cờ "đã đi" (không đi tiếp được), bấm ô sáng để đi, hủy, kết thúc lượt. Những thứ đó là Story 1.5.
 - Tác giả không đọc code. Thứ tác giả nhìn là đầu ra của `tools/xem_kich_ban.sh`, `tools/test.sh` và game chạy bằng `tools/chay.sh`.
 
-### Luật đi (spec) **[GDD, FR5–FR7; mục MẶC ĐỊNH chờ duyệt qua kịch bản]**
+### Luật đi (spec) **[GDD, FR5–FR7]**
 
 - 4 hướng, không đi chéo. Tầm đi tính bằng **số bước** thật (đường vòng tính đủ bước), không phải khoảng cách đường chim bay.
 - Tầm đi lấy từ `chi_so.json` (`tam_di`, tướng là 3).
@@ -181,7 +181,7 @@ Số bước trên đã kiểm bằng BFS lúc tạo story. Dev kiểm lại b�
 
 Không viết thêm kịch bản ngoài 8 cái này. Ca chưa có trong đợt (ví dụ hầm chông, đi hai lần) để story của nó.
 
-### Chọn và bỏ chọn (`BattleView`) **[MẶC ĐỊNH, chờ tác giả chốt]**
+### Chọn và bỏ chọn (`BattleView`) **[Tác giả chốt 2026-10-18]**
 
 | Thao tác | Đang không chọn ai | Đang chọn tướng X |
 |---|---|---|
@@ -309,12 +309,18 @@ Nhớ commit file `.uid` của mọi script mới.
 
 - Đọc `_bmad-output/project-context.md` trước khi viết code.
 - **M3 không ngoại lệ.** Không viết code luật trước khi tác giả duyệt. Không bao giờ sửa hay xóa kịch bản `da_duyet: true` để test đạt. Nghi kịch bản sai thì hỏi tác giả.
-- Luật không có trong GDD hay bảng thứ tự phân giải thì hỏi tác giả, không tự đoán. Các mục **[MẶC ĐỊNH, chờ tác giả chốt]** ở trên là đề xuất; tác giả có thể đổi trước khi dev bắt đầu.
+- Luật không có trong GDD hay bảng thứ tự phân giải thì hỏi tác giả, không tự đoán. Các mục **[Tác giả chốt 2026-10-18]** ở trên là đề xuất; tác giả có thể đổi trước khi dev bắt đầu.
 - Sau mỗi lần phân giải trong test: `state.validate()` rỗng.
 - Thứ tự B→Đ→N→T cho mọi trường hợp hòa (BFS, chọn đường).
 - Chữ hiển thị qua `tr()` (story này không thêm chữ mới cho người chơi; lý do từ chối là chữ cho dev).
 - Commit chỉ khi `tools/test.sh` xanh. Lệnh cho tác giả nằm trong `tools/`, chạy từ gốc repo.
 - MCP chỉ để nhìn và thử (`--dev`). Luật và dữ liệu chỉ sửa trong code, có test.
+
+### Quyết định trong story này (tác giả đồng ý cả 3 mục, 2026-10-18)
+
+1. **Bỏ chọn** (AC 8): bấm lại tướng đang chọn hoặc gõ lại phím của nó thì bỏ chọn; bấm ô không sáng thì bỏ chọn; bấm ô sáng chưa làm gì (Story 1.5).
+2. **Lệnh đi không hợp lệ trong kịch bản**: tướng đứng yên, bàn sau giống bàn trước, kịch bản đạt.
+3. **Hầm chông**: đợt này không có kịch bản hầm chông. Trong game tướng đi vào ô hầm chông được nhưng chưa mất máu, tới Story 3.4 (mất máu) và E3 (đường ít hầm chông nhất).
 
 ### References
 
@@ -347,3 +353,4 @@ Nhớ commit file `.uid` của mọi script mới.
 ### Change Log
 
 - 2026-10-18: Tạo story.
+- 2026-10-18: Tác giả chốt 3 quyết định (bỏ chọn, lệnh đi không hợp lệ, hầm chông).
