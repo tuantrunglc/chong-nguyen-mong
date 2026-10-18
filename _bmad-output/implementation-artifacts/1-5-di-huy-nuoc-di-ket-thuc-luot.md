@@ -4,7 +4,7 @@ baseline_commit: 02a300ccbeb8855bed37bfbb2fb980c46ec953c0
 
 # Story 1.5: Đi, hủy nước đi, kết thúc lượt
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -534,3 +534,4 @@ Claude Opus 5.5 (claude-opus-5-5)
 - 2026-10-18: Tác giả chốt 5 câu hỏi: chỉ hủy được một nước (sửa AC 5–6, kịch bản `huy_hai_lan`, controller giữ một bản chụp, thêm việc sửa kiến trúc ở Task 9.1); giữ chọn khi đi và khi hủy; bỏ chọn khi kết thúc lượt; đỏ xỉn cho "đã đi".
 - 2026-10-18: Làm story: mỗi tướng đi một lần mỗi lượt, hủy một nước, kết thúc lượt (sang hiệp mới); `BattleController.submit/undo` có bản chụp hủy và quay lại khi hỏng bất biến; bảng nút HUD; đồng quân đỏ xỉn khi đã đi. 7 kịch bản mới tác giả đã duyệt, đều đạt. `tools/test.sh`: 303/303.
 - 2026-10-18: Code review: thêm `hiep`, `da_di` vào phần "sau" của kịch bản (tác giả chốt), 6 kịch bản `huy/`, `hiep/` chờ duyệt lại; bộ nạp chặn mã `tu_choi` không hợp lệnh; log lệnh nhận vào; test quay lại, menu, bấm nút rồi Space; sửa `epics.md`.
+- 2026-10-18: Tác giả duyệt lại 6 kịch bản `huy/`, `hiep/` có `hiep`, `da_di`. Story xong.

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Chỉ hủy được một nước: lần hủy đầu trả nước đi của Phạm Ngũ Lão, lần hủy thứ hai không có gì xảy ra, Nguyễn Khoái vẫn đứng ở ô mới.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",
