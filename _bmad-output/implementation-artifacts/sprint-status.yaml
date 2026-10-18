@@ -56,8 +56,8 @@ development_status:
   1-3-kich-ban-luat-va-cong-cu-duyet-tren-terminal: done
   1-4-chon-tuong-va-xem-cac-o-di-duoc: done
   1-5-di-huy-nuoc-di-ket-thuc-luot: done
-  1-6-f5-nap-lai-du-lieu: review
-  1-7-ban-co-nghieng-isometric-tam: backlog
+  1-6-f5-nap-lai-du-lieu: done
+  1-7-ban-co-nghieng-isometric-tam: ready-for-dev
   epic-1-retrospective: optional
   epic-2: backlog
   2-1-nguyen-khoai-danh-day-va-va-cham: backlog
