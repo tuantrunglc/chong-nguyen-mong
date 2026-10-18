@@ -3,7 +3,7 @@ extends Node2D
 ## F1 (chỉ khi bật dev): tọa độ "cot,hang" ở nửa trái mỗi ô thoi (không đè chữ trên đồng quân), id quân ở bên
 ## phải đầu đồng quân.
 ## main.gd đặt node này làm con cuối của BoardView, nên nó nằm trên đồng quân và ẩn theo bàn cờ.
-## Vị trí chỉ tính qua BoardView.cell_center (bàn nghiêng, Story 1.7).
+## Vị trí chỉ tính qua BoardView.top_center (bàn nghiêng, Story 1.7). Nhãn không nhận chuột: bấm xuyên xuống bàn.
 
 const FONT_SIZE: int = 12
 const TEXT_COLOR: Color = Color(1.0, 1.0, 1.0)
@@ -24,10 +24,10 @@ func show_state(state: BattleState) -> void:
 	for r: int in range(state.size.y):
 		for c: int in range(state.size.x):
 			var cell: Vector2i = Vector2i(c, r)
-			var left: Vector2 = BoardView.cell_center(cell) - Vector2(BoardView.TILE_W / 4.0, _lift(state, cell))
+			var left: Vector2 = BoardView.top_center(cell, state.terrain_at(cell)) - Vector2(BoardView.TILE_W / 4.0, 0)
 			_add_label("%d,%d" % [c, r], left, true)
 	for unit: Unit in state.units:
-		var feet: Vector2 = BoardView.cell_center(unit.cell) - Vector2(0, _lift(state, unit.cell))
+		var feet: Vector2 = BoardView.top_center(unit.cell, state.terrain_at(unit.cell))
 		_add_label(str(unit.id), feet + Vector2(UnitToken.RADIUS, -UnitToken.TOKEN_LIFT - UnitToken.RADIUS), false)
 
 
@@ -45,11 +45,6 @@ func texts() -> Array[String]:
 	return out
 
 
-## Mặt ô cao hơn mặt đất bao nhiêu (bệ ô ải).
-func _lift(state: BattleState, cell: Vector2i) -> float:
-	return BoardView.surface_height(state.terrain_at(cell))
-
-
 ## centered: tâm nhãn ở at; không thì góc trên trái nhãn ở at.
 func _add_label(text: String, at: Vector2, centered: bool) -> void:
 	var label: Label = Label.new()
@@ -58,6 +53,7 @@ func _add_label(text: String, at: Vector2, centered: bool) -> void:
 	label.add_theme_font_size_override("font_size", FONT_SIZE)
 	label.add_theme_color_override("font_color", TEXT_COLOR)
 	var panel: PanelContainer = PanelContainer.new()
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = BACKGROUND_COLOR
 	style.content_margin_left = 2

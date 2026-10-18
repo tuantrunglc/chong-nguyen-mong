@@ -121,6 +121,8 @@ func _select(id: int) -> void:
 	_cells = _controller.reachable(id)
 	_board.show_selection(_controller.snapshot().unit_by_id(id).cell, _cells)
 	# Chuột có thể đang nằm sẵn trên một ô vừa sáng: vẽ đường đi ngay, không chờ rê sang ô khác.
+	# Đồng quân vừa dời có thể che ô đang trỏ: chọn lại ô dưới chuột trước.
+	_input.refresh_hover()
 	_on_cell_hovered(_input.hovered_cell())
 
 

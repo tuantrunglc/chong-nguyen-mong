@@ -8,7 +8,7 @@ const PROBE_FILE: String = PROBE_DIR + "/thu_luu.json"
 const LEVEL_DIR: String = PROBE_DIR + "/tran"
 const PASS_LEVEL: String = LEVEL_DIR + "/tran_01.json"
 ## Khoảng cách (px) từ đỉnh ô thoi vào phía tâm khi thử điểm sát mép.
-const EDGE_STEP: float = 3.0
+const EDGE_STEP: float = 2.0
 
 
 func before_each() -> void:
@@ -204,7 +204,13 @@ func test_token_on_pass_stands_on_platform() -> void:
 	var token: UnitToken = board.tokens()[1] as UnitToken
 	assert_eq(token.position, BoardView.cell_center(Vector2i(0, 6)) - Vector2(0, BoardView.PASS_HEIGHT),
 		"đứng trên bệ ải")
-	assert_eq(board.pick_cell(BoardView.cell_center(Vector2i(0, 6))), Vector2i(0, 6))
+	# Đầu đồng nâng theo bệ: điểm này ngoài bàn (cell_at) và cao hơn đầu đồng nếu đứng trên đất phẳng.
+	var head: Vector2 = BoardView.cell_center(Vector2i(0, 6)) \
+		+ Vector2(0, -BoardView.PASS_HEIGHT - UnitToken.TOKEN_LIFT - UnitToken.RADIUS + 4)
+	assert_eq(board.cell_at(head), BoardView.NO_CELL)
+	assert_lt(head.y, BoardView.cell_center(Vector2i(0, 6)).y - UnitToken.TOKEN_LIFT - UnitToken.RADIUS)
+	assert_eq(board.pick_cell(head), Vector2i(0, 6), "bấm đầu đồng trên bệ: chọn ô ải")
+	assert_true(board.board_rect().has_point(board.position + head), "khung bàn bao đầu đồng trên bệ")
 	assert_eq(_blocks(board).size(), 0, "bệ ải vẽ trên mặt đất, không phải khối")
 
 

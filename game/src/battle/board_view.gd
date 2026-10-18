@@ -30,8 +30,8 @@ const BLOCK_KINDS: Array[int] = [Terrain.FOREST, Terrain.GRANARY, Terrain.VILLAG
 ## Sông trũng xuống; thành sông phía sau lộ ra, tối hơn mặt nước.
 const RIVER_DEPTH: float = 6.0
 const RIVER_BANK_SHADE: float = 0.4
-## Phần đồng quân và khối nhô lên trên đỉnh ô 0,0 (để tính khung bàn).
-const TOP_OVERHANG: float = 28.0
+## Chừa thêm phía trên vật cao nhất ở hàng đầu (để tính khung bàn).
+const TOP_MARGIN: float = 4.0
 
 ## Màu từng loại ô (màu UI, không phải số cân bằng).
 const TERRAIN_COLORS: Dictionary = {
@@ -99,6 +99,11 @@ static func diamond(center: Vector2) -> PackedVector2Array:
 		center + Vector2(0, -TILE_H / 2.0), center + Vector2(TILE_W / 2.0, 0),
 		center + Vector2(0, TILE_H / 2.0), center + Vector2(-TILE_W / 2.0, 0),
 	])
+
+
+## Tâm mặt trên của ô loại kind: nơi đồng quân đứng (ô ải cao hơn mặt đất).
+static func top_center(cell: Vector2i, kind: int) -> Vector2:
+	return cell_center(cell) - Vector2(0, surface_height(kind))
 
 
 ## Mặt trên của loại ô cao hơn mặt đất bao nhiêu (0 là phẳng).
@@ -230,12 +235,15 @@ func tokens() -> Dictionary:
 
 
 ## Khung bàn trong tọa độ của BoardView (cả nửa nét viền bàn).
+## Phía trên: đầu đồng quân đứng trên bệ ô ải ở ô 0,0, hoặc mặt trên khối nhô lên, cái nào cao hơn.
 func _local_rect() -> Rect2:
 	var stroke: float = BORDER_WIDTH / 2.0
 	var left: float = -rows * TILE_W / 2.0 - stroke
 	var right: float = cols * TILE_W / 2.0 + stroke
 	var bottom: float = (cols + rows) * TILE_H / 2.0 + EDGE_DEPTH + stroke
-	return Rect2(left, -TOP_OVERHANG, right - left, bottom + TOP_OVERHANG)
+	var token_top: float = PASS_HEIGHT + UnitToken.TOKEN_LIFT + UnitToken.RADIUS - TILE_H / 2.0
+	var top: float = maxf(token_top, BLOCK_HEIGHT) + TOP_MARGIN
+	return Rect2(left, -top, right - left, bottom + top)
 
 
 ## Mặt trên của ô (ô ải cao hơn mặt đất).
@@ -350,25 +358,27 @@ func _draw() -> void:
 	var border: PackedVector2Array = big.duplicate()
 	border.append(big[0])
 	draw_polyline(border, LINE_COLOR, BORDER_WIDTH, true)
-	# Bệ ô ải vẽ trên mặt đất, theo thứ tự sâu dần (quân đứng lên được, xem BLOCK_KINDS).
-	if _state != null:
-		for depth: int in range(cols + rows - 1):
-			for c: int in range(cols):
-				var cell: Vector2i = Vector2i(c, depth - c)
-				if cell.y >= 0 and cell.y < rows and _state.terrain_at(cell) == Terrain.PASS:
-					draw_raised(self, diamond(cell_center(cell)), PASS_HEIGHT, TERRAIN_COLORS[Terrain.PASS] as Color,
-						EDGE_LEFT_SHADE, EDGE_RIGHT_SHADE)
-	for cell: Vector2i in _lit_cells:
-		draw_colored_polygon(diamond(_top_center(cell)), REACH_COLOR)
-	if _selected_cell != NO_CELL:
-		draw_polyline(_ellipse(_top_center(_selected_cell), SELECT_RADIUS), SELECT_COLOR, SELECT_WIDTH, true)
-		if not _path.is_empty():
-			var points: PackedVector2Array = PackedVector2Array([_top_center(_selected_cell)])
-			for cell: Vector2i in _path:
-				points.append(_top_center(cell))
-			draw_polyline(points, PATH_COLOR, PATH_WIDTH, true)
-			# Bỏ điểm cuối trùng điểm đầu: đa giác không nhận điểm lặp.
-			draw_colored_polygon(_ellipse(_top_center(_path[_path.size() - 1]), PATH_END_RADIUS).slice(0, SELECT_POINTS), PATH_COLOR)
+	# Bệ ô ải, ô sáng và vòng chọn vẽ trên mặt đất, theo thứ tự sâu dần (quân đứng lên bệ được, xem
+	# BLOCK_KINDS): bệ ô ải phía trước che ô sáng phía sau, ô sáng trên bệ nằm trên mặt bệ.
+	for depth: int in range(cols + rows - 1):
+		for c: int in range(cols):
+			var cell: Vector2i = Vector2i(c, depth - c)
+			if cell.y < 0 or cell.y >= rows:
+				continue
+			if _state != null and _state.terrain_at(cell) == Terrain.PASS:
+				draw_raised(self, diamond(cell_center(cell)), PASS_HEIGHT, TERRAIN_COLORS[Terrain.PASS] as Color,
+					EDGE_LEFT_SHADE, EDGE_RIGHT_SHADE)
+			if _lit_cells.has(cell):
+				draw_colored_polygon(diamond(_top_center(cell)), REACH_COLOR)
+			if cell == _selected_cell:
+				draw_polyline(_ellipse(_top_center(cell), SELECT_RADIUS), SELECT_COLOR, SELECT_WIDTH, true)
+	if _selected_cell != NO_CELL and not _path.is_empty():
+		var points: PackedVector2Array = PackedVector2Array([_top_center(_selected_cell)])
+		for cell: Vector2i in _path:
+			points.append(_top_center(cell))
+		draw_polyline(points, PATH_COLOR, PATH_WIDTH, true)
+		# Bỏ điểm cuối trùng điểm đầu: đa giác không nhận điểm lặp.
+		draw_colored_polygon(_ellipse(_top_center(_path[_path.size() - 1]), PATH_END_RADIUS).slice(0, SELECT_POINTS), PATH_COLOR)
 
 
 ## Sông trũng: cả ô là thành sông tối, mặt nước hạ xuống RIVER_DEPTH, cắt theo mép ô.

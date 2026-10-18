@@ -393,6 +393,35 @@ func test_coord_overlay_follows_moved_unit() -> void:
 	assert_true(found, "lớp F1 có id 1")
 
 
+## Bàn chạy F1: nhãn tọa độ không nuốt chuột, bấm xuyên xuống bàn cờ.
+func test_coord_labels_let_mouse_through() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main()
+	var overlay: CoordOverlay = main._coord_overlay as CoordOverlay
+	assert_gt(overlay.get_child_count(), 0)
+	for child: Node in overlay.get_children():
+		assert_eq((child as Control).mouse_filter, Control.MOUSE_FILTER_IGNORE)
+		assert_eq((child.get_child(0) as Control).mouse_filter, Control.MOUSE_FILTER_IGNORE)
+
+
+## Chuột đứng yên trên đất ô 0,4, đúng chỗ đầu đồng sẽ che khi Khoái sang 1,5: ô dưới chuột đổi theo,
+## hủy nước đi thì về lại 0,4 và vẽ đường đi tới đó.
+func test_resting_mouse_follows_token_moving_under_it() -> void:
+	var main: Node2D = _make_main()
+	_press_key(main, 1)
+	var point: Vector2 = BoardView.cell_center(Vector2i(1, 5)) + Vector2(0, -40)
+	assert_eq(_board(main).cell_at(point), Vector2i(0, 4), "đất của ô 0,4")
+	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+	motion.position = _board(main).get_global_transform_with_canvas() * point
+	_battle_input(main)._unhandled_input(motion)
+	assert_eq(_battle_input(main).hovered_cell(), Vector2i(0, 4))
+	_click(main, Vector2i(1, 5))
+	assert_eq(_battle_input(main).hovered_cell(), Vector2i(1, 5), "đầu đồng Khoái che chỗ chuột")
+	_press_physical(main, KEY_Z)
+	assert_eq(_battle_input(main).hovered_cell(), Vector2i(0, 4))
+	assert_eq(_board(main).path(), [Vector2i(0, 5), Vector2i(0, 4)] as Array[Vector2i])
+
+
 func test_hover_lit_cell_draws_path() -> void:
 	var main: Node2D = _make_main()
 	_press_key(main, 1)

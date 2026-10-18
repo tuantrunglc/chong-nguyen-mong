@@ -30,6 +30,8 @@ const ACTION_KEYS: Dictionary = {
 
 var _board: BoardView = null
 var _hovered: Vector2i = BoardView.NO_CELL
+## Lần di chuột cuối trên cửa sổ (tọa độ màn hình); null khi chuột đã ra khỏi cửa sổ.
+var _last_motion: InputEventMouseMotion = null
 
 
 func setup(board: BoardView) -> void:
@@ -54,9 +56,8 @@ func _ready() -> void:
 
 ## Chuột ra khỏi cửa sổ (hay khung itch.io) không sinh sự kiện di chuột: coi như ra ngoài bàn.
 func _on_mouse_exited() -> void:
-	if _hovered != BoardView.NO_CELL:
-		_hovered = BoardView.NO_CELL
-		cell_hovered.emit(_hovered)
+	_last_motion = null
+	_set_hovered(BoardView.NO_CELL)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -78,10 +79,27 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	# Vị trí lấy từ chính sự kiện (đổi sang tọa độ bàn cờ), không đọc con trỏ thật: đúng cả khi cửa sổ
 	# co giãn và khi input được bơm vào (GoPeak, test). Ô là ô nhìn thấy (đồng quân, khối che ô phía sau).
-	var cell: Vector2i = _board.pick_cell((_board.make_input_local(mouse) as InputEventMouse).position)
+	var cell: Vector2i = _pick(mouse)
 	var button: InputEventMouseButton = mouse as InputEventMouseButton
 	if button != null and button.button_index == MOUSE_BUTTON_LEFT and button.pressed:
 		cell_clicked.emit(cell)
-	elif mouse is InputEventMouseMotion and cell != _hovered:
+	elif mouse is InputEventMouseMotion:
+		_last_motion = mouse as InputEventMouseMotion
+		_set_hovered(cell)
+
+
+## Chọn lại ô dưới chuột đứng yên: đồng quân vừa dời tới có thể che ô mặt đất đang trỏ.
+## Gọi sau khi bàn cờ vẽ bản chụp mới.
+func refresh_hover() -> void:
+	if _board != null and _last_motion != null:
+		_set_hovered(_pick(_last_motion))
+
+
+func _pick(mouse: InputEventMouse) -> Vector2i:
+	return _board.pick_cell((_board.make_input_local(mouse) as InputEventMouse).position)
+
+
+func _set_hovered(cell: Vector2i) -> void:
+	if cell != _hovered:
 		_hovered = cell
 		cell_hovered.emit(cell)

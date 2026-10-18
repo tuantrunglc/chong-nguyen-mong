@@ -4,7 +4,7 @@ baseline_commit: f927e1d2b778a953038cfc05beed451b512eda7f
 
 # Story 1.7: Bàn cờ nghiêng (isometric) tạm
 
-Status: review
+Status: done
 
 ## Story
 
@@ -82,6 +82,20 @@ _Thêm 2026-10-18 theo `sprint-change-proposal-2026-10-18-isometric.md`. Cắt �
   - [x] 9.2 `deferred-work.md` dòng 4 (chưa có test canh giữa `BoardView.setup`): đánh dấu đã làm bằng test 7.5.
   - [x] 9.3 `tools/test.sh` xanh. Commit một lần, lời commit tiếng Việt, ví dụ `Bàn cờ nghiêng isometric tạm (Story 1.7)`.
   - [x] 9.4 Ghi hướng dẫn tác giả tự test vào Completion Notes (mẫu ở mục Testing), kèm ảnh chụp đã xem.
+
+### Review Findings
+
+_Code review 2026-10-18 (Blind Hunter, Edge Case Hunter, Acceptance Auditor)._
+
+- [x] [Review][Patch] Ô sáng và vòng chọn ở ô ngay sau ô ải tô lấn 8px lên mặt bệ ô ải phía trước (gặp ở trận thu_ba_tuong, ô 5,3 và 6,2): vẽ ô sáng xen với bệ ô ải theo độ sâu. Tác giả chọn giữ bệ ô ải vẽ trên mặt đất (2026-10-18) [game/src/battle/board_view.gd:354]
+- [x] [Review][Defer] Khối rừng, kho lương, làng đứng sau ô ải che dải 8px của bệ (trong khi pick_cell chọn ô ải); chữ ô phẳng phía sau đè lên bệ ô ải [game/src/battle/board_view.gd:354] — deferred, trận hiện có chưa gặp; xem lại khi làm trận Giữ ải
+- [x] [Review][Patch] Ô dưới chuột không cập nhật khi đồng quân dời tới mà chuột đứng yên (đi, hủy, lượt địch, F5): đường đi xem trước vẽ tới ô cũ, còn cú bấm kế tiếp trúng đồng quân [game/src/battle/battle_input.gd:85]
+- [x] [Review][Patch] Nhãn tọa độ F1 (PanelContainer, mặc định MOUSE_FILTER_STOP) nuốt cú bấm và rê chuột trên phần lớn mỗi ô; cần MOUSE_FILTER_IGNORE [game/src/debug/coord_overlay.gd:56]
+- [x] [Review][Patch] `TOP_OVERHANG = 28` là số cứng; nên tính từ `TOKEN_LIFT`, `RADIUS`, `PASS_HEIGHT` để `board_rect()` không hụt khi chỉnh cỡ [game/src/battle/board_view.gd:31]
+- [x] [Review][Patch] Test chưa đúng spec: `test_token_on_pass_stands_on_platform` bấm vào điểm mà `cell_at` vốn đã trả đúng ô, nên không kiểm được việc chọn theo vị trí đã nâng (Task 3.3); `EDGE_STEP` là 3px thay vì 2px (Task 7.1) [game/tests/test_board_view.gd]
+- [x] [Review][Patch] `CoordOverlay` tự cộng độ cao bệ (`surface_height`) vào `cell_center`, trái luật "chỉ BoardView đổi ô ↔ điểm"; nên thêm một hàm static tâm mặt trên ô ở BoardView và gọi hàm đó [game/src/debug/coord_overlay.gd:27]
+- [x] [Review][Patch] Ghi chép story chưa khớp: Debug Log ghi 332/332, Completion ghi 333/333. Change Log ghi "14 test mới/sửa", thực tế là 14 mới, 3 sửa, 1 xóa. Việc xóa `test_cell_at_maps_board_pixels` (AC 8 ghi "không xóa"), dùng Lão 2,6 thay Khoái 0,6 (Task 7.2) và phá thử 7.8 chỉ làm một nhánh đều chưa ghi lại. Task 9.4 thiếu ảnh chụp [_bmad-output/implementation-artifacts/1-7-ban-co-nghieng-isometric-tam.md]
+- [x] [Review][Defer] Bàn lớn hơn 7×7 tràn khỏi AREA và đè HUD, không có co giãn; file trận hiện khóa ở 7×7 [game/src/battle/board_view.gd:199] — deferred, chưa gặp được
 
 ## Dev Notes
 
@@ -236,15 +250,18 @@ Claude Opus 5.5 (claude-opus-5-5)
   - Khối đặt ở đỉnh trên ô (như Task 3.4 ghi) bằng đúng y với quân ở ô phía sau sát nó (`64 < 64` trượt). Đổi khối lên cao hơn tâm `TILE_H / 4`: quân phía sau nhỏ hơn 16px, quân cùng độ sâu lớn hơn 16px, quân trên bệ ô ải lớn hơn 8px.
   - `board_rect` hụt đúng mép phải (Rect2 không tính mép cuối). Thêm nửa nét viền bàn vào khung.
   - `test_reload_rebuilds_token_when_id_changes_type` còn đọc `_units`. Đổi sang đếm `UnitToken` trong `_world`.
-- Làm hỏng tạm (trả lại ngay, sau đó 332/332 xanh):
+- Làm hỏng tạm (trả lại ngay, sau đó 332/332 xanh; về sau thêm `test_error_screen_covers_board_rect` nên thành 333):
   - đảo dấu `cell_at` → 9 trượt (2 test đổi ô ↔ điểm và 5 test chuột cũ);
   - tắt `y_sort_enabled` → `test_blocks_and_tokens_sort_by_depth` trượt;
   - `BattleInput` quay về `cell_at` → `test_mouse_click_on_token_head_selects_that_general` trượt;
   - bỏ nâng quân trên ô ải → `test_token_on_pass_stands_on_platform` trượt.
+  - Nhánh "đặt khối ở `cell_center`" của Task 7.8 chưa chạy thử; đọc code thì `assert_gt` cho quân cùng độ sâu sẽ trượt vì bằng y (ghi bổ sung khi code review).
 - Lệch so với Tasks (đã cân nhắc, cùng mục đích):
   - Task 3.3: bệ ô ải vẽ trên mặt đất trong `BoardView._draw`, không phải node `TerrainBlock`. Ô sáng, vòng chọn, đường đi trên ô ải vẽ trên mặt bệ; nếu bệ là node trong `_world` thì nó che mất chúng. Bệ chỉ cao 8px nên không cần sắp theo chiều sâu với quân. Test 7.3 phần ô ải đổi thành kiểm quân đứng trên bệ (`cell_center - PASS_HEIGHT`) và bệ không nằm trong `_world`.
   - Task 3.4: khối đặt cao hơn tâm `TILE_H / 4`, không phải ở đỉnh trên (xem trên).
   - Task 5.2: nhãn tọa độ F1 đặt ở nửa trái ô. Ảnh chụp cho thấy đặt ở nửa trên thì đè lên tên quân.
+  - Task 7.1 / AC 8: `test_cell_at_maps_board_pixels` (ô vuông) bị xóa, không sửa tại chỗ; các test đổi ô ↔ điểm mới trong `test_board_view.gd` thay nó (ghi bổ sung khi code review).
+  - Task 7.2: test đầu đồng dùng Lão ở `2,6` thay Khoái ở `0,6`: đầu đồng Khoái nằm ngoài bàn (`cell_at` trả `NO_CELL`), không nằm trên đất của ô sau lưng như spec giả định (ghi bổ sung khi code review).
 - GoPeak (`tools/chay.sh --dev`):
   - Trận 1: bàn thoi, sông dải chéo có khe `3,3`, quân đứng có bóng, không đè tiêu đề và HUD.
   - `select_general_1`: 7 ô sáng, vòng elip. Rê chuột (294, 334) = ô `1,4`: đường đi.
@@ -252,6 +269,7 @@ Claude Opus 5.5 (claude-opus-5-5)
   - `dev_f1`: tọa độ đúng từng ô.
   - `--tran=thu_ba_tuong`: rừng, kho, làng là khối; ô ải là bệ xám; hầm chông có 3 mũi; sông trũng. Cung kỵ ở `5,2` che lên kho `5,1` phía sau.
 - `tools/build_web.sh`: đạt, nén 10.4 MB / 25 MB.
+- Ảnh chụp (code review): `_bmad-output/implementation-artifacts/anh/1-7-thu-ba-tuong.png`, trận `thu_ba_tuong`, Dư đã đi và đang chọn.
 
 ### Completion Notes List
 
@@ -309,4 +327,5 @@ Claude Opus 5.5 (claude-opus-5-5)
 
 - 2026-10-18: Tạo story.
 - 2026-10-18: Tác giả chốt ô ải là bệ đá thấp, quân đứng trên được nâng lên (phương án a).
-- 2026-10-18: Làm story: bàn nghiêng isometric 2:1, khối địa hình, đồng quân đứng, chọn ô nhìn thấy dưới chuột, F1 theo ô thoi; 14 test mới/sửa; `tools/test.sh` 333/333; build web đạt.
+- 2026-10-18: Làm story: bàn nghiêng isometric 2:1, khối địa hình, đồng quân đứng, chọn ô nhìn thấy dưới chuột, F1 theo ô thoi; 14 test mới, 3 test sửa, 1 test xóa; `tools/test.sh` 333/333; build web đạt.
+- 2026-10-18: Sửa theo code review: ô sáng vẽ xen với bệ ô ải theo độ sâu; chuột đứng yên chọn lại ô khi đồng quân dời tới; nhãn F1 không nuốt chuột; khung bàn tính phần nhô từ cỡ đồng quân; `BoardView.top_center` cho F1; test chọn đầu đồng trên bệ ô ải, sát mép 2px; 2 test mới; `tools/test.sh` 335/335.
