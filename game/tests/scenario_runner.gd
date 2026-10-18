@@ -131,7 +131,8 @@ static func _general(state: BattleState, type: int) -> Unit:
 	return null
 
 
-## So state với bàn sau: địa hình rồi quân, theo thứ tự đọc bàn. Mỗi chỗ khác một câu.
+## So state với bàn sau: địa hình rồi quân theo thứ tự đọc bàn, rồi hiệp và dấu "đã đi" (nếu kịch bản ghi).
+## Mỗi chỗ khác một câu.
 static func compare(state: BattleState, scenario: ScenarioData) -> Array[String]:
 	var problems: Array[String] = []
 	var expected: Dictionary = {}  # ô -> ExpectedUnit
@@ -153,6 +154,17 @@ static func compare(state: BattleState, scenario: ScenarioData) -> Array[String]
 				state.unit_at(cell))
 			if not problem.is_empty():
 				problems.append(problem)
+	if scenario.after_round > 0 and state.round_number != scenario.after_round:
+		problems.append("sau: mong đợi hiệp %d, thực tế hiệp %d" % [scenario.after_round, state.round_number])
+	if scenario.checks_moved:
+		for type: int in UnitType.GENERALS:
+			var general: Unit = _general(state, type)
+			if general == null or general.has_moved == scenario.after_moved.has(type):
+				continue
+			var want: String = "đã đi" if scenario.after_moved.has(type) else "chưa đi"
+			var got: String = "đã đi" if general.has_moved else "chưa đi"
+			problems.append("sau: %s (%s) mong đợi %s, thực tế %s"
+				% [unit_symbol(type), UNIT_NAMES.get(type, "?"), want, got])
 	return problems
 
 

@@ -4,7 +4,7 @@ baseline_commit: 02a300ccbeb8855bed37bfbb2fb980c46ec953c0
 
 # Story 1.5: Đi, hủy nước đi, kết thúc lượt
 
-Status: review
+Status: in-progress
 
 ## Story
 
@@ -135,6 +135,24 @@ tôi muốn đi, hủy nước vừa đi và kết thúc lượt,
   - [x] 9.2 Chạy `tools/chay.sh --dev` ở chế độ nền, chờ ~5 giây. Dùng GoPeak: `inject_action` (`select_general_1`, `undo_move`, `end_turn`; `inject_key` không kích hoạt action theo phím vật lý, xem Debug Log 1.4), `inject_mouse_click` vào ô `0,4` (pixel = vị trí bàn `(332, 52)` + `cell_center`, tức `(376, 448)`), `capture_screenshot` sau mỗi bước. Xem: màu "đã đi" khác rõ màu tướng chưa đi, chữ và số máu còn đọc được; bảng bên phải không đè bàn cờ, không đè nhãn phiên bản; nút Hủy mờ khi không hủy được. Tắt game. Ghi Debug Log.
   - [x] 9.3 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, `.uid` mới, `text.vi.translation`. Ví dụ: `Đi, hủy nước đi, kết thúc lượt; kịch bản huy và hiep (Story 1.5)`.
   - [x] 9.4 Ghi hướng dẫn tác giả tự test vào Completion Notes theo mẫu ở mục Testing, dùng kết quả thật.
+
+### Review Findings
+
+- [x] [Review][Decision] Kịch bản luật không kiểm được dấu "đã đi" và số hiệp — tác giả chốt 2026-10-18: thêm khóa vào phần "sau" (`hiep`: số hiệp, `da_di`: tướng nào đã đi), công cụ duyệt hiện hai thông tin này. Thành Patch bên dưới.
+- [x] [Review][Patch] Phần "sau" của kịch bản thêm `hiep` và `da_di`: bộ nạp đọc, bộ chạy so, công cụ duyệt hiện; sửa 6 kịch bản `huy/` và `hiep/`, đặt `da_duyet: false`, chờ tác giả duyệt lại [game/src/data/scenario_loader.gd:14]
+- [x] [Review][Patch] Test quay lại khi hỏng bất biến yếu: chưa đi nước nào nên `can_undo()` luôn false; chỉ so ô, không so máu, dấu "đã đi", số hiệp (Task 6.2 "giống hệt") [game/tests/test_battle_controller.gd]
+- [x] [Review][Patch] Màn menu chưa test bảng nút bị ẩn và phím Z/Space không làm gì (AC 10, Task 8.1) [game/tests/test_battle_view.gd]
+- [x] [Review][Patch] Chưa test (cũng chưa thử tay) "bấm nút bằng chuột rồi gõ Space" chỉ kết thúc một lượt; test hiện chỉ kiểm `focus_mode` (AC 9, Dev Notes HUD) [game/tests/test_battle_view.gd]
+- [x] [Review][Dismiss] Đường đi cũ còn vẽ khi chuột rê thẳng từ bàn cờ sang nút Hủy/Kết thúc lượt — báo nhầm: đã thử trong Godot 4.7.2, nút không nuốt sự kiện di chuột (vẫn tới `_unhandled_input`), đường đi mất đúng. Giữ test `test_mouse_onto_button_clears_path` để canh [game/tests/test_battle_view.gd]
+- [x] [Review][Patch] Bộ nạp kịch bản nhận mã `tu_choi` không hợp với lệnh (`huy` + `khong_toi_duoc`, `di` + `khong_con_nuoc_di`): tác giả có thể duyệt một kịch bản không bao giờ đạt [game/src/data/scenario_loader.gd:281]
+- [x] [Review][Patch] `Log.debug` cho lệnh nhận vào chỉ ghi khi lệnh chạy được; lệnh bị quay lại không có dòng nào nói đó là lệnh gì (Dev Notes BattleController) [game/src/battle/battle_controller.gd:47]
+- [x] [Review][Patch] `epics.md` còn nói "ngăn xếp bản chụp" / "ngăn xếp hủy nước đi", trái với quyết định chỉ hủy một nước [_bmad-output/planning-artifacts/epics.md:120,910]
+- [x] [Review][Patch] Dev Agent Record thiếu "Agent Model Used" [_bmad-output/implementation-artifacts/1-5-di-huy-nuoc-di-ket-thuc-luot.md]
+- [x] [Review][Defer] Lệnh bị từ chối không khôi phục `before`: an toàn chỉ vì luật hiện kiểm hết rồi mới sửa; luật "đánh" ở E2 mà sửa rồi mới từ chối thì trận lệch nửa chừng [game/src/battle/battle_controller.gd:37] — deferred, chưa gặp được; xét lại ở Story 2.1
+- [x] [Review][Defer] Kết thúc lượt luôn bỏ chọn kể cả khi lệnh bị quay lại [game/src/battle/battle_view.gd:97] — deferred, chưa gặp được tới khi pha địch E2 có luật
+- [x] [Review][Defer] Hủy phát `events_resolved` với danh sách sự kiện rỗng, chưa có loại sự kiện "đã hủy" [game/src/battle/battle_controller.gd:67] — deferred, cần khi có EventPlayer/hoạt ảnh
+- [x] [Review][Defer] Phím Z gán theo vị trí vật lý: bàn phím AZERTY thì nút ghi "(Z)" nhưng phím W mới hủy [game/src/battle/battle_input.gd:27] — deferred, theo mẫu phím 1-2-3; bàn phím Việt là QWERTY
+- [x] [Review][Defer] Vẽ lại đúng phụ thuộc thứ tự nối signal trong `main.gd` (bàn cờ trước, BattleView sau); chưa có test giữ thứ tự [game/src/app/main.gd:113] — deferred, đã ghi chú trong code
 
 ## Dev Notes
 
@@ -436,6 +454,8 @@ Nhớ commit file `.uid` của mọi script mới.
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5)
+
 ### Debug Log References
 
 - Task 1: khung (2 mã từ chối mới, `huy` nhận `tu_choi`, chữ công cụ duyệt) + 7 kịch bản viết bằng script. `tools/xem_kich_ban.sh huy`/`hiep`: bàn trước/sau khớp `mo_ta`, dòng `→ bị từ chối: …` hiện đúng. `tools/test.sh`: 273/273 đạt, `Kịch bản luật: 8 đã duyệt · 7 chưa duyệt (7 chưa đạt)`, lý do từng file khớp bảng "Lý do chưa đạt".
@@ -447,6 +467,8 @@ Nhớ commit file `.uid` của mọi script mới.
 - Task 8: `test_coord_overlay_follows_moved_unit` lần đầu không thấy id vì chữ F1 nằm trong `PanelContainer`; sửa cách tìm trong test.
 - Task 9.2 (GoPeak, `tools/chay.sh --dev`): bảng bên phải "Hiệp 1", nút Hủy mờ, không đè bàn cờ hay nhãn phiên bản. Bấm Khoái rồi ô `0,4` (pixel 376, 448): Khoái sang ô mới, đỏ xỉn khác rõ đỏ đậm của Lão, chữ và số máu đọc được, nút Hủy sáng. `inject_action undo_move`: Khoái về `0,6`, đỏ đậm lại, nút Hủy mờ. `select_general_2` + bấm `2,4`: Lão đi, vẫn có vòng vàng, không còn ô sáng. Bấm nút "Kết thúc lượt" (pixel 1100, 177): "Hiệp 2", bỏ chọn, Lão đỏ đậm lại, nút Hủy mờ. Log không có ERROR. Lưu ý khi thử bằng GoPeak: ảnh chụp ngay sau cú bấm có thể chưa kịp vẽ lại; lần đầu tưởng bấm không ăn nên bấm thêm, cú thứ ba trúng chính Khoái ở ô mới nên bỏ chọn (đúng luật).
 - `tools/test.sh` cuối cùng: 303/303 đạt, ranh giới đạt, `Kịch bản luật: 15 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
+- Sửa theo code review: test nút bấm chạy qua viewport thật (`push_input`) trong `SubViewport` riêng, vì bảng kết quả của GUT nằm đè lên viewport gốc và nuốt chuột. Godot chạy không màn hình không đưa Space (`ui_accept`) tới nút đang focus (đã thử với `FOCUS_ALL`: nút giữ focus nhưng Space vẫn kết thúc lượt), nên `test_click_undo_button_then_space_ends_turn` kiểm thẳng "bấm chuột xong không nút nào giữ focus". Làm hỏng tạm (đã trả lại): `FOCUS_ALL` → trượt test đó và `test_hud_buttons_never_take_focus`; khi quay lại do hỏng bất biến mà xóa bản chụp hủy, hoặc chỉ trả lại hiệp → trượt `test_invariant_violation_rolls_back`.
+- Sửa theo code review: `tools/test.sh` 314/314 đạt, `Kịch bản luật: 9 đã duyệt · 6 chưa duyệt (0 chưa đạt)`. Bước khóa `da_duyet` trượt cho tới khi commit (6 kịch bản đã duyệt bị sửa để thêm `hiep`, `da_di`), như lần review Story 1.4.
 
 ### Completion Notes List
 
@@ -485,6 +507,8 @@ Nhớ commit file `.uid` của mọi script mới.
 - `game/src/ui/hud.gd` (mới)
 - `game/src/app/main.gd`
 - `game/src/data/scenario_loader.gd`
+- `game/src/data/scenario_data.gd` (code review)
+- `game/tests/scenario_viewer.gd` (code review)
 - `game/i18n/text.csv`, `game/i18n/text.vi.translation`
 - `game/tests/scenario_runner.gd`
 - `game/tests/test_scenario_loader.gd`
@@ -499,6 +523,7 @@ Nhớ commit file `.uid` của mọi script mới.
 - file `.uid` của mọi script mới
 - `_bmad-output/planning-artifacts/game-architecture.md`
 - `_bmad-output/project-context.md`
+- `_bmad-output/planning-artifacts/epics.md` (code review)
 - `_bmad-output/implementation-artifacts/deferred-work.md`
 - `_bmad-output/implementation-artifacts/1-5-di-huy-nuoc-di-ket-thuc-luot.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
@@ -508,3 +533,4 @@ Nhớ commit file `.uid` của mọi script mới.
 - 2026-10-18: Tạo story.
 - 2026-10-18: Tác giả chốt 5 câu hỏi: chỉ hủy được một nước (sửa AC 5–6, kịch bản `huy_hai_lan`, controller giữ một bản chụp, thêm việc sửa kiến trúc ở Task 9.1); giữ chọn khi đi và khi hủy; bỏ chọn khi kết thúc lượt; đỏ xỉn cho "đã đi".
 - 2026-10-18: Làm story: mỗi tướng đi một lần mỗi lượt, hủy một nước, kết thúc lượt (sang hiệp mới); `BattleController.submit/undo` có bản chụp hủy và quay lại khi hỏng bất biến; bảng nút HUD; đồng quân đỏ xỉn khi đã đi. 7 kịch bản mới tác giả đã duyệt, đều đạt. `tools/test.sh`: 303/303.
+- 2026-10-18: Code review: thêm `hiep`, `da_di` vào phần "sau" của kịch bản (tác giả chốt), 6 kịch bản `huy/`, `hiep/` chờ duyệt lại; bộ nạp chặn mã `tu_choi` không hợp lệnh; log lệnh nhận vào; test quay lại, menu, bấm nút rồi Space; sửa `epics.md`.

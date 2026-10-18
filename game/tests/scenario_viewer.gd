@@ -160,8 +160,28 @@ static func render(scenario: ScenarioData, stats: Stats) -> String:
 	lines.append_array(_notes_side_by_side(
 		_notes(size, scenario.before.terrain, before_units, stats),
 		_notes(size, scenario.after_terrain, after_units, stats)))
+	var after_state: String = _after_state(scenario)
+	if not after_state.is_empty():
+		lines.append("")
+		lines.append("  " + after_state)
 	lines.append("")
 	return "\n".join(lines)
+
+
+## "Sau lệnh: hiệp 2 · đã đi: Nguyễn Khoái" từ "sau.hiep" và "sau.da_di"; "" nếu kịch bản không ghi cả hai.
+static func _after_state(scenario: ScenarioData) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	if scenario.after_round > 0:
+		parts.append(_t("scenario.viewer.after_round") % scenario.after_round)
+	if scenario.checks_moved:
+		var names: PackedStringArray = PackedStringArray()
+		for type: int in scenario.after_moved:
+			names.append(_unit_name(type))
+		var shown: String = ", ".join(names) if not names.is_empty() else _t("scenario.viewer.after_moved_none")
+		parts.append(_t("scenario.viewer.after_moved") % shown)
+	if parts.is_empty():
+		return ""
+	return _t("scenario.viewer.after_state") % " · ".join(parts)
 
 
 ## Các dòng của một bàn: tiêu đề, số cột, rồi từng hàng.

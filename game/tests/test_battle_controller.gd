@@ -3,12 +3,19 @@ extends GutTest
 ## Trận nhỏ dựng tay, không dựa vào file trận hay chi_so.json.
 
 
-## Lệnh nào cũng làm hỏng bất biến (đặt Lão chồng lên Khoái), để thử đường cứu trận.
+## Khi broken: lệnh nào cũng làm hỏng bất biến (đặt Lão chồng lên Khoái và đổi cả hiệp, máu, dấu đã đi),
+## để thử đường cứu trận. Tắt broken thì chạy luật thật.
 class BrokenController:
 	extends BattleController
 
-	func _resolve(state: BattleState, _command: Command) -> Array[BattleEvent]:
-		state.units[1] = Unit.new(2, UnitType.PHAM_NGU_LAO, state.units[0].cell, 3)
+	var broken: bool = true
+
+	func _resolve(state: BattleState, command: Command) -> Array[BattleEvent]:
+		if not broken:
+			return super(state, command)
+		state.units[1] = Unit.new(2, UnitType.PHAM_NGU_LAO, state.units[0].cell, 1, true)
+		state.units[0].has_moved = not state.units[0].has_moved
+		state.round_number += 1
 		return [] as Array[BattleEvent]
 
 
@@ -154,19 +161,34 @@ func test_start_again_clears_undo() -> void:
 
 func test_invariant_violation_rolls_back() -> void:
 	var c: BattleController = _controller(BrokenController.new())
+	(c as BrokenController).broken = false
+	c.submit(Command.move(1, Vector2i(0, 4)))
+	(c as BrokenController).broken = true
+	_events_seen = []
 	var before: BattleState = c.snapshot()
-	var events: Array[BattleEvent] = c.submit(Command.move(1, Vector2i(0, 4)))
+	var events: Array[BattleEvent] = c.submit(Command.move(2, Vector2i(1, 4)))
 	assert_eq(events, [] as Array[BattleEvent])
 	assert_eq(_rolled_back_seen.size(), 1, "phát rolled_back")
-	assert_eq(_rolled_back_seen[0], ["quân 2 ở ô 0,6 đứng chung ô với quân 1"] as Array[String])
+	assert_eq(_rolled_back_seen[0], ["quân 2 ở ô 0,4 đứng chung ô với quân 1"] as Array[String])
 	assert_eq(_events_seen.size(), 0, "không phát events_resolved")
-	assert_false(c.can_undo(), "bản chụp hủy không đổi")
-	var after: BattleState = c.snapshot()
-	for i: int in range(before.units.size()):
-		assert_eq(after.units[i].cell, before.units[i].cell, "quay về ô trước lệnh")
-	assert_eq(after.validate(), [] as Array[String])
+	_assert_same_state(c.snapshot(), before)
+	assert_eq(c.snapshot().validate(), [] as Array[String])
+	assert_true(c.can_undo(), "bản chụp hủy của nước đi trước vẫn còn")
+	c.undo()
+	assert_eq(_cell(c, 1), Vector2i(0, 6), "hủy vẫn trả Khoái về ô cũ")
 	var logged: bool = false
 	for line: String in Log.get_lines():
 		if line.begins_with("[ERROR][battle]"):
 			logged = true
 	assert_true(logged, "có dòng log ERROR")
+
+
+## Giống hệt: cùng hiệp, cùng số quân, từng quân cùng id, loại, ô, máu, dấu đã đi.
+func _assert_same_state(got: BattleState, want: BattleState) -> void:
+	assert_eq(got.round_number, want.round_number, "cùng hiệp")
+	assert_eq(got.units.size(), want.units.size(), "cùng số quân")
+	for i: int in range(mini(got.units.size(), want.units.size())):
+		var g: Unit = got.units[i]
+		var w: Unit = want.units[i]
+		assert_eq([g.id, g.type, g.cell, g.hp, g.has_moved], [w.id, w.type, w.cell, w.hp, w.has_moved],
+			"quân %d giống trước lệnh" % w.id)

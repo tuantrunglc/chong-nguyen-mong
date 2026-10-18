@@ -79,7 +79,7 @@ _File này chứa các luật và mẫu mà mọi phiên AI phải theo khi vi�
   3. chạy toàn bộ GUT `--headless`;
   4. in tóm tắt **tiếng Việt**.
   Mã thoát khác 0 nghĩa là **trượt**.
-- **Kịch bản luật là spec** (`game/tests/kich_ban/<nhóm>/<luat>_<truong_hop>.json`). Mỗi kịch bản gồm `truoc` (bàn cờ chữ), `hanh_dong`, `sau` (bàn cờ chữ + máu), `mo_ta` (một câu tiếng Việt), `da_duyet`. Lệnh luật phải từ chối ghi thêm `"tu_choi": "<mã lý do>"`, bắt buộc (tác giả chốt 2026-10-18).
+- **Kịch bản luật là spec** (`game/tests/kich_ban/<nhóm>/<luat>_<truong_hop>.json`). Mỗi kịch bản gồm `truoc` (bàn cờ chữ), `hanh_dong`, `sau` (bàn cờ chữ + máu, thêm `hiep` và `da_di` khi cần kiểm số hiệp và tướng đã đi), `mo_ta` (một câu tiếng Việt), `da_duyet`. Lệnh luật phải từ chối ghi thêm `"tu_choi": "<mã lý do>"`, bắt buộc (tác giả chốt 2026-10-18).
 - **Quy trình M3, không ngoại lệ:**
   1. AI viết kịch bản (ca thường và mọi ca biên đã biết), đặt `da_duyet: false`.
   2. Tác giả duyệt bằng `tools/xem_kich_ban.sh`, mỗi story luật một đợt nhỏ, trước khi viết code.

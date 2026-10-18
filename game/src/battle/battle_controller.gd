@@ -31,6 +31,7 @@ func snapshot() -> BattleState:
 ## Chạy lệnh. Bị từ chối: state không đổi, bản chụp hủy giữ nguyên, không phát signal.
 ## Làm hỏng bất biến: ghi log ERROR, quay về trước lệnh, phát rolled_back, trả [].
 func submit(command: Command) -> Array[BattleEvent]:
+	Log.debug("battle", "nhận lệnh: %s" % _describe(command))
 	var before: BattleState = _state.clone()
 	var events: Array[BattleEvent] = _resolve(_state, command)
 	var rejected: BattleEvent = _rejection(events)
@@ -46,10 +47,9 @@ func submit(command: Command) -> Array[BattleEvent]:
 		return []
 	match command.kind:
 		Command.Kind.MOVE:
-			Log.debug("battle", "quân %d đi tới %d,%d" % [command.unit_id, command.cell.x, command.cell.y])
 			_undo_snapshot = before  # thay bản cũ: chỉ hủy được nước gần nhất
 		Command.Kind.END_TURN:
-			Log.debug("battle", "kết thúc lượt, sang hiệp %d" % _state.round_number)
+			Log.debug("battle", "sang hiệp %d" % _state.round_number)
 			_undo_snapshot = null  # Story 2.1: đánh cũng xóa; E3: mưu kế cũng xóa
 	events_resolved.emit(events, _state.clone())
 	return events
@@ -92,6 +92,16 @@ func path_to(unit_id: int, cell: Vector2i) -> Array[Vector2i]:
 ## Chỉ gọi Rules.resolve. Tách ra để test thay được (ca cứu trận).
 func _resolve(state: BattleState, command: Command) -> Array[BattleEvent]:
 	return Rules.resolve(state, command)
+
+
+## Câu cho log: "quân 1 đi tới 0,4", "kết thúc lượt".
+static func _describe(command: Command) -> String:
+	match command.kind:
+		Command.Kind.MOVE:
+			return "quân %d đi tới %d,%d" % [command.unit_id, command.cell.x, command.cell.y]
+		Command.Kind.END_TURN:
+			return "kết thúc lượt"
+	return str(command.kind)
 
 
 static func _rejection(events: Array[BattleEvent]) -> BattleEvent:

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Kết thúc lượt: sang hiệp mới, Nguyễn Khoái đi lại được.",
-  "da_duyet": true,
+  "da_duyet": false,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",
@@ -45,6 +45,8 @@
       ". . . . . . .",
       ". . . . . . .",
       ". . . . . . ."
-    ]
+    ],
+    "hiep": 2,
+    "da_di": ["1"]
   }
 }

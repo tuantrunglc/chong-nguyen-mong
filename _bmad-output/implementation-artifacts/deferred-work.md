@@ -74,3 +74,11 @@
 
 - `BattleController.rolled_back` (lệnh làm hỏng bất biến, đã quay lại) chưa có chỗ hiện cho người chơi câu "Có lỗi, đã quay lại nước trước". Hiện chỉ ghi log ERROR. Làm cùng `src/ui/notice.gd` ở E2. Chỉ xảy ra khi có bug luật.
 - Kịch bản có `ket_thuc_luot` (`hiep/`, Story 1.5) không có quân Nguyên trên bàn, để pha địch E2 không làm hỏng bàn sau. Nếu E2 chốt luật "bàn không còn quân Nguyên thì thắng ngay ở cuối hiệp" thay vì "kiểm sau sự kiện gục", hai kịch bản này phải xét lại với tác giả.
+
+## Deferred from: code review of 1-5-di-huy-nuoc-di-ket-thuc-luot (2026-10-18)
+
+- `BattleController.submit` (`game/src/battle/battle_controller.gd:37`): lệnh bị từ chối không khôi phục bản chụp `before`. An toàn chỉ vì luật hiện tại kiểm hết rồi mới sửa trận. Luật "đánh" (Story 2.1) mà sửa rồi mới từ chối thì trận lệch nửa chừng, không phát signal. Xét lại khi viết Story 2.1: hoặc `_state = before` khi từ chối, hoặc giữ luật "kiểm trước, sửa sau".
+- `BattleView._on_end_turn` (`game/src/battle/battle_view.gd:97`) luôn bỏ chọn kể cả khi lệnh bị quay lại. Chưa gặp được tới khi pha địch E2 có luật; làm cùng thông báo `rolled_back`.
+- `BattleController.undo` phát `events_resolved` với danh sách sự kiện rỗng, chưa có loại sự kiện "đã hủy". Người nghe sau này (EventPlayer, hoạt ảnh) coi "không có sự kiện" là "không đổi gì" thì bỏ sót lần hủy.
+- Phím Z/Space/1-2-3 gán theo vị trí vật lý: bàn phím AZERTY thì nút ghi "(Z)" nhưng phím W mới hủy. Bàn phím Việt là QWERTY nên để sau.
+- `main.gd` nối `events_resolved` trước `BattleView.start` để đồng quân vẽ lại trước ô sáng. Đúng thứ tự là nhờ chú thích, chưa có test giữ.

@@ -301,7 +301,72 @@ func test_end_turn_button_and_held_space() -> void:
 	assert_eq(_hud(main).round_text(), "Hiệp 2", "giữ phím (lặp) không kết thúc thêm lượt")
 
 
-## Nút nhận focus thì Space (ui_accept) bấm lại nút vừa bấm bằng chuột.
+## Màn hình gốc trong SubViewport riêng 1280×720: bảng kết quả của GUT nằm đè lên viewport gốc và nuốt chuột.
+func _make_main_in_viewport() -> Node2D:
+	var viewport: SubViewport = SubViewport.new()
+	viewport.size = Vector2i(1280, 720)
+	add_child_autofree(viewport)
+	var main: Node2D = (load(MAIN_SCENE) as PackedScene).instantiate() as Node2D
+	viewport.add_child(main)
+	await _wait_layout()
+	return main
+
+
+## Gửi sự kiện qua viewport thật (như người chơi), để nút được nhận trước BattleInput.
+func _push(main: Node2D, event: InputEvent) -> void:
+	main.get_viewport().push_input(event, true)
+
+
+## Bấm chuột trái vào giữa nút (nhấn rồi nhả: nút chạy khi nhả).
+func _click_button(main: Node2D, button: Button) -> void:
+	for pressed: bool in [true, false]:
+		var click: InputEventMouseButton = InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = pressed
+		click.position = button.get_global_rect().get_center()
+		_push(main, click)
+
+
+## Chờ bảng nút xếp chỗ xong (container xếp con ở khung hình sau).
+func _wait_layout() -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+
+## Nút nhận focus thì Space (ui_accept) bấm lại nút vừa bấm bằng chuột: bấm Hủy rồi gõ Space sẽ hủy thay vì
+## kết thúc lượt (AC 9).
+func test_click_undo_button_then_space_ends_turn() -> void:
+	var main: Node2D = await _make_main_in_viewport()
+	_press_key(main, 1)
+	_click(main, KHOAI_TARGET)
+	_click_button(main, _hud(main).undo_button())
+	assert_eq(_unit_cell(main, 1), KHOAI_CELL, "bấm nút Hủy bằng chuột: đã hủy")
+	# Godot chạy không màn hình không đưa Space (ui_accept) tới nút đang focus, nên kiểm thẳng điều kiện của lỗi.
+	assert_null(main.get_viewport().gui_get_focus_owner(), "bấm chuột không để nút giữ focus")
+	_click(main, KHOAI_TARGET)
+	var space: InputEventKey = InputEventKey.new()
+	space.keycode = KEY_SPACE
+	space.physical_keycode = KEY_SPACE
+	space.pressed = true
+	_push(main, space)
+	assert_eq(_hud(main).round_text(), "Hiệp 2", "Space kết thúc đúng một lượt")
+	assert_eq(_unit_cell(main, 1), KHOAI_TARGET, "Space không bấm lại nút Hủy")
+
+
+## Rê thẳng từ ô sáng lên nút: đường đi phải mất. Godot 4.7 vẫn chuyển sự kiện di chuột trên nút tới
+## _unhandled_input (đã thử khi review Story 1.5); test này giữ điều đó.
+func test_mouse_onto_button_clears_path() -> void:
+	var main: Node2D = await _make_main_in_viewport()
+	_press_key(main, 1)
+	_hover_by_mouse(main, Vector2i(2, 5))
+	assert_false(_board(main).path().is_empty())
+	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+	motion.position = _hud(main).end_turn_button().get_global_rect().get_center()
+	_push(main, motion)
+	assert_eq(_board(main).path(), [] as Array[Vector2i])
+	assert_eq(_battle_input(main).hovered_cell(), BoardView.NO_CELL)
+
+
 func test_hud_buttons_never_take_focus() -> void:
 	var main: Node2D = _make_main()
 	for button: Button in [_hud(main).undo_button(), _hud(main).end_turn_button()]:
@@ -393,11 +458,19 @@ func test_keys_do_nothing_on_error_screen() -> void:
 func test_back_to_menu_clears_selection() -> void:
 	var main: Node2D = _make_main()
 	_press_key(main, 1)
+	_click(main, KHOAI_TARGET)
+	var controller: BattleController = _controller(main)
 	main._show_menu()
 	_assert_nothing_selected(main)
+	assert_false(_hud(main).visible, "màn menu không có bảng nút")
 	_press_key(main, 1)
 	_click(main, KHOAI_CELL)
 	_assert_nothing_selected(main)
+	_press_physical(main, KEY_Z)
+	_press_physical(main, KEY_SPACE)
+	assert_eq(controller.snapshot().unit_by_id(1).cell, KHOAI_TARGET, "Z không hủy")
+	assert_eq(controller.snapshot().round_number, 1, "Space không kết thúc lượt")
+	assert_false(_hud(main).visible)
 
 
 func test_restart_battle_clears_selection() -> void:

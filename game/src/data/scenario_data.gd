@@ -55,3 +55,9 @@ var steps: Array[ScenarioStep] = []
 var after_terrain: PackedInt32Array = PackedInt32Array()
 ## Theo thứ tự đọc bàn: hàng trên xuống, trái sang phải.
 var after_units: Array[ExpectedUnit] = []
+## Hiệp mong đợi ("sau.hiep"); 0 là không kiểm.
+var after_round: int = 0
+## Có kiểm dấu "đã đi" không ("sau.da_di" có ghi, kể cả []).
+var checks_moved: bool = false
+## UnitType các tướng phải đã đi; tướng khác trên bàn phải chưa đi.
+var after_moved: Array[int] = []

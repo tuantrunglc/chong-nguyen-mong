@@ -8,7 +8,8 @@ const FORMAT_VERSION: int = 1
 
 const ROOT_KEYS: Array[String] = ["phien_ban_dinh_dang", "mo_ta", "da_duyet", "truoc", "hanh_dong", "sau"]
 const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich"]
-const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau"]
+## "hiep", "da_di" không bắt buộc: không ghi thì không kiểm (review Story 1.5, tác giả chốt 2026-10-18).
+const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di"]
 
 ## Lệnh -> khóa thêm. Lệnh mới thêm ở story của nó, kèm câu lỗi. "tu_choi" không bắt buộc.
 const COMMANDS: Dictionary = {
@@ -29,6 +30,11 @@ const REJECT_CODES: Dictionary = {
 }
 const REJECT_LIST: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", ' \
 	+ '"da_di_roi", "khong_con_nuoc_di"'
+## Lệnh -> các mã "tu_choi" luật của lệnh đó trả được. Lệnh chưa có ở đây (danh) nhận mọi mã: thêm ở story của nó.
+const COMMAND_REJECTS: Dictionary = {
+	"di": ["khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", "da_di_roi"],
+	"huy": ["khong_con_nuoc_di"],
+}
 
 
 ## Một phần "truoc" hoặc "sau" đã đọc (chỉ dùng trong bộ nạp).
@@ -44,6 +50,10 @@ class Section:
 	var hp: Dictionary = {}
 	## Array[Vector2i] thứ tự quân Nguyên (chỉ "truoc"), hoặc null nếu không đọc được.
 	var order: Variant = null
+	## "hiep" (chỉ "sau"); 0 là không ghi.
+	var round_number: int = 0
+	## "da_di" (chỉ "sau"): UnitType các tướng đã đi, theo thứ tự ký hiệu; null là không ghi.
+	var moved: Variant = null
 
 
 ## Mọi file .json trong root_dir và thư mục con, sắp theo đường dẫn. Thư mục không có thì [].
@@ -109,6 +119,10 @@ static func parse_scenario(text: String, path: String, root_dir: String, stats: 
 	scenario.before = _build_level(before, scenario.id)
 	scenario.steps = steps
 	scenario.after_terrain = BoardLayers.terrain_values(after.terrain_rows)
+	scenario.after_round = after.round_number
+	if after.moved != null:
+		scenario.checks_moved = true
+		scenario.after_moved = after.moved as Array[int]
 	for cell: Vector2i in BoardLayers.reading_order(after.unit_rows, _unit_symbols()):
 		var type: int = BoardText.UNIT_SYMBOLS[BoardLayers.symbol(after.unit_rows, cell)] as int
 		var hp: int = after.hp[cell] as int if after.hp.has(cell) else stats.max_hp(type)
@@ -191,7 +205,42 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 			side.order = BoardLayers.reading_order(side.unit_rows, BoardLayers.ENEMY_SYMBOLS)
 	if section.has("mau"):
 		_read_hp(section["mau"], name + ".mau", side, stats, file, result)
+	if known.has("hiep") and section.has("hiep"):
+		var round_value: Variant = JsonFile.get_int(section, "hiep", name + ".hiep", 1, file, result)
+		if round_value != null:
+			side.round_number = round_value as int
+	if known.has("da_di") and section.has("da_di"):
+		side.moved = _read_moved(section["da_di"], name + ".da_di", name + ".quan", side, file, result)
 	return side
+
+
+## "da_di": ["1", "2"] là các tướng đã đi trong lượt; [] là chưa tướng nào đi. Trả Array[int] UnitType theo
+## thứ tự ký hiệu, hoặc null nếu sai (đã thêm lỗi).
+static func _read_moved(value: Variant, shown: String, units_shown: String, side: Section,
+		file: String, result: LoadResult) -> Variant:
+	if not value is Array:
+		result.add_error(JsonFile.type_error(file, shown, "một danh sách", value))
+		return null
+	var errors_before: int = result.errors.size()
+	var seen: Array[String] = []
+	for item: Variant in value as Array:
+		if not item is String or not BoardLayers.GENERAL_SYMBOLS.has(item):
+			result.add_error('%s: "%s" có %s, chỉ được "1", "2", "3"' % [file, shown, JsonFile.show(item)])
+			continue
+		if seen.has(item):
+			result.add_error('%s: "%s" ghi tướng "%s" hai lần' % [file, shown, item])
+			continue
+		seen.append(item as String)
+		# Lớp quân đã sai thì không kiểm chéo (đã có lỗi riêng).
+		if side.units_clean and not side.generals.has(item):
+			result.add_error('%s: "%s" có tướng "%s" không có trong "%s"' % [file, shown, item, units_shown])
+	if result.errors.size() != errors_before:
+		return null
+	var moved: Array[int] = []
+	for symbol: String in BoardLayers.GENERAL_SYMBOLS:
+		if seen.has(symbol):
+			moved.append(BoardText.UNIT_SYMBOLS[symbol] as int)
+	return moved
 
 
 ## "mau": { "cot,hang": máu } cho quân không đầy máu.
@@ -280,10 +329,16 @@ static func _read_step(item: Variant, number: int, before: Section, file: String
 	var reject: String = ""
 	if d.has("tu_choi") and fields.has("tu_choi"):
 		var value: Variant = d["tu_choi"]
-		if value is String and REJECT_CODES.has(value):
-			reject = value as String
-		else:
+		if not value is String or not REJECT_CODES.has(value):
 			result.add_error('%s: "tu_choi" là %s, chỉ được %s' % [where, JsonFile.show(value), REJECT_LIST])
+		elif COMMAND_REJECTS.has(kind) and not (COMMAND_REJECTS[kind] as Array).has(value):
+			var allowed: PackedStringArray = PackedStringArray()
+			for code: String in COMMAND_REJECTS[kind] as Array:
+				allowed.append('"%s"' % code)
+			result.add_error('%s: "tu_choi" là %s, lệnh "%s" chỉ bị từ chối vì %s'
+				% [where, JsonFile.show(value), kind, ", ".join(allowed)])
+		else:
+			reject = value as String
 	if result.errors.size() != errors_before:
 		return null
 	return ScenarioData.ScenarioStep.new(kind as String, general, cell, reject)

@@ -117,7 +117,7 @@ File này chia các yêu cầu trong GDD và tài liệu kiến trúc thành epi
 - **Test:** cài GUT v9.7.1. `tools/test.sh` là một lệnh duy nhất: kiểm tra ranh giới, khóa `da_duyet`, chạy GUT `--headless`, in tóm tắt tiếng Việt.
 - **Kịch bản luật** (`tests/kich_ban/`) là spec. Mỗi story luật có một đợt duyệt nhỏ bằng `tools/xem_kich_ban.sh`.
 - **Ranh giới:** `tools/check_boundaries.sh` kiểm tra `src/core` cấm Node, cấm I/O, cấm ngẫu nhiên; chỉ `Effects` được sửa máu và vị trí.
-- **Lõi luật:** `BattleState` thuần dữ liệu có `clone()` và `validate()`; `Rules.resolve` trả về danh sách sự kiện; `BattleController` giữ trạng thái và ngăn xếp bản chụp; `EventPlayer` phát lại sự kiện.
+- **Lõi luật:** `BattleState` thuần dữ liệu có `clone()` và `validate()`; `Rules.resolve` trả về danh sách sự kiện; `BattleController` giữ trạng thái và một bản chụp hủy (chỉ hủy được nước gần nhất, tác giả chốt 2026-10-18); `EventPlayer` phát lại sự kiện.
 - **Dữ liệu:** JSON hai lớp bàn cờ chữ (`dia_hinh`, `quan`), có số phiên bản; `LoadResult` gom mọi lỗi tiếng Việt; `test_loaders.gd`; `test_determinism.gd`.
 - **Xử lý lỗi:** vi phạm bất biến thì ghi log ERROR, khôi phục bản chụp và báo người chơi. Lỗi dữ liệu thì hiện màn hình lỗi.
 - **Log:** lớp static `Log`, giữ 200 dòng gần nhất.
@@ -907,7 +907,7 @@ tôi muốn chơi lại hiệp một lần khi tính sai,
 **Thì** mưu kế đó được trả lại, dùng lại được trong lượt chơi lại (FR39)
 
 **Khi** đã chơi lại hiệp rồi bấm Hủy (`Z`)
-**Thì** không quay về được nước đi nào trước lúc chơi lại; ngăn xếp hủy nước đi đã bị xóa sạch
+**Thì** không quay về được nước đi nào trước lúc chơi lại; bản chụp hủy nước đi đã bị xóa
 
 ### Story 3.3: Trận 2
 

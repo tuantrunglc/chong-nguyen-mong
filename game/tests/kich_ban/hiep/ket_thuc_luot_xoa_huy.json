@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Kết thúc lượt rồi thì không hủy được nước đi của lượt trước.",
-  "da_duyet": true,
+  "da_duyet": false,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",
@@ -45,6 +45,8 @@
       ". . . . . . .",
       ". . . . . . .",
       ". . . . . . ."
-    ]
+    ],
+    "hiep": 2,
+    "da_di": []
   }
 }

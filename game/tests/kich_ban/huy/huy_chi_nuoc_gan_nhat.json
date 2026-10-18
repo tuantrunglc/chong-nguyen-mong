@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Hủy chỉ trả lại nước đi gần nhất: Phạm Ngũ Lão về chỗ cũ, Nguyễn Khoái vẫn đứng ở ô mới.",
-  "da_duyet": true,
+  "da_duyet": false,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",
@@ -45,6 +45,8 @@
       "1 . . . . . .",
       ". . . . . . .",
       ". 2 . . . . ."
-    ]
+    ],
+    "hiep": 1,
+    "da_di": ["1"]
   }
 }
