@@ -355,15 +355,29 @@ func test_step_reject_code_errors() -> void:
 	d["hanh_dong"] = [
 		{"lenh": "di", "tuong": "1", "o": "4,6", "tu_choi": "bi_chan"},
 		{"lenh": "di", "tuong": "1", "o": "4,6", "tu_choi": true},
-		{"lenh": "huy", "tu_choi": "khong_toi_duoc"},
+		{"lenh": "ket_thuc_luot", "tu_choi": "khong_toi_duoc"},
 	]
 	var r: LoadResult = _parse(d)
-	var codes: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc"'
+	var codes: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", ' \
+		+ '"da_di_roi", "khong_con_nuoc_di"'
 	assert_eq(r.errors, [
 		F + ': "hanh_dong" mục 1 (di): "tu_choi" là "bi_chan", chỉ được ' + codes,
 		F + ': "hanh_dong" mục 2 (di): "tu_choi" là true, chỉ được ' + codes,
 	] as Array[String])
-	assert_eq(r.warnings, [F + ': "hanh_dong" mục 3 (huy): bỏ qua khóa lạ "tu_choi"'] as Array[String])
+	assert_eq(r.warnings, [F + ': "hanh_dong" mục 3 (ket_thuc_luot): bỏ qua khóa lạ "tu_choi"'] as Array[String])
+
+
+func test_undo_step_reads_reject_code() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [{"lenh": "huy", "tu_choi": "khong_con_nuoc_di"}]
+	var r: LoadResult = _parse(d)
+	assert_eq(r.errors, [] as Array[String])
+	assert_eq(r.warnings, [] as Array[String])
+	var s: ScenarioData = _scenario(d)
+	if s == null:
+		return
+	assert_eq(s.steps[0].kind, "huy")
+	assert_eq(s.steps[0].reject, "khong_con_nuoc_di")
 
 
 func test_many_errors_are_listed_together() -> void:

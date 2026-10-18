@@ -16,6 +16,8 @@ const REJECT_EVENTS: Dictionary = {
 	"khong_phai_tuong": BattleEvent.Reject.NOT_GENERAL,
 	"da_dung_o_do": BattleEvent.Reject.ALREADY_THERE,
 	"khong_toi_duoc": BattleEvent.Reject.UNREACHABLE,
+	"da_di_roi": BattleEvent.Reject.ALREADY_MOVED,
+	"khong_con_nuoc_di": BattleEvent.Reject.NOTHING_TO_UNDO,
 }
 
 ## Tên đầy đủ cho câu so sánh. Ký hiệu lấy ngược từ BoardText (unit_symbol, terrain_symbol).

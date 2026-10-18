@@ -14,7 +14,7 @@ const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau"]
 const COMMANDS: Dictionary = {
 	"di": ["tuong", "o", "tu_choi"],
 	"danh": ["tuong", "o", "tu_choi"],
-	"huy": [],
+	"huy": ["tu_choi"],
 	"ket_thuc_luot": [],
 }
 const COMMAND_LIST: String = '"di", "danh", "huy", "ket_thuc_luot"'
@@ -24,8 +24,11 @@ const REJECT_CODES: Dictionary = {
 	"khong_phai_tuong": "scenario.viewer.reject_not_general",
 	"da_dung_o_do": "scenario.viewer.reject_already_there",
 	"khong_toi_duoc": "scenario.viewer.reject_unreachable",
+	"da_di_roi": "scenario.viewer.reject_already_moved",
+	"khong_con_nuoc_di": "scenario.viewer.reject_nothing_to_undo",
 }
-const REJECT_LIST: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc"'
+const REJECT_LIST: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", ' \
+	+ '"da_di_roi", "khong_con_nuoc_di"'
 
 
 ## Một phần "truoc" hoặc "sau" đã đọc (chỉ dùng trong bộ nạp).
