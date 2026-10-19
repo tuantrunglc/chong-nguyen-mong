@@ -709,13 +709,14 @@ func test_click_ally_while_confirming_cancels_confirm() -> void:
 
 # ---------- Lao của Phạm Ngũ Lão (Story 2.3) ----------
 
-## Lão ở 3,3: Bộ binh kề Bắc 3,2, Bộ binh 3,1; Kỵ binh 6,3 (Đông, ô 3); Khoái 3,5 chắn trước Bộ binh 3,6; Bộ binh 0,0.
+## Giống data/tran/thu_lao.json. Lão ở 3,3: Bộ binh kề Bắc 3,2, Bộ binh 3,1; Kỵ binh 6,3 (Đông, ô 3, sông 4,3 và
+## 5,3 nằm giữa); Khoái 3,5 chắn trước Bộ binh 3,6; Bộ binh 0,0.
 func _make_lao_main() -> Node2D:
 	return _make_level_main(LAO_DIR, LAO_LEVEL, {
 		"phien_ban_dinh_dang": 1,
 		"ten": "Thử lao",
 		"kieu": "tieu_diet",
-		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . . . .",
+		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . ~ ~ .",
 			". . . . . . .", ". . . . . . .", ". . . . . . ."],
 		"quan": ["B . . . . . .", ". . . B . . .", ". . . B . . .", ". . . 2 . . K",
 			". . . . . . .", ". . . 1 . . .", ". . . B . . ."],
@@ -730,13 +731,17 @@ func test_selecting_lao_outlines_nearest_enemy_each_way() -> void:
 	_press_physical(main, KEY_2)
 	assert_eq(_view(main).selected_id(), 2)
 	var targets: Array[Vector2i] = [Vector2i(3, 1), Vector2i(6, 3), Vector2i(3, 6)]
-	assert_eq(_view(main).target_cells(), targets, "B→Đ→N→T; không có Bộ binh kề 3,2; 3,6 có viền dù Khoái chắn")
+	assert_eq(_view(main).target_cells(), targets,
+		"B→Đ→N→T; không có Bộ binh kề 3,2; 6,3 có viền dù sông giữa; 3,6 có viền dù Khoái chắn")
 	assert_eq(_board(main).target_cells(), targets)
 
 
 func test_lance_flies_over_adjacent_unit() -> void:
 	var main: Node2D = _make_lao_main()
 	_press_physical(main, KEY_2)
+	assert_eq(_unit_at(main, Vector2i(3, 1)).hp, 3, "trước: Bộ binh ô 2 đủ máu")
+	assert_eq(_unit_at(main, Vector2i(3, 2)).hp, 3, "trước: Bộ binh kề đủ máu")
+	assert_true(_view(main).target_cells().has(Vector2i(3, 1)), "trước: 3,1 có viền")
 	_click_by_mouse(main, Vector2i(3, 1))
 	assert_eq(_unit_at(main, Vector2i(3, 1)).hp, 2, "Bộ binh ô 2 trúng lao")
 	assert_eq(_unit_at(main, Vector2i(3, 2)).hp, 3, "Bộ binh kề không bị gì")
@@ -748,6 +753,9 @@ func test_lance_flies_over_adjacent_unit() -> void:
 func test_lance_hits_blocking_khoai() -> void:
 	var main: Node2D = _make_lao_main()
 	_press_physical(main, KEY_2)
+	assert_eq(_controller(main).snapshot().unit_by_id(1).hp, 3, "trước: Khoái đủ máu")
+	assert_eq(_unit_at(main, Vector2i(3, 6)).hp, 3, "trước: Bộ binh đủ máu")
+	assert_true(_view(main).target_cells().has(Vector2i(3, 6)), "trước: 3,6 có viền")
 	_click_by_mouse(main, Vector2i(3, 6))
 	assert_eq(_controller(main).snapshot().unit_by_id(1).hp, 2, "Khoái đứng chắn trúng lao")
 	assert_eq(_unit_at(main, Vector2i(3, 6)).hp, 3, "Bộ binh không bị gì")

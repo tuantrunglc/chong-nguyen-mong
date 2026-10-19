@@ -103,3 +103,7 @@
 ## Deferred from: code review of 2-2-song-va-danh-trung-quan-minh (2026-10-19)
 
 - Bộ chạy kịch bản (`game/tests/scenario_runner.gd:160`) vẫn bỏ qua tướng đã gục khi so `da_danh`/`da_di`. Kịch bản `va_cham/tuong_minh_guc_vi_va.json` là kịch bản đầu tiên có tướng gục; bàn sau (ô Lão trống) đủ bắt lỗi. Nên báo "tướng có trong `sau` mà không còn trên bàn" khi có kịch bản tướng gục phức tạp hơn (đòn địch, 2.8).
+
+## Deferred from: code review of 2-3-pham-ngu-lao-phong-lao (2026-10-19)
+
+- Bộ nạp kịch bản (`game/src/data/scenario_loader.gd:40`, `COMMAND_REJECTS`) kiểm mã `tu_choi` theo lệnh, không theo tướng: Khoái + `ngoai_tam` hay Lão + `khong_ke` vẫn nạp được, chỉ trượt lúc chạy với câu báo mã khác. `test_scenario_loader.gd:482` dùng đúng ca Khoái + `ngoai_tam`. Xem lại khi Dư có đòn (2.4) nếu tác giả muốn bộ nạp báo sớm.

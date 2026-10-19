@@ -228,6 +228,7 @@ func test_lance_once_per_turn_and_no_move_after() -> void:
 	var before: Array[String] = BoardFixture.picture(state)
 	assert_eq(_attack(state, 2, Vector2i(1, 0)), ["REJECTED ALREADY_ATTACKED"] as Array[String])
 	var events: Array[BattleEvent] = Rules.resolve(state, Command.move(2, Vector2i(1, 4)))
+	assert_eq(state.validate(), [] as Array[String], "bất biến sau lệnh đi")
 	assert_eq(BoardFixture.describe(events), ["REJECTED ALREADY_ATTACKED"] as Array[String])
 	assert_eq(BoardFixture.picture(state), before)
 
@@ -235,6 +236,7 @@ func test_lance_once_per_turn_and_no_move_after() -> void:
 func test_move_then_lance() -> void:
 	var state: BattleState = BoardFixture.state({Vector2i(1, 5): "2", Vector2i(4, 3): "B"})
 	Rules.resolve(state, Command.move(2, Vector2i(1, 3)))
+	assert_eq(state.validate(), [] as Array[String], "bất biến sau lệnh đi")
 	assert_eq(_attack(state, 2, Vector2i(4, 3)), ["ATTACKED 2 4,3", "DAMAGED 101 -1 STRIKE"] as Array[String])
 	assert_true(state.unit_by_id(2).has_moved)
 
@@ -252,5 +254,9 @@ func test_lance_targets() -> void:
 		"chỉ có tướng mình trong tầm: không có viền")
 	var far: BattleState = BoardFixture.state({Vector2i(0, 6): "2", Vector2i(0, 1): "B", Vector2i(5, 6): "B"})
 	assert_eq(RulesAttack.targets(far, far.unit_by_id(2)), [] as Array[Vector2i], "cách 5: ngoài tầm")
+	# Lão ở 1,5: ô thứ 2 về Nam (1,7) và về Tây (-1,5) đã ra ngoài bàn, dừng hướng đó.
+	var edge: BattleState = BoardFixture.state({Vector2i(1, 5): "2", Vector2i(1, 3): "B", Vector2i(4, 5): "B"})
+	assert_eq(RulesAttack.targets(edge, edge.unit_by_id(2)), [Vector2i(1, 3), Vector2i(4, 5)] as Array[Vector2i],
+		"dừng ở mép bàn")
 	_attack(state, 2, Vector2i(3, 1))
 	assert_eq(RulesAttack.targets(state, lao), [] as Array[Vector2i], "đã phóng")

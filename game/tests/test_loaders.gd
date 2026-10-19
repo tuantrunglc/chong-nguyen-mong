@@ -522,6 +522,12 @@ func test_stats_value_not_integer() -> void:
 		_stat_errors(['"tuong.pham_ngu_lao.sat_thuong" phải là số nguyên từ 1 trở lên, đang là 1.5']))
 
 
+## Lao luôn bay qua ô kề: tầm gần của Lão là 1 thì báo lỗi (tác giả chốt 2026-10-19, review 2.3).
+func test_stats_lance_near_range_at_least_two() -> void:
+	assert_eq(_stats(_with_stat("tuong", "pham_ngu_lao", "tam_danh_gan", 1)).errors,
+		_stat_errors(['"tuong.pham_ngu_lao.tam_danh_gan" phải là số nguyên từ 2 trở lên, đang là 1']))
+
+
 func test_stats_range_order() -> void:
 	assert_eq(_stats(_with_stat("tuong", "pham_ngu_lao", "tam_danh_gan", 5)).errors,
 		_stat_errors(['"tuong.pham_ngu_lao.tam_danh_gan" (5) lớn hơn "tuong.pham_ngu_lao.tam_danh_xa" (4)']))
@@ -578,6 +584,14 @@ func test_real_stats_file_loads() -> void:
 	var r: LoadResult = StatsLoader.load_stats("res://data/chi_so.json")
 	assert_eq(r.errors, [] as Array[String], "data/chi_so.json không có lỗi")
 	assert_true(r.ok)
+	var stats: Stats = r.data as Stats
+	assert_not_null(stats)
+	if stats == null:
+		return
+	# Các bước tác giả tự test (Story 2.3) dựa vào tầm lao 2–4 và 1 sát thương.
+	assert_eq(stats.damage(UnitType.PHAM_NGU_LAO), 1)
+	assert_eq(stats.min_range(UnitType.PHAM_NGU_LAO), 2)
+	assert_eq(stats.max_range(UnitType.PHAM_NGU_LAO), 4)
 
 
 func test_real_level_1_loads() -> void:

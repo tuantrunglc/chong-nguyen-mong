@@ -23,7 +23,7 @@ const MIN_VALUE: Dictionary = {
 	"tam_di": 0,
 	"sat_thuong": 1,
 	"do_day": 0,
-	"tam_danh_gan": 1,
+	"tam_danh_gan": 2,  # lao luôn bay qua ô kề (tác giả chốt 2026-10-19)
 	"tam_danh_xa": 1,
 	"tam_danh": 1,
 	"tam_keo": 0,

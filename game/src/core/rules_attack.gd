@@ -113,3 +113,5 @@ static func lao_throw(state: BattleState, lao: Unit, cell: Vector2i, events: Arr
 			events.append(BattleEvent.attacked(lao.id, target.cell))
 			Effects.damage(state, target, state.stats.damage(lao.type), BattleEvent.Cause.STRIKE, events)
 			return
+	# resolve đã kiểm cell có trong targets: tới đây là targets và lao_throw lệch nhau.
+	assert(false, "RulesAttack.lao_throw: không trúng ai từ %s tới %s" % [lao.cell, cell])
