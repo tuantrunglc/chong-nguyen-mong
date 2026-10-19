@@ -30,13 +30,14 @@ const REJECT_CODES: Dictionary = {
 	"da_danh_roi": "scenario.viewer.reject_already_attacked",
 	"khong_ke": "scenario.viewer.reject_not_adjacent",
 	"khong_co_dich": "scenario.viewer.reject_no_target",
+	"ngoai_tam": "scenario.viewer.reject_not_in_range",
 }
 const REJECT_LIST: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", ' \
-	+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich"'
+	+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam"'
 ## Lệnh -> các mã "tu_choi" luật của lệnh đó trả được. Lệnh mới thêm ở story của nó.
 const COMMAND_REJECTS: Dictionary = {
 	"di": ["khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc"],
-	"danh": ["khong_co_quan", "khong_phai_tuong", "da_danh_roi", "khong_ke", "khong_co_dich"],
+	"danh": ["khong_co_quan", "khong_phai_tuong", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam"],
 	"huy": ["khong_con_nuoc_di"],
 }
 

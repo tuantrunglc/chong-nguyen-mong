@@ -4,7 +4,7 @@ baseline_commit: 055ab740f221d9c11ff8b5dcd05292a14f30b3d5
 
 # Story 2.3: Phạm Ngũ Lão phóng lao
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 
@@ -42,15 +42,15 @@ _Story luật thứ ba của E2, đòn thứ hai. Lao chỉ gây sát thương, 
 
 - [x] **Task 0: Tác giả chốt 3 câu hỏi** ở "Quyết định của tác giả" (2026-10-19, cả 3 câu chọn phương án (a)).
 - [ ] **Task 1: Khung, đợt kịch bản 5, dừng chờ duyệt** (AC: 1, 2)
-  - [ ] 1.1 Khung (không phải code luật, làm trước để file kịch bản nạp được):
+  - [x] 1.1 Khung (không phải code luật, làm trước để file kịch bản nạp được):
     - `src/core/battle_event.gd`: thêm `NOT_IN_RANGE` vào **cuối** enum `Reject`.
     - `src/data/scenario_loader.gd`: `REJECT_CODES` thêm `"ngoai_tam": "scenario.viewer.reject_not_in_range"`; sửa `REJECT_LIST` cho đủ 10 mã; `COMMAND_REJECTS["danh"]` thêm `"ngoai_tam"`.
     - `tests/scenario_runner.gd`: `REJECT_EVENTS` thêm `"ngoai_tam": BattleEvent.Reject.NOT_IN_RANGE` (cùng thứ tự với `REJECT_CODES`; `test_scenario_loader.gd` kiểm hai bảng cùng khóa).
     - `i18n/text.csv`: `scenario.viewer.reject_not_in_range` = `ô đó không thẳng hàng hoặc ngoài tầm lao`; sửa `scenario.viewer.reject_no_target` thành `ô đó không có quân Nguyên đánh được` (câu cũ sai với ca "Bộ binh đứng sau Bộ binh"; chỉ là chữ của công cụ duyệt, không đổi file kịch bản nào).
     - `tests/test_scenario_loader.gd`: `danh` + `ngoai_tam` nạp được; `di` + `ngoai_tam` báo lỗi như các mã sai lệnh khác.
-  - [ ] 1.2 Viết 8 file đúng như Dev Notes "Đợt kịch bản 5", `"da_duyet": false`, thư mục mới `tests/kich_ban/lao/`. Không đụng 28 kịch bản đã duyệt.
-  - [ ] 1.3 `tools/xem_kich_ban.sh lao`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `tu_choi` của #7 hiện đúng câu tiếng Việt. `tools/test.sh`: xanh, `28 đã duyệt · 8 chưa duyệt (8 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
-  - [ ] 1.4 Commit: `Kịch bản phóng lao chờ duyệt (Story 2.3)`.
+  - [x] 1.2 Viết 8 file đúng như Dev Notes "Đợt kịch bản 5", `"da_duyet": false`, thư mục mới `tests/kich_ban/lao/`. Không đụng 28 kịch bản đã duyệt.
+  - [x] 1.3 `tools/xem_kich_ban.sh lao`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `tu_choi` của #7 hiện đúng câu tiếng Việt. `tools/test.sh`: xanh, `28 đã duyệt · 8 chưa duyệt (8 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
+  - [x] 1.4 Commit: `Kịch bản phóng lao chờ duyệt (Story 2.3)`.
   - [ ] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh lao`, đọc 8 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ hai điều:
     - #4: bấm Bộ binh mà lao trúng Khoái đứng chắn trước (luật "trúng vật đầu tiên"); trước Story 2.12 (xem trước) game chưa báo trước điều này.
     - Trước Story 3.1, lao bay qua rừng, kho lương, làng (chưa có kịch bản nào có rừng trên đường lao).
@@ -330,7 +330,12 @@ _Tác giả chốt 2026-10-19: cả 3 câu chọn phương án (a)._
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5)
+
 ### Debug Log References
+
+- Task 1.1 (2026-10-19): `Reject.NOT_IN_RANGE`, mã `ngoai_tam` (bộ nạp, bộ chạy, chữ công cụ duyệt), chữ `reject_no_target` đổi thành "ô đó không có quân Nguyên đánh được". `test_scenario_loader.gd`: `test_step_reject_code_errors` (danh sách 10 mã), `test_attack_reject_codes_fit_command` thêm `danh` + `ngoai_tam` nạp được, `di` + `ngoai_tam` báo lỗi. `tools/test.sh`: 382/382.
+- Task 1.2–1.3: 8 file trong `tests/kich_ban/lao/`, `da_duyet: false`. `tools/xem_kich_ban.sh lao`: bàn trước/sau khớp `mo_ta`; #4 bàn sau hiện `Máu: 3,4 Nguyễn Khoái 2/3`; #7 sáu dòng từ chối hiện đúng câu (3 câu "không thẳng hàng hoặc ngoài tầm lao", 3 câu "không có quân Nguyên đánh được"). `tools/test.sh`: xanh 382/382, `Kịch bản luật: 28 đã duyệt · 8 chưa duyệt (8 chưa đạt)`, lý do đúng bảng (7 file "luật từ chối ("khong_co_dich": quân 2 chưa có đòn (Story 2.3, 2.4)) mà kịch bản không ghi "tu_choi""; `khong_phong_duoc.json` "luật từ chối vì "khong_co_dich" (…), kịch bản ghi "tu_choi": "ngoai_tam"").
 
 ### Completion Notes List
 

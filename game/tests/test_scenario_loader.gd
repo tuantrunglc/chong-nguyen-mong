@@ -359,7 +359,7 @@ func test_step_reject_code_errors() -> void:
 	]
 	var r: LoadResult = _parse(d)
 	var codes: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", ' \
-		+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich"'
+		+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam"'
 	assert_eq(r.errors, [
 		F + ': "hanh_dong" mục 1 (di): "tu_choi" là "bi_chan", chỉ được ' + codes,
 		F + ': "hanh_dong" mục 2 (di): "tu_choi" là true, chỉ được ' + codes,
@@ -479,20 +479,25 @@ func test_attack_reject_codes_fit_command() -> void:
 		{"lenh": "danh", "tuong": "1", "o": "2,6", "tu_choi": "khong_ke"},
 		{"lenh": "danh", "tuong": "1", "o": "1,6", "tu_choi": "da_danh_roi"},
 		{"lenh": "di", "tuong": "1", "o": "1,6", "tu_choi": "da_danh_roi"},
+		{"lenh": "danh", "tuong": "1", "o": "1,6", "tu_choi": "ngoai_tam"},
 	]
 	var s: ScenarioData = _scenario(d)
 	if s == null:
 		return
 	assert_eq(s.steps[0].reject, "khong_co_dich")
 	assert_eq(s.steps[3].reject, "da_danh_roi")
+	assert_eq(s.steps[4].reject, "ngoai_tam")
 	d["hanh_dong"] = [
 		{"lenh": "danh", "tuong": "1", "o": "1,6", "tu_choi": "khong_con_nuoc_di"},
 		{"lenh": "di", "tuong": "1", "o": "1,6", "tu_choi": "khong_ke"},
+		{"lenh": "di", "tuong": "1", "o": "1,6", "tu_choi": "ngoai_tam"},
 	]
 	assert_eq(_parse(d).errors, [
 		F + ': "hanh_dong" mục 1 (danh): "tu_choi" là "khong_con_nuoc_di", lệnh "danh" chỉ bị từ chối vì '
-			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "khong_ke", "khong_co_dich"',
+			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam"',
 		F + ': "hanh_dong" mục 2 (di): "tu_choi" là "khong_ke", lệnh "di" chỉ bị từ chối vì '
+			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc"',
+		F + ': "hanh_dong" mục 3 (di): "tu_choi" là "ngoai_tam", lệnh "di" chỉ bị từ chối vì '
 			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc"',
 	] as Array[String])
 

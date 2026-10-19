@@ -18,6 +18,7 @@ const REJECT_EVENTS: Dictionary = {
 	"da_danh_roi": BattleEvent.Reject.ALREADY_ATTACKED,
 	"khong_ke": BattleEvent.Reject.NOT_ADJACENT,
 	"khong_co_dich": BattleEvent.Reject.NO_TARGET,
+	"ngoai_tam": BattleEvent.Reject.NOT_IN_RANGE,
 }
 
 ## Tên đầy đủ cho câu so sánh. Ký hiệu lấy ngược từ BoardText (unit_symbol, terrain_symbol).
