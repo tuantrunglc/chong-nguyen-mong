@@ -94,7 +94,7 @@
 
 ## Deferred from: code review of 2-1-nguyen-khoai-danh-day-va-va-cham (2026-10-18)
 
-- `BattleView` (`game/src/battle/battle_view.gd:83`): đang chờ xác nhận đòn mà bấm hoặc gõ phím vào tướng đã đánh thì không bỏ chờ, gợi ý "Bấm lần nữa để đánh" vẫn còn (AC 10 của 2.1). Chưa gặp được vì chỉ Khoái có đòn; xem lại ở Story 2.3/2.4.
+- `BattleView` (`game/src/battle/battle_view.gd:83`): đang chờ xác nhận đòn mà bấm hoặc gõ phím vào tướng đã đánh thì không bỏ chờ, gợi ý "Bấm lần nữa để đánh" vẫn còn (AC 10 của 2.1). Chưa gặp được vì chỉ Khoái có đòn; xem lại ở Story 2.3/2.4. **Đã làm ở Story 2.3** (bỏ chờ, giữ tướng đang chọn; cả chuột lẫn phím).
 - `UnitToken.update` (`game/src/battle/unit_token.gd:82`): bỏ cờ đã đánh thì màu chữ tên về màu Đại Việt, không theo phe. Quân Nguyên chưa đánh tới 2.6+.
 - `ForcedMove.OBSTACLES` (`game/src/core/forced_move.gd:10`) tách khỏi `Terrain.WALKABLE`: thêm loại ô không đi được mà quên thêm vào đây thì quân bị đẩy lên ô đó, `validate` quay lại cả đòn. Hiện hai danh sách khớp.
 - Bộ chạy kịch bản (`game/tests/scenario_runner.gd:177`) bỏ qua tướng đã gục khi so `sau.da_danh`. Tướng chưa gục được trong kịch bản 2.1; xem lại khi va chạm làm tướng gục (2.2).

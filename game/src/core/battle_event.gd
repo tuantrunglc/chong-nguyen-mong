@@ -18,11 +18,11 @@ enum Type {
 	COLLIDED,
 	## Quân Nguyên vào ô sông to_cell và chết đuối (bị nhấc khỏi bàn).
 	DROWNED,
-	## Tướng unit_id ra đòn vào ô to_cell.
+	## Tướng unit_id ra đòn vào ô to_cell: ô bị đánh (Khoái), ô quân trúng lao (Lão; có thể khác ô được bấm).
 	ATTACKED,
 }
 
-## Vì sao quân đổi ô hoặc mất máu. Kéo thêm ở Story 2.4.
+## Vì sao quân đổi ô hoặc mất máu. STRIKE: đòn có sát thương của tướng (Khoái, Lão). Kéo thêm ở Story 2.4.
 enum Cause { WALK, STRIKE, PUSH, COLLISION }
 
 ## Vì sao lệnh bị từ chối (REJECTED). Kịch bản luật ghi bằng mã "tu_choi" (ScenarioRunner.REJECT_EVENTS).

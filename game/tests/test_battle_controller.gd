@@ -199,9 +199,12 @@ func _assert_same_state(got: BattleState, want: BattleState) -> void:
 
 ## Khoái ở 3,4 kề Bộ binh 3,3; Lão ở 0,6; thêm một Bộ binh sát mép phải ở 6,4.
 func _attack_controller() -> BattleController:
+	return _controller_for({Vector2i(3, 4): "1", Vector2i(0, 6): "2", Vector2i(3, 3): "B", Vector2i(6, 4): "B"})
+
+
+func _controller_for(units: Dictionary) -> BattleController:
 	var controller: BattleController = BattleController.new()
-	var state: BattleState = BoardFixture.state({Vector2i(3, 4): "1", Vector2i(0, 6): "2", Vector2i(3, 3): "B",
-		Vector2i(6, 4): "B"})
+	var state: BattleState = BoardFixture.state(units)
 	var level: LevelData = LevelData.new()
 	level.size = state.size
 	level.terrain = state.terrain
@@ -239,10 +242,22 @@ func test_rejected_attack_keeps_undo() -> void:
 func test_attack_targets_query() -> void:
 	var c: BattleController = _attack_controller()
 	assert_eq(c.attack_targets(1), [Vector2i(3, 3)] as Array[Vector2i])
-	assert_eq(c.attack_targets(2), [] as Array[Vector2i], "Lão chưa có đòn")
+	assert_eq(c.attack_targets(2), [] as Array[Vector2i], "Lão không có quân Nguyên thẳng hàng trong tầm")
 	assert_eq(c.attack_targets(99), [] as Array[Vector2i])
 	c.submit(Command.attack(1, Vector2i(3, 3)))
 	assert_eq(c.attack_targets(1), [] as Array[Vector2i], "đã đánh")
+
+
+## Lão ở 1,5 cách Bộ binh 4,5 ba ô (Story 2.3).
+func test_lance_targets_and_clears_undo() -> void:
+	var c: BattleController = _controller_for({Vector2i(1, 5): "2", Vector2i(4, 5): "B", Vector2i(0, 0): "1"})
+	assert_eq(c.attack_targets(2), [Vector2i(4, 5)] as Array[Vector2i])
+	c.submit(Command.move(1, Vector2i(1, 0)))
+	assert_true(c.can_undo())
+	c.submit(Command.attack(2, Vector2i(4, 5)))
+	assert_false(c.can_undo(), "phóng lao xóa lịch sử hủy")
+	assert_eq(c.snapshot().unit_at(Vector2i(4, 5)).hp, 2)
+	assert_eq(c.attack_targets(2), [] as Array[Vector2i], "đã phóng")
 
 
 ## Đòn làm gục (va mép bàn): quân bị nhấc khỏi bàn, validate() rỗng nên không bị quay lại.

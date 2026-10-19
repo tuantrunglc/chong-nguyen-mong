@@ -148,7 +148,7 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 | Tướng | Vai | Đòn chính | Ý đồ chiến thuật |
 |---|---|---|---|
 | **Nguyễn Khoái** | Tiên phong (cận chiến) | Đánh 1 ô kề, **2 sát thương**, đẩy mục tiêu lùi **1 ô** theo hướng đánh | Đẩy địch vào chướng ngại, vào bẫy hoặc vào nhau |
-| **Phạm Ngũ Lão** | Phóng lao (đánh xa) | Phóng thẳng hàng, **bay qua ô kề**, trúng vật đầu tiên ở ô thứ **2–4**, **1 sát thương**. Rừng hoặc kho lương ở bất kỳ ô nào trên đường, kể cả ô kề, đều chặn lao [MẶC ĐỊNH, duyệt qua kịch bản luật]. Sông không chặn | Kết liễu từ xa. Gợi đến câu "Hoành sóc giang sơn" trong *Thuật hoài* |
+| **Phạm Ngũ Lão** | Phóng lao (đánh xa) | Phóng thẳng hàng, **bay qua ô kề**, trúng vật đầu tiên ở ô thứ **2–4**, **1 sát thương**. Rừng hoặc kho lương ở bất kỳ ô nào trên đường, kể cả ô kề, đều chặn lao [MẶC ĐỊNH, duyệt qua kịch bản luật]. Sông không chặn. Chọn Lão thì mỗi hướng có một viền "đánh được", ở quân Nguyên gần nhất trong ô 2–4; tướng mình đứng chắn trước thì bấm quân Nguyên sau nó, lao trúng tướng mình. Chốt 2026-10-19 | Kết liễu từ xa. Gợi đến câu "Hoành sóc giang sơn" trong *Thuật hoài* |
 | **Trần Khánh Dư** | Phục binh (khống chế) | Kéo **vật đầu tiên trên hàng** trong vòng **3 ô** về phía mình **2 ô** (dừng sớm nếu bị chặn), **0 sát thương**. Vật đó phải là quân Nguyên; nếu vật đầu tiên là tướng, rừng hoặc kho lương thì không kéo được [MẶC ĐỊNH, duyệt qua kịch bản luật] | Kéo địch khỏi vị trí đẹp hoặc kéo vào bẫy, làm lệch đòn địch đã báo trước |
 
 **Nguồn sử của từng tướng** (chi tiết trong `history-notes-1288.md`):

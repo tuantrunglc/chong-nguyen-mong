@@ -4,7 +4,7 @@ baseline_commit: 055ab740f221d9c11ff8b5dcd05292a14f30b3d5
 
 # Story 2.3: Phạm Ngũ Lão phóng lao
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -41,7 +41,7 @@ _Story luật thứ ba của E2, đòn thứ hai. Lao chỉ gây sát thương, 
 ## Tasks / Subtasks
 
 - [x] **Task 0: Tác giả chốt 3 câu hỏi** ở "Quyết định của tác giả" (2026-10-19, cả 3 câu chọn phương án (a)).
-- [ ] **Task 1: Khung, đợt kịch bản 5, dừng chờ duyệt** (AC: 1, 2)
+- [x] **Task 1: Khung, đợt kịch bản 5, dừng chờ duyệt** (AC: 1, 2)
   - [x] 1.1 Khung (không phải code luật, làm trước để file kịch bản nạp được):
     - `src/core/battle_event.gd`: thêm `NOT_IN_RANGE` vào **cuối** enum `Reject`.
     - `src/data/scenario_loader.gd`: `REJECT_CODES` thêm `"ngoai_tam": "scenario.viewer.reject_not_in_range"`; sửa `REJECT_LIST` cho đủ 10 mã; `COMMAND_REJECTS["danh"]` thêm `"ngoai_tam"`.
@@ -51,22 +51,22 @@ _Story luật thứ ba của E2, đòn thứ hai. Lao chỉ gây sát thương, 
   - [x] 1.2 Viết 8 file đúng như Dev Notes "Đợt kịch bản 5", `"da_duyet": false`, thư mục mới `tests/kich_ban/lao/`. Không đụng 28 kịch bản đã duyệt.
   - [x] 1.3 `tools/xem_kich_ban.sh lao`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `tu_choi` của #7 hiện đúng câu tiếng Việt. `tools/test.sh`: xanh, `28 đã duyệt · 8 chưa duyệt (8 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
   - [x] 1.4 Commit: `Kịch bản phóng lao chờ duyệt (Story 2.3)`.
-  - [ ] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh lao`, đọc 8 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ hai điều:
+  - [x] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh lao`, đọc 8 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ hai điều:
     - #4: bấm Bộ binh mà lao trúng Khoái đứng chắn trước (luật "trúng vật đầu tiên"); trước Story 2.12 (xem trước) game chưa báo trước điều này.
     - Trước Story 3.1, lao bay qua rừng, kho lương, làng (chưa có kịch bản nào có rừng trên đường lao).
     Không làm Task 2 trở đi khi chưa có câu trả lời.
-  - [ ] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" thì xử lý theo AC 2. `tools/test.sh` **phải trượt**. Ghi Debug Log. **Không commit** khi đang đỏ.
-- [ ] **Task 2: Lõi luật** (AC: 3–10)
-  - [ ] 2.1 `src/core/grid.gd`: `static func straight_dir(from: Vector2i, to: Vector2i) -> Vector2i`: cùng hàng hoặc cùng cột và khác ô thì trả một phần tử của `DIRECTIONS`, còn lại trả `Vector2i.ZERO`. `static func distance(a: Vector2i, b: Vector2i) -> int` (Manhattan; kiến trúc cây thư mục đã ghi "khoảng cách Manhattan"). `is_adjacent` dùng lại `distance`.
-  - [ ] 2.2 `src/core/stats.gd`: `min_range(type)` (`tam_danh_gan`), `max_range(type)` (`tam_danh_xa`). `StatsLoader` đã kiểm hai khóa này có mặt và `gan ≤ xa` (`RANGES`), không sửa bộ nạp.
-  - [ ] 2.3 `src/core/rules_attack.gd`:
+  - [x] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" thì xử lý theo AC 2. `tools/test.sh` **phải trượt**. Ghi Debug Log. **Không commit** khi đang đỏ.
+- [x] **Task 2: Lõi luật** (AC: 3–10)
+  - [x] 2.1 `src/core/grid.gd`: `static func straight_dir(from: Vector2i, to: Vector2i) -> Vector2i`: cùng hàng hoặc cùng cột và khác ô thì trả một phần tử của `DIRECTIONS`, còn lại trả `Vector2i.ZERO`. `static func distance(a: Vector2i, b: Vector2i) -> int` (Manhattan; kiến trúc cây thư mục đã ghi "khoảng cách Manhattan"). `is_adjacent` dùng lại `distance`.
+  - [x] 2.2 `src/core/stats.gd`: `min_range(type)` (`tam_danh_gan`), `max_range(type)` (`tam_danh_xa`). `StatsLoader` đã kiểm hai khóa này có mặt và `gan ≤ xa` (`RANGES`), không sửa bộ nạp.
+  - [x] 2.3 `src/core/rules_attack.gd`:
     - `targets(state, unit)`: tách theo loại tướng. Khoái giữ nguyên code hiện tại (đưa vào `_khoai_targets`). Lão: `_lao_targets` theo "Viền mục tiêu của Lão" ở Dev Notes. Dư vẫn rỗng (Story 2.4).
     - `resolve`: theo "Bảng thứ tự kiểm của lệnh đánh" ở Dev Notes. Dòng "chưa có đòn" chỉ còn cho Dư, lý do đổi thành `quân %d chưa có đòn (Story 2.4)`. **Kiểm hết rồi mới sửa.** Hợp lệ thì `ATTACKED` → `lao_throw` → `unit.has_attacked = true`.
     - `static func lao_throw(state, lao, cell, events)`: theo "Đường lao" ở Dev Notes. Không gọi `ForcedMove` (lao không đẩy). Sát thương qua `Effects.damage(..., state.stats.damage(lao.type), BattleEvent.Cause.STRIKE, events)`; ghi chú "Sát Thát (+1) thêm ở Story 3.13" như `khoai_strike`.
     - Sửa chú thích đầu file (bỏ "Lão, Dư: Story 2.3, 2.4", thêm Lão).
-  - [ ] 2.4 `src/core/battle_event.gd`: chú thích `ATTACKED` ghi rõ `to_cell` là ô lao trúng (Lão) hoặc ô bị đánh (Khoái); chú thích `Cause.STRIKE` ghi "đòn có sát thương của tướng (Khoái, Lão)".
-- [ ] **Task 3: Test lõi luật** (AC: 3–11)
-  - [ ] 3.1 `tests/test_rules_attack.gd` thêm (dựng bằng `BoardFixture`, mỗi ca so **đúng dãy sự kiện** và `validate()` rỗng qua `_attack`):
+  - [x] 2.4 `src/core/battle_event.gd`: chú thích `ATTACKED` ghi rõ `to_cell` là ô lao trúng (Lão) hoặc ô bị đánh (Khoái); chú thích `Cause.STRIKE` ghi "đòn có sát thương của tướng (Khoái, Lão)".
+- [x] **Task 3: Test lõi luật** (AC: 3–11)
+  - [x] 3.1 `tests/test_rules_attack.gd` thêm (dựng bằng `BoardFixture`, mỗi ca so **đúng dãy sự kiện** và `validate()` rỗng qua `_attack`):
     - lao trúng quân Nguyên ở ô thứ 2, 3, 4, thử đủ 4 hướng: `["ATTACKED 2 c,h", "DAMAGED 101 -1 STRIKE"]`, quân đứng yên, `has_attacked` của Lão bật, `has_moved` không bật;
     - bay qua quân Nguyên kề và bay qua tướng mình kề;
     - trúng quân gần nhất khi có hai quân Nguyên trên hàng (bấm con gần);
@@ -76,18 +76,18 @@ _Story luật thứ ba của E2, đòn thứ hai. Lao chỉ gây sát thương, 
     - sông ở ô kề và ô thứ 2: vẫn trúng;
     - từ chối theo đủ bảng (mỗi dòng một ca, cho Lão): `NOT_IN_RANGE` với ô kề, ô chéo, ô cách 5, ô ngoài bàn; `NO_TARGET` với ô trống, ô tướng mình, quân Nguyên đứng sau quân Nguyên khác; `ALREADY_ATTACKED` khi phóng hai lần. State giữ nguyên (`BoardFixture.picture`), `has_attacked` không bật;
     - đi rồi phóng được; phóng rồi đi bị `ALREADY_ATTACKED`.
-  - [ ] 3.2 Sửa test cũ đang ghi "Lão chưa có đòn" (đọc từng chỗ, giữ ý của test):
+  - [x] 3.2 Sửa test cũ đang ghi "Lão chưa có đòn" (đọc từng chỗ, giữ ý của test):
     - `test_rejections_keep_state` (dòng 54): `[2, Vector2i(4, 3), "NO_TARGET"]` thành `"NOT_IN_RANGE"` (Lão ở `4,4` đánh ô kề `4,3`). Dòng của Dư giữ `NO_TARGET`;
     - `test_targets_are_adjacent_nguyen_units_in_direction_order` (dòng 97): Lão ở `4,3` giờ có `targets` là `[2,3]` (bay qua Khoái kề ở `3,3`, Bộ binh `4,4` kề không tính). Đổi câu thông báo cho đúng. Ca của Dư giữ nguyên;
     - `test_battle_controller.gd:242` và `test_battle_view.gd:564`: bố cục hiện tại không có quân Nguyên nào thẳng hàng với Lão (`0,6`), nên vẫn rỗng; chỉ đổi câu thông báo thành "Lão không có quân Nguyên thẳng hàng trong tầm";
     - `test_battle_view.gd:686` (`test_click_adjacent_ally_switches_selection`, câu "không còn viền mục tiêu"): Lão ở `2,4` không thẳng hàng với Bộ binh `3,3` và `6,6`, vẫn rỗng; giữ nguyên.
     Mọi chỗ sửa ghi vào "Lệch so với Tasks" nếu khác danh sách này.
-  - [ ] 3.3 `tests/test_rules_attack.gd`:
+  - [x] 3.3 `tests/test_rules_attack.gd`:
     - `targets` của Lão: đúng thứ tự B→Đ→N→T; mỗi hướng một ô; bỏ qua tướng mình để tìm quân Nguyên sau nó; không có ô kề; dừng ở mép bàn; rỗng khi đã phóng;
     - `test_grid_direction_helpers` thêm `straight_dir` (4 hướng, cách xa, ô chéo trả `ZERO`, cùng ô trả `ZERO`) và `distance`;
     - `test_stats_read_damage_and_push_distance` thêm `min_range`, `max_range` của Lão đọc đúng `chi_so.json` (2 và 4), `damage` của Lão là 1.
-  - [ ] 3.4 `tests/test_battle_controller.gd`: Lão phóng thì `can_undo()` false; `attack_targets(2)` đúng trên một bố cục có quân Nguyên thẳng hàng.
-  - [ ] 3.5 Phá thử, **mỗi lần sửa tạm một chỗ**, chạy `tools/test.sh`, ghi tên kịch bản và test GUT trượt vào Debug Log, trả lại ngay, `git diff --quiet game/src` sau mỗi lần:
+  - [x] 3.4 `tests/test_battle_controller.gd`: Lão phóng thì `can_undo()` false; `attack_targets(2)` đúng trên một bố cục có quân Nguyên thẳng hàng.
+  - [x] 3.5 Phá thử, **mỗi lần sửa tạm một chỗ**, chạy `tools/test.sh`, ghi tên kịch bản và test GUT trượt vào Debug Log, trả lại ngay, `git diff --quiet game/src` sau mỗi lần:
     - lao bắt đầu tìm từ ô kề (ô thứ 1) → `lao/bay_qua_o_ke.json`, `lao/bay_qua_tuong_minh_ke.json` phải trượt;
     - lao trúng ô được bấm thay vì quân đầu tiên → `lao/trung_tuong_minh.json` phải trượt;
     - lao trúng mọi quân trong tầm (không dừng ở quân đầu tiên) → `lao/trung_vat_dau_tien.json`, `lao/trung_tuong_minh.json` phải trượt;
@@ -95,28 +95,28 @@ _Story luật thứ ba của E2, đòn thứ hai. Lao chỉ gây sát thương, 
     - tầm xa đọc thành 3 (`max_range` trừ 1) → `lao/guc_vi_lao.json` phải trượt;
     - lao đẩy mục tiêu như Khoái (gọi `ForcedMove.run`) → `lao/phong_lao_cach_3_o.json` phải trượt;
     - bỏ kiểm `NOT_IN_RANGE` (để rơi xuống `NO_TARGET`) → `lao/khong_phong_duoc.json` phải trượt.
-- [ ] **Task 4: Giao diện** (AC: 9, 11, 12)
-  - [ ] 4.1 `src/battle/battle_view.gd`: viền, chờ xác nhận, bỏ chọn sau khi đánh đã chạy chung cho mọi tướng qua `attack_targets` (Story 2.1); **không** viết nhánh riêng cho Lão. Chỉ sửa mục hoãn (AC 12):
+- [x] **Task 4: Giao diện** (AC: 9, 11, 12)
+  - [x] 4.1 `src/battle/battle_view.gd`: viền, chờ xác nhận, bỏ chọn sau khi đánh đã chạy chung cho mọi tướng qua `attack_targets` (Story 2.1); **không** viết nhánh riêng cho Lão. Chỉ sửa mục hoãn (AC 12):
     - `_on_cell_clicked`, nhánh tướng mình đã đánh (hiện là `return` không làm gì, dòng ~86–90): gọi `_set_pending(BoardView.NO_CELL)` trước `return`; tướng đang chọn giữ nguyên;
     - `_on_general_key`: phím số của tướng đã đánh cũng bỏ chờ như trên.
-  - [ ] 4.2 `tests/test_battle_view.gd` thêm trận thử `_make_lao_main()` qua `_make_level_main` (thư mục riêng `LAO_DIR`, xóa ở `after_each` như `ALLY_DIR`). Bố cục: Lão `2` ở `3,3`; Bộ binh `3,2` (kề Bắc), Bộ binh `3,1`; Khoái `1` ở `3,5`, Bộ binh `3,6`; Kỵ binh `6,3`; Bộ binh `0,0`; không có sông (sông đã có kịch bản). Các ca, mỗi ca kiểm cả điều kiện trước:
+  - [x] 4.2 `tests/test_battle_view.gd` thêm trận thử `_make_lao_main()` qua `_make_level_main` (thư mục riêng `LAO_DIR`, xóa ở `after_each` như `ALLY_DIR`). Bố cục: Lão `2` ở `3,3`; Bộ binh `3,2` (kề Bắc), Bộ binh `3,1`; Khoái `1` ở `3,5`, Bộ binh `3,6`; Kỵ binh `6,3`; Bộ binh `0,0`; không có sông (sông đã có kịch bản). Các ca, mỗi ca kiểm cả điều kiện trước:
     - phím `2` thật: `_view(main).target_cells()` **đúng bằng** `[3,1, 6,3, 3,6]` (B→Đ→N→T; không có `3,2` kề; `3,6` có viền dù Khoái đứng chắn); `_board(main).target_cells()` giống hệt;
     - bấm chuột thật vào `3,1`: Bộ binh `3,1` còn 2 máu, Bộ binh `3,2` còn 3; đồng Lão `is_attacked()`; Lão bị bỏ chọn; `can_undo()` false;
     - bấm `3,6`: Khoái còn 2 máu, Bộ binh `3,6` còn 3 máu;
     - đi Lão rồi bấm mục tiêu: lần đầu `pending_cell()` đúng ô đó và dòng nhắc là `tr("hud.confirm_attack")`; lần hai mới trúng (đi `3,3` → `2,3`, lúc đó Kỵ binh `6,3` cách 4 ô ở hướng Đông và Bộ binh `3,2`, `3,1` không còn thẳng hàng; kiểm `target_cells()` sau khi đi trước khi bấm);
     - AC 12: Khoái đánh Bộ binh `3,6` trước (Khoái mờ), chọn Lão, đi `2,3`, bấm Kỵ binh `6,3` (chờ xác nhận), bấm Khoái → `pending_cell()` là `NO_CELL`, dòng nhắc rỗng, `selected_id()` vẫn 2, Kỵ binh còn 2 máu; làm lại với phím `1` thật thay cho bấm chuột.
-  - [ ] 4.3 Phá thử giao diện (ghi Debug Log): bỏ dòng `_set_pending` vừa thêm ở nhánh tướng đã đánh → ca AC 12 bằng chuột trượt; bỏ ở `_on_general_key` → ca bằng phím trượt.
-- [ ] **Task 5: Trận thử `thu_lao`** (AC: 13; theo câu 2)
-  - [ ] 5.1 `game/data/tran/thu_lao.json` (MỚI) đúng bố cục ở Dev Notes "Trận thử `thu_lao`". Không đổi `tran_01.json`, `thu_ba_tuong.json`, `thu_day.json`.
-  - [ ] 5.2 `tests/test_loaders.gd`: thêm `test_real_lance_trial_level_loads` theo mẫu `test_real_push_trial_level_loads` (đã sửa theo review 2.2): không lỗi, không cảnh báo, **so đủ ô và loại của mọi quân**, kiểm từng ô sông.
-- [ ] **Task 6: Tài liệu, kiểm bằng mắt, commit** (AC: 3–14)
-  - [ ] 6.1 `_bmad-output/planning-artifacts/game-architecture.md`: danh sách mã `tu_choi` (dòng ~341) thêm `ngoai_tam`; cây thư mục `data/tran/` thêm `thu_lao.json` vào dòng trận thử; cây `kich_ban/` thêm nhóm `lao/` nếu cây có liệt kê nhóm; bảng "Đòn của tướng", dòng Phạm Ngũ Lão, thêm câu viền mục tiêu theo câu 1.
-  - [ ] 6.2 GDD (`gdds/gdd-GameTest-2026-10-15/gdd.md` dòng 151, cột luật của Phạm Ngũ Lão): thêm câu viền mục tiêu theo câu 1 (a) và "Chốt 2026-10-19". Không sửa chỗ nào khác của GDD.
-  - [ ] 6.3 `deferred-work.md`: mục hoãn "chờ xác nhận mà bấm tướng đã đánh" (review 2.1) ghi "đã làm ở Story 2.3".
-  - [ ] 6.4 Kiểm bằng mắt: chạy `tools/chay.sh --dev --tran=thu_lao` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím (`select_general_2`, `end_turn`…), `inject_mouse_click` theo pixel `(486 + (cột − hàng)·64, 141 + (cột + hàng)·32 + 32)` (công thức Debug Log 2.2). Làm theo "Hướng dẫn tác giả tự test" ở Dev Notes, `capture_screenshot` sau mỗi bước chính, lưu `_bmad-output/implementation-artifacts/anh/2-3-*.png` (ít nhất: chọn Lão thấy 3 viền; sau khi lao bay qua quân kề; sau khi lao trúng Khoái). Tắt game. Log không có ERROR/WARN.
-  - [ ] 6.5 Trận 1 (`tools/chay.sh --dev`): Lão đi `2,6` → `2,4`, Bộ binh `5,4` có viền (sông ở `3,4` nằm giữa), bấm hai lần → Bộ binh còn 2 máu. Chụp `anh/2-3-*-tran-1.png`.
-  - [ ] 6.6 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, trận thử, tài liệu, `.uid` mới. Ví dụ: `Phạm Ngũ Lão phóng lao (Story 2.3)`.
-  - [ ] 6.7 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, dùng kết quả thật (số test thật).
+  - [x] 4.3 Phá thử giao diện (ghi Debug Log): bỏ dòng `_set_pending` vừa thêm ở nhánh tướng đã đánh → ca AC 12 bằng chuột trượt; bỏ ở `_on_general_key` → ca bằng phím trượt.
+- [x] **Task 5: Trận thử `thu_lao`** (AC: 13; theo câu 2)
+  - [x] 5.1 `game/data/tran/thu_lao.json` (MỚI) đúng bố cục ở Dev Notes "Trận thử `thu_lao`". Không đổi `tran_01.json`, `thu_ba_tuong.json`, `thu_day.json`.
+  - [x] 5.2 `tests/test_loaders.gd`: thêm `test_real_lance_trial_level_loads` theo mẫu `test_real_push_trial_level_loads` (đã sửa theo review 2.2): không lỗi, không cảnh báo, **so đủ ô và loại của mọi quân**, kiểm từng ô sông.
+- [x] **Task 6: Tài liệu, kiểm bằng mắt, commit** (AC: 3–14)
+  - [x] 6.1 `_bmad-output/planning-artifacts/game-architecture.md`: danh sách mã `tu_choi` (dòng ~341) thêm `ngoai_tam`; cây thư mục `data/tran/` thêm `thu_lao.json` vào dòng trận thử; cây `kich_ban/` thêm nhóm `lao/` nếu cây có liệt kê nhóm; bảng "Đòn của tướng", dòng Phạm Ngũ Lão, thêm câu viền mục tiêu theo câu 1.
+  - [x] 6.2 GDD (`gdds/gdd-GameTest-2026-10-15/gdd.md` dòng 151, cột luật của Phạm Ngũ Lão): thêm câu viền mục tiêu theo câu 1 (a) và "Chốt 2026-10-19". Không sửa chỗ nào khác của GDD.
+  - [x] 6.3 `deferred-work.md`: mục hoãn "chờ xác nhận mà bấm tướng đã đánh" (review 2.1) ghi "đã làm ở Story 2.3".
+  - [x] 6.4 Kiểm bằng mắt: chạy `tools/chay.sh --dev --tran=thu_lao` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím (`select_general_2`, `end_turn`…), `inject_mouse_click` theo pixel `(486 + (cột − hàng)·64, 141 + (cột + hàng)·32 + 32)` (công thức Debug Log 2.2). Làm theo "Hướng dẫn tác giả tự test" ở Dev Notes, `capture_screenshot` sau mỗi bước chính, lưu `_bmad-output/implementation-artifacts/anh/2-3-*.png` (ít nhất: chọn Lão thấy 3 viền; sau khi lao bay qua quân kề; sau khi lao trúng Khoái). Tắt game. Log không có ERROR/WARN.
+  - [x] 6.5 Trận 1 (`tools/chay.sh --dev`): Lão đi `2,6` → `2,4`, Bộ binh `5,4` có viền (sông ở `3,4` nằm giữa), bấm hai lần → Bộ binh còn 2 máu. Chụp `anh/2-3-*-tran-1.png`.
+  - [x] 6.6 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, trận thử, tài liệu, `.uid` mới. Ví dụ: `Phạm Ngũ Lão phóng lao (Story 2.3)`.
+  - [x] 6.7 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, dùng kết quả thật (số test thật).
 
 ## Dev Notes
 
@@ -337,12 +337,62 @@ Claude Opus 5.5 (claude-opus-5-5)
 - Task 1.1 (2026-10-19): `Reject.NOT_IN_RANGE`, mã `ngoai_tam` (bộ nạp, bộ chạy, chữ công cụ duyệt), chữ `reject_no_target` đổi thành "ô đó không có quân Nguyên đánh được". `test_scenario_loader.gd`: `test_step_reject_code_errors` (danh sách 10 mã), `test_attack_reject_codes_fit_command` thêm `danh` + `ngoai_tam` nạp được, `di` + `ngoai_tam` báo lỗi. `tools/test.sh`: 382/382.
 - Task 1.2–1.3: 8 file trong `tests/kich_ban/lao/`, `da_duyet: false`. `tools/xem_kich_ban.sh lao`: bàn trước/sau khớp `mo_ta`; #4 bàn sau hiện `Máu: 3,4 Nguyễn Khoái 2/3`; #7 sáu dòng từ chối hiện đúng câu (3 câu "không thẳng hàng hoặc ngoài tầm lao", 3 câu "không có quân Nguyên đánh được"). `tools/test.sh`: xanh 382/382, `Kịch bản luật: 28 đã duyệt · 8 chưa duyệt (8 chưa đạt)`, lý do đúng bảng (7 file "luật từ chối ("khong_co_dich": quân 2 chưa có đòn (Story 2.3, 2.4)) mà kịch bản không ghi "tu_choi""; `khong_phong_duoc.json` "luật từ chối vì "khong_co_dich" (…), kịch bản ghi "tu_choi": "ngoai_tam"").
 
+- Task 1.5–1.6 (2026-10-19): tác giả trả lời "ok", hỏi lại thì xác nhận "Đúng, duyệt cả 8". Đổi `da_duyet: true` (chỉ khóa đó). `tools/test.sh` trượt đúng như AC 2: `test_approved_scenarios_pass` "kịch bản đã duyệt lao/bay_qua_o_ke.json: bước 1: luật từ chối ("khong_co_dich": quân 2 chưa có đòn (Story 2.3, 2.4)) mà kịch bản không ghi "tu_choi"", `36 đã duyệt · 0 chưa duyệt`. Không commit khi đỏ.
+- Task 3.1–3.3 viết trước: `test_rules_attack.gd` thêm 11 test lao, sửa `test_rejections_keep_state` (Lão đánh ô kề → `NOT_IN_RANGE`), `test_targets_are_adjacent_nguyen_units_in_direction_order` (Lão `4,3` có `[2,3]`), `test_stats_read_damage_and_push_distance`, `test_grid_direction_helpers`. Chạy: lỗi script "Static function "straight_dir()" not found in base "Grid"" (đỏ đúng chỗ).
+- Task 2: `Grid.distance`, `Grid.straight_dir`; `Stats.min_range`, `max_range`; `RulesAttack` tách `_khoai_targets`, `_lao_targets`, `lao_throw` (tự ghi `ATTACKED` với ô quân trúng); chú thích `ATTACKED`, `Cause.STRIKE`. `tools/test.sh`: 393/393, `36 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
+- Task 3.2, 3.4, 4: `test_battle_controller.gd` thêm `_controller_for(units)` (gom từ `_attack_controller`), `test_lance_targets_and_clears_undo`; câu "Lão chưa có đòn" ở controller và view đổi thành "Lão không có quân Nguyên thẳng hàng trong tầm". `battle_view.gd`: nhánh tướng đã đánh (chuột và phím) gọi `_set_pending(NO_CELL)`. `test_battle_view.gd`: `LAO_DIR`, `_make_lao_main()`, 6 test (viền 3 ô, bay qua quân kề, trúng Khoái chắn, đi rồi phải xác nhận, bấm/gõ phím tướng đã đánh bỏ chờ). `tools/test.sh`: 400/400.
+- **Sự cố khi phá thử:** script phá thử lần đầu trả code về bằng `git checkout -q game/src`, nhưng code lao chưa commit nên bị xóa (`rules_attack.gd`, `grid.gd`, `stats.gd`, chú thích `battle_event.gd`, `battle_view.gd`). Test và kịch bản không mất. Viết lại đúng nội dung vừa làm; `tools/test.sh` 400/400 như trước. Sau đó `git add game/src` và sửa script: lưu bản sao file trước khi sửa, trả lại từ bản sao, kiểm `git diff --quiet game/src` sau mỗi lần.
+- Task 3.5, 4.3 phá thử (mỗi lần một chỗ, trả lại ngay):
+  - R1 lao tìm từ ô kề (cả `_lao_targets` và `lao_throw`) → 6 trượt: `test_selecting_lao_outlines_nearest_enemy_each_way`, `test_lance_flies_over_adjacent_unit`, `test_targets_are_adjacent_nguyen_units_in_direction_order`, `test_lance_flies_over_adjacent_unit_of_any_side`, `test_lance_targets`, kịch bản `lao/bay_qua_o_ke.json` ("luật từ chối ("khong_co_dich": ô 3,3 không phải quân Nguyên gần nhất trong tầm lao)…") và `lao/bay_qua_tuong_minh_ke.json` ("ô 2,5 B mong đợi 2 máu, thực tế 3 máu").
+  - R2 lao trúng ô được bấm → `test_lance_hits_blocking_khoai`, `test_lance_hits_blocking_general`, `test_lance_can_kill_blocking_general`, kịch bản `lao/trung_tuong_minh.json` ("ô 3,3 B mong đợi 3 máu, thực tế 2 máu").
+  - R3 lao trúng mọi quân (bỏ `return` sau khi trúng) → 3 test trúng tướng chắn và `lao/trung_tuong_minh.json`. `lao/trung_vat_dau_tien.json` **không** trượt: lao chỉ bay tới ô được bấm, bấm con gần thì không tới con xa (xem "Lệch so với Tasks").
+  - R4 sông chặn lao → `test_lance_flies_over_river`, `lao/bay_qua_song.json` ("ô 4,5 B mong đợi 2 máu, thực tế 3 máu").
+  - R5 `max_range` trừ 1 → 7 trượt, có `test_lance_kills_at_max_range_without_moving_anyone`, `test_stats_read_damage_and_push_distance`, 3 test giao diện dùng Kỵ binh cách 4 ô, `lao/guc_vi_lao.json` ("luật từ chối ("ngoai_tam": ô 5,2 không thẳng hàng với quân 2 trong tầm 2–3)…").
+  - R6 lao đẩy 1 ô → 11 trượt, có 6 kịch bản lao (ví dụ `lao/phong_lao_cach_3_o.json` "ô 4,3 mong đợi B (Bộ binh, 2 máu), thực tế trống").
+  - R7 bỏ kiểm `NOT_IN_RANGE` (`if false:`) → `test_rejections_keep_state`, `test_lance_rejections_keep_state`, `lao/khong_phong_duoc.json` ("bước 1: luật từ chối vì "khong_co_dich" (ô 2,1 …), kịch bản ghi "tu_choi": "ngoai_tam""). Lần đầu viết sai (`if false and A or B…` chỉ tắt vế ngoài bàn, chỉ 1 test trượt), làm lại.
+  - U1 bỏ `_set_pending` ở nhánh chuột → chỉ `test_click_spent_general_cancels_confirm`. U2 bỏ ở `_on_general_key` → chỉ `test_key_of_spent_general_cancels_confirm`.
+- Task 5: `game/data/tran/thu_lao.json` đúng bố cục Dev Notes; `test_real_lance_trial_level_loads` so đủ 7 ô quân và 2 ô sông. `tools/test.sh`: 401/401.
+- Task 6.4 kiểm bằng mắt: `tools/chay.sh --dev --tran=thu_lao` chạy nền; log `[INFO][battle] nạp trận thu_lao`, không ERROR/WARN. `inject_action` phải gửi cả bấm (`pressed` true) lẫn nhả (false), không thì lần bấm sau không ăn; ảnh chụp trễ một nhịp, chụp hai lần. Ảnh `anh/2-3-1-chon-lao-ba-vien.png`: vòng vàng ở Lão, viền trắng ở Bộ binh `3,1`, Kỵ binh `6,3` (bên kia sông), Bộ binh `3,6` (sau Khoái); Bộ binh `3,2` kề không viền. Ảnh `anh/2-3-2-lao-bay-qua-quan-ke.png`: Bộ binh `3,1` còn 2 máu, `3,2` còn 3, Lão xám. Sau đó cả hai lần chạy, mọi thao tác GoPeak không còn tác dụng (bàn đứng yên dù gửi `end_turn`, chọn tướng, bấm chuột); không chụp được ca trúng Khoái và trận 1 (xem "Lệch so với Tasks").
+- Task 6.6: `tools/test.sh` 401/401, `Kịch bản luật: 36 đã duyệt · 0 chưa duyệt (0 chưa đạt)`, kiểm ranh giới đạt.
+- Ghi chú: trong lúc làm story này có 2 commit của phiên khác (`e60f5eb`, `8b681b0`: đổi bàn sang nhìn chếch, Story 1.8 làm ngay sau 2.3). Không đụng file của story này; Task 6.1 sửa `game-architecture.md` sau các commit đó.
+
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
+- Phạm Ngũ Lão phóng lao: thẳng hàng, bay qua ô kề, trúng quân đầu tiên ở ô 2–4 (đọc từ `chi_so.json`), 1 sát thương, không đẩy; viền ở quân Nguyên gần nhất mỗi hướng; tướng mình đứng chắn thì trúng tướng mình. Mã từ chối mới `ngoai_tam`. Giao diện chạy chung với đòn Khoái; thêm "bấm/gõ phím tướng đã đánh thì bỏ chờ xác nhận" (mục hoãn 2.1). Trận thử `thu_lao`.
+- Tổng test: 382 → 401 (11 test luật lao, 1 test controller, 6 test giao diện, 1 test nạp trận). Kịch bản: 28 → 36 đã duyệt.
+- Lệch so với Tasks:
+  1. Task 3.3: test chỉ số của Lão đọc `BoardFixture.stats()` như test của Khoái đang có, không đọc `chi_so.json` (số giống nhau; `test_loaders.gd` đã kiểm file thật).
+  2. Task 3.5: phá thử "lao trúng mọi quân" không làm `lao/trung_vat_dau_tien.json` trượt như Task ghi (lao chỉ bay tới ô được bấm). Ca này do `lao/trung_tuong_minh.json` và 3 test GUT bắt.
+  3. Task 3.5 R7: lần phá thử đầu viết sai điều kiện, làm lại (Debug Log).
+  4. Task 5.2: viết `thu_lao.json` trước test nạp trận, không thấy test đỏ trước.
+  5. Task 6.4–6.5: chỉ có 2 ảnh (viền 3 ô, bay qua quân kề). Ca "trúng Khoái" và trận 1 không chụp được vì thao tác GoPeak ngừng có tác dụng sau vài giây ở cả hai lần chạy. Hai ca này có test giao diện (`test_lance_hits_blocking_khoai`, `test_lance_after_move_needs_confirm`); tác giả kiểm bằng tay theo hướng dẫn dưới đây.
+  6. Sự cố phá thử xóa code chưa commit, đã viết lại (Debug Log).
+  7. Task 3.4: thêm hàm phụ `_controller_for(units)` trong `test_battle_controller.gd` (gom từ `_attack_controller`).
+- **Hướng dẫn tác giả tự test:**
+  1. `tools/test.sh`: thấy `Kịch bản luật: 36 đã duyệt · 0 chưa duyệt (0 chưa đạt)` và `✅ 401/401 test đạt`.
+  2. `tools/chay.sh --dev --tran=thu_lao`. (Tắt bộ gõ VNI/Telex trước khi gõ phím.)
+  3. Gõ `2` chọn Lão: 3 viền trắng, ở Bộ binh xa phía trên Lão (không phải con đứng sát Lão), Kỵ binh bên kia sông, Bộ binh dưới cùng (sau Khoái). So với ảnh `anh/2-3-1-chon-lao-ba-vien.png`.
+  4. Bấm Bộ binh xa phía trên: nó còn 2 máu, con đứng sát Lão vẫn 3. Lão xám. So với `anh/2-3-2-lao-bay-qua-quan-ke.png`.
+  5. `Space`, gõ `2`, bấm Kỵ binh bên kia sông: Kỵ binh còn 1 máu.
+  6. `Space`, gõ `2`, bấm Bộ binh dưới cùng: **Khoái** còn 2 máu, Bộ binh không bị gì.
+  7. `Space`. Gõ `1`, bấm Bộ binh dưới cùng (Khoái đánh, Khoái xám). Gõ `2`, bấm ô `2,3` (Fn+F1 hiện tọa độ ô; Lão đi 1 ô), bấm Kỵ binh (hiện "Bấm lần nữa để đánh"), rồi bấm Khoái: dòng nhắc mất, Lão vẫn được chọn, Kỵ binh không mất máu.
+  8. Trận 1 (`tools/chay.sh --dev`): gõ `2`, bấm ô `2,4` (Lão đi 2 ô); Bộ binh `5,4` bên kia sông có viền; bấm nó hai lần (lần đầu hiện "Bấm lần nữa để đánh"): nó còn 2 máu.
+  - Nhắc: trên Mac F1 là Fn+F1.
 
 ### File List
+
+- `game/src/core/rules_attack.gd`, `grid.gd`, `stats.gd`, `battle_event.gd` (sửa)
+- `game/src/battle/battle_view.gd` (sửa)
+- `game/src/data/scenario_loader.gd`, `game/tests/scenario_runner.gd`, `game/i18n/text.csv` (sửa, Task 1.1)
+- `game/tests/kich_ban/lao/` 8 file (mới)
+- `game/tests/test_rules_attack.gd`, `test_battle_controller.gd`, `test_battle_view.gd`, `test_loaders.gd`, `test_scenario_loader.gd` (sửa)
+- `game/data/tran/thu_lao.json` (mới)
+- `_bmad-output/planning-artifacts/game-architecture.md`, `gdds/gdd-GameTest-2026-10-15/gdd.md` (sửa)
+- `_bmad-output/implementation-artifacts/anh/2-3-1-chon-lao-ba-vien.png`, `2-3-2-lao-bay-qua-quan-ke.png` (mới)
+- `_bmad-output/implementation-artifacts/2-3-pham-ngu-lao-phong-lao.md`, `sprint-status.yaml`, `deferred-work.md` (sửa)
 
 ### Change Log
 
 - 2026-10-19: Tạo story. Tác giả chốt cả 3 câu chọn (a): viền ở quân Nguyên gần nhất mỗi hướng, thêm trận thử `thu_lao`, báo trước khi lao trúng tướng mình để Story 2.12.
+- 2026-10-19: Kịch bản đợt 5 (8 cái) tác giả duyệt; luật lao, mã `ngoai_tam`, bỏ chờ xác nhận khi bấm tướng đã đánh, trận thử `thu_lao`, sửa GDD dòng 151 và kiến trúc. Test 382 → 401, kịch bản 36 đã duyệt. Chuyển sang review.

@@ -635,3 +635,25 @@ func test_real_push_trial_level_loads() -> void:
 	assert_eq(actual, expected)
 	assert_eq(level.terrain_at(Vector2i(3, 1)), Terrain.RIVER)
 	assert_eq(level.terrain_at(Vector2i(3, 2)), Terrain.RIVER, "Bộ binh 2,2 bị đẩy sang Đông thì xuống sông")
+
+
+func test_real_lance_trial_level_loads() -> void:
+	var r: LoadResult = LevelLoader.load_level("res://data/tran/thu_lao.json")
+	assert_eq(r.errors, [] as Array[String])
+	assert_eq(r.warnings, [] as Array[String])
+	var level: LevelData = r.data as LevelData
+	assert_not_null(level)
+	if level == null:
+		return
+	# Các bước tác giả tự test (Story 2.3) dựa vào đúng chỗ đứng này.
+	var expected: Dictionary = {
+		Vector2i(3, 3): UnitType.PHAM_NGU_LAO, Vector2i(3, 5): UnitType.NGUYEN_KHOAI,
+		Vector2i(0, 0): UnitType.BO_BINH, Vector2i(3, 1): UnitType.BO_BINH, Vector2i(3, 2): UnitType.BO_BINH,
+		Vector2i(6, 3): UnitType.KY_BINH, Vector2i(3, 6): UnitType.BO_BINH,
+	}
+	var actual: Dictionary = {}
+	for p: LevelData.UnitPlacement in level.units:
+		actual[p.cell] = p.type
+	assert_eq(actual, expected)
+	assert_eq(level.terrain_at(Vector2i(4, 3)), Terrain.RIVER, "lao bay qua sông tới Kỵ binh 6,3")
+	assert_eq(level.terrain_at(Vector2i(5, 3)), Terrain.RIVER)

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Cung kỵ 1 máu ở ô thứ 4 (xa nhất) trúng lao thì gục, bị nhấc khỏi bàn.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

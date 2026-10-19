@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Khoái đứng ở ô thứ 2, Bộ binh ở ô thứ 3: bấm Bộ binh thì lao trúng Khoái đứng chắn. Khoái mất 1 máu, Bộ binh không bị gì.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

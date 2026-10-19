@@ -338,7 +338,7 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
 | Phần | Nội dung |
 |---|---|
 | `truoc` | Bàn cờ và máu ban đầu |
-| `hanh_dong` | Danh sách lệnh dạng object, ví dụ `{"tuong": "3", "lenh": "danh", "o": "4,2"}`. Lệnh `{"lenh": "ket_thuc_luot"}` chạy luôn pha địch. Lệnh luật phải từ chối thì ghi thêm `"tu_choi": "<mã lý do>"` (`khong_co_quan`, `khong_phai_tuong`, `da_dung_o_do`, `khong_toi_duoc`, `da_di_roi`, `khong_con_nuoc_di`, `da_danh_roi`, `khong_ke`, `khong_co_dich`; lệnh `huy` cũng nhận `tu_choi`; mỗi lệnh chỉ nhận mã của luật lệnh đó); lệnh bị từ chối mà không ghi, hoặc ghi mà không bị từ chối, là kịch bản trượt |
+| `hanh_dong` | Danh sách lệnh dạng object, ví dụ `{"tuong": "3", "lenh": "danh", "o": "4,2"}`. Lệnh `{"lenh": "ket_thuc_luot"}` chạy luôn pha địch. Lệnh luật phải từ chối thì ghi thêm `"tu_choi": "<mã lý do>"` (`khong_co_quan`, `khong_phai_tuong`, `da_dung_o_do`, `khong_toi_duoc`, `da_di_roi`, `khong_con_nuoc_di`, `da_danh_roi`, `khong_ke`, `khong_co_dich`, `ngoai_tam`; lệnh `huy` cũng nhận `tu_choi`; mỗi lệnh chỉ nhận mã của luật lệnh đó); lệnh bị từ chối mà không ghi, hoặc ghi mà không bị từ chối, là kịch bản trượt |
 | `sau` | Bàn cờ và máu mong đợi. Không bắt buộc: `"hiep": 2` (hiệp mong đợi) và `"da_di": ["1"]` (các tướng đã đi trong lượt; `[]` là chưa tướng nào đi, tướng không ghi phải chưa đi), `"da_danh": ["1"]` (như `da_di`, các tướng đã đánh; Story 2.1); không ghi thì không kiểm (tác giả chốt 2026-10-18). Có thể ghi thêm vài sự kiện chính (ví dụ `chet_duoi`) khi đó chính là điều cần kiểm |
 
 Mỗi khi chốt một luật, AI viết kịch bản, tác giả đọc rồi trả lời "đúng" hoặc "sai". Một lệnh chạy toàn bộ kịch bản và in kết quả đạt/trượt bằng tiếng Việt.
@@ -601,7 +601,7 @@ chong-nguyen-mong/                    # repo
 │   │   ├── chien_dich.json           # thứ tự 6 trận, mưu kế mở theo trận
 │   │   └── tran/
 │   │       ├── tran_01.json … tran_05.json
-│   │       ├── thu_ba_tuong.json, thu_day.json   # trận thử, chỉ mở bằng --dev --tran=<tên>
+│   │       ├── thu_ba_tuong.json, thu_day.json, thu_lao.json   # trận thử, chỉ mở bằng --dev --tran=<tên>
 │   ├── assets/
 │   │   ├── fonts/
 │   │   ├── audio/sfx/  audio/music/
@@ -611,7 +611,7 @@ chong-nguyen-mong/                    # repo
 │   │   └── text.csv                  # cột: keys, vi (sau này thêm en)
 │   └── tests/
 │       ├── kich_ban/                 # ★ TÁC GIẢ DUYỆT: kịch bản luật
-│       │   ├── di_chuyen/  day/  keo/  va_cham/  dia_hinh/
+│       │   ├── di_chuyen/  day/  keo/  va_cham/  dia_hinh/  lao/
 │       │   ├── don_dich/  ai/  tiep_vien/  muu_ke/  hiep/  thang_thua/  lang/  gioi_han_hiep/
 │       ├── test_scenarios.gd         # chạy mọi file trong kich_ban/
 │       ├── test_loaders.gd           # dữ liệu sai -> báo lỗi đúng
@@ -815,7 +815,7 @@ Mọi luật đều đi qua đúng quy trình này. Không có ngoại lệ.
 | Tướng | Luật |
 |---|---|
 | Nguyễn Khoái | Đánh 1 ô kề có quân Nguyên, gây sát thương rồi đẩy 1 ô theo hướng đánh. Mục tiêu gục vì sát thương thì không đẩy |
-| Phạm Ngũ Lão | Thẳng hàng. **Bay qua ô kề**, rồi trúng vật đầu tiên ở các ô từ thứ 2 đến thứ 4. Rừng, kho lương hoặc làng **ở bất kỳ ô nào trên đường, kể cả ô kề**, đều chặn lao **(mặc định)**; lao bị làng chặn thì **Lòng dân −1** **(mặc định)**. Sông không chặn |
+| Phạm Ngũ Lão | Thẳng hàng. **Bay qua ô kề**, rồi trúng vật đầu tiên ở các ô từ thứ 2 đến thứ 4. Rừng, kho lương hoặc làng **ở bất kỳ ô nào trên đường, kể cả ô kề**, đều chặn lao **(mặc định)**; lao bị làng chặn thì **Lòng dân −1** **(mặc định)**. Sông không chặn. Viền "đánh được": mỗi hướng một viền, ở **quân Nguyên gần nhất** trong ô 2–4; tướng mình đứng chắn trước thì quân Nguyên sau nó vẫn có viền, bấm vào thì lao trúng tướng mình (tác giả chốt 2026-10-19) |
 | Trần Khánh Dư | Chỉ kéo **vật đầu tiên trên hàng** trong vòng 3 ô, và vật đó phải là quân Nguyên. Vật đầu tiên là tướng, rừng, kho lương hoặc làng thì không kéo được **(mặc định)**. Kéo 2 ô theo bảng di chuyển cưỡng bức. 0 sát thương |
 
 **Chọn mục tiêu:** không được chọn tướng mình làm mục tiêu của đòn (chốt 2026-10-17). Bấm vào tướng mình luôn là lệnh chọn tướng. Tướng mình vẫn trúng đòn như hệ quả: lao trúng vật đầu tiên trên hàng, hoặc bị quân khác va vào.

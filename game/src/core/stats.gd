@@ -32,3 +32,12 @@ func damage(type: int) -> int:
 
 func push_distance(type: int) -> int:
 	return value(type, "do_day")
+
+
+## Tầm lao của Phạm Ngũ Lão: ô gần nhất và xa nhất lao trúng được (tính từ tướng).
+func min_range(type: int) -> int:
+	return value(type, "tam_danh_gan")
+
+
+func max_range(type: int) -> int:
+	return value(type, "tam_danh_xa")

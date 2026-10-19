@@ -14,6 +14,8 @@ const ATTACK_LEVEL: String = ATTACK_DIR + "/tran_01.json"
 ## Trận thử cho tướng mình đứng kề (Story 2.2, FR16).
 const ALLY_DIR: String = PROBE_DIR + "/tran_dong_minh"
 const ALLY_LEVEL: String = ALLY_DIR + "/tran_01.json"
+const LAO_DIR: String = PROBE_DIR + "/tran_lao"
+const LAO_LEVEL: String = LAO_DIR + "/tran_01.json"
 
 ## Ô sáng mong đợi trên trận 1 (AC 4, AC 5), theo thứ tự đọc bàn.
 const KHOAI_CELLS: Array[Vector2i] = [
@@ -43,12 +45,13 @@ func after_each() -> void:
 		if InputMap.has_action("dev_f%d" % (i + 1)):
 			InputMap.erase_action("dev_f%d" % (i + 1))
 	SaveProbe.path = SaveProbe.DEFAULT_PATH
-	for path: String in [BROKEN_LEVEL, ATTACK_LEVEL, ALLY_LEVEL, PROBE_FILE]:
+	for path: String in [BROKEN_LEVEL, ATTACK_LEVEL, ALLY_LEVEL, LAO_LEVEL, PROBE_FILE]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(BROKEN_DIR)
 	DirAccess.remove_absolute(ATTACK_DIR)
 	DirAccess.remove_absolute(ALLY_DIR)
+	DirAccess.remove_absolute(LAO_DIR)
 	DirAccess.remove_absolute(PROBE_DIR)
 	Log.clear()
 
@@ -561,7 +564,7 @@ func test_selecting_khoai_outlines_targets() -> void:
 	assert_eq(_view(main).target_cells(), targets, "B→Đ→N→T: Bắc trước Đông")
 	assert_eq(_board(main).target_cells(), targets, "bàn cờ viền đúng các ô đó")
 	_press_physical(main, KEY_2)
-	assert_eq(_board(main).target_cells(), [] as Array[Vector2i], "Lão chưa có đòn")
+	assert_eq(_board(main).target_cells(), [] as Array[Vector2i], "Lão không có quân Nguyên thẳng hàng trong tầm")
 
 
 func test_click_target_attacks_and_general_is_spent() -> void:
@@ -702,3 +705,97 @@ func test_click_ally_while_confirming_cancels_confirm() -> void:
 	assert_eq(_hud(main).hint_text(), "", "dòng nhắc mất")
 	assert_eq(_unit_at(main, Vector2i(3, 3)).hp, 3, "Bộ binh không mất máu")
 	assert_false(_controller(main).snapshot().unit_by_id(1).has_attacked, "Khoái chưa đánh")
+
+
+# ---------- Lao của Phạm Ngũ Lão (Story 2.3) ----------
+
+## Lão ở 3,3: Bộ binh kề Bắc 3,2, Bộ binh 3,1; Kỵ binh 6,3 (Đông, ô 3); Khoái 3,5 chắn trước Bộ binh 3,6; Bộ binh 0,0.
+func _make_lao_main() -> Node2D:
+	return _make_level_main(LAO_DIR, LAO_LEVEL, {
+		"phien_ban_dinh_dang": 1,
+		"ten": "Thử lao",
+		"kieu": "tieu_diet",
+		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . . . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"quan": ["B . . . . . .", ". . . B . . .", ". . . B . . .", ". . . 2 . . K",
+			". . . . . . .", ". . . 1 . . .", ". . . B . . ."],
+		"thu_tu_dich": ["0,0", "3,1", "3,2", "6,3", "3,6"],
+		"tiep_vien": [],
+		"muu_ke_mo": [],
+	})
+
+
+func test_selecting_lao_outlines_nearest_enemy_each_way() -> void:
+	var main: Node2D = _make_lao_main()
+	_press_physical(main, KEY_2)
+	assert_eq(_view(main).selected_id(), 2)
+	var targets: Array[Vector2i] = [Vector2i(3, 1), Vector2i(6, 3), Vector2i(3, 6)]
+	assert_eq(_view(main).target_cells(), targets, "B→Đ→N→T; không có Bộ binh kề 3,2; 3,6 có viền dù Khoái chắn")
+	assert_eq(_board(main).target_cells(), targets)
+
+
+func test_lance_flies_over_adjacent_unit() -> void:
+	var main: Node2D = _make_lao_main()
+	_press_physical(main, KEY_2)
+	_click_by_mouse(main, Vector2i(3, 1))
+	assert_eq(_unit_at(main, Vector2i(3, 1)).hp, 2, "Bộ binh ô 2 trúng lao")
+	assert_eq(_unit_at(main, Vector2i(3, 2)).hp, 3, "Bộ binh kề không bị gì")
+	assert_true(_token(main, 2).is_attacked())
+	assert_eq(_view(main).selected_id(), BattleView.NONE, "phóng xong thì bỏ chọn")
+	assert_false(_controller(main).can_undo())
+
+
+func test_lance_hits_blocking_khoai() -> void:
+	var main: Node2D = _make_lao_main()
+	_press_physical(main, KEY_2)
+	_click_by_mouse(main, Vector2i(3, 6))
+	assert_eq(_controller(main).snapshot().unit_by_id(1).hp, 2, "Khoái đứng chắn trúng lao")
+	assert_eq(_unit_at(main, Vector2i(3, 6)).hp, 3, "Bộ binh không bị gì")
+
+
+func test_lance_after_move_needs_confirm() -> void:
+	var main: Node2D = _make_lao_main()
+	_press_physical(main, KEY_2)
+	_click_by_mouse(main, Vector2i(2, 3))
+	assert_eq(_unit_cell(main, 2), Vector2i(2, 3), "trước: Lão đã đi tới 2,3")
+	assert_eq(_view(main).target_cells(), [Vector2i(6, 3)] as Array[Vector2i], "trước: chỉ còn Kỵ binh cách 4 ô")
+	_click_by_mouse(main, Vector2i(6, 3))
+	assert_eq(_view(main).pending_cell(), Vector2i(6, 3), "lần đầu chỉ chờ xác nhận")
+	assert_eq(_hud(main).hint_text(), tr("hud.confirm_attack"))
+	assert_eq(_unit_at(main, Vector2i(6, 3)).hp, 2, "chưa phóng")
+	_click_by_mouse(main, Vector2i(6, 3))
+	assert_eq(_unit_at(main, Vector2i(6, 3)).hp, 1, "lần hai mới phóng")
+
+
+## Khoái đã đánh; Lão đi rồi chờ xác nhận Kỵ binh; bấm (hoặc gõ phím) Khoái thì bỏ chờ, Lão vẫn được chọn (AC 12).
+func _lao_pending_with_spent_khoai() -> Node2D:
+	var main: Node2D = _make_lao_main()
+	_press_physical(main, KEY_1)
+	_click_by_mouse(main, Vector2i(3, 6))
+	assert_true(_token(main, 1).is_attacked(), "trước: Khoái đã đánh")
+	_press_physical(main, KEY_2)
+	_click_by_mouse(main, Vector2i(2, 3))
+	_click_by_mouse(main, Vector2i(6, 3))
+	assert_eq(_view(main).pending_cell(), Vector2i(6, 3), "trước: đang chờ xác nhận Kỵ binh")
+	assert_eq(_hud(main).hint_text(), tr("hud.confirm_attack"))
+	return main
+
+
+func _assert_pending_cleared_lao_kept(main: Node2D) -> void:
+	assert_eq(_view(main).pending_cell(), BoardView.NO_CELL, "bỏ chờ xác nhận")
+	assert_eq(_board(main).pending_cell(), BoardView.NO_CELL)
+	assert_eq(_hud(main).hint_text(), "", "dòng nhắc mất")
+	assert_eq(_view(main).selected_id(), 2, "Lão vẫn được chọn")
+	assert_eq(_unit_at(main, Vector2i(6, 3)).hp, 2, "Kỵ binh không bị gì")
+
+
+func test_click_spent_general_cancels_confirm() -> void:
+	var main: Node2D = _lao_pending_with_spent_khoai()
+	_click_by_mouse(main, Vector2i(3, 5))
+	_assert_pending_cleared_lao_kept(main)
+
+
+func test_key_of_spent_general_cancels_confirm() -> void:
+	var main: Node2D = _lao_pending_with_spent_khoai()
+	_press_physical(main, KEY_1)
+	_assert_pending_cleared_lao_kept(main)

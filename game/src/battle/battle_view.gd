@@ -72,8 +72,11 @@ func _on_general_key(id: int) -> void:
 		_deselect()
 		return
 	var unit: Unit = _controller.snapshot().unit_by_id(id)
-	if unit != null and unit.faction == Unit.Faction.DAI_VIET and not unit.has_attacked:
-		_select(id)
+	if unit != null and unit.faction == Unit.Faction.DAI_VIET:
+		if unit.has_attacked:
+			_set_pending(BoardView.NO_CELL)  # như bấm chuột vào tướng đã đánh
+		else:
+			_select(unit.id)
 
 
 func _on_cell_clicked(cell: Vector2i) -> void:
@@ -82,10 +85,12 @@ func _on_cell_clicked(cell: Vector2i) -> void:
 	var unit: Unit = _controller.snapshot().unit_at(cell) if cell != BoardView.NO_CELL else null
 	if unit != null and unit.faction == Unit.Faction.DAI_VIET:
 		# Bấm vào tướng mình luôn là chọn (GDD, chốt 2026-10-17); bấm lại tướng đang chọn thì bỏ chọn.
-		# Tướng đã đánh không chọn được: không gì xảy ra.
+		# Tướng đã đánh không chọn được: chỉ bỏ chờ xác nhận, tướng đang chọn giữ nguyên (Story 2.3).
 		if unit.id == _selected:
 			_deselect()
-		elif not unit.has_attacked:
+		elif unit.has_attacked:
+			_set_pending(BoardView.NO_CELL)
+		else:
 			_select(unit.id)
 		return
 	if _selected != NONE and _targets.has(cell):

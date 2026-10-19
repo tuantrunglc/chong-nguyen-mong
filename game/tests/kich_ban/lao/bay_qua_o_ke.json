@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Lao bay qua Bộ binh đứng ngay trước Lão, trúng Bộ binh ở ô thứ 2. Bộ binh đứng kề không bị gì.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

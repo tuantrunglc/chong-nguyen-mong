@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Hai Bộ binh cùng hàng ở ô thứ 2 và ô thứ 4: lao trúng con gần, con xa không bị gì.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",
