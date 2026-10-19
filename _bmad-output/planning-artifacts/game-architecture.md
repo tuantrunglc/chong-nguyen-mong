@@ -571,7 +571,7 @@ chong-nguyen-mong/                    # repo
 │   │   ├── battle/                   # CẦU NỐI + TRÌNH BÀY TRẬN (Node)
 │   │   │   ├── battle_controller.gd  # giữ trạng thái sống, bản chụp hủy, xem trước
 │   │   │   ├── battle_view.gd        # gốc phần hiển thị trận
-│   │   │   ├── board_view.gd         # vẽ 49 ô thoi (isometric) bằng code; nơi duy nhất đổi ô ↔ điểm
+│   │   │   ├── board_view.gd         # vẽ 49 ô vuông nhìn chếch bằng code (Story 1.8); nơi duy nhất đổi ô ↔ điểm
 │   │   │   ├── unit_token.gd         # đồng quân tròn khắc chữ
 │   │   │   ├── telegraph_view.gd     # ô đỏ, số thứ tự, mũi tên xung phong
 │   │   │   ├── preview_view.gd       # bóng mờ vị trí cuối + máu
@@ -675,7 +675,7 @@ chong-nguyen-mong/                    # repo
 | Signal | `snake_case`, thì quá khứ | `events_resolved` |
 | Tên riêng lịch sử trong code | Tiếng Việt không dấu, UPPER | `UnitType.NGUYEN_KHOAI`, `Stratagem.SAT_THAT` |
 | Tọa độ | `Vector2i(cot, hang)`; trong file dữ liệu là `"cot,hang"` | `Vector2i(4, 2)` ↔ `"4,2"` |
-| Ô ↔ điểm màn hình | Chỉ `BoardView.cell_center()` và `BoardView.cell_at()` (isometric 2:1, ô `0,0` ở đỉnh trên, gốc local là đỉnh trên ô `0,0`). View khác gọi hai hàm này, không tự tính. Chuột dùng `BoardView.pick_cell()`: ô **nhìn thấy** (đồng quân, khối nhô lên che ô phía sau), không trúng gì thì như `cell_at`. Thứ tự vẽ theo `cot + hang`, lớn hơn vẽ sau: khối địa hình và đồng quân là con của `BoardView._world` (`y_sort_enabled`); khối đặt cao hơn tâm ô `TILE_H / 4` để không bằng y với quân ô bên cạnh. Ô sáng, đường đi, vòng chọn, sông, hầm chông, bệ ô ải vẽ trên mặt đất (`_draw` của `BoardView`), luôn dưới khối và quân (Story 1.7) | `cell_at(cell_center(c)) == c`; `pick_cell(cell_center(c)) == c` |
+| Ô ↔ điểm màn hình | Chỉ `BoardView.cell_center()` và `BoardView.cell_at()` (từ Story 1.8: ô vuông nhìn chếch, cạnh ô là bội số của 16 px, ô `0,0` ở góc trên bên trái, Bắc ở trên; trước đó là isometric 2:1 của Story 1.7). View khác gọi hai hàm này, không tự tính. Chuột dùng `BoardView.pick_cell()`: ô **nhìn thấy** (đồng quân, khối nhô lên che ô phía sau), không trúng gì thì như `cell_at`. Thứ tự vẽ theo `hang` (từ Story 1.8; Story 1.7 dùng `cot + hang`), lớn hơn vẽ sau: khối địa hình và đồng quân là con của `BoardView._world` (`y_sort_enabled`); khối đặt cao hơn tâm ô `TILE_H / 4` để không bằng y với quân ô bên cạnh. Ô sáng, đường đi, vòng chọn, sông, hầm chông, bệ ô ải vẽ trên mặt đất (`_draw` của `BoardView`), luôn dưới khối và quân (Story 1.7) | `cell_at(cell_center(c)) == c`; `pick_cell(cell_center(c)) == c` |
 | Khóa dịch | `<man>.<muc>` | `hud.end_turn`, `error.rolled_back` |
 | Khóa JSON dữ liệu | tiếng Việt không dấu, `snake_case` | `thu_tu_dich`, `tiep_vien` |
 

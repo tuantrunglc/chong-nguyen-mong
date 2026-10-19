@@ -24,7 +24,7 @@ File này chia các yêu cầu trong GDD và tài liệu kiến trúc thành epi
 **Bàn cờ và dữ liệu trận**
 - FR1: Bàn 7×7 ô vuông, đi 4 hướng, không đi chéo; khoảng cách tính bằng số ô (Manhattan).
 - FR2: Mỗi trận nạp từ file dữ liệu: địa hình, vị trí quân, tướng nào ra trận, thứ tự hành động của quân Nguyên, lịch tiếp viện, kiểu nhiệm vụ, mưu kế được dùng. Thêm hoặc sửa trận không cần sửa code.
-- FR3: Hiển thị 6 loại ô (đất trống, sông, rừng, hầm chông, kho lương, làng) và ô ải; quân là đồng tròn có chữ hoặc biểu tượng. Bàn vẽ nghiêng kiểu isometric (Story 1.7).
+- FR3: Hiển thị 6 loại ô (đất trống, sông, rừng, hầm chông, kho lương, làng) và ô ải; quân là đồng tròn có chữ hoặc biểu tượng. Bàn vẽ nhìn chếch từ trên xuống, ô vuông (Story 1.8; thay bàn isometric của Story 1.7).
 - FR4: Chỉ số (máu, tầm đi, tầm đánh, sát thương, độ đẩy, tầm kéo, tham số mưu kế) nạp từ `chi_so.json`; tác giả tự sửa được.
 
 **Tướng và di chuyển**
@@ -171,17 +171,17 @@ Khi sang giai đoạn 1 nên chạy `gds-ux`.
 
 ## Danh sách epic
 
-**Ngân sách giờ** (chia lại 2026-10-17; E3 thêm ~10 giờ và E1 thêm ~3 giờ ngày 2026-10-18; tổng ≈ 143 giờ, khoảng 10 giờ/tuần):
+**Ngân sách giờ** (chia lại 2026-10-17; E3 thêm ~10 giờ và E1 thêm ~3 giờ ngày 2026-10-18, E1 thêm ~3 giờ ngày 2026-10-19; tổng ≈ 146 giờ, khoảng 10 giờ/tuần):
 
 | Epic | Giờ | Tuần (ước) | Số story |
 |---|---|---|---|
 | E0 Dựng nền | ~12 | 1–2 | 6 |
-| E1 Bàn cờ và di chuyển | ~21 | 2–3 | 7 |
+| E1 Bàn cờ và di chuyển | ~24 | 2–3 | 8 |
 | E2 Combat cốt lõi | ~35 | 4–7 | 15 |
 | E3 Địa hình và mưu kế | ~45 | 7–11 | 14 |
 | E4 Sáu trận và chơi thử | ~30 | 12–14 | 9 |
 
-**"Trễ" nghĩa là:** một epic dùng quá số giờ trên 25% (ví dụ E2 quá 44 giờ). Khi đó áp dụng phương án cắt: bàn nghiêng tạm (Story 1.7), Cung kỵ (Story 2.15), trận 6 (Story 4.5), trau chuốt xem trước (Story 4.6), trận 4 "Bảo vệ làng" (Story 3.8; khi cắt thì đặt làng vào trận 3). Không cắt luật lõi. Gợi ý luật (Story 4.8) là phần hướng dẫn, không cắt (chốt 2026-10-18).
+**"Trễ" nghĩa là:** một epic dùng quá số giờ trên 25% (ví dụ E2 quá 44 giờ). Khi đó áp dụng phương án cắt: bàn nhìn chếch (Story 1.8, khi cắt thì giữ bàn isometric của Story 1.7), Cung kỵ (Story 2.15), trận 6 (Story 4.5), trau chuốt xem trước (Story 4.6), trận 4 "Bảo vệ làng" (Story 3.8; khi cắt thì đặt làng vào trận 3). Không cắt luật lõi. Gợi ý luật (Story 4.8) là phần hướng dẫn, không cắt (chốt 2026-10-18).
 
 Thứ tự bắt buộc: E0 → E1 → E2 → E3 → E4. Epic sau dùng kết quả của epic trước, không epic nào cần epic sau mới chạy được. Mỗi story luật có một đợt duyệt kịch bản nhỏ bằng `tools/xem_kich_ban.sh`, trước khi viết code.
 
@@ -190,7 +190,7 @@ Tác giả mở link itch.io (riêng tư) và thấy bàn cờ 7×7 trống. Gõ
 **Phủ:** các yêu cầu bổ sung từ kiến trúc (project, GUT, `tools/`, ranh giới, MCP, `Log`, cờ dev, hiển thị phiên bản, bản địa hóa, font, build và deploy); NFR2, NFR4 (đo lần đầu).
 
 ### E1: Bàn cờ và di chuyển
-Tác giả mở trận 1 từ file dữ liệu, chọn tướng, đi, hủy nước đi, kết thúc lượt; tự sửa file trận rồi bấm F5 thì thấy thay đổi; bàn cờ vẽ nghiêng (isometric) tạm.
+Tác giả mở trận 1 từ file dữ liệu, chọn tướng, đi, hủy nước đi, kết thúc lượt; tự sửa file trận rồi bấm F5 thì thấy thay đổi; bàn cờ vẽ nhìn chếch, ô vuông (hình khối tạm).
 **Phủ:** FR1–FR7, FR9–FR11, FR43 (bố cục trận 1). Công cụ dev F1, F5, `?tran=N`.
 
 ### E2: Combat cốt lõi ⚠️ rủi ro cao nhất
@@ -353,7 +353,7 @@ tôi muốn AI tự nhìn thấy được game đang chạy,
 
 ## Epic 1: Bàn cờ và di chuyển
 
-Tác giả mở trận 1 từ file dữ liệu, chọn tướng, đi, hủy nước đi, kết thúc lượt; tự sửa file trận rồi bấm F5 thì thấy thay đổi; bàn cờ vẽ nghiêng (isometric) tạm.
+Tác giả mở trận 1 từ file dữ liệu, chọn tướng, đi, hủy nước đi, kết thúc lượt; tự sửa file trận rồi bấm F5 thì thấy thay đổi; bàn cờ vẽ nhìn chếch, ô vuông (hình khối tạm).
 
 ### Story 1.1: Nạp chỉ số và trận từ file, báo lỗi bằng tiếng Việt
 
@@ -512,6 +512,36 @@ _Thêm 2026-10-18 theo `sprint-change-proposal-2026-10-18-isometric.md`. Cắt �
 **Thì** tọa độ `cot,hang` và id quân hiện đúng trên từng ô thoi
 
 **Và** `tools/test.sh` xanh; có test cho phép đổi ô ↔ điểm (đi rồi về đúng ô, điểm sát mép rơi đúng ô)
+**Và** bản web trên itch.io chạy mượt như trước
+**Và** không sửa gì trong `src/core/`, dữ liệu trận và kịch bản luật
+
+### Story 1.8: Bàn cờ nhìn chếch, ô vuông (thay bàn isometric)
+
+Là tác giả,
+tôi muốn bàn cờ theo kiểu pixel art nhìn chếch từ trên xuống như ảnh mẫu,
+để hình tạm bây giờ đã đúng hướng tranh sẽ làm ở E8.
+
+_Thêm 2026-10-19: tác giả đổi hướng hình ảnh (xem decision-log, ảnh mẫu ở `art-reference/`). Làm trước Story 2.3. Cắt được: khi cắt thì giữ bàn isometric._
+
+**Tiêu chí nghiệm thu:**
+
+**Cho** trận 1 đang mở
+**Thì** bàn 7×7 là các ô vuông; ô `0,0` ở góc trên bên trái, cột tăng sang phải, hàng tăng xuống dưới, giống hệt cách viết trong file trận; bàn nằm gọn trong cửa sổ, chừa chỗ cho HUD
+**Và** kích thước ô là bội số của 16 px (để E8 thay bằng pixel art không bị nhòe)
+**Và** sông thấp hơn mặt đất, thấy bờ ở cạnh trên; rừng, kho lương, làng là khối nhô lên, thấy được mặt trước tối hơn; ô ải là bệ đá thấp; hầm chông phẳng có ký hiệu; mỗi loại ô vẫn phân biệt được bằng màu hoặc ký hiệu
+**Và** mỗi quân là đồng tròn khắc chữ đứng trên ô, có bóng, vẫn hiện số máu; quân và khối cao có thể che một phần ô phía trên, vật ở hàng dưới che vật ở hàng trên, không bị ngược
+
+**Khi** bấm vào bất kỳ ô nào, kể cả sát mép ô
+**Thì** game chọn đúng ô đó (thử với cả 49 ô)
+**Và** bấm vào phần thân quân hoặc khối nhô lên ô phía trên thì vẫn chọn đúng quân hoặc ô của khối đó (như Story 1.7)
+
+**Khi** chọn tướng, rê chuột lên ô sáng, xem viền mục tiêu đánh (Story 2.1, 2.2)
+**Thì** ô sáng, vòng chọn, đường đi và viền mục tiêu hiện đúng trên bàn mới
+
+**Khi** bật dev và bấm F1
+**Thì** tọa độ `cot,hang` và id quân hiện đúng trên từng ô
+
+**Và** `tools/test.sh` xanh; test đổi ô ↔ điểm cập nhật theo bàn mới (đi rồi về đúng ô, điểm sát mép rơi đúng ô, bấm vào thân quân chọn đúng quân)
 **Và** bản web trên itch.io chạy mượt như trước
 **Và** không sửa gì trong `src/core/`, dữ liệu trận và kịch bản luật
 

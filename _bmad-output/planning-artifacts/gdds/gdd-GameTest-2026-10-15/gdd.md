@@ -326,7 +326,7 @@ Thứ người chơi tiến bộ chủ yếu là **kỹ năng đọc bàn cờ**
 ### Art Style
 - **Bàn cờ và quân cờ** (tạm thời): theo phong cách cờ tướng. Mỗi quân là một đồng tròn khắc chữ hoặc biểu tượng, đặt trên nền bản đồ cổ. Tác giả tự làm được bằng code và font chữ.
   [HOÃN SANG E8] Prototype dùng chữ hoặc biểu tượng đơn giản (chốt 2026-10-16). Ở E8 thử viền sơn mài, hoặc đặt hình bóng tướng lên đồng tròn.
-- **Góc nhìn 2,5D** (chốt 2026-10-18): bàn cờ isometric, ô hình thoi, ô `0,0` ở đỉnh trên. Làm **sớm ở Story 1.7** với hình khối và màu tạm; quân vẫn là đồng tròn khắc chữ. [HOÃN SANG E8] thay hình khối tạm bằng tranh 2D vẽ theo góc nghiêng. Không làm 3D thật (chi phí, hiệu năng web, khó sửa trang phục thời Trần). Xem `sprint-change-proposal-2026-10-18-isometric.md`.
+- **Góc nhìn** (chốt 2026-10-19, thay bàn isometric của Story 1.7): **pixel art nhìn chếch từ trên xuống, ô vuông**. Ô `0,0` ở góc trên bên trái, hướng Bắc ở phía trên, đúng như file trận. Vật nhô lên (rừng, kho lương, làng, ô ải, quân) thấy được mặt trước và che một phần ô phía trên. Làm sớm ở **Story 1.8** bằng hình khối và màu tạm; quân vẫn là đồng tròn khắc chữ. [HOÃN SANG E8] thay bằng tranh pixel art (ô là bội số của 16 px, phóng to bằng lọc Nearest để không nhòe). Ảnh mẫu không khí: `_bmad-output/planning-artifacts/art-reference/`. Lý do đổi: tác giả thích kiểu này; rẻ hơn isometric (dễ vẽ, dễ tìm bộ hình sẵn, tọa độ màn hình trùng với file trận). Không làm 3D thật.
 - **Ô đỏ báo đòn** phải nổi bật nhất trên màn hình. Thứ tự ra đòn hiện bằng số lớn.
 - **Tranh minh họa giữa các trận và cảnh Bạch Đằng:** phong cách sơn mài hoặc Đông Hồ. Thuê vẽ 1–3 bức chủ đạo ở giai đoạn 1.
 - **Chính sách AI:**
