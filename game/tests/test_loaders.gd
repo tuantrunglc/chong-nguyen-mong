@@ -623,10 +623,15 @@ func test_real_push_trial_level_loads() -> void:
 	assert_not_null(level)
 	if level == null:
 		return
-	var generals: int = 0
+	# Các bước tác giả tự test (Story 2.2) dựa vào đúng chỗ đứng này.
+	var expected: Dictionary = {
+		Vector2i(0, 3): UnitType.PHAM_NGU_LAO, Vector2i(1, 3): UnitType.NGUYEN_KHOAI,
+		Vector2i(1, 5): UnitType.TRAN_KHANH_DU, Vector2i(2, 2): UnitType.BO_BINH,
+		Vector2i(1, 4): UnitType.BO_BINH, Vector2i(6, 6): UnitType.BO_BINH,
+	}
+	var actual: Dictionary = {}
 	for p: LevelData.UnitPlacement in level.units:
-		if UnitType.is_general(p.type):
-			generals += 1
-	assert_eq(generals, 3, "đủ 3 tướng")
-	assert_eq(level.units.size() - generals, 3, "3 quân Nguyên")
+		actual[p.cell] = p.type
+	assert_eq(actual, expected)
+	assert_eq(level.terrain_at(Vector2i(3, 1)), Terrain.RIVER)
 	assert_eq(level.terrain_at(Vector2i(3, 2)), Terrain.RIVER, "Bộ binh 2,2 bị đẩy sang Đông thì xuống sông")

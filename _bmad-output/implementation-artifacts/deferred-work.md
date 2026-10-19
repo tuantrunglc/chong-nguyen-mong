@@ -99,3 +99,7 @@
 - `ForcedMove.OBSTACLES` (`game/src/core/forced_move.gd:10`) tách khỏi `Terrain.WALKABLE`: thêm loại ô không đi được mà quên thêm vào đây thì quân bị đẩy lên ô đó, `validate` quay lại cả đòn. Hiện hai danh sách khớp.
 - Bộ chạy kịch bản (`game/tests/scenario_runner.gd:177`) bỏ qua tướng đã gục khi so `sau.da_danh`. Tướng chưa gục được trong kịch bản 2.1; xem lại khi va chạm làm tướng gục (2.2).
 - `BattleView._on_target_clicked` không kiểm tướng đang chọn còn trên bàn. Tướng chưa gục được giữa hai cú bấm; xem lại khi pha địch có đòn.
+
+## Deferred from: code review of 2-2-song-va-danh-trung-quan-minh (2026-10-19)
+
+- Bộ chạy kịch bản (`game/tests/scenario_runner.gd:160`) vẫn bỏ qua tướng đã gục khi so `da_danh`/`da_di`. Kịch bản `va_cham/tuong_minh_guc_vi_va.json` là kịch bản đầu tiên có tướng gục; bàn sau (ô Lão trống) đủ bắt lỗi. Nên báo "tướng có trong `sau` mà không còn trên bàn" khi có kịch bản tướng gục phức tạp hơn (đòn địch, 2.8).

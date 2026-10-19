@@ -674,20 +674,24 @@ func test_ally_next_to_khoai_has_no_outline() -> void:
 func test_click_adjacent_ally_switches_selection() -> void:
 	var main: Node2D = _make_ally_main()
 	_press_physical(main, KEY_1)
-	assert_true(_view(main).target_cells().has(Vector2i(3, 3)), "trước: Khoái đang chọn, Bộ binh có viền")
+	assert_eq(_view(main).target_cells(), [Vector2i(3, 3)] as Array[Vector2i], "trước: Khoái đang chọn, Bộ binh có viền")
 	_click_by_mouse(main, Vector2i(2, 4))
 	assert_eq(_view(main).selected_id(), 2, "bấm Lão là chọn Lão")
+	assert_false(_controller(main).can_undo(), "không lệnh nào được gửi")
 	assert_eq(_unit_at(main, Vector2i(3, 3)).hp, 3, "Bộ binh không mất máu")
 	assert_eq(_unit_at(main, Vector2i(2, 4)).hp, 3, "Lão không mất máu")
 	assert_false(_controller(main).snapshot().unit_by_id(1).has_attacked, "Khoái chưa đánh")
-	assert_eq(_board(main).target_cells(), [] as Array[Vector2i], "Lão chưa có đòn")
+	assert_eq(_view(main).target_cells(), [] as Array[Vector2i], "không còn viền mục tiêu")
+	assert_eq(_board(main).target_cells(), [] as Array[Vector2i])
 
 
 func test_click_ally_while_confirming_cancels_confirm() -> void:
 	var main: Node2D = _make_ally_main()
 	_press_physical(main, KEY_1)
-	_click_by_mouse(main, Vector2i(4, 3))
-	assert_eq(_unit_cell(main, 1), Vector2i(4, 3), "trước: Khoái đã đi tới 4,3")
+	assert_eq(_view(main).selected_id(), 1)
+	_click_by_mouse(main, Vector2i(2, 3))
+	assert_eq(_unit_cell(main, 1), Vector2i(2, 3), "trước: Khoái đã đi tới 2,3, xuyên qua Lão")
+	assert_eq(_unit_cell(main, 2), Vector2i(2, 4), "trước: Lão kề Nam Khoái")
 	_click_by_mouse(main, Vector2i(3, 3))
 	assert_eq(_view(main).pending_cell(), Vector2i(3, 3), "trước: đang chờ xác nhận Bộ binh")
 	assert_eq(_hud(main).hint_text(), tr("hud.confirm_attack"))

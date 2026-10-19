@@ -600,7 +600,8 @@ chong-nguyen-mong/                    # repo
 │   │   ├── chi_so.json
 │   │   ├── chien_dich.json           # thứ tự 6 trận, mưu kế mở theo trận
 │   │   └── tran/
-│   │       ├── tran_01.json … tran_05.json, thu_day.json
+│   │       ├── tran_01.json … tran_05.json
+│   │       ├── thu_ba_tuong.json, thu_day.json   # trận thử, chỉ mở bằng --dev --tran=<tên>
 │   ├── assets/
 │   │   ├── fonts/
 │   │   ├── audio/sfx/  audio/music/

@@ -1,5 +1,5 @@
 # generated: 2026-10-17 10:21
-# last_updated: 2026-10-18 14:00
+# last_updated: 2026-10-19
 # project: GameTest
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-10-17 10:21"
-last_updated: 2026-10-18
+last_updated: 2026-10-19
 project: GameTest
 project_key: NOKEY
 tracking_system: file-system
@@ -61,7 +61,7 @@ development_status:
   epic-1-retrospective: optional
   epic-2: in-progress
   2-1-nguyen-khoai-danh-day-va-va-cham: done
-  2-2-song-va-danh-trung-quan-minh: review
+  2-2-song-va-danh-trung-quan-minh: done
   2-3-pham-ngu-lao-phong-lao: backlog
   2-4-tran-khanh-du-keo: backlog
   2-5-mau-guc-thang-va-thua-tieu-diet: backlog

@@ -4,7 +4,7 @@ baseline_commit: 33634bdd90e446446a571a6ad919d9ba58537615
 
 # Story 2.2: Sông và đánh trúng quân mình
 
-Status: review
+Status: done
 
 ## Story
 
@@ -62,6 +62,19 @@ _Story luật thứ hai của E2. Phần lớn luật đã có code từ Story 2
   - [x] 5.3 Kiểm bằng mắt : chạy `tools/chay.sh --dev --tran=thu_day` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím (`select_general_1`, `end_turn`…), `inject_mouse_click` theo pixel = vị trí bàn `(486, 141)` + `BoardView.cell_center` (cách tính như Debug Log 2.1). Làm theo "Hướng dẫn tác giả tự test" ở Dev Notes, `capture_screenshot` sau mỗi bước chính, lưu `_bmad-output/implementation-artifacts/anh/2-2-*.png` (ít nhất: chọn Khoái thấy viền ở Bộ binh, không có viền ở Lão; sau khi đẩy vào Dư; sau khi đẩy xuống sông). Tắt game. Log không có ERROR/WARN.
   - [x] 5.4 `tools/test.sh` xanh (AC 2). Commit một lần: kịch bản đã duyệt, test, trận thử, tài liệu. Ví dụ: `Sông và đánh trúng quân mình (Story 2.2)`.
   - [x] 5.5 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, dùng kết quả thật (số test thật).
+
+### Review Findings
+
+_Code review 2026-10-19 (Blind Hunter, Edge Case Hunter, Acceptance Auditor)._
+
+- [x] [Review][Patch] Ca "đang chờ xác nhận mà bấm tướng mình" cho Khoái đi tới `4,3`, lúc đó Lão `2,4` không còn kề Khoái; AC 6 đòi Lão kề. Đổi đường đi sang `2,3` (kề Bộ binh `3,3` phía Đông, kề Lão `2,4` phía Nam), kiểm trước Lão kề Khoái [game/tests/test_battle_view.gd:686]
+- [x] [Review][Patch] Ca "bấm tướng mình kề bên là chuyển chọn" chỉ kiểm `_board().target_cells()` rỗng ("Lão chưa có đòn" đúng vì Lão chưa có đòn, không phải vì không có viền ở Lão). Thêm: `_view().target_cells()` rỗng, `can_undo()` false (không lệnh nào được gửi), trước khi bấm `target_cells()` đúng bằng `[3,3]` [game/tests/test_battle_view.gd:674]
+- [x] [Review][Patch] Test nạp `thu_day` chỉ đếm quân và một ô sông; dời một quân thì các bước tác giả tự test hỏng mà test vẫn xanh. Kiểm vị trí 6 quân và cả hai ô sông `3,1`, `3,2` [game/tests/test_loaders.gd:618]
+- [x] [Review][Patch] AC 4 (chết đuối: `MOVED PUSH` rồi `DROWNED`, không có `DAMAGED` va chạm, không có `DIED`) chỉ được kiểm ở mức `ForcedMove.run`; chưa có test cho cả cú đánh của Khoái đẩy xuống sông. Thêm test ở `test_rules_attack.gd` so đúng danh sách sự kiện [game/tests/test_rules_attack.gd]
+- [x] [Review][Patch] Tướng mình gục vì va (AC 7) chỉ có kịch bản kiểm bàn sau; chưa test GUT nào kiểm sự kiện `DIED` của tướng (Story 2.5 thua dựa vào đây). Thêm `test_collision_can_kill_general` [game/tests/test_forced_move.gd]
+- [x] [Review][Patch] Ghi chép: phá thử 2.2(a) sửa hai chỗ cùng lúc, Task chỉ đòi một trong hai; sửa riêng `RulesAttack.targets` để thấy từng test bắt được. Ghi vào "Lệch so với Tasks" cả việc này và việc gom `_make_attack_main()` qua `_make_level_main()` [_bmad-output/implementation-artifacts/2-2-song-va-danh-trung-quan-minh.md]
+- [x] [Review][Patch] Cây thư mục kiến trúc thêm `thu_day.json` nhưng thiếu `thu_ba_tuong.json` đã có sẵn; ghi rõ hai file là trận thử (chỉ mở khi `--dev`) [_bmad-output/planning-artifacts/game-architecture.md:603]
+- [x] [Review][Defer] Bộ chạy kịch bản bỏ qua tướng đã gục khi so `da_danh`; kịch bản #3 là kịch bản đầu tiên dựa vào đó, nhưng bàn sau (ô `3,2` trống) vẫn bắt được lỗi [game/tests/scenario_runner.gd:160] — deferred, có từ 2.1; bàn sau đủ bắt cho kịch bản hiện có
 
 ## Dev Notes
 
@@ -244,15 +257,22 @@ Claude Opus 5.5 (claude-opus-5-5)
 - Task 4: viết `test_real_push_trial_level_loads` trước → trượt (chưa có file). Tạo `game/data/tran/thu_day.json` đúng bố cục Dev Notes → 380/380.
 - Task 5.3 kiểm bằng mắt: `tools/chay.sh --dev --tran=thu_day` chạy nền; pixel = `(486 + (cột − hàng)·64, 141 + (cột + hàng)·32 + 32)`. Log: `[INFO][battle] nạp trận thu_day`, không ERROR/WARN. Ảnh `anh/2-2-1` … `2-2-5`: (1) phím 1: viền trắng chỉ ở Bộ binh `1,4`, Lão và Bộ binh `2,2` không viền; (2) bấm Lão: vòng vàng chuyển sang Lão, ô xanh của Lão, không ai mất máu; (3) phím 1, bấm Bộ binh `1,4`: Bộ binh biến mất, Dư 2 máu, Khoái xám; (4) Space, phím 1, đi `1,2`, bấm Bộ binh `2,2`: viền chờ xác nhận, dòng "Bấm lần nữa để đánh"; (5) bấm lần hai: Bộ binh xuống sông, biến khỏi bàn. Tắt game (mã thoát 143 do mình tắt).
 - Task 5.4: `tools/test.sh` 380/380, `Kịch bản luật: 28 đã duyệt · 0 chưa duyệt (0 chưa đạt)`, kiểm ranh giới đạt.
+- Sửa theo code review (2026-10-19): ca chờ xác nhận cho Khoái đi `2,3` (xuyên qua Lão), Lão kề Nam lúc bấm; ca chuyển chọn kiểm thêm `can_undo()` false, `_view().target_cells()` rỗng, trước khi bấm `target_cells()` đúng bằng `[3,3]`; test nạp `thu_day` so đủ 6 ô quân và hai ô sông; thêm `test_strike_pushes_into_river_drowns`, `test_collision_can_kill_general`. `tools/test.sh`: 382/382, `28 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
+- Phá thử lại sau review (mỗi lần một chỗ, trả lại ngay):
+  - Chỉ `RulesAttack.targets` lấy mọi phe → 5 trượt: `test_ally_next_to_khoai_has_no_outline`, `test_click_adjacent_ally_switches_selection`, `test_rejections_keep_state`, `test_targets_are_adjacent_nguyen_units_in_direction_order`, kịch bản `danh/khong_danh_duoc.json`.
+  - Thêm cả `_on_cell_clicked` xét mục tiêu trước tướng mình → thêm `test_click_ally_while_confirming_cancels_confirm` trượt (bản cũ, Lão không kề, không bắt được). Chỉ đổi thứ tự bấm mà `targets` đúng thì không lỗi nào xảy ra được: tướng mình không bao giờ có trong `_targets`.
+  - Sông là vật cản với mọi quân → `test_nguyen_unit_drowns_in_river`, `test_strike_pushes_into_river_drowns` trượt.
+  - `Effects.damage` không nhấc tướng hết máu → `test_collision_can_kill_general` và kịch bản `va_cham/tuong_minh_guc_vi_va.json` trượt.
+  - `thu_day.json` dời Bộ binh `2,2` lên `2,1` → `test_real_push_trial_level_loads` trượt.
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
 - Story 2.2 không viết code luật mới: luật sông và va tướng mình đã có từ 2.1. Thêm 3 kịch bản (tác giả duyệt cả 3), 3 test giao diện FR16, 1 test nạp trận, trận thử `thu_day`, sửa GDD dòng 223 và cây thư mục kiến trúc.
-- Tổng test: 376 → 380 (3 test giao diện + 1 test nạp trận). Kịch bản: 25 → 28 đã duyệt.
-- Lệch so với Tasks: không có. Ghi thêm: Task 2.2 phá thử (a) làm trượt thêm 2 test của `test_rules_attack.gd` ngoài các ca đã nêu; Task 3.3 thấy cả hai kịch bản trượt trong `build/test/kich_ban.txt`, còn tóm tắt chỉ in câu đầu.
+- Tổng test: 376 → 380 (3 test giao diện + 1 test nạp trận) → 382 sau code review (2 test GUT). Kịch bản: 25 → 28 đã duyệt.
+- Lệch so với Tasks: (1) Task 2.2 phá thử (a) lúc đầu sửa hai chỗ cùng lúc, Task chỉ đòi một trong hai; sau code review đã phá thử riêng từng chỗ (Debug Log). (2) Task 2.1: gom phần ghi file trận thử của `_make_attack_main()` vào `_make_level_main()` để dùng chung. (3) Task 2.1 ca thứ ba: Khoái đi `2,3` thay vì `4,3` để Lão còn kề (AC 6), sửa theo code review. (4) Task 4.2: test nạp `thu_day` kiểm cả chỗ đứng 6 quân và hai ô sông, nhiều hơn Task đòi. (5) Task 5.2: cây thư mục thêm cả `thu_ba_tuong.json`, ghi rõ là trận thử. Ghi thêm: Task 2.2 phá thử (a) làm trượt thêm 2 test của `test_rules_attack.gd` ngoài các ca đã nêu; Task 3.3 thấy cả hai kịch bản trượt trong `build/test/kich_ban.txt`, còn tóm tắt chỉ in câu đầu.
 - **Hướng dẫn tác giả tự test:**
-  1. `tools/test.sh`: thấy `Kịch bản luật: 28 đã duyệt · 0 chưa duyệt (0 chưa đạt)` và `✅ 380/380 test đạt`.
+  1. `tools/test.sh`: thấy `Kịch bản luật: 28 đã duyệt · 0 chưa duyệt (0 chưa đạt)` và `✅ 382/382 test đạt`.
   2. `tools/chay.sh --dev --tran=thu_day`. (Tắt bộ gõ VNI/Telex trước khi gõ phím.)
   3. Gõ `1` chọn Khoái: viền trắng quanh Bộ binh ở dưới Khoái; Lão bên trái Khoái **không** có viền; Bộ binh chéo phía trên phải không có viền.
   4. Bấm Lão: game chuyển sang chọn Lão (vòng vàng ở Lão, ô xanh của Lão), không ai mất máu.
@@ -267,13 +287,15 @@ Claude Opus 5.5 (claude-opus-5-5)
 - `game/tests/kich_ban/va_cham/tuong_minh_guc_vi_va.json` (mới)
 - `game/tests/test_battle_view.gd` (sửa)
 - `game/tests/test_loaders.gd` (sửa)
+- `game/tests/test_rules_attack.gd`, `game/tests/test_forced_move.gd` (sửa, code review)
 - `game/data/tran/thu_day.json` (mới)
 - `_bmad-output/planning-artifacts/gdds/gdd-GameTest-2026-10-15/gdd.md` (sửa dòng 223)
 - `_bmad-output/planning-artifacts/game-architecture.md` (sửa cây thư mục)
 - `_bmad-output/implementation-artifacts/anh/2-2-1-chon-khoai-vien-bo-binh.png`, `2-2-2-bam-lao-chuyen-chon.png`, `2-2-3-day-va-du.png`, `2-2-4-cho-xac-nhan-canh-song.png`, `2-2-5-day-xuong-song.png` (mới)
-- `_bmad-output/implementation-artifacts/2-2-song-va-danh-trung-quan-minh.md`, `sprint-status.yaml` (sửa)
+- `_bmad-output/implementation-artifacts/2-2-song-va-danh-trung-quan-minh.md`, `sprint-status.yaml`, `deferred-work.md` (sửa)
 
 ### Change Log
 
 - 2026-10-18: Tạo story. Tác giả chốt: giữ luật "tướng bị đẩy vào sông" trong code, không kịch bản, sửa GDD dòng 223; thêm trận thử `thu_day`.
 - 2026-10-18: Kịch bản đợt 4 (3 cái) tác giả duyệt; test giao diện FR16, trận thử `thu_day`, sửa GDD dòng 223. Test 376 → 380, kịch bản 28 đã duyệt. Chuyển sang review.
+- 2026-10-19: Sửa theo code review: 7 mục sửa (test FR16 chặt hơn, test nạp `thu_day` so chỗ đứng, 2 test GUT chết đuối và tướng gục vì va, ghi chép, cây thư mục), 1 mục hoãn. Test 380 → 382. Xong.

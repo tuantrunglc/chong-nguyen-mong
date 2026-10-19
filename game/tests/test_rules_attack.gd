@@ -32,6 +32,14 @@ func test_killed_target_is_not_pushed() -> void:
 	assert_eq(state.unit_by_id(101).hp, 3, "quân đứng sau không bị va")
 
 
+## Story 2.2 (AC 4): chết đuối không có DAMAGED va chạm, không có DIED.
+func test_strike_pushes_into_river_drowns() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(2, 3): "1", Vector2i(3, 3): "B"}, {Vector2i(4, 3): "~"})
+	assert_eq(_attack(state, 1, Vector2i(3, 3)), ["ATTACKED 1 3,3", "DAMAGED 101 -2 STRIKE",
+		"MOVED 101 3,3>4,3 PUSH", "DROWNED 101 4,3"] as Array[String])
+	assert_null(state.unit_by_id(101))
+
+
 func test_rejections_keep_state() -> void:
 	var units: Dictionary = {Vector2i(3, 4): "1", Vector2i(4, 4): "2", Vector2i(4, 3): "B", Vector2i(3, 2): "K",
 		Vector2i(5, 3): "3"}

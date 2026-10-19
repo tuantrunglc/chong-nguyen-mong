@@ -65,6 +65,15 @@ func test_collision_with_general_hurts_general() -> void:
 	assert_eq(state.unit_by_id(2).hp, 2)
 
 
+## Story 2.2 (AC 7): tướng gục vì va thì bị nhấc khỏi bàn, có DIED.
+func test_collision_can_kill_general() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "B", Vector2i(3, 2): "2"}, {}, {Vector2i(3, 2): 1})
+	assert_eq(_push(state, 101, N), ["COLLIDED 101 2 3,2", "DAMAGED 101 -1 COLLISION",
+		"DAMAGED 2 -1 COLLISION", "DIED 2 3,2"] as Array[String])
+	assert_null(state.unit_by_id(2))
+	assert_eq(state.unit_by_id(101).cell, Vector2i(3, 3))
+
+
 func test_collision_can_kill_pushed_unit() -> void:
 	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "B"}, {Vector2i(3, 2): "#"}, {Vector2i(3, 3): 1})
 	assert_eq(_push(state, 101, N), ["COLLIDED 101 0 3,2", "DAMAGED 101 -1 COLLISION",
