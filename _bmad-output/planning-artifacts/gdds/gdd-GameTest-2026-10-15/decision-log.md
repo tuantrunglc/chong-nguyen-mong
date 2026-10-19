@@ -69,3 +69,4 @@
 - 2026-10-18: GHI CHÚ hướng 2,5D: sau này làm isometric bằng tranh 2D ở E8; không làm 3D thật (chi phí, hiệu năng web, khó sửa trang phục). Luật không đổi. Chưa chèn story nào; chi tiết ở GDD mục Art Style.
 - 2026-10-18: CHỐT làm bàn cờ isometric tạm ở Story 1.7 (cuối E1): ô thoi, ô `0,0` ở đỉnh trên, địa hình bằng khối và màu tạm, quân vẫn là đồng tròn. Tranh vẫn ở E8. Luật không đổi. Thay cho ghi chú hoãn cùng ngày.
 - 2026-10-19: CHỐT đổi hướng hình ảnh sang pixel art nhìn chếch từ trên xuống, ô vuông (theo 2 ảnh mẫu tác giả gửi, lưu ở `art-reference/`). Thay bàn isometric của Story 1.7 bằng Story 1.8, làm trước Story 2.3. Luật không đổi. Tranh pixel art vẫn ở E8.
+- 2026-10-19: SỬA thứ tự: Story 1.8 làm ngay sau Story 2.3 (2.3 đã bắt đầu khi chốt), trước Story 2.4.

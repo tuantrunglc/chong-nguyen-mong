@@ -13,7 +13,8 @@ Tác giả gửi 2 ảnh mẫu (pixel art, nhìn chếch từ trên xuống, ô 
 
 ## 2. Ảnh hưởng
 - **E1:** thêm Story 1.8, ~3 giờ (E1 ~24 giờ, tổng ≈ 146 giờ). Story 1.7 giữ trạng thái xong; phần vẽ của nó được thay.
-- **E2:** 2.1, 2.2 đã xong và vẽ qua `cell_center` / `cell_at` / `pick_cell`, nên chỉ cần kiểm lại viền mục tiêu. Story 1.8 làm **trước 2.3** để các story vẽ sau (2.3 trở đi) dựng thẳng trên bàn mới.
+- **E2:** 2.1, 2.2 đã xong; 2.3 đã bắt đầu khi chốt (kịch bản lao đang làm). Story 1.8 làm **ngay sau 2.3, trước 2.4**, để không đụng phiên đang làm 2.3 và để các story vẽ từ 2.4 trở đi dựng thẳng trên bàn mới. Story 1.8 phải kiểm lại mọi thứ 2.1–2.3 vẽ lên bàn.
+- **Kỹ thuật:** ngoài `board_view.gd`, các file đang dựa vào hình thoi (dùng `TILE_W`, `TILE_H` hoặc độ lệch theo ô thoi) cũng phải sửa: `terrain_block.gd`, `unit_token.gd`, `debug/coord_overlay.gd`; test `test_board_view.gd`, `test_battle_view.gd`. `battle_input.gd` chỉ gọi `pick_cell` nên không đổi.
 - **Luật, dữ liệu trận, kịch bản:** không đổi.
 - **E8:** tranh pixel art, ô bội số của 16 px, lọc Nearest.
 
@@ -25,4 +26,4 @@ Tác giả gửi 2 ảnh mẫu (pixel art, nhìn chếch từ trên xuống, ô 
 - Ảnh mẫu và ghi chú dùng/không dùng: `art-reference/`.
 
 ## 4. Bàn giao
-AI (vai Developer) tạo và làm Story 1.8 trước Story 2.3. Tác giả thử theo tiêu chí nghiệm thu trong `epics.md`.
+AI (vai Developer) tạo và làm Story 1.8 ngay sau khi Story 2.3 xong, trước Story 2.4. Tác giả thử theo tiêu chí nghiệm thu trong `epics.md`.

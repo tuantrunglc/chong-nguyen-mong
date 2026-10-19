@@ -521,7 +521,7 @@ Là tác giả,
 tôi muốn bàn cờ theo kiểu pixel art nhìn chếch từ trên xuống như ảnh mẫu,
 để hình tạm bây giờ đã đúng hướng tranh sẽ làm ở E8.
 
-_Thêm 2026-10-19: tác giả đổi hướng hình ảnh (xem decision-log, ảnh mẫu ở `art-reference/`). Làm trước Story 2.3. Cắt được: khi cắt thì giữ bàn isometric._
+_Thêm 2026-10-19: tác giả đổi hướng hình ảnh (xem decision-log, ảnh mẫu ở `art-reference/`). Làm ngay sau Story 2.3 (2.3 đã bắt đầu khi chốt), trước Story 2.4. Cắt được: khi cắt thì giữ bàn isometric._
 
 **Tiêu chí nghiệm thu:**
 
@@ -535,8 +535,8 @@ _Thêm 2026-10-19: tác giả đổi hướng hình ảnh (xem decision-log, ả
 **Thì** game chọn đúng ô đó (thử với cả 49 ô)
 **Và** bấm vào phần thân quân hoặc khối nhô lên ô phía trên thì vẫn chọn đúng quân hoặc ô của khối đó (như Story 1.7)
 
-**Khi** chọn tướng, rê chuột lên ô sáng, xem viền mục tiêu đánh (Story 2.1, 2.2)
-**Thì** ô sáng, vòng chọn, đường đi và viền mục tiêu hiện đúng trên bàn mới
+**Khi** chọn tướng, rê chuột lên ô sáng, xem viền mục tiêu đánh và viền lao (Story 2.1–2.3)
+**Thì** ô sáng, vòng chọn, đường đi, viền mục tiêu và mọi thứ Story 2.1–2.3 vẽ lên bàn hiện đúng trên bàn mới
 
 **Khi** bật dev và bấm F1
 **Thì** tọa độ `cot,hang` và id quân hiện đúng trên từng ô
