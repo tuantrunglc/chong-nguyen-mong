@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Nguyễn Khoái đánh Bộ binh cuối cùng chỉ còn 1 máu: quân đó gục (không bị đẩy), hết quân Nguyên, thắng.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

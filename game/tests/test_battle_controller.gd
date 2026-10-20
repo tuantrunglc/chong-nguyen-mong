@@ -282,3 +282,27 @@ func test_lethal_attack_is_not_rolled_back() -> void:
 	assert_eq(rolled, [], "không quay lại")
 	assert_null(c.snapshot().unit_at(Vector2i(6, 4)), "Bộ binh va mép bàn, gục")
 	assert_eq(c.snapshot().units.size(), 3)
+
+
+## Story 2.5: hết trận thì khóa lệnh và cả hủy; lệnh bị khóa không phát signal, không đổi gì.
+func test_battle_over_locks_submit_and_undo() -> void:
+	var c: BattleController = _controller_for({Vector2i(3, 1): "1", Vector2i(3, 0): "B", Vector2i(0, 6): "2"})
+	c.submit(Command.move(2, Vector2i(0, 5)))
+	assert_true(c.can_undo(), "điều kiện trước: còn hủy được")
+	c.submit(Command.attack(1, Vector2i(3, 0)))
+	assert_eq(c.snapshot().phase, BattleState.Phase.WON, "Bộ binh cuối va mép bàn và gục")
+	assert_false(c.can_undo())
+	_events_seen = []
+	var rolled: Array = []
+	c.rolled_back.connect(func(problems: Array[String]) -> void: rolled.append(problems))
+	var undone: Array[BattleEvent] = c.undo()
+	assert_eq(BoardFixture.describe(undone), ["REJECTED BATTLE_OVER"] as Array[String])
+	var moved: Array[BattleEvent] = c.submit(Command.move(2, Vector2i(0, 4)))
+	assert_eq(BoardFixture.describe(moved), ["REJECTED BATTLE_OVER"] as Array[String])
+	var ended: Array[BattleEvent] = c.submit(Command.end_turn())
+	assert_eq(BoardFixture.describe(ended), ["REJECTED BATTLE_OVER"] as Array[String])
+	assert_eq(_events_seen.size(), 0, "không phát signal")
+	assert_eq(rolled, [], "không quay lại")
+	assert_eq(_cell(c, 2), Vector2i(0, 5), "Lão không dời")
+	assert_eq(c.snapshot().round_number, 1, "không sang hiệp mới")
+	assert_false(c.can_undo())

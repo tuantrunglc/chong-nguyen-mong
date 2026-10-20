@@ -6,6 +6,10 @@ extends RefCounted
 ## Id quân Nguyên đầu tiên; tướng lấy id theo ký hiệu 1, 2, 3.
 const FIRST_ENEMY_ID: int = 101
 
+## Pha trận (kiến trúc "Mẫu trạng thái"). Story 2.5 chỉ dùng PLAYER, WON, LOST; các pha còn lại để pha địch
+## (Story 2.6–2.8) dùng. Chỉ rules_enemy_phase.gd và rules_victory.gd được đổi pha.
+enum Phase { ENEMY_PREPARE, PLAYER, ENEMY_ACT, END_OF_ROUND, WON, LOST }
+
 var size: Vector2i = Vector2i.ZERO
 ## Theo hàng: index = hang * size.x + cot (như LevelData).
 var terrain: PackedInt32Array = PackedInt32Array()
@@ -14,6 +18,10 @@ var units: Array[Unit] = []
 var round_number: int = 1
 ## Chỉ đọc, dùng chung giữa các bản sao.
 var stats: Stats = null
+## Pha hiện tại. WON hoặc LOST là hết trận: Rules.resolve từ chối mọi lệnh (Story 2.5).
+var phase: Phase = Phase.PLAYER
+## Kiểu nhiệm vụ của trận (chép từ file trận). Kịch bản luật không ghi kiểu nên là Tiêu diệt.
+var mission: LevelData.Mission = LevelData.Mission.ELIMINATE
 
 
 ## Tướng: id = vị trí trong UnitType.GENERALS + 1. Quân Nguyên: 101, 102… theo thứ tự level.units
@@ -23,6 +31,7 @@ static func from_level(level: LevelData, p_stats: Stats) -> BattleState:
 	state.size = level.size
 	state.terrain = level.terrain.duplicate()
 	state.stats = p_stats
+	state.mission = level.mission
 	var next_enemy_id: int = FIRST_ENEMY_ID
 	for p: LevelData.UnitPlacement in level.units:
 		var id: int
@@ -41,6 +50,8 @@ func clone() -> BattleState:
 	copy.terrain = terrain.duplicate()
 	copy.stats = stats
 	copy.round_number = round_number
+	copy.phase = phase
+	copy.mission = mission
 	for u: Unit in units:
 		copy.units.append(Unit.new(u.id, u.type, u.cell, u.hp, u.has_moved, u.has_attacked))
 	return copy
@@ -70,6 +81,10 @@ func validate() -> Array[String]:
 		var max_hp: int = stats.max_hp(u.type)
 		if u.hp < 1 or u.hp > max_hp:
 			problems.append("%s có máu %d, cần từ 1 tới %d" % [where, u.hp, max_hp])
+	if phase == Phase.WON and mission == LevelData.Mission.ELIMINATE:
+		for u: Unit in units:
+			if u.faction == Unit.Faction.NGUYEN:
+				problems.append("đã thắng (Tiêu diệt) mà còn quân Nguyên %d" % u.id)
 	return problems
 
 

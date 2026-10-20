@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Nguyễn Khoái đẩy Bộ binh xuống sông, nhưng còn một Bộ binh khác trên bàn: quân đó chết đuối, trận vẫn đang chơi.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

@@ -46,10 +46,11 @@ func _ready() -> void:
 	box.add_child(_hint_label)
 
 
-## Hiện bảng với số hiệp; nút Hủy mờ khi không có gì để hủy.
-func show_turn(round_number: int, can_undo: bool) -> void:
+## Hiện bảng với số hiệp; nút Hủy mờ khi không có gì để hủy. Hết trận (over) thì cả hai nút đều mờ.
+func show_turn(round_number: int, can_undo: bool, over: bool = false) -> void:
 	_round_label.text = tr("hud.round") % round_number
-	_undo_button.disabled = not can_undo
+	_undo_button.disabled = over or not can_undo
+	_end_turn_button.disabled = over
 	visible = true
 
 

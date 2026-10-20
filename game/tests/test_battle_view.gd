@@ -20,6 +20,8 @@ const KEO_DIR: String = PROBE_DIR + "/tran_keo"
 const KEO_LEVEL: String = KEO_DIR + "/tran_01.json"
 ## Phím chọn Dư (tướng thứ ba).
 const KEO_KEY: Key = KEY_3
+const WIN_DIR: String = PROBE_DIR + "/tran_thang"
+const WIN_LEVEL: String = WIN_DIR + "/tran_01.json"
 
 ## Ô sáng mong đợi trên trận 1 (AC 4, AC 5), theo thứ tự đọc bàn.
 const KHOAI_CELLS: Array[Vector2i] = [
@@ -49,7 +51,7 @@ func after_each() -> void:
 		if InputMap.has_action("dev_f%d" % (i + 1)):
 			InputMap.erase_action("dev_f%d" % (i + 1))
 	SaveProbe.path = SaveProbe.DEFAULT_PATH
-	for path: String in [BROKEN_LEVEL, ATTACK_LEVEL, ALLY_LEVEL, LAO_LEVEL, KEO_LEVEL, PROBE_FILE]:
+	for path: String in [BROKEN_LEVEL, ATTACK_LEVEL, ALLY_LEVEL, LAO_LEVEL, KEO_LEVEL, WIN_LEVEL, PROBE_FILE]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(BROKEN_DIR)
@@ -57,6 +59,7 @@ func after_each() -> void:
 	DirAccess.remove_absolute(ALLY_DIR)
 	DirAccess.remove_absolute(LAO_DIR)
 	DirAccess.remove_absolute(KEO_DIR)
+	DirAccess.remove_absolute(WIN_DIR)
 	DirAccess.remove_absolute(PROBE_DIR)
 	Log.clear()
 
@@ -953,3 +956,107 @@ func test_large_board_edge_push_and_f1() -> void:
 			assert_eq((child as Control).position, expected, "id 1 cạnh đầu đồng Khoái")
 			found = true
 	assert_true(found, "lớp F1 có id 1")
+
+
+# ---------- Thắng và thua (Story 2.5) ----------
+
+## Giống data/tran/thu_thang.json (Lão chưa đánh ở 0,6 để thử khóa bàn). Khoái 1,2 đẩy Bộ binh 2,2 xuống sông
+## 3,2; Dư 5,5 kéo Bộ binh 5,2 (cách 3 ô) xuống sông 5,4. Hai đòn độc lập: hết quân Nguyên sau đòn thứ hai.
+func _make_win_main() -> Node2D:
+	return _make_level_main(WIN_DIR, WIN_LEVEL, {
+		"phien_ban_dinh_dang": 1,
+		"ten": "Thử thắng",
+		"kieu": "tieu_diet",
+		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . ~ . . .", ". . . . . . .",
+			". . . . . ~ .", ". . . . . . .", ". . . . . . ."],
+		"quan": [". . . . . . .", ". . . . . . .", ". 1 B . . B .", ". . . . . . .",
+			". . . . . . .", ". . . . . 3 .", "2 . . . . . ."],
+		"thu_tu_dich": ["2,2", "5,2"],
+		"tiep_vien": [],
+		"muu_ke_mo": [],
+	})
+
+
+func _banner(main: Node2D) -> ResultBanner:
+	return main._result_banner as ResultBanner
+
+
+## Thắng trong hai đòn: đòn đầu chưa có bảng, đòn sau hiện "Thắng!" và khóa bàn.
+func _win(main: Node2D) -> void:
+	_press_physical(main, KEY_1)
+	_click_by_mouse(main, Vector2i(2, 2))
+	_press_physical(main, KEO_KEY)
+	_click_by_mouse(main, Vector2i(5, 2))
+
+
+func test_win_needs_every_enemy_gone() -> void:
+	var main: Node2D = _make_win_main()
+	assert_false(_banner(main).is_showing(), "trước: chưa có bảng")
+	assert_eq(_controller(main).snapshot().phase, BattleState.Phase.PLAYER)
+	_press_physical(main, KEY_1)
+	assert_eq(_view(main).target_cells(), [Vector2i(2, 2)] as Array[Vector2i], "trước: Bộ binh 2,2 có viền")
+	_click_by_mouse(main, Vector2i(2, 2))
+	assert_null(_unit_at(main, Vector2i(2, 2)), "Bộ binh đầu chết đuối")
+	assert_not_null(_unit_at(main, Vector2i(5, 2)), "còn Bộ binh thứ hai")
+	assert_false(_banner(main).is_showing(), "còn quân Nguyên thì chưa thắng")
+	assert_false(_hud(main).end_turn_button().disabled)
+
+
+func test_win_shows_banner_and_locks_the_board() -> void:
+	var main: Node2D = _make_win_main()
+	_press_physical(main, KEY_1)
+	_click_by_mouse(main, Vector2i(2, 2))
+	_press_physical(main, KEO_KEY)
+	assert_eq(_view(main).target_cells(), [Vector2i(5, 2)] as Array[Vector2i], "trước: Bộ binh 5,2 có viền")
+	_click_by_mouse(main, Vector2i(5, 2))
+	assert_null(_unit_at(main, Vector2i(5, 2)), "Bộ binh cuối chết đuối")
+	assert_true(_banner(main).is_showing())
+	assert_eq(_banner(main).result_text(), tr("result.won"))
+	assert_eq(_controller(main).snapshot().phase, BattleState.Phase.WON)
+	assert_eq(_view(main).selected_id(), BattleView.NONE)
+	assert_eq(_view(main).target_cells(), [] as Array[Vector2i])
+	assert_eq(_board(main).target_cells(), [] as Array[Vector2i])
+	assert_true(_hud(main).undo_button().disabled)
+	assert_true(_hud(main).end_turn_button().disabled)
+	# Lão chưa đánh: nếu bàn không khóa thì phím 2 chọn được Lão, bấm ô sáng thì Lão đi.
+	_press_physical(main, KEY_2)
+	assert_eq(_view(main).selected_id(), BattleView.NONE, "phím 2 không chọn được")
+	_click_by_mouse(main, Vector2i(0, 6))
+	assert_eq(_view(main).selected_id(), BattleView.NONE, "bấm vào Lão không chọn được")
+	_click_by_mouse(main, Vector2i(0, 5))
+	assert_eq(_unit_cell(main, 2), Vector2i(0, 6), "Lão không dời")
+	_hud(main).end_turn_button().pressed.emit()
+	_view(main)._on_undo()
+	assert_eq(_controller(main).snapshot().round_number, 1, "không sang hiệp mới")
+	assert_eq(_controller(main).snapshot().phase, BattleState.Phase.WON, "kết cục giữ nguyên")
+
+
+func test_retry_button_reloads_the_battle() -> void:
+	var main: Node2D = _make_win_main()
+	_win(main)
+	assert_true(_banner(main).is_showing(), "điều kiện trước: đã thắng")
+	assert_true(_banner(main).retry_button().visible, "nút Chơi lại trận hiện cùng bảng")
+	_banner(main).retry_button().pressed.emit()
+	_assert_fresh_win_battle(main)
+
+
+func test_f5_after_win_clears_the_banner() -> void:
+	var main: Node2D = _make_win_main()
+	AppState.launch.dev = true
+	_win(main)
+	assert_true(_banner(main).is_showing(), "điều kiện trước: đã thắng")
+	main._reload_data()
+	_assert_fresh_win_battle(main)
+
+
+func _assert_fresh_win_battle(main: Node2D) -> void:
+	assert_false(_banner(main).is_showing(), "bảng ẩn")
+	var state: BattleState = _controller(main).snapshot()
+	assert_eq(state.phase, BattleState.Phase.PLAYER)
+	assert_eq(state.units.size(), 5, "đủ quân như lúc đầu")
+	assert_not_null(_unit_at(main, Vector2i(2, 2)))
+	assert_not_null(_unit_at(main, Vector2i(5, 2)))
+	assert_false(_hud(main).end_turn_button().disabled)
+	_press_physical(main, KEY_1)
+	assert_eq(_view(main).selected_id(), 1, "chơi tiếp được")
+	assert_eq(_view(main).target_cells(), [Vector2i(2, 2)] as Array[Vector2i])

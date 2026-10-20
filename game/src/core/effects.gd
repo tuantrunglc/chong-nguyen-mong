@@ -16,7 +16,8 @@ static func move(state: BattleState, unit: Unit, to_cell: Vector2i, cause: Battl
 
 
 ## Trừ amount máu, ghi DAMAGED với số máu đã trừ thật (máu không xuống dưới 0). Hết máu thì nhấc khỏi bàn, ghi DIED
-## (cả tướng lẫn quân Nguyên, kiến trúc "Gục, thắng, thua"). Kiểm thắng/thua: Story 2.5. amount luôn từ 1 trở lên
+## (cả tướng lẫn quân Nguyên, kiến trúc "Gục, thắng, thua"). Kiểm thắng/thua không làm ở đây mà ở cuối
+## Rules.resolve (RulesVictory.check, Story 2.5), để kết cục xét theo trạng thái cuối lệnh. amount luôn từ 1 trở lên
 ## (bộ nạp chặn sat_thuong 0, tác giả chốt 2026-10-18).
 static func damage(state: BattleState, unit: Unit, amount: int, cause: BattleEvent.Cause,
 		events: Array[BattleEvent]) -> void:

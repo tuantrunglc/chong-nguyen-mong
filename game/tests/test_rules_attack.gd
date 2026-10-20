@@ -36,7 +36,9 @@ func test_killed_target_is_not_pushed() -> void:
 
 ## Story 2.2 (AC 4): chết đuối không có DAMAGED va chạm, không có DIED.
 func test_strike_pushes_into_river_drowns() -> void:
-	var state: BattleState = BoardFixture.state({Vector2i(2, 3): "1", Vector2i(3, 3): "B"}, {Vector2i(4, 3): "~"})
+	# Thêm một Bộ binh xa (102) để quân chết đuối không phải quân Nguyên cuối: ca này không bàn chuyện thắng (2.5).
+	var state: BattleState = BoardFixture.state({Vector2i(2, 3): "1", Vector2i(3, 3): "B", Vector2i(6, 6): "B"},
+		{Vector2i(4, 3): "~"})
 	assert_eq(_attack(state, 1, Vector2i(3, 3)), ["ATTACKED 1 3,3", "DAMAGED 101 -2 STRIKE",
 		"MOVED 101 3,3>4,3 PUSH", "DROWNED 101 4,3"] as Array[String])
 	assert_null(state.unit_by_id(101))

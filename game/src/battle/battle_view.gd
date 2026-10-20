@@ -65,8 +65,9 @@ func pending_cell() -> Vector2i:
 
 
 ## Phím 1-2-3: tướng không có trên bàn hoặc đã đánh thì không gì; phím của tướng đang chọn thì bỏ chọn.
+## Hết trận (thắng hoặc thua) thì mọi thao tác không làm gì (Story 2.5).
 func _on_general_key(id: int) -> void:
-	if _controller == null:
+	if _controller == null or _battle_over():
 		return
 	if id == _selected:
 		_deselect()
@@ -80,7 +81,7 @@ func _on_general_key(id: int) -> void:
 
 
 func _on_cell_clicked(cell: Vector2i) -> void:
-	if _controller == null:
+	if _controller == null or _battle_over():
 		return
 	var unit: Unit = _controller.snapshot().unit_at(cell) if cell != BoardView.NO_CELL else null
 	if unit != null and unit.faction == Unit.Faction.DAI_VIET:
@@ -121,14 +122,14 @@ func _set_pending(cell: Vector2i) -> void:
 
 ## Hủy nước đi gần nhất; vẫn giữ tướng đang chọn (tác giả chốt). Không có gì để hủy thì không gì.
 func _on_undo() -> void:
-	if _controller == null:
+	if _controller == null or _battle_over():
 		return
 	_controller.undo()
 
 
 ## Kết thúc lượt rồi bỏ chọn (tác giả chốt).
 func _on_end_turn() -> void:
-	if _controller == null:
+	if _controller == null or _battle_over():
 		return
 	_controller.submit(Command.end_turn())
 	_deselect()
@@ -137,6 +138,10 @@ func _on_end_turn() -> void:
 ## Sau mỗi lệnh chạy được và mỗi lần hủy: ô sáng, vòng chọn, đường đi của tướng đang chọn tính lại.
 func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) -> void:
 	if _controller == null:
+		return
+	if Rules.is_battle_over(snapshot):
+		_deselect()
+		_update_hud()
 		return
 	if _selected != NONE:
 		var unit: Unit = snapshot.unit_by_id(_selected)
@@ -168,7 +173,13 @@ func _select(id: int) -> void:
 
 
 func _update_hud() -> void:
-	_hud.show_turn(_controller.snapshot().round_number, _controller.can_undo())
+	var snapshot: BattleState = _controller.snapshot()
+	_hud.show_turn(snapshot.round_number, _controller.can_undo(), Rules.is_battle_over(snapshot))
+
+
+## Trận đã kết thúc (thắng hoặc thua).
+func _battle_over() -> bool:
+	return Rules.is_battle_over(_controller.snapshot())
 
 
 func _deselect() -> void:

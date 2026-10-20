@@ -4,7 +4,7 @@ baseline_commit: a38f181
 
 # Story 2.5: Máu, gục, thắng và thua (Tiêu diệt)
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -44,7 +44,7 @@ _**Chưa có** (đừng làm ở đây): thua vì hết `so_hiep_toi_da` (3.5), 
 ## Tasks / Subtasks
 
 - [x] **Task 0: Tác giả chốt 2 câu hỏi** ở "Quyết định của tác giả" (2026-10-20: câu 1 chọn (a) khóa trận; câu 2 chọn (b) bảng chữ kèm nút "Chơi lại trận"). Các Task dưới đây viết đúng theo hai lựa chọn này.
-- [ ] **Task 1: Khung, đợt kịch bản 7, dừng chờ duyệt** (AC: 1, 2) _(1.1–1.4 xong; còn 1.5 HALT chờ tác giả, 1.6)_
+- [x] **Task 1: Khung, đợt kịch bản 7, dừng chờ duyệt** (AC: 1, 2)
   - [x] 1.1 Khung (không phải code luật, làm trước để file kịch bản nạp được):
     - `src/core/battle_event.gd`: thêm `VICTORY`, `DEFEAT` vào **cuối** enum `Type` (sau `ATTACKED`) và hai hàm tạo `victory()`, `defeat()`; thêm `BATTLE_OVER` vào **cuối** enum `Reject`. Sửa chú thích đầu enum.
     - `tests/board_fixture.gd` (`describe`): nhánh mặc định `_` đã in tên loại, nên `VICTORY`, `DEFEAT` ra đúng chữ; kiểm lại, không sửa nếu đủ.
@@ -55,28 +55,28 @@ _**Chưa có** (đừng làm ở đây): thua vì hết `so_hiep_toi_da` (3.5), 
   - [x] 1.2 Viết 5 file đúng như Dev Notes "Đợt kịch bản 7", `"da_duyet": false`, thư mục mới `tests/kich_ban/ket_thuc/`. Không đụng 44 kịch bản đã duyệt.
   - [x] 1.3 `tools/xem_kich_ban.sh ket_thuc`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `ket_qua` và `tu_choi` hiện đúng câu tiếng Việt. `tools/test.sh`: xanh, `44 đã duyệt · 5 chưa duyệt (5 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
   - [x] 1.4 Commit: `Kịch bản kết cục trận chờ duyệt (Story 2.5)`.
-  - [ ] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh ket_thuc`, đọc 5 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ ba điều:
+  - [x] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh ket_thuc`, đọc 5 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ ba điều:
     - hết trận thì **mọi lệnh bị từ chối** (kịch bản #5), theo câu 1;
     - **không có kịch bản "thua"**: chưa có đòn nào của địch, và tướng cuối không tự làm mình gục được bằng lệnh của người chơi; luật thua kiểm bằng test GUT (nói rõ để tác giả không tưởng bị bỏ sót);
     - kịch bản cũ không ghi `ket_qua` thì không bị kiểm kết cục.
     Không làm Task 2 trở đi khi chưa có câu trả lời.
-  - [ ] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" thì xử lý theo AC 2. `tools/test.sh` **phải trượt**. Ghi Debug Log. **Không commit** khi đang đỏ.
-- [ ] **Task 2: Lõi luật** (AC: 3–10)
-  - [ ] 2.1 `src/core/battle_state.gd`: thêm `enum Phase { ENEMY_PREPARE, PLAYER, ENEMY_ACT, END_OF_ROUND, WON, LOST }` (đúng kiến trúc "Mẫu trạng thái"; chỉ `PLAYER`, `WON`, `LOST` dùng ở story này, phần còn lại để 2.6–2.8 dùng) và `var phase: Phase = Phase.PLAYER`; `var mission: LevelData.Mission = LevelData.Mission.ELIMINATE`. `from_level` chép `level.mission`. **`clone()` chép cả hai** (luật "thêm thuộc tính thì thêm vào `clone()`"). Test `test_battle_state.gd`: clone giữ `phase` và `mission`; sửa bản sao không đổi bản gốc.
-  - [ ] 2.2 `src/core/rules_victory.gd` (MỚI, `RefCounted`, hàm `static`): `check(state, events)`:
+  - [x] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" thì xử lý theo AC 2. `tools/test.sh` **phải trượt**. Ghi Debug Log. **Không commit** khi đang đỏ.
+- [x] **Task 2: Lõi luật** (AC: 3–10)
+  - [x] 2.1 `src/core/battle_state.gd`: thêm `enum Phase { ENEMY_PREPARE, PLAYER, ENEMY_ACT, END_OF_ROUND, WON, LOST }` (đúng kiến trúc "Mẫu trạng thái"; chỉ `PLAYER`, `WON`, `LOST` dùng ở story này, phần còn lại để 2.6–2.8 dùng) và `var phase: Phase = Phase.PLAYER`; `var mission: LevelData.Mission = LevelData.Mission.ELIMINATE`. `from_level` chép `level.mission`. **`clone()` chép cả hai** (luật "thêm thuộc tính thì thêm vào `clone()`"). Test `test_battle_state.gd`: clone giữ `phase` và `mission`; sửa bản sao không đổi bản gốc.
+  - [x] 2.2 `src/core/rules_victory.gd` (MỚI, `RefCounted`, hàm `static`): `check(state, events)`:
     - không làm gì nếu `phase` đã là `WON` hay `LOST`;
     - không làm gì nếu `events` không có `DIED` hay `DROWNED` (AC 8);
     - **thắng trước**: `mission == ELIMINATE` và không còn quân Nguyên → `phase = WON`, thêm `BattleEvent.victory()`; rồi mới tới thua: không còn quân Đại Việt → `phase = LOST`, thêm `defeat()`. Cả hai cùng đúng thì chỉ thắng (AC 7);
     - đếm theo `faction` của quân còn trên `state.units`, không theo id, không viết cứng số tướng (AC 6);
     - viết thành các điều kiện nhỏ tách riêng (`_enemies_cleared`, `_generals_lost`) để 3.5, 3.7, 3.11 thêm điều kiện mà không sửa khung.
     - Đây là chỗ **duy nhất** đổi `phase` sang `WON`/`LOST` (kiến trúc: chỉ `rules_enemy_phase.gd` và `rules_victory.gd` đổi pha). `check_boundaries.sh` hiện chưa bắt phép gán `phase`: đừng thêm nếu không cần; chỉ đảm bảo không nơi nào khác gán `WON`/`LOST`.
-  - [ ] 2.3 `src/core/rules.gd`: đầu `resolve`, nếu `state.phase` là `WON` hay `LOST` thì trả một sự kiện `REJECTED` `BATTLE_OVER` (lý do cho dev: "trận đã kết thúc") và **không** chạy lệnh. Cuối `resolve` (sau `match`), nếu **không** bị từ chối thì gọi `RulesVictory.check(state, events)`. Một điểm vào, không gọi kiểm ở chỗ khác (không trong `Effects`).
-  - [ ] 2.4 `src/battle/battle_controller.gd`: `undo()` khi `phase` là `WON`/`LOST` trả `REJECTED BATTLE_OVER`, không phát signal, không đổi gì. (Thực tế bản chụp hủy đã xóa sau lệnh đánh, nhưng khóa rõ ràng để lệnh sau này, ví dụ hầm chông 3.4, không mở lỗ.) `submit` không cần sửa: lệnh bị từ chối đã được xử lý chung.
-  - [ ] 2.5 `src/core/battle_state.gd` `validate()`: thêm bất biến `phase == WON` thì không còn quân Nguyên **khi mission là ELIMINATE** (rỗng là đúng). Đừng thêm bất biến cho `LOST`: bàn mở đầu có thể chưa đủ tướng trong trận thử. Nếu thấy bất biến này làm hỏng test cũ vì lý do chính đáng thì bỏ và ghi lý do.
-  - [ ] 2.6 Chạy `tools/test.sh`; kịch bản mới phải đạt. **Test cũ trượt vì trận bị khóa giữa chừng** (ví dụ test GUT giết quân Nguyên cuối rồi chạy tiếp lệnh): sửa **test GUT** bằng cách thêm một quân Nguyên đứng xa, không phải nới luật. Kịch bản cũ trượt thì dừng, hỏi tác giả (AC 10).
-  - [ ] 2.7 **Phá thử** (mỗi lần một chỗ, ghi Debug Log, trả lại sau mỗi lần): bỏ kiểm `DROWNED` (kịch bản #2 phải trượt); đảo thứ tự thua trước thắng (test thắng ưu tiên phải trượt); bỏ khóa ở `Rules.resolve` (kịch bản #5 phải trượt); kiểm kết cục cả khi không có quân gục (một test GUT "không gục thì không kiểm" phải trượt); bỏ chép `phase` trong `clone()` (test clone phải trượt). Chạy từng kịch bản riêng (`tools/xem_kich_ban.sh`) để chắc mỗi lần phá trượt đúng kịch bản mong đợi, vì `test_scenarios` chỉ in kịch bản trượt đầu tiên.
-- [ ] **Task 3: Test GUT lõi luật** (AC: 4–9)
-  - [ ] 3.1 `tests/test_rules_victory.gd` (MỚI), dùng `BoardFixture`, mỗi ca so **dãy sự kiện** (cuối danh sách là `VICTORY`/`DEFEAT`) và `validate()` rỗng:
+  - [x] 2.3 `src/core/rules.gd`: đầu `resolve`, nếu `state.phase` là `WON` hay `LOST` thì trả một sự kiện `REJECTED` `BATTLE_OVER` (lý do cho dev: "trận đã kết thúc") và **không** chạy lệnh. Cuối `resolve` (sau `match`), nếu **không** bị từ chối thì gọi `RulesVictory.check(state, events)`. Một điểm vào, không gọi kiểm ở chỗ khác (không trong `Effects`).
+  - [x] 2.4 `src/battle/battle_controller.gd`: `undo()` khi `phase` là `WON`/`LOST` trả `REJECTED BATTLE_OVER`, không phát signal, không đổi gì. (Thực tế bản chụp hủy đã xóa sau lệnh đánh, nhưng khóa rõ ràng để lệnh sau này, ví dụ hầm chông 3.4, không mở lỗ.) `submit` không cần sửa: lệnh bị từ chối đã được xử lý chung.
+  - [x] 2.5 `src/core/battle_state.gd` `validate()`: thêm bất biến `phase == WON` thì không còn quân Nguyên **khi mission là ELIMINATE** (rỗng là đúng). Đừng thêm bất biến cho `LOST`: bàn mở đầu có thể chưa đủ tướng trong trận thử. Nếu thấy bất biến này làm hỏng test cũ vì lý do chính đáng thì bỏ và ghi lý do.
+  - [x] 2.6 Chạy `tools/test.sh`; kịch bản mới phải đạt. **Test cũ trượt vì trận bị khóa giữa chừng** (ví dụ test GUT giết quân Nguyên cuối rồi chạy tiếp lệnh): sửa **test GUT** bằng cách thêm một quân Nguyên đứng xa, không phải nới luật. Kịch bản cũ trượt thì dừng, hỏi tác giả (AC 10).
+  - [x] 2.7 **Phá thử** (mỗi lần một chỗ, ghi Debug Log, trả lại sau mỗi lần): bỏ kiểm `DROWNED` (kịch bản #2 phải trượt); đảo thứ tự thua trước thắng (test thắng ưu tiên phải trượt); bỏ khóa ở `Rules.resolve` (kịch bản #5 phải trượt); kiểm kết cục cả khi không có quân gục (một test GUT "không gục thì không kiểm" phải trượt); bỏ chép `phase` trong `clone()` (test clone phải trượt). Chạy từng kịch bản riêng (`tools/xem_kich_ban.sh`) để chắc mỗi lần phá trượt đúng kịch bản mong đợi, vì `test_scenarios` chỉ in kịch bản trượt đầu tiên.
+- [x] **Task 3: Test GUT lõi luật** (AC: 4–9)
+  - [x] 3.1 `tests/test_rules_victory.gd` (MỚI), dùng `BoardFixture`, mỗi ca so **dãy sự kiện** (cuối danh sách là `VICTORY`/`DEFEAT`) và `validate()` rỗng:
     - thắng khi quân Nguyên cuối gục vì sát thương; gục vì chết đuối (Dư kéo, Khoái đẩy); gục vì va chạm với quân Nguyên khác (cả hai gục, hết quân);
     - còn quân Nguyên thì chưa thắng, `phase` vẫn `PLAYER`, không có sự kiện kết cục;
     - **thua**: dựng trạng thái bằng `Effects.damage` trực tiếp lên từng tướng (test được phép; chỉ `src/` bị `check_boundaries.sh` chặn), rồi gọi `RulesVictory.check(state, events)` với danh sách sự kiện của lần giết đó. Ca: 2 tướng, một gục thì chưa thua; cả hai gục thì `DEFEAT`; **1 tướng** và **3 tướng** (không viết cứng số tướng);
@@ -85,29 +85,29 @@ _**Chưa có** (đừng làm ở đây): thua vì hết `so_hiep_toi_da` (3.5), 
     - `mission = HOLD_PASS`: hết quân Nguyên **không** thắng (nhưng hết tướng vẫn thua);
     - **khóa:** sau thắng, `Command.move`, `Command.attack`, `Command.end_turn` đều `REJECTED BATTLE_OVER`, `BoardFixture.picture` giữ nguyên, không thêm `VICTORY` lần hai; sau thua cũng vậy;
     - tướng gục (hết máu) bị nhấc khỏi bàn, ô trống đi vào được (AC 4: chưa có test cho tướng).
-  - [ ] 3.2 `tests/test_battle_controller.gd`: `undo()` sau thắng trả `REJECTED BATTLE_OVER` và không phát `events_resolved`; `submit` lệnh bị khóa không phát signal, `can_undo()` giữ nguyên.
-  - [ ] 3.3 Kiểm `grep -rn "Type\.\|Reject\." game/tests game/src` mọi chỗ duyệt hay `match` trên `BattleEvent.Type`/`Reject`: chữ mô tả của công cụ duyệt cho `BATTLE_OVER` ra đúng; không có `match` nào bị thiếu nhánh mà âm thầm bỏ qua.
-- [ ] **Task 4: Giao diện** (AC: 4, 11, 12)
-  - [ ] 4.1 `src/ui/result_banner.gd` (MỚI): `Control` dựng bằng code như `Hud`; nhãn lớn giữa bàn (`BoardView.AREA`), ẩn mặc định; `show_result(phase)` hiện "Thắng!" hoặc "Thua!" (`tr("result.won")`, `tr("result.lost")`); `hide_result()`. Không nhận chuột (`mouse_filter` bỏ qua). Màu chữ theo màu sẵn có của dự án (đọc `hud.gd`, theme), không số màu tự đặt mới nếu có hằng; bảng có nền bán trong suốt để nhìn xuyên xuống bàn. Nếu tác giả chọn câu 2 (b): thêm nút "Chơi lại trận" phát signal `retry_pressed`, `focus_mode` là `FOCUS_NONE` (như nút của `Hud`).
-  - [ ] 4.2 `src/app/main.gd`: tạo bảng sau `Hud` (nằm trên bàn), trong `_on_events_resolved` đọc `snapshot.phase`: `WON`/`LOST` thì hiện bảng, ngược lại ẩn. `_start_battle` ẩn bảng trước khi dựng trận (F5 xóa bảng, AC 12). Nếu nút có: nối `retry_pressed` với `_start_battle` (cùng logic F5, không bật bằng dev).
-  - [ ] 4.3 `src/battle/battle_view.gd`: trong `_on_events_resolved`, khi `snapshot.phase` là `WON`/`LOST` thì `_deselect()` và không chọn lại; `_on_cell_clicked`, `_on_general_key`, `_on_end_turn` không gửi lệnh khi trận hết (dùng một hàm nhỏ `_battle_over()` đọc `snapshot().phase`); `_update_hud` mờ cả Hủy và Kết thúc lượt khi hết. `src/ui/hud.gd`: `show_turn` nhận thêm cờ `over` (mặc định false) làm mờ `end_turn_button`; đổi chữ ký thì sửa mọi chỗ gọi và test.
-  - [ ] 4.4 `i18n/text.csv`: thêm `result.won,Thắng!`, `result.lost,Thua!` (và `result.retry,Chơi lại trận` nếu có nút); sinh lại `text.vi.translation`. Khóa theo mẫu `<màn>.<mục>`.
-  - [ ] 4.5 `tests/test_battle_view.gd` (qua `main.tscn` thật, trận thử viết vào `user://` rồi xóa ở `after_each`, phím và chuột bằng sự kiện thật). Bố cục: Khoái, một Bộ binh kề, sông sau Bộ binh (thắng bằng một đòn). Các ca, mỗi ca kiểm cả điều kiện trước (bằng đẳng thức, không `has()`):
+  - [x] 3.2 `tests/test_battle_controller.gd`: `undo()` sau thắng trả `REJECTED BATTLE_OVER` và không phát `events_resolved`; `submit` lệnh bị khóa không phát signal, `can_undo()` giữ nguyên.
+  - [x] 3.3 Kiểm `grep -rn "Type\.\|Reject\." game/tests game/src` mọi chỗ duyệt hay `match` trên `BattleEvent.Type`/`Reject`: chữ mô tả của công cụ duyệt cho `BATTLE_OVER` ra đúng; không có `match` nào bị thiếu nhánh mà âm thầm bỏ qua.
+- [x] **Task 4: Giao diện** (AC: 4, 11, 12)
+  - [x] 4.1 `src/ui/result_banner.gd` (MỚI): `Control` dựng bằng code như `Hud`; nhãn lớn giữa bàn (`BoardView.AREA`), ẩn mặc định; `show_result(phase)` hiện "Thắng!" hoặc "Thua!" (`tr("result.won")`, `tr("result.lost")`); `hide_result()`. Không nhận chuột (`mouse_filter` bỏ qua). Màu chữ theo màu sẵn có của dự án (đọc `hud.gd`, theme), không số màu tự đặt mới nếu có hằng; bảng có nền bán trong suốt để nhìn xuyên xuống bàn. Nếu tác giả chọn câu 2 (b): thêm nút "Chơi lại trận" phát signal `retry_pressed`, `focus_mode` là `FOCUS_NONE` (như nút của `Hud`).
+  - [x] 4.2 `src/app/main.gd`: tạo bảng sau `Hud` (nằm trên bàn), trong `_on_events_resolved` đọc `snapshot.phase`: `WON`/`LOST` thì hiện bảng, ngược lại ẩn. `_start_battle` ẩn bảng trước khi dựng trận (F5 xóa bảng, AC 12). Nếu nút có: nối `retry_pressed` với `_start_battle` (cùng logic F5, không bật bằng dev).
+  - [x] 4.3 `src/battle/battle_view.gd`: trong `_on_events_resolved`, khi `snapshot.phase` là `WON`/`LOST` thì `_deselect()` và không chọn lại; `_on_cell_clicked`, `_on_general_key`, `_on_end_turn` không gửi lệnh khi trận hết (dùng một hàm nhỏ `_battle_over()` đọc `snapshot().phase`); `_update_hud` mờ cả Hủy và Kết thúc lượt khi hết. `src/ui/hud.gd`: `show_turn` nhận thêm cờ `over` (mặc định false) làm mờ `end_turn_button`; đổi chữ ký thì sửa mọi chỗ gọi và test.
+  - [x] 4.4 `i18n/text.csv`: thêm `result.won,Thắng!`, `result.lost,Thua!` (và `result.retry,Chơi lại trận` nếu có nút); sinh lại `text.vi.translation`. Khóa theo mẫu `<màn>.<mục>`.
+  - [x] 4.5 `tests/test_battle_view.gd` (qua `main.tscn` thật, trận thử viết vào `user://` rồi xóa ở `after_each`, phím và chuột bằng sự kiện thật). Bố cục: Khoái, một Bộ binh kề, sông sau Bộ binh (thắng bằng một đòn). Các ca, mỗi ca kiểm cả điều kiện trước (bằng đẳng thức, không `has()`):
     - trước: bảng ẩn, `selected_id()` là `NONE`; sau khi đánh quân cuối: bảng hiện chữ `tr("result.won")`; `selected_id()` là `NONE`; `target_cells()` rỗng;
     - sau thắng: bấm một ô sáng cũ và bấm tướng không gửi lệnh (`snapshot()` giữ nguyên; kiểm bằng đồng quân không dời), nút Hủy và Kết thúc lượt mờ, gõ Space không đổi hiệp;
     - máu đổi ngay: trận hai quân Nguyên, Khoái đánh một quân (3 → 1 máu): `_token(main, id).hp_text()` là `"1"` ngay sau lệnh (AC 4; nếu test tương tự đã có từ 2.1 thì tái dùng, chỉ ghi lại);
     - F5 (dev) sau thắng: bảng ẩn, `phase` về `PLAYER`, đồng quân trở lại bố cục đầu. Nút "Chơi lại trận" nếu có: cùng kết quả.
     - Không có thao tác nào dựa vào hoạt ảnh (Phần 1 chưa có).
-  - [ ] 4.6 Phá thử giao diện (mỗi lần một chỗ, ghi Debug Log): bỏ `_deselect()` khi hết trận; bỏ ẩn bảng trong `_start_battle`; bỏ `_battle_over()` ở `_on_cell_clicked`: mỗi lần phải có một test giao diện trượt.
-- [ ] **Task 5: Trận thử `thu_thang`** (AC: 13)
-  - [ ] 5.1 `game/data/tran/thu_thang.json` (MỚI) đúng bố cục ở Dev Notes "Trận thử `thu_thang`". Không đổi `tran_01.json` và các trận thử cũ.
-  - [ ] 5.2 `tests/test_loaders.gd`: thêm `test_real_win_trial_level_loads` theo mẫu `test_real_pull_trial_level_loads`: không lỗi, không cảnh báo, **so đủ ô và loại của mọi quân**, kiểm ô sông. Thêm một test chơi thật trên chính file này (nạp `thu_thang.json`, chạy hai lệnh: Khoái đẩy, Dư kéo) kết thúc `WON`; test dùng file thật nên sửa file trận thì test báo.
-- [ ] **Task 6: Tài liệu và kiểm tay** (AC: 3, 13, 14)
-  - [ ] 6.1 `game-architecture.md`: thêm `thu_thang.json` vào cây `data/tran/`, `result_banner.gd` vào cây `ui/`, `rules_victory.gd` đã có trong cây (kiểm); bảng thứ tự phân giải: dòng kiểm thắng/thua đặt **sau** lệnh, và "thắng trước thua". Nếu sai lệch với kiến trúc (ví dụ đã đặt tên khác) ghi vào "Lệch so với Tasks".
-  - [ ] 6.2 `epics.md` Story 2.5: không sửa tiêu chí; nếu quyết định của tác giả (câu 1, 2) làm đổi nghĩa tiêu chí thì ghi chú một dòng.
-  - [ ] 6.3 Kiểm bằng mắt: chạy `tools/chay.sh --dev --tran=thu_thang` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím, `inject_mouse_click` theo pixel của công thức hiện hành (bàn 7×7 giữ `board.position = (262, 139)`; **tính lại từ Debug Log 2.3, không đoán**). Làm theo "Hướng dẫn tác giả tự test", `capture_screenshot` sau mỗi bước chính, lưu `_bmad-output/implementation-artifacts/anh/2-5-*.png` (ít nhất: sau khi Khoái đẩy xuống sông còn một quân Nguyên chưa có bảng; sau khi Dư kéo xuống sông hiện "Thắng!"). Tắt game. Log không có ERROR/WARN. GoPeak không kết nối được thì **bỏ dấu [x] và ghi rõ chờ tác giả kiểm tay** (review 2.3 và 2.4 đã bắt lỗi ghi [x] mà thiếu ảnh).
-  - [ ] 6.4 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, trận thử, tài liệu, `.uid` mới (cho `rules_victory.gd`, `result_banner.gd`, `test_rules_victory.gd`), `game/i18n/text.vi.translation`. Ví dụ: `Thắng và thua của trận Tiêu diệt (Story 2.5)`.
-  - [ ] 6.5 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, dùng kết quả thật (số test thật).
+  - [x] 4.6 Phá thử giao diện (mỗi lần một chỗ, ghi Debug Log): bỏ `_deselect()` khi hết trận; bỏ ẩn bảng trong `_start_battle`; bỏ `_battle_over()` ở `_on_cell_clicked`: mỗi lần phải có một test giao diện trượt.
+- [x] **Task 5: Trận thử `thu_thang`** (AC: 13)
+  - [x] 5.1 `game/data/tran/thu_thang.json` (MỚI) đúng bố cục ở Dev Notes "Trận thử `thu_thang`". Không đổi `tran_01.json` và các trận thử cũ.
+  - [x] 5.2 `tests/test_loaders.gd`: thêm `test_real_win_trial_level_loads` theo mẫu `test_real_pull_trial_level_loads`: không lỗi, không cảnh báo, **so đủ ô và loại của mọi quân**, kiểm ô sông. Thêm một test chơi thật trên chính file này (nạp `thu_thang.json`, chạy hai lệnh: Khoái đẩy, Dư kéo) kết thúc `WON`; test dùng file thật nên sửa file trận thì test báo.
+- [ ] **Task 6: Tài liệu và kiểm tay** (AC: 3, 13, 14) _(chỉ còn 6.3, chờ tác giả kiểm tay)_
+  - [x] 6.1 `game-architecture.md`: thêm `thu_thang.json` vào cây `data/tran/`, `result_banner.gd` vào cây `ui/`, `rules_victory.gd` đã có trong cây (kiểm); bảng thứ tự phân giải: dòng kiểm thắng/thua đặt **sau** lệnh, và "thắng trước thua". Nếu sai lệch với kiến trúc (ví dụ đã đặt tên khác) ghi vào "Lệch so với Tasks".
+  - [x] 6.2 `epics.md` Story 2.5: không sửa tiêu chí; nếu quyết định của tác giả (câu 1, 2) làm đổi nghĩa tiêu chí thì ghi chú một dòng.
+  - [ ] 6.3 _(Chưa xong: game mở được `thu_thang`, log sạch; chưa chụp ảnh vì GoPeak không kết nối trong phiên này (`CONNECTION_CLOSED`); chờ tác giả kiểm tay, xem Lệch 2)_ Kiểm bằng mắt: chạy `tools/chay.sh --dev --tran=thu_thang` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím, `inject_mouse_click` theo pixel của công thức hiện hành (bàn 7×7 giữ `board.position = (262, 139)`; **tính lại từ Debug Log 2.3, không đoán**). Làm theo "Hướng dẫn tác giả tự test", `capture_screenshot` sau mỗi bước chính, lưu `_bmad-output/implementation-artifacts/anh/2-5-*.png` (ít nhất: sau khi Khoái đẩy xuống sông còn một quân Nguyên chưa có bảng; sau khi Dư kéo xuống sông hiện "Thắng!"). Tắt game. Log không có ERROR/WARN. GoPeak không kết nối được thì **bỏ dấu [x] và ghi rõ chờ tác giả kiểm tay** (review 2.3 và 2.4 đã bắt lỗi ghi [x] mà thiếu ảnh).
+  - [x] 6.4 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, trận thử, tài liệu, `.uid` mới (cho `rules_victory.gd`, `result_banner.gd`, `test_rules_victory.gd`), `game/i18n/text.vi.translation`. Ví dụ: `Thắng và thua của trận Tiêu diệt (Story 2.5)`.
+  - [x] 6.5 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, dùng kết quả thật (số test thật).
 
 ## Dev Notes
 
@@ -297,18 +297,74 @@ _(dev điền)_
 - Task 1.1: `ket_thuc_luot` **không** nhận `tu_choi` (test cũ `test_step_reject_code_errors` khẳng định điều này). Task 1.1 chỉ cho thêm `tran_da_het` cho lệnh kết thúc lượt "nếu bảng có": bảng không có, và kịch bản #5 dùng lệnh `di`, nên giữ nguyên. `tran_da_het` có ở `di`, `danh`, `huy`.
 - Task 1.1: sửa 4 chỗ trong `test_scenario_loader.gd` có chuỗi liệt kê mã từ chối (thêm `"tran_da_het"` ở cuối); thêm 4 test (`test_after_outcome_is_read`, `test_after_outcome_errors`, `test_battle_over_reject_fits_every_command`, `test_runner_compares_outcome_only_when_written`).
 - Task 1.3: `tools/test.sh` xanh, 451/451, `Kịch bản luật: 44 đã duyệt · 5 chưa duyệt (4 chưa đạt)`. Lý do chưa đạt: #2, #3, #4 `sau: mong đợi kết cục "thang", thực tế "dang_choi"`; #5 `bước 2: kịch bản ghi "tu_choi": "tran_da_het" nhưng luật cho chạy`. **#1 (`dich_con_lai_chua_thang`) đạt ngay**, vì "đang chơi" cũng là trạng thái hiện tại (đúng như ghi chú trong Dev Notes); số `(4 chưa đạt)` thay cho `(5 chưa đạt)` ở AC 1.
+- Task 1.6: tác giả trả lời "ok" cho cả 5 kịch bản (2026-10-20), hiểu là cả 5 "đúng". Đổi `da_duyet: true` (chỉ khóa đó). `tools/test.sh` trượt đúng như AC 2: `kịch bản đã duyệt ket_thuc/het_tran_khoa_lenh.json: bước 2: kịch bản ghi "tu_choi": "tran_da_het" nhưng luật cho chạy`.
+- Task 2/3 (đỏ trước khi code): viết `test_rules_victory.gd` (15 test), `test_clone_copies_phase_and_mission`, `test_from_level_copies_mission`, `test_battle_over_locks_submit_and_undo` **trước** code luật; chạy thấy đỏ (`Cannot find member "Phase" in base "BattleState"`, kịch bản #5 trượt), rồi mới viết `BattleState.phase/mission`, `RulesVictory`, khóa ở `Rules.resolve` và `BattleController.undo`, và đổi `ScenarioRunner._outcome` đọc `state.phase`.
+- Task 2.6: sau khi có luật, 1 test cũ trượt: `test_rules_attack.gd › test_strike_pushes_into_river_drowns` (quân chết đuối là quân Nguyên duy nhất nên có thêm `VICTORY`). Sửa test GUT bằng cách thêm Bộ binh xa `6,6` (id 102), không nới luật. **Không kịch bản cũ nào trượt**; không phải sửa kịch bản nào.
+- Task 2.7 phá thử (mỗi lần một chỗ, `tools/test.sh`, đã trả lại sau mỗi lần):
+  - bỏ `DROWNED` khỏi `_someone_fell`: `test_last_enemy_drowns_by_push_wins`, `test_last_enemy_drowns_by_pull_next_to_du_wins` + kịch bản `ket_thuc/thang_dich_cuoi_chet_duoi.json` (`mong đợi kết cục "thang", thực tế "dang_choi"`);
+  - xét thua trước thắng: `test_victory_beats_defeat_in_either_order` (chỉ test GUT bắt, vì không có kịch bản thắng-thua cùng lúc, theo thiết kế);
+  - bỏ khóa ở `Rules.resolve`: `test_commands_are_locked_after_victory`, `test_commands_are_locked_after_defeat`, `test_battle_over_locks_submit_and_undo` + kịch bản `ket_thuc/het_tran_khoa_lenh.json` (`bước 2: … nhưng luật cho chạy`);
+  - kiểm cả khi không ai gục: 14 test trượt (nhiều test controller và `test_adjacent_cell_off_board_is_not_adjacent`…), gồm `test_no_death_means_no_check`;
+  - `clone()` không chép `phase`: `test_clone_copies_phase_and_mission`, `test_battle_over_locks_submit_and_undo` + kịch bản `het_tran_khoa_lenh.json` (`mong đợi kết cục "thang", thực tế "dang_choi"`).
+  Lưu ý: `test_scenarios` chỉ in kịch bản trượt đầu tiên mỗi lần chạy, nên mỗi lần phá chỉ thấy một kịch bản; mỗi lần phá thử đó chỉ có tối đa một kịch bản bị ảnh hưởng nên đủ chứng minh.
+- Task 3.3: `grep` mọi chỗ duyệt `BattleEvent.Type`/`Reject`: chỉ `BoardFixture.describe` có `match` trên `Type`, nhánh mặc định `_` in tên loại nên `VICTORY`/`DEFEAT` ra đúng chữ; không `match` nào bị thiếu nhánh.
+- Test sau Task 3: 469/469 đạt; `Kịch bản luật: 49 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
+- Task 4.2/4.3: `BattleView` dùng `Rules.is_battle_over(snapshot)` (hàm nhỏ mới ở `rules.gd`, `check_boundaries.sh` không chặn) thay vì tự so `phase`, để chỉ một chỗ biết "WON hoặc LOST". `Hud.show_turn(round, can_undo, over = false)`: thêm tham số cuối có mặc định nên mọi chỗ gọi cũ không đổi.
+- Task 4.5: ca "máu đổi ngay" (AC 4) đã có từ 2.1: `test_click_target_attacks_and_general_is_spent` kiểm `_token(main, 101).hp_text() == "1"` ngay sau đòn; tái dùng, không viết lại. Test mới: `test_win_needs_every_enemy_gone`, `test_win_shows_banner_and_locks_the_board`, `test_retry_button_reloads_the_battle`, `test_f5_after_win_clears_the_banner`, và 6 test ở `test_result_banner.gd` (chữ "Thua!" chỉ kiểm ở đây vì chưa thua được bằng lệnh thật).
+- Task 4.6 phá thử giao diện (mỗi lần một chỗ, đã trả lại): bỏ `_deselect()` khi hết trận → `test_win_shows_banner_and_locks_the_board`; bỏ ẩn bảng trong `_start_battle` → `test_retry_button_reloads_the_battle`, `test_f5_after_win_clears_the_banner`; bỏ `_battle_over()` ở `_on_cell_clicked` → `test_win_shows_banner_and_locks_the_board`.
+- Task 5: `thu_thang.json` thêm Lão `2` ở `0,6` (Dev Notes cho phép): Lão chưa đánh nên hết trận bấm Lão là thấy rõ bàn đã khóa. Bố cục của `_make_win_main()` trong test giao diện giống hệt file này.
+- Task 6.1: `game-architecture.md`: thêm mã `tran_da_het` và khóa `sau.ket_qua` vào bảng định dạng kịch bản, `result_banner.gd` và `thu_thang.json` vào cây, đổi tên nhóm kịch bản `thang_thua/` thành `ket_thuc/` (tên tôi đã dùng ở đợt kịch bản), và ghi cách kiểm thắng/thua và luật khóa vào mục "Gục, thắng, thua". Không sửa `epics.md` (tiêu chí không đổi nghĩa).
+- Task 6.3: `timeout 12 tools/chay.sh --dev --tran=thu_thang`: log có `[INFO][battle] nạp trận thu_thang`, không có ERROR/WARN. Không chụp ảnh vì GoPeak không kết nối được (`CONNECTION_CLOSED`).
+- Test cuối: 481/481 đạt (447 + 34 mới: 15 `test_rules_victory`, 6 `test_result_banner`, 4 giao diện, 4 `test_scenario_loader`, 2 `test_loaders`, 2 `test_battle_state`, 1 `test_battle_controller`); `Kịch bản luật: 49 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
 - Kịch bản dùng đúng số liệu 2.1: Khoái gây 2 sát thương, Bộ binh 3 máu; #4 dựa trên `va_cham/day_vao_quan_khac.json` (Bộ binh đẩy vào Bộ binh: cả hai mất 1 máu) với Bộ binh sau ghi 1 máu.
 
 ### Completion Notes List
 
-_(dev điền)_
+- Trận Tiêu diệt có kết cục: hết quân Nguyên (hết máu, chết đuối, hoặc va chạm) thì `VICTORY`, `phase = WON`; hết tướng trên bàn thì `DEFEAT`, `phase = LOST`; thắng được ưu tiên khi cùng lúc; số tướng đếm từ bàn. Kiểm ở cuối `Rules.resolve`, chỉ khi lệnh có quân gục (`DIED`/`DROWNED`).
+- Hết trận thì khóa: mọi lệnh và cả Hủy bị từ chối `BATTLE_OVER` (mã kịch bản `tran_da_het`), theo quyết định 1a của tác giả.
+- Giao diện: bảng "Thắng!"/"Thua!" giữa bàn (nhỏ, hơi trong suốt, không nhận chuột) kèm nút "Chơi lại trận" (quyết định 2b, nạp lại trận như F5, bấm được khi không bật dev); Hủy, Kết thúc lượt mờ; chọn tướng, ô sáng, viền, bấm bàn đều không còn tác dụng. F5 hoặc nút nạp lại thì bảng ẩn.
+- `BattleState` thêm `phase`, `mission` (đều chép trong `clone()`), `validate()` thêm bất biến "đã thắng (Tiêu diệt) thì không còn quân Nguyên". `Effects` không đổi logic.
+- 5 kịch bản `ket_thuc/` đã duyệt và đạt; khóa mới `sau.ket_qua` (không bắt buộc) và mã `tran_da_het`; 44 kịch bản cũ không bị sửa.
+- Trận thử `thu_thang.json` (Khoái, Lão, Dư; hai Bộ binh; thắng bằng hai đòn trong một lượt).
+- **Lệch so với Tasks:** (1) Task 1.1: lệnh `ket_thuc_luot` không nhận `tu_choi` (giữ hợp đồng cũ, xem Debug Log); (2) Task 6.3 chưa xong: không chụp ảnh được (GoPeak không kết nối), chờ tác giả kiểm tay, nên `[ ]`; (3) Task 5: `thu_thang.json` có thêm Lão; (4) AC 1 ghi `(5 chưa đạt)` nhưng thực tế `(4 chưa đạt)` vì kịch bản #1 đạt ngay (Dev Notes đã báo trước); (5) Task 2.6: một test GUT cũ (`test_strike_pushes_into_river_drowns`) được thêm Bộ binh xa, không kịch bản nào bị sửa.
+- Việc để lại: Story 2.8 phải gọi thêm `RulesVictory.check` sau từng đòn địch (đã ghi `deferred-work.md`); khi 2.8 hoặc 3.4 cho thua thật thì thêm kịch bản "thua" vào `ket_thuc/`.
+- **Hướng dẫn tác giả tự test (kết quả thật):**
+  1. `tools/test.sh`: `Kịch bản luật: 49 đã duyệt · 0 chưa duyệt (0 chưa đạt)`, `✅ 481/481 test đạt`.
+  2. `tools/chay.sh --dev --tran=thu_thang` (tắt bộ gõ VNI/Telex). Mở lên: hai Bộ binh (3 máu), Khoái `1,2`, Lão `0,6`, Dư `5,5`; chưa có bảng.
+  3. Gõ `1`, bấm Bộ binh `2,2` (viền trắng): Bộ binh rơi xuống sông và biến mất. **Chưa** có bảng "Thắng!" vì còn một Bộ binh.
+  4. Gõ `3`, bấm Bộ binh `5,2`: Dư kéo, Bộ binh rơi xuống sông. Hiện **"Thắng!"** giữa bàn (bàn vẫn nhìn thấy), kèm nút "Chơi lại trận"; nút Hủy và Kết thúc lượt mờ.
+  5. Gõ `2` hoặc bấm vào Lão, bấm các ô, gõ `Space`, `Z`: không gì xảy ra (Lão không chọn được).
+  6. Bấm nút "Chơi lại trận" (hoặc `F5` khi bật dev): bàn về đầu, hết bảng, chơi tiếp được.
+  7. **Thua chưa thử bằng tay được** (chưa có đòn địch, Story 2.8); kiểm bằng test GUT.
+  8. (Tùy) Trận 1 thật `tools/chay.sh --dev`: hạ 3 Bộ binh thì hiện "Thắng!".
 
 ### File List
 
-_(dev điền)_
+- `game/src/core/battle_state.gd` (sửa)
+- `game/src/core/rules_victory.gd` (mới), `rules_victory.gd.uid` (mới)
+- `game/src/core/rules.gd` (sửa)
+- `game/src/core/battle_event.gd` (sửa)
+- `game/src/core/effects.gd` (sửa, chỉ chú thích)
+- `game/src/battle/battle_controller.gd` (sửa)
+- `game/src/battle/battle_view.gd` (sửa)
+- `game/src/ui/hud.gd` (sửa)
+- `game/src/ui/result_banner.gd` (mới), `result_banner.gd.uid` (mới)
+- `game/src/app/main.gd` (sửa)
+- `game/src/data/scenario_loader.gd`, `game/src/data/scenario_data.gd` (sửa)
+- `game/i18n/text.csv` (sửa), `game/i18n/text.vi.translation` (sinh lại)
+- `game/data/tran/thu_thang.json` (mới)
+- `game/tests/kich_ban/ket_thuc/dich_con_lai_chua_thang.json`, `thang_dich_cuoi_chet_duoi.json`, `thang_dich_cuoi_het_mau.json`, `thang_khi_hai_dich_cung_gac.json`, `het_tran_khoa_lenh.json` (mới)
+- `game/tests/test_rules_victory.gd` (mới), `test_rules_victory.gd.uid` (mới)
+- `game/tests/test_result_banner.gd` (mới), `test_result_banner.gd.uid` (mới)
+- `game/tests/scenario_runner.gd`, `game/tests/scenario_viewer.gd` (sửa)
+- `game/tests/test_scenario_loader.gd`, `test_battle_state.gd`, `test_battle_controller.gd`, `test_battle_view.gd`, `test_loaders.gd`, `test_rules_attack.gd` (sửa)
+- `_bmad-output/planning-artifacts/game-architecture.md` (sửa)
+- `_bmad-output/implementation-artifacts/deferred-work.md` (sửa)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (sửa)
 
 ### Change Log
 
+- 2026-10-20: Task 2–6 (trừ 6.3): lõi luật thắng/thua, khóa trận, bảng kết cục và nút Chơi lại trận, trận thử `thu_thang`; 481/481 test, 49 kịch bản đã duyệt. Chuyển `review`. Task 6.3 chờ tác giả kiểm tay.
 - 2026-10-20: Task 1 xong 1.1–1.4: khung kịch bản kết cục (`ket_qua`, `tran_da_het`, sự kiện `VICTORY`/`DEFEAT`), 5 kịch bản `ket_thuc/` chưa duyệt; chờ tác giả duyệt (1.5).
 - 2026-10-20: Tạo story (gds-create-story).
 - 2026-10-20: Tác giả chốt 2 câu hỏi: 1 (a) khóa trận khi hết; 2 (b) bảng chữ kèm nút "Chơi lại trận".

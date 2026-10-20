@@ -164,6 +164,34 @@ func test_clone_copies_attacked_flag() -> void:
 	assert_true(original.unit_by_id(1).has_attacked, "bản gốc không đổi cờ")
 
 
+## Story 2.5: phase và mission là một phần của trạng thái nên clone() phải chép.
+func test_clone_copies_phase_and_mission() -> void:
+	var original: BattleState = _state()
+	assert_eq(original.phase, BattleState.Phase.PLAYER, "mặc định đang lượt người chơi")
+	assert_eq(original.mission, LevelData.Mission.ELIMINATE, "mặc định Tiêu diệt")
+	original.phase = BattleState.Phase.WON
+	original.mission = LevelData.Mission.HOLD_PASS
+	var copy: BattleState = original.clone()
+	assert_eq(copy.phase, BattleState.Phase.WON)
+	assert_eq(copy.mission, LevelData.Mission.HOLD_PASS)
+	copy.phase = BattleState.Phase.LOST
+	copy.mission = LevelData.Mission.ELIMINATE
+	assert_eq(original.phase, BattleState.Phase.WON, "bản gốc không đổi")
+	assert_eq(original.mission, LevelData.Mission.HOLD_PASS, "bản gốc không đổi")
+
+
+func test_from_level_copies_mission() -> void:
+	var level: LevelData = LevelData.new()
+	level.size = Vector2i(5, 5)
+	for i: int in range(25):
+		level.terrain.append(Terrain.PLAIN)
+	level.units.append(LevelData.UnitPlacement.new(UnitType.NGUYEN_KHOAI, Vector2i(0, 4)))
+	level.mission = LevelData.Mission.HOLD_PASS
+	assert_eq(BattleState.from_level(level, BoardFixture.stats()).mission, LevelData.Mission.HOLD_PASS)
+	level.mission = LevelData.Mission.ELIMINATE
+	assert_eq(BattleState.from_level(level, BoardFixture.stats()).mission, LevelData.Mission.ELIMINATE)
+
+
 func test_validate_round_number() -> void:
 	var s: BattleState = _manual([] as Array[Unit])
 	s.round_number = 0

@@ -58,7 +58,11 @@ func submit(command: Command) -> Array[BattleEvent]:
 
 
 ## Hủy nước đi gần nhất. Không có gì để hủy thì một sự kiện REJECTED (NOTHING_TO_UNDO), không phát signal.
+## Trận đã kết thúc thì REJECTED (BATTLE_OVER): đánh đã xóa bản chụp hủy, nhưng khóa rõ ràng cho mọi lệnh về sau.
 func undo() -> Array[BattleEvent]:
+	if Rules.is_battle_over(_state):
+		Log.debug("battle", "hủy: trận đã kết thúc")
+		return [BattleEvent.rejected(BattleEvent.Reject.BATTLE_OVER, "trận đã kết thúc")]
 	if _undo_snapshot == null:
 		Log.debug("battle", "hủy: %s" % NOTHING_TO_UNDO_REASON)
 		return [BattleEvent.rejected(BattleEvent.Reject.NOTHING_TO_UNDO, NOTHING_TO_UNDO_REASON)]

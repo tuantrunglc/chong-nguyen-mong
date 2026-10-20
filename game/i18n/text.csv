@@ -7,6 +7,9 @@ hud.round,Hiệp %d
 hud.undo,Hủy (Z)
 hud.end_turn,Kết thúc lượt (Space)
 hud.confirm_attack,Bấm lần nữa để đánh
+result.won,Thắng!
+result.lost,Thua!
+result.retry,Chơi lại trận
 unit.nguyen_khoai,Khoái
 unit.pham_ngu_lao,Lão
 unit.tran_khanh_du,Dư

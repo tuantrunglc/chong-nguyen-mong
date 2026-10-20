@@ -1,0 +1,48 @@
+class_name RulesVictory
+extends RefCounted
+## Kết cục của trận (FR36, FR38): thắng khi hết quân Nguyên (Tiêu diệt), thua khi mọi tướng trên bàn đã gục.
+## Chỉ nơi này (và rules_enemy_phase.gd) được đổi BattleState.phase sang WON hoặc LOST.
+## Điều kiện thắng/thua thêm ở story của nó: số hiệp tối đa (3.5), Lòng dân (3.7), Giữ ải (3.11): thêm hàm điều
+## kiện nhỏ như _enemies_cleared, _generals_lost, không sửa khung check().
+
+
+## Gọi sau mỗi lệnh (Rules.resolve) và, từ Story 2.8, sau từng đòn địch. events là các sự kiện vừa sinh ra: chỉ
+## khi có quân gục (DIED, hoặc DROWNED vì chết đuối không có DIED) mới kiểm, nên bàn không có quân Nguyên từ đầu
+## không bị thắng ngay. Thắng được ưu tiên: hết quân Nguyên và hết tướng cùng lúc thì chỉ thắng.
+## Trận đã hết thì không làm gì (không sinh kết cục lần hai).
+static func check(state: BattleState, events: Array[BattleEvent]) -> void:
+	if state.phase == BattleState.Phase.WON or state.phase == BattleState.Phase.LOST:
+		return
+	if not _someone_fell(events):
+		return
+	if _enemies_cleared(state):
+		state.phase = BattleState.Phase.WON
+		events.append(BattleEvent.victory())
+	elif _generals_lost(state):
+		state.phase = BattleState.Phase.LOST
+		events.append(BattleEvent.defeat())
+
+
+static func _someone_fell(events: Array[BattleEvent]) -> bool:
+	for event: BattleEvent in events:
+		if event.type == BattleEvent.Type.DIED or event.type == BattleEvent.Type.DROWNED:
+			return true
+	return false
+
+
+## Tiêu diệt: không còn quân Nguyên. Giữ ải thắng theo luật khác (Story 3.11), nên không thắng ở đây.
+static func _enemies_cleared(state: BattleState) -> bool:
+	return state.mission == LevelData.Mission.ELIMINATE and _count(state, Unit.Faction.NGUYEN) == 0
+
+
+## Mọi tướng trên bàn đã gục. Số tướng do file trận quy định, nên đếm quân còn lại, không viết cứng số tướng.
+static func _generals_lost(state: BattleState) -> bool:
+	return _count(state, Unit.Faction.DAI_VIET) == 0
+
+
+static func _count(state: BattleState, faction: Unit.Faction) -> int:
+	var count: int = 0
+	for unit: Unit in state.units:
+		if unit.faction == faction:
+			count += 1
+	return count

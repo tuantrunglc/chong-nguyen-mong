@@ -187,8 +187,13 @@ static func compare(state: BattleState, scenario: ScenarioData) -> Array[String]
 	return problems
 
 
-## Kết cục của state theo cách kịch bản ghi ("ket_qua"). Task 2 (Story 2.5) đọc state.phase; chưa có thì luôn đang chơi.
-static func _outcome(_state: BattleState) -> String:
+## Kết cục của state theo cách kịch bản ghi ("ket_qua").
+static func _outcome(state: BattleState) -> String:
+	match state.phase:
+		BattleState.Phase.WON:
+			return "thang"
+		BattleState.Phase.LOST:
+			return "thua"
 	return "dang_choi"
 
 

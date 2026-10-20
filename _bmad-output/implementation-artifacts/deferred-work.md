@@ -118,3 +118,10 @@
 
 - `RulesAttack._du_targets` (`game/src/core/rules_attack.gd:55-73`) bỏ qua địa hình: kéo qua rừng/kho lương/làng vẫn có viền và va chạm mất 1 máu. Test `test_pull_blocked_by_forest_collides_before_story_3_1` khóa hành vi tạm; sửa cả hai ở Story 3.1.
 - `BattleEvent.attacked()` (`game/src/core/battle_event.gd:94`) luôn gắn `Cause.STRIKE`, kể cả đòn kéo không sát thương. Chưa nơi nào đọc cause của ATTACKED; xem lại khi có log, âm thanh hoặc hoạt ảnh theo cause.
+
+## Deferred from: dev of 2-5-mau-guc-thang-va-thua-tieu-diet (2026-10-20)
+
+- Story 2.8 (đòn địch): phải gọi `RulesVictory.check(state, events)` **sau từng đòn địch** (truyền danh sách sự kiện của riêng đòn đó) và dừng pha địch khi `phase` là `WON`/`LOST`, để quân địch còn lại không đánh tiếp khi trận đã hết. Hiện `check` chỉ gọi ở cuối `Rules.resolve`.
+- Khi Story 2.8 hoặc 3.4 (hầm chông) cho tướng cuối gục thật bằng một lệnh, thêm kịch bản "thua" và "thắng thua cùng lúc" vào `tests/kich_ban/ket_thuc/` (hiện chỉ có test GUT dựng bằng `Effects.damage`).
+- `RulesVictory._someone_fell` dựa vào `DIED`/`DROWNED`: loại sự kiện gục mới thêm sau này (ví dụ quân tiếp viện, 3.10) phải cập nhật hàm này.
+- Nút "Chơi lại trận" của `ResultBanner` bỏ khi có menu ở Story 4.2.

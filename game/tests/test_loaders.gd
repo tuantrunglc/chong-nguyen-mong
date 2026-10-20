@@ -777,3 +777,47 @@ func test_real_pull_trial_level_loads() -> void:
 	assert_eq(level.terrain_at(Vector2i(4, 3)), Terrain.RIVER, "Kỵ binh 6,3 bị kéo qua sông")
 	assert_eq(level.terrain_at(Vector2i(5, 3)), Terrain.RIVER)
 	assert_eq(level.size, Vector2i(7, 7))
+
+
+func test_real_win_trial_level_loads() -> void:
+	var r: LoadResult = LevelLoader.load_level("res://data/tran/thu_thang.json")
+	assert_eq(r.errors, [] as Array[String])
+	assert_eq(r.warnings, [] as Array[String])
+	var level: LevelData = r.data as LevelData
+	assert_not_null(level)
+	if level == null:
+		return
+	# Các bước tác giả tự test (Story 2.5) dựa vào đúng chỗ đứng này.
+	var expected: Dictionary = {
+		Vector2i(1, 2): UnitType.NGUYEN_KHOAI, Vector2i(0, 6): UnitType.PHAM_NGU_LAO,
+		Vector2i(5, 5): UnitType.TRAN_KHANH_DU, Vector2i(2, 2): UnitType.BO_BINH, Vector2i(5, 2): UnitType.BO_BINH,
+	}
+	var actual: Dictionary = {}
+	for p: LevelData.UnitPlacement in level.units:
+		actual[p.cell] = p.type
+	assert_eq(actual, expected)
+	assert_eq(level.terrain_at(Vector2i(3, 2)), Terrain.RIVER, "Bộ binh 2,2 bị đẩy xuống sông")
+	assert_eq(level.terrain_at(Vector2i(5, 4)), Terrain.RIVER, "Bộ binh 5,2 bị kéo xuống sông")
+	assert_eq(level.size, Vector2i(7, 7))
+	assert_eq(level.mission, LevelData.Mission.ELIMINATE)
+
+
+## Chơi thật trên chính file trận: Khoái đẩy, Dư kéo; hết quân Nguyên thì thắng (chỉ số thật của chi_so.json).
+func test_real_win_trial_level_can_be_won_in_one_turn() -> void:
+	var level: LevelData = LevelLoader.load_level("res://data/tran/thu_thang.json").data as LevelData
+	var stats: Stats = StatsLoader.load_stats("res://data/chi_so.json").data as Stats
+	assert_not_null(level)
+	assert_not_null(stats)
+	if level == null or stats == null:
+		return
+	var controller: BattleController = BattleController.new()
+	controller.start(level, stats)
+	assert_eq(controller.snapshot().phase, BattleState.Phase.PLAYER, "trước: đang chơi")
+	var first: Array[BattleEvent] = controller.submit(Command.attack(1, Vector2i(2, 2)))
+	assert_eq(first.filter(func(e: BattleEvent) -> bool: return e.type == BattleEvent.Type.VICTORY).size(), 0)
+	assert_eq(controller.snapshot().phase, BattleState.Phase.PLAYER, "còn Bộ binh 5,2")
+	var second: Array[BattleEvent] = controller.submit(Command.attack(3, Vector2i(5, 2)))
+	assert_eq(second[second.size() - 1].type, BattleEvent.Type.VICTORY)
+	assert_eq(controller.snapshot().phase, BattleState.Phase.WON)
+	assert_eq(controller.snapshot().units.size(), 3, "còn ba tướng")
+	assert_eq(controller.snapshot().validate(), [] as Array[String])

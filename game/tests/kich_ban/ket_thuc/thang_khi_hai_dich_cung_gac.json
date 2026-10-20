@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Nguyễn Khoái đẩy Bộ binh vào một Bộ binh 1 máu: cả hai cùng gục trong một đòn, hết quân Nguyên, thắng.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",
