@@ -7,7 +7,7 @@ enum Screen { MENU, BATTLE, TRANSITION, ERROR }
 const BUILD_INFO_PATH: String = "res://build_info.json"
 const VERSION_FONT_SIZE: int = 14
 const VERSION_MARGIN: int = 8
-## Tiêu đề nằm phía trên bàn cờ (bàn cờ bắt đầu ở y = 52).
+## Tiêu đề nằm phía trên bàn cờ (vùng bàn cờ BoardView.AREA bắt đầu ở y = 52).
 const TITLE_TOP: int = 4
 const TITLE_HEIGHT: int = 44
 ## Chưa có màn hình chính (story 4.1): không chọn trận thì mở trận 1.

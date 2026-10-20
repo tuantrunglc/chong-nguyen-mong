@@ -90,7 +90,7 @@
 ## Deferred from: code review of 1-7-ban-co-nghieng-isometric-tam (2026-10-18)
 
 - `BoardView.setup` (`game/src/battle/board_view.gd`) canh giữa bàn trong `AREA` nhưng không co giãn: bàn lớn hơn 7×7 (cot + hang > ~14) sẽ tràn dưới HUD và ra ngoài màn hình, màn hình lỗi tràn theo. File trận hiện khóa 7×7 nên chưa gặp; khi cho phép bàn khác cỡ thì thêm `scale` hoặc báo lỗi.
-- Bệ ô ải vẽ trên mặt đất (`BoardView._draw`), không nằm trong lớp y-sort: khối rừng, kho lương, làng đứng ngay sau ô ải che dải 8px của bệ, nhưng `pick_cell` lại chọn ô ải; chữ "sông", "chông" của ô phía sau đè lên bệ ô ải. Trận hiện có chưa gặp. Tác giả chọn giữ cách vẽ này (2026-10-18); xem lại khi làm trận "Giữ ải" hoặc khi E8 thay tranh.
+- Bệ ô ải vẽ trên mặt đất (`BoardView._draw`), không nằm trong lớp y-sort: khối rừng, kho lương, làng đứng ngay sau ô ải che dải 8px của bệ, nhưng `pick_cell` lại chọn ô ải; chữ "sông", "chông" của ô phía sau đè lên bệ ô ải. Trận hiện có chưa gặp. Tác giả chọn giữ cách vẽ này (2026-10-18); xem lại khi làm trận "Giữ ải" hoặc khi E8 thay tranh. Vẫn còn trên bàn nhìn chếch (khối ở hàng trên che dải 8 px của bệ ô ải ngay dưới), Story 1.8.
 
 ## Deferred from: code review of 2-1-nguyen-khoai-danh-day-va-va-cham (2026-10-18)
 

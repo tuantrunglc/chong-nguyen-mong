@@ -1,13 +1,13 @@
 extends GutTest
-## Bàn cờ nghiêng (Story 1.7): đổi ô ↔ điểm, chọn ô nhìn thấy dưới chuột, thứ tự che khuất, bố cục.
-## Isometric 2:1, ô 0,0 ở đỉnh trên; cột tăng xuống phải, hàng tăng xuống trái.
+## Bàn cờ nhìn chếch (Story 1.8, thay bàn nghiêng của 1.7): đổi ô ↔ điểm, chọn ô nhìn thấy dưới chuột,
+## thứ tự che khuất, bố cục. Ô vuông, ô 0,0 ở góc trên trái; cột tăng sang phải, hàng tăng xuống dưới.
 
 const MAIN_SCENE: String = "res://scenes/main.tscn"
 const PROBE_DIR: String = "user://test_board_view"
 const PROBE_FILE: String = PROBE_DIR + "/thu_luu.json"
 const LEVEL_DIR: String = PROBE_DIR + "/tran"
 const PASS_LEVEL: String = LEVEL_DIR + "/tran_01.json"
-## Khoảng cách (px) từ đỉnh ô thoi vào phía tâm khi thử điểm sát mép.
+## Khoảng cách (px) từ góc ô vào phía tâm khi thử điểm sát mép, hoặc ra ngoài cạnh bàn.
 const EDGE_STEP: float = 2.0
 
 
@@ -54,20 +54,19 @@ func _board(main: Node2D) -> BoardView:
 	return main._board_view as BoardView
 
 
-func _all_cells() -> Array[Vector2i]:
+func _all_cells(board: BoardView) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
-	for r: int in range(7):
-		for c: int in range(7):
+	for r: int in range(board.rows):
+		for c: int in range(board.cols):
 			cells.append(Vector2i(c, r))
 	return cells
 
 
-## Bốn đỉnh ô thoi trên mặt đất: trên, phải, dưới, trái.
+## Bốn góc ô vuông trên mặt đất: trên trái, trên phải, dưới phải, dưới trái.
 func _corners(cell: Vector2i) -> Array[Vector2]:
-	var center: Vector2 = BoardView.cell_center(cell)
-	var half: Vector2 = Vector2(BoardView.TILE_W, BoardView.TILE_H) / 2.0
-	return [center + Vector2(0, -half.y), center + Vector2(half.x, 0), center + Vector2(0, half.y),
-		center + Vector2(-half.x, 0)] as Array[Vector2]
+	var rect: Rect2 = BoardView.cell_rect(cell)
+	return [rect.position, Vector2(rect.end.x, rect.position.y), rect.end,
+		Vector2(rect.position.x, rect.end.y)] as Array[Vector2]
 
 
 func _blocks(board: BoardView) -> Array[TerrainBlock]:
@@ -82,40 +81,44 @@ func _blocks(board: BoardView) -> Array[TerrainBlock]:
 
 func test_cell_center_round_trips_every_cell() -> void:
 	var board: BoardView = _board(_make_main())
-	for cell: Vector2i in _all_cells():
+	for cell: Vector2i in _all_cells(board):
 		assert_eq(board.cell_at(BoardView.cell_center(cell)), cell)
 
 
 func test_points_near_each_corner_stay_in_cell() -> void:
 	var board: BoardView = _board(_make_main())
-	for cell: Vector2i in _all_cells():
+	for cell: Vector2i in _all_cells(board):
 		var center: Vector2 = BoardView.cell_center(cell)
 		for corner: Vector2 in _corners(cell):
-			var point: Vector2 = corner + (center - corner).normalized() * EDGE_STEP
-			assert_eq(board.cell_at(point), cell, "sát đỉnh %s của ô %s" % [corner, cell])
+			var point: Vector2 = corner + (center - corner).sign() * EDGE_STEP
+			assert_eq(board.cell_at(point), cell, "sát góc %s của ô %s" % [corner, cell])
 
 
-func test_points_outside_big_diamond_are_off_board() -> void:
+func test_points_outside_board_are_off_board() -> void:
 	var board: BoardView = _board(_make_main())
+	var last_col: Vector2i = Vector2i(board.cols - 1, 0)
+	var last_row: Vector2i = Vector2i(0, board.rows - 1)
 	var outside: Array[Vector2] = [
-		_corners(Vector2i(0, 0))[0] + Vector2(0, -EDGE_STEP),
-		_corners(Vector2i(6, 0))[1] + Vector2(EDGE_STEP, 0),
-		_corners(Vector2i(6, 6))[2] + Vector2(0, EDGE_STEP),
-		_corners(Vector2i(0, 6))[3] + Vector2(-EDGE_STEP, 0),
+		BoardView.cell_center(Vector2i(0, 0)) + Vector2(0, -BoardView.TILE_SIZE / 2.0 - EDGE_STEP),
+		BoardView.cell_center(Vector2i(0, 0)) + Vector2(-BoardView.TILE_SIZE / 2.0 - EDGE_STEP, 0),
+		BoardView.cell_center(last_col) + Vector2(BoardView.TILE_SIZE / 2.0 + EDGE_STEP, 0),
+		BoardView.cell_center(last_row) + Vector2(0, BoardView.TILE_SIZE / 2.0 + EDGE_STEP),
+		# Sát mép trái: int(-1 / 64) là 0, phải dùng floori mới ra ngoài bàn.
+		Vector2(-1, BoardView.TILE_SIZE / 2.0),
 	]
 	for point: Vector2 in outside:
 		assert_eq(board.cell_at(point), BoardView.NO_CELL, "ngoài bàn: %s" % point)
 
 
-func test_columns_go_down_right_rows_go_down_left() -> void:
+func test_columns_go_right_rows_go_down() -> void:
 	var origin: Vector2 = BoardView.cell_center(Vector2i(0, 0))
-	var next_col: Vector2 = BoardView.cell_center(Vector2i(1, 0))
-	var next_row: Vector2 = BoardView.cell_center(Vector2i(0, 1))
-	assert_gt(next_col.x, origin.x)
-	assert_gt(next_col.y, origin.y)
-	assert_lt(next_row.x, origin.x)
-	assert_gt(next_row.y, origin.y)
-	assert_eq(BoardView.TILE_W, BoardView.TILE_H * 2, "thoi rộng gấp đôi cao")
+	assert_eq(BoardView.cell_center(Vector2i(1, 0)) - origin, Vector2(BoardView.TILE_SIZE, 0))
+	assert_eq(BoardView.cell_center(Vector2i(0, 1)) - origin, Vector2(0, BoardView.TILE_SIZE))
+
+
+func test_tile_is_64_px_multiple_of_16() -> void:
+	assert_eq(BoardView.TILE_SIZE, 64, "khớp tranh E8 64×64 hiện 1:1")
+	assert_eq(BoardView.TILE_SIZE % 16, 0)
 
 
 # ---------- Chọn ô nhìn thấy dưới chuột ----------
@@ -123,20 +126,20 @@ func test_columns_go_down_right_rows_go_down_left() -> void:
 func test_pick_every_cell_center_with_units_on_board() -> void:
 	for main: Node2D in [_make_main(), _make_three_generals()]:
 		var board: BoardView = _board(main)
-		for cell: Vector2i in _all_cells():
+		for cell: Vector2i in _all_cells(board):
 			assert_eq(board.pick_cell(BoardView.cell_center(cell)), cell)
 
 
 func test_pick_head_of_token_selects_its_cell() -> void:
 	var board: BoardView = _board(_make_main())
-	# Lão ở 2,6: đầu đồng nằm trên đất của ô 1,5 phía sau.
+	# Lão ở 2,6: đầu đồng nằm trên đất của ô 2,5 phía trên.
 	var head: Vector2 = BoardView.cell_center(Vector2i(2, 6)) \
 		+ Vector2(0, -UnitToken.TOKEN_LIFT - UnitToken.RADIUS + 4)
-	assert_eq(board.cell_at(head), Vector2i(1, 5), "đầu đồng nằm trên đất của ô sau lưng")
+	assert_eq(board.cell_at(head), Vector2i(2, 5), "đầu đồng nằm trên đất của ô phía trên")
 	assert_eq(board.pick_cell(head), Vector2i(2, 6))
 
 
-## Bấm chuột thật (qua BattleInput) vào đầu đồng Lão, chỗ nằm trên đất của ô 1,5: chọn Lão.
+## Bấm chuột thật (qua BattleInput) vào đầu đồng Lão, chỗ nằm trên đất của ô 2,5: chọn Lão.
 func test_mouse_click_on_token_head_selects_that_general() -> void:
 	var main: Node2D = _make_main()
 	var board: BoardView = _board(main)
@@ -152,14 +155,20 @@ func test_mouse_click_on_token_head_selects_that_general() -> void:
 
 func test_pick_raised_block_top_selects_block() -> void:
 	var board: BoardView = _board(_make_three_generals())
-	var top: Vector2 = _corners(Vector2i(1, 1))[0] + Vector2(0, -BoardView.BLOCK_HEIGHT + 4)
-	assert_ne(board.cell_at(top), Vector2i(1, 1), "mặt trên khối nhô vào ô phía sau")
+	# Rừng ở 1,1; mặt trên nhô lên ô 1,0, nơi có Bộ binh đứng (điểm nằm ngoài đồng của nó).
+	var top: Vector2 = BoardView.cell_rect(Vector2i(1, 1)).position \
+		+ Vector2(BoardView.TILE_SIZE / 2.0, -BoardView.BLOCK_HEIGHT + 4)
+	assert_eq(board.cell_at(top), Vector2i(1, 0), "mặt trên khối nhô vào ô phía trên")
+	for token: UnitToken in board.tokens().values():
+		if token.cell == Vector2i(1, 0):
+			assert_false(token.hit(top - token.position), "không trúng đồng Bộ binh ở 1,0")
 	assert_eq(board.pick_cell(top), Vector2i(1, 1))
 
 
 func test_pick_outside_board_is_no_cell() -> void:
 	var board: BoardView = _board(_make_main())
-	assert_eq(board.pick_cell(_corners(Vector2i(0, 0))[0] + Vector2(0, -60)), BoardView.NO_CELL)
+	# Cao hơn mọi vật nhô lên ở hàng 0.
+	assert_eq(board.pick_cell(BoardView.cell_center(Vector2i(0, 0)) + Vector2(0, -60)), BoardView.NO_CELL)
 
 
 # ---------- Che khuất ----------
@@ -174,10 +183,8 @@ func test_blocks_and_tokens_sort_by_depth() -> void:
 		kinds.append(block.kind)
 	assert_has(kinds, Terrain.FOREST)
 	for block: TerrainBlock in blocks:
-		var block_depth: int = block.cell.x + block.cell.y
 		for token: UnitToken in board.tokens().values():
-			var depth: int = token.cell.x + token.cell.y
-			if depth < block_depth:
+			if token.cell.y < block.cell.y:
 				assert_lt(token.position.y, block.position.y, "quân %s sau khối %s" % [token.cell, block.cell])
 			else:
 				assert_gt(token.position.y, block.position.y, "quân %s trước khối %s" % [token.cell, block.cell])
@@ -204,10 +211,10 @@ func test_token_on_pass_stands_on_platform() -> void:
 	var token: UnitToken = board.tokens()[1] as UnitToken
 	assert_eq(token.position, BoardView.cell_center(Vector2i(0, 6)) - Vector2(0, BoardView.PASS_HEIGHT),
 		"đứng trên bệ ải")
-	# Đầu đồng nâng theo bệ: điểm này ngoài bàn (cell_at) và cao hơn đầu đồng nếu đứng trên đất phẳng.
+	# Đầu đồng nâng theo bệ: điểm này trên đất ô 0,5 (cell_at) và cao hơn đầu đồng nếu đứng trên đất phẳng.
 	var head: Vector2 = BoardView.cell_center(Vector2i(0, 6)) \
 		+ Vector2(0, -BoardView.PASS_HEIGHT - UnitToken.TOKEN_LIFT - UnitToken.RADIUS + 4)
-	assert_eq(board.cell_at(head), BoardView.NO_CELL)
+	assert_eq(board.cell_at(head), Vector2i(0, 5))
 	assert_lt(head.y, BoardView.cell_center(Vector2i(0, 6)).y - UnitToken.TOKEN_LIFT - UnitToken.RADIUS)
 	assert_eq(board.pick_cell(head), Vector2i(0, 6), "bấm đầu đồng trên bệ: chọn ô ải")
 	assert_true(board.board_rect().has_point(board.position + head), "khung bàn bao đầu đồng trên bệ")
@@ -219,7 +226,7 @@ func test_token_on_pass_stands_on_platform() -> void:
 func test_board_fits_left_of_hud_below_title() -> void:
 	for main: Node2D in [_make_main(), _make_three_generals()]:
 		var rect: Rect2 = _board(main).board_rect()
-		assert_true(Rect2(16, 52, 940, 612).encloses(rect), "bàn trong vùng trống: %s" % rect)
+		assert_true(BoardView.AREA.encloses(rect), "bàn trong vùng trống: %s" % rect)
 		var title: Label = main._title_label
 		assert_false(rect.intersects(Rect2(title.position, title.size)), "không đè tiêu đề")
 		var hud: Rect2 = Rect2(Hud.PANEL_POSITION, Vector2(Hud.PANEL_WIDTH, 200))
@@ -231,12 +238,28 @@ func test_board_fits_left_of_hud_below_title() -> void:
 func test_board_rect_covers_every_cell_and_token() -> void:
 	var board: BoardView = _board(_make_main())
 	var rect: Rect2 = board.board_rect()
-	for cell: Vector2i in _all_cells():
+	for cell: Vector2i in _all_cells(board):
 		for corner: Vector2 in _corners(cell):
-			assert_true(rect.has_point(board.position + corner), "đỉnh ô %s" % cell)
+			assert_true(rect.has_point(board.position + corner), "góc ô %s" % cell)
 	for token: UnitToken in board.tokens().values():
 		var top: Vector2 = board.position + token.position + Vector2(0, -UnitToken.TOKEN_LIFT - UnitToken.RADIUS)
 		assert_true(rect.has_point(top), "đầu đồng %s" % token.cell)
+
+
+func test_board_sits_on_whole_pixels() -> void:
+	for main: Node2D in [_make_main(), _make_three_generals()]:
+		var board: BoardView = _board(main)
+		assert_eq(board.position, board.position.round(), "góc bàn rơi đúng điểm ảnh nguyên")
+
+
+## Đồng quân và khối nhô lên ô phía trên nhưng không bao giờ che tâm ô hàng xóm (pick_cell(tâm ô) == ô).
+func test_token_and_block_never_cover_a_neighbour_center() -> void:
+	var tile: float = BoardView.TILE_SIZE
+	assert_lt(UnitToken.TOKEN_LIFT + UnitToken.RADIUS, tile, "đồng không với tới tâm ô phía trên")
+	assert_lt(UnitToken.RADIUS, tile / 2.0, "đồng không lấn sang ô hai bên")
+	# Tính từ chân đồng: tâm đồng ở -TOKEN_LIFT, tâm ô hàng trên ở -tile; hai tâm cách nhau hơn một bán kính.
+	assert_gt(tile - UnitToken.TOKEN_LIFT, UnitToken.RADIUS, "đồng hàng dưới không che tâm ô hàng trên")
+	assert_lt(BoardView.BLOCK_HEIGHT, tile / 2.0, "mặt trên khối không với tới tâm ô phía trên")
 
 
 # ---------- Viền mục tiêu (Story 2.1) ----------

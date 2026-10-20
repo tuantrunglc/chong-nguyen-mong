@@ -1,13 +1,13 @@
 class_name BoardView
 extends Node2D
-## Vẽ bàn cờ nghiêng (isometric 2:1) bằng code, đặt giữa vùng trống bên trái HUD: 49 ô thoi, địa hình, đồng quân.
-## Ô 0,0 ở đỉnh trên; cột tăng thì xuống bên phải, hàng tăng thì xuống bên trái (tác giả chốt 2026-10-18).
-## Nơi duy nhất đổi ô ↔ điểm: cell_center, cell_at (mặt đất) và pick_cell (thứ nhìn thấy dưới chuột).
-## Gốc tọa độ local là đỉnh trên của ô 0,0. Chỉ vẽ theo bản chụp (show_state); null thì về bàn trống.
+## Vẽ bàn cờ nhìn chếch từ trên xuống (ô vuông) bằng code, đặt giữa vùng trống bên trái HUD: ô, địa hình, đồng quân.
+## Ô 0,0 ở góc trên trái; cột tăng thì sang phải, hàng tăng thì xuống dưới, giống bàn cờ chữ trong file trận.
+## Vật nhô lên chỉ thấy mặt trên và mặt trước (phía người xem); vật ở hàng dưới che vật ở hàng trên.
+## Nơi duy nhất đổi ô ↔ điểm: cell_center, cell_rect, cell_at (mặt đất) và pick_cell (thứ nhìn thấy dưới chuột).
+## Gốc tọa độ local là góc trên trái của ô 0,0 trên mặt đất. Chỉ vẽ theo bản chụp (show_state); null thì về bàn trống.
 
-## Ô thoi rộng gấp đôi cao.
-const TILE_W: int = 128
-const TILE_H: int = 64
+## Cạnh ô (px), khớp tranh E8 64×64 hiện 1:1.
+const TILE_SIZE: int = 64
 ## Đọc từ project.godot để chỉ có một nơi khai báo kích thước màn hình.
 static var viewport_size: Vector2 = Vector2(
 	ProjectSettings.get_setting("display/window/size/viewport_width") as int,
@@ -19,15 +19,14 @@ const CELL_COLOR: Color = Color(0.93, 0.87, 0.73)
 const LINE_COLOR: Color = Color(0.36, 0.24, 0.14)
 const LINE_WIDTH: float = 2.0
 const BORDER_WIDTH: float = 4.0
-## Độ dày mép bàn ở hai cạnh trước.
+## Độ dày mép bàn ở cạnh trước.
 const EDGE_DEPTH: float = 12.0
-const EDGE_LEFT_SHADE: float = 0.35
-const EDGE_RIGHT_SHADE: float = 0.5
+const EDGE_SHADE: float = 0.4
 ## Rừng, kho lương, làng nhô lên; ô ải là bệ thấp, quân đứng lên được (tác giả chốt 2026-10-18).
 const BLOCK_HEIGHT: float = 16.0
 const PASS_HEIGHT: float = BLOCK_HEIGHT / 2.0
 const BLOCK_KINDS: Array[int] = [Terrain.FOREST, Terrain.GRANARY, Terrain.VILLAGE]
-## Sông trũng xuống; thành sông phía sau lộ ra, tối hơn mặt nước.
+## Sông trũng xuống; bờ sông ở cạnh trên lộ ra, tối hơn mặt nước.
 const RIVER_DEPTH: float = 6.0
 const RIVER_BANK_SHADE: float = 0.4
 ## Chừa thêm phía trên vật cao nhất ở hàng đầu (để tính khung bàn).
@@ -53,10 +52,10 @@ const TERRAIN_KEYS: Dictionary = {
 	Terrain.PASS: "terrain.pass",
 }
 const TERRAIN_FONT_SIZE: int = 12
-## Ký hiệu hầm chông: ba mũi nhọn quanh tâm ô.
+## Ký hiệu hầm chông: ba mũi nhọn ở nửa trên ô (nửa dưới để chữ).
 const SPIKE_COLOR: Color = Color(0.45, 0.30, 0.18)
-const SPIKE_SIZE: Vector2 = Vector2(10, 12)
-const SPIKE_OFFSETS: Array[Vector2] = [Vector2(-22, -2), Vector2(0, -8), Vector2(22, -2)]
+const SPIKE_SIZE: Vector2 = Vector2(10, 14)
+const SPIKE_OFFSETS: Array[Vector2] = [Vector2(-16, -10), Vector2(0, -14), Vector2(16, -10)]
 ## Ô ngoài bàn (cell_at).
 const NO_CELL: Vector2i = Vector2i(-1, -1)
 ## Ô đi tới được: xanh lá nhạt, khác đỏ của ô báo đòn (E2) và khác màu sông.
@@ -66,17 +65,17 @@ const REACH_COLOR: Color = Color(0.45, 0.78, 0.40, 0.55)
 const TARGET_COLOR: Color = Color(1.0, 1.0, 1.0)
 const TARGET_WIDTH: float = 3.0
 const PENDING_WIDTH: float = 6.0
-## Viền thụt vào trong ô một chút để không chồng lên nét lưới.
-const TARGET_INSET: float = 0.86
-## Vòng elip trên mặt đất quanh chân tướng đang chọn.
+## Viền thụt vào trong ô (px) để không chồng lên nét lưới.
+const TARGET_INSET: float = 5.0
+## Vòng elip trên mặt đất quanh chân tướng đang chọn; nằm gọn trong ô.
 const SELECT_COLOR: Color = Color(0.95, 0.72, 0.10)
-const SELECT_RADIUS: Vector2 = Vector2(40, 20)
+const SELECT_RADIUS: Vector2 = Vector2(28, 18)
 const SELECT_WIDTH: float = 4.0
 const SELECT_POINTS: int = 40
 ## Đường đi khi rê chuột lên ô sáng.
 const PATH_COLOR: Color = Color(0.13, 0.35, 0.65)
 const PATH_WIDTH: float = 6.0
-const PATH_END_RADIUS: Vector2 = Vector2(10, 5)
+const PATH_END_RADIUS: Vector2 = Vector2(8, 6)
 
 var cols: int = 7
 var rows: int = 7
@@ -85,7 +84,7 @@ var rows: int = 7
 var _state: BattleState = null
 ## Chữ của ô phẳng (sông, hầm chông, ô ải), nằm dưới đồng quân.
 var _terrain_labels: Node2D
-## Khối địa hình và đồng quân, sắp theo y (tức theo cot + hang): vật ở gần người xem vẽ sau.
+## Khối địa hình và đồng quân, sắp theo y (tức theo hang): vật ở hàng dưới, gần người xem, vẽ sau.
 var _world: Node2D
 ## id quân -> UnitToken
 var _tokens: Dictionary = {}
@@ -98,17 +97,14 @@ var _pending_cell: Vector2i = NO_CELL
 var _path: Array[Vector2i] = []
 
 
-## Tâm ô trên mặt đất, tính trong tọa độ của BoardView (gốc là đỉnh trên của ô 0,0).
+## Tâm ô trên mặt đất, tính trong tọa độ của BoardView (gốc là góc trên trái của ô 0,0).
 static func cell_center(cell: Vector2i) -> Vector2:
-	return Vector2((cell.x - cell.y) * TILE_W / 2.0, (cell.x + cell.y) * TILE_H / 2.0 + TILE_H / 2.0)
+	return Vector2((cell.x + 0.5) * TILE_SIZE, (cell.y + 0.5) * TILE_SIZE)
 
 
-## Bốn đỉnh ô thoi quanh center: trên, phải, dưới, trái.
-static func diamond(center: Vector2) -> PackedVector2Array:
-	return PackedVector2Array([
-		center + Vector2(0, -TILE_H / 2.0), center + Vector2(TILE_W / 2.0, 0),
-		center + Vector2(0, TILE_H / 2.0), center + Vector2(-TILE_W / 2.0, 0),
-	])
+## Ô vuông trên mặt đất.
+static func cell_rect(cell: Vector2i) -> Rect2:
+	return Rect2(Vector2(cell * TILE_SIZE), Vector2(TILE_SIZE, TILE_SIZE))
 
 
 ## Tâm mặt trên của ô loại kind: nơi đồng quân đứng (ô ải cao hơn mặt đất).
@@ -125,59 +121,53 @@ static func surface_height(kind: int) -> float:
 	return 0.0
 
 
-## Vẽ khối thoi nhô lên height từ các đỉnh corners (trên, phải, dưới, trái) trên mặt đất, lên canvas.
+## Vẽ khối nhô lên height từ ô ground trên mặt đất, lên canvas: mặt trên là ground nâng lên height, mặt trước là
+## dải cao height ở cạnh dưới ground, tối hơn front_shade. Nhìn chếch từ phía người xem nên không thấy mặt bên.
 ## Chỉ gọi trong _draw của canvas đó.
-static func draw_raised(canvas: CanvasItem, corners: PackedVector2Array, height: float, color: Color,
-		left_shade: float, right_shade: float) -> void:
-	var up: Vector2 = Vector2(0, -height)
-	var top: PackedVector2Array = PackedVector2Array([corners[0] + up, corners[1] + up, corners[2] + up, corners[3] + up])
-	canvas.draw_colored_polygon(PackedVector2Array([top[3], top[2], corners[2], corners[3]]), color.darkened(left_shade))
-	canvas.draw_colored_polygon(PackedVector2Array([top[2], top[1], corners[1], corners[2]]), color.darkened(right_shade))
-	canvas.draw_colored_polygon(top, color)
-	var outline: PackedVector2Array = top.duplicate()
-	outline.append(top[0])
-	canvas.draw_polyline(outline, LINE_COLOR, 1.5, true)
-	canvas.draw_polyline(PackedVector2Array([top[3], corners[3], corners[2], corners[1], top[1]]), LINE_COLOR, 1.5, true)
-	canvas.draw_line(top[2], corners[2], LINE_COLOR, 1.5, true)
+static func draw_raised(canvas: CanvasItem, ground: Rect2, height: float, color: Color, front_shade: float) -> void:
+	var top: Rect2 = Rect2(ground.position - Vector2(0, height), ground.size)
+	var front: Rect2 = Rect2(top.position.x, top.end.y, ground.size.x, height)
+	canvas.draw_rect(front, color.darkened(front_shade))
+	canvas.draw_rect(top, color)
+	canvas.draw_rect(front, LINE_COLOR, false, 1.5)
+	canvas.draw_rect(top, LINE_COLOR, false, 1.5)
 
 
 ## Ô chứa điểm local_pos trên mặt đất (tọa độ của BoardView); ngoài bàn thì NO_CELL.
 ## cell_at(cell_center(c)) == c.
 func cell_at(local_pos: Vector2) -> Vector2i:
-	var a: float = local_pos.x / TILE_W + local_pos.y / TILE_H
-	var b: float = local_pos.y / TILE_H - local_pos.x / TILE_W
-	var cell: Vector2i = Vector2i(floori(a), floori(b))
+	# floori, không dùng int(): int(-0.5) là 0, điểm ngay bên trái hay ngay trên bàn sẽ rơi nhầm vào ô.
+	var cell: Vector2i = Vector2i(floori(local_pos.x / TILE_SIZE), floori(local_pos.y / TILE_SIZE))
 	if cell.x < 0 or cell.y < 0 or cell.x >= cols or cell.y >= rows:
 		return NO_CELL
 	return cell
 
 
 ## Ô người chơi nhìn thấy dưới chuột: đồng quân và khối nhô lên che ô phía sau, nên trúng chúng thì lấy ô
-## của chúng (vật gần người xem nhất thắng); không trúng gì thì là ô mặt đất (cell_at).
+## của chúng (vật gần người xem nhất, tức hàng lớn nhất, thắng); không trúng gì thì là ô mặt đất (cell_at).
 func pick_cell(local_pos: Vector2) -> Vector2i:
 	var best: Vector2i = NO_CELL
 	var best_depth: int = -1
 	for token: UnitToken in _tokens.values():
-		if token.hit(local_pos - token.position) and token.cell.x + token.cell.y > best_depth:
+		if token.hit(local_pos - token.position) and token.cell.y > best_depth:
 			best = token.cell
-			best_depth = token.cell.x + token.cell.y
+			best_depth = token.cell.y
 	if _state != null:
 		for r: int in range(rows):
 			for c: int in range(cols):
 				var cell: Vector2i = Vector2i(c, r)
 				var height: float = surface_height(_state.terrain_at(cell))
-				if height == 0.0 or c + r <= best_depth:
+				if height == 0.0 or r <= best_depth:
 					continue
-				if Geometry2D.is_point_in_polygon(local_pos, _silhouette(cell, height)):
+				if _silhouette(cell, height).has_point(local_pos):
 					best = cell
-					best_depth = c + r
+					best_depth = r
 	return best if best != NO_CELL else cell_at(local_pos)
 
 
 ## Khung chữ nhật bao trọn bàn (cả mép bàn, khối và đồng quân nhô lên), trong tọa độ của cha.
 func board_rect() -> Rect2:
-	var local: Rect2 = _local_rect()
-	return Rect2(position + local.position, local.size)
+	return transform * _local_rect()
 
 
 ## Vẽ vòng quanh tướng ở unit_cell và tô sáng cells. Xóa đường đi cũ.
@@ -265,13 +255,13 @@ func tokens() -> Dictionary:
 
 
 ## Khung bàn trong tọa độ của BoardView (cả nửa nét viền bàn).
-## Phía trên: đầu đồng quân đứng trên bệ ô ải ở ô 0,0, hoặc mặt trên khối nhô lên, cái nào cao hơn.
+## Phía trên: đầu đồng quân đứng trên bệ ô ải ở hàng 0, hoặc mặt trên khối nhô lên, cái nào cao hơn.
 func _local_rect() -> Rect2:
 	var stroke: float = BORDER_WIDTH / 2.0
-	var left: float = -rows * TILE_W / 2.0 - stroke
-	var right: float = cols * TILE_W / 2.0 + stroke
-	var bottom: float = (cols + rows) * TILE_H / 2.0 + EDGE_DEPTH + stroke
-	var token_top: float = PASS_HEIGHT + UnitToken.TOKEN_LIFT + UnitToken.RADIUS - TILE_H / 2.0
+	var left: float = -stroke
+	var right: float = cols * TILE_SIZE + stroke
+	var bottom: float = rows * TILE_SIZE + EDGE_DEPTH + stroke
+	var token_top: float = PASS_HEIGHT + UnitToken.TOKEN_LIFT + UnitToken.RADIUS - TILE_SIZE / 2.0
 	var top: float = maxf(token_top, BLOCK_HEIGHT) + TOP_MARGIN
 	return Rect2(left, -top, right - left, bottom + top)
 
@@ -286,16 +276,10 @@ func _top_center(cell: Vector2i) -> Vector2:
 	return cell_center(cell) - Vector2(0, _surface(cell))
 
 
-## Hình bao của khối nhô lên height ở cell (mặt trên và hai mặt bên).
-func _silhouette(cell: Vector2i, height: float) -> PackedVector2Array:
-	var g: PackedVector2Array = diamond(cell_center(cell))
-	var up: Vector2 = Vector2(0, -height)
-	return PackedVector2Array([g[0] + up, g[1] + up, g[1], g[2], g[3], g[3] + up])
-
-
-## Điểm lưới: đường a = const là ranh cột, b = const là ranh hàng.
-func _grid_point(a: float, b: float) -> Vector2:
-	return Vector2((a - b) * TILE_W / 2.0, (a + b) * TILE_H / 2.0)
+## Hình bao của khối nhô lên height ở cell (mặt trên nâng lên và mặt trước).
+func _silhouette(cell: Vector2i, height: float) -> Rect2:
+	var ground: Rect2 = cell_rect(cell)
+	return Rect2(ground.position - Vector2(0, height), ground.size + Vector2(0, height))
 
 
 ## Dựng lại chữ ô phẳng và khối nhô lên theo bản chụp.
@@ -321,15 +305,15 @@ func _rebuild_terrain() -> void:
 				block.setup(cell, kind, BLOCK_HEIGHT, text)
 				_world.add_child(block)
 				continue
-			# Ô phẳng: chữ ở nửa dưới ô thoi, không bị đồng quân đứng giữa ô che.
+			# Ô phẳng: chữ ở phần dưới ô, không bị đồng quân đứng giữa ô che hết.
 			var label: Label = Label.new()
 			label.text = text
 			label.add_theme_font_size_override("font_size", TERRAIN_FONT_SIZE)
 			label.add_theme_color_override("font_color", LINE_COLOR)
 			label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-			label.size = Vector2(TILE_W / 2.0, TERRAIN_FONT_SIZE * 1.5)
-			label.position = _top_center(cell) + Vector2(0, TILE_H / 4.0) - label.size / 2.0
+			label.size = Vector2(TILE_SIZE, TERRAIN_FONT_SIZE * 1.5)
+			label.position = _top_center(cell) + Vector2(0, TILE_SIZE / 4.0) - label.size / 2.0
 			_terrain_labels.add_child(label)
 
 
@@ -364,14 +348,9 @@ func _remove_token(id: int) -> void:
 
 
 func _draw() -> void:
-	var big: PackedVector2Array = PackedVector2Array([
-		_grid_point(0, 0), _grid_point(cols, 0), _grid_point(cols, rows), _grid_point(0, rows),
-	])
+	var surface: Rect2 = Rect2(0, 0, cols * TILE_SIZE, rows * TILE_SIZE)
 	# Mép bàn: cả bàn là một tấm dày EDGE_DEPTH, mặt trên là mặt đất.
-	var base: PackedVector2Array = PackedVector2Array()
-	for point: Vector2 in big:
-		base.append(point + Vector2(0, EDGE_DEPTH))
-	draw_raised(self, base, EDGE_DEPTH, CELL_COLOR, EDGE_LEFT_SHADE, EDGE_RIGHT_SHADE)
+	draw_raised(self, Rect2(surface.position + Vector2(0, EDGE_DEPTH), surface.size), EDGE_DEPTH, CELL_COLOR, EDGE_SHADE)
 	if _state != null:
 		for r: int in range(rows):
 			for c: int in range(cols):
@@ -382,24 +361,19 @@ func _draw() -> void:
 					Terrain.SPIKES:
 						_draw_spikes(cell)
 	for c: int in range(1, cols):
-		draw_line(_grid_point(c, 0), _grid_point(c, rows), LINE_COLOR, LINE_WIDTH, true)
+		draw_line(Vector2(c * TILE_SIZE, 0), Vector2(c * TILE_SIZE, surface.end.y), LINE_COLOR, LINE_WIDTH, true)
 	for r: int in range(1, rows):
-		draw_line(_grid_point(0, r), _grid_point(cols, r), LINE_COLOR, LINE_WIDTH, true)
-	var border: PackedVector2Array = big.duplicate()
-	border.append(big[0])
-	draw_polyline(border, LINE_COLOR, BORDER_WIDTH, true)
-	# Bệ ô ải, ô sáng, viền mục tiêu và vòng chọn vẽ trên mặt đất, theo thứ tự sâu dần (quân đứng lên bệ được, xem
-	# BLOCK_KINDS): bệ ô ải phía trước che ô sáng phía sau, ô sáng trên bệ nằm trên mặt bệ.
-	for depth: int in range(cols + rows - 1):
+		draw_line(Vector2(0, r * TILE_SIZE), Vector2(surface.end.x, r * TILE_SIZE), LINE_COLOR, LINE_WIDTH, true)
+	draw_rect(surface, LINE_COLOR, false, BORDER_WIDTH)
+	# Bệ ô ải, ô sáng, viền mục tiêu và vòng chọn vẽ trên mặt đất, từng hàng từ trên xuống (quân đứng lên bệ được,
+	# xem BLOCK_KINDS): bệ ô ải ở hàng dưới che ô sáng ở hàng trên, ô sáng trên bệ nằm trên mặt bệ.
+	for r: int in range(rows):
 		for c: int in range(cols):
-			var cell: Vector2i = Vector2i(c, depth - c)
-			if cell.y < 0 or cell.y >= rows:
-				continue
+			var cell: Vector2i = Vector2i(c, r)
 			if _state != null and _state.terrain_at(cell) == Terrain.PASS:
-				draw_raised(self, diamond(cell_center(cell)), PASS_HEIGHT, TERRAIN_COLORS[Terrain.PASS] as Color,
-					EDGE_LEFT_SHADE, EDGE_RIGHT_SHADE)
+				draw_raised(self, cell_rect(cell), PASS_HEIGHT, TERRAIN_COLORS[Terrain.PASS] as Color, EDGE_SHADE)
 			if _lit_cells.has(cell):
-				draw_colored_polygon(diamond(_top_center(cell)), REACH_COLOR)
+				draw_rect(_top_rect(cell), REACH_COLOR)
 			if _target_cells.has(cell):
 				_draw_target(cell)
 			if cell == _selected_cell:
@@ -413,31 +387,36 @@ func _draw() -> void:
 		draw_colored_polygon(_ellipse(_top_center(_path[_path.size() - 1]), PATH_END_RADIUS).slice(0, SELECT_POINTS), PATH_COLOR)
 
 
-## Viền ô thoi khép kín quanh mục tiêu, thụt vào trong ô; ô chờ xác nhận viền dày hơn.
+## Mặt trên của ô (ô ải nâng lên theo bệ).
+func _top_rect(cell: Vector2i) -> Rect2:
+	var ground: Rect2 = cell_rect(cell)
+	return Rect2(ground.position - Vector2(0, _surface(cell)), ground.size)
+
+
+## Khung vuông quanh mục tiêu, thụt vào trong mặt trên ô, không tô; ô chờ xác nhận viền dày hơn.
 func _draw_target(cell: Vector2i) -> void:
-	var center: Vector2 = _top_center(cell)
-	var outline: PackedVector2Array = PackedVector2Array()
-	for corner: Vector2 in diamond(center):
-		outline.append(center + (corner - center) * TARGET_INSET)
-	outline.append(outline[0])
 	var width: float = PENDING_WIDTH if cell == _pending_cell else TARGET_WIDTH
-	draw_polyline(outline, TARGET_COLOR, width, true)
+	draw_rect(_top_rect(cell).grow(-TARGET_INSET), TARGET_COLOR, false, width)
 
 
-## Sông trũng: cả ô là thành sông tối, mặt nước hạ xuống RIVER_DEPTH, cắt theo mép ô.
+## Sông trũng: cả ô là bờ tối, mặt nước bỏ dải RIVER_DEPTH ở trên cùng. Ô ngay phía trên cũng là sông thì không có
+## bờ, nước liền một mạch; hàng 0 luôn có bờ.
 func _draw_river(cell: Vector2i) -> void:
 	var color: Color = TERRAIN_COLORS[Terrain.RIVER] as Color
-	var ground: PackedVector2Array = diamond(cell_center(cell))
-	draw_colored_polygon(ground, color.darkened(RIVER_BANK_SHADE))
-	var water: PackedVector2Array = diamond(cell_center(cell) + Vector2(0, RIVER_DEPTH))
-	for part: PackedVector2Array in Geometry2D.intersect_polygons(water, ground):
-		draw_colored_polygon(part, color)
+	var ground: Rect2 = cell_rect(cell)
+	var above: Vector2i = cell + Vector2i(0, -1)
+	# terrain_at không tự kiểm biên: chỉ hỏi khi ô phía trên còn trong bàn.
+	if above.y >= 0 and _state.terrain_at(above) == Terrain.RIVER:
+		draw_rect(ground, color)
+		return
+	draw_rect(ground, color.darkened(RIVER_BANK_SHADE))
+	draw_rect(Rect2(ground.position + Vector2(0, RIVER_DEPTH), ground.size - Vector2(0, RIVER_DEPTH)), color)
 
 
 ## Hầm chông: ô phẳng màu riêng, ba mũi nhọn quanh tâm.
 func _draw_spikes(cell: Vector2i) -> void:
 	var center: Vector2 = cell_center(cell)
-	draw_colored_polygon(diamond(center), TERRAIN_COLORS[Terrain.SPIKES] as Color)
+	draw_rect(cell_rect(cell), TERRAIN_COLORS[Terrain.SPIKES] as Color)
 	for offset: Vector2 in SPIKE_OFFSETS:
 		var base: Vector2 = center + offset
 		draw_colored_polygon(PackedVector2Array([
@@ -447,7 +426,7 @@ func _draw_spikes(cell: Vector2i) -> void:
 		]), SPIKE_COLOR)
 
 
-## Elip khép kín (vòng chọn, chấm cuối đường đi) nằm trên mặt ô nghiêng.
+## Elip khép kín (vòng chọn, chấm cuối đường đi) nằm trên mặt ô nhìn chếch.
 func _ellipse(center: Vector2, radius: Vector2) -> PackedVector2Array:
 	var points: PackedVector2Array = PackedVector2Array()
 	for i: int in range(SELECT_POINTS + 1):

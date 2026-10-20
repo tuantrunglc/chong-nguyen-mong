@@ -1,14 +1,15 @@
 class_name UnitToken
 extends Node2D
-## Đồng quân tròn có chữ, đứng trên ô bàn nghiêng, có bóng dưới chân, kèm chấm máu ở góc dưới phải.
+## Đồng quân tròn có chữ, đứng trên ô bàn nhìn chếch, có bóng dưới chân, kèm chấm máu ở góc dưới phải.
 ## position là chân đồng: tâm mặt trên của ô (BoardView.cell_center, cộng độ cao bệ ô ải nếu có).
+## Đồng nhô lên ô phía trên nhưng không với tới tâm ô đó, và không lấn sang ô hai bên.
 ## Chỉ vẽ theo bản chụp, không giữ tham chiếu tới trạng thái đang sống.
 
-const RADIUS: float = 26.0
+const RADIUS: float = 24.0
 ## Tâm đồng cao hơn chân đồng. Đủ nhỏ để đồng không với tới tâm ô hàng xóm (BoardView.pick_cell).
-const TOKEN_LIFT: float = 22.0
+const TOKEN_LIFT: float = 20.0
 const SHADOW_COLOR: Color = Color(0.0, 0.0, 0.0, 0.3)
-const SHADOW_RADIUS: Vector2 = Vector2(24, 11)
+const SHADOW_RADIUS: Vector2 = Vector2(22, 8)
 const SHADOW_POINTS: int = 24
 const BORDER_WIDTH: float = 3.0
 const DAI_VIET_COLOR: Color = Color(0.70, 0.13, 0.13)
@@ -20,7 +21,7 @@ const ATTACKED_COLOR: Color = Color(0.72, 0.72, 0.70)
 const ATTACKED_TEXT_COLOR: Color = Color(0.25, 0.25, 0.25)
 const NGUYEN_COLOR: Color = Color(0.17, 0.20, 0.28)
 const NGUYEN_TEXT_COLOR: Color = Color(1.0, 1.0, 1.0)
-const NAME_FONT_SIZE: int = 16
+const NAME_FONT_SIZE: int = 15
 const HP_RADIUS: float = 9.0
 ## Chấm máu, tính từ tâm đồng.
 const HP_OFFSET: Vector2 = Vector2(19, 17)
