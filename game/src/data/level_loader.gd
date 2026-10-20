@@ -65,6 +65,10 @@ static func parse_level(text: String, file: String) -> LoadResult:
 	var generals: Dictionary = BoardLayers.check_unit_cells(terrain_rows, unit_rows, "quan", file, result)
 	if units_clean and generals.is_empty():
 		result.add_error('%s: "quan" không có tướng nào (cần ít nhất một trong 1, 2, 3)' % file)
+	# Tiêu diệt thắng khi hết quân Nguyên: bàn trống quân Nguyên từ đầu thì trận thắng ngay ở lần gục đầu tiên.
+	if units_clean and mission == LevelData.Mission.ELIMINATE \
+			and BoardLayers.reading_order(unit_rows, BoardLayers.ENEMY_SYMBOLS).is_empty():
+		result.add_error('%s: trận "tieu_diet" phải có ít nhất một quân Nguyên trong "quan"' % file)
 
 	var order: Variant = BoardLayers.read_enemy_order(root, "thu_tu_dich", "thu_tu_dich", unit_rows, units_clean,
 		size, file, result)

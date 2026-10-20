@@ -228,13 +228,6 @@ func test_giu_ai_pass_cell_not_checked_when_terrain_is_broken() -> void:
 	assert_eq(_level(d).errors, _errors(['"dia_hinh" dòng 4: có 6 ô, dòng 1 có 7']))
 
 
-func test_no_enemy_is_allowed() -> void:
-	var d: Dictionary = _with_row(_valid_level(), "quan", 0, ". . . . . . .")
-	d = _with_row(d, "quan", 4, ". . . . . . .")
-	d["thu_tu_dich"] = []
-	assert_eq(_level(d).errors, [] as Array[String])
-
-
 # ---------- File trận: lỗi file và JSON ----------
 
 func test_missing_file() -> void:
@@ -345,7 +338,8 @@ func test_row_wrong_length() -> void:
 
 # ---------- File trận: cỡ bàn (Story 1.9) ----------
 
-## Bàn toàn đất trống cols × rows, Nguyễn Khoái ở góc dưới trái, không có quân Nguyên.
+## Bàn toàn đất trống cols × rows, Nguyễn Khoái ở góc dưới trái, một Bộ binh ở góc trên phải (trận Tiêu diệt phải có
+## quân Nguyên).
 func _board_level(cols: int, rows: int) -> Dictionary:
 	var terrain: Array = []
 	var units: Array = []
@@ -356,10 +350,12 @@ func _board_level(cols: int, rows: int) -> Dictionary:
 		terrain.append(" ".join(cells))
 		if r == rows - 1:
 			cells[0] = "1"
+		if r == 0:
+			cells[cols - 1] = "B"
 		units.append(" ".join(cells))
 	var d: Dictionary = _with(_valid_level(), "dia_hinh", terrain)
 	d["quan"] = units
-	d["thu_tu_dich"] = []
+	d["thu_tu_dich"] = ["%d,0" % (cols - 1)]
 	return d
 
 
@@ -411,8 +407,8 @@ func test_non_square_board_loads() -> void:
 
 
 func test_enemy_order_outside_non_square_board() -> void:
-	var d: Dictionary = _with(_board_level(6, 7), "thu_tu_dich", ["6,0"])
-	assert_eq(_level(d).errors, _errors(['"thu_tu_dich" mục 1: ô 6,0 nằm ngoài bàn']))
+	var d: Dictionary = _with(_board_level(6, 7), "thu_tu_dich", ["5,0", "6,0"])
+	assert_eq(_level(d).errors, _errors(['"thu_tu_dich" mục 2: ô 6,0 nằm ngoài bàn']))
 
 
 func test_co_nho_and_co_lon_load() -> void:
@@ -461,6 +457,37 @@ func test_duplicate_general() -> void:
 func test_no_general() -> void:
 	assert_eq(_level(_with_row(_valid_level(), "quan", 6, ". . . . . . .")).errors,
 		_errors(['"quan" không có tướng nào (cần ít nhất một trong 1, 2, 3)']))
+
+
+func test_tieu_diet_without_enemy() -> void:
+	var d: Dictionary = _valid_level()
+	d["quan"] = [
+		". . . . . . .",
+		". . . . . . .",
+		". . . . . . .",
+		". . . . . . .",
+		". . . . . . .",
+		". . . . . . .",
+		"2 . 1 . . . .",
+	]
+	d["thu_tu_dich"] = []
+	assert_eq(_level(d).errors,
+		_errors(['trận "tieu_diet" phải có ít nhất một quân Nguyên trong "quan"']))
+
+
+func test_giu_ai_without_enemy_is_allowed() -> void:
+	var d: Dictionary = _with(_valid_level(), "kieu", "giu_ai")
+	d["quan"] = [
+		". . . . . . .",
+		". . . . . . .",
+		". . . . . . .",
+		". . . . . . .",
+		". . . . . . .",
+		". . . . . . .",
+		"2 . 1 . . . .",
+	]
+	d["thu_tu_dich"] = []
+	assert_true(_level(d).ok)
 
 
 func test_no_general_not_reported_when_layer_broken() -> void:

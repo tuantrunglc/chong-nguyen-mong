@@ -79,10 +79,10 @@ func can_undo() -> bool:
 	return _undo_snapshot != null
 
 
-## Các ô quân unit_id dừng được, theo thứ tự đọc bàn. Không có quân đó thì [].
+## Các ô quân unit_id dừng được, theo thứ tự đọc bàn. Không có quân đó, hoặc trận đã hết, thì [].
 func reachable(unit_id: int) -> Array[Vector2i]:
 	var unit: Unit = _state.unit_by_id(unit_id)
-	if unit == null:
+	if unit == null or Rules.is_battle_over(_state):
 		return []
 	return RulesMove.reachable(_state, unit)
 
@@ -95,10 +95,10 @@ func path_to(unit_id: int, cell: Vector2i) -> Array[Vector2i]:
 	return RulesMove.path_to(_state, unit, cell)
 
 
-## Các ô quân unit_id đánh được, theo thứ tự B→Đ→N→T. Không có quân đó thì [].
+## Các ô quân unit_id đánh được, theo thứ tự B→Đ→N→T. Không có quân đó, hoặc trận đã hết, thì [].
 func attack_targets(unit_id: int) -> Array[Vector2i]:
 	var unit: Unit = _state.unit_by_id(unit_id)
-	if unit == null:
+	if unit == null or Rules.is_battle_over(_state):
 		return []
 	return RulesAttack.targets(_state, unit)
 

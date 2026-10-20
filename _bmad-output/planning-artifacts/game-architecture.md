@@ -584,7 +584,7 @@ chong-nguyen-mong/                    # repo
 │   │   │   ├── event_player.gd       # BattleEvent -> Tween; tua nhanh
 │   │   │   └── battle_input.gd       # chuột + phím tắt -> Command
 │   │   ├── ui/
-│   │   │   ├── hud.gd                # nút mưu kế, Hủy, Kết thúc lượt, Chơi lại; tooltip
+│   │   │   ├── hud.gd                # nút mưu kế, Hủy, Kết thúc lượt, Chơi lại hiệp; tooltip
 │   │   │   ├── result_banner.gd      # bảng "Thắng!"/"Thua!" + nút Chơi lại trận (bỏ nút khi có menu, 4.2)
 │   │   │   ├── main_menu.gd
 │   │   │   ├── level_transition.gd
@@ -849,6 +849,7 @@ Mọi luật đều đi qua đúng quy trình này. Không có ngoại lệ.
 **Gục, thắng, thua:**
 - Quân Nguyên gục thì bị nhấc khỏi bàn. **Tướng gục cũng bị nhấc khỏi bàn**, không chiếm ô. **(mặc định)** **[KIỂM TRA KHI PLAYTEST E4]**: phương án thay thế là để xác lại làm vật cản.
 - Kiểm tra thắng/thua **sau mỗi sự kiện gây gục**, cả trong lượt người chơi lẫn trong pha địch. Cài đặt (Story 2.5): `RulesVictory.check` gọi ở **cuối `Rules.resolve`** (và từ Story 2.8 sau từng đòn địch), chỉ khi lệnh có `DIED` hoặc `DROWNED`; kết cục xét theo trạng thái cuối lệnh; ghi vào `BattleState.phase` (`WON`/`LOST`) và sự kiện `VICTORY`/`DEFEAT`.
+- Trận Tiêu diệt phải có ít nhất một quân Nguyên trong `quan`, nếu không `LevelLoader` báo lỗi (tác giả chốt 2026-10-20, review Story 2.5): bàn trống quân Nguyên thì lần gục đầu tiên cho thắng ngay.
 - **Hết trận thì khóa** (tác giả chốt 2026-10-20): khi `phase` là `WON`/`LOST`, mọi lệnh và cả Hủy bị từ chối với `Reject.BATTLE_OVER` (mã kịch bản `tran_da_het`).
 - Thắng và thua xảy ra cùng lúc (ví dụ quân Nguyên cuối cùng và tướng cuối cùng cùng gục vì va chạm): **thắng được ưu tiên**. **(mặc định)**
 - Giữ ải: quân Nguyên vào ô ải **bằng bất kỳ cách nào**, kể cả do bị người chơi kéo vào, thì thua ngay. **(mặc định)**

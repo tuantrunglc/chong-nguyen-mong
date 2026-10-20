@@ -160,6 +160,23 @@ func test_hold_pass_is_not_won_by_clearing_enemies() -> void:
 	assert_eq(state.phase, BattleState.Phase.LOST)
 
 
+## Nhánh thua đi qua Rules.resolve: lao của Lão trúng Khoái 1 máu đứng chắn, Khoái gục qua lệnh thật. Lão còn trên
+## bàn nên chưa thua. Lệnh của người chơi chưa làm tướng cuối gục được (người ra đòn luôn còn), nên DEFEAT qua lệnh
+## thật chờ đòn địch (Story 2.8).
+func test_general_falling_through_resolve_is_checked() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 6): "2", Vector2i(3, 4): "1", Vector2i(3, 3): "B"}, {},
+		{Vector2i(3, 4): 1})
+	var events: Array[String] = _attack(state, 2, Vector2i(3, 3))
+	assert_true(events.has("DIED 1 3,4"), "Khoái gục vì lao: %s" % [events])
+	assert_false(events.has("DEFEAT"), "còn Lão: chưa thua")
+	assert_eq(state.phase, BattleState.Phase.PLAYER)
+	# Lão gục tiếp (thay cho đòn địch chưa có): lúc đó mới thua.
+	var more: Array[BattleEvent] = []
+	_kill(state, 2, more)
+	assert_eq(_last(_check(state, more)), "DEFEAT")
+	assert_eq(state.phase, BattleState.Phase.LOST)
+
+
 func test_commands_are_locked_after_victory() -> void:
 	var state: BattleState = BoardFixture.state({Vector2i(3, 4): "1", Vector2i(0, 6): "2", Vector2i(3, 3): "B"}, {},
 		{Vector2i(3, 3): 1})

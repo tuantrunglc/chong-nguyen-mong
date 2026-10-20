@@ -4,7 +4,7 @@ baseline_commit: a38f181
 
 # Story 2.5: Máu, gục, thắng và thua (Tiêu diệt)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -19,7 +19,7 @@ _**Chưa có** (đừng làm ở đây): thua vì hết `so_hiep_toi_da` (3.5), 
 ## Acceptance Criteria
 
 1. **Đợt duyệt kịch bản trước khi viết code luật (M3).** **Cho** 5 kịch bản mới ở Dev Notes "Đợt kịch bản 7" (`da_duyet: false`) và phần khung ở Task 1.1 (khóa `ket_qua` của `sau`, mã từ chối `tran_da_het`). **Khi** gõ `tools/test.sh`, **thì**:
-   - test xanh, có dòng `Kịch bản luật: 44 đã duyệt · 5 chưa duyệt (5 chưa đạt)`;
+   - test xanh, có dòng `Kịch bản luật: 44 đã duyệt · 5 chưa duyệt (4 chưa đạt)`;
    - mỗi kịch bản mới có lý do đúng như bảng "Lý do chưa đạt" ở Dev Notes.
 
    AI commit đợt này rồi **dừng lại chờ tác giả duyệt** bằng `tools/xem_kich_ban.sh ket_thuc`. Chưa duyệt xong thì không viết dòng code luật nào (`rules_victory.gd`, `rules.gd`, `battle_state.gd`).
@@ -53,7 +53,7 @@ _**Chưa có** (đừng làm ở đây): thua vì hết `so_hiep_toi_da` (3.5), 
     - `tests/test_scenario_loader.gd`: ca nạp `ket_qua` đúng (3 giá trị), ca giá trị sai, ca `tu_choi: "tran_da_het"`.
     - **Chưa** thêm `phase`, `mission`, `RulesVictory` (để Task 2): kịch bản nạp được nhưng chạy thì trượt.
   - [x] 1.2 Viết 5 file đúng như Dev Notes "Đợt kịch bản 7", `"da_duyet": false`, thư mục mới `tests/kich_ban/ket_thuc/`. Không đụng 44 kịch bản đã duyệt.
-  - [x] 1.3 `tools/xem_kich_ban.sh ket_thuc`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `ket_qua` và `tu_choi` hiện đúng câu tiếng Việt. `tools/test.sh`: xanh, `44 đã duyệt · 5 chưa duyệt (5 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
+  - [x] 1.3 `tools/xem_kich_ban.sh ket_thuc`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `ket_qua` và `tu_choi` hiện đúng câu tiếng Việt. `tools/test.sh`: xanh, `44 đã duyệt · 5 chưa duyệt (4 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
   - [x] 1.4 Commit: `Kịch bản kết cục trận chờ duyệt (Story 2.5)`.
   - [x] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh ket_thuc`, đọc 5 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ ba điều:
     - hết trận thì **mọi lệnh bị từ chối** (kịch bản #5), theo câu 1;
@@ -102,10 +102,10 @@ _**Chưa có** (đừng làm ở đây): thua vì hết `so_hiep_toi_da` (3.5), 
 - [x] **Task 5: Trận thử `thu_thang`** (AC: 13)
   - [x] 5.1 `game/data/tran/thu_thang.json` (MỚI) đúng bố cục ở Dev Notes "Trận thử `thu_thang`". Không đổi `tran_01.json` và các trận thử cũ.
   - [x] 5.2 `tests/test_loaders.gd`: thêm `test_real_win_trial_level_loads` theo mẫu `test_real_pull_trial_level_loads`: không lỗi, không cảnh báo, **so đủ ô và loại của mọi quân**, kiểm ô sông. Thêm một test chơi thật trên chính file này (nạp `thu_thang.json`, chạy hai lệnh: Khoái đẩy, Dư kéo) kết thúc `WON`; test dùng file thật nên sửa file trận thì test báo.
-- [ ] **Task 6: Tài liệu và kiểm tay** (AC: 3, 13, 14) _(chỉ còn 6.3, chờ tác giả kiểm tay)_
+- [x] **Task 6: Tài liệu và kiểm tay** (AC: 3, 13, 14)
   - [x] 6.1 `game-architecture.md`: thêm `thu_thang.json` vào cây `data/tran/`, `result_banner.gd` vào cây `ui/`, `rules_victory.gd` đã có trong cây (kiểm); bảng thứ tự phân giải: dòng kiểm thắng/thua đặt **sau** lệnh, và "thắng trước thua". Nếu sai lệch với kiến trúc (ví dụ đã đặt tên khác) ghi vào "Lệch so với Tasks".
   - [x] 6.2 `epics.md` Story 2.5: không sửa tiêu chí; nếu quyết định của tác giả (câu 1, 2) làm đổi nghĩa tiêu chí thì ghi chú một dòng.
-  - [ ] 6.3 _(Chưa xong: game mở được `thu_thang`, log sạch; chưa chụp ảnh vì GoPeak không kết nối trong phiên này (`CONNECTION_CLOSED`); chờ tác giả kiểm tay, xem Lệch 2)_ Kiểm bằng mắt: chạy `tools/chay.sh --dev --tran=thu_thang` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím, `inject_mouse_click` theo pixel của công thức hiện hành (bàn 7×7 giữ `board.position = (262, 139)`; **tính lại từ Debug Log 2.3, không đoán**). Làm theo "Hướng dẫn tác giả tự test", `capture_screenshot` sau mỗi bước chính, lưu `_bmad-output/implementation-artifacts/anh/2-5-*.png` (ít nhất: sau khi Khoái đẩy xuống sông còn một quân Nguyên chưa có bảng; sau khi Dư kéo xuống sông hiện "Thắng!"). Tắt game. Log không có ERROR/WARN. GoPeak không kết nối được thì **bỏ dấu [x] và ghi rõ chờ tác giả kiểm tay** (review 2.3 và 2.4 đã bắt lỗi ghi [x] mà thiếu ảnh).
+  - [x] 6.3 _(Tác giả tự kiểm tay AC 13 và 14 (2026-10-20), đạt. Không có ảnh trong `anh/` vì GoPeak không kết nối.)_ Kiểm bằng mắt: chạy `tools/chay.sh --dev --tran=thu_thang` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím, `inject_mouse_click` theo pixel của công thức hiện hành (bàn 7×7 giữ `board.position = (262, 139)`; **tính lại từ Debug Log 2.3, không đoán**). Làm theo "Hướng dẫn tác giả tự test", `capture_screenshot` sau mỗi bước chính, lưu `_bmad-output/implementation-artifacts/anh/2-5-*.png` (ít nhất: sau khi Khoái đẩy xuống sông còn một quân Nguyên chưa có bảng; sau khi Dư kéo xuống sông hiện "Thắng!"). Tắt game. Log không có ERROR/WARN. GoPeak không kết nối được thì **bỏ dấu [x] và ghi rõ chờ tác giả kiểm tay** (review 2.3 và 2.4 đã bắt lỗi ghi [x] mà thiếu ảnh).
   - [x] 6.4 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, trận thử, tài liệu, `.uid` mới (cho `rules_victory.gd`, `result_banner.gd`, `test_rules_victory.gd`), `game/i18n/text.vi.translation`. Ví dụ: `Thắng và thua của trận Tiêu diệt (Story 2.5)`.
   - [x] 6.5 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, dùng kết quả thật (số test thật).
 
@@ -285,6 +285,21 @@ _Hai câu dưới đây là chỗ GDD và epics chưa nói rõ. Tác giả chố
 - `_bmad-output/project-context.md` ("Kiểm tra thắng/thua sau mỗi sự kiện gây gục", "Số tướng do file trận quy định", luật test).
 - `_bmad-output/implementation-artifacts/2-4-tran-khanh-du-keo.md` (mẫu story và review findings), `2-1-nguyen-khoai-danh-day-va-va-cham.md`, `2-2-song-va-danh-trung-quan-minh.md`, `2-3-pham-ngu-lao-phong-lao.md`, `deferred-work.md`.
 
+### Review Findings
+
+_Code review 2026-10-20, mốc `8c70e77..7c4cfaa`, ba lớp (Blind, Edge Case, Acceptance). Sau review, tác giả tự kiểm tay AC 13 và 14 (đạt) nên Task 6.3 xong; không có ảnh chụp. Tác giả chọn 1a, 2b, sửa hết patch (2026-10-20)._
+
+- [x] [Review][Decision] Trận Tiêu diệt thắng khi "không còn quân Nguyên trên bàn" — nếu file trận không có quân Nguyên từ đầu, hoặc còn `tiep_vien` chưa vào bàn, thì một lần gục (kể cả tướng cuối) cho `WON` ngay. Hiện chưa trận nào gặp (`thu_thang.json` có `tiep_vien: []`). Chọn: (a) `LevelLoader` báo lỗi khi `tieu_diet` mà không có quân Nguyên, còn tiếp viện để Story 3.10 lo; (b) chỉ thắng khi có quân Nguyên gục trong `events`; (c) để nguyên, ghi vào deferred. [game/src/core/rules_victory.gd:41, game/src/data/level_loader.gd:66] — **Tác giả chọn (a).** `LevelLoader` báo `<f>: trận "tieu_diet" phải có ít nhất một quân Nguyên trong "quan"`. Luật này thay luật cũ của Story 1.1 (trận không quân Nguyên vẫn nạp được): test `test_no_enemy_is_allowed` đổi thành `test_tieu_diet_without_enemy` + `test_giu_ai_without_enemy_is_allowed`; bàn mẫu `_board_level` (test_loaders) và trận lỗi của `test_main` thêm một Bộ binh. Tiếp viện chưa vào bàn: ghi deferred cho Story 3.10.
+- [x] [Review][Decision] Kịch bản không kiểm được khóa `ket_thuc_luot` sau khi hết trận — `COMMAND_REJECTS` không nhận `ket_thuc_luot` + `tran_da_het`, nên khóa END_TURN chỉ có test GUT bảo vệ. Chọn: (a) mở rộng loader/runner cho `ket_thuc_luot` nhận `tran_da_het` và sửa `test_step_reject_code_errors`; (b) giữ nguyên hợp đồng cũ như dev đã ghi (đã có test GUT). [game/src/data/scenario_loader.gd:42-52, game/tests/scenario_runner.gd:22] — **Tác giả chọn (b).** Giữ nguyên.
+- [x] [Review][Patch] `Rules.resolve` gọi `RulesVictory.check` cả khi lệnh bị từ chối, lệch Task 2.3 và chú thích sai; thoát sớm khi `events` có `REJECTED` [game/src/core/rules.gd:19-20]
+- [x] [Review][Patch] AC 1 và AC 3 còn ghi `(5 chưa đạt)`, thực tế kịch bản #1 `(4 chưa đạt)`; sửa số cho khớp theo Dev Notes [2-5-mau-guc-thang-va-thua-tieu-diet.md:AC 1, AC 3]
+- [x] [Review][Patch] Test `test_win_shows_banner_and_locks_the_board` bấm `(0,5)` (ô kề Lão) chứ không phải ô sáng cũ của tướng vừa chọn như Task 4.5 yêu cầu; sửa để bấm đúng ô sáng cũ và bấm tướng, rồi kiểm không lệnh nào gửi [game/tests/test_battle_view.gd]
+- [x] [Review][Patch] `BattleController.reachable` và `attack_targets` vẫn trả ô sau khi hết trận; trả `[]` khi `Rules.is_battle_over(_state)` [game/src/battle/battle_controller.gd:88-107]
+- [x] [Review][Patch] Chưa có test GUT cho nhánh thua đi qua `Rules.resolve` (mọi ca thua gọi thẳng `RulesVictory.check`); thêm một ca dùng lệnh thật hoặc đặt trạng thái rồi `resolve` [game/tests/test_rules_victory.gd] — Khi sửa: lệnh của người chơi chưa làm tướng cuối gục được (người ra đòn luôn còn), nên `test_general_falling_through_resolve_is_checked` cho lao Lão hạ Khoái qua `Rules.resolve` (chưa thua vì còn Lão), rồi mới hạ Lão bằng `Effects.damage`. DEFEAT qua lệnh thật chờ Story 2.8.
+- [x] [Review][Patch] `ResultBanner.PANEL_SIZE.y = 170` có thể nhỏ hơn nội dung (chữ 56px + khoảng cách + nút 44 + đệm + viền), và test chỉ kiểm rect của `banner`, không phải rect của panel; đo lại và kiểm rect thật [game/src/ui/result_banner.gd:9, game/tests/test_result_banner.gd]
+- [x] [Review][Patch] `game-architecture.md`: dòng `hud.gd` còn ghi nút "Chơi lại", nút này nằm ở `result_banner.gd`; bỏ khỏi dòng `hud.gd` [_bmad-output/planning-artifacts/game-architecture.md] — Khi sửa: chữ "Chơi lại" ở đó là nút "Chơi lại hiệp" (luật hoàn tác, chưa làm), không phải nút Chơi lại trận; ghi rõ thành "Chơi lại hiệp" thay vì xóa.
+- [x] [Review][Defer] `ResultBanner` chép lại hằng màu nền và viền của `error_screen.gd`, trái Task 4.1 (không số màu tự đặt) — deferred, chưa có hằng dùng chung; gom vào theme khi có màn thứ ba cần dùng [game/src/ui/result_banner.gd]
+
 ## Dev Agent Record
 
 ### Agent Model Used
@@ -357,13 +372,15 @@ _(dev điền)_
 - `game/tests/test_rules_victory.gd` (mới), `test_rules_victory.gd.uid` (mới)
 - `game/tests/test_result_banner.gd` (mới), `test_result_banner.gd.uid` (mới)
 - `game/tests/scenario_runner.gd`, `game/tests/scenario_viewer.gd` (sửa)
-- `game/tests/test_scenario_loader.gd`, `test_battle_state.gd`, `test_battle_controller.gd`, `test_battle_view.gd`, `test_loaders.gd`, `test_rules_attack.gd` (sửa)
+- `game/tests/test_scenario_loader.gd`, `test_battle_state.gd`, `test_battle_controller.gd`, `test_battle_view.gd`, `test_loaders.gd`, `test_rules_attack.gd`, `test_main.gd` (sửa)
+- `game/src/data/level_loader.gd` (sửa, sau review)
 - `_bmad-output/planning-artifacts/game-architecture.md` (sửa)
 - `_bmad-output/implementation-artifacts/deferred-work.md` (sửa)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` (sửa)
 
 ### Change Log
 
+- 2026-10-20: Sửa theo code review: tác giả chọn 1a (trận Tiêu diệt không có quân Nguyên thì báo lỗi khi nạp), 2b (giữ nguyên), sửa cả 7 mục patch. Tác giả tự kiểm tay AC 13, 14 nên Task 6.3 xong. 485/485 test, 49 kịch bản đã duyệt. Chuyển `done`.
 - 2026-10-20: Task 2–6 (trừ 6.3): lõi luật thắng/thua, khóa trận, bảng kết cục và nút Chơi lại trận, trận thử `thu_thang`; 481/481 test, 49 kịch bản đã duyệt. Chuyển `review`. Task 6.3 chờ tác giả kiểm tay.
 - 2026-10-20: Task 1 xong 1.1–1.4: khung kịch bản kết cục (`ket_qua`, `tran_da_het`, sự kiện `VICTORY`/`DEFEAT`), 5 kịch bản `ket_thuc/` chưa duyệt; chờ tác giả duyệt (1.5).
 - 2026-10-20: Tạo story (gds-create-story).

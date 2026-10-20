@@ -17,18 +17,17 @@ const LOST_COLOR: Color = Color(1.0, 0.62, 0.52)
 const TITLE_FONT_SIZE: int = 56
 const BUTTON_HEIGHT: float = 44.0
 
+var _panel: PanelContainer
 var _title: Label
 var _retry_button: Button
 
 
 func _ready() -> void:
-	size = PANEL_SIZE
-	position = (BoardView.AREA.get_center() - PANEL_SIZE / 2.0).round()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
 
 	var panel: PanelContainer = PanelContainer.new()
-	panel.size = PANEL_SIZE
+	_panel = panel
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = BACKGROUND_COLOR
@@ -57,6 +56,15 @@ func _ready() -> void:
 	_retry_button.pressed.connect(func() -> void: retry_pressed.emit())
 	box.add_child(_retry_button)
 
+	# PANEL_SIZE là cỡ nhỏ nhất; chữ và nút cần nhiều chỗ hơn thì nới ra, để khung luôn bọc hết nội dung và vẫn ở
+	# giữa bàn. Đo với chữ dài hơn trong hai chữ kết cục.
+	_title.text = tr("result.won") if tr("result.won").length() >= tr("result.lost").length() else tr("result.lost")
+	var panel_size: Vector2 = PANEL_SIZE.max(panel.get_combined_minimum_size()).ceil()
+	_title.text = ""
+	panel.size = panel_size
+	size = panel_size
+	position = (BoardView.AREA.get_center() - panel_size / 2.0).round()
+
 
 ## Hiện bảng theo pha: WON là "Thắng!", LOST là "Thua!"; pha khác thì ẩn bảng.
 func show_result(phase: BattleState.Phase) -> void:
@@ -83,6 +91,11 @@ func is_showing() -> bool:
 
 func result_text() -> String:
 	return _title.text if visible else ""
+
+
+## Khung thật trên màn hình (tọa độ cha), để test kiểm khung chứ không chỉ kiểm Control bọc ngoài.
+func panel_rect() -> Rect2:
+	return Rect2(position + _panel.position, _panel.size)
 
 
 func retry_button() -> Button:

@@ -306,3 +306,12 @@ func test_battle_over_locks_submit_and_undo() -> void:
 	assert_eq(_cell(c, 2), Vector2i(0, 5), "Lão không dời")
 	assert_eq(c.snapshot().round_number, 1, "không sang hiệp mới")
 	assert_false(c.can_undo())
+
+
+func test_battle_over_shows_no_cells() -> void:
+	var c: BattleController = _controller_for({Vector2i(3, 1): "1", Vector2i(3, 0): "B", Vector2i(0, 6): "2"})
+	assert_false(c.reachable(2).is_empty(), "điều kiện trước: Lão đi được")
+	c.submit(Command.attack(1, Vector2i(3, 0)))
+	assert_eq(c.snapshot().phase, BattleState.Phase.WON, "điều kiện trước: đã thắng")
+	assert_eq(c.reachable(2), [] as Array[Vector2i], "hết trận: không còn ô đi")
+	assert_eq(c.attack_targets(2), [] as Array[Vector2i], "hết trận: không còn ô đánh")

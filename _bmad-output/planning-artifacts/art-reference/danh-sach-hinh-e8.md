@@ -7,10 +7,32 @@ Lập 2026-10-19. Dùng khi làm E8 (Hình ảnh & âm thanh). Danh sách âm th
 - **Góc nhìn:** pixel art nhìn chếch từ trên xuống, ô vuông (GDD, Art Style; ảnh mẫu ở thư mục này).
 - **Ô:** **64×64 px**, hiện đúng tỉ lệ 1:1 (chốt 2026-10-20, thay cho 32×32). Godot đặt lọc `Nearest` để không nhòe.
 - **Vật đứng** (quân, khối nhô lên): khung **64×64**. Chân hoặc đáy nằm trong ô; phần trên được phép che ô phía trên. Vũ khí dài không được thò quá nửa ô sang hai bên.
-- **Bảng màu:** một bảng duy nhất từ lospec.com (đề xuất Endesga 32 hoặc Resurrect 64). Mọi hình, kể cả hình tải về và hình AI, đều đổi về bảng này.
+- **Bảng màu:** **Resurrect 64** (64 màu, Kerrie Lake, https://lospec.com/palette-list/resurrect-64), tác giả chốt 2026-10-20. File bảng màu để nạp vào phần mềm vẽ: `resurrect-64.gpl` cùng thư mục này. Mọi hình, kể cả hình tải về và hình AI, đều đổi về bảng này.
+- **Màu hai phe** (tác giả chốt 2026-10-20): **Đại Việt đỏ** (đỏ sẫm, đen, đồng), **Nguyên xám xanh** (xám xanh, nâu da). Quân Nguyên không dùng đỏ để không lẫn với ô đỏ báo đòn.
 - **Không có chữ trong hình.** Chữ (tên, số máu, nút) để game hiện bằng font.
 - **Ô đỏ báo đòn, số thứ tự ra đòn, ô sáng, đường đi:** giữ vẽ bằng code để luôn nổi bật nhất (NFR9). Tranh địa hình phải dùng màu dịu, không dùng đỏ tươi.
 - **Mỗi hình đưa vào game phải có một dòng trong `game/assets/CREDITS.md`.**
+
+## Link nguồn để xem mẫu (tra 2026-10-20)
+
+Đã mở từng trang để kiểm giấy phép và cỡ ô. Giấy phép có thể đổi: khi tải về thật thì đọc lại trang và ghi vào `game/assets/CREDITS.md`.
+
+**Lưu ý cỡ ô:** game dùng ô 64×64. Gói 16×16 phải phóng ×4, gói 32×32 phóng ×2 (lọc `Nearest`, phóng theo bậc nguyên nên không nhòe), nhưng hình sẽ to hạt hơn hình vẽ thẳng ở 64 px. Dùng các gói này để xem phong cách, hoặc làm hình tạm cho E8 P1.
+
+| Dùng cho | Gói | Link | Cỡ ô | Giấy phép | Ghi chú |
+|---|---|---|---|---|---|
+| A. Địa hình | Ninja Adventure | https://pixel-boy.itch.io/ninja-adventure-asset-pack | 16×16 | CC0 | Miễn phí (tự chọn giá). Có cả ô đất, nước, cây, nhà; kèm hơn 100 hiệu ứng âm thanh, 37 bản nhạc, giao diện, hiệu ứng hình, 2 font và project mẫu cho Godot 4 |
+| A. Địa hình | Kenney – Tiny Town | https://kenney.nl/assets/tiny-town | 16×16 | CC0 | Làng, cỏ, cây, đường |
+| A. Địa hình | Kenney – Roguelike/RPG Pack | https://kenney.nl/assets/roguelike-rpg-pack | 16×16 | CC0 | Khoảng 1700 file: địa hình, đồ vật, nút, khung giao diện |
+| A. Địa hình | Ulerinn – Free Forest Tilesets | https://ulerinn.itch.io/free-forest-tilesets | 16, 32, 48 | CC0 | Một bộ rừng nhỏ. Không được bán lại hay chia sẻ lại nguyên gói. Tác giả ghi không dùng AI |
+| A. Địa hình | Cainos – Pixel Art Top Down Basic | https://cainos.itch.io/pixel-art-top-down-basic | 32×32 | Riêng của tác giả: cho dùng thương mại, không bắt ghi tên, không được bán lại hay chia sẻ lại | Miễn phí. Làm cho Unity nhưng có ảnh PNG dùng được trong Godot. Không phải CC0: ghi đúng tên giấy phép vào CREDITS |
+| A. Địa hình | (tìm thêm) Kenney theo chủ đề nhìn từ trên | https://kenney.nl/assets/tag:top-down | — | CC0 | Phần lớn là tàu, xe tăng, súng: ít hợp thời Trần |
+| D. Giao diện | Kenney – UI Pack Pixel Adventure | https://kenney.nl/assets/ui-pack-pixel-adventure | — | CC0 | Nút, khung, thanh trượt kiểu pixel |
+| Bảng màu | Resurrect 64 | https://lospec.com/palette-list/resurrect-64 | — | (bảng màu, dùng tự do) | 64 màu, của Kerrie Lake. **Đã chốt** (2026-10-20) |
+| B. Quân | PixelLab | https://www.pixellab.ai | 64×64 (bản nháp Phạm Ngũ Lão) | Điều khoản: người dùng giữ quyền sở hữu hình tạo ra, được dùng thương mại; không thấy phân biệt gói trả phí và miễn phí; cấm dùng hình để huấn luyện AI khác | Điều khoản: https://www.pixellab.ai/termsofservice. Vẫn phải sửa tay (chính sách AI trong GDD) |
+
+- Kenney: mọi gói trên trang là CC0, không bắt ghi tên (ghi "Kenney" nếu muốn), chỉ không được dùng logo Kenney (https://kenney.nl/support).
+- Không dùng gói giấy phép CC-BY-SA (ví dụ bộ LPC trên OpenGameArt) nếu chưa hỏi (luật ở `game/assets/CREDITS.md`).
 
 ## Ưu tiên
 
@@ -39,14 +61,14 @@ Nguồn đề xuất: PixelLab hoặc AI vẽ nháp, rồi **sửa tay** theo t�
 
 | # | Quân | Phe | Vũ khí, dấu nhận diện | Lưu ý lịch sử |
 |---|---|---|---|---|
-| B1 | Nguyễn Khoái | Đại Việt | đòn đánh đẩy lùi | Đối chiếu trang phục tướng thời Trần |
+| B1 | Nguyễn Khoái | Đại Việt | **mạch đao** (tác giả chốt 2026-10-20, thay đại đao), đòn đánh đẩy lùi | Đối chiếu trang phục tướng thời Trần |
 | B2 | Phạm Ngũ Lão | Đại Việt | giáo, lao (phóng xa) | Giai thoại cầm giáo ngồi đan sọt  Bản nháp AI: `img/Pham_Ngu_Lao_muscular_13th/` (PixelLab, 64×64, 8 hướng, chỉ có tư thế đứng). Cần: đổi về bảng màu chung; kiểm tra áo choàng đỏ ở hướng đông và tây (prompt không yêu cầu); đối chiếu giáp sơn đen và khăn đỏ với tư liệu; xem lại ngọn giáo cầm ngang (61 px, thò sang ô bên cạnh). |
-| B3 | Trần Khánh Dư | Đại Việt | đòn kéo (vũ khí chốt khi vẽ) | Tôn thất nhà Trần |
+| B3 | Trần Khánh Dư | Đại Việt | móc dài (tác giả chốt 2026-10-20), đòn kéo | Tôn thất nhà Trần |
 | B4 | Bộ binh | Nguyên | đao, khiên | Giáp da phiến, mũ lông |
 | B5 | Kỵ binh | Nguyên | ngựa thảo nguyên nhỏ, giáo | Xung phong theo hàng |
 | B6 | Cung kỵ | Nguyên | cung ngắn trên ngựa | |
 
-Mỗi quân cần (khung 64×64, hai phe tách màu rõ: Đại Việt và Nguyên):
+Mỗi quân cần (khung 64×64, hai phe tách màu rõ: Đại Việt đỏ, Nguyên xám xanh):
 
 | Trạng thái | Ưu tiên | Số khung gợi ý | Ghi chú |
 |---|---|---|---|

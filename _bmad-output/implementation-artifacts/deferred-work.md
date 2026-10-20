@@ -125,3 +125,8 @@
 - Khi Story 2.8 hoặc 3.4 (hầm chông) cho tướng cuối gục thật bằng một lệnh, thêm kịch bản "thua" và "thắng thua cùng lúc" vào `tests/kich_ban/ket_thuc/` (hiện chỉ có test GUT dựng bằng `Effects.damage`).
 - `RulesVictory._someone_fell` dựa vào `DIED`/`DROWNED`: loại sự kiện gục mới thêm sau này (ví dụ quân tiếp viện, 3.10) phải cập nhật hàm này.
 - Nút "Chơi lại trận" của `ResultBanner` bỏ khi có menu ở Story 4.2.
+
+## Deferred from: code review of 2-5-mau-guc-thang-va-thua-tieu-diet (2026-10-20)
+
+- `ResultBanner` (`game/src/ui/result_banner.gd`) chép lại hằng màu nền và viền của `error_screen.gd` thay vì dùng chung; gom vào theme khi có màn thứ ba cần dùng.
+- Trận Tiêu diệt còn `tiep_vien` chưa vào bàn: luật hiện tại cho thắng khi quân Nguyên trên bàn gục hết, kể cả khi còn tiếp viện. Story 3.10 (tiếp viện) phải xét điều kiện thắng cùng tiếp viện. Trận không có quân Nguyên nào thì đã có lỗi nạp (quyết định 1a).

@@ -1,0 +1,254 @@
+diff -ruN a/game/data/tran/thu_ba_tuong.json b/game/data/tran/thu_ba_tuong.json
+--- a/game/data/tran/thu_ba_tuong.json	2026-10-20 15:53:41.751454194 +0700
++++ b/game/data/tran/thu_ba_tuong.json	2026-10-20 16:15:03.294611743 +0700
+@@ -3,12 +3,12 @@
+   "ten": "Thử ba tướng",
+   "kieu": "tieu_diet",
+   "dia_hinh": [
+-    ". . . ~ . . .",
+-    ". # . ~ . L .",
+-    ". . . ~ . . .",
++    ". . . ~ . . #",
++    "# # . ~ . L .",
++    "# . . ~ . . .",
+     ". ^ . . . . A",
+     ". . . ~ D . .",
+-    ". . . ~ . . .",
++    ". . D ~ . . #",
+     ". . . ~ . . ."
+   ],
+   "quan": [
+diff -ruN a/game/data/tran/van_don.json b/game/data/tran/van_don.json
+--- a/game/data/tran/van_don.json	1970-01-01 08:00:00.000000000 +0800
++++ b/game/data/tran/van_don.json	2026-10-20 16:15:03.294611743 +0700
+@@ -0,0 +1,23 @@
++{
++  "phien_ban_dinh_dang": 1,
++  "ten": "Vân Đồn (thử hình)",
++  "kieu": "tieu_diet",
++  "dia_hinh": [
++    "# # ~ ~ # . ~",
++    "# . ~ L ~ . ~",
++    "~ ~ ~ # ~ ~ L",
++    ". ~ L ~ ~ # ~",
++    ". . ~ # . . #"
++  ],
++  "quan": [
++    ". . . . . B .",
++    ". 2 . . . B .",
++    ". . . . . . .",
++    ". . . . . . .",
++    "1 . . . 3 . ."
++  ],
++  "thu_tu_dich": ["5,0", "5,1"],
++  "long_dan": 3,
++  "tiep_vien": [],
++  "muu_ke_mo": []
++}
+diff -ruN a/game/data/tran/van_don_lon.json b/game/data/tran/van_don_lon.json
+--- a/game/data/tran/van_don_lon.json	1970-01-01 08:00:00.000000000 +0800
++++ b/game/data/tran/van_don_lon.json	2026-10-20 16:15:03.294611743 +0700
+@@ -0,0 +1,29 @@
++{
++  "phien_ban_dinh_dang": 1,
++  "ten": "Vân Đồn lớn (thử hình)",
++  "kieu": "tieu_diet",
++  "dia_hinh": [
++    "# # ~ ~ ~ ~ ~ # . ~",
++    "# . ~ # ~ ~ L ~ . ~",
++    "~ ~ ~ ~ ~ # ~ ~ ~ L",
++    "~ ~ ~ ~ L ~ ~ ~ # ~",
++    "~ ~ # ~ ~ ~ # L ~ ~",
++    "~ ~ ~ ~ # ~ ~ ~ ~ #",
++    ". ~ # ~ ~ ~ ~ # ~ ~",
++    ". . ~ ~ ~ # . . ~ ~"
++  ],
++  "quan": [
++    ". . . . . . . . B .",
++    ". B . . . . . . B .",
++    ". . . . . . . . . .",
++    ". . . . . . . . . .",
++    ". . . . . . . . . .",
++    ". . . . . . . . . .",
++    "1 . . . . . . . . .",
++    ". 2 . . . . 3 . . ."
++  ],
++  "thu_tu_dich": ["8,0", "8,1", "1,1"],
++  "long_dan": 3,
++  "tiep_vien": [],
++  "muu_ke_mo": []
++}
+diff -ruN a/game/project.godot b/game/project.godot
+--- a/game/project.godot	2026-10-20 15:53:41.752454201 +0700
++++ b/game/project.godot	2026-10-20 16:15:03.294611743 +0700
+@@ -39,3 +39,6 @@
+ 
+ renderer/rendering_method="gl_compatibility"
+ renderer/rendering_method.mobile="gl_compatibility"
++
++[rendering]
++environment/defaults/default_clear_color=Color(0.12, 0.14, 0.14, 1)
+diff -ruN a/game/src/battle/board_view.gd b/game/src/battle/board_view.gd
+--- a/game/src/battle/board_view.gd	2026-10-20 15:53:41.753454209 +0700
++++ b/game/src/battle/board_view.gd	2026-10-20 16:15:03.295611716 +0700
+@@ -8,6 +8,15 @@
+ 
+ ## Cạnh ô (px), khớp tranh E8 64×64 hiện 1:1.
+ const TILE_SIZE: int = 64
++static var _tex_cache: Dictionary = {}
++static func has_bg() -> bool:
++	return FileAccess.file_exists("res://mock/nen.png")
++
++
++static func tex(name: String) -> Texture2D:
++	if not _tex_cache.has(name):
++		_tex_cache[name] = ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path("res://mock/%s.png" % name)))
++	return _tex_cache[name] as Texture2D
+ ## Đọc từ project.godot để chỉ có một nơi khai báo kích thước màn hình.
+ static var viewport_size: Vector2 = Vector2(
+ 	ProjectSettings.get_setting("display/window/size/viewport_width") as int,
+@@ -16,7 +25,7 @@
+ ## Vùng trống cho bàn (tọa độ màn hình): dưới tiêu đề, trái bảng HUD, trên nhãn phiên bản.
+ const AREA: Rect2 = Rect2(16, 52, 940, 612)
+ const CELL_COLOR: Color = Color(0.93, 0.87, 0.73)
+-const LINE_COLOR: Color = Color(0.36, 0.24, 0.14)
++const LINE_COLOR: Color = Color(0.18, 0.13, 0.18)
+ const LINE_WIDTH: float = 2.0
+ const BORDER_WIDTH: float = 4.0
+ ## Độ dày mép bàn ở cạnh trước.
+@@ -40,7 +49,7 @@
+ 	Terrain.SPIKES: Color(0.80, 0.62, 0.45),
+ 	Terrain.GRANARY: Color(0.85, 0.70, 0.30),
+ 	Terrain.VILLAGE: Color(0.76, 0.52, 0.40),
+-	Terrain.PASS: Color(0.70, 0.70, 0.72),
++	Terrain.PASS: Color("7f708a"),
+ }
+ ## Khóa dịch của chữ ngắn trên ô. Đất trống không có chữ.
+ const TERRAIN_KEYS: Dictionary = {
+@@ -321,9 +330,10 @@
+ 			var text: String = tr(TERRAIN_KEYS[kind] as String)
+ 			if BLOCK_KINDS.has(kind):
+ 				var block: TerrainBlock = TerrainBlock.new()
+-				block.setup(cell, kind, BLOCK_HEIGHT, text)
++				block.setup(cell, kind, BLOCK_HEIGHT, "")
+ 				_world.add_child(block)
+ 				continue
++			continue
+ 			# Ô phẳng: chữ ở phần dưới ô, không bị đồng quân đứng giữa ô che hết.
+ 			var label: Label = Label.new()
+ 			label.text = text
+@@ -369,20 +379,31 @@
+ func _draw() -> void:
+ 	var surface: Rect2 = Rect2(0, 0, cols * TILE_SIZE, rows * TILE_SIZE)
+ 	# Mép bàn: cả bàn là một tấm dày EDGE_DEPTH, mặt trên là mặt đất.
+-	draw_raised(self, Rect2(surface.position + Vector2(0, EDGE_DEPTH), surface.size), EDGE_DEPTH, CELL_COLOR, EDGE_SHADE)
+-	if _state != null:
++	draw_raised(self, Rect2(surface.position + Vector2(0, EDGE_DEPTH), surface.size), EDGE_DEPTH, Color("4c3e24"), 0.3)
++	if _state != null and has_bg():
++		var bg: Texture2D = tex("nen")
++		# Nền có viền: ảnh lớn hơn bàn, canh giữa quanh bàn.
++		draw_texture(bg, -Vector2((bg.get_width() - cols * TILE_SIZE) / 2, (bg.get_height() - rows * TILE_SIZE) / 2))
++		# Thuyền trang trí (chỉ để thử hình): mock/trang_tri.json = [["ten_hinh", cot, hang], ...]
++		if FileAccess.file_exists("res://mock/trang_tri.json"):
++			for item: Array in JSON.parse_string(FileAccess.get_file_as_string("res://mock/trang_tri.json")):
++				var t: Texture2D = tex(item[0])
++				draw_texture(t, Vector2(int(item[1]) * TILE_SIZE, (int(item[2]) + 1) * TILE_SIZE - t.get_height() + 2))
++	elif _state != null:
+ 		for r: int in range(rows):
+ 			for c: int in range(cols):
+ 				var cell: Vector2i = Vector2i(c, r)
++				var h: int = (c * 7 + r * 13 + c * r) % 9
++				draw_texture(tex("dat_2" if h == 0 else "dat_1" if h < 5 else "dat_0"), Vector2(cell_rect(cell).position))
+ 				match _state.terrain_at(cell):
+ 					Terrain.RIVER:
+ 						_draw_river(cell)
+ 					Terrain.SPIKES:
+ 						_draw_spikes(cell)
+ 	for c: int in range(1, cols):
+-		draw_line(Vector2(c * TILE_SIZE, 0), Vector2(c * TILE_SIZE, surface.end.y), LINE_COLOR, LINE_WIDTH, true)
++		draw_line(Vector2(c * TILE_SIZE, 0), Vector2(c * TILE_SIZE, surface.end.y), Color(0, 0, 0, 0.18), 1.0)
+ 	for r: int in range(1, rows):
+-		draw_line(Vector2(0, r * TILE_SIZE), Vector2(surface.end.x, r * TILE_SIZE), LINE_COLOR, LINE_WIDTH, true)
++		draw_line(Vector2(0, r * TILE_SIZE), Vector2(surface.end.x, r * TILE_SIZE), Color(0, 0, 0, 0.18), 1.0)
+ 	draw_rect(surface, LINE_COLOR, false, BORDER_WIDTH)
+ 	# Bệ ô ải, ô sáng và vòng chọn vẽ trên mặt đất, từng hàng từ trên xuống (quân đứng lên bệ được,
+ 	# xem BLOCK_KINDS): bệ ô ải ở hàng dưới che ô sáng ở hàng trên, ô sáng trên bệ nằm trên mặt bệ.
+@@ -432,17 +453,15 @@
+ 	var ground: Rect2 = cell_rect(cell)
+ 	var above: Vector2i = cell + Vector2i(0, -1)
+ 	# terrain_at không tự kiểm biên: chỉ hỏi khi ô phía trên còn trong bàn.
+-	if above.y >= 0 and _state.terrain_at(above) == Terrain.RIVER:
+-		draw_rect(ground, color)
+-		return
+-	draw_rect(ground, color.darkened(RIVER_BANK_SHADE))
+-	draw_rect(Rect2(ground.position + Vector2(0, RIVER_DEPTH), ground.size - Vector2(0, RIVER_DEPTH)), color)
++	var joined: bool = above.y >= 0 and _state.terrain_at(above) == Terrain.RIVER
++	draw_texture(tex("song" if joined else "song_bo"), ground.position)
+ 
+ 
+ ## Hầm chông: ô phẳng màu riêng, ba mũi nhọn quanh tâm.
+ func _draw_spikes(cell: Vector2i) -> void:
+ 	var center: Vector2 = cell_center(cell)
+-	draw_rect(cell_rect(cell), TERRAIN_COLORS[Terrain.SPIKES] as Color)
++	draw_texture(tex("chong"), cell_rect(cell).position)
++	return
+ 	for offset: Vector2 in SPIKE_OFFSETS:
+ 		var base: Vector2 = center + offset
+ 		draw_colored_polygon(PackedVector2Array([
+diff -ruN a/game/src/battle/terrain_block.gd b/game/src/battle/terrain_block.gd
+--- a/game/src/battle/terrain_block.gd	2026-10-20 15:53:41.752454201 +0700
++++ b/game/src/battle/terrain_block.gd	2026-10-20 16:15:03.295611716 +0700
+@@ -37,4 +37,7 @@
+ 	# Ô vuông trên mặt đất, tính từ position.
+ 	var ground: Rect2 = BoardView.cell_rect(cell)
+ 	ground.position -= position
+-	BoardView.draw_raised(self, ground, _height, color, FRONT_SHADE)
++	if kind == Terrain.FOREST and BoardView.has_bg():
++		return
++	var t: Texture2D = BoardView.tex({Terrain.FOREST: "rung", Terrain.VILLAGE: "lang", Terrain.GRANARY: "kho"}[kind])
++	draw_texture(t, Vector2(ground.position.x, ground.end.y - t.get_height() + 2))
+diff -ruN a/game/src/battle/unit_token.gd b/game/src/battle/unit_token.gd
+--- a/game/src/battle/unit_token.gd	2026-10-20 15:53:41.752454201 +0700
++++ b/game/src/battle/unit_token.gd	2026-10-20 16:15:03.295611716 +0700
+@@ -24,7 +24,7 @@
+ const NAME_FONT_SIZE: int = 15
+ const HP_RADIUS: float = 9.0
+ ## Chấm máu, tính từ tâm đồng.
+-const HP_OFFSET: Vector2 = Vector2(19, 17)
++const HP_OFFSET: Vector2 = Vector2(24, 28)
+ const HP_BORDER_WIDTH: float = 1.5
+ const HP_COLOR: Color = Color(1.0, 1.0, 1.0)
+ const HP_TEXT_COLOR: Color = Color(0.12, 0.10, 0.08)
+@@ -60,10 +60,13 @@
+ 	var text_color: Color = DAI_VIET_TEXT_COLOR if _faction == Unit.Faction.DAI_VIET else NGUYEN_TEXT_COLOR
+ 
+ 	var coin: Vector2 = Vector2(0, -TOKEN_LIFT)
+-	_name_label = _centered_label(Vector2(RADIUS * 2, RADIUS * 2), coin)
++	_name_label = _centered_label(Vector2(56, 16), Vector2(0, 22))
++	_name_label.add_theme_constant_override("outline_size", 4)
++	_name_label.add_theme_color_override("font_outline_color", Color("2e222f"))
++	_name_label.visible = _faction == Unit.Faction.DAI_VIET
+ 	_name_label.text = tr(NAME_KEYS[unit.type] as String)
+ 	_name_label.theme_type_variation = &"TitleLabel"
+-	_name_label.add_theme_font_size_override("font_size", NAME_FONT_SIZE)
++	_name_label.add_theme_font_size_override("font_size", 12)
+ 	_name_label.add_theme_color_override("font_color", text_color)
+ 
+ 	_hp_label = _centered_label(Vector2(HP_RADIUS * 2, HP_RADIUS * 2), coin + HP_OFFSET)
+@@ -123,8 +126,14 @@
+ 		shadow.append(Vector2(cos(angle) * SHADOW_RADIUS.x, sin(angle) * SHADOW_RADIUS.y))
+ 	draw_colored_polygon(shadow, SHADOW_COLOR)
+ 	var coin: Vector2 = Vector2(0, -TOKEN_LIFT)
+-	draw_circle(coin, RADIUS, _fill_color())
+-	draw_circle(coin, RADIUS, BoardView.LINE_COLOR, false, BORDER_WIDTH, true)
++	var tint: Color = Color(1, 1, 1)
++	if _attacked:
++		tint = Color(0.55, 0.55, 0.55)
++	elif _moved:
++		tint = Color(0.8, 0.7, 0.7)
++	var tex_name: String = {UnitType.NGUYEN_KHOAI: "khoai", UnitType.TRAN_KHANH_DU: "du"}.get(unit_type, "lao" if _faction == Unit.Faction.DAI_VIET else "nguyen")
++	var t: Texture2D = BoardView.tex(tex_name)
++	draw_texture(t, Vector2(-32, -58 - (t.get_height() - 64)), tint)
+ 	draw_circle(coin + HP_OFFSET, HP_RADIUS, HP_COLOR)
+ 	draw_circle(coin + HP_OFFSET, HP_RADIUS, BoardView.LINE_COLOR, false, HP_BORDER_WIDTH, true)
+ 

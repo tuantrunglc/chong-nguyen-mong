@@ -70,7 +70,7 @@ func _broken_level_dir() -> String:
 		"kieu": "tieu_diet",
 		"dia_hinh": ["X . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . . . .",
 			". . . . . . .", ". . . . . . .", ". . . . . . ."],
-		"quan": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . . . .",
+		"quan": [". . . . . . B", ". . . . . . .", ". . . . . . .", ". . . . . . .",
 			". . . . . . .", ". . . . . . .", "1 . . . . . ."],
 	}
 	var file: FileAccess = FileAccess.open(BROKEN_LEVEL, FileAccess.WRITE)
