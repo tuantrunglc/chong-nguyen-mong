@@ -333,7 +333,6 @@ func test_pull_rejections_keep_state() -> void:
 		[Vector2i(0, 3), "NOT_IN_RANGE"],  # kề
 		[Vector2i(2, 4), "NOT_IN_RANGE"],  # chéo
 		[Vector2i(5, 3), "NOT_IN_RANGE"],  # cách 4
-		[Vector2i(1, -1), "NOT_IN_RANGE"],  # ngoài bàn, thẳng hàng
 		[Vector2i(1, 3), "NOT_IN_RANGE"],  # chính ô Dư
 		[Vector2i(1, 1), "NO_TARGET"],  # ô trống trong tầm
 		[Vector2i(3, 3), "NO_TARGET"],  # tướng mình
@@ -346,6 +345,33 @@ func test_pull_rejections_keep_state() -> void:
 		assert_eq(_attack(state, 3, c[0] as Vector2i), ["REJECTED %s" % c[1]] as Array[String], str(c))
 		assert_eq(BoardFixture.picture(state), before, "state giữ nguyên: %s" % str(c))
 		assert_false(state.unit_by_id(3).has_attacked, str(c))
+
+
+func test_pull_rejects_cell_out_of_board_within_reach() -> void:
+	# Dư sát mép: (1,-1) thẳng hàng, cách 2 ô (trong tầm) nhưng ngoài bàn, nên chỉ nhánh in_bounds chặn được.
+	var state: BattleState = BoardFixture.state({Vector2i(1, 1): "3", Vector2i(1, 3): "B"})
+	var before: Array[String] = BoardFixture.picture(state)
+	assert_eq(_attack(state, 3, Vector2i(1, -1)), ["REJECTED NOT_IN_RANGE"] as Array[String])
+	assert_eq(BoardFixture.picture(state), before)
+	assert_false(state.unit_by_id(3).has_attacked)
+
+
+func test_pull_rejects_adjacent_own_general_and_enemy_behind_it() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "3", Vector2i(3, 4): "2", Vector2i(3, 6): "B"})
+	var before: Array[String] = BoardFixture.picture(state)
+	assert_eq(_attack(state, 3, Vector2i(3, 4)), ["REJECTED NOT_IN_RANGE"] as Array[String], "tướng kề")
+	assert_eq(_attack(state, 3, Vector2i(3, 6)), ["REJECTED NO_TARGET"] as Array[String], "sau tướng kề")
+	assert_eq(BoardFixture.picture(state), before)
+	assert_false(state.unit_by_id(3).has_attacked)
+
+
+func test_pull_into_adjacent_river_drowns() -> void:
+	# Sông ở ô kề Dư: cách 3 ô thì kéo 2 ô, quân lọt sông ở ô kề.
+	var state: BattleState = BoardFixture.state({Vector2i(1, 3): "3", Vector2i(4, 3): "K", Vector2i(6, 6): "B"},
+		{Vector2i(2, 3): "~"})
+	assert_eq(_attack(state, 3, Vector2i(4, 3)), ["ATTACKED 3 4,3", "MOVED 101 4,3>3,3 PULL",
+		"MOVED 101 3,3>2,3 PULL", "DROWNED 101 2,3"] as Array[String])
+	assert_null(state.unit_by_id(101), "bị nhấc khỏi bàn")
 
 
 func test_pull_once_per_turn_and_no_move_after() -> void:

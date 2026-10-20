@@ -4,7 +4,7 @@ baseline_commit: baba5d3
 
 # Story 2.4: Trần Khánh Dư kéo
 
-Status: review
+Status: done
 
 ## Story
 
@@ -109,9 +109,23 @@ _Story luật thứ tư của E2, đòn thứ ba (đòn cuối của ba tướng
 - [x] **Task 6: Tài liệu, kiểm bằng mắt, commit** (AC: 3–15)
   - [x] 6.1 `_bmad-output/planning-artifacts/game-architecture.md`: cây thư mục `data/tran/` thêm `thu_keo.json`; cây `kich_ban/` thêm nhóm `keo/` nếu cây có liệt kê nhóm; bảng "Đòn của tướng", dòng Trần Khánh Dư, ghi các câu trả lời 1–2 và "kề không có viền"; danh sách `Cause` (nếu kiến trúc liệt kê) thêm `PULL`.
   - [x] 6.2 GDD (`gdds/gdd-GameTest-2026-10-15/gdd.md` dòng 160 cột luật của Trần Khánh Dư và dòng 206): ghi câu trả lời 1–2 và "Chốt <ngày>". Không sửa chỗ nào khác của GDD.
-  - [x] 6.3 _(Làm một phần: game mở được `thu_keo`, log sạch; chưa chụp ảnh vì GoPeak không kết nối trong phiên này; chờ tác giả kiểm tay, xem Lệch 3)_ Kiểm bằng mắt: chạy `tools/chay.sh --dev --tran=thu_keo` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím, `inject_mouse_click` theo pixel `(486 + (cột − hàng)·64, 141 + (cột + hàng)·32 + 32)` hoặc công thức hiện hành trong Debug Log 2.3 (bàn 7×7 giữ `board.position = (262, 139)`; **tính lại từ Debug Log 2.3, không đoán**). Làm theo "Hướng dẫn tác giả tự test", `capture_screenshot` sau mỗi bước chính, lưu `_bmad-output/implementation-artifacts/anh/2-4-*.png` (ít nhất: chọn Dư thấy 2 viền; sau khi kéo cách 3 ô; sau khi kéo xuống sông). Tắt game. Log không có ERROR/WARN. Task nào không làm được thì **bỏ dấu [x] và ghi rõ chờ tác giả kiểm tay** (review 2.3 đã bắt lỗi ghi [x] mà thiếu ảnh).
+  - [x] 6.3 _(Làm một phần: game mở được `thu_keo`, log sạch; chưa chụp ảnh vì GoPeak không kết nối trong phiên này; tác giả đã tự kiểm tay trên `thu_keo` và xác nhận đúng, 2026-10-20, không có ảnh)_ Kiểm bằng mắt: chạy `tools/chay.sh --dev --tran=thu_keo` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím, `inject_mouse_click` theo pixel `(486 + (cột − hàng)·64, 141 + (cột + hàng)·32 + 32)` hoặc công thức hiện hành trong Debug Log 2.3 (bàn 7×7 giữ `board.position = (262, 139)`; **tính lại từ Debug Log 2.3, không đoán**). Làm theo "Hướng dẫn tác giả tự test", `capture_screenshot` sau mỗi bước chính, lưu `_bmad-output/implementation-artifacts/anh/2-4-*.png` (ít nhất: chọn Dư thấy 2 viền; sau khi kéo cách 3 ô; sau khi kéo xuống sông). Tắt game. Log không có ERROR/WARN. Task nào không làm được thì **bỏ dấu [x] và ghi rõ chờ tác giả kiểm tay** (review 2.3 đã bắt lỗi ghi [x] mà thiếu ảnh).
   - [x] 6.4 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, trận thử, tài liệu, `.uid` mới, `game/i18n/text.vi.translation` nếu đổi. Ví dụ: `Trần Khánh Dư kéo (Story 2.4)`.
   - [x] 6.5 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, dùng kết quả thật (số test thật).
+
+### Review Findings
+
+_Code review 2026-10-20 (Blind Hunter, Edge Case Hunter, Acceptance Auditor). Luật kéo, kịch bản và số test khớp spec; không có lỗi chặn._
+
+- [x] [Review][Patch] Task 6.3 đang `[x]` dù chưa chụp ảnh (`anh/` không có `2-4-*.png`); spec yêu cầu bỏ `[x]` và ghi chờ tác giả kiểm tay [2-4-tran-khanh-du-keo.md:112]
+- [x] [Review][Patch] Ca "ngoài bàn" `Vector2i(1,-1)` không kiểm nhánh `in_bounds` vì cách Dư 4 ô, đằng nào cũng bị chặn bởi tầm; đổi sang ô ngoài bàn nằm trong tầm (Dư gần mép) [game/tests/test_rules_attack.gd:868]
+- [x] [Review][Patch] Thiếu hai ca của Task 3.1: tướng mình đứng kề Dư (từ chối), và sông ở ô kề [game/tests/test_rules_attack.gd]
+- [x] [Review][Patch] `test_click_adjacent_enemy_sends_nothing` chưa kiểm "Dư không xám" (`_token(main, 3).is_attacked()` phải false) và `can_undo()` false cũng đúng khi lệnh bị từ chối, nên chưa chứng minh "không gửi lệnh" [game/tests/test_battle_view.gd:~699]
+- [x] [Review][Patch] Ba dòng trống liên tiếp trước `test_real_pull_trial_level_loads`, quy ước là hai [game/tests/test_loaders.gd:757-759]
+- [x] [Review][Defer] Kéo qua rừng/kho lương/làng vẫn có viền và va chạm mất 1 máu; test `test_pull_blocked_by_forest_collides_before_story_3_1` khóa hành vi tạm [game/src/core/rules_attack.gd:55-73] — deferred, đã ghi trong story: làm ở Story 3.1
+- [x] [Review][Defer] `BattleEvent.attacked()` luôn gắn `Cause.STRIKE`, kể cả đòn kéo không sát thương; chưa nơi nào đọc cause của ATTACKED [game/src/core/battle_event.gd:94] — deferred, xem lại khi có log/âm thanh/hoạt ảnh theo cause (Phần 2)
+
+_Bỏ qua (12): phàn nàn về thông báo i18n `ngoai_tam` (tác giả đã chốt), test GUT không chạy đỏ riêng, Task 3.5 chưa phá thử từng file (test GUT vẫn bắt), `PULL_MIN_RANGE` là hằng có tên, assert/return thừa trong `du_pull`, thứ tự `has_attacked`, i18n cho PULL, `KEY_3` so với `KEO_KEY`, id 101/102 cứng theo `BoardFixture`, dữ liệu trận thử lặp, doc comment `targets()`, `text.vi.translation` nhị phân._
 
 ## Dev Notes
 

@@ -756,7 +756,6 @@ func test_real_lance_trial_level_loads() -> void:
 	assert_eq(level.terrain_at(Vector2i(5, 3)), Terrain.RIVER)
 
 
-
 func test_real_pull_trial_level_loads() -> void:
 	var r: LoadResult = LevelLoader.load_level("res://data/tran/thu_keo.json")
 	assert_eq(r.errors, [] as Array[String])

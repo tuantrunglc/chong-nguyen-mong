@@ -877,6 +877,7 @@ func test_click_adjacent_enemy_sends_nothing() -> void:
 	assert_eq(_unit_cell(main, 3), Vector2i(3, 3))
 	assert_eq(_view(main).pending_cell(), BoardView.NO_CELL)
 	assert_false(_controller(main).can_undo(), "không có lệnh nào được gửi")
+	assert_false(_token(main, 3).is_attacked(), "Dư không xám")
 
 
 func test_pull_after_move_needs_confirm() -> void:

@@ -113,3 +113,8 @@
 - `BoardView.fit_scale` (`game/src/battle/board_view.gd:231`): thu 1/3 cho ô 21,33 px, không còn góc điểm ảnh nguyên như lời giải thích bậc nguyên. Nhánh thu không chạy ở 1280×720 với mọi cỡ hợp lệ (5..10 × 5..8); xem lại nếu đổi `TILE_SIZE` hoặc cho phép bàn lớn hơn.
 - `test_board_view.gd`: chưa có test `setup` khi hệ số thu khác 1 (chỉ test `fit_scale` và đặt `scale` bằng tay). Làm cùng lúc với việc trên.
 - `test_board_view.gd` (`_boards()`): dùng `AppState.launch` toàn cục, phụ thuộc thứ tự test; số `(262, 139)` chỉ đúng khi `tran` rỗng.
+
+## Deferred from: code review of 2-4-tran-khanh-du-keo (2026-10-20)
+
+- `RulesAttack._du_targets` (`game/src/core/rules_attack.gd:55-73`) bỏ qua địa hình: kéo qua rừng/kho lương/làng vẫn có viền và va chạm mất 1 máu. Test `test_pull_blocked_by_forest_collides_before_story_3_1` khóa hành vi tạm; sửa cả hai ở Story 3.1.
+- `BattleEvent.attacked()` (`game/src/core/battle_event.gd:94`) luôn gắn `Cause.STRIKE`, kể cả đòn kéo không sát thương. Chưa nơi nào đọc cause của ATTACKED; xem lại khi có log, âm thanh hoặc hoạt ảnh theo cause.
