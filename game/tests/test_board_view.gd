@@ -264,6 +264,15 @@ func test_token_and_block_never_cover_a_neighbour_center() -> void:
 
 # ---------- Viền mục tiêu (Story 2.1) ----------
 
+## Viền mục tiêu nằm trên đồng quân, thấy đủ 4 cạnh (review 1.8, tác giả chốt 2026-10-20); F1 vẫn trên cùng.
+func test_target_outline_draws_above_tokens() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main()
+	var board: BoardView = _board(main)
+	assert_gt(board._target_layer.get_index(), board._world.get_index(), "viền vẽ sau đồng quân")
+	assert_gt((main._coord_overlay as Node).get_index(), board._target_layer.get_index(), "F1 vẫn trên cùng")
+
+
 func test_target_outline_and_pending_are_cleared() -> void:
 	var board: BoardView = _board(_make_main())
 	board.show_selection(Vector2i(0, 6), [] as Array[Vector2i], [Vector2i(0, 5)] as Array[Vector2i])

@@ -4,7 +4,7 @@ baseline_commit: f60aeeff4441d9b69b6b865b7803274d98bd6d8f
 
 # Story 1.8: Bàn cờ nhìn chếch, ô vuông (thay bàn isometric)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -171,6 +171,10 @@ _Story này chỉ **đổi cách vẽ**. Không có luật mới, không có đ�
   - [x] 8.2 `deferred-work.md`, mục review 1.7 "Bệ ô ải vẽ trên mặt đất…": ghi thêm "vẫn còn trên bàn nhìn chếch (khối ở hàng trên che dải 8 px của bệ ô ải ngay dưới), Story 1.8". Mục "bàn lớn hơn 7×7 tràn dưới HUD" để Story 1.9 đánh dấu, story này không đụng.
   - [x] 8.3 `tools/test.sh` xanh. Commit một lần, lời commit tiếng Việt, ví dụ `Bàn cờ nhìn chếch, ô vuông 64 px (Story 1.8)`. Commit gồm cả ảnh chụp và `.uid` mới nếu có.
   - [x] 8.4 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes theo mẫu ở Dev Notes, dùng kết quả thật (số test thật, ảnh thật).
+
+### Review Findings
+
+- [x] [Review][Decision] Viền mục tiêu và trạng thái chờ xác nhận bị đồng quân che phần trên — Ảnh `1-8-7` và `1-8-9` cho thấy đồng quân che gần hết cạnh trên của viền; ba cạnh còn lại vẫn nhận ra được. Godot vẽ node con `_world` trên phần `_draw()` của `BoardView`, nên đây là hành vi ổn định tại `game/src/battle/board_view.gd:377`. Cần tác giả quyết định giữ cách thể hiện có chiều sâu hiện tại hay đưa chỉ báo lên trên quân để dễ đọc hơn. **Tác giả chọn (2026-10-20): vẽ viền lên trên quân.** Đã sửa: viền vẽ trên lớp `_target_layer`, con của `BoardView` nằm sau `_world` và trước overlay F1; thêm `test_target_outline_draws_above_tokens`; chụp lại ảnh `1-8-7`, `1-8-9`.
 
 ## Dev Notes
 
@@ -457,11 +461,11 @@ Claude Opus 5.5 (claude-opus-5-5[1m])
 - Test: `test_board_view.gd` sửa tại chỗ (đổi tên 2 test, không xóa test nào) và thêm 3 test (`test_tile_is_64_px_multiple_of_16`, `test_board_sits_on_whole_pixels`, `test_token_and_block_never_cover_a_neighbour_center`). `test_battle_view.gd`: chỉ đổi ô `1,5` → `0,5` trong `test_resting_mouse_follows_token_moving_under_it`. `test_main.gd` và các test bấm chuột khác xanh mà không sửa. Số test 402 → **405**, đạt hết.
 - AC 11: `git diff --stat` không có file nào trong `game/src/core/`, `game/data/`, `game/tests/kich_ban/`.
 - Ảnh chụp: `anh/1-8-1-tran-1.png`, `1-8-2-chon-khoai.png` (7 ô sáng, vòng chọn, đường đi), `1-8-3-khoai-da-di.png`, `1-8-4-f1.png`, `1-8-5-ba-tuong.png`, `1-8-6-ba-tuong-chon-khoai.png`, `1-8-7-lao-ba-vien.png`, `1-8-8-lao-danh.png` (Bộ binh `3,1` còn 2 máu, Lão xám), `1-8-9-khoai-cho-xac-nhan.png` (viền dày và "Bấm lần nữa để đánh").
-- Cần tác giả xem: viền mục tiêu trắng trên ô có quân địch bị đồng quân che gần hết nửa trên, chỉ còn thấy hai cạnh bên và cạnh dưới (ảnh 1-8-7, 1-8-9). Vẫn nhận ra được, nhưng mờ hơn bàn nghiêng.
+- Viền mục tiêu trước đây bị đồng quân che cạnh trên. Review 1.8: tác giả chọn vẽ viền lên trên quân. `BoardView` có thêm con `_target_layer` (sau `_world`, trước overlay F1), vẽ viền qua signal `draw`; mọi chỗ vẽ lại gọi `_redraw()` để vẽ lại cả lớp này. Viền giờ thấy đủ 4 cạnh, cạnh trên đè lên mép đồng quân (ảnh 1-8-7, 1-8-9 chụp lại). Thêm `test_target_outline_draws_above_tokens` (đỏ trước khi sửa, lỗi thiếu `_target_layer`). Số test 405 → **406**, đạt hết.
 
 **Hướng dẫn tác giả tự test**
 
-1. `tools/test.sh`: thấy `✅ 405/405 test đạt`.
+1. `tools/test.sh`: thấy `✅ 406/406 test đạt`.
 2. `tools/chay.sh` (so với ảnh `anh/1-8-1-tran-1.png`):
    - bàn ô vuông, ô `0,0` ở góc trên trái, giống bàn cờ chữ trong file trận;
    - Khoái ở góc dưới trái, Lão cách Khoái 2 ô bên phải;
@@ -474,7 +478,7 @@ Claude Opus 5.5 (claude-opus-5-5[1m])
    - Rừng (xanh lá), Kho (vàng), Làng (nâu) là khối nổi, có dải mặt trước tối hơn;
    - Ải là bệ đá xám thấp, Chông có 3 mũi nhọn, sông trũng;
    - Cung kỵ (`C`) đứng ngay dưới Kho, che mặt trước Kho.
-7. `tools/chay.sh --dev --tran=thu_lao`, gõ `2`: 3 viền trắng ở trên, phải và dưới Lão (ảnh `1-8-7`). Bấm Bộ binh xa phía trên Lão: nó còn 2 máu, Lão xám (ảnh `1-8-8`).
+7. `tools/chay.sh --dev --tran=thu_lao`, gõ `2`: 3 viền trắng đủ 4 cạnh, nằm trên đồng quân địch, ở trên, phải và dưới Lão (ảnh `1-8-7`). Bấm Bộ binh xa phía trên Lão: nó còn 2 máu, Lão xám (ảnh `1-8-8`).
 8. Còn trong `--dev`: bấm F1 (Mac: Fn+F1), thấy tọa độ ở góc dưới trái mỗi ô, số id cạnh đầu mỗi quân (ảnh `1-8-4`). F5 (Fn+F5): trận nạp lại.
 9. (Web) `python3 -m http.server 8060 -d build/web`, mở `http://localhost:8060` trong Chrome, xem có mượt không. Ctrl+C để tắt. Bản build đã có sẵn trong `build/web/`.
 
@@ -498,3 +502,4 @@ Claude Opus 5.5 (claude-opus-5-5[1m])
 
 - 2026-10-20: Tạo story. Cạnh ô 64 px theo proposal 2026-10-20; bàn 7×7 vừa ở 1:1 trong 1280×720 (khung 452×486 trong vùng 940×612).
 - 2026-10-20: Làm story. Bàn ô vuông 64 px nhìn chếch thay bàn isometric; khối chỉ còn mặt trước; độ sâu theo `hang`; đồng quân nhỏ lại (24/20). Test 402 → 405, đạt hết. Kiểm bằng mắt bằng script chụp tạm (không có GoPeak), 9 ảnh. Bản web 10,4 MB. Chuyển sang review.
+- 2026-10-20: Sửa theo code review: viền mục tiêu và viền chờ xác nhận vẽ trên đồng quân (tác giả chọn). Test 405 → 406, đạt hết. Xong story.

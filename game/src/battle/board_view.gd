@@ -86,6 +86,8 @@ var _state: BattleState = null
 var _terrain_labels: Node2D
 ## Khối địa hình và đồng quân, sắp theo y (tức theo hang): vật ở hàng dưới, gần người xem, vẽ sau.
 var _world: Node2D
+## Viền mục tiêu, vẽ trên đồng quân để thấy đủ 4 cạnh (tác giả chốt 2026-10-20, review 1.8).
+var _target_layer: Node2D
 ## id quân -> UnitToken
 var _tokens: Dictionary = {}
 ## Tướng đang chọn: ô của nó (NO_CELL là không chọn), các ô sáng, đường đi đang vẽ (không gồm ô tướng).
@@ -177,7 +179,7 @@ func show_selection(unit_cell: Vector2i, cells: Array[Vector2i], targets: Array[
 	_target_cells = targets.duplicate()
 	_pending_cell = NO_CELL
 	_path = []
-	queue_redraw()
+	_redraw()
 
 
 ## Đường đi từ tướng đang chọn qua path (không gồm ô tướng). [] là xóa.
@@ -185,7 +187,7 @@ func show_path(path: Array[Vector2i]) -> void:
 	if path == _path:
 		return
 	_path = path.duplicate()
-	queue_redraw()
+	_redraw()
 
 
 ## Ô mục tiêu đang chờ bấm lần nữa để đánh; NO_CELL là bỏ chờ.
@@ -193,7 +195,7 @@ func show_pending(cell: Vector2i) -> void:
 	if cell == _pending_cell:
 		return
 	_pending_cell = cell
-	queue_redraw()
+	_redraw()
 
 
 func clear_selection() -> void:
@@ -202,7 +204,7 @@ func clear_selection() -> void:
 	_target_cells = []
 	_pending_cell = NO_CELL
 	_path = []
-	queue_redraw()
+	_redraw()
 
 
 func lit_cells() -> Array[Vector2i]:
@@ -225,16 +227,19 @@ func setup(new_cols: int = 7, new_rows: int = 7) -> void:
 	cols = new_cols
 	rows = new_rows
 	position = (AREA.get_center() - _local_rect().get_center()).round()
-	queue_redraw()
+	_redraw()
 
 
 func _ready() -> void:
-	# Thứ tự con: chữ ô phẳng, rồi khối và đồng quân. Overlay F1 do main.gd thêm vào sau cùng.
+	# Thứ tự con: chữ ô phẳng, khối và đồng quân, viền mục tiêu. Overlay F1 do main.gd thêm vào sau cùng.
 	_terrain_labels = Node2D.new()
 	add_child(_terrain_labels)
 	_world = Node2D.new()
 	_world.y_sort_enabled = true
 	add_child(_world)
+	_target_layer = Node2D.new()
+	_target_layer.draw.connect(_draw_targets)
+	add_child(_target_layer)
 	setup(cols, rows)
 
 
@@ -246,7 +251,7 @@ func show_state(state: BattleState) -> void:
 		clear_selection()
 	_rebuild_terrain()
 	_sync_tokens()
-	queue_redraw()
+	_redraw()
 
 
 ## Đồng quân đang hiện, theo id.
@@ -365,7 +370,7 @@ func _draw() -> void:
 	for r: int in range(1, rows):
 		draw_line(Vector2(0, r * TILE_SIZE), Vector2(surface.end.x, r * TILE_SIZE), LINE_COLOR, LINE_WIDTH, true)
 	draw_rect(surface, LINE_COLOR, false, BORDER_WIDTH)
-	# Bệ ô ải, ô sáng, viền mục tiêu và vòng chọn vẽ trên mặt đất, từng hàng từ trên xuống (quân đứng lên bệ được,
+	# Bệ ô ải, ô sáng và vòng chọn vẽ trên mặt đất, từng hàng từ trên xuống (quân đứng lên bệ được,
 	# xem BLOCK_KINDS): bệ ô ải ở hàng dưới che ô sáng ở hàng trên, ô sáng trên bệ nằm trên mặt bệ.
 	for r: int in range(rows):
 		for c: int in range(cols):
@@ -374,8 +379,6 @@ func _draw() -> void:
 				draw_raised(self, cell_rect(cell), PASS_HEIGHT, TERRAIN_COLORS[Terrain.PASS] as Color, EDGE_SHADE)
 			if _lit_cells.has(cell):
 				draw_rect(_top_rect(cell), REACH_COLOR)
-			if _target_cells.has(cell):
-				_draw_target(cell)
 			if cell == _selected_cell:
 				draw_polyline(_ellipse(_top_center(cell), SELECT_RADIUS), SELECT_COLOR, SELECT_WIDTH, true)
 	if _selected_cell != NO_CELL and not _path.is_empty():
@@ -393,10 +396,19 @@ func _top_rect(cell: Vector2i) -> Rect2:
 	return Rect2(ground.position - Vector2(0, _surface(cell)), ground.size)
 
 
-## Khung vuông quanh mục tiêu, thụt vào trong mặt trên ô, không tô; ô chờ xác nhận viền dày hơn.
-func _draw_target(cell: Vector2i) -> void:
-	var width: float = PENDING_WIDTH if cell == _pending_cell else TARGET_WIDTH
-	draw_rect(_top_rect(cell).grow(-TARGET_INSET), TARGET_COLOR, false, width)
+## Vẽ lại mặt đất và lớp viền mục tiêu.
+func _redraw() -> void:
+	queue_redraw()
+	if _target_layer != null:
+		_target_layer.queue_redraw()
+
+
+## Khung vuông quanh mỗi mục tiêu, thụt vào trong mặt trên ô, không tô; ô chờ xác nhận viền dày hơn.
+## Vẽ lên _target_layer (trên đồng quân), cùng tọa độ với BoardView.
+func _draw_targets() -> void:
+	for cell: Vector2i in _target_cells:
+		var width: float = PENDING_WIDTH if cell == _pending_cell else TARGET_WIDTH
+		_target_layer.draw_rect(_top_rect(cell).grow(-TARGET_INSET), TARGET_COLOR, false, width)
 
 
 ## Sông trũng: cả ô là bờ tối, mặt nước bỏ dải RIVER_DEPTH ở trên cùng. Ô ngay phía trên cũng là sông thì không có
