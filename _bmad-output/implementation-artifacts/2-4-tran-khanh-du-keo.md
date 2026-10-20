@@ -28,20 +28,20 @@ _Story luật thứ tư của E2, đòn thứ ba (đòn cuối của ba tướng
    - sau mỗi lệnh, `BattleState.validate()` rỗng.
 4. **Kéo (FR14).** **Cho** Trần Khánh Dư và một quân Nguyên thẳng hàng (cùng hàng hoặc cùng cột), cách 3 ô, đường trống. **Khi** bấm vào quân đó, **thì** quân đó bị kéo 2 ô về phía Dư (đứng kề Dư) và **không mất máu**. Tầm 3 lấy từ `tam_danh` và số ô kéo 2 lấy từ `tam_keo` trong `chi_so.json`, không ghi số trong code.
 5. **Kéo vật đầu tiên trên hàng.** Mỗi hướng chỉ xét **vật đầu tiên** trong vòng `tam_danh` (3) ô tính từ Dư. Vật đó là **quân Nguyên** thì có thể kéo. Là **tướng mình** thì hướng đó không kéo được: không có viền, và bấm quân Nguyên đứng sau tướng bị từ chối.
-6. **Mục tiêu kề.** **Khi** quân Nguyên đã đứng kề Dư, **thì** không có gì xảy ra, không ai mất máu **(theo câu 2 ở "Quyết định của tác giả": chờ chốt, mặc định (a): ô kề không có viền, bấm vào bị từ chối `ngoai_tam`, Dư không bị tính là đã đánh)**.
-7. **Mục tiêu cách 2 ô** **(theo câu 1: chờ chốt, mặc định (a))**. Kéo 2 ô nhưng chỉ còn 1 ô trống giữa Dư và mục tiêu: quân bị kéo **dừng sát Dư** (1 ô), không ai mất máu, Dư vẫn tính là đã đánh.
+6. **Mục tiêu kề.** **Khi** quân Nguyên đã đứng kề Dư, **thì** không có gì xảy ra, không ai mất máu **(câu 2 (a), đã chốt: ô kề không có viền, bấm vào bị từ chối `ngoai_tam`, Dư không bị tính là đã đánh)**.
+7. **Mục tiêu cách 2 ô** **(câu 1 (a), đã chốt)**. Kéo 2 ô nhưng chỉ còn 1 ô trống giữa Dư và mục tiêu: quân bị kéo **dừng sát Dư** (1 ô), không ai mất máu, Dư vẫn tính là đã đánh.
 8. **Kéo qua sông.** **Khi** đường kéo đi qua ô sông, **thì** quân Nguyên rơi xuống sông, chết đuối, bị nhấc khỏi bàn (`DROWNED`). Quân đã chết đuối không bị kéo tiếp.
 9. **Đường kéo đi từng ô qua `ForcedMove.run`**, dùng chung với đòn đẩy: va chạm, vật cản và chết đuối đã có sẵn từ Story 2.1–2.2. Không viết lại cách đi từng ô. Mọi `MOVED` của đòn kéo ghi nguyên nhân mới `PULL`.
 10. **Viền mục tiêu.** **Khi** chọn Dư, **thì** chỉ quân Nguyên là vật đầu tiên của hàng (ở ô thứ 2–3, theo câu 2) mới có viền trắng "đánh được". Mỗi hướng nhiều nhất một viền; không có thì hướng đó không bấm đánh được.
 11. **Từ chối.** Lệnh kéo vào ô không thẳng hàng, ô kề, ô xa quá 3, ô ngoài bàn bị từ chối `ngoai_tam`. Ô trong tầm mà không có viền (ô trống, tướng mình, quân Nguyên đứng sau tướng hay sau quân Nguyên khác) bị từ chối `khong_co_dich`. Bàn giữ nguyên. Chữ của công cụ duyệt cho `ngoai_tam` đổi cho đúng cả lao lẫn kéo.
 12. **Như đòn Khoái và Lão.** Đi rồi kéo được; đã đi thì phải bấm xác nhận lần hai (FR15). Kéo rồi thì Dư mờ xám, không đi, không kéo được nữa; kéo xóa lịch sử hủy (FR10). Kết thúc lượt thì kéo lại được. Mọi việc này chạy chung qua `attack_targets`: **không viết nhánh riêng cho Dư** trong `BattleView`.
-13. **Trận thử** (theo câu 3, mặc định (a)). `tools/chay.sh --dev --tran=thu_keo` mở trận "Thử kéo". Tác giả làm được trong game: kéo cách 3 ô, kéo xuống sông, thấy tướng mình đứng chắn thì không kéo được, thấy quân kề không có viền.
+13. **Trận thử** (câu 3 (a), đã chốt). `tools/chay.sh --dev --tran=thu_keo` mở trận "Thử kéo". Tác giả làm được trong game: kéo cách 3 ô, kéo xuống sông, thấy tướng mình đứng chắn thì không kéo được, thấy quân kề không có viền.
 14. **Kịch bản.** Có kịch bản trong `keo/`, đã duyệt và đạt.
 15. **Không sửa luật khác.** Đòn của Khoái và Lão, bảng thứ tự kiểm của lệnh đánh với hai tướng này, giữ nguyên hành vi; 37 kịch bản đã duyệt hiện có vẫn đạt, không sửa file nào.
 
 ## Tasks / Subtasks
 
-- [ ] **Task 0: Tác giả chốt 3 câu hỏi** ở "Quyết định của tác giả". Mặc định đã ghi sẵn (phương án (a) mỗi câu); tác giả đổi thì sửa AC 6, 7, 10, 13 và kịch bản #2, #4 theo đó **trước Task 1**. Không làm Task 1 khi chưa có câu trả lời (kịch bản #2, #4 phụ thuộc câu 1, 2).
+- [x] **Task 0: Tác giả chốt 3 câu hỏi** ở "Quyết định của tác giả" (2026-10-20, cả 3 câu chọn phương án (a)).
 - [ ] **Task 1: Khung, đợt kịch bản 6, dừng chờ duyệt** (AC: 1, 2)
   - [ ] 1.1 Khung (không phải code luật, làm trước để file kịch bản nạp được):
     - `src/core/battle_event.gd`: thêm `PULL` vào **cuối** enum `Cause` (`WALK, STRIKE, PUSH, COLLISION, PULL`); sửa chú thích đầu enum. Kiểm mọi chỗ duyệt hay `match` trên `Cause` (`grep -rn "Cause" game/src game/tests`): chữ mô tả sự kiện của `BoardFixture.describe` và công cụ duyệt phải ra `PULL` hợp lý.
@@ -324,18 +324,18 @@ dia_hinh                 quan
 - Bật dev bằng `--dev`; `--tran=` chỉ có tác dụng khi bật dev.
 - Commit khi xanh, lời commit tiếng Việt. Không `push --force`.
 
-### Quyết định của tác giả (chờ chốt)
+### Quyết định của tác giả (2026-10-20)
 
-_Ba câu dưới đây là chỗ GDD và epics chưa nói rõ. Mặc định (a) đã được dùng để viết kịch bản và AC. Tác giả đổi thì sửa theo trước Task 1 (Task 0)._
+_Ba câu dưới đây là chỗ GDD và epics chưa nói rõ. Tác giả chốt 2026-10-20: cả 3 câu chọn phương án (a)._
 
 1. **Mục tiêu cách Dư 2 ô** (chỉ còn 1 ô trống giữa Dư và mục tiêu). GDD: "kéo 2 ô (dừng sớm nếu bị chặn)"; "kéo mục tiêu đã đứng kề thì không có hiệu ứng". Chưa nói ca cách 2 ô: kéo ô thứ hai sẽ đi vào chính ô Dư đứng.
-   - (a) **MẶC ĐỊNH:** Quân bị kéo **dừng sát Dư** (1 ô), không ai mất máu. Nhất quán với ca "kề thì không có hiệu ứng": Dư không bao giờ tự làm mình mất máu khi kéo.
+   - (a) **ĐÃ CHỐT:** Quân bị kéo **dừng sát Dư** (1 ô), không ai mất máu. Nhất quán với ca "kề thì không có hiệu ứng": Dư không bao giờ tự làm mình mất máu khi kéo.
    - (b) Quân bị kéo 1 ô rồi **va vào Dư**: theo luật va chạm, cả quân Nguyên và Dư đều mất 1 máu (Dư tự chịu giá khi kéo gần).
 2. **Quân Nguyên đã đứng kề Dư thì có viền và bấm được không.** Epics: "mục tiêu đã đứng kề thì không có gì xảy ra, không ai mất máu".
-   - (a) **MẶC ĐỊNH:** Kề thì **không có viền**, bấm vào bị từ chối `ngoai_tam`, Dư **không** bị tính là đã đánh (như ô kề của Lão: bay qua, không viền). Quân kề cũng chặn hướng đó (vật đầu tiên là quân Nguyên kề thì các quân sau không kéo được).
+   - (a) **ĐÃ CHỐT:** Kề thì **không có viền**, bấm vào bị từ chối `ngoai_tam`, Dư **không** bị tính là đã đánh (như ô kề của Lão: bay qua, không viền). Quân kề cũng chặn hướng đó (vật đầu tiên là quân Nguyên kề thì các quân sau không kéo được).
    - (b) Kề có viền, bấm được: lệnh hợp lệ nhưng không đổi gì, Dư **bị tính là đã đánh** (mờ xám) mà không ai bị gì. Dễ làm người chơi tốn lượt nhầm.
 3. **Thử trong game.** Epics ghi "thử bằng `thu_ba_tuong`". Ở đó Dư ở `4,6`; **không** có quân Nguyên thẳng hàng trong tầm 3 nếu chưa đi, và cần đi nhiều bước mới kéo thử được; không có ca "tướng mình đứng chắn" hay "quân kề".
-   - (a) **MẶC ĐỊNH:** Thêm trận thử `thu_keo` (chỉ mở khi `--dev`, bố cục ở Dev Notes), như `thu_lao` ở Story 2.3. Không sửa `thu_ba_tuong.json`.
+   - (a) **ĐÃ CHỐT:** Thêm trận thử `thu_keo` (chỉ mở khi `--dev`, bố cục ở Dev Notes), như `thu_lao` ở Story 2.3. Không sửa `thu_ba_tuong.json`.
    - (b) Chỉ thử trong `thu_ba_tuong` (Dư đi sang `5,6` thì Bộ binh `5,4` cách 2 ô: thử được ca cách 2 ô và qua sông cần thêm chỉnh tay); các ca còn lại xem qua kịch bản.
 
 ### Quyết định mặc định đã chọn (tác giả có thể đổi)
@@ -367,4 +367,4 @@ _Ba câu dưới đây là chỗ GDD và epics chưa nói rõ. Mặc định (a)
 
 ### Change Log
 
-- 2026-10-20: Tạo story. Ba câu hỏi chờ tác giả chốt (cách 2 ô, quân kề, trận thử), mặc định (a) đã ghi.
+- 2026-10-20: Tạo story. Ba câu hỏi (cách 2 ô, quân kề, trận thử): tác giả chốt (a) cả ba.
