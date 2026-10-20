@@ -65,3 +65,5 @@ var after_moved: Array[int] = []
 var checks_attacked: bool = false
 ## UnitType các tướng phải đã đánh; tướng khác trên bàn phải chưa đánh.
 var after_attacked: Array[int] = []
+## Kết cục mong đợi ("sau.ket_qua": "dang_choi", "thang", "thua"); "" là không kiểm.
+var after_outcome: String = ""

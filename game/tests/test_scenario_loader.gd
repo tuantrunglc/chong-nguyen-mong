@@ -359,7 +359,7 @@ func test_step_reject_code_errors() -> void:
 	]
 	var r: LoadResult = _parse(d)
 	var codes: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", ' \
-		+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam"'
+		+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam", "tran_da_het"'
 	assert_eq(r.errors, [
 		F + ': "hanh_dong" mục 1 (di): "tu_choi" là "bi_chan", chỉ được ' + codes,
 		F + ': "hanh_dong" mục 2 (di): "tu_choi" là true, chỉ được ' + codes,
@@ -448,6 +448,57 @@ func test_after_attacked_errors() -> void:
 	assert_eq(_parse(d).warnings, [F + ': bỏ qua khóa lạ "truoc.da_danh"'] as Array[String])
 
 
+func test_after_outcome_is_read() -> void:
+	var s: ScenarioData = _scenario(_valid())
+	if s == null:
+		return
+	assert_eq(s.after_outcome, "", "không ghi ket_qua thì không kiểm")
+	for outcome: String in ["dang_choi", "thang", "thua"]:
+		var d: Dictionary = _valid()
+		d["sau"]["ket_qua"] = outcome
+		s = _scenario(d)
+		if s == null:
+			return
+		assert_eq(s.after_outcome, outcome)
+
+
+func test_after_outcome_errors() -> void:
+	var d: Dictionary = _valid()
+	d["sau"]["ket_qua"] = "hoa"
+	assert_eq(_errors(d), [F + ': "sau.ket_qua" là "hoa", chỉ được "dang_choi", "thang", "thua"'] as Array[String])
+	d["sau"]["ket_qua"] = 1
+	assert_eq(_errors(d), [F + ': "sau.ket_qua" là 1, chỉ được "dang_choi", "thang", "thua"'] as Array[String])
+	d = _valid()
+	d["truoc"]["ket_qua"] = "thang"
+	assert_eq(_parse(d).warnings, [F + ': bỏ qua khóa lạ "truoc.ket_qua"'] as Array[String])
+
+
+## "tran_da_het" nhận ở đi, đánh, hủy (lệnh kết thúc lượt vẫn không có "tu_choi", như trước).
+func test_battle_over_reject_fits_every_command() -> void:
+	var d: Dictionary = _valid()
+	d["hanh_dong"] = [
+		{"lenh": "di", "tuong": "1", "o": "2,5", "tu_choi": "tran_da_het"},
+		{"lenh": "danh", "tuong": "1", "o": "1,6", "tu_choi": "tran_da_het"},
+		{"lenh": "huy", "tu_choi": "tran_da_het"},
+	]
+	var s: ScenarioData = _scenario(d)
+	if s == null:
+		return
+	for step: ScenarioData.ScenarioStep in s.steps:
+		assert_eq(step.reject, "tran_da_het", step.kind)
+
+
+func test_runner_compares_outcome_only_when_written() -> void:
+	var d: Dictionary = _valid()
+	assert_true(_run(d).passed, "không ghi ket_qua thì không kiểm")
+	d["sau"]["ket_qua"] = "dang_choi"
+	assert_true(_run(d).passed, "chưa có quân gục: đang chơi")
+	d["sau"]["ket_qua"] = "thang"
+	var result: ScenarioRunner.ScenarioResult = _run(d)
+	assert_false(result.passed)
+	assert_eq(result.problems, ['sau: mong đợi kết cục "thang", thực tế "dang_choi"'] as Array[String])
+
+
 func test_before_ignores_round_and_moved() -> void:
 	var d: Dictionary = _valid()
 	d["truoc"]["hiep"] = 2
@@ -465,9 +516,9 @@ func test_step_reject_code_must_fit_command() -> void:
 	]
 	assert_eq(_parse(d).errors, [
 		F + ': "hanh_dong" mục 1 (huy): "tu_choi" là "khong_toi_duoc", lệnh "huy" chỉ bị từ chối vì '
-			+ '"khong_con_nuoc_di"',
+			+ '"khong_con_nuoc_di", "tran_da_het"',
 		F + ': "hanh_dong" mục 2 (di): "tu_choi" là "khong_con_nuoc_di", lệnh "di" chỉ bị từ chối vì '
-			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc"',
+			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc", "tran_da_het"',
 	] as Array[String])
 
 
@@ -494,11 +545,11 @@ func test_attack_reject_codes_fit_command() -> void:
 	]
 	assert_eq(_parse(d).errors, [
 		F + ': "hanh_dong" mục 1 (danh): "tu_choi" là "khong_con_nuoc_di", lệnh "danh" chỉ bị từ chối vì '
-			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam"',
+			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam", "tran_da_het"',
 		F + ': "hanh_dong" mục 2 (di): "tu_choi" là "khong_ke", lệnh "di" chỉ bị từ chối vì '
-			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc"',
+			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc", "tran_da_het"',
 		F + ': "hanh_dong" mục 3 (di): "tu_choi" là "ngoai_tam", lệnh "di" chỉ bị từ chối vì '
-			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc"',
+			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc", "tran_da_het"',
 	] as Array[String])
 
 

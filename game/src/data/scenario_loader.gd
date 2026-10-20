@@ -12,8 +12,12 @@ const FORMAT_VERSION: int = 1
 
 const ROOT_KEYS: Array[String] = ["phien_ban_dinh_dang", "mo_ta", "da_duyet", "truoc", "hanh_dong", "sau"]
 const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich"]
-## "hiep", "da_di", "da_danh" không bắt buộc: không ghi thì không kiểm (review Story 1.5, tác giả chốt 2026-10-18).
-const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh"]
+## "hiep", "da_di", "da_danh", "ket_qua" không bắt buộc: không ghi thì không kiểm (review Story 1.5, tác giả chốt
+## 2026-10-18; "ket_qua": Story 2.5).
+const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh", "ket_qua"]
+## Giá trị của "sau.ket_qua": đang chơi, thắng, thua (khớp BattleState.Phase PLAYER, WON, LOST).
+const OUTCOMES: Array[String] = ["dang_choi", "thang", "thua"]
+const OUTCOME_LIST: String = '"dang_choi", "thang", "thua"'
 
 ## Lệnh -> khóa thêm. Lệnh mới thêm ở story của nó, kèm câu lỗi. "tu_choi" không bắt buộc.
 const COMMANDS: Dictionary = {
@@ -35,14 +39,17 @@ const REJECT_CODES: Dictionary = {
 	"khong_ke": "scenario.viewer.reject_not_adjacent",
 	"khong_co_dich": "scenario.viewer.reject_no_target",
 	"ngoai_tam": "scenario.viewer.reject_not_in_range",
+	"tran_da_het": "scenario.viewer.reject_battle_over",
 }
 const REJECT_LIST: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", ' \
-	+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam"'
+	+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam", "tran_da_het"'
 ## Lệnh -> các mã "tu_choi" luật của lệnh đó trả được. Lệnh mới thêm ở story của nó.
 const COMMAND_REJECTS: Dictionary = {
-	"di": ["khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc"],
-	"danh": ["khong_co_quan", "khong_phai_tuong", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam"],
-	"huy": ["khong_con_nuoc_di"],
+	"di": ["khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc",
+		"tran_da_het"],
+	"danh": ["khong_co_quan", "khong_phai_tuong", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam",
+		"tran_da_het"],
+	"huy": ["khong_con_nuoc_di", "tran_da_het"],
 }
 
 
@@ -67,6 +74,8 @@ class Section:
 	var moved: Variant = null
 	## "da_danh" (chỉ "sau"): như moved, các tướng đã đánh.
 	var attacked: Variant = null
+	## "ket_qua" (chỉ "sau"): một giá trị của OUTCOMES; "" là không ghi.
+	var outcome: String = ""
 
 
 ## Mọi file .json trong root_dir và thư mục con, sắp theo đường dẫn. Thư mục không có thì [].
@@ -140,6 +149,7 @@ static func parse_scenario(text: String, path: String, root_dir: String, stats: 
 	if after.attacked != null:
 		scenario.checks_attacked = true
 		scenario.after_attacked = after.attacked as Array[int]
+	scenario.after_outcome = after.outcome
 	for cell: Vector2i in BoardLayers.reading_order(after.unit_rows, _unit_symbols()):
 		var type: int = BoardText.UNIT_SYMBOLS[BoardLayers.symbol(after.unit_rows, cell)] as int
 		var hp: int = after.hp[cell] as int if after.hp.has(cell) else stats.max_hp(type)
@@ -235,6 +245,12 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 		side.moved = _read_generals(section["da_di"], name + ".da_di", name + ".quan", side, file, result)
 	if known.has("da_danh") and section.has("da_danh"):
 		side.attacked = _read_generals(section["da_danh"], name + ".da_danh", name + ".quan", side, file, result)
+	if known.has("ket_qua") and section.has("ket_qua"):
+		var outcome: Variant = section["ket_qua"]
+		if not outcome is String or not OUTCOMES.has(outcome):
+			result.add_error('%s: "%s.ket_qua" là %s, chỉ được %s' % [file, name, JsonFile.show(outcome), OUTCOME_LIST])
+		else:
+			side.outcome = outcome as String
 	return side
 
 

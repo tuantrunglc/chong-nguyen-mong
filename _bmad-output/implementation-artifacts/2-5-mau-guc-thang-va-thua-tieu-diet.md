@@ -44,17 +44,17 @@ _**Chưa có** (đừng làm ở đây): thua vì hết `so_hiep_toi_da` (3.5), 
 ## Tasks / Subtasks
 
 - [x] **Task 0: Tác giả chốt 2 câu hỏi** ở "Quyết định của tác giả" (2026-10-20: câu 1 chọn (a) khóa trận; câu 2 chọn (b) bảng chữ kèm nút "Chơi lại trận"). Các Task dưới đây viết đúng theo hai lựa chọn này.
-- [ ] **Task 1: Khung, đợt kịch bản 7, dừng chờ duyệt** (AC: 1, 2)
-  - [ ] 1.1 Khung (không phải code luật, làm trước để file kịch bản nạp được):
+- [ ] **Task 1: Khung, đợt kịch bản 7, dừng chờ duyệt** (AC: 1, 2) _(1.1–1.4 xong; còn 1.5 HALT chờ tác giả, 1.6)_
+  - [x] 1.1 Khung (không phải code luật, làm trước để file kịch bản nạp được):
     - `src/core/battle_event.gd`: thêm `VICTORY`, `DEFEAT` vào **cuối** enum `Type` (sau `ATTACKED`) và hai hàm tạo `victory()`, `defeat()`; thêm `BATTLE_OVER` vào **cuối** enum `Reject`. Sửa chú thích đầu enum.
     - `tests/board_fixture.gd` (`describe`): nhánh mặc định `_` đã in tên loại, nên `VICTORY`, `DEFEAT` ra đúng chữ; kiểm lại, không sửa nếu đủ.
     - `tests/scenario_runner.gd` (`REJECT_EVENTS`): thêm `"tran_da_het": BattleEvent.Reject.BATTLE_OVER`. `src/data/scenario_loader.gd`: thêm `tran_da_het` vào `REJECT_CODES` (kèm khóa `scenario.viewer.reject_battle_over`), vào chuỗi liệt kê mã ở câu lỗi, và vào **mọi** lệnh trong `COMMAND_REJECTS` (di, danh, và lệnh kết thúc lượt nếu bảng có). `i18n/text.csv`: thêm `scenario.viewer.reject_battle_over,trận đã kết thúc (thắng hoặc thua)`; sinh lại `text.vi.translation`.
     - Khóa mới `ket_qua` của `sau` (không bắt buộc): `"dang_choi"`, `"thang"` hoặc `"thua"`. Thêm vào `AFTER_KEYS` của `scenario_loader.gd`; `ScenarioData` thêm `has_outcome`/`outcome` (như `da_di`); giá trị khác thì báo lỗi tiếng Việt kèm file và giá trị sai. `ScenarioRunner.compare` so với `state.phase` **chỉ khi có khóa**; `tests/scenario_viewer.gd` in thêm "kết quả: thắng" ở dòng "Sau lệnh".
     - `tests/test_scenario_loader.gd`: ca nạp `ket_qua` đúng (3 giá trị), ca giá trị sai, ca `tu_choi: "tran_da_het"`.
     - **Chưa** thêm `phase`, `mission`, `RulesVictory` (để Task 2): kịch bản nạp được nhưng chạy thì trượt.
-  - [ ] 1.2 Viết 5 file đúng như Dev Notes "Đợt kịch bản 7", `"da_duyet": false`, thư mục mới `tests/kich_ban/ket_thuc/`. Không đụng 44 kịch bản đã duyệt.
-  - [ ] 1.3 `tools/xem_kich_ban.sh ket_thuc`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `ket_qua` và `tu_choi` hiện đúng câu tiếng Việt. `tools/test.sh`: xanh, `44 đã duyệt · 5 chưa duyệt (5 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
-  - [ ] 1.4 Commit: `Kịch bản kết cục trận chờ duyệt (Story 2.5)`.
+  - [x] 1.2 Viết 5 file đúng như Dev Notes "Đợt kịch bản 7", `"da_duyet": false`, thư mục mới `tests/kich_ban/ket_thuc/`. Không đụng 44 kịch bản đã duyệt.
+  - [x] 1.3 `tools/xem_kich_ban.sh ket_thuc`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `ket_qua` và `tu_choi` hiện đúng câu tiếng Việt. `tools/test.sh`: xanh, `44 đã duyệt · 5 chưa duyệt (5 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
+  - [x] 1.4 Commit: `Kịch bản kết cục trận chờ duyệt (Story 2.5)`.
   - [ ] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh ket_thuc`, đọc 5 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ ba điều:
     - hết trận thì **mọi lệnh bị từ chối** (kịch bản #5), theo câu 1;
     - **không có kịch bản "thua"**: chưa có đòn nào của địch, và tướng cuối không tự làm mình gục được bằng lệnh của người chơi; luật thua kiểm bằng test GUT (nói rõ để tác giả không tưởng bị bỏ sót);
@@ -293,7 +293,11 @@ _(dev điền)_
 
 ### Debug Log References
 
-_(dev điền)_
+- Task 1.1: không thêm `phase`, `mission`, `RulesVictory` (để Task 2). Để `ScenarioRunner.compare` biên dịch được khi chưa có `state.phase`, thêm hàm tạm `ScenarioRunner._outcome(state)` luôn trả `"dang_choi"`; Task 2 đổi thành đọc `state.phase`.
+- Task 1.1: `ket_thuc_luot` **không** nhận `tu_choi` (test cũ `test_step_reject_code_errors` khẳng định điều này). Task 1.1 chỉ cho thêm `tran_da_het` cho lệnh kết thúc lượt "nếu bảng có": bảng không có, và kịch bản #5 dùng lệnh `di`, nên giữ nguyên. `tran_da_het` có ở `di`, `danh`, `huy`.
+- Task 1.1: sửa 4 chỗ trong `test_scenario_loader.gd` có chuỗi liệt kê mã từ chối (thêm `"tran_da_het"` ở cuối); thêm 4 test (`test_after_outcome_is_read`, `test_after_outcome_errors`, `test_battle_over_reject_fits_every_command`, `test_runner_compares_outcome_only_when_written`).
+- Task 1.3: `tools/test.sh` xanh, 451/451, `Kịch bản luật: 44 đã duyệt · 5 chưa duyệt (4 chưa đạt)`. Lý do chưa đạt: #2, #3, #4 `sau: mong đợi kết cục "thang", thực tế "dang_choi"`; #5 `bước 2: kịch bản ghi "tu_choi": "tran_da_het" nhưng luật cho chạy`. **#1 (`dich_con_lai_chua_thang`) đạt ngay**, vì "đang chơi" cũng là trạng thái hiện tại (đúng như ghi chú trong Dev Notes); số `(4 chưa đạt)` thay cho `(5 chưa đạt)` ở AC 1.
+- Kịch bản dùng đúng số liệu 2.1: Khoái gây 2 sát thương, Bộ binh 3 máu; #4 dựa trên `va_cham/day_vao_quan_khac.json` (Bộ binh đẩy vào Bộ binh: cả hai mất 1 máu) với Bộ binh sau ghi 1 máu.
 
 ### Completion Notes List
 
@@ -305,5 +309,6 @@ _(dev điền)_
 
 ### Change Log
 
+- 2026-10-20: Task 1 xong 1.1–1.4: khung kịch bản kết cục (`ket_qua`, `tran_da_het`, sự kiện `VICTORY`/`DEFEAT`), 5 kịch bản `ket_thuc/` chưa duyệt; chờ tác giả duyệt (1.5).
 - 2026-10-20: Tạo story (gds-create-story).
 - 2026-10-20: Tác giả chốt 2 câu hỏi: 1 (a) khóa trận khi hết; 2 (b) bảng chữ kèm nút "Chơi lại trận".

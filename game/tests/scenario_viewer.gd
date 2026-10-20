@@ -187,6 +187,8 @@ static func _after_state(scenario: ScenarioData) -> String:
 		var shown: String = ", ".join(names) if not names.is_empty() \
 			else _t("scenario.viewer.after_attacked_none")
 		parts.append(_t("scenario.viewer.after_attacked") % shown)
+	if not scenario.after_outcome.is_empty():
+		parts.append(_t("scenario.viewer.after_outcome") % _t("scenario.viewer.outcome_" + scenario.after_outcome))
 	if parts.is_empty():
 		return ""
 	return _t("scenario.viewer.after_state") % " · ".join(parts)

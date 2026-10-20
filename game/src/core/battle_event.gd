@@ -21,6 +21,10 @@ enum Type {
 	## Tướng unit_id ra đòn vào ô to_cell: ô bị đánh (Khoái), ô quân trúng lao (Lão; có thể khác ô được bấm),
 	## ô quân bị kéo trước khi kéo (Dư).
 	ATTACKED,
+	## Hết trận: quân Nguyên cuối gục (thắng). Chỉ RulesVictory sinh, luôn là sự kiện cuối của lệnh (Story 2.5).
+	VICTORY,
+	## Hết trận: mọi tướng trên bàn đã gục (thua).
+	DEFEAT,
 }
 
 ## Vì sao quân đổi ô hoặc mất máu. STRIKE: đòn có sát thương của tướng (Khoái, Lão).
@@ -31,6 +35,8 @@ enum Cause { WALK, STRIKE, PUSH, COLLISION, PULL }
 enum Reject {
 	NONE, NO_UNIT, NOT_GENERAL, ALREADY_THERE, UNREACHABLE, ALREADY_MOVED, NOTHING_TO_UNDO,
 	ALREADY_ATTACKED, NOT_ADJACENT, NO_TARGET, NOT_IN_RANGE,
+	## Trận đã kết thúc (thắng hoặc thua): mọi lệnh bị khóa (Story 2.5).
+	BATTLE_OVER,
 }
 
 var type: Type
@@ -92,3 +98,11 @@ static func drowned(p_unit_id: int, p_cell: Vector2i) -> BattleEvent:
 
 static func attacked(p_unit_id: int, p_cell: Vector2i) -> BattleEvent:
 	return BattleEvent.new(Type.ATTACKED, p_unit_id, Vector2i.ZERO, p_cell, Cause.STRIKE)
+
+
+static func victory() -> BattleEvent:
+	return BattleEvent.new(Type.VICTORY)
+
+
+static func defeat() -> BattleEvent:
+	return BattleEvent.new(Type.DEFEAT)

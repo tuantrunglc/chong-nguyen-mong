@@ -19,6 +19,7 @@ const REJECT_EVENTS: Dictionary = {
 	"khong_ke": BattleEvent.Reject.NOT_ADJACENT,
 	"khong_co_dich": BattleEvent.Reject.NO_TARGET,
 	"ngoai_tam": BattleEvent.Reject.NOT_IN_RANGE,
+	"tran_da_het": BattleEvent.Reject.BATTLE_OVER,
 }
 
 ## Tên đầy đủ cho câu so sánh. Ký hiệu lấy ngược từ BoardText (unit_symbol, terrain_symbol).
@@ -181,7 +182,14 @@ static func compare(state: BattleState, scenario: ScenarioData) -> Array[String]
 			var got: String = "đã đánh" if general.has_attacked else "chưa đánh"
 			problems.append("sau: %s (%s) mong đợi %s, thực tế %s"
 				% [unit_symbol(type), UNIT_NAMES.get(type, "?"), want, got])
+	if not scenario.after_outcome.is_empty() and _outcome(state) != scenario.after_outcome:
+		problems.append('sau: mong đợi kết cục "%s", thực tế "%s"' % [scenario.after_outcome, _outcome(state)])
 	return problems
+
+
+## Kết cục của state theo cách kịch bản ghi ("ket_qua"). Task 2 (Story 2.5) đọc state.phase; chưa có thì luôn đang chơi.
+static func _outcome(_state: BattleState) -> String:
+	return "dang_choi"
 
 
 static func _compare_cell(cell: Vector2i, want: ScenarioData.ExpectedUnit, got: Unit) -> String:
