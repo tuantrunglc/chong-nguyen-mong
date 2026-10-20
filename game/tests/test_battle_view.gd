@@ -16,6 +16,10 @@ const ALLY_DIR: String = PROBE_DIR + "/tran_dong_minh"
 const ALLY_LEVEL: String = ALLY_DIR + "/tran_01.json"
 const LAO_DIR: String = PROBE_DIR + "/tran_lao"
 const LAO_LEVEL: String = LAO_DIR + "/tran_01.json"
+const KEO_DIR: String = PROBE_DIR + "/tran_keo"
+const KEO_LEVEL: String = KEO_DIR + "/tran_01.json"
+## Phím chọn Dư (tướng thứ ba).
+const KEO_KEY: Key = KEY_3
 
 ## Ô sáng mong đợi trên trận 1 (AC 4, AC 5), theo thứ tự đọc bàn.
 const KHOAI_CELLS: Array[Vector2i] = [
@@ -45,13 +49,14 @@ func after_each() -> void:
 		if InputMap.has_action("dev_f%d" % (i + 1)):
 			InputMap.erase_action("dev_f%d" % (i + 1))
 	SaveProbe.path = SaveProbe.DEFAULT_PATH
-	for path: String in [BROKEN_LEVEL, ATTACK_LEVEL, ALLY_LEVEL, LAO_LEVEL, PROBE_FILE]:
+	for path: String in [BROKEN_LEVEL, ATTACK_LEVEL, ALLY_LEVEL, LAO_LEVEL, KEO_LEVEL, PROBE_FILE]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(BROKEN_DIR)
 	DirAccess.remove_absolute(ATTACK_DIR)
 	DirAccess.remove_absolute(ALLY_DIR)
 	DirAccess.remove_absolute(LAO_DIR)
+	DirAccess.remove_absolute(KEO_DIR)
 	DirAccess.remove_absolute(PROBE_DIR)
 	Log.clear()
 
@@ -807,6 +812,86 @@ func test_key_of_spent_general_cancels_confirm() -> void:
 	var main: Node2D = _lao_pending_with_spent_khoai()
 	_press_physical(main, KEY_1)
 	_assert_pending_cleared_lao_kept(main)
+
+
+# ---------- Kéo của Trần Khánh Dư (Story 2.4) ----------
+
+## Giống data/tran/thu_keo.json. Dư ở 3,3: Bộ binh 3,0 (Bắc, ô 3); Kỵ binh 6,3 (Đông, ô 3, sông 4,3 và 5,3 giữa);
+## Khoái 3,4 kề Nam chắn Bộ binh 3,6; Bộ binh 2,3 kề Tây chắn Bộ binh 1,3.
+func _make_keo_main() -> Node2D:
+	return _make_level_main(KEO_DIR, KEO_LEVEL, {
+		"phien_ban_dinh_dang": 1,
+		"ten": "Thử kéo",
+		"kieu": "tieu_diet",
+		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . ~ ~ .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"quan": [". . . B . . .", ". . . . . . .", ". . . . . . .", ". B B 3 . . K",
+			". . . 1 . . .", ". . . . . . .", ". . . B . . ."],
+		"thu_tu_dich": ["3,0", "1,3", "2,3", "6,3", "3,6"],
+		"tiep_vien": [],
+		"muu_ke_mo": [],
+	})
+
+
+func test_selecting_du_outlines_first_enemy_each_way() -> void:
+	var main: Node2D = _make_keo_main()
+	_press_physical(main, KEY_3)
+	assert_eq(_view(main).selected_id(), 3)
+	var targets: Array[Vector2i] = [Vector2i(3, 0), Vector2i(6, 3)]
+	assert_eq(_view(main).target_cells(), targets,
+		"B→Đ→N→T; 6,3 có viền dù sông giữa; không có Khoái chắn Nam, Bộ binh kề Tây, và hai quân sau chúng")
+	assert_eq(_board(main).target_cells(), targets)
+
+
+func test_pull_by_mouse_brings_enemy_next_to_du() -> void:
+	var main: Node2D = _make_keo_main()
+	_press_physical(main, KEO_KEY)
+	assert_eq(_unit_at(main, Vector2i(3, 0)).hp, 3, "trước: Bộ binh đủ máu")
+	assert_true(_view(main).target_cells().has(Vector2i(3, 0)), "trước: 3,0 có viền")
+	_click_by_mouse(main, Vector2i(3, 0))
+	assert_null(_unit_at(main, Vector2i(3, 0)), "Bộ binh rời 3,0")
+	assert_eq(_unit_at(main, Vector2i(3, 2)).faction, Unit.Faction.NGUYEN, "Bộ binh kề Dư")
+	assert_eq(_unit_at(main, Vector2i(3, 2)).hp, 3, "không mất máu")
+	assert_true(_token(main, 3).is_attacked())
+	assert_eq(_view(main).selected_id(), BattleView.NONE, "kéo xong thì bỏ chọn")
+	assert_false(_controller(main).can_undo())
+
+
+func test_pull_over_river_drowns_cavalry() -> void:
+	var main: Node2D = _make_keo_main()
+	_press_physical(main, KEO_KEY)
+	assert_eq(_unit_at(main, Vector2i(6, 3)).hp, 2, "trước: Kỵ binh đủ máu")
+	assert_true(_view(main).target_cells().has(Vector2i(6, 3)), "trước: 6,3 có viền")
+	_click_by_mouse(main, Vector2i(6, 3))
+	assert_null(_unit_at(main, Vector2i(6, 3)), "Kỵ binh rời 6,3")
+	assert_null(_unit_at(main, Vector2i(5, 3)), "rơi xuống sông 5,3 và biến mất")
+	assert_null(_unit_at(main, Vector2i(4, 3)))
+
+
+func test_click_adjacent_enemy_sends_nothing() -> void:
+	var main: Node2D = _make_keo_main()
+	_press_physical(main, KEO_KEY)
+	_click_by_mouse(main, Vector2i(2, 3))
+	assert_false(_controller(main).snapshot().unit_by_id(3).has_attacked, "Dư chưa đánh")
+	assert_eq(_unit_at(main, Vector2i(2, 3)).hp, 3, "không ai mất máu")
+	assert_eq(_unit_cell(main, 3), Vector2i(3, 3))
+	assert_eq(_view(main).pending_cell(), BoardView.NO_CELL)
+	assert_false(_controller(main).can_undo(), "không có lệnh nào được gửi")
+
+
+func test_pull_after_move_needs_confirm() -> void:
+	var main: Node2D = _make_keo_main()
+	_press_physical(main, KEO_KEY)
+	_click_by_mouse(main, Vector2i(3, 2))
+	assert_eq(_unit_cell(main, 3), Vector2i(3, 2), "trước: Dư đã đi tới 3,2")
+	assert_eq(_view(main).target_cells(), [Vector2i(3, 0)] as Array[Vector2i], "trước: chỉ còn Bộ binh cách 2 ô")
+	_click_by_mouse(main, Vector2i(3, 0))
+	assert_eq(_view(main).pending_cell(), Vector2i(3, 0), "lần đầu chỉ chờ xác nhận")
+	assert_eq(_hud(main).hint_text(), tr("hud.confirm_attack"))
+	assert_eq(_unit_at(main, Vector2i(3, 0)).faction, Unit.Faction.NGUYEN, "chưa kéo")
+	_click_by_mouse(main, Vector2i(3, 0))
+	assert_null(_unit_at(main, Vector2i(3, 0)), "lần hai mới kéo")
+	assert_eq(_unit_at(main, Vector2i(3, 1)).hp, 3, "cách 2 ô: dừng sát Dư, không mất máu")
 
 
 ## Bàn 10×8 (Story 1.9, thu_co_lon): đẩy ra ngoài cột 9 rồi ngoài hàng 7, bấm chuột thật; F1 có tọa độ góc cuối.

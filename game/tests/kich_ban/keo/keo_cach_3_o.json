@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Trần Khánh Dư kéo Bộ binh cách 3 ô cùng cột: Bộ binh bị kéo 2 ô về phía Dư, đứng kề Dư, không mất máu.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

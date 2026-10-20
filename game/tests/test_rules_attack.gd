@@ -1,7 +1,8 @@
 extends GutTest
 ## Đòn Nguyễn Khoái (Story 2.1): đánh ô kề có quân Nguyên, 2 sát thương, đẩy 1 ô theo hướng đánh; bảng từ chối;
 ## đánh một lần mỗi lượt. Lao của Phạm Ngũ Lão (Story 2.3): thẳng hàng, bay qua ô kề, trúng quân đầu tiên ở ô 2–4,
-## 1 sát thương, không đẩy. Chỉ số tự đặt (BoardFixture).
+## 1 sát thương, không đẩy. Kéo của Trần Khánh Dư (Story 2.4): vật đầu tiên trong 3 ô, kéo 2 ô, 0 sát thương.
+## Chỉ số tự đặt (BoardFixture).
 
 
 func _attack(state: BattleState, id: int, cell: Vector2i) -> Array[String]:
@@ -53,7 +54,7 @@ func test_rejections_keep_state() -> void:
 		[1, Vector2i(2, 4), "NO_TARGET"],
 		[1, Vector2i(4, 4), "NO_TARGET"],
 		[2, Vector2i(4, 3), "NOT_IN_RANGE"],
-		[3, Vector2i(4, 3), "NO_TARGET"],
+		[3, Vector2i(4, 3), "NOT_IN_RANGE"],
 	]
 	for c: Array in cases:
 		var state: BattleState = BoardFixture.state(units)
@@ -98,7 +99,8 @@ func test_targets_are_adjacent_nguyen_units_in_direction_order() -> void:
 	assert_eq(RulesAttack.targets(state, state.unit_by_id(2)), [Vector2i(2, 3)] as Array[Vector2i],
 		"Lão: bay qua Khoái kề ở 3,3 tới Bộ binh 2,3; Bộ binh 4,4 kề thì không")
 	var du_state: BattleState = BoardFixture.state({Vector2i(3, 3): "3", Vector2i(3, 2): "B"})
-	assert_eq(RulesAttack.targets(du_state, du_state.unit_by_id(3)), [] as Array[Vector2i], "Dư chưa có đòn (2.4)")
+	assert_eq(RulesAttack.targets(du_state, du_state.unit_by_id(3)), [] as Array[Vector2i],
+		"Dư: Bộ binh kề 3,2 không có viền (Story 2.4)")
 	_attack(state, 1, Vector2i(3, 2))
 	assert_eq(RulesAttack.targets(state, khoai), [] as Array[Vector2i], "đã đánh")
 
@@ -118,6 +120,8 @@ func test_stats_read_damage_and_push_distance() -> void:
 	assert_eq(stats.damage(UnitType.PHAM_NGU_LAO), 1)
 	assert_eq(stats.min_range(UnitType.PHAM_NGU_LAO), 2)
 	assert_eq(stats.max_range(UnitType.PHAM_NGU_LAO), 4)
+	assert_eq(stats.pull_range(UnitType.TRAN_KHANH_DU), 3)
+	assert_eq(stats.pull_distance(UnitType.TRAN_KHANH_DU), 2)
 
 
 func test_grid_direction_helpers() -> void:
@@ -260,3 +264,125 @@ func test_lance_targets() -> void:
 		"dừng ở mép bàn")
 	_attack(state, 2, Vector2i(3, 1))
 	assert_eq(RulesAttack.targets(state, lao), [] as Array[Vector2i], "đã phóng")
+
+
+# ---------- Kéo của Trần Khánh Dư (Story 2.4) ----------
+
+func _cell(c: Vector2i) -> String:
+	return BoardText.cell_text(c)
+
+
+func test_pull_three_cells_away_moves_two_in_every_direction() -> void:
+	var dirs: Array[Vector2i] = [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]
+	for dir: Vector2i in dirs:
+		var du_cell: Vector2i = Vector2i(3, 3)
+		var target: Vector2i = du_cell + dir * 3
+		var state: BattleState = BoardFixture.state({du_cell: "3", target: "B"})
+		assert_eq(_attack(state, 3, target), ["ATTACKED 3 %s" % _cell(target),
+			"MOVED 101 %s>%s PULL" % [_cell(target), _cell(du_cell + dir * 2)],
+			"MOVED 101 %s>%s PULL" % [_cell(du_cell + dir * 2), _cell(du_cell + dir)]] as Array[String], str(dir))
+		assert_eq(state.unit_by_id(101).cell, du_cell + dir, "đứng kề Dư")
+		assert_eq(state.unit_by_id(101).hp, 3, "kéo không mất máu")
+		assert_true(state.unit_by_id(3).has_attacked)
+		assert_false(state.unit_by_id(3).has_moved, "kéo không tính là đi")
+
+
+func test_pull_at_two_cells_stops_next_to_du() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(1, 3): "3", Vector2i(3, 3): "B"})
+	assert_eq(_attack(state, 3, Vector2i(3, 3)), ["ATTACKED 3 3,3", "MOVED 101 3,3>2,3 PULL"] as Array[String])
+	assert_eq(state.unit_by_id(101).hp, 3, "không va Dư")
+	assert_eq(state.unit_by_id(3).hp, 3, "Dư không mất máu")
+
+
+func test_pull_into_river_drowns() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(1, 3): "3", Vector2i(4, 3): "K", Vector2i(6, 6): "B"},
+		{Vector2i(3, 3): "~"})
+	assert_eq(_attack(state, 3, Vector2i(4, 3)), ["ATTACKED 3 4,3", "MOVED 101 4,3>3,3 PULL",
+		"DROWNED 101 3,3"] as Array[String])
+	assert_null(state.unit_by_id(101), "bị nhấc khỏi bàn")
+	assert_eq(state.unit_by_id(102).cell, Vector2i(6, 6))
+
+
+func test_pull_does_not_damage_one_hp_unit() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 5): "3", Vector2i(3, 2): "C", Vector2i(0, 0): "B"})
+	# Bộ binh 0,0 là 101, Cung kỵ là 102.
+	assert_eq(_attack(state, 3, Vector2i(3, 2)), ["ATTACKED 3 3,2", "MOVED 102 3,2>3,3 PULL",
+		"MOVED 102 3,3>3,4 PULL"] as Array[String])
+	assert_eq(state.unit_by_id(102).hp, 1)
+
+
+func test_pull_leaves_unit_behind_target_alone() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 5): "3", Vector2i(3, 2): "B", Vector2i(3, 1): "K"})
+	_attack(state, 3, Vector2i(3, 2))
+	assert_eq(state.unit_at(Vector2i(3, 1)).type, UnitType.KY_BINH, "quân sau mục tiêu đứng yên")
+	assert_eq(state.unit_at(Vector2i(3, 1)).hp, 2)
+
+
+func test_pull_blocked_by_forest_collides_before_story_3_1() -> void:
+	# Story 3.1 đổi ca này: rừng là vật đầu tiên trên hàng thì không kéo được. Trước đó rừng chỉ chặn đường kéo.
+	var state: BattleState = BoardFixture.state({Vector2i(3, 5): "3", Vector2i(3, 2): "B"}, {Vector2i(3, 3): "#"})
+	assert_eq(_attack(state, 3, Vector2i(3, 2)), ["ATTACKED 3 3,2", "COLLIDED 101 0 3,3",
+		"DAMAGED 101 -1 COLLISION"] as Array[String])
+	assert_eq(state.unit_by_id(101).cell, Vector2i(3, 2))
+
+
+func test_pull_rejections_keep_state() -> void:
+	var units: Dictionary = {Vector2i(0, 3): "B", Vector2i(1, 3): "3", Vector2i(3, 3): "2", Vector2i(4, 3): "B",
+		Vector2i(5, 3): "B", Vector2i(2, 4): "K", Vector2i(1, 5): "B", Vector2i(1, 6): "B"}
+	var cases: Array = [
+		[Vector2i(0, 3), "NOT_IN_RANGE"],  # kề
+		[Vector2i(2, 4), "NOT_IN_RANGE"],  # chéo
+		[Vector2i(5, 3), "NOT_IN_RANGE"],  # cách 4
+		[Vector2i(1, -1), "NOT_IN_RANGE"],  # ngoài bàn, thẳng hàng
+		[Vector2i(1, 3), "NOT_IN_RANGE"],  # chính ô Dư
+		[Vector2i(1, 1), "NO_TARGET"],  # ô trống trong tầm
+		[Vector2i(3, 3), "NO_TARGET"],  # tướng mình
+		[Vector2i(4, 3), "NO_TARGET"],  # sau tướng mình
+		[Vector2i(1, 6), "NO_TARGET"],  # Bộ binh sau Bộ binh 1,5
+	]
+	for c: Array in cases:
+		var state: BattleState = BoardFixture.state(units)
+		var before: Array[String] = BoardFixture.picture(state)
+		assert_eq(_attack(state, 3, c[0] as Vector2i), ["REJECTED %s" % c[1]] as Array[String], str(c))
+		assert_eq(BoardFixture.picture(state), before, "state giữ nguyên: %s" % str(c))
+		assert_false(state.unit_by_id(3).has_attacked, str(c))
+
+
+func test_pull_once_per_turn_and_no_move_after() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 5): "3", Vector2i(3, 2): "B", Vector2i(6, 5): "B"})
+	_attack(state, 3, Vector2i(3, 2))
+	var before: Array[String] = BoardFixture.picture(state)
+	assert_eq(_attack(state, 3, Vector2i(6, 5)), ["REJECTED ALREADY_ATTACKED"] as Array[String])
+	var events: Array[BattleEvent] = Rules.resolve(state, Command.move(3, Vector2i(2, 5)))
+	assert_eq(state.validate(), [] as Array[String], "bất biến sau lệnh đi")
+	assert_eq(BoardFixture.describe(events), ["REJECTED ALREADY_ATTACKED"] as Array[String])
+	assert_eq(BoardFixture.picture(state), before)
+
+
+func test_move_then_pull() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 6): "3", Vector2i(3, 2): "B"})
+	Rules.resolve(state, Command.move(3, Vector2i(3, 5)))
+	assert_eq(state.validate(), [] as Array[String], "bất biến sau lệnh đi")
+	assert_eq(_attack(state, 3, Vector2i(3, 2)), ["ATTACKED 3 3,2", "MOVED 101 3,2>3,3 PULL",
+		"MOVED 101 3,3>3,4 PULL"] as Array[String])
+	assert_true(state.unit_by_id(3).has_moved)
+
+
+func test_pull_targets() -> void:
+	# Bắc: 3,0 cách 3 có viền. Đông: sông 4,3 không chặn, 6,3 cách 3 có viền. Nam: Khoái kề chắn, Bộ binh 3,6
+	# phía sau không có viền. Tây: Bộ binh kề 2,3 chắn, Cung kỵ 1,3 sau nó không có viền.
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "3", Vector2i(3, 0): "B", Vector2i(6, 3): "K",
+		Vector2i(3, 4): "1", Vector2i(3, 6): "B", Vector2i(2, 3): "B", Vector2i(1, 3): "C"}, {Vector2i(4, 3): "~"})
+	var du: Unit = state.unit_by_id(3)
+	assert_eq(RulesAttack.targets(state, du), [Vector2i(3, 0), Vector2i(6, 3)] as Array[Vector2i],
+		"B→Đ→N→T; Nam: tướng mình chắn; Tây: quân kề chắn")
+	var gap: BattleState = BoardFixture.state({Vector2i(3, 3): "3", Vector2i(3, 1): "B", Vector2i(3, 0): "B"})
+	assert_eq(RulesAttack.targets(gap, gap.unit_by_id(3)), [Vector2i(3, 1)] as Array[Vector2i],
+		"cách 2 ô có viền; con sau nó thì không")
+	var far: BattleState = BoardFixture.state({Vector2i(0, 6): "3", Vector2i(0, 1): "B", Vector2i(4, 6): "B"})
+	assert_eq(RulesAttack.targets(far, far.unit_by_id(3)), [] as Array[Vector2i], "cách 5 và cách 4: ngoài tầm")
+	var edge: BattleState = BoardFixture.state({Vector2i(1, 5): "3", Vector2i(1, 2): "B", Vector2i(4, 5): "B"})
+	assert_eq(RulesAttack.targets(edge, edge.unit_by_id(3)), [Vector2i(1, 2), Vector2i(4, 5)] as Array[Vector2i],
+		"dừng ở mép bàn (Nam và Tây ra ngoài bàn)")
+	_attack(state, 3, Vector2i(3, 0))
+	assert_eq(RulesAttack.targets(state, du), [] as Array[Vector2i], "đã kéo")

@@ -2,10 +2,17 @@ class_name RulesAttack
 extends RefCounted
 ## Đòn của tướng (FR12–FR16). Nguyễn Khoái (Story 2.1): đánh 1 ô kề có quân Nguyên, gây sát thương rồi đẩy theo
 ## hướng đánh; mục tiêu gục thì không đẩy. Phạm Ngũ Lão (Story 2.3): lao thẳng hàng, bay qua ô kề, trúng quân đầu
-## tiên ở ô min_range–max_range, không đẩy. Mỗi tướng đánh một lần mỗi lượt (has_attacked). Dư: Story 2.4.
+## tiên ở ô min_range–max_range, không đẩy. Trần Khánh Dư (Story 2.4): kéo vật đầu tiên trên hàng trong pull_range ô
+## (phải là quân Nguyên, không kề) về phía mình pull_distance ô, 0 sát thương. Mỗi tướng đánh một lần mỗi lượt
+## (has_attacked).
 
 
-## Ô tướng đánh được, theo thứ tự hướng B→Đ→N→T. Đã đánh hoặc chưa có đòn thì rỗng.
+## Quân Nguyên kề Dư không kéo được (GDD "kéo mục tiêu đã đứng kề thì không có hiệu ứng", tác giả chốt 2026-10-20):
+## luật cố định, không nằm trong chi_so.json.
+const PULL_MIN_RANGE: int = 2
+
+
+## Ô tướng đánh được, theo thứ tự hướng B→Đ→N→T. Đã đánh thì rỗng.
 static func targets(state: BattleState, unit: Unit) -> Array[Vector2i]:
 	if unit.has_attacked:
 		return []
@@ -14,6 +21,8 @@ static func targets(state: BattleState, unit: Unit) -> Array[Vector2i]:
 			return _khoai_targets(state, unit)
 		UnitType.PHAM_NGU_LAO:
 			return _lao_targets(state, unit)
+		UnitType.TRAN_KHANH_DU:
+			return _du_targets(state, unit)
 	return []
 
 
@@ -41,6 +50,25 @@ static func _lao_targets(state: BattleState, lao: Unit) -> Array[Vector2i]:
 			if unit != null and unit.faction == Unit.Faction.NGUYEN:
 				cells.append(cell)
 				break
+	return cells
+
+
+## Mỗi hướng nhiều nhất một ô: chỉ xét vật đầu tiên trong pull_range ô. Là quân Nguyên ở ô thứ PULL_MIN_RANGE trở đi
+## thì có viền. Tướng mình hoặc quân Nguyên kề thì hướng đó rỗng (khác Lão: không bay qua).
+## Story 3.1: rừng, kho lương, làng cũng là vật đầu tiên không kéo được.
+static func _du_targets(state: BattleState, du: Unit) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for dir: Vector2i in Grid.DIRECTIONS:
+		for d: int in range(1, state.stats.pull_range(du.type) + 1):
+			var cell: Vector2i = du.cell + dir * d
+			if not state.in_bounds(cell):
+				break
+			var unit: Unit = state.unit_at(cell)
+			if unit == null:
+				continue
+			if unit.faction == Unit.Faction.NGUYEN and d >= PULL_MIN_RANGE:
+				cells.append(cell)
+			break
 	return cells
 
 
@@ -85,9 +113,22 @@ static func resolve(state: BattleState, command: Command, events: Array[BattleEv
 					"ô %s không phải quân Nguyên gần nhất trong tầm lao" % where))
 				return
 			lao_throw(state, unit, command.cell, events)
+		UnitType.TRAN_KHANH_DU:
+			var distance: int = Grid.distance(unit.cell, command.cell)
+			var reach: int = state.stats.pull_range(unit.type)
+			if not state.in_bounds(command.cell) or Grid.straight_dir(unit.cell, command.cell) == Vector2i.ZERO \
+					or distance < PULL_MIN_RANGE or distance > reach:
+				events.append(BattleEvent.rejected(BattleEvent.Reject.NOT_IN_RANGE,
+					"ô %s không thẳng hàng với quân %d trong tầm %d–%d" % [where, unit.id, PULL_MIN_RANGE, reach]))
+				return
+			if not targets(state, unit).has(command.cell):
+				events.append(BattleEvent.rejected(BattleEvent.Reject.NO_TARGET,
+					"ô %s không phải quân Nguyên đầu tiên trên hàng trong tầm kéo" % where))
+				return
+			events.append(BattleEvent.attacked(unit.id, command.cell))
+			du_pull(state, unit, command.cell, events)
 		_:
-			events.append(BattleEvent.rejected(BattleEvent.Reject.NO_TARGET,
-				"quân %d chưa có đòn (Story 2.4)" % unit.id))
+			events.append(BattleEvent.rejected(BattleEvent.Reject.NO_TARGET, "quân %d không có đòn" % unit.id))
 			return
 	unit.has_attacked = true
 
@@ -115,3 +156,14 @@ static func lao_throw(state: BattleState, lao: Unit, cell: Vector2i, events: Arr
 			return
 	# resolve đã kiểm cell có trong targets: tới đây là targets và lao_throw lệch nhau.
 	assert(false, "RulesAttack.lao_throw: không trúng ai từ %s tới %s" % [lao.cell, cell])
+
+
+## Kéo quân ở cell về phía Dư, đi từng ô qua ForcedMove, 0 sát thương. Chỉ còn đúng số ô trống giữa Dư và mục tiêu:
+## quân dừng sát Dư, không va Dư (tác giả chốt 2026-10-20). Sát Thát không cộng (Story 3.13).
+static func du_pull(state: BattleState, du: Unit, cell: Vector2i, events: Array[BattleEvent]) -> void:
+	var target: Unit = state.unit_at(cell)
+	assert(target != null, "RulesAttack.du_pull: không có quân ở %s" % cell)
+	if target == null:
+		return
+	var steps: int = mini(state.stats.pull_distance(du.type), Grid.distance(du.cell, cell) - 1)
+	ForcedMove.run(state, target, Grid.straight_dir(cell, du.cell), steps, BattleEvent.Cause.PULL, events)

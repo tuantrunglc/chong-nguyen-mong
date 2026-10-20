@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Khoái đứng ở ô thứ 2, Bộ binh ở ô thứ 3 phía sau: vật đầu tiên là tướng mình nên không kéo được Bộ binh đó. Hướng khác vẫn kéo được Bộ binh cách 3 ô.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

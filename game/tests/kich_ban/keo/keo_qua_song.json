@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Đường kéo đi qua sông: Kỵ binh bị kéo xuống sông ở ô thứ 2, chết đuối, bị nhấc khỏi bàn.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

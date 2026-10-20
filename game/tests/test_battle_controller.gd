@@ -260,6 +260,18 @@ func test_lance_targets_and_clears_undo() -> void:
 	assert_eq(c.attack_targets(2), [] as Array[Vector2i], "đã phóng")
 
 
+## Dư ở 3,5 cách Bộ binh 3,2 ba ô (Story 2.4).
+func test_pull_targets_and_clears_undo() -> void:
+	var c: BattleController = _controller_for({Vector2i(3, 5): "3", Vector2i(3, 2): "B", Vector2i(0, 0): "1"})
+	assert_eq(c.attack_targets(3), [Vector2i(3, 2)] as Array[Vector2i])
+	c.submit(Command.move(1, Vector2i(1, 0)))
+	assert_true(c.can_undo())
+	c.submit(Command.attack(3, Vector2i(3, 2)))
+	assert_false(c.can_undo(), "kéo xóa lịch sử hủy")
+	assert_eq(c.snapshot().unit_at(Vector2i(3, 4)).hp, 3, "Bộ binh bị kéo sát Dư, không mất máu")
+	assert_eq(c.attack_targets(3), [] as Array[Vector2i], "đã kéo")
+
+
 ## Đòn làm gục (va mép bàn): quân bị nhấc khỏi bàn, validate() rỗng nên không bị quay lại.
 func test_lethal_attack_is_not_rolled_back() -> void:
 	var c: BattleController = _attack_controller()

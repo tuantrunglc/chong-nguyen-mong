@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Dư không kéo được: ô kề, ô chéo, ô cách 4, ô trống, tướng mình, quân đứng sau tướng mình, Bộ binh đứng sau Bộ binh khác.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

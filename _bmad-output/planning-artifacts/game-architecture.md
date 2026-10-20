@@ -607,7 +607,7 @@ chong-nguyen-mong/                    # repo
 │   │   ├── chien_dich.json           # thứ tự 6 trận, mưu kế mở theo trận
 │   │   └── tran/
 │   │       ├── tran_01.json … tran_05.json
-│   │       ├── thu_ba_tuong.json, thu_day.json, thu_lao.json   # trận thử, chỉ mở bằng --dev --tran=<tên>
+│   │       ├── thu_ba_tuong.json, thu_day.json, thu_lao.json, thu_keo.json   # trận thử, chỉ mở bằng --dev --tran=<tên>
 │   ├── assets/
 │   │   ├── fonts/
 │   │   ├── audio/sfx/  audio/music/
@@ -822,7 +822,7 @@ Mọi luật đều đi qua đúng quy trình này. Không có ngoại lệ.
 |---|---|
 | Nguyễn Khoái | Đánh 1 ô kề có quân Nguyên, gây sát thương rồi đẩy 1 ô theo hướng đánh. Mục tiêu gục vì sát thương thì không đẩy |
 | Phạm Ngũ Lão | Thẳng hàng. **Bay qua ô kề**, rồi trúng vật đầu tiên ở các ô từ thứ 2 đến thứ 4. Rừng, kho lương hoặc làng **ở bất kỳ ô nào trên đường, kể cả ô kề**, đều chặn lao **(mặc định)**; lao bị làng chặn thì **Lòng dân −1** **(mặc định)**. Sông không chặn. Viền "đánh được": mỗi hướng một viền, ở **quân Nguyên gần nhất** trong ô 2–4; tướng mình đứng chắn trước thì quân Nguyên sau nó vẫn có viền, bấm vào thì lao trúng tướng mình (tác giả chốt 2026-10-19) |
-| Trần Khánh Dư | Chỉ kéo **vật đầu tiên trên hàng** trong vòng 3 ô, và vật đó phải là quân Nguyên. Vật đầu tiên là tướng, rừng, kho lương hoặc làng thì không kéo được **(mặc định)**. Kéo 2 ô theo bảng di chuyển cưỡng bức. 0 sát thương |
+| Trần Khánh Dư | Chỉ kéo **vật đầu tiên trên hàng** trong vòng 3 ô, và vật đó phải là quân Nguyên. Vật đầu tiên là tướng, rừng, kho lương hoặc làng thì không kéo được **(mặc định; rừng, kho lương, làng làm ở Story 3.1)**. Kéo 2 ô theo bảng di chuyển cưỡng bức (`ForcedMove.run`, nguyên nhân `Cause.PULL`). 0 sát thương. Quân Nguyên **kề** Dư không có viền, bấm bị từ chối `ngoai_tam`, Dư không tính là đã đánh; quân **cách 2 ô** chỉ bị kéo 1 ô, dừng sát Dư, không va Dư (tác giả chốt 2026-10-20) |
 
 **Chọn mục tiêu:** không được chọn tướng mình làm mục tiêu của đòn (chốt 2026-10-17). Bấm vào tướng mình luôn là lệnh chọn tướng. Tướng mình vẫn trúng đòn như hệ quả: lao trúng vật đầu tiên trên hàng, hoặc bị quân khác va vào.
 

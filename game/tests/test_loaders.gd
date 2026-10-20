@@ -754,3 +754,27 @@ func test_real_lance_trial_level_loads() -> void:
 	assert_eq(actual, expected)
 	assert_eq(level.terrain_at(Vector2i(4, 3)), Terrain.RIVER, "lao bay qua sông tới Kỵ binh 6,3")
 	assert_eq(level.terrain_at(Vector2i(5, 3)), Terrain.RIVER)
+
+
+
+func test_real_pull_trial_level_loads() -> void:
+	var r: LoadResult = LevelLoader.load_level("res://data/tran/thu_keo.json")
+	assert_eq(r.errors, [] as Array[String])
+	assert_eq(r.warnings, [] as Array[String])
+	var level: LevelData = r.data as LevelData
+	assert_not_null(level)
+	if level == null:
+		return
+	# Các bước tác giả tự test (Story 2.4) dựa vào đúng chỗ đứng này.
+	var expected: Dictionary = {
+		Vector2i(3, 3): UnitType.TRAN_KHANH_DU, Vector2i(3, 4): UnitType.NGUYEN_KHOAI,
+		Vector2i(3, 0): UnitType.BO_BINH, Vector2i(1, 3): UnitType.BO_BINH, Vector2i(2, 3): UnitType.BO_BINH,
+		Vector2i(6, 3): UnitType.KY_BINH, Vector2i(3, 6): UnitType.BO_BINH,
+	}
+	var actual: Dictionary = {}
+	for p: LevelData.UnitPlacement in level.units:
+		actual[p.cell] = p.type
+	assert_eq(actual, expected)
+	assert_eq(level.terrain_at(Vector2i(4, 3)), Terrain.RIVER, "Kỵ binh 6,3 bị kéo qua sông")
+	assert_eq(level.terrain_at(Vector2i(5, 3)), Terrain.RIVER)
+	assert_eq(level.size, Vector2i(7, 7))

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Bộ binh cách Dư 2 ô: chỉ còn 1 ô trống nên bị kéo 1 ô, dừng sát Dư, không ai mất máu.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

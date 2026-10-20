@@ -41,3 +41,13 @@ func min_range(type: int) -> int:
 
 func max_range(type: int) -> int:
 	return value(type, "tam_danh_xa")
+
+
+## Tầm kéo của Trần Khánh Dư: vật đầu tiên trên hàng trong vòng này mới kéo được (ô kề không kéo, xem RulesAttack).
+func pull_range(type: int) -> int:
+	return value(type, "tam_danh")
+
+
+## Số ô quân Nguyên bị kéo về phía Dư (dừng sớm nếu bị chặn).
+func pull_distance(type: int) -> int:
+	return value(type, "tam_keo")

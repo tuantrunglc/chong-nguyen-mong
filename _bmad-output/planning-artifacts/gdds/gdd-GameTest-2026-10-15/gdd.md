@@ -157,7 +157,7 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 |---|---|---|---|
 | **Nguyễn Khoái** | Tiên phong (cận chiến) | Đánh 1 ô kề, **2 sát thương**, đẩy mục tiêu lùi **1 ô** theo hướng đánh | Đẩy địch vào chướng ngại, vào bẫy hoặc vào nhau |
 | **Phạm Ngũ Lão** | Phóng lao (đánh xa) | Phóng thẳng hàng, **bay qua ô kề**, trúng vật đầu tiên ở ô thứ **2–4**, **1 sát thương**. Rừng hoặc kho lương ở bất kỳ ô nào trên đường, kể cả ô kề, đều chặn lao [MẶC ĐỊNH, duyệt qua kịch bản luật]. Sông không chặn. Chọn Lão thì mỗi hướng có một viền "đánh được", ở quân Nguyên gần nhất trong ô 2–4; tướng mình đứng chắn trước thì bấm quân Nguyên sau nó, lao trúng tướng mình. Chốt 2026-10-19 | Kết liễu từ xa. Gợi đến câu "Hoành sóc giang sơn" trong *Thuật hoài* |
-| **Trần Khánh Dư** | Phục binh (khống chế) | Kéo **vật đầu tiên trên hàng** trong vòng **3 ô** về phía mình **2 ô** (dừng sớm nếu bị chặn), **0 sát thương**. Vật đó phải là quân Nguyên; nếu vật đầu tiên là tướng, rừng hoặc kho lương thì không kéo được [MẶC ĐỊNH, duyệt qua kịch bản luật] | Kéo địch khỏi vị trí đẹp hoặc kéo vào bẫy, làm lệch đòn địch đã báo trước |
+| **Trần Khánh Dư** | Phục binh (khống chế) | Kéo **vật đầu tiên trên hàng** trong vòng **3 ô** về phía mình **2 ô** (dừng sớm nếu bị chặn), **0 sát thương**. Vật đó phải là quân Nguyên và không kề Dư (cách 2–3 ô); nếu vật đầu tiên là tướng, rừng hoặc kho lương thì không kéo được [MẶC ĐỊNH, duyệt qua kịch bản luật]. Cách 2 ô thì kéo 1 ô, dừng sát Dư. Chốt 2026-10-20 | Kéo địch khỏi vị trí đẹp hoặc kéo vào bẫy, làm lệch đòn địch đã báo trước |
 
 **Nguồn sử của từng tướng** (chi tiết trong `history-notes-1288.md`):
 - **Trần Khánh Dư:** *Toàn thư* chép rõ trận Vân Đồn, khi ông đánh tan đoàn thuyền lương.
@@ -203,7 +203,7 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 - **Mọi đòn trúng mọi người đứng trên ô bị nhắm**, không phân phe. Lao của Phạm Ngũ Lão, đòn đẩy của Nguyễn Khoái và đòn của địch đều có thể trúng tướng nhà Trần.
 - **Không được chọn tướng mình làm mục tiêu.** Bấm vào tướng mình luôn là chọn tướng đó. Tướng mình chỉ trúng đòn như *hệ quả*: lao trúng vật đầu tiên trên hàng là tướng mình, hoặc quân bị đẩy/kéo va vào tướng mình. Chốt 2026-10-17.
 - **Kỵ binh xung phong** thì đứng yên tại chỗ, đòn trúng vật đầu tiên trên hàng theo hướng đã báo. Sông không chặn đòn xung phong; rừng thì chặn.
-- **Kéo mục tiêu đã đứng kề** Trần Khánh Dư thì mục tiêu đứng yên, không ai mất máu.
+- **Kéo mục tiêu đã đứng kề** Trần Khánh Dư thì mục tiêu đứng yên, không ai mất máu. Quân kề không có viền, bấm vào bị từ chối, Dư không tính là đã đánh. Quân cách Dư 2 ô chỉ bị kéo 1 ô, dừng sát Dư, không ai mất máu. Chốt 2026-10-20.
 
 **Hoàn tác.**
 - Chỉ hủy được **nước đi gần nhất**, và chỉ khi tướng đó chưa đánh. Muốn quay lại xa hơn thì dùng "chơi lại hiệp". [MẶC ĐỊNH, duyệt qua kịch bản luật]

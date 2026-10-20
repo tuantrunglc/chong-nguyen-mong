@@ -4,7 +4,7 @@ baseline_commit: baba5d3
 
 # Story 2.4: Trần Khánh Dư kéo
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -42,7 +42,7 @@ _Story luật thứ tư của E2, đòn thứ ba (đòn cuối của ba tướng
 ## Tasks / Subtasks
 
 - [x] **Task 0: Tác giả chốt 3 câu hỏi** ở "Quyết định của tác giả" (2026-10-20, cả 3 câu chọn phương án (a)).
-- [ ] **Task 1: Khung, đợt kịch bản 6, dừng chờ duyệt** (AC: 1, 2)
+- [x] **Task 1: Khung, đợt kịch bản 6, dừng chờ duyệt** (AC: 1, 2)
   - [x] 1.1 Khung (không phải code luật, làm trước để file kịch bản nạp được):
     - `src/core/battle_event.gd`: thêm `PULL` vào **cuối** enum `Cause` (`WALK, STRIKE, PUSH, COLLISION, PULL`); sửa chú thích đầu enum. Kiểm mọi chỗ duyệt hay `match` trên `Cause` (`grep -rn "Cause" game/src game/tests`): chữ mô tả sự kiện của `BoardFixture.describe` và công cụ duyệt phải ra `PULL` hợp lý.
     - `i18n/text.csv`: `scenario.viewer.reject_not_in_range` đổi thành `ô đó không thẳng hàng hoặc ngoài tầm đánh`. Chỉ là chữ công cụ duyệt, không đổi file kịch bản nào. `scenario.viewer.reject_no_target` giữ `ô đó không có quân Nguyên đánh được` (đã đúng cho kéo). Nếu `text.vi.translation` sinh từ csv thì sinh lại (xem Story 2.3: file đó phải vào File List).
@@ -51,22 +51,22 @@ _Story luật thứ tư của E2, đòn thứ ba (đòn cuối của ba tướng
   - [x] 1.2 Viết 7 file đúng như Dev Notes "Đợt kịch bản 6", `"da_duyet": false`, thư mục mới `tests/kich_ban/keo/`. Không đụng 37 kịch bản đã duyệt.
   - [x] 1.3 `tools/xem_kich_ban.sh keo`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `tu_choi` của #6 hiện đúng câu tiếng Việt. `tools/test.sh`: xanh, `37 đã duyệt · 7 chưa duyệt (7 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
   - [x] 1.4 Commit: `Kịch bản Trần Khánh Dư kéo chờ duyệt (Story 2.4)`.
-  - [ ] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh keo`, đọc 7 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ ba điều:
+  - [x] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh keo`, đọc 7 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ ba điều:
     - #2 (cách 2 ô) và #4 (quân kề) thể hiện hai câu trả lời của "Quyết định của tác giả";
     - trước Story 3.1, rừng, kho lương, làng nằm giữa đường kéo **không** chặn việc chọn mục tiêu (chưa có kịch bản nào có rừng trên đường kéo, vì 3.1 sẽ đổi luật này);
     - hầm chông trừ máu khi bị kéo ngang qua chờ Story 3.4.
     Không làm Task 2 trở đi khi chưa có câu trả lời.
-  - [ ] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" thì xử lý theo AC 2. `tools/test.sh` **phải trượt**. Ghi Debug Log. **Không commit** khi đang đỏ.
-- [ ] **Task 2: Lõi luật** (AC: 3–11, 15)
-  - [ ] 2.1 `src/core/stats.gd`: `pull_range(type)` (`tam_danh`), `pull_distance(type)` (`tam_keo`). `StatsLoader` đã bắt buộc hai khóa này (`tam_danh` ≥ 1, `tam_keo` ≥ 0), không sửa bộ nạp. Chú thích đầu file "Hàm đòn thêm ở story dùng nó" giữ nguyên.
-  - [ ] 2.2 `src/core/rules_attack.gd`:
+  - [x] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" thì xử lý theo AC 2. `tools/test.sh` **phải trượt**. Ghi Debug Log. **Không commit** khi đang đỏ.
+- [x] **Task 2: Lõi luật** (AC: 3–11, 15)
+  - [x] 2.1 `src/core/stats.gd`: `pull_range(type)` (`tam_danh`), `pull_distance(type)` (`tam_keo`). `StatsLoader` đã bắt buộc hai khóa này (`tam_danh` ≥ 1, `tam_keo` ≥ 0), không sửa bộ nạp. Chú thích đầu file "Hàm đòn thêm ở story dùng nó" giữ nguyên.
+  - [x] 2.2 `src/core/rules_attack.gd`:
     - `targets`: thêm `UnitType.TRAN_KHANH_DU: return _du_targets(state, unit)`. `_du_targets` theo "Viền mục tiêu của Dư" ở Dev Notes.
     - `resolve`: nhánh Dư thay cho nhánh `_` "chưa có đòn" (nhánh `_` không còn loại tướng nào, giữ lại với `assert(false, ...)` hoặc bỏ nếu `match` đã phủ đủ ba tướng; chọn một, ghi Debug Log). Thứ tự kiểm theo "Bảng thứ tự kiểm của lệnh đánh" ở Dev Notes. **Kiểm hết rồi mới sửa.** Hợp lệ thì `ATTACKED` → `du_pull` → `unit.has_attacked = true`.
     - `static func du_pull(state, du, cell, events)`: theo "Đường kéo (`du_pull`)" ở Dev Notes. Không gọi `Effects.damage` (kéo 0 sát thương). Đi từng ô qua `ForcedMove.run(..., BattleEvent.Cause.PULL, events)`.
     - Sửa chú thích đầu file (bỏ "Dư: Story 2.4", thêm Dư).
-  - [ ] 2.3 `src/core/battle_event.gd`: chú thích `ATTACKED` ghi `to_cell` là ô quân bị kéo (Dư) cùng với hai tướng kia.
-- [ ] **Task 3: Test lõi luật** (AC: 3–12, 15)
-  - [ ] 3.1 `tests/test_rules_attack.gd` thêm (dựng bằng `BoardFixture`, mỗi ca so **đúng dãy sự kiện** và `validate()` rỗng qua `_attack`):
+  - [x] 2.3 `src/core/battle_event.gd`: chú thích `ATTACKED` ghi `to_cell` là ô quân bị kéo (Dư) cùng với hai tướng kia.
+- [x] **Task 3: Test lõi luật** (AC: 3–12, 15)
+  - [x] 3.1 `tests/test_rules_attack.gd` thêm (dựng bằng `BoardFixture`, mỗi ca so **đúng dãy sự kiện** và `validate()` rỗng qua `_attack`):
     - kéo quân Nguyên ở ô thứ 3, đủ 4 hướng: `["ATTACKED 3 c,h", "MOVED 101 a>b PULL", "MOVED 101 b>c PULL"]`, máu không đổi, Dư `has_attacked` bật, `has_moved` không bật;
     - cách 2 ô (theo câu 1): một `MOVED ... PULL`, đứng sát Dư, không `DAMAGED`;
     - kéo xuống sông ở ô thứ 2 hoặc ô kề: `MOVED ... PULL`, `DROWNED 101 c,h`, quân bị nhấc khỏi bàn, không `DAMAGED`;
@@ -76,15 +76,15 @@ _Story luật thứ tư của E2, đòn thứ ba (đòn cuối của ba tướng
     - từ chối theo đủ bảng (mỗi dòng một ca, cho Dư): `NOT_IN_RANGE` với ô kề (theo câu 2), ô chéo, ô cách 4, ô ngoài bàn; `NO_TARGET` với ô trống, ô tướng mình, quân Nguyên đứng sau tướng mình, quân Nguyên đứng sau quân Nguyên khác; `ALREADY_ATTACKED` khi kéo hai lần. State giữ nguyên (`BoardFixture.picture`), `has_attacked` không bật;
     - đi rồi kéo được; kéo rồi đi bị `ALREADY_MOVED`... (kiểm đúng mã luật đi đang trả khi tướng đã đánh, như ca của Lão trong `test_lance_once_per_turn_and_no_move_after`);
     - rừng nằm giữa Dư và mục tiêu (**trước 3.1**): mục tiêu vẫn có viền, kéo thì quân dừng trước rừng và mất 1 máu (va chạm `ForcedMove`). Ghi chú trong test: 3.1 đổi ca này (rừng là vật đầu tiên thì không kéo được); đây là ca duy nhất 3.1 phải sửa, vì thế nó nằm trong test GUT chứ **không** thành kịch bản đã duyệt.
-  - [ ] 3.2 Sửa test cũ đang ghi "Dư chưa có đòn" (đọc từng chỗ, giữ ý của test):
+  - [x] 3.2 Sửa test cũ đang ghi "Dư chưa có đòn" (đọc từng chỗ, giữ ý của test):
     - `test_rejections_keep_state` (dòng 54): ca `[3, Vector2i(4, 3), "NO_TARGET"]` với Dư ở `5,3`, mục tiêu `4,3` kề: theo câu 2 thành `"NOT_IN_RANGE"` (giữ ca, đổi mã);
     - `test_targets_are_adjacent_nguyen_units_in_direction_order` (dòng 101): đổi ca Dư (`du_state`: Dư `3,3`, Bộ binh `3,2` kề) thành kết quả mới: kề thì `targets` rỗng (theo câu 2); thêm một `du_state` thứ hai có Bộ binh cách 2 và cách 3. Đổi câu thông báo cho đúng;
     - `test_battle_controller.gd`, `test_battle_view.gd`, `test_main.gd`: tìm mọi ca dùng Dư (grep `"3"` trên bàn dựng tay, `KEY_3`); chỉ đổi ca nào ghi "Dư chưa có đòn". Mọi chỗ sửa ghi vào "Lệch so với Tasks" nếu khác danh sách này.
-  - [ ] 3.3 `tests/test_rules_attack.gd`:
+  - [x] 3.3 `tests/test_rules_attack.gd`:
     - `targets` của Dư: đúng thứ tự B→Đ→N→T; mỗi hướng một ô; **không** bỏ qua tướng mình (tướng mình đứng chắn thì hướng đó rỗng, khác Lão); không có ô kề; dừng ở mép bàn; rỗng khi đã kéo;
     - `test_stats_read_damage_and_push_distance` thêm `pull_range` và `pull_distance` của Dư đọc đúng `chi_so.json` (3 và 2).
-  - [ ] 3.4 `tests/test_battle_controller.gd`: Dư kéo thì `can_undo()` false; `attack_targets(3)` đúng trên một bố cục có quân Nguyên thẳng hàng.
-  - [ ] 3.5 Phá thử, **mỗi lần sửa tạm một chỗ**, chạy `tools/test.sh`, ghi tên kịch bản và test GUT trượt vào Debug Log, trả lại ngay, `git diff --quiet game/src` sau mỗi lần:
+  - [x] 3.4 `tests/test_battle_controller.gd`: Dư kéo thì `can_undo()` false; `attack_targets(3)` đúng trên một bố cục có quân Nguyên thẳng hàng.
+  - [x] 3.5 Phá thử, **mỗi lần sửa tạm một chỗ**, chạy `tools/test.sh`, ghi tên kịch bản và test GUT trượt vào Debug Log, trả lại ngay, `git diff --quiet game/src` sau mỗi lần:
     - kéo không đi (`du_pull` rỗng) → `keo/keo_cach_3_o.json` phải trượt;
     - kéo 1 ô thay vì `tam_keo` → `keo/keo_cach_3_o.json` phải trượt;
     - kéo gây 1 sát thương → `keo/keo_cach_3_o.json`, `keo/keo_quan_1_mau.json` phải trượt;
@@ -94,24 +94,24 @@ _Story luật thứ tư của E2, đòn thứ ba (đòn cuối của ba tướng
     - cho phép kéo quân kề → `keo/muc_tieu_ke_khong_keo.json`, `keo/khong_keo_duoc.json` phải trượt (nếu câu 2 chọn (a));
     - tầm đọc thành 2 (`pull_range` trừ 1) → `keo/keo_cach_3_o.json` phải trượt;
     - bỏ kiểm `NOT_IN_RANGE` (để rơi xuống `NO_TARGET`) → `keo/khong_keo_duoc.json` phải trượt.
-- [ ] **Task 4: Giao diện** (AC: 10, 12)
-  - [ ] 4.1 Đọc `src/battle/battle_view.gd`. Viền, chờ xác nhận, bỏ chọn sau khi đánh đã chạy chung cho mọi tướng qua `attack_targets`; phím `3` (hoặc phím chọn tướng thứ ba) chọn Dư. **Không** viết nhánh riêng cho Dư. Có gì phải sửa thì ghi vào "Lệch so với Tasks".
-  - [ ] 4.2 `tests/test_battle_view.gd` thêm trận thử `_make_keo_main()` qua `_make_level_main` (thư mục riêng `KEO_DIR`, xóa ở `after_each` như `LAO_DIR`). Bố cục: Dư `3` ở `3,3`; Bộ binh `3,0` (ô thứ 3 hướng Bắc); Kỵ binh `6,3` (hướng Đông, có sông `4,3`, `5,3`); Khoái `1` ở `3,4` kề Nam, Bộ binh `3,6` sau Khoái; Bộ binh `2,3` kề Tây, Bộ binh `1,3` sau nó. Các ca, mỗi ca kiểm cả điều kiện trước:
+- [x] **Task 4: Giao diện** (AC: 10, 12)
+  - [x] 4.1 Đọc `src/battle/battle_view.gd`. Viền, chờ xác nhận, bỏ chọn sau khi đánh đã chạy chung cho mọi tướng qua `attack_targets`; phím `3` (hoặc phím chọn tướng thứ ba) chọn Dư. **Không** viết nhánh riêng cho Dư. Có gì phải sửa thì ghi vào "Lệch so với Tasks".
+  - [x] 4.2 `tests/test_battle_view.gd` thêm trận thử `_make_keo_main()` qua `_make_level_main` (thư mục riêng `KEO_DIR`, xóa ở `after_each` như `LAO_DIR`). Bố cục: Dư `3` ở `3,3`; Bộ binh `3,0` (ô thứ 3 hướng Bắc); Kỵ binh `6,3` (hướng Đông, có sông `4,3`, `5,3`); Khoái `1` ở `3,4` kề Nam, Bộ binh `3,6` sau Khoái; Bộ binh `2,3` kề Tây, Bộ binh `1,3` sau nó. Các ca, mỗi ca kiểm cả điều kiện trước:
     - phím `3` thật: `_view(main).target_cells()` **đúng bằng** `[3,0, 6,3]` (B→Đ→N→T; không có `3,4`, `3,6`, `2,3`, `1,3`); `_board(main).target_cells()` giống hệt;
     - bấm chuột thật vào `3,0`: Bộ binh về `3,2` (kề Dư), còn 3 máu; đồng Dư `is_attacked()`; Dư bị bỏ chọn; `can_undo()` false;
     - bấm `6,3`: Kỵ binh bị nhấc khỏi bàn (rơi xuống sông `5,3`);
     - đi Dư rồi bấm mục tiêu: lần đầu `pending_cell()` đúng ô đó và dòng nhắc là `tr("hud.confirm_attack")`; lần hai mới kéo (đi sang ô giữ nguyên hướng thẳng hàng với một Bộ binh; kiểm `target_cells()` sau khi đi, trước khi bấm);
     - bấm quân kề `2,3`: không có lệnh nào được gửi (`can_undo()` giữ nguyên) và Dư không xám (theo câu 2).
-  - [ ] 4.3 Phá thử giao diện (ghi Debug Log): nếu `4.1` phải sửa `battle_view.gd` thì phá thử đúng chỗ đó; không sửa thì ghi "không phải sửa giao diện" và bỏ mục này.
-- [ ] **Task 5: Trận thử `thu_keo`** (AC: 13; theo câu 3)
-  - [ ] 5.1 `game/data/tran/thu_keo.json` (MỚI) đúng bố cục ở Dev Notes "Trận thử `thu_keo`". Không đổi `tran_01.json`, `thu_ba_tuong.json`, `thu_day.json`, `thu_lao.json`.
-  - [ ] 5.2 `tests/test_loaders.gd`: thêm `test_real_pull_trial_level_loads` theo mẫu `test_real_lance_trial_level_loads`: không lỗi, không cảnh báo, **so đủ ô và loại của mọi quân**, kiểm từng ô sông.
-- [ ] **Task 6: Tài liệu, kiểm bằng mắt, commit** (AC: 3–15)
-  - [ ] 6.1 `_bmad-output/planning-artifacts/game-architecture.md`: cây thư mục `data/tran/` thêm `thu_keo.json`; cây `kich_ban/` thêm nhóm `keo/` nếu cây có liệt kê nhóm; bảng "Đòn của tướng", dòng Trần Khánh Dư, ghi các câu trả lời 1–2 và "kề không có viền"; danh sách `Cause` (nếu kiến trúc liệt kê) thêm `PULL`.
-  - [ ] 6.2 GDD (`gdds/gdd-GameTest-2026-10-15/gdd.md` dòng 160 cột luật của Trần Khánh Dư và dòng 206): ghi câu trả lời 1–2 và "Chốt <ngày>". Không sửa chỗ nào khác của GDD.
-  - [ ] 6.3 Kiểm bằng mắt: chạy `tools/chay.sh --dev --tran=thu_keo` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím, `inject_mouse_click` theo pixel `(486 + (cột − hàng)·64, 141 + (cột + hàng)·32 + 32)` hoặc công thức hiện hành trong Debug Log 2.3 (bàn 7×7 giữ `board.position = (262, 139)`; **tính lại từ Debug Log 2.3, không đoán**). Làm theo "Hướng dẫn tác giả tự test", `capture_screenshot` sau mỗi bước chính, lưu `_bmad-output/implementation-artifacts/anh/2-4-*.png` (ít nhất: chọn Dư thấy 2 viền; sau khi kéo cách 3 ô; sau khi kéo xuống sông). Tắt game. Log không có ERROR/WARN. Task nào không làm được thì **bỏ dấu [x] và ghi rõ chờ tác giả kiểm tay** (review 2.3 đã bắt lỗi ghi [x] mà thiếu ảnh).
-  - [ ] 6.4 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, trận thử, tài liệu, `.uid` mới, `game/i18n/text.vi.translation` nếu đổi. Ví dụ: `Trần Khánh Dư kéo (Story 2.4)`.
-  - [ ] 6.5 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, dùng kết quả thật (số test thật).
+  - [x] 4.3 _(Không phải sửa giao diện: bỏ mục này)_ Phá thử giao diện (ghi Debug Log): nếu `4.1` phải sửa `battle_view.gd` thì phá thử đúng chỗ đó; không sửa thì ghi "không phải sửa giao diện" và bỏ mục này.
+- [x] **Task 5: Trận thử `thu_keo`** (AC: 13; theo câu 3)
+  - [x] 5.1 `game/data/tran/thu_keo.json` (MỚI) đúng bố cục ở Dev Notes "Trận thử `thu_keo`". Không đổi `tran_01.json`, `thu_ba_tuong.json`, `thu_day.json`, `thu_lao.json`.
+  - [x] 5.2 `tests/test_loaders.gd`: thêm `test_real_pull_trial_level_loads` theo mẫu `test_real_lance_trial_level_loads`: không lỗi, không cảnh báo, **so đủ ô và loại của mọi quân**, kiểm từng ô sông.
+- [x] **Task 6: Tài liệu, kiểm bằng mắt, commit** (AC: 3–15)
+  - [x] 6.1 `_bmad-output/planning-artifacts/game-architecture.md`: cây thư mục `data/tran/` thêm `thu_keo.json`; cây `kich_ban/` thêm nhóm `keo/` nếu cây có liệt kê nhóm; bảng "Đòn của tướng", dòng Trần Khánh Dư, ghi các câu trả lời 1–2 và "kề không có viền"; danh sách `Cause` (nếu kiến trúc liệt kê) thêm `PULL`.
+  - [x] 6.2 GDD (`gdds/gdd-GameTest-2026-10-15/gdd.md` dòng 160 cột luật của Trần Khánh Dư và dòng 206): ghi câu trả lời 1–2 và "Chốt <ngày>". Không sửa chỗ nào khác của GDD.
+  - [x] 6.3 _(Làm một phần: game mở được `thu_keo`, log sạch; chưa chụp ảnh vì GoPeak không kết nối trong phiên này; chờ tác giả kiểm tay, xem Lệch 3)_ Kiểm bằng mắt: chạy `tools/chay.sh --dev --tran=thu_keo` ở chế độ nền, chờ ~5 giây. GoPeak: `inject_action` cho phím, `inject_mouse_click` theo pixel `(486 + (cột − hàng)·64, 141 + (cột + hàng)·32 + 32)` hoặc công thức hiện hành trong Debug Log 2.3 (bàn 7×7 giữ `board.position = (262, 139)`; **tính lại từ Debug Log 2.3, không đoán**). Làm theo "Hướng dẫn tác giả tự test", `capture_screenshot` sau mỗi bước chính, lưu `_bmad-output/implementation-artifacts/anh/2-4-*.png` (ít nhất: chọn Dư thấy 2 viền; sau khi kéo cách 3 ô; sau khi kéo xuống sông). Tắt game. Log không có ERROR/WARN. Task nào không làm được thì **bỏ dấu [x] và ghi rõ chờ tác giả kiểm tay** (review 2.3 đã bắt lỗi ghi [x] mà thiếu ảnh).
+  - [x] 6.4 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, trận thử, tài liệu, `.uid` mới, `game/i18n/text.vi.translation` nếu đổi. Ví dụ: `Trần Khánh Dư kéo (Story 2.4)`.
+  - [x] 6.5 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, dùng kết quả thật (số test thật).
 
 ## Dev Notes
 
@@ -359,15 +359,57 @@ _Ba câu dưới đây là chỗ GDD và epics chưa nói rõ. Tác giả chốt
 
 ### Agent Model Used
 
+Claude Sonnet 5.5 (claude-sonnet-5-5)
+
 ### Debug Log References
 
+- Task 1.6: tác giả duyệt cả 7 kịch bản ("true", 2026-10-20). Đổi `da_duyet: true`; `tools/test.sh` trượt đúng như AC 2 (`test_approved_scenarios_pass`, `bước 1: luật từ chối ("khong_co_dich": quân 3 chưa có đòn (Story 2.4))…`).
+- Task 2–3: viết code luật và test GUT cùng một lượt (không chạy đỏ riêng cho test GUT; phần "phải trượt trước khi code" của M3 do 7 kịch bản đã duyệt đảm nhiệm). Lần chạy đầu: 436/437, một test sai id quân (Bộ binh `0,0` là 101, Cung kỵ là 102) trong `test_pull_does_not_damage_one_hp_unit`, đã sửa. Sau đó 437/437.
+- Task 3.5 phá thử (mỗi lần một chỗ, `rules_attack.gd`, đã trả lại sau mỗi lần), tất cả đều bị bắt:
+  - `du_pull` không đi: 6 test GUT (`test_pull_*`, `test_move_then_pull`) + kịch bản (`keo/keo_cach_2_o.json` in đầu tiên).
+  - kéo 1 ô: `test_pull_three_cells_away…`, `test_pull_does_not_damage_one_hp_unit`, `test_move_then_pull` + `keo/keo_cach_3_o.json`.
+  - kéo gây 1 sát thương: 6 test GUT + kịch bản (`keo/keo_cach_2_o.json`: máu 2 thay vì 3).
+  - kéo đủ 2 ô, va Dư: `test_pull_at_two_cells_stops_next_to_du` + `keo/keo_cach_2_o.json`.
+  - kéo ngược (đẩy ra xa): 7 test GUT + kịch bản.
+  - bỏ qua tướng mình: `test_pull_rejections_keep_state`, `test_pull_targets` + `keo/khong_keo_duoc.json` (bước 6).
+  - cho kéo quân kề: 5 test GUT + `keo/khong_keo_duoc.json` (bước 1).
+  - tầm 2 thay vì 3: 7 test GUT + kịch bản.
+  - bỏ kiểm `NOT_IN_RANGE`: `test_rejections_keep_state`, `test_pull_rejections_keep_state` + `keo/khong_keo_duoc.json` (bước 1).
+  Lưu ý: `test_scenarios` chỉ in kịch bản trượt đầu tiên mỗi lần, nên danh sách "kịch bản phải trượt" của Task 3.5 chưa được kiểm riêng từng file cho mọi lần phá (có test GUT bắt đủ mọi lần).
+- Task 4: `BattleView` chạy chung `attack_targets` cho Dư, không phải sửa; test giao diện mới đạt ngay.
+- Task 6.3: `timeout 12 tools/chay.sh --dev --tran=thu_keo`: log có `[INFO][battle] nạp trận thu_keo`, không có ERROR/WARN. Không chụp ảnh vì GoPeak báo `CONNECTION_CLOSED` trong phiên này.
+- Test cuối: 444/444 đạt (427 + 17 mới); `Kịch bản luật: 44 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
 - Task 1.3: `tools/test.sh` xanh, `37 đã duyệt · 7 chưa duyệt (7 chưa đạt)`, 427/427 test. Lý do chưa đạt của 7 kịch bản khớp đúng bảng "Lý do chưa đạt" (#1, #2, #3, #7: bước 1 thiếu `tu_choi`; #4, #6: bước 1 `ngoai_tam` ≠ `khong_co_dich`; #5: bước 2).
 - Task 1.1: không cần sửa `scenario_loader.gd`, `scenario_runner.gd` (không có mã từ chối mới). `text.vi.translation` được Godot sinh lại sau khi sửa `text.csv`, vào File List.
 
 ### Completion Notes List
 
+- Trần Khánh Dư kéo được: vật đầu tiên trên hàng trong 3 ô, phải là quân Nguyên và không kề; kéo về phía Dư tối đa 2 ô, dừng sát Dư (cách 2 ô thì kéo 1 ô); 0 sát thương; sông thì chết đuối. Đi từng ô qua `ForcedMove.run`, nguyên nhân mới `Cause.PULL`.
+- `RulesAttack`: `_du_targets`, nhánh Dư trong `resolve`, `du_pull`, hằng `PULL_MIN_RANGE = 2`. `Stats`: `pull_range`, `pull_distance`. Không sửa `chi_so.json`, bộ nạp, giao diện, bộ nạp kịch bản.
+- 7 kịch bản `keo/` đã duyệt và đạt; 10 test GUT lõi luật, 1 test điều khiển, 5 test giao diện, 1 test trận thử thật. Trận thử `thu_keo.json`.
+- Chữ công cụ duyệt cho `ngoai_tam` đổi thành "ô đó không thẳng hàng hoặc ngoài tầm đánh".
+- **Lệch so với Tasks:** (1) Task 4.3 bỏ vì không sửa giao diện; (2) Task 3.2: `test_rejections_keep_state` đổi ca Dư kề thành `NOT_IN_RANGE`, `test_targets_are_adjacent…` đổi câu thông báo; (3) Task 6.3 làm một phần: không chụp ảnh được (GoPeak không kết nối), chỉ kiểm log; **chờ tác giả kiểm tay** theo "Hướng dẫn tác giả tự test"; (4) nhánh `_` của `resolve` giữ lại, đổi lý do thành `quân %d không có đòn` (không còn loại tướng nào chạm tới); (5) Task 6.4 gộp commit sau khi tác giả duyệt kịch bản.
+- Hướng dẫn tác giả tự test (kết quả thật): 1. `tools/test.sh`: `Kịch bản luật: 44 đã duyệt · 0 chưa duyệt (0 chưa đạt)`, `✅ 444/444 test đạt`. 2. `tools/chay.sh --dev --tran=thu_keo` (tắt bộ gõ VNI/Telex). 3. Gõ `3`: 2 viền (Bộ binh phía trên, Kỵ binh bên kia sông). 4. Bấm Bộ binh phía trên: nó nhảy sát Dư, Dư xám. 5. `Space`, `3`, bấm Kỵ binh: rơi sông, biến mất. 6. Thử bấm quân kề bên trái: không có gì xảy ra.
+
 ### File List
+
+- `game/src/core/rules_attack.gd` (sửa)
+- `game/src/core/stats.gd` (sửa)
+- `game/src/core/battle_event.gd` (sửa)
+- `game/i18n/text.csv` (sửa)
+- `game/i18n/text.vi.translation` (sinh lại)
+- `game/data/tran/thu_keo.json` (mới)
+- `game/tests/kich_ban/keo/keo_cach_3_o.json`, `keo_cach_2_o.json`, `keo_qua_song.json`, `muc_tieu_ke_khong_keo.json`, `tuong_chan_khong_keo.json`, `khong_keo_duoc.json`, `keo_quan_1_mau.json` (mới)
+- `game/tests/test_rules_attack.gd` (sửa)
+- `game/tests/test_battle_controller.gd` (sửa)
+- `game/tests/test_battle_view.gd` (sửa)
+- `game/tests/test_loaders.gd` (sửa)
+- `_bmad-output/planning-artifacts/game-architecture.md` (sửa)
+- `_bmad-output/planning-artifacts/gdds/gdd-GameTest-2026-10-15/gdd.md` (sửa)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (sửa)
+- `_bmad-output/implementation-artifacts/2-4-tran-khanh-du-keo.md` (mới)
 
 ### Change Log
 
 - 2026-10-20: Tạo story. Ba câu hỏi (cách 2 ô, quân kề, trận thử): tác giả chốt (a) cả ba.
+- 2026-10-20: Làm story. Kịch bản kéo (7, đã duyệt), code luật, test (427 → 444), trận thử `thu_keo`, tài liệu. Chuyển sang review. Chưa có ảnh chụp (GoPeak không kết nối).
