@@ -207,9 +207,10 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 	var side: Section = Section.new()
 	_warn_unknown(section, known, name + ".", file, result)
 	var terrain_shown: String = name + ".dia_hinh"
+	var decides_size: bool = name == "truoc"
 	side.terrain_rows = BoardLayers.read_layer(section, "dia_hinh", terrain_shown, BoardText.TERRAIN_SYMBOLS,
-		file, result, size, "" if terrain_shown == SIZE_LAYER else SIZE_LAYER)
-	side.size = BoardLayers.layer_size(side.terrain_rows) if terrain_shown == SIZE_LAYER else size
+		file, result, size, "" if decides_size else SIZE_LAYER)
+	side.size = BoardLayers.layer_size(side.terrain_rows) if decides_size else size
 	var errors_before_units: int = result.errors.size()
 	side.unit_rows = BoardLayers.read_layer(section, "quan", name + ".quan", BoardText.UNIT_SYMBOLS, file, result,
 		side.size, SIZE_LAYER)

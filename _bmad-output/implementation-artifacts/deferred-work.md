@@ -107,3 +107,9 @@
 ## Deferred from: code review of 2-3-pham-ngu-lao-phong-lao (2026-10-19)
 
 - Bộ nạp kịch bản (`game/src/data/scenario_loader.gd:40`, `COMMAND_REJECTS`) kiểm mã `tu_choi` theo lệnh, không theo tướng: Khoái + `ngoai_tam` hay Lão + `khong_ke` vẫn nạp được, chỉ trượt lúc chạy với câu báo mã khác. `test_scenario_loader.gd:482` dùng đúng ca Khoái + `ngoai_tam`. Xem lại khi Dư có đòn (2.4) nếu tác giả muốn bộ nạp báo sớm.
+
+## Deferred from: code review of 1-9-co-ban-theo-file-tran (2026-10-20)
+
+- `BoardView.fit_scale` (`game/src/battle/board_view.gd:231`): thu 1/3 cho ô 21,33 px, không còn góc điểm ảnh nguyên như lời giải thích bậc nguyên. Nhánh thu không chạy ở 1280×720 với mọi cỡ hợp lệ (5..10 × 5..8); xem lại nếu đổi `TILE_SIZE` hoặc cho phép bàn lớn hơn.
+- `test_board_view.gd`: chưa có test `setup` khi hệ số thu khác 1 (chỉ test `fit_scale` và đặt `scale` bằng tay). Làm cùng lúc với việc trên.
+- `test_board_view.gd` (`_boards()`): dùng `AppState.launch` toàn cục, phụ thuộc thứ tự test; số `(262, 139)` chỉ đúng khi `tran` rỗng.

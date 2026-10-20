@@ -810,18 +810,30 @@ func test_key_of_spent_general_cancels_confirm() -> void:
 
 
 ## Bàn 10×8 (Story 1.9, thu_co_lon): đẩy ra ngoài cột 9 rồi ngoài hàng 7, bấm chuột thật; F1 có tọa độ góc cuối.
+func _enemy_count(main: Node2D) -> int:
+	var count: int = 0
+	for unit: Unit in _controller(main).snapshot().units:
+		if unit.faction != Unit.Faction.DAI_VIET:
+			count += 1
+	return count
+
+
 func test_large_board_edge_push_and_f1() -> void:
 	AppState.launch.dev = true
 	AppState.launch.tran = "thu_co_lon"
 	var main: Node2D = _make_main()
 	assert_eq(_controller(main).snapshot().size, Vector2i(10, 8))
 	var khoai: Vector2i = Vector2i(8, 4)
+	var enemies_before: int = _enemy_count(main)
 	_click_by_mouse(main, khoai)
 	assert_eq(_view(main).selected_id(), 1, "chọn Khoái")
 	assert_has(_board(main).target_cells(), Vector2i(9, 4), "viền mục tiêu ở cột 9")
 	_click_by_mouse(main, Vector2i(9, 4))
 	assert_null(_unit_at(main, Vector2i(9, 4)), "Bộ binh bị đẩy vào mép phải, gục")
+	assert_eq(_enemy_count(main), enemies_before - 1, "đúng một quân Nguyên gục, không phải bị đẩy đi chỗ khác")
+	assert_eq(_unit_cell(main, 1), khoai, "Khoái đứng yên")
 	assert_true(_unit_at(main, khoai).has_attacked, "Khoái đã đánh")
+	assert_true(_token(main, 1).is_attacked(), "Khoái xám")
 	_press_physical(main, KEY_SPACE)
 	_click_by_mouse(main, khoai)
 	assert_has(_board(main).lit_cells(), Vector2i(8, 6))
@@ -833,7 +845,16 @@ func test_large_board_edge_push_and_f1() -> void:
 	assert_eq(_board(main).pending_cell(), Vector2i(8, 7), "đã đi nên chờ xác nhận")
 	_click_by_mouse(main, Vector2i(8, 7))
 	assert_null(_unit_at(main, Vector2i(8, 7)), "Bộ binh bị đẩy vào mép dưới, gục")
+	assert_eq(_enemy_count(main), enemies_before - 2, "quân Nguyên thứ hai gục")
 	var overlay: CoordOverlay = main._coord_overlay as CoordOverlay
+	var dev_tools: DevTools = null
+	for node: Node in main.get_children():
+		if node is DevTools:
+			dev_tools = node as DevTools
+	assert_not_null(dev_tools)
+	assert_false(overlay.visible, "mặc định ẩn")
+	dev_tools.f1_pressed.emit()
+	assert_true(overlay.visible, "F1 lần một hiện tọa độ")
 	assert_has(overlay.texts(), "9,7", "tọa độ ô góc dưới phải")
 	assert_has(overlay.texts(), "0,0")
 	var expected: Vector2 = BoardView.cell_center(Vector2i(8, 6)) \

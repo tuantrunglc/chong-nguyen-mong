@@ -4,7 +4,7 @@ baseline_commit: 19d14dc81764debd1bcbce4f24a3be5be904440a
 
 # Story 1.9: Cỡ bàn theo file trận
 
-Status: review
+Status: done
 
 ## Story
 
@@ -484,3 +484,13 @@ Claude Opus 5.5 (claude-opus-5-5[1m])
 
 - 2026-10-20: Tạo story. Cỡ bàn suy ra từ bàn cờ chữ (5×5 đến 10×8); mọi cỡ hợp lệ vừa ở ô 64 px trong 1280×720.
 - 2026-10-20: Làm story. Bộ nạp suy ra cỡ bàn từ bàn cờ chữ, `BoardView` canh và thu theo bậc nguyên, 2 trận thử, kịch bản mép bàn 5×6 (tác giả đã duyệt). Test 406 → 427, đạt hết. 7 ảnh. Bản web 10,4 MB. Chuyển sang review.
+
+### Review Findings
+
+_Code review 2026-10-20 (Blind Hunter, Edge Case Hunter, Acceptance Auditor). Không có vi phạm AC. 2 patch, 3 defer, 17 bỏ._
+
+- [x] [Review][Patch] `test_large_board_edge_push_and_f1` chưa bấm F1 và kiểm yếu hơn spec (AC 5, Task 4.4): chỉ đọc `overlay.texts()`, không bấm F1; chỉ kiểm "ô trống" và `has_attacked`, không kiểm máu Khoái, trạng thái xám, hay Bộ binh gục thật (không phải bị đẩy đi chỗ khác) [game/tests/test_battle_view.gd:813]
+- [x] [Review][Patch] `ScenarioLoader._read_side` so chuỗi `terrain_shown == SIZE_LAYER` để biết đang đọc phe `truoc`; đổi tên khóa là hỏng ngầm. Dùng cờ bool rõ ràng [game/src/data/scenario_loader.gd:211]
+- [x] [Review][Defer] Bàn thu theo 1/3 thì ô 21,33 px, không còn "điểm ảnh nguyên"; lời giải thích bậc nguyên chỉ đúng với 1 và 1/2. Nhánh này chưa chạy ở 1280×720 [game/src/battle/board_view.gd:231] — deferred, chưa tới được
+- [x] [Review][Defer] Chưa có test `setup` khi hệ số thu khác 1 (chỉ test `fit_scale` và đặt `scale` bằng tay, spec cho phép) [game/tests/test_board_view.gd] — deferred, nhánh chưa chạy
+- [x] [Review][Defer] `_boards()` dùng trạng thái toàn cục `AppState.launch`, phụ thuộc thứ tự test; số `(262, 139)` chỉ đúng khi `tran` rỗng [game/tests/test_board_view.gd:59] — deferred, hiện test đạt
