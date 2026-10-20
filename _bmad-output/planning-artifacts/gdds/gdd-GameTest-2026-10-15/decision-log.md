@@ -70,3 +70,5 @@
 - 2026-10-18: CHỐT làm bàn cờ isometric tạm ở Story 1.7 (cuối E1): ô thoi, ô `0,0` ở đỉnh trên, địa hình bằng khối và màu tạm, quân vẫn là đồng tròn. Tranh vẫn ở E8. Luật không đổi. Thay cho ghi chú hoãn cùng ngày.
 - 2026-10-19: CHỐT đổi hướng hình ảnh sang pixel art nhìn chếch từ trên xuống, ô vuông (theo 2 ảnh mẫu tác giả gửi, lưu ở `art-reference/`). Thay bàn isometric của Story 1.7 bằng Story 1.8, làm trước Story 2.3. Luật không đổi. Tranh pixel art vẫn ở E8.
 - 2026-10-19: SỬA thứ tự: Story 1.8 làm ngay sau Story 2.3 (2.3 đã bắt đầu khi chốt), trước Story 2.4.
+- 2026-10-20: CHỐT mỗi trận một cỡ bàn theo quy mô trận thật, có thể không vuông, từ 5×5 đến 10 cột × 8 hàng. Quy mô thể hiện qua cỡ bàn, số quân Nguyên và lượng tiếp viện; vẫn 3 tướng. Gợi ý cỡ và sự kiện thật cho 6 trận nằm ở Campaign Structure. Thêm Story 1.9. Xem `sprint-change-proposal-2026-10-20-co-ban.md`.
+- 2026-10-20: CHỐT tranh E8 dùng ô 64×64 và quân 64×64, hiện 1:1 (thay cho ô 32×32 và quân 32×48). Bộ hình Phạm Ngũ Lão do AI (PixelLab) tạo là bản nháp B2.

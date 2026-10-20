@@ -45,7 +45,8 @@ _File này chứa các luật và mẫu mà mọi phiên AI phải theo khi vi�
 
 ### Hiệu năng
 
-- Mục tiêu: **60 FPS** trên laptop văn phòng dùng card tích hợp, chạy trên trình duyệt. Bàn 7×7 nên hiệu năng **không phải vấn đề**: không tối ưu sớm, không dùng object pool, không cache phức tạp.
+- Mục tiêu: **60 FPS** trên laptop văn phòng dùng card tích hợp, chạy trên trình duyệt. Bàn tối đa 10×8 (80 ô) nên hiệu năng **không phải vấn đề**: không tối ưu sớm, không dùng object pool, không cache phức tạp.
+- **Không lặp cứng cỡ bàn** (`range(7)`, `49`). Luôn dùng `level.size` hoặc cỡ của trận thử. Mỗi trận có cỡ riêng, từ 5×5 đến 10×8 (2026-10-20).
 - `clone()` rẻ, cứ dùng thoải mái cho hoàn tác và xem trước.
 - **Xem trước** chỉ chạy lại khi ô trỏ chuột đổi, không chạy mỗi khung hình trong `_process`.
 - Mỗi pha địch ra đòn **≤ 3 giây** hoạt ảnh. Tua nhanh bằng cách đổi tốc độ Tween, không bỏ qua sự kiện.

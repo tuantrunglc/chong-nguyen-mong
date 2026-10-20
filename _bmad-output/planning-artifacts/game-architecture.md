@@ -50,7 +50,7 @@ Tài liệu đã hoàn tất qua GDS Architecture Workflow. Đây là luật b�
 
 ### Tổng quan game
 
-**Chống Nguyên Mông (tên tạm)**: tactics roguelite 2D theo lượt. Người chơi là Trần Hưng Đạo, đứng ngoài bàn cờ, chỉ huy 2–3 tướng có thật trên bàn 7×7 (file trận quy định tướng nào ra trận). Địch luôn báo trước đòn đánh vào ô. Người chơi dùng đẩy/kéo, va chạm, địa hình và mưu kế để phá thế trận. Combat hoàn toàn tất định.
+**Chống Nguyên Mông (tên tạm)**: tactics roguelite 2D theo lượt. Người chơi là Trần Hưng Đạo, đứng ngoài bàn cờ, chỉ huy 2–3 tướng có thật trên bàn có cỡ riêng cho từng trận, từ 5×5 đến 10×8 (file trận quy định cỡ bàn và tướng nào ra trận). Địch luôn báo trước đòn đánh vào ô. Người chơi dùng đẩy/kéo, va chạm, địa hình và mưu kế để phá thế trận. Combat hoàn toàn tất định.
 
 ### Phạm vi kỹ thuật
 
@@ -91,7 +91,6 @@ Tài liệu đã hoàn tất qua GDS Architecture Workflow. Đây là luật b�
 - nâng cấp tướng (đổi chỉ số và luật đòn);
 - mở khóa giữa các lượt chơi;
 - trận Bạch Đằng (thủy triều làm địa hình đổi theo hiệp, bãi cọc, thuyền);
-- bàn có kích thước khác 7×7;
 - tranh, nhạc, chữ kể chuyện.
 
 ### Yêu cầu kỹ thuật
@@ -195,7 +194,7 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
 
 | Thành phần | Giải pháp | Ghi chú |
 |---|---|---|
-| Render | Renderer Compatibility (WebGL 2), 2D | Bắt buộc cho web. Đủ cho bàn 7×7 ở 60 FPS |
+| Render | Renderer Compatibility (WebGL 2), 2D | Bắt buộc cho web. Đủ cho bàn tối đa 10×8 (80 ô) ở 60 FPS |
 | Vật lý | Không dùng | Mọi va chạm là luật trên lưới, nằm trong bộ phân giải |
 | Âm thanh | AudioStreamPlayer có sẵn | Trình duyệt chỉ cho phát âm thanh sau lần bấm đầu tiên |
 | Input | InputMap (chuột + phím tắt) | Các phím 1-2-3, Q/W, Z, Space, R khai báo trong InputMap |
@@ -239,7 +238,7 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
 |---|---|---|---|---|
 | 1 | Trạng thái trận | `BattleState` thuần dữ liệu (RefCounted), có `clone()`, không tham chiếu tới Node | — | Hoàn tác, xem trước, test và tính tất định đều cần luật chạy được mà không cần màn hình |
 | 2 | Chủ giữ trạng thái | Chỉ `BattleController` giữ trạng thái đang sống. Phần trình bày chỉ nhận sự kiện và bản chụp | — | Tránh lỗi hoạt ảnh nhìn thấy dữ liệu bị đổi giữa lúc đang diễn |
-| 3 | Hoàn tác | Bản chụp trạng thái (hủy nước đi giữ một bản; chơi lại hiệp giữ bản đầu lượt) | — | Bàn 7×7 nên chụp rất rẻ; đơn giản hơn lệnh đảo ngược |
+| 3 | Hoàn tác | Bản chụp trạng thái (hủy nước đi giữ một bản; chơi lại hiệp giữ bản đầu lượt) | — | Bàn tối đa 10×8 (80 ô) nên chụp rất rẻ; đơn giản hơn lệnh đảo ngược |
 | 4 | Bộ phân giải luật | Hàm thuần: nhận trạng thái và lệnh, áp dụng luật, trả về danh sách sự kiện | — | Một chỗ duy nhất chứa luật. Nhật ký sự kiện dùng chung cho hoạt ảnh, test và tua nhanh |
 | 5 | Trình tự hiệp | Biến pha nằm trong `BattleState`; chuyển pha bằng hàm của lõi luật | — | Không dùng StateMachine kiểu Node, để luật không lọt vào scene |
 | 6 | Enemy AI | Hàm thuần trong lõi luật, BFS tự viết, duyệt hướng cố định B→Đ→N→T | — | Tất định. Luật "đi xuyên quân mình" không khớp với AStarGrid2D |
@@ -320,6 +319,13 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
 - **Ký hiệu địa hình** (theo GDD): `.` đất trống, `~` sông, `#` rừng, `^` hầm chông, `L` kho lương, `D` làng, `A` ô ải.
 - **Ký hiệu quân:** `1` Nguyễn Khoái, `2` Phạm Ngũ Lão, `3` Trần Khánh Dư, `B` Bộ binh, `K` Kỵ binh, `C` Cung kỵ.
 - **Tọa độ:** `cột,hàng`, gốc `0,0` ở góc trên bên trái, hướng Bắc ở phía trên.
+- **Cỡ bàn** (thêm 2026-10-20):
+  - Cỡ bàn suy ra từ lớp `dia_hinh`: số dòng là số hàng, số ký hiệu trên một dòng là số cột.
+  - Lớp `quan` và mọi lớp khác phải cùng cỡ với lớp `dia_hinh`.
+  - Cỡ hợp lệ: số cột từ 5 đến 10, số hàng từ 5 đến 8. Cỡ sai thì báo lỗi tiếng Việt, ghi rõ file và cỡ đọc được.
+  - Hai giới hạn này là hằng số `BOARD_MIN` và `BOARD_MAX` trong `board_layers.gd`, thay cho `BOARD_SIZE`.
+  - Kịch bản luật dùng cùng luật cỡ bàn này.
+  - Không lặp cứng cỡ bàn: luôn dùng `level.size`.
 - **`thu_tu_dich`:** chỉ ghi tọa độ. Bộ nạp đối chiếu với lớp `quan`; ô nào không có quân Nguyên thì báo lỗi.
 - **`tiep_vien`:** mỗi mục có dạng `{"hiep": 2, "o": "3,0", "loai": "K"}`.
 - **`so_hiep_toi_da`** (không bắt buộc, chỉ dùng cho `"kieu": "tieu_diet"`): số nguyên dương. Không có thì không giới hạn hiệp. (thêm 2026-10-18)
@@ -360,7 +366,7 @@ Nạp sẵn toàn bộ khi mở game. Asset của prototype chỉ gồm font, kh
   - *Bối cảnh:* cần hoàn tác, chơi lại hiệp, xem trước, tua nhanh, test; nhiều phiên AI cùng viết code.
   - *Quyết định:* mọi luật nằm trong lõi thuần dữ liệu. Chỉ `BattleController` giữ trạng thái đang sống. Node chỉ vẽ và phát lại sự kiện.
   - *Hệ quả:* phải viết thêm một lớp nối giữa lõi và phần hiển thị; đổi lại, test chạy được mà không cần màn hình.
-- **ADR-002: Hoàn tác bằng bản chụp, không dùng lệnh đảo ngược.** Bàn 7×7 nên chụp lại gần như miễn phí và ít lỗi.
+- **ADR-002: Hoàn tác bằng bản chụp, không dùng lệnh đảo ngược.** Bàn tối đa 10×8 (80 ô) nên chụp lại gần như miễn phí và ít lỗi.
 - **ADR-003: Dữ liệu trận là JSON có bàn cờ chữ.**
   - *Lý do:* tác giả không mở editor và tự thiết kế trận; Godot có sẵn bộ đọc JSON nên AI ít viết sai.
   - *Đã loại:* `.tres` (phải dùng editor), định dạng chữ tự chế (thêm bộ đọc, thêm chỗ sinh lỗi).
@@ -571,7 +577,7 @@ chong-nguyen-mong/                    # repo
 │   │   ├── battle/                   # CẦU NỐI + TRÌNH BÀY TRẬN (Node)
 │   │   │   ├── battle_controller.gd  # giữ trạng thái sống, bản chụp hủy, xem trước
 │   │   │   ├── battle_view.gd        # gốc phần hiển thị trận
-│   │   │   ├── board_view.gd         # vẽ 49 ô vuông nhìn chếch bằng code (Story 1.8); nơi duy nhất đổi ô ↔ điểm
+│   │   │   ├── board_view.gd         # vẽ mọi ô của bàn (cỡ theo trận) nhìn chếch bằng code (Story 1.8); nơi duy nhất đổi ô ↔ điểm
 │   │   │   ├── unit_token.gd         # đồng quân tròn khắc chữ
 │   │   │   ├── telegraph_view.gd     # ô đỏ, số thứ tự, mũi tên xung phong
 │   │   │   ├── preview_view.gd       # bóng mờ vị trí cuối + máu
@@ -675,7 +681,7 @@ chong-nguyen-mong/                    # repo
 | Signal | `snake_case`, thì quá khứ | `events_resolved` |
 | Tên riêng lịch sử trong code | Tiếng Việt không dấu, UPPER | `UnitType.NGUYEN_KHOAI`, `Stratagem.SAT_THAT` |
 | Tọa độ | `Vector2i(cot, hang)`; trong file dữ liệu là `"cot,hang"` | `Vector2i(4, 2)` ↔ `"4,2"` |
-| Ô ↔ điểm màn hình | Chỉ `BoardView.cell_center()` và `BoardView.cell_at()` (từ Story 1.8: ô vuông nhìn chếch, cạnh ô là bội số của 16 px, ô `0,0` ở góc trên bên trái, Bắc ở trên; trước đó là isometric 2:1 của Story 1.7). View khác gọi hai hàm này, không tự tính. Chuột dùng `BoardView.pick_cell()`: ô **nhìn thấy** (đồng quân, khối nhô lên che ô phía sau), không trúng gì thì như `cell_at`. Thứ tự vẽ theo `hang` (từ Story 1.8; Story 1.7 dùng `cot + hang`), lớn hơn vẽ sau: khối địa hình và đồng quân là con của `BoardView._world` (`y_sort_enabled`); khối đặt cao hơn tâm ô `TILE_H / 4` để không bằng y với quân ô bên cạnh. Ô sáng, đường đi, vòng chọn, sông, hầm chông, bệ ô ải vẽ trên mặt đất (`_draw` của `BoardView`), luôn dưới khối và quân (Story 1.7) | `cell_at(cell_center(c)) == c`; `pick_cell(cell_center(c)) == c` |
+| Ô ↔ điểm màn hình | Chỉ `BoardView.cell_center()` và `BoardView.cell_at()` (từ Story 1.8: ô vuông nhìn chếch, cạnh ô là bội số của 16 px (E8: 64 px); từ Story 1.9: `BoardView` canh giữa bàn theo `level.size` trong vùng chơi, chừa chỗ cho HUD. Nếu bàn không vừa thì thu nhỏ theo bậc nguyên, không thu lẻ; ô `0,0` ở góc trên bên trái, Bắc ở trên; trước đó là isometric 2:1 của Story 1.7). View khác gọi hai hàm này, không tự tính. Chuột dùng `BoardView.pick_cell()`: ô **nhìn thấy** (đồng quân, khối nhô lên che ô phía sau), không trúng gì thì như `cell_at`. Thứ tự vẽ theo `hang` (từ Story 1.8; Story 1.7 dùng `cot + hang`), lớn hơn vẽ sau: khối địa hình và đồng quân là con của `BoardView._world` (`y_sort_enabled`); khối đặt cao hơn tâm ô `TILE_H / 4` để không bằng y với quân ô bên cạnh. Ô sáng, đường đi, vòng chọn, sông, hầm chông, bệ ô ải vẽ trên mặt đất (`_draw` của `BoardView`), luôn dưới khối và quân (Story 1.7) | `cell_at(cell_center(c)) == c`; `pick_cell(cell_center(c)) == c` |
 | Khóa dịch | `<man>.<muc>` | `hud.end_turn`, `error.rolled_back` |
 | Khóa JSON dữ liệu | tiếng Việt không dấu, `snake_case` | `thu_tu_dich`, `tiep_vien` |
 

@@ -22,8 +22,8 @@ File này chia các yêu cầu trong GDD và tài liệu kiến trúc thành epi
 ### Yêu cầu chức năng (FR)
 
 **Bàn cờ và dữ liệu trận**
-- FR1: Bàn 7×7 ô vuông, đi 4 hướng, không đi chéo; khoảng cách tính bằng số ô (Manhattan).
-- FR2: Mỗi trận nạp từ file dữ liệu: địa hình, vị trí quân, tướng nào ra trận, thứ tự hành động của quân Nguyên, lịch tiếp viện, kiểu nhiệm vụ, mưu kế được dùng. Thêm hoặc sửa trận không cần sửa code.
+- FR1: Bàn ô vuông, cỡ riêng cho từng trận (từ 5×5 đến 10 cột × 8 hàng, có thể không vuông), đi 4 hướng, không đi chéo; khoảng cách tính bằng số ô (Manhattan).
+- FR2: Mỗi trận nạp từ file dữ liệu (cỡ bàn suy ra từ bàn cờ chữ): địa hình, vị trí quân, tướng nào ra trận, thứ tự hành động của quân Nguyên, lịch tiếp viện, kiểu nhiệm vụ, mưu kế được dùng. Thêm hoặc sửa trận không cần sửa code.
 - FR3: Hiển thị 6 loại ô (đất trống, sông, rừng, hầm chông, kho lương, làng) và ô ải; quân là đồng tròn có chữ hoặc biểu tượng. Bàn vẽ nhìn chếch từ trên xuống, ô vuông (Story 1.8; thay bàn isometric của Story 1.7).
 - FR4: Chỉ số (máu, tầm đi, tầm đánh, sát thương, độ đẩy, tầm kéo, tham số mưu kế) nạp từ `chi_so.json`; tác giả tự sửa được.
 
@@ -171,17 +171,17 @@ Khi sang giai đoạn 1 nên chạy `gds-ux`.
 
 ## Danh sách epic
 
-**Ngân sách giờ** (chia lại 2026-10-17; E3 thêm ~10 giờ và E1 thêm ~3 giờ ngày 2026-10-18, E1 thêm ~3 giờ ngày 2026-10-19; tổng ≈ 146 giờ, khoảng 10 giờ/tuần):
+**Ngân sách giờ** (chia lại 2026-10-17; E3 thêm ~10 giờ và E1 thêm ~3 giờ ngày 2026-10-18, E1 thêm ~3 giờ ngày 2026-10-19, E1 thêm ~3 giờ ngày 2026-10-20; tổng ≈ 149 giờ, khoảng 10 giờ/tuần):
 
 | Epic | Giờ | Tuần (ước) | Số story |
 |---|---|---|---|
 | E0 Dựng nền | ~12 | 1–2 | 6 |
-| E1 Bàn cờ và di chuyển | ~24 | 2–3 | 8 |
+| E1 Bàn cờ và di chuyển | ~27 | 2–3 | 9 |
 | E2 Combat cốt lõi | ~35 | 4–7 | 15 |
 | E3 Địa hình và mưu kế | ~45 | 7–11 | 14 |
 | E4 Sáu trận và chơi thử | ~30 | 12–14 | 9 |
 
-**"Trễ" nghĩa là:** một epic dùng quá số giờ trên 25% (ví dụ E2 quá 44 giờ). Khi đó áp dụng phương án cắt: bàn nhìn chếch (Story 1.8, khi cắt thì giữ bàn isometric của Story 1.7), Cung kỵ (Story 2.15), trận 6 (Story 4.5), trau chuốt xem trước (Story 4.6), trận 4 "Bảo vệ làng" (Story 3.8; khi cắt thì đặt làng vào trận 3). Không cắt luật lõi. Gợi ý luật (Story 4.8) là phần hướng dẫn, không cắt (chốt 2026-10-18).
+**"Trễ" nghĩa là:** một epic dùng quá số giờ trên 25% (ví dụ E2 quá 44 giờ). Khi đó áp dụng phương án cắt: bàn nhìn chếch (Story 1.8, khi cắt thì giữ bàn isometric của Story 1.7), cỡ bàn theo trận (Story 1.9, khi cắt thì giữ 7×7), Cung kỵ (Story 2.15), trận 6 (Story 4.5), trau chuốt xem trước (Story 4.6), trận 4 "Bảo vệ làng" (Story 3.8; khi cắt thì đặt làng vào trận 3). Không cắt luật lõi. Gợi ý luật (Story 4.8) là phần hướng dẫn, không cắt (chốt 2026-10-18).
 
 Thứ tự bắt buộc: E0 → E1 → E2 → E3 → E4. Epic sau dùng kết quả của epic trước, không epic nào cần epic sau mới chạy được. Mỗi story luật có một đợt duyệt kịch bản nhỏ bằng `tools/xem_kich_ban.sh`, trước khi viết code.
 
@@ -190,7 +190,7 @@ Tác giả mở link itch.io (riêng tư) và thấy bàn cờ 7×7 trống. Gõ
 **Phủ:** các yêu cầu bổ sung từ kiến trúc (project, GUT, `tools/`, ranh giới, MCP, `Log`, cờ dev, hiển thị phiên bản, bản địa hóa, font, build và deploy); NFR2, NFR4 (đo lần đầu).
 
 ### E1: Bàn cờ và di chuyển
-Tác giả mở trận 1 từ file dữ liệu, chọn tướng, đi, hủy nước đi, kết thúc lượt; tự sửa file trận rồi bấm F5 thì thấy thay đổi; bàn cờ vẽ nhìn chếch, ô vuông (hình khối tạm).
+Tác giả mở trận 1 từ file dữ liệu, chọn tướng, đi, hủy nước đi, kết thúc lượt; tự sửa file trận rồi bấm F5 thì thấy thay đổi; bàn cờ vẽ nhìn chếch, ô vuông (hình khối tạm); mỗi trận có cỡ bàn riêng.
 **Phủ:** FR1–FR7, FR9–FR11, FR43 (bố cục trận 1). Công cụ dev F1, F5, `?tran=N`.
 
 ### E2: Combat cốt lõi ⚠️ rủi ro cao nhất
@@ -544,6 +544,34 @@ _Thêm 2026-10-19: tác giả đổi hướng hình ảnh (xem decision-log, ả
 **Và** `tools/test.sh` xanh; test đổi ô ↔ điểm cập nhật theo bàn mới (đi rồi về đúng ô, điểm sát mép rơi đúng ô, bấm vào thân quân chọn đúng quân)
 **Và** bản web trên itch.io chạy mượt như trước
 **Và** không sửa gì trong `src/core/`, dữ liệu trận và kịch bản luật
+
+### Story 1.9: Cỡ bàn theo file trận
+
+Là tác giả,
+tôi muốn mỗi trận có cỡ bàn riêng theo quy mô của trận đánh thật,
+để trận phục kích nhỏ và trận Bạch Đằng lớn không phải chung một bàn 7×7.
+
+_Thêm 2026-10-20 theo `sprint-change-proposal-2026-10-20-co-ban.md`. Làm ngay sau Story 1.8, trước Story 2.4. Có thể cắt: nếu cắt thì giữ bàn 7×7._
+
+**Tiêu chí nghiệm thu:**
+
+**Cho** trận thử `thu_co_nho.json` cỡ 5×5 và trận thử `thu_co_lon.json` cỡ 10×8 (chỉ mở được khi bật dev)
+**Khi** mở từng trận
+**Thì** bàn hiện đúng số cột và số hàng như trong file, nằm gọn trong cửa sổ, không đè lên HUD
+**Và** mỗi ô hiện 64 px; nếu phải thu nhỏ thì thu theo bậc nguyên, hình không bị nhòe
+**Và** trận 1 và mọi trận thử 7×7 cũ hiện y như trước
+
+**Khi** sửa một file trận để có một trong các lỗi sau: một dòng thiếu ký hiệu, lớp `quan` khác cỡ với lớp `dia_hinh`, bàn 11×8
+**Thì** game báo lỗi tiếng Việt, ghi rõ file, dòng và cỡ đọc được
+
+**Khi** ở trận 10×8, lần lượt chọn tướng, đi, đánh đẩy quân vào mép bàn, rồi bấm F1
+**Thì** ô sáng, đường đi, viền mục tiêu, va chạm mép bàn và tọa độ F1 đều đúng, kể cả ở cột 9 và hàng 7
+**Và** bấm vào bất kỳ ô nào (thử cả các góc và mép) thì game chọn đúng ô đó
+
+**Và** viết được kịch bản luật trên bàn khác 7×7; có ít nhất một kịch bản về mép bàn trên bàn 5×6
+**Và** `tools/test.sh` xanh; test không còn lặp cứng `range(7)` mà lặp theo cỡ bàn của trận thử
+**Và** mục "tràn dưới HUD" trong `deferred-work.md` được đánh dấu xong ở Story 1.9
+**Và** không sửa luật trong `src/core/`, ngoài việc đọc cỡ bàn từ `level.size`
 
 ## Epic 2: Combat cốt lõi ⚠️
 

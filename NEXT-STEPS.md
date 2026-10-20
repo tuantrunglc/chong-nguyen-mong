@@ -1,6 +1,6 @@
 # Ghi chú làm tiếp: Chống Nguyên Mông (tên tạm)
 
-Cập nhật lần cuối: 2026-10-17
+Cập nhật lần cuối: 2026-10-20
 
 ## Đang ở đâu
 
@@ -25,7 +25,7 @@ Cập nhật lần cuối: 2026-10-17
   3. Tôn trọng lịch sử
   4. Nhỏ mà xong
 - **Combat:**
-  - Bàn 7×7.
+  - Mỗi trận một cỡ bàn theo quy mô trận thật, từ 5×5 đến 10 cột × 8 hàng (đổi 2026-10-20, Story 1.9).
   - Địch báo trước đòn đánh. Đòn đánh vào **ô** chứ không đánh vào người.
   - Địa hình: sông, rừng, hầm chông, kho lương.
   - Mưu kế: Sát Thát, Vườn không nhà trống.
@@ -75,6 +75,10 @@ Không nhớ đang ở bước nào thì chạy `/bmad-help`.
 - Toàn bộ quyết định và lý do nằm trong `decision-log.md` của GDD và `.decision-log.md` của brief.
 - **Phạm Ngũ Lão không có tên trong *Toàn thư* các năm 1287–1288.** Thông tin về ông lấy theo *Việt Nam sử lược*, nên trong game phải ghi chú nguồn.
 - Chưa rõ Nghị định 147/2024 có áp dụng cho bản web miễn phí hay không. Cần tìm hiểu trước khi phát hành công khai.
+- **Thay đổi 2026-10-20** (`sprint-change-proposal-2026-10-20-co-ban.md`):
+  - Mỗi trận có cỡ bàn riêng. Thêm **Story 1.9**, làm sau Story 1.8, trước Story 2.4.
+  - Tranh E8 dùng ô 64×64 px.
+  - Bộ hình Phạm Ngũ Lão do AI vẽ (`img/`, chưa commit) là bản nháp, cần sửa tay và kiểm tra quyền dùng thương mại của PixelLab.
 - **Tên game đã chốt: "Hào Khí Đông A"** (2026-10-17). Repo vẫn tên `chong-nguyen-mong`.
 - **Còn treo, tác giả chưa quyết:** công cụ giải thử (để sau E4); có công khai bản web hay không (mặc định riêng tư).
 - Các luật gắn **[MẶC ĐỊNH]** trong GDD sẽ được duyệt qua kịch bản luật ở từng story.

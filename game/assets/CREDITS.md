@@ -24,6 +24,7 @@ Trước khi phát hành, phần ghi công trong game (màn hình chính) lấy 
 | Hạng mục (mã trong danh sách E8) | File | Nguồn (link) | Tác giả | Giấy phép | AI | Sửa gì | Đã đối chiếu lịch sử | Ngày thêm |
 |---|---|---|---|---|---|---|---|---|
 | _ví dụ: A1 Đất trống_ | _`assets/tiles/dat.png`_ | _link gói_ | _tên_ | _CC0_ | _Không_ | _đổi màu theo bảng Endesga 32_ | _Không cần_ | _2026-xx-xx_ |
+| B2 Phạm Ngũ Lão (nháp, chưa đưa vào game) | `img/Pham_Ngu_Lao_muscular_13th/` | PixelLab | tác giả tạo bằng AI | theo điều khoản PixelLab (cần kiểm tra quyền dùng thương mại) | Có: PixelLab, chưa sửa | chưa sửa | Chưa | 2026-10-19 |
 
 ## Âm thanh và nhạc
 

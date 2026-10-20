@@ -5,8 +5,8 @@ Lập 2026-10-19. Dùng khi làm E8 (Hình ảnh & âm thanh). Danh sách âm th
 ## Thông số chung (chốt trước khi vẽ hoặc tải)
 
 - **Góc nhìn:** pixel art nhìn chếch từ trên xuống, ô vuông (GDD, Art Style; ảnh mẫu ở thư mục này).
-- **Ô:** 32×32 px, phóng to ×2 hoặc ×3 lúc hiện. Godot đặt lọc `Nearest` để không nhòe.
-- **Vật đứng** (quân, khối nhô lên): khung rộng 32 px, cao tới 48 px; chân hoặc đáy nằm trong 32 px dưới cùng, phần trên được phép che ô phía trên.
+- **Ô:** **64×64 px**, hiện đúng tỉ lệ 1:1 (chốt 2026-10-20, thay cho 32×32). Godot đặt lọc `Nearest` để không nhòe.
+- **Vật đứng** (quân, khối nhô lên): khung **64×64**. Chân hoặc đáy nằm trong ô; phần trên được phép che ô phía trên. Vũ khí dài không được thò quá nửa ô sang hai bên.
 - **Bảng màu:** một bảng duy nhất từ lospec.com (đề xuất Endesga 32 hoặc Resurrect 64). Mọi hình, kể cả hình tải về và hình AI, đều đổi về bảng này.
 - **Không có chữ trong hình.** Chữ (tên, số máu, nút) để game hiện bằng font.
 - **Ô đỏ báo đòn, số thứ tự ra đòn, ô sáng, đường đi:** giữ vẽ bằng code để luôn nổi bật nhất (NFR9). Tranh địa hình phải dùng màu dịu, không dùng đỏ tươi.
@@ -24,13 +24,13 @@ Nguồn đề xuất: gói CC0 (ví dụ "Ninja Adventure", Kenney), đổi màu
 
 | # | Ô | Ký hiệu | Kích thước | Biến thể, trạng thái | Ghi chú |
 |---|---|---|---|---|---|
-| A1 | Đất trống | `.` | 32×32 | 3–4 biến thể (cỏ, đất, cỏ lẫn đất) | Màu dịu, lặp không lộ |
-| A2 | Sông | `~` | 32×32 | nước + bộ bờ (4 cạnh, 4 góc ngoài, 4 góc trong) | Thấp hơn mặt đất, thấy bờ ở cạnh trên |
-| A3 | Rừng | `#` | 32×48 | 2 biến thể | Khối nhô lên, chặn đi và chặn đòn |
-| A4 | Hầm chông | `^` | 32×32 | 1 | Phẳng, nhìn ra là bẫy nhưng không nổi hơn ô đỏ |
-| A5 | Kho lương | `L` | 32×48 | còn / đã đốt (tro, thành ô trống) | Đốt bởi *Vườn không nhà trống* |
-| A6 | Làng | `D` | 32×48 | 2 biến thể; trạng thái bị trúng (khói) | Nhà tranh Đại Việt, không dùng nhà kiểu Nhật |
-| A7 | Ô ải | `A` | 32×40 | 1 | Bệ đá thấp (chốt ở Story 1.7) |
+| A1 | Đất trống | `.` | 64×64 | 3–4 biến thể (cỏ, đất, cỏ lẫn đất) | Màu dịu, lặp không lộ |
+| A2 | Sông | `~` | 64×64 | nước + bộ bờ (4 cạnh, 4 góc ngoài, 4 góc trong) | Thấp hơn mặt đất, thấy bờ ở cạnh trên |
+| A3 | Rừng | `#` | 64×64 | 2 biến thể | Khối nhô lên, chặn đi và chặn đòn |
+| A4 | Hầm chông | `^` | 64×64 | 1 | Phẳng, nhìn ra là bẫy nhưng không nổi hơn ô đỏ |
+| A5 | Kho lương | `L` | 64×64 | còn / đã đốt (tro, thành ô trống) | Đốt bởi *Vườn không nhà trống* |
+| A6 | Làng | `D` | 64×64 | 2 biến thể; trạng thái bị trúng (khói) | Nhà tranh Đại Việt, không dùng nhà kiểu Nhật |
+| A7 | Ô ải | `A` | 64×64 | 1 | Bệ đá thấp (chốt ở Story 1.7) |
 | A8 | Nền quanh bàn | — | tùy | rừng, nước, đá | Trang trí, tối hơn bàn để bàn nổi lên |
 
 ## B. Quân (P1 hình đứng, P2 chuyển động)
@@ -40,13 +40,13 @@ Nguồn đề xuất: PixelLab hoặc AI vẽ nháp, rồi **sửa tay** theo t�
 | # | Quân | Phe | Vũ khí, dấu nhận diện | Lưu ý lịch sử |
 |---|---|---|---|---|
 | B1 | Nguyễn Khoái | Đại Việt | đòn đánh đẩy lùi | Đối chiếu trang phục tướng thời Trần |
-| B2 | Phạm Ngũ Lão | Đại Việt | giáo, lao (phóng xa) | Giai thoại cầm giáo ngồi đan sọt |
+| B2 | Phạm Ngũ Lão | Đại Việt | giáo, lao (phóng xa) | Giai thoại cầm giáo ngồi đan sọt  Bản nháp AI: `img/Pham_Ngu_Lao_muscular_13th/` (PixelLab, 64×64, 8 hướng, chỉ có tư thế đứng). Cần: đổi về bảng màu chung; kiểm tra áo choàng đỏ ở hướng đông và tây (prompt không yêu cầu); đối chiếu giáp sơn đen và khăn đỏ với tư liệu; xem lại ngọn giáo cầm ngang (61 px, thò sang ô bên cạnh). |
 | B3 | Trần Khánh Dư | Đại Việt | đòn kéo (vũ khí chốt khi vẽ) | Tôn thất nhà Trần |
 | B4 | Bộ binh | Nguyên | đao, khiên | Giáp da phiến, mũ lông |
 | B5 | Kỵ binh | Nguyên | ngựa thảo nguyên nhỏ, giáo | Xung phong theo hàng |
 | B6 | Cung kỵ | Nguyên | cung ngắn trên ngựa | |
 
-Mỗi quân cần (khung 32×48, hai phe tách màu rõ: Đại Việt và Nguyên):
+Mỗi quân cần (khung 64×64, hai phe tách màu rõ: Đại Việt và Nguyên):
 
 | Trạng thái | Ưu tiên | Số khung gợi ý | Ghi chú |
 |---|---|---|---|
@@ -105,7 +105,7 @@ Mỗi quân cần (khung 32×48, hai phe tách màu rõ: Đại Việt và Nguy�
 
 ## Kiểm tra trước khi đưa một hình vào game
 
-1. Đúng kích thước, đúng lưới 32 px, không có điểm ảnh nhòe.
+1. Đúng kích thước, đúng lưới 64 px, không có điểm ảnh nhòe.
 2. Chỉ dùng màu trong bảng màu chung.
 3. Trang phục, vũ khí, cờ đã đối chiếu tư liệu thời Trần. Không có chữ quốc ngữ trên cờ; nếu cần chữ thì dùng chữ Hán (ví dụ 陳).
 4. Không có chữ do AI vẽ.

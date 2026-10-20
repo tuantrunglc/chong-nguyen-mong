@@ -132,7 +132,15 @@ Không có thao tác kéo thả. Mọi thao tác đều là bấm, nên sau này
 
 ## Turn-Based Tactics Specific Design
 ### Grid System and Movement
-- **Lưới:** ô vuông, **7×7** (cho prototype; các trận về sau có thể khác kích thước).
+- **Lưới:** ô vuông. **Mỗi trận một cỡ bàn**, chọn theo quy mô của trận đánh thật, có thể không vuông. Nhỏ nhất **5×5**, lớn nhất **10 cột × 8 hàng** (để ô 64 px vừa màn hình 1280×720). Chốt 2026-10-20.
+- **Quy mô trận** thể hiện qua ba yếu tố cùng lúc: cỡ bàn, số quân Nguyên, lượng tiếp viện. Bên người chơi vẫn chỉ có tối đa 3 tướng.
+
+  | Quy mô | Cỡ bàn (cột × hàng) | Quân Nguyên khởi đầu | Dùng cho |
+  |---|---|---|---|
+  | Nhỏ: đụng độ, phục kích | 5×5 – 6×6 | 2–4 | Trận dạy chơi, phục kích |
+  | Hẹp: ải, đèo | khoảng 5×8 hoặc 6×7 | 3–5 + tiếp viện | Giữ ải; quân Nguyên dồn vào lối hẹp |
+  | Vừa: trận thường | 7×7 – 8×8 | 4–6 | Phần lớn các trận |
+  | Lớn: trận then chốt | đến 10×8 | 6–9 + tiếp viện | Vạn Kiếp, Bạch Đằng |
 - **Di chuyển:** 4 hướng, không đi chéo. Khoảng cách tính bằng số ô (Manhattan).
 - **Tầm đi:** tướng **3 ô**, quân Nguyên **2–3 ô** tùy loại (xem Unit Types).
 - **Chi phí địa hình:** không có. Mỗi ô hoặc đi được, hoặc bị chặn. Địa hình tác động bằng *hiệu ứng*, không bằng chi phí di chuyển.
@@ -235,14 +243,16 @@ AI phải tất định và đọc được: người chơi đoán được quâ
 
 **Prototype: chuỗi 6 trận cố định, làm tay.** Mỗi trận dạy một luật mới. (Thêm trận 4 "Bảo vệ làng" ngày 2026-10-18; trận Giữ ải cũ thành trận 5–6.)
 
-| Trận | Kiểu | Luật được dạy | Quân Nguyên | Địa hình chính |
-|---|---|---|---|---|
-| 1 | Tiêu diệt | Né ô đỏ, đẩy địch xuống sông | 3 Bộ binh | Sông |
-| 2 | Tiêu diệt | Kỵ binh xung phong, dùng rừng chặn đường, địch đánh trúng nhau | 2 Kỵ binh, 1 Bộ binh | Rừng, sông |
-| 3 | Tiêu diệt | Trần Khánh Dư ra trận: đòn kéo, hầm chông; **giới hạn hiệp** | 2 Bộ binh, 2 Cung kỵ | Hầm chông, rừng |
-| 4 | Tiêu diệt | **Bảo vệ làng**: làng và Lòng dân (vẫn có giới hạn hiệp) | Chốt khi thiết kế trận (gợi ý 2 Bộ binh, 1 Kỵ binh, 1 Cung kỵ) | Làng, sông, rừng |
-| 5 | Giữ ải | Kho lương, *Vườn không nhà trống*, quân tiếp viện | 4 quân khởi đầu, +1 mỗi hiệp | Kho lương, sông |
-| 6 | Giữ ải | Tổng hợp mọi luật, *Sát Thát* | 5 quân khởi đầu, +1–2 mỗi hiệp | Đủ các loại |
+| Trận | Kiểu | Luật được dạy | Quân Nguyên | Địa hình chính | Cỡ (gợi ý) | Sự kiện thật (gợi ý) |
+|---|---|---|---|---|---|---|
+| 1 | Tiêu diệt | Né ô đỏ, đẩy địch xuống sông | 3 Bộ binh | Sông | 7×6 | Cửa Đại Than |
+| 2 | Tiêu diệt | Kỵ binh xung phong, dùng rừng chặn đường, địch đánh trúng nhau | 2 Kỵ binh, 1 Bộ binh | Rừng, sông | 6×7 | Ải Lãnh Kinh |
+| 3 | Tiêu diệt | Trần Khánh Dư ra trận: đòn kéo, hầm chông; **giới hạn hiệp** | 2 Bộ binh, 2 Cung kỵ | Hầm chông, rừng | 6×6 | Phục kích ở ải Nội Bàng (theo *Việt Nam sử lược*) |
+| 4 | Tiêu diệt | **Bảo vệ làng**: làng và Lòng dân (vẫn có giới hạn hiệp) | Chốt khi thiết kế trận (gợi ý 2 Bộ binh, 1 Kỵ binh, 1 Cung kỵ) | Làng, sông, rừng | 7×7 | Làng quanh Vạn Kiếp |
+| 5 | Giữ ải | Kho lương, *Vườn không nhà trống*, quân tiếp viện | 4 quân khởi đầu, +1 mỗi hiệp | Kho lương, sông | 8×8 | Thăng Long bỏ ngỏ |
+| 6 | Giữ ải | Tổng hợp mọi luật, *Sát Thát* | 5 quân khởi đầu, +1–2 mỗi hiệp | Đủ các loại | 10×8 | Phục binh hai bờ Bạch Đằng |
+
+- **Cỡ bàn và sự kiện thật** chỉ là gợi ý, chốt khi thiết kế từng trận. Xem `history-notes-1288.md`. Thêm 2026-10-20.
 
 - **Tướng ra trận theo nhịp dạy chơi:** trận 1–2 chỉ có Nguyễn Khoái và Phạm Ngũ Lão; Trần Khánh Dư ra trận từ trận 3. File trận quy định tướng nào có mặt. Chốt 2026-10-17.
 - **Trận 1–2 là phần hướng dẫn:** dễ, không giới hạn hiệp, không có làng. Luật mới của mỗi trận được giới thiệu bằng dòng gợi ý đầu trận. Giới hạn hiệp có từ trận 3, làng từ trận 4; số hiệp cụ thể chốt khi thiết kế từng trận. Chốt 2026-10-18.
@@ -305,8 +315,8 @@ Thứ người chơi tiến bộ chủ yếu là **kỹ năng đọc bàn cờ**
 
 ### Level Progression
 **Quy tắc thiết kế mỗi trận:**
-- Bàn 7×7.
-- 3–6 quân Nguyên khởi đầu.
+- Cỡ bàn theo bảng quy mô (Grid System), từ 5×5 đến 10×8.
+- 3–6 quân Nguyên khởi đầu là mức của trận nhỏ và trận vừa. Trận lớn có thể nhiều hơn.
 - Ít nhất **một cách thắng không mất tướng nào** (trận có làng: và không mất Lòng dân), do người thiết kế tự tìm ra và kiểm tra.
 - Mỗi trận chỉ giới thiệu tối đa **một** luật mới.
 - Trận thứ *n* dùng lại các luật của những trận trước.
@@ -326,7 +336,7 @@ Thứ người chơi tiến bộ chủ yếu là **kỹ năng đọc bàn cờ**
 ### Art Style
 - **Bàn cờ và quân cờ** (tạm thời): theo phong cách cờ tướng. Mỗi quân là một đồng tròn khắc chữ hoặc biểu tượng, đặt trên nền bản đồ cổ. Tác giả tự làm được bằng code và font chữ.
   [HOÃN SANG E8] Prototype dùng chữ hoặc biểu tượng đơn giản (chốt 2026-10-16). Ở E8 thử viền sơn mài, hoặc đặt hình bóng tướng lên đồng tròn.
-- **Góc nhìn** (chốt 2026-10-19, thay bàn isometric của Story 1.7): **pixel art nhìn chếch từ trên xuống, ô vuông**. Ô `0,0` ở góc trên bên trái, hướng Bắc ở phía trên, đúng như file trận. Vật nhô lên (rừng, kho lương, làng, ô ải, quân) thấy được mặt trước và che một phần ô phía trên. Làm sớm ở **Story 1.8** bằng hình khối và màu tạm; quân vẫn là đồng tròn khắc chữ. [HOÃN SANG E8] thay bằng tranh pixel art (ô là bội số của 16 px, phóng to bằng lọc Nearest để không nhòe). Ảnh mẫu không khí: `_bmad-output/planning-artifacts/art-reference/`. Lý do đổi: tác giả thích kiểu này; rẻ hơn isometric (dễ vẽ, dễ tìm bộ hình sẵn, tọa độ màn hình trùng với file trận). Không làm 3D thật.
+- **Góc nhìn** (chốt 2026-10-19, thay bàn isometric của Story 1.7): **pixel art nhìn chếch từ trên xuống, ô vuông**. Ô `0,0` ở góc trên bên trái, hướng Bắc ở phía trên, đúng như file trận. Vật nhô lên (rừng, kho lương, làng, ô ải, quân) thấy được mặt trước và che một phần ô phía trên. Làm sớm ở **Story 1.8** bằng hình khối và màu tạm; quân vẫn là đồng tròn khắc chữ. [HOÃN SANG E8] thay bằng tranh pixel art (ô **64×64 px**, quân nằm trong khung 64×64, hiện đúng tỉ lệ 1:1, lọc Nearest; chốt 2026-10-20). Ảnh mẫu không khí: `_bmad-output/planning-artifacts/art-reference/`. Lý do đổi: tác giả thích kiểu này; rẻ hơn isometric (dễ vẽ, dễ tìm bộ hình sẵn, tọa độ màn hình trùng với file trận). Không làm 3D thật.
 - **Ô đỏ báo đòn** phải nổi bật nhất trên màn hình. Thứ tự ra đòn hiện bằng số lớn.
 - **Tranh minh họa giữa các trận và cảnh Bạch Đằng:** phong cách sơn mài hoặc Đông Hồ. Thuê vẽ 1–3 bức chủ đạo ở giai đoạn 1.
 - **Chính sách AI:**
@@ -343,7 +353,7 @@ Thứ người chơi tiến bộ chủ yếu là **kỹ năng đọc bàn cờ**
 ## Technical Specifications
 
 ### Performance Requirements
-- Chạy **60 FPS** ổn định trên trình duyệt desktop, đo trên laptop văn phòng có card đồ họa tích hợp, trong suốt một trận 7×7.
+- Chạy **60 FPS** ổn định trên trình duyệt desktop, đo trên laptop văn phòng có card đồ họa tích hợp, trong suốt một trận 10×8 (cỡ lớn nhất).
 - File tải về **≤ 50MB**.
 - Từ lúc mở link đến màn hình chính **≤ 10 giây** với mạng 20Mbps.
 - Hoạt ảnh một pha địch ra đòn **≤ 3 giây**. Có nút tua nhanh.

@@ -1,5 +1,5 @@
 # generated: 2026-10-17 10:21
-# last_updated: 2026-10-19
+# last_updated: 2026-10-20
 # project: GameTest
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-10-17 10:21"
-last_updated: 2026-10-19
+last_updated: 2026-10-20
 project: GameTest
 project_key: NOKEY
 tracking_system: file-system
@@ -59,6 +59,7 @@ development_status:
   1-6-f5-nap-lai-du-lieu: done
   1-7-ban-co-nghieng-isometric-tam: done
   1-8-ban-co-nhin-chech-o-vuong: backlog  # làm ngay sau 2-3, trước 2-4
+  1-9-co-ban-theo-file-tran: backlog  # làm ngay sau 1-8, trước 2-4
   epic-1-retrospective: optional
   epic-2: in-progress
   2-1-nguyen-khoai-danh-day-va-va-cham: done
