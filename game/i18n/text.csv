@@ -50,7 +50,7 @@ scenario.viewer.reject_nothing_to_undo,không còn nước đi nào để hủy
 scenario.viewer.reject_already_attacked,tướng đã đánh rồi trong lượt này
 scenario.viewer.reject_not_adjacent,ô đó không kề tướng
 scenario.viewer.reject_no_target,ô đó không có quân Nguyên đánh được
-scenario.viewer.reject_not_in_range,ô đó không thẳng hàng hoặc ngoài tầm lao
+scenario.viewer.reject_not_in_range,ô đó không thẳng hàng hoặc ngoài tầm đánh
 scenario.viewer.after_state,Sau lệnh: %s
 scenario.viewer.after_round,hiệp %d
 scenario.viewer.after_moved,đã đi: %s

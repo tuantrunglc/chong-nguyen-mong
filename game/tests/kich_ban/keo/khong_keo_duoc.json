@@ -1,0 +1,55 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Dư không kéo được: ô kề, ô chéo, ô cách 4, ô trống, tướng mình, quân đứng sau tướng mình, Bộ binh đứng sau Bộ binh khác.",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      "B 3 . 2 B B .",
+      ". . K . . . .",
+      ". B . . . . .",
+      ". B . . . . ."
+    ]
+  },
+  "hanh_dong": [
+    { "lenh": "danh", "tuong": "3", "o": "0,3", "tu_choi": "ngoai_tam" },
+    { "lenh": "danh", "tuong": "3", "o": "2,4", "tu_choi": "ngoai_tam" },
+    { "lenh": "danh", "tuong": "3", "o": "5,3", "tu_choi": "ngoai_tam" },
+    { "lenh": "danh", "tuong": "3", "o": "1,1", "tu_choi": "khong_co_dich" },
+    { "lenh": "danh", "tuong": "3", "o": "3,3", "tu_choi": "khong_co_dich" },
+    { "lenh": "danh", "tuong": "3", "o": "4,3", "tu_choi": "khong_co_dich" },
+    { "lenh": "danh", "tuong": "3", "o": "1,6", "tu_choi": "khong_co_dich" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      "B 3 . 2 B B .",
+      ". . K . . . .",
+      ". B . . . . .",
+      ". B . . . . ."
+    ],
+    "da_danh": []
+  }
+}

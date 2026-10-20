@@ -43,14 +43,14 @@ _Story luật thứ tư của E2, đòn thứ ba (đòn cuối của ba tướng
 
 - [x] **Task 0: Tác giả chốt 3 câu hỏi** ở "Quyết định của tác giả" (2026-10-20, cả 3 câu chọn phương án (a)).
 - [ ] **Task 1: Khung, đợt kịch bản 6, dừng chờ duyệt** (AC: 1, 2)
-  - [ ] 1.1 Khung (không phải code luật, làm trước để file kịch bản nạp được):
+  - [x] 1.1 Khung (không phải code luật, làm trước để file kịch bản nạp được):
     - `src/core/battle_event.gd`: thêm `PULL` vào **cuối** enum `Cause` (`WALK, STRIKE, PUSH, COLLISION, PULL`); sửa chú thích đầu enum. Kiểm mọi chỗ duyệt hay `match` trên `Cause` (`grep -rn "Cause" game/src game/tests`): chữ mô tả sự kiện của `BoardFixture.describe` và công cụ duyệt phải ra `PULL` hợp lý.
     - `i18n/text.csv`: `scenario.viewer.reject_not_in_range` đổi thành `ô đó không thẳng hàng hoặc ngoài tầm đánh`. Chỉ là chữ công cụ duyệt, không đổi file kịch bản nào. `scenario.viewer.reject_no_target` giữ `ô đó không có quân Nguyên đánh được` (đã đúng cho kéo). Nếu `text.vi.translation` sinh từ csv thì sinh lại (xem Story 2.3: file đó phải vào File List).
     - Bộ nạp kịch bản (`src/data/scenario_loader.gd`, `COMMAND_REJECTS["danh"]`) đã nhận `ngoai_tam`, `khong_co_dich`: **không** thêm mã từ chối mới.
     - `tests/test_scenario_loader.gd`: không cần thêm ca (không có mã mới); nếu có test liệt kê nguyên nhân sự kiện thì thêm `PULL`.
-  - [ ] 1.2 Viết 7 file đúng như Dev Notes "Đợt kịch bản 6", `"da_duyet": false`, thư mục mới `tests/kich_ban/keo/`. Không đụng 37 kịch bản đã duyệt.
-  - [ ] 1.3 `tools/xem_kich_ban.sh keo`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `tu_choi` của #6 hiện đúng câu tiếng Việt. `tools/test.sh`: xanh, `37 đã duyệt · 7 chưa duyệt (7 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
-  - [ ] 1.4 Commit: `Kịch bản Trần Khánh Dư kéo chờ duyệt (Story 2.4)`.
+  - [x] 1.2 Viết 7 file đúng như Dev Notes "Đợt kịch bản 6", `"da_duyet": false`, thư mục mới `tests/kich_ban/keo/`. Không đụng 37 kịch bản đã duyệt.
+  - [x] 1.3 `tools/xem_kich_ban.sh keo`: đọc lại từng bàn trước/sau, khớp `mo_ta`; dòng `tu_choi` của #6 hiện đúng câu tiếng Việt. `tools/test.sh`: xanh, `37 đã duyệt · 7 chưa duyệt (7 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
+  - [x] 1.4 Commit: `Kịch bản Trần Khánh Dư kéo chờ duyệt (Story 2.4)`.
   - [ ] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh keo`, đọc 7 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ ba điều:
     - #2 (cách 2 ô) và #4 (quân kề) thể hiện hai câu trả lời của "Quyết định của tác giả";
     - trước Story 3.1, rừng, kho lương, làng nằm giữa đường kéo **không** chặn việc chọn mục tiêu (chưa có kịch bản nào có rừng trên đường kéo, vì 3.1 sẽ đổi luật này);
@@ -360,6 +360,9 @@ _Ba câu dưới đây là chỗ GDD và epics chưa nói rõ. Tác giả chốt
 ### Agent Model Used
 
 ### Debug Log References
+
+- Task 1.3: `tools/test.sh` xanh, `37 đã duyệt · 7 chưa duyệt (7 chưa đạt)`, 427/427 test. Lý do chưa đạt của 7 kịch bản khớp đúng bảng "Lý do chưa đạt" (#1, #2, #3, #7: bước 1 thiếu `tu_choi`; #4, #6: bước 1 `ngoai_tam` ≠ `khong_co_dich`; #5: bước 2).
+- Task 1.1: không cần sửa `scenario_loader.gd`, `scenario_runner.gd` (không có mã từ chối mới). `text.vi.translation` được Godot sinh lại sau khi sửa `text.csv`, vào File List.
 
 ### Completion Notes List
 
