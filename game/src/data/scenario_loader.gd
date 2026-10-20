@@ -3,6 +3,10 @@ extends RefCounted
 ## Nạp kịch bản luật (tests/kich_ban/<nhóm>/*.json) thành ScenarioData. Gom mọi lỗi rồi mới trả;
 ## không ghi log (bên gọi ghi). Định dạng và câu lỗi: Story 1.3, mục "Định dạng kịch bản".
 ## Thứ tự lỗi: file/JSON -> phien_ban, mo_ta, da_duyet -> truoc -> hanh_dong -> sau.
+## Cỡ bàn suy ra từ truoc.dia_hinh (như file trận); các lớp khác phải cùng cỡ (Story 1.9).
+
+## Lớp quyết cỡ bàn, in trong câu lỗi của các lớp khác cỡ.
+const SIZE_LAYER: String = "truoc.dia_hinh"
 
 const FORMAT_VERSION: int = 1
 
@@ -46,6 +50,8 @@ const COMMAND_REJECTS: Dictionary = {
 class Section:
 	extends RefCounted
 
+	## Cỡ bàn (của truoc.dia_hinh); NO_SIZE nếu không đọc được.
+	var size: Vector2i = BoardLayers.NO_SIZE
 	var terrain_rows: Array = []
 	var unit_rows: Array = []
 	var units_clean: bool = false
@@ -108,12 +114,13 @@ static func parse_scenario(text: String, path: String, root_dir: String, stats: 
 	var before: Section = null
 	var before_section: Variant = _read_section(root, "truoc", file, result)
 	if before_section != null:
-		before = _read_side(before_section as Dictionary, "truoc", BEFORE_KEYS, stats, file, result)
-	var steps: Array[ScenarioData.ScenarioStep] = _read_steps(root, before, file, result)
+		before = _read_side(before_section as Dictionary, "truoc", BEFORE_KEYS, stats, BoardLayers.NO_SIZE, file, result)
+	var size: Vector2i = before.size if before != null else BoardLayers.NO_SIZE
+	var steps: Array[ScenarioData.ScenarioStep] = _read_steps(root, before, size, file, result)
 	var after: Section = null
 	var after_section: Variant = _read_section(root, "sau", file, result)
 	if after_section != null:
-		after = _read_side(after_section as Dictionary, "sau", AFTER_KEYS, stats, file, result)
+		after = _read_side(after_section as Dictionary, "sau", AFTER_KEYS, stats, size, file, result)
 
 	if not result.ok:
 		return result
@@ -194,14 +201,18 @@ static func _read_section(root: Dictionary, key: String, file: String, result: L
 	return root[key]
 
 
-static func _read_side(section: Dictionary, name: String, known: Array[String], stats: Stats,
+## size: cỡ bàn đã biết (phần "sau"), hoặc NO_SIZE cho phần "truoc" (dia_hinh của nó quyết cỡ).
+static func _read_side(section: Dictionary, name: String, known: Array[String], stats: Stats, size: Vector2i,
 		file: String, result: LoadResult) -> Section:
 	var side: Section = Section.new()
 	_warn_unknown(section, known, name + ".", file, result)
-	side.terrain_rows = BoardLayers.read_layer(section, "dia_hinh", name + ".dia_hinh",
-		BoardText.TERRAIN_SYMBOLS, file, result)
+	var terrain_shown: String = name + ".dia_hinh"
+	side.terrain_rows = BoardLayers.read_layer(section, "dia_hinh", terrain_shown, BoardText.TERRAIN_SYMBOLS,
+		file, result, size, "" if terrain_shown == SIZE_LAYER else SIZE_LAYER)
+	side.size = BoardLayers.layer_size(side.terrain_rows) if terrain_shown == SIZE_LAYER else size
 	var errors_before_units: int = result.errors.size()
-	side.unit_rows = BoardLayers.read_layer(section, "quan", name + ".quan", BoardText.UNIT_SYMBOLS, file, result)
+	side.unit_rows = BoardLayers.read_layer(section, "quan", name + ".quan", BoardText.UNIT_SYMBOLS, file, result,
+		side.size, SIZE_LAYER)
 	side.units_clean = result.errors.size() == errors_before_units and not side.unit_rows.is_empty()
 	side.generals = BoardLayers.check_unit_cells(side.terrain_rows, side.unit_rows, name + ".quan", file, result)
 	if name == "truoc" and side.units_clean \
@@ -210,7 +221,7 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 	if known.has("thu_tu_dich"):
 		if section.has("thu_tu_dich"):
 			side.order = BoardLayers.read_enemy_order(section, "thu_tu_dich", name + ".thu_tu_dich",
-				side.unit_rows, side.units_clean, file, result)
+				side.unit_rows, side.units_clean, side.size, file, result)
 		elif side.units_clean:
 			side.order = BoardLayers.reading_order(side.unit_rows, BoardLayers.ENEMY_SYMBOLS)
 	if section.has("mau"):
@@ -262,7 +273,7 @@ static func _read_hp(value: Variant, shown: String, side: Section, stats: Stats,
 		result.add_error(JsonFile.type_error(file, shown, "một object", value))
 		return
 	var hp_map: Dictionary = value as Dictionary
-	var board: Rect2i = Rect2i(Vector2i.ZERO, BoardLayers.BOARD_SIZE)
+	var board: Rect2i = Rect2i(Vector2i.ZERO, side.size)
 	var seen: Dictionary = {}  # ô -> khóa đầu tiên trỏ tới ô đó ("0,6" và "00,6" là một ô)
 	for key: Variant in hp_map.keys():
 		var parsed: Variant = BoardText.parse_cell(key as String) if key is String else null
@@ -277,7 +288,7 @@ static func _read_hp(value: Variant, shown: String, side: Section, stats: Stats,
 				% [file, shown, cell_shown, JsonFile.show(seen[cell]), JsonFile.show(key)])
 			continue
 		seen[cell] = key
-		if not board.has_point(cell):
+		if side.size != BoardLayers.NO_SIZE and not board.has_point(cell):
 			result.add_error('%s: "%s" ô %s nằm ngoài bàn' % [file, shown, cell_shown])
 			continue
 		var unit: String = BoardLayers.symbol(side.unit_rows, cell)
@@ -295,7 +306,7 @@ static func _read_hp(value: Variant, shown: String, side: Section, stats: Stats,
 		side.hp[cell] = int(hp)
 
 
-static func _read_steps(root: Dictionary, before: Section, file: String,
+static func _read_steps(root: Dictionary, before: Section, size: Vector2i, file: String,
 		result: LoadResult) -> Array[ScenarioData.ScenarioStep]:
 	var steps: Array[ScenarioData.ScenarioStep] = []
 	if not root.has("hanh_dong"):
@@ -306,14 +317,15 @@ static func _read_steps(root: Dictionary, before: Section, file: String,
 		return steps
 	var items: Array = root["hanh_dong"] as Array
 	for i: int in range(items.size()):
-		var step: Variant = _read_step(items[i], i + 1, before, file, result)
+		var step: Variant = _read_step(items[i], i + 1, before, size, file, result)
 		if step != null:
 			steps.append(step as ScenarioData.ScenarioStep)
 	return steps
 
 
 ## Trả ScenarioStep, hoặc null nếu lệnh sai.
-static func _read_step(item: Variant, number: int, before: Section, file: String, result: LoadResult) -> Variant:
+static func _read_step(item: Variant, number: int, before: Section, size: Vector2i, file: String,
+		result: LoadResult) -> Variant:
 	var where: String = '%s: "hanh_dong" mục %d' % [file, number]
 	if not item is Dictionary:
 		result.add_error("%s phải là một object, đang là %s" % [where, JsonFile.show(item)])
@@ -337,7 +349,7 @@ static func _read_step(item: Variant, number: int, before: Section, file: String
 	if fields.has("tuong"):
 		general = _read_general(d, where, before, result)
 	if fields.has("o"):
-		cell = _read_step_cell(d, where, result)
+		cell = _read_step_cell(d, where, size, result)
 	var reject: String = ""
 	if d.has("tu_choi") and fields.has("tu_choi"):
 		var value: Variant = d["tu_choi"]
@@ -372,13 +384,16 @@ static func _read_general(d: Dictionary, where: String, before: Section, result:
 	return BoardText.UNIT_SYMBOLS[value] as int
 
 
-static func _read_step_cell(d: Dictionary, where: String, result: LoadResult) -> Vector2i:
+## size NO_SIZE (bàn trước không đọc được): chỉ kiểm "o" là tọa độ, không kiểm ngoài bàn.
+static func _read_step_cell(d: Dictionary, where: String, size: Vector2i, result: LoadResult) -> Vector2i:
 	if not d.has("o"):
 		result.add_error('%s: thiếu khóa "o"' % where)
 		return ScenarioData.NO_CELL
 	var value: Variant = d["o"]
 	var parsed: Variant = BoardText.parse_cell(value as String) if value is String else null
-	if parsed == null or not Rect2i(Vector2i.ZERO, BoardLayers.BOARD_SIZE).has_point(parsed as Vector2i):
+	var outside: bool = parsed != null and size != BoardLayers.NO_SIZE \
+		and not Rect2i(Vector2i.ZERO, size).has_point(parsed as Vector2i)
+	if parsed == null or outside:
 		result.add_error('%s: "o" là %s, không phải ô trong bàn' % [where, JsonFile.show(value)])
 		return ScenarioData.NO_CELL
 	return parsed as Vector2i
@@ -390,7 +405,7 @@ static func _build_level(side: Section, name: String) -> LevelData:
 	level.format_version = FORMAT_VERSION
 	level.name = name
 	level.mission = LevelData.Mission.ELIMINATE
-	level.size = BoardLayers.BOARD_SIZE
+	level.size = side.size
 	level.terrain = BoardLayers.terrain_values(side.terrain_rows)
 	for symbol: String in BoardLayers.GENERAL_SYMBOLS:
 		if side.generals.has(symbol):

@@ -3,7 +3,8 @@ extends RefCounted
 ## Dựng BattleState từ bàn cờ chữ cho test luật đánh, đẩy (Story 2.1). Chỉ số tự đặt, không dựa vào
 ## data/chi_so.json (tác giả được sửa): Khoái 3 máu, 2 sát thương, đẩy 1; Bộ binh 3 máu; Kỵ binh 2; Cung kỵ 1.
 
-const EMPTY_ROW: String = ". . . . . . ."
+## Cỡ bàn khi test không chỉ định (bàn 7×7 như trận 1).
+const DEFAULT_SIZE: Vector2i = Vector2i(7, 7)
 
 
 static func stats() -> Stats:
@@ -17,12 +18,14 @@ static func stats() -> Stats:
 	return Stats.new(values)
 
 
-## 7 dòng trống, ô (c, r) thay bằng ký hiệu.
-static func rows(cells: Dictionary) -> Array[String]:
+## Bàn trống cỡ size, ô (c, r) thay bằng ký hiệu.
+static func rows(cells: Dictionary, size: Vector2i = DEFAULT_SIZE) -> Array[String]:
 	var out: Array[String] = []
-	for r: int in range(7):
-		var row: PackedStringArray = BoardText.split_row(EMPTY_ROW)
-		for c: int in range(7):
+	for r: int in range(size.y):
+		var row: PackedStringArray = PackedStringArray()
+		row.resize(size.x)
+		row.fill(".")
+		for c: int in range(size.x):
 			if cells.has(Vector2i(c, r)):
 				row[c] = cells[Vector2i(c, r)] as String
 		out.append(" ".join(row))
@@ -30,17 +33,18 @@ static func rows(cells: Dictionary) -> Array[String]:
 
 
 ## Tướng theo ký hiệu (id 1, 2, 3), quân Nguyên theo thứ tự đọc bàn (id 101, 102…). hp: ô -> máu.
-static func state(units: Dictionary, terrain: Dictionary = {}, hp: Dictionary = {}) -> BattleState:
-	var unit_rows: Array[String] = rows(units)
-	var terrain_rows: Array[String] = rows(terrain)
+static func state(units: Dictionary, terrain: Dictionary = {}, hp: Dictionary = {},
+		size: Vector2i = DEFAULT_SIZE) -> BattleState:
+	var unit_rows: Array[String] = rows(units, size)
+	var terrain_rows: Array[String] = rows(terrain, size)
 	var level: LevelData = LevelData.new()
-	level.size = Vector2i(7, 7)
+	level.size = size
 	var generals: Array[LevelData.UnitPlacement] = []
 	var enemies: Array[LevelData.UnitPlacement] = []
-	for r: int in range(7):
+	for r: int in range(size.y):
 		var terrain_row: PackedStringArray = BoardText.split_row(terrain_rows[r])
 		var unit_row: PackedStringArray = BoardText.split_row(unit_rows[r])
-		for c: int in range(7):
+		for c: int in range(size.x):
 			level.terrain.append(BoardText.TERRAIN_SYMBOLS[terrain_row[c]] as int)
 			var type: int = BoardText.UNIT_SYMBOLS[unit_row[c]] as int
 			if type == BoardText.NO_UNIT:

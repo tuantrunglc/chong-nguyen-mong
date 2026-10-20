@@ -23,15 +23,16 @@ func _stats(move_range: int = 3) -> Stats:
 
 
 ## Dựng state từ hai lớp bàn cờ chữ (ký hiệu như file trận): tướng theo ký hiệu, quân Nguyên theo thứ tự đọc bàn.
+## Cỡ bàn lấy từ lớp quân: số dòng là số hàng, số ô của dòng đầu là số cột.
 func _state(units: Array[String], terrain: Array[String] = EMPTY, stats: Stats = _stats()) -> BattleState:
 	var level: LevelData = LevelData.new()
-	level.size = Vector2i(7, 7)
+	level.size = Vector2i(BoardText.split_row(units[0]).size(), units.size())
 	var generals: Array[LevelData.UnitPlacement] = []
 	var enemies: Array[LevelData.UnitPlacement] = []
-	for r: int in range(7):
+	for r: int in range(level.size.y):
 		var terrain_row: PackedStringArray = BoardText.split_row(terrain[r])
 		var unit_row: PackedStringArray = BoardText.split_row(units[r])
-		for c: int in range(7):
+		for c: int in range(level.size.x):
 			level.terrain.append(BoardText.TERRAIN_SYMBOLS[terrain_row[c]] as int)
 			var type: int = BoardText.UNIT_SYMBOLS[unit_row[c]] as int
 			if type == BoardText.NO_UNIT:
@@ -49,12 +50,12 @@ func _state(units: Array[String], terrain: Array[String] = EMPTY, stats: Stats =
 	return state
 
 
-## 7 dòng trống, ô (c, r) thay bằng ký hiệu.
+## Bàn EMPTY, ô (c, r) thay bằng ký hiệu.
 func _rows(cells: Dictionary) -> Array[String]:
 	var rows: Array[String] = []
-	for r: int in range(7):
+	for r: int in range(EMPTY.size()):
 		var row: PackedStringArray = BoardText.split_row(EMPTY[r])
-		for c: int in range(7):
+		for c: int in range(row.size()):
 			if cells.has(Vector2i(c, r)):
 				row[c] = cells[Vector2i(c, r)] as String
 		rows.append(" ".join(row))
@@ -256,3 +257,14 @@ func test_other_general_still_moves_after_one_moved() -> void:
 	assert_eq(state.unit_by_id(2).cell, Vector2i(1, 3))
 	assert_true(state.unit_by_id(2).has_moved)
 	assert_eq(state.validate(), [] as Array[String])
+
+
+## Bàn 10×8 (Story 1.9): đi từ góc dưới phải tới đủ 3 ô theo hàng và theo cột, không ra ngoài bàn.
+func test_reachable_on_large_board_stays_inside() -> void:
+	var size: Vector2i = Vector2i(10, 8)
+	var state: BattleState = BoardFixture.state({Vector2i(9, 7): "1"}, {}, {}, size)
+	var cells: Array[Vector2i] = _reachable(state)
+	assert_has(cells, Vector2i(9, 4))
+	assert_has(cells, Vector2i(6, 7))
+	for cell: Vector2i in cells:
+		assert_true(Rect2i(Vector2i.ZERO, size).has_point(cell), "ô %s trong bàn" % cell)

@@ -807,3 +807,42 @@ func test_key_of_spent_general_cancels_confirm() -> void:
 	var main: Node2D = _lao_pending_with_spent_khoai()
 	_press_physical(main, KEY_1)
 	_assert_pending_cleared_lao_kept(main)
+
+
+## Bàn 10×8 (Story 1.9, thu_co_lon): đẩy ra ngoài cột 9 rồi ngoài hàng 7, bấm chuột thật; F1 có tọa độ góc cuối.
+func test_large_board_edge_push_and_f1() -> void:
+	AppState.launch.dev = true
+	AppState.launch.tran = "thu_co_lon"
+	var main: Node2D = _make_main()
+	assert_eq(_controller(main).snapshot().size, Vector2i(10, 8))
+	var khoai: Vector2i = Vector2i(8, 4)
+	_click_by_mouse(main, khoai)
+	assert_eq(_view(main).selected_id(), 1, "chọn Khoái")
+	assert_has(_board(main).target_cells(), Vector2i(9, 4), "viền mục tiêu ở cột 9")
+	_click_by_mouse(main, Vector2i(9, 4))
+	assert_null(_unit_at(main, Vector2i(9, 4)), "Bộ binh bị đẩy vào mép phải, gục")
+	assert_true(_unit_at(main, khoai).has_attacked, "Khoái đã đánh")
+	_press_physical(main, KEY_SPACE)
+	_click_by_mouse(main, khoai)
+	assert_has(_board(main).lit_cells(), Vector2i(8, 6))
+	_hover_by_mouse(main, Vector2i(8, 6))
+	assert_eq(_board(main).path(), [Vector2i(8, 5), Vector2i(8, 6)] as Array[Vector2i], "đường đi xuống")
+	_click_by_mouse(main, Vector2i(8, 6))
+	assert_eq(_unit_at(main, Vector2i(8, 6)).id, 1, "Khoái đi tới 8,6")
+	_click_by_mouse(main, Vector2i(8, 7))
+	assert_eq(_board(main).pending_cell(), Vector2i(8, 7), "đã đi nên chờ xác nhận")
+	_click_by_mouse(main, Vector2i(8, 7))
+	assert_null(_unit_at(main, Vector2i(8, 7)), "Bộ binh bị đẩy vào mép dưới, gục")
+	var overlay: CoordOverlay = main._coord_overlay as CoordOverlay
+	assert_has(overlay.texts(), "9,7", "tọa độ ô góc dưới phải")
+	assert_has(overlay.texts(), "0,0")
+	var expected: Vector2 = BoardView.cell_center(Vector2i(8, 6)) \
+		+ Vector2(UnitToken.RADIUS, -UnitToken.TOKEN_LIFT - UnitToken.RADIUS)
+	var found: bool = false
+	for child: Node in overlay.get_children():
+		if child.is_queued_for_deletion() or child.get_child_count() == 0:
+			continue
+		if (child.get_child(0) as Label).text == "1":
+			assert_eq((child as Control).position, expected, "id 1 cạnh đầu đồng Khoái")
+			found = true
+	assert_true(found, "lớp F1 có id 1")

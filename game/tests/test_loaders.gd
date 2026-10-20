@@ -225,7 +225,7 @@ func test_tieu_diet_without_pass_cell_is_allowed() -> void:
 
 func test_giu_ai_pass_cell_not_checked_when_terrain_is_broken() -> void:
 	var d: Dictionary = _with_row(_with(_valid_level(), "kieu", "giu_ai"), "dia_hinh", 3, "^ . . . . .")
-	assert_eq(_level(d).errors, _errors(['"dia_hinh" dòng 4: có 6 ô, cần 7']))
+	assert_eq(_level(d).errors, _errors(['"dia_hinh" dòng 4: có 6 ô, dòng 1 có 7']))
 
 
 func test_no_enemy_is_allowed() -> void:
@@ -326,10 +326,11 @@ func test_layer_wrong_type() -> void:
 		_errors(['"dia_hinh" phải là một danh sách, đang là "abc"']))
 
 
-func test_wrong_row_count() -> void:
+## Bỏ một dòng dia_hinh: bàn 7×6 vẫn hợp lệ (Story 1.9), lỗi là lớp quan khác cỡ.
+func test_unit_layer_row_count_differs_from_terrain() -> void:
 	var d: Dictionary = _valid_level()
 	(d["dia_hinh"] as Array).pop_back()
-	assert_eq(_level(d).errors, _errors(['"dia_hinh" có 6 dòng, cần 7']))
+	assert_eq(_level(d).errors, _errors(['"quan" có 7 dòng, "dia_hinh" có 6']))
 
 
 func test_row_not_string() -> void:
@@ -339,7 +340,89 @@ func test_row_not_string() -> void:
 
 func test_row_wrong_length() -> void:
 	assert_eq(_level(_with_row(_valid_level(), "dia_hinh", 2, ". . ~ . L .")).errors,
-		_errors(['"dia_hinh" dòng 3: có 6 ô, cần 7']))
+		_errors(['"dia_hinh" dòng 3: có 6 ô, dòng 1 có 7']))
+
+
+# ---------- File trận: cỡ bàn (Story 1.9) ----------
+
+## Bàn toàn đất trống cols × rows, Nguyễn Khoái ở góc dưới trái, không có quân Nguyên.
+func _board_level(cols: int, rows: int) -> Dictionary:
+	var terrain: Array = []
+	var units: Array = []
+	for r: int in range(rows):
+		var cells: PackedStringArray = PackedStringArray()
+		cells.resize(cols)
+		cells.fill(".")
+		terrain.append(" ".join(cells))
+		if r == rows - 1:
+			cells[0] = "1"
+		units.append(" ".join(cells))
+	var d: Dictionary = _with(_valid_level(), "dia_hinh", terrain)
+	d["quan"] = units
+	d["thu_tu_dich"] = []
+	return d
+
+
+func test_board_too_wide() -> void:
+	assert_eq(_level(_board_level(11, 8)).errors,
+		_errors(['"dia_hinh": bàn 11 cột × 8 hàng, chỉ được từ 5 đến 10 cột và từ 5 đến 8 hàng']))
+
+
+func test_board_too_small() -> void:
+	assert_eq(_level(_board_level(4, 5)).errors,
+		_errors(['"dia_hinh": bàn 4 cột × 5 hàng, chỉ được từ 5 đến 10 cột và từ 5 đến 8 hàng']))
+
+
+func test_board_too_tall() -> void:
+	assert_eq(_level(_board_level(7, 9)).errors,
+		_errors(['"dia_hinh": bàn 7 cột × 9 hàng, chỉ được từ 5 đến 10 cột và từ 5 đến 8 hàng']))
+
+
+func test_empty_terrain_layer_is_a_size_error() -> void:
+	var d: Dictionary = _with(_board_level(5, 5), "dia_hinh", [])
+	var errors: Array[String] = _level(d).errors
+	assert_has(errors, LEVEL_FILE + ': "dia_hinh": bàn 0 cột × 0 hàng, chỉ được từ 5 đến 10 cột và từ 5 đến 8 hàng')
+
+
+func test_unit_row_wrong_length() -> void:
+	assert_eq(_level(_with_row(_valid_level(), "quan", 1, ". . . . . .")).errors,
+		_errors(['"quan" dòng 2: có 6 ô, "dia_hinh" có 7']))
+
+
+func test_smallest_and_largest_boards_load() -> void:
+	for size: Vector2i in [Vector2i(5, 5), Vector2i(10, 8)]:
+		var r: LoadResult = _level(_board_level(size.x, size.y))
+		assert_eq(r.errors, [] as Array[String], "bàn %s" % size)
+		if r.ok:
+			assert_eq((r.data as LevelData).size, size)
+
+
+func test_non_square_board_loads() -> void:
+	var d: Dictionary = _board_level(6, 7)
+	(d["dia_hinh"] as Array)[6] = ". . . . . ~"
+	var r: LoadResult = _level(d)
+	assert_eq(r.errors, [] as Array[String])
+	if not r.ok:
+		return
+	var level: LevelData = r.data as LevelData
+	assert_eq(level.size, Vector2i(6, 7), "6 cột, 7 hàng")
+	assert_eq(level.terrain_at(Vector2i(5, 6)), Terrain.RIVER, "ô góc dưới phải")
+	assert_eq(level.units[0].cell, Vector2i(0, 6))
+
+
+func test_enemy_order_outside_non_square_board() -> void:
+	var d: Dictionary = _with(_board_level(6, 7), "thu_tu_dich", ["6,0"])
+	assert_eq(_level(d).errors, _errors(['"thu_tu_dich" mục 1: ô 6,0 nằm ngoài bàn']))
+
+
+func test_co_nho_and_co_lon_load() -> void:
+	var sizes: Dictionary = {"thu_co_nho": Vector2i(5, 5), "thu_co_lon": Vector2i(10, 8)}
+	for name: String in sizes:
+		var r: LoadResult = LevelLoader.load_level("res://data/tran/%s.json" % name)
+		assert_eq(r.errors, [] as Array[String], name)
+		assert_eq(r.warnings, [] as Array[String], name)
+		if r.ok:
+			assert_eq((r.data as LevelData).size, sizes[name], name)
 
 
 func test_unknown_terrain_symbol() -> void:

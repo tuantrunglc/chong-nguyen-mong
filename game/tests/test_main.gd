@@ -435,6 +435,36 @@ func test_f1_stays_on_after_reload() -> void:
 	assert_has(main._coord_overlay.texts(), "0,0")
 
 
+## F5 nạp lại trận đã đổi cỡ (Story 1.9): bàn theo cỡ mới, vẫn trong vùng chơi, không còn đồng ngoài bàn.
+func test_f5_reload_follows_new_board_size() -> void:
+	var dir: String = PROBE_DIR + "/tran_co"
+	DirAccess.make_dir_recursive_absolute(dir)
+	var path: String = dir + "/tran_01.json"
+	var source: FileAccess = FileAccess.open("res://data/tran/tran_01.json", FileAccess.READ)
+	var text: String = source.get_as_text()
+	source.close()
+	_write_text(path, text)
+	var main: Node2D = _make_main(dir)
+	var board: BoardView = main._board_view as BoardView
+	assert_eq(Vector2i(board.cols, board.rows), Vector2i(7, 7))
+	source = FileAccess.open("res://data/tran/thu_co_nho.json", FileAccess.READ)
+	_write_text(path, source.get_as_text())
+	source.close()
+	main._start_battle()
+	assert_eq(Vector2i(board.cols, board.rows), Vector2i(5, 5), "bàn theo cỡ mới")
+	assert_true(BoardView.AREA.encloses(board.board_rect()), "vẫn trong vùng chơi")
+	for token: UnitToken in board.tokens().values():
+		assert_true(Rect2i(Vector2i.ZERO, Vector2i(5, 5)).has_point(token.cell), "đồng %s trong bàn" % token.cell)
+	DirAccess.remove_absolute(path)
+	DirAccess.remove_absolute(dir)
+
+
+func _write_text(path: String, text: String) -> void:
+	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
+	file.store_string(text)
+	file.close()
+
+
 func test_no_coordinates_without_dev() -> void:
 	var main: Node2D = _make_main()
 	assert_null(main._coord_overlay)

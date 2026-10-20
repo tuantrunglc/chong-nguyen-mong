@@ -45,9 +45,22 @@ func _make_main(level_dir: String = "") -> Node2D:
 
 
 func _make_three_generals() -> Node2D:
+	return _make_level_main("thu_ba_tuong")
+
+
+## Mở trận thử trong data/tran theo tên (bật dev).
+func _make_level_main(name: String) -> Node2D:
 	AppState.launch.dev = true
-	AppState.launch.tran = "thu_ba_tuong"
+	AppState.launch.tran = name
 	return _make_main()
+
+
+## Bàn của trận 1, thu_ba_tuong, bàn nhỏ 5×5 và bàn lớn 10×8 (Story 1.9).
+func _boards() -> Array[BoardView]:
+	var out: Array[BoardView] = [_board(_make_main())]
+	for name: String in ["thu_ba_tuong", "thu_co_nho", "thu_co_lon"]:
+		out.append(_board(_make_level_main(name)))
+	return out
 
 
 func _board(main: Node2D) -> BoardView:
@@ -80,34 +93,34 @@ func _blocks(board: BoardView) -> Array[TerrainBlock]:
 # ---------- Đổi ô ↔ điểm ----------
 
 func test_cell_center_round_trips_every_cell() -> void:
-	var board: BoardView = _board(_make_main())
-	for cell: Vector2i in _all_cells(board):
-		assert_eq(board.cell_at(BoardView.cell_center(cell)), cell)
+	for board: BoardView in _boards():
+		for cell: Vector2i in _all_cells(board):
+			assert_eq(board.cell_at(BoardView.cell_center(cell)), cell)
 
 
 func test_points_near_each_corner_stay_in_cell() -> void:
-	var board: BoardView = _board(_make_main())
-	for cell: Vector2i in _all_cells(board):
-		var center: Vector2 = BoardView.cell_center(cell)
-		for corner: Vector2 in _corners(cell):
-			var point: Vector2 = corner + (center - corner).sign() * EDGE_STEP
-			assert_eq(board.cell_at(point), cell, "sát góc %s của ô %s" % [corner, cell])
+	for board: BoardView in _boards():
+		for cell: Vector2i in _all_cells(board):
+			var center: Vector2 = BoardView.cell_center(cell)
+			for corner: Vector2 in _corners(cell):
+				var point: Vector2 = corner + (center - corner).sign() * EDGE_STEP
+				assert_eq(board.cell_at(point), cell, "sát góc %s của ô %s" % [corner, cell])
 
 
 func test_points_outside_board_are_off_board() -> void:
-	var board: BoardView = _board(_make_main())
-	var last_col: Vector2i = Vector2i(board.cols - 1, 0)
-	var last_row: Vector2i = Vector2i(0, board.rows - 1)
-	var outside: Array[Vector2] = [
-		BoardView.cell_center(Vector2i(0, 0)) + Vector2(0, -BoardView.TILE_SIZE / 2.0 - EDGE_STEP),
-		BoardView.cell_center(Vector2i(0, 0)) + Vector2(-BoardView.TILE_SIZE / 2.0 - EDGE_STEP, 0),
-		BoardView.cell_center(last_col) + Vector2(BoardView.TILE_SIZE / 2.0 + EDGE_STEP, 0),
-		BoardView.cell_center(last_row) + Vector2(0, BoardView.TILE_SIZE / 2.0 + EDGE_STEP),
-		# Sát mép trái: int(-1 / 64) là 0, phải dùng floori mới ra ngoài bàn.
-		Vector2(-1, BoardView.TILE_SIZE / 2.0),
-	]
-	for point: Vector2 in outside:
-		assert_eq(board.cell_at(point), BoardView.NO_CELL, "ngoài bàn: %s" % point)
+	for board: BoardView in _boards():
+		var last_col: Vector2i = Vector2i(board.cols - 1, 0)
+		var last_row: Vector2i = Vector2i(0, board.rows - 1)
+		var outside: Array[Vector2] = [
+			BoardView.cell_center(Vector2i(0, 0)) + Vector2(0, -BoardView.TILE_SIZE / 2.0 - EDGE_STEP),
+			BoardView.cell_center(Vector2i(0, 0)) + Vector2(-BoardView.TILE_SIZE / 2.0 - EDGE_STEP, 0),
+			BoardView.cell_center(last_col) + Vector2(BoardView.TILE_SIZE / 2.0 + EDGE_STEP, 0),
+			BoardView.cell_center(last_row) + Vector2(0, BoardView.TILE_SIZE / 2.0 + EDGE_STEP),
+			# Sát mép trái: int(-1 / 64) là 0, phải dùng floori mới ra ngoài bàn.
+			Vector2(-1, BoardView.TILE_SIZE / 2.0),
+		]
+		for point: Vector2 in outside:
+			assert_eq(board.cell_at(point), BoardView.NO_CELL, "ngoài bàn %dx%d: %s" % [board.cols, board.rows, point])
 
 
 func test_columns_go_right_rows_go_down() -> void:
@@ -124,8 +137,7 @@ func test_tile_is_64_px_multiple_of_16() -> void:
 # ---------- Chọn ô nhìn thấy dưới chuột ----------
 
 func test_pick_every_cell_center_with_units_on_board() -> void:
-	for main: Node2D in [_make_main(), _make_three_generals()]:
-		var board: BoardView = _board(main)
+	for board: BoardView in _boards():
 		for cell: Vector2i in _all_cells(board):
 			assert_eq(board.pick_cell(BoardView.cell_center(cell)), cell)
 
@@ -224,8 +236,9 @@ func test_token_on_pass_stands_on_platform() -> void:
 # ---------- Bố cục ----------
 
 func test_board_fits_left_of_hud_below_title() -> void:
-	for main: Node2D in [_make_main(), _make_three_generals()]:
-		var rect: Rect2 = _board(main).board_rect()
+	for board: BoardView in _boards():
+		var main: Node2D = board.get_parent() as Node2D
+		var rect: Rect2 = board.board_rect()
 		assert_true(BoardView.AREA.encloses(rect), "bàn trong vùng trống: %s" % rect)
 		var title: Label = main._title_label
 		assert_false(rect.intersects(Rect2(title.position, title.size)), "không đè tiêu đề")
@@ -236,20 +249,53 @@ func test_board_fits_left_of_hud_below_title() -> void:
 
 
 func test_board_rect_covers_every_cell_and_token() -> void:
-	var board: BoardView = _board(_make_main())
-	var rect: Rect2 = board.board_rect()
-	for cell: Vector2i in _all_cells(board):
-		for corner: Vector2 in _corners(cell):
-			assert_true(rect.has_point(board.position + corner), "góc ô %s" % cell)
-	for token: UnitToken in board.tokens().values():
-		var top: Vector2 = board.position + token.position + Vector2(0, -UnitToken.TOKEN_LIFT - UnitToken.RADIUS)
-		assert_true(rect.has_point(top), "đầu đồng %s" % token.cell)
+	for board: BoardView in _boards():
+		var rect: Rect2 = board.board_rect()
+		for cell: Vector2i in _all_cells(board):
+			for corner: Vector2 in _corners(cell):
+				assert_true(rect.has_point(board.transform * corner), "góc ô %s" % cell)
+		for token: UnitToken in board.tokens().values():
+			var top: Vector2 = token.position + Vector2(0, -UnitToken.TOKEN_LIFT - UnitToken.RADIUS)
+			assert_true(rect.has_point(board.transform * top), "đầu đồng %s" % token.cell)
 
 
 func test_board_sits_on_whole_pixels() -> void:
-	for main: Node2D in [_make_main(), _make_three_generals()]:
-		var board: BoardView = _board(main)
+	for board: BoardView in _boards():
 		assert_eq(board.position, board.position.round(), "góc bàn rơi đúng điểm ảnh nguyên")
+
+
+## Cỡ bàn theo file trận; mọi cỡ hợp lệ hiện ô 64 px, không thu nhỏ ở 1280×720 (Story 1.9).
+func test_board_size_follows_level() -> void:
+	var sizes: Array[Vector2i] = [Vector2i(7, 7), Vector2i(7, 7), Vector2i(5, 5), Vector2i(10, 8)]
+	var boards: Array[BoardView] = _boards()
+	for i: int in range(boards.size()):
+		assert_eq(Vector2i(boards[i].cols, boards[i].rows), sizes[i])
+		assert_eq(boards[i].scale, Vector2.ONE, "ô 64 px")
+
+
+func test_level_1_board_unchanged() -> void:
+	assert_eq(_board(_make_main()).position, Vector2(262, 139), "như sau Story 1.8")
+
+
+func test_fit_scale_uses_whole_steps() -> void:
+	assert_eq(BoardView.fit_scale(Vector2(644, 550), BoardView.AREA.size), 1.0, "bàn 10×8 vừa ở 1:1")
+	assert_eq(BoardView.fit_scale(Vector2(1000, 500), Vector2(940, 612)), 0.5)
+	assert_eq(BoardView.fit_scale(Vector2(2000, 500), Vector2(940, 612)), 1.0 / 3.0)
+	assert_eq(BoardView.fit_scale(Vector2(900, 1300), Vector2(940, 612)), 1.0 / 3.0, "chiều cao quyết")
+
+
+## AREA là const nên không ép được nhánh thu nhỏ qua setup: đặt thẳng scale, kiểm đường chuột và khung bàn.
+func test_scaled_board_still_maps_clicks() -> void:
+	var board: BoardView = _board(_make_level_main("thu_co_lon"))
+	board.scale = Vector2(0.5, 0.5)
+	var rect: Rect2 = board.board_rect()
+	for cell: Vector2i in [Vector2i(0, 0), Vector2i(board.cols - 1, 0), Vector2i(0, board.rows - 1),
+			Vector2i(board.cols - 1, board.rows - 1)]:
+		var event: InputEventMouseButton = InputEventMouseButton.new()
+		event.position = board.get_global_transform_with_canvas() * BoardView.cell_center(cell)
+		var local: Vector2 = (board.make_input_local(event) as InputEventMouse).position
+		assert_eq(board.pick_cell(local), cell, "ô %s khi thu 1/2" % cell)
+		assert_true(rect.has_point(board.transform * BoardView.cell_center(cell)), "khung bao ô %s" % cell)
 
 
 ## Đồng quân và khối nhô lên ô phía trên nhưng không bao giờ che tâm ô hàng xóm (pick_cell(tâm ô) == ô).

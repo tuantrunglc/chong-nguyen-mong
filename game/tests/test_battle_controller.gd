@@ -35,7 +35,7 @@ func after_each() -> void:
 func _level() -> LevelData:
 	var level: LevelData = LevelData.new()
 	level.size = Vector2i(7, 7)
-	for i: int in range(49):
+	for i: int in range(level.size.x * level.size.y):
 		level.terrain.append(Terrain.PLAIN)
 	level.units.append(LevelData.UnitPlacement.new(UnitType.NGUYEN_KHOAI, Vector2i(0, 6)))
 	level.units.append(LevelData.UnitPlacement.new(UnitType.PHAM_NGU_LAO, Vector2i(1, 6)))

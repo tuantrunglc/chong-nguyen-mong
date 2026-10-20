@@ -77,8 +77,11 @@ const PATH_COLOR: Color = Color(0.13, 0.35, 0.65)
 const PATH_WIDTH: float = 6.0
 const PATH_END_RADIUS: Vector2 = Vector2(8, 6)
 
-var cols: int = 7
-var rows: int = 7
+## Cỡ bàn trống khi chưa có trận (màn hình lỗi, test). Có trận thì theo state.size (Story 1.9).
+const EMPTY_SIZE: Vector2i = Vector2i(7, 7)
+
+var cols: int = EMPTY_SIZE.x
+var rows: int = EMPTY_SIZE.y
 
 ## Bản chụp đang vẽ; null là bàn trống.
 var _state: BattleState = null
@@ -223,10 +226,21 @@ func path() -> Array[Vector2i]:
 	return _path.duplicate()
 
 
-func setup(new_cols: int = 7, new_rows: int = 7) -> void:
+## Hệ số thu khung bàn board_size cho vừa area_size: 1 / k với k nguyên dương nhỏ nhất còn vừa (thu theo bậc
+## nguyên để tranh pixel không nhòe, không bao giờ thu lẻ). Ở 1280×720 mọi cỡ bàn hợp lệ đều ra 1.
+static func fit_scale(board_size: Vector2, area_size: Vector2) -> float:
+	var k: int = maxi(1, ceili(maxf(board_size.x / area_size.x, board_size.y / area_size.y)))
+	return 1.0 / k
+
+
+## Canh bàn cols × rows giữa AREA, thu theo bậc nguyên nếu không vừa; góc bàn rơi đúng điểm ảnh nguyên.
+func setup(new_cols: int = EMPTY_SIZE.x, new_rows: int = EMPTY_SIZE.y) -> void:
 	cols = new_cols
 	rows = new_rows
-	position = (AREA.get_center() - _local_rect().get_center()).round()
+	var local: Rect2 = _local_rect()
+	var factor: float = fit_scale(local.size, AREA.size)
+	scale = Vector2(factor, factor)
+	position = (AREA.get_center() - local.get_center() * factor).round()
 	_redraw()
 
 

@@ -4,18 +4,24 @@ extends RefCounted
 ## Dùng chung cho file trận và kịch bản luật. `key` là khóa trong object, `shown` là tên in trong câu lỗi
 ## ("quan" với file trận, "truoc.quan" với kịch bản).
 
-## Quy cách định dạng của prototype (không phải số cân bằng). Giai đoạn 1 mới có bàn khác cỡ.
-const BOARD_SIZE: Vector2i = Vector2i(7, 7)
+## Cỡ bàn (cột, hàng) suy ra từ bàn cờ chữ, hợp lệ trong [BOARD_MIN, BOARD_MAX] (tác giả chốt 2026-10-20).
+## Quy cách định dạng, không phải số cân bằng.
+const BOARD_MIN: Vector2i = Vector2i(5, 5)
+const BOARD_MAX: Vector2i = Vector2i(10, 8)
+## Chưa biết cỡ (lớp đầu tiên hỏng): không kiểm chéo, không kiểm ô ngoài bàn (đã có lỗi riêng).
+const NO_SIZE: Vector2i = Vector2i.ZERO
 
 const GENERAL_SYMBOLS: Array[String] = ["1", "2", "3"]
 const ENEMY_SYMBOLS: Array[String] = ["B", "K", "C"]
 
 
-## Đọc một lớp bàn cờ chữ. Trả mảng BOARD_SIZE.y phần tử: mỗi phần tử là PackedStringArray
-## các ký hiệu của dòng (ô có ký hiệu lạ thành ""), hoặc null nếu cả dòng không đọc được.
-## Lớp thiếu, sai kiểu hoặc sai số dòng thì trả [] (không kiểm chéo với lớp khác).
+## Đọc một lớp bàn cờ chữ. Trả mảng theo dòng: mỗi phần tử là PackedStringArray các ký hiệu của dòng
+## (ô có ký hiệu lạ thành ""), hoặc null nếu cả dòng không đọc được. Lớp thiếu hoặc sai kiểu thì trả [].
+## size_shown "" là lớp đầu tiên (quyết cỡ bàn): mọi dòng phải cùng số ô với dòng đầu tiên, và cỡ phải nằm trong
+## [BOARD_MIN, BOARD_MAX]. Lớp khác: cùng cỡ `size` của lớp size_shown, sai số dòng thì trả []; size là NO_SIZE
+## (lớp đầu hỏng) thì chỉ kiểm các dòng cùng số ô với nhau.
 static func read_layer(root: Dictionary, key: String, shown: String, symbols: Dictionary,
-		file: String, result: LoadResult) -> Array:
+		file: String, result: LoadResult, size: Vector2i = NO_SIZE, size_shown: String = "") -> Array:
 	if not root.has(key):
 		result.add_error('%s: thiếu khóa "%s"' % [file, shown])
 		return []
@@ -23,6 +29,10 @@ static func read_layer(root: Dictionary, key: String, shown: String, symbols: Di
 		result.add_error(JsonFile.type_error(file, shown, "một danh sách", root[key]))
 		return []
 	var lines: Array = root[key] as Array
+	var cross_check: bool = not size_shown.is_empty() and size != NO_SIZE
+	# Dòng đầu tiên là chuỗi: số ô của nó là số cột khi chưa có cỡ để so.
+	var first_row: int = -1
+	var first_width: int = 0
 	var rows: Array = []
 	for r: int in range(lines.size()):
 		var line: Variant = lines[r]
@@ -32,9 +42,17 @@ static func read_layer(root: Dictionary, key: String, shown: String, symbols: Di
 			rows.append(null)
 			continue
 		var tokens: PackedStringArray = BoardText.split_row(line as String)
-		if tokens.size() != BOARD_SIZE.x:
-			result.add_error('%s: "%s" dòng %d: có %d ô, cần %d'
-				% [file, shown, r + 1, tokens.size(), BOARD_SIZE.x])
+		if first_row < 0:
+			first_row = r
+			first_width = tokens.size()
+		if cross_check and tokens.size() != size.x:
+			result.add_error('%s: "%s" dòng %d: có %d ô, "%s" có %d'
+				% [file, shown, r + 1, tokens.size(), size_shown, size.x])
+			rows.append(null)
+			continue
+		if not cross_check and tokens.size() != first_width:
+			result.add_error('%s: "%s" dòng %d: có %d ô, dòng %d có %d'
+				% [file, shown, r + 1, tokens.size(), first_row + 1, first_width])
 			rows.append(null)
 			continue
 		for c: int in range(tokens.size()):
@@ -43,10 +61,22 @@ static func read_layer(root: Dictionary, key: String, shown: String, symbols: Di
 					% [file, shown, r + 1, c + 1, c, r, JsonFile.show(tokens[c])])
 				tokens[c] = ""
 		rows.append(tokens)
-	if lines.size() != BOARD_SIZE.y:
-		result.add_error('%s: "%s" có %d dòng, cần %d' % [file, shown, lines.size(), BOARD_SIZE.y])
+	if cross_check and lines.size() != size.y:
+		result.add_error('%s: "%s" có %d dòng, "%s" có %d' % [file, shown, lines.size(), size_shown, size.y])
 		return []
+	if size_shown.is_empty() and not rows.has(null):
+		var read: Vector2i = Vector2i(first_width, lines.size())
+		if read.x < BOARD_MIN.x or read.y < BOARD_MIN.y or read.x > BOARD_MAX.x or read.y > BOARD_MAX.y:
+			result.add_error('%s: "%s": bàn %d cột × %d hàng, chỉ được từ %d đến %d cột và từ %d đến %d hàng'
+				% [file, shown, read.x, read.y, BOARD_MIN.x, BOARD_MAX.x, BOARD_MIN.y, BOARD_MAX.y])
 	return rows
+
+
+## Cỡ (cột, hàng) của lớp đã đọc; NO_SIZE nếu lớp rỗng hoặc có dòng không đọc được.
+static func layer_size(rows: Array) -> Vector2i:
+	if rows.is_empty() or rows.has(null):
+		return NO_SIZE
+	return Vector2i((rows[0] as PackedStringArray).size(), rows.size())
 
 
 static func has_symbol(rows: Array, symbol_text: String) -> bool:
@@ -56,21 +86,24 @@ static func has_symbol(rows: Array, symbol_text: String) -> bool:
 	return false
 
 
-## Ký hiệu ở ô; "" nếu ô hoặc dòng không đọc được.
+## Ký hiệu ở ô; "" nếu ô hoặc dòng không đọc được, hay ô nằm ngoài lớp (lớp khác cỡ đã có lỗi riêng).
 static func symbol(rows: Array, cell: Vector2i) -> String:
-	if rows.is_empty() or rows[cell.y] == null:
+	if cell.y < 0 or cell.y >= rows.size() or rows[cell.y] == null:
 		return ""
-	return (rows[cell.y] as PackedStringArray)[cell.x]
+	var row: PackedStringArray = rows[cell.y] as PackedStringArray
+	if cell.x < 0 or cell.x >= row.size():
+		return ""
+	return row[cell.x]
 
 
 ## Kiểm từng ô của lớp quân: quân đứng trên ô chặn, tướng lặp. Trả { ký hiệu tướng: ô }.
 static func check_unit_cells(terrain_rows: Array, unit_rows: Array, shown: String,
 		file: String, result: LoadResult) -> Dictionary:
 	var generals: Dictionary = {}
-	if unit_rows.is_empty():
-		return generals
-	for r: int in range(BOARD_SIZE.y):
-		for c: int in range(BOARD_SIZE.x):
+	for r: int in range(unit_rows.size()):
+		if unit_rows[r] == null:
+			continue
+		for c: int in range((unit_rows[r] as PackedStringArray).size()):
 			var cell: Vector2i = Vector2i(c, r)
 			var unit: String = symbol(unit_rows, cell)
 			if unit == "" or unit == ".":
@@ -89,8 +122,9 @@ static func check_unit_cells(terrain_rows: Array, unit_rows: Array, shown: Strin
 
 
 ## Đọc thứ tự quân Nguyên và đối chiếu với lớp quân. Trả Array[Vector2i], hoặc null nếu thiếu/sai kiểu.
+## size là cỡ bàn; NO_SIZE thì không kiểm ô ngoài bàn.
 static func read_enemy_order(root: Dictionary, key: String, shown: String, unit_rows: Array,
-		units_clean: bool, file: String, result: LoadResult) -> Variant:
+		units_clean: bool, size: Vector2i, file: String, result: LoadResult) -> Variant:
 	if not root.has(key):
 		result.add_error('%s: thiếu khóa "%s"' % [file, shown])
 		return null
@@ -100,7 +134,7 @@ static func read_enemy_order(root: Dictionary, key: String, shown: String, unit_
 	var items: Array = root[key] as Array
 	var order: Array[Vector2i] = []
 	var seen: Dictionary = {}  # ô -> số mục (đếm từ 1)
-	var board: Rect2i = Rect2i(Vector2i.ZERO, BOARD_SIZE)
+	var board: Rect2i = Rect2i(Vector2i.ZERO, size)
 	for i: int in range(items.size()):
 		var item: Variant = items[i]
 		var where: String = '%s: "%s" mục %d' % [file, shown, i + 1]
@@ -110,7 +144,7 @@ static func read_enemy_order(root: Dictionary, key: String, shown: String, unit_
 			continue
 		var cell: Vector2i = parsed as Vector2i
 		var cell_shown: String = BoardText.cell_text(cell)
-		if not board.has_point(cell):
+		if size != NO_SIZE and not board.has_point(cell):
 			result.add_error("%s: ô %s nằm ngoài bàn" % [where, cell_shown])
 			continue
 		if seen.has(cell):
@@ -136,8 +170,10 @@ static func read_enemy_order(root: Dictionary, key: String, shown: String, unit_
 ## Các ô có ký hiệu thuộc `symbols`, theo thứ tự đọc bàn: hàng trên xuống, trái sang phải.
 static func reading_order(rows: Array, symbols: Array[String]) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
-	for r: int in range(BOARD_SIZE.y):
-		for c: int in range(BOARD_SIZE.x):
+	for r: int in range(rows.size()):
+		if rows[r] == null:
+			continue
+		for c: int in range((rows[r] as PackedStringArray).size()):
 			var cell: Vector2i = Vector2i(c, r)
 			if symbols.has(symbol(rows, cell)):
 				cells.append(cell)

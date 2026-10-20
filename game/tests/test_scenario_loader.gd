@@ -42,10 +42,10 @@ func _stats() -> Stats:
 	return Stats.new(values)
 
 
-## 7 dòng, dòng `row` thay bằng `line`.
+## Bàn RIVER_TERRAIN toàn đất trống, dòng `row` thay bằng `line`.
 func _rows(row: int = -1, line: String = "") -> Array[String]:
 	var rows: Array[String] = []
-	for r: int in range(7):
+	for r: int in range(RIVER_TERRAIN.size()):
 		rows.append(line if r == row else EMPTY_ROW)
 	return rows
 
@@ -532,8 +532,61 @@ func test_many_errors_are_listed_together() -> void:
 		F + ': thiếu khóa "mo_ta"',
 		F + ': "truoc.mau" ô 5,4: máu phải là số nguyên từ 1 tới 3, đang là 9',
 		F + ': "hanh_dong" mục 1: lệnh lạ "x", chỉ được "di", "danh", "huy", "ket_thuc_luot"',
-		F + ': "sau.dia_hinh" dòng 1: có 3 ô, cần 7',
+		F + ': "sau.dia_hinh" dòng 1: có 3 ô, "truoc.dia_hinh" có 7',
 	] as Array[String])
+
+
+# ---------- Cỡ bàn (Story 1.9) ----------
+
+## Bàn đất trống cols × rows: Khoái ở ô `general`, Bộ binh ở góc trên phải.
+func _board(cols: int, rows: int, general: Vector2i = Vector2i(0, 0)) -> Dictionary:
+	var terrain: Array[String] = []
+	var units: Array[String] = []
+	for r: int in range(rows):
+		var cells: PackedStringArray = PackedStringArray()
+		cells.resize(cols)
+		cells.fill(".")
+		terrain.append(" ".join(cells))
+		if r == general.y:
+			cells[general.x] = "1"
+		if r == 0:
+			cells[cols - 1] = "B"
+		units.append(" ".join(cells))
+	var d: Dictionary = _valid()
+	d["truoc"] = {"dia_hinh": terrain.duplicate(), "quan": units.duplicate()}
+	d["sau"] = {"dia_hinh": terrain.duplicate(), "quan": units.duplicate()}
+	return d
+
+
+func test_non_7x7_scenario_loads() -> void:
+	var s: ScenarioData = _scenario(_board(5, 6, Vector2i(2, 5)))
+	if s == null:
+		return
+	assert_eq(s.before.size, Vector2i(5, 6))
+	assert_eq(s.after_terrain.size(), 30)
+
+
+func test_after_units_differ_from_before_size() -> void:
+	var d: Dictionary = _board(5, 6)
+	(d["sau"]["quan"] as Array).pop_back()
+	assert_eq(_errors(d), [F + ': "sau.quan" có 5 dòng, "truoc.dia_hinh" có 6'] as Array[String])
+
+
+func test_step_cell_outside_small_board() -> void:
+	var d: Dictionary = _board(5, 6)
+	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "5,0"}]
+	assert_eq(_errors(d), [F + ': "hanh_dong" mục 1 (di): "o" là "5,0", không phải ô trong bàn'] as Array[String])
+
+
+func test_hp_cell_outside_small_board() -> void:
+	var d: Dictionary = _board(5, 6)
+	d["truoc"]["mau"] = {"0,6": 1}
+	assert_eq(_errors(d), [F + ': "truoc.mau" ô 0,6 nằm ngoài bàn'] as Array[String])
+
+
+func test_scenario_board_too_wide() -> void:
+	assert_eq(_errors(_board(11, 8)),
+		[F + ': "truoc.dia_hinh": bàn 11 cột × 8 hàng, chỉ được từ 5 đến 10 cột và từ 5 đến 8 hàng'] as Array[String])
 
 
 func test_missing_file() -> void:
