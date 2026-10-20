@@ -323,7 +323,7 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
   - Cỡ bàn suy ra từ lớp `dia_hinh`: số dòng là số hàng, số ký hiệu trên một dòng là số cột.
   - Lớp `quan` và mọi lớp khác phải cùng cỡ với lớp `dia_hinh`.
   - Cỡ hợp lệ: số cột từ 5 đến 10, số hàng từ 5 đến 8. Cỡ sai thì báo lỗi tiếng Việt, ghi rõ file và cỡ đọc được.
-  - Hai giới hạn này là hằng số `BOARD_MIN` và `BOARD_MAX` trong `board_layers.gd`, thay cho `BOARD_SIZE`.
+  - Hai giới hạn này là hằng số `BOARD_MIN` và `BOARD_MAX` trong `board_layers.gd`, thay cho `BOARD_SIZE`. `NO_SIZE` là "chưa biết cỡ" (lớp `dia_hinh` hỏng): khi đó không kiểm chéo lớp khác và không kiểm ô ngoài bàn.
   - Kịch bản luật dùng cùng luật cỡ bàn này.
   - Không lặp cứng cỡ bàn: luôn dùng `level.size`.
 - **`thu_tu_dich`:** chỉ ghi tọa độ. Bộ nạp đối chiếu với lớp `quan`; ô nào không có quân Nguyên thì báo lỗi.
@@ -681,7 +681,7 @@ chong-nguyen-mong/                    # repo
 | Signal | `snake_case`, thì quá khứ | `events_resolved` |
 | Tên riêng lịch sử trong code | Tiếng Việt không dấu, UPPER | `UnitType.NGUYEN_KHOAI`, `Stratagem.SAT_THAT` |
 | Tọa độ | `Vector2i(cot, hang)`; trong file dữ liệu là `"cot,hang"` | `Vector2i(4, 2)` ↔ `"4,2"` |
-| Ô ↔ điểm màn hình | Chỉ `BoardView.cell_center()`, `BoardView.cell_rect()` và `BoardView.cell_at()` (từ Story 1.8: ô vuông nhìn chếch, cạnh ô `TILE_SIZE` = 64 px; từ Story 1.9: `BoardView` canh giữa bàn theo `level.size` trong vùng chơi, chừa chỗ cho HUD. Nếu bàn không vừa thì thu nhỏ theo bậc nguyên, không thu lẻ; ô `0,0` ở góc trên bên trái, Bắc ở trên; trước đó là isometric 2:1 của Story 1.7). View khác gọi các hàm này, không tự tính. Chuột dùng `BoardView.pick_cell()`: ô **nhìn thấy** (đồng quân, khối nhô lên che ô phía sau), không trúng gì thì như `cell_at`. Thứ tự vẽ theo `hang` (từ Story 1.8; Story 1.7 dùng `cot + hang`), lớn hơn vẽ sau: khối địa hình và đồng quân là con của `BoardView._world` (`y_sort_enabled`); khối đặt cao hơn tâm ô `TILE_SIZE / 4` để không bằng y với quân ô bên cạnh. Ô sáng, đường đi, vòng chọn, sông, hầm chông, bệ ô ải vẽ trên mặt đất (`_draw` của `BoardView`), luôn dưới khối và quân (Story 1.7) | `cell_at(cell_center(c)) == c`; `pick_cell(cell_center(c)) == c` |
+| Ô ↔ điểm màn hình | Chỉ `BoardView.cell_center()`, `BoardView.cell_rect()` và `BoardView.cell_at()` (từ Story 1.8: ô vuông nhìn chếch, cạnh ô `TILE_SIZE` = 64 px; từ Story 1.9: `BoardView` canh giữa bàn theo `level.size` trong vùng chơi, chừa chỗ cho HUD. Nếu bàn không vừa thì thu nhỏ theo bậc nguyên `1/k` (`BoardView.fit_scale`), không thu lẻ; ô `0,0` ở góc trên bên trái, Bắc ở trên; trước đó là isometric 2:1 của Story 1.7). View khác gọi các hàm này, không tự tính. Chuột dùng `BoardView.pick_cell()`: ô **nhìn thấy** (đồng quân, khối nhô lên che ô phía sau), không trúng gì thì như `cell_at`. Thứ tự vẽ theo `hang` (từ Story 1.8; Story 1.7 dùng `cot + hang`), lớn hơn vẽ sau: khối địa hình và đồng quân là con của `BoardView._world` (`y_sort_enabled`); khối đặt cao hơn tâm ô `TILE_SIZE / 4` để không bằng y với quân ô bên cạnh. Ô sáng, đường đi, vòng chọn, sông, hầm chông, bệ ô ải vẽ trên mặt đất (`_draw` của `BoardView`), luôn dưới khối và quân (Story 1.7) | `cell_at(cell_center(c)) == c`; `pick_cell(cell_center(c)) == c` |
 | Khóa dịch | `<man>.<muc>` | `hud.end_turn`, `error.rolled_back` |
 | Khóa JSON dữ liệu | tiếng Việt không dấu, `snake_case` | `thu_tu_dich`, `tiep_vien` |
 

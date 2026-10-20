@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Bàn 5 cột × 6 hàng: Bộ binh ở hàng cuối (hàng 5) bị Khoái đẩy xuống ra ngoài bàn: đứng yên, mất thêm 1 máu, gục.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . .",

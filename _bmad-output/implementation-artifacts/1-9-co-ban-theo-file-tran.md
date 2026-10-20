@@ -4,7 +4,7 @@ baseline_commit: 19d14dc81764debd1bcbce4f24a3be5be904440a
 
 # Story 1.9: Cỡ bàn theo file trận
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -110,25 +110,25 @@ _Story này **không có luật mới**. Luật đã đọc `level.size` từ St
     - `fit_scale` luôn trả `1.0` → `test_fit_scale_uses_whole_steps` trượt;
     - `setup` bỏ `.round()` → không bắt buộc trượt (7×7, 5×5, 10×8 đều ra số nguyên); ghi lại kết quả thật, không cần thêm test;
     - `level_loader` gán `level.size = Vector2i(7, 7)` → `test_board_size_follows_level` và `test_co_nho_and_co_lon_load` trượt.
-- [ ] **Task 5: Trận thử, đợt duyệt kịch bản** (AC: 1, 5, 7)
+- [x] **Task 5: Trận thử, đợt duyệt kịch bản** (AC: 1, 5, 7)
   - [x] 5.1 Thêm `game/data/tran/thu_co_nho.json` và `thu_co_lon.json` đúng như Dev Notes "Trận thử". Không sửa trận cũ.
   - [x] 5.2 `tools/xem_kich_ban.sh va_cham`: kịch bản 5×6 hiện bàn 5 cột × 6 hàng, trước và sau đúng `mo_ta`. `tools/test.sh` xanh, có dòng `Kịch bản luật: 36 đã duyệt · 1 chưa duyệt (0 chưa đạt)`. Ghi Debug Log.
   - [x] 5.3 Commit: `Cỡ bàn theo file trận, kịch bản mép bàn 5×6 chờ duyệt (Story 1.9)`.
-  - [ ] 5.4 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh va_cham`, đọc kịch bản `day_vao_mep_ban_5x6`, trả lời "đúng" hoặc "sai: <lý do>". Nói rõ: luật đẩy vào mép bàn đã có từ Story 2.1, nên kịch bản này **đạt ngay** khi duyệt; nó kiểm rằng mép bàn tính đúng trên bàn không phải 7×7 (cột 4, hàng 5 là mép).
-  - [ ] 5.5 Tác giả nói "đúng": đổi `da_duyet: true` (chỉ khóa đó). "Sai": sửa kịch bản theo lý do rồi cho duyệt lại, không sửa code để khớp. Kịch bản đúng mà game sai thì sửa code (không sửa `src/core/` nếu chưa hỏi tác giả).
-- [ ] **Task 6: Kiểm bằng mắt và bản web** (AC: 1, 3, 5, 6, 11)
-  - [ ] 6.1 Chụp (GoPeak nếu chạy được; không thì dùng script chụp tạm như Debug Log 1.8, không đưa script vào repo). Lưu `_bmad-output/implementation-artifacts/anh/1-9-*.png`:
+  - [x] 5.4 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh va_cham`, đọc kịch bản `day_vao_mep_ban_5x6`, trả lời "đúng" hoặc "sai: <lý do>". Nói rõ: luật đẩy vào mép bàn đã có từ Story 2.1, nên kịch bản này **đạt ngay** khi duyệt; nó kiểm rằng mép bàn tính đúng trên bàn không phải 7×7 (cột 4, hàng 5 là mép).
+  - [x] 5.5 Tác giả nói "đúng": đổi `da_duyet: true` (chỉ khóa đó). "Sai": sửa kịch bản theo lý do rồi cho duyệt lại, không sửa code để khớp. Kịch bản đúng mà game sai thì sửa code (không sửa `src/core/` nếu chưa hỏi tác giả).
+- [x] **Task 6: Kiểm bằng mắt và bản web** (AC: 1, 3, 5, 6, 11)
+  - [x] 6.1 Chụp (GoPeak nếu chạy được; không thì dùng script chụp tạm như Debug Log 1.8, không đưa script vào repo). Lưu `_bmad-output/implementation-artifacts/anh/1-9-*.png`:
     - `tools/chay.sh --dev --tran=thu_co_nho`: bàn 5×5 giữa vùng chơi;
     - `--tran=thu_co_lon`: bàn 10×8 vừa vùng chơi, không đè HUD; chọn Khoái thấy ô sáng; sau khi đánh `9,4`; F1 có `9,7`;
     - trận 1: giống `anh/1-8-1-tran-1.png`.
-  - [ ] 6.2 Đọc `board.position` thật của từng trận (log tạm hoặc test) trước khi bấm. Số dự tính ở Dev Notes "Bàn có vừa không".
-  - [ ] 6.3 Thử một file trận hỏng (chép `thu_co_nho.json` ra `user://` hoặc dùng test) để chụp màn hình lỗi cỡ bàn. Không để file hỏng trong `game/data/tran/`.
-  - [ ] 6.4 `tools/build_web.sh` đạt. Không deploy.
-- [ ] **Task 7: Tài liệu, test, commit** (AC: 8, 9)
-  - [ ] 7.1 `deferred-work.md`, mục review 1.7 "`BoardView.setup` … tràn dưới HUD": thêm "**Đã làm ở Story 1.9** (canh theo cỡ bàn, thu theo bậc nguyên; bàn lớn nhất 10×8 vừa ở 1:1)".
-  - [ ] 7.2 `game-architecture.md`: mục "Cỡ bàn" (dòng ~322) đã viết đúng; chỉ thêm `NO_SIZE` nếu dùng, và ghi "thu theo bậc `1/k`" vào dòng 684 nếu chưa có. Không sửa chỗ khác.
-  - [ ] 7.3 `tools/test.sh` xanh. Commit: `Cỡ bàn theo file trận (Story 1.9)`, gồm kịch bản đã duyệt, ảnh, `.uid` mới.
-  - [ ] 7.4 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes theo mẫu ở Dev Notes, dùng kết quả thật.
+  - [x] 6.2 Đọc `board.position` thật của từng trận (log tạm hoặc test) trước khi bấm. Số dự tính ở Dev Notes "Bàn có vừa không".
+  - [x] 6.3 Thử một file trận hỏng (chép `thu_co_nho.json` ra `user://` hoặc dùng test) để chụp màn hình lỗi cỡ bàn. Không để file hỏng trong `game/data/tran/`.
+  - [x] 6.4 `tools/build_web.sh` đạt. Không deploy.
+- [x] **Task 7: Tài liệu, test, commit** (AC: 8, 9)
+  - [x] 7.1 `deferred-work.md`, mục review 1.7 "`BoardView.setup` … tràn dưới HUD": thêm "**Đã làm ở Story 1.9** (canh theo cỡ bàn, thu theo bậc nguyên; bàn lớn nhất 10×8 vừa ở 1:1)".
+  - [x] 7.2 `game-architecture.md`: mục "Cỡ bàn" (dòng ~322) đã viết đúng; chỉ thêm `NO_SIZE` nếu dùng, và ghi "thu theo bậc `1/k`" vào dòng 684 nếu chưa có. Không sửa chỗ khác.
+  - [x] 7.3 `tools/test.sh` xanh. Commit: `Cỡ bàn theo file trận (Story 1.9)`, gồm kịch bản đã duyệt, ảnh, `.uid` mới.
+  - [x] 7.4 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes theo mẫu ở Dev Notes, dùng kết quả thật.
 
 ## Dev Notes
 
@@ -428,13 +428,59 @@ Claude Opus 5.5 (claude-opus-5-5[1m])
   - bỏ `.round()` trong `setup` → 427/427 đạt (đúng dự đoán: 5×5, 7×7, 10×8 đều ra số nguyên);
   - `level.size = Vector2i(7, 7)` trong `level_loader` → 13 test trượt (bố cục, bấm ô, nạp bàn nhỏ/lớn, F5 đổi cỡ, chơi bàn 10×8).
 - **Task 5.2:** `tools/xem_kich_ban.sh va_cham` hiện bàn 5 cột × 6 hàng, trước/sau khớp `mo_ta`. `tools/test.sh`: 427/427, `36 đã duyệt · 1 chưa duyệt (0 chưa đạt)`.
+- **Task 5.3–5.5:** commit `d3ddfd1` (chờ duyệt). Tác giả trả lời "ok rồi" (đúng). Đổi `da_duyet: true`; `tools/test.sh`: 427/427, `37 đã duyệt · 0 chưa duyệt (0 chưa đạt)`. Không có luật mới nên kịch bản đạt ngay (tác giả đã đồng ý cách này khi tạo story).
+- **Task 6 (chụp):** GoPeak vẫn không chạy (Node 18); dùng lại script chụp tạm của 1.8 (ngoài repo). `board.position` thật: 5×5 = `(326, 203)`, 10×8 = `(166, 107)`, trận 1 = `(262, 139)`; khớp bảng Dev Notes. Màn hình lỗi chụp bằng file tạm `game/data/tran/thu_hong_tam.json` (dòng 2 của `dia_hinh` còn 4 ô), xóa ngay sau khi chụp; `git status game/data` sạch.
+- `tools/build_web.sh`: bản nén 10,4 MB (giới hạn 25 MB).
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
+- **Bộ nạp:** cỡ bàn suy ra từ `dia_hinh` (file trận) hoặc `truoc.dia_hinh` (kịch bản); mọi lớp khác phải cùng cỡ; cỡ hợp lệ 5–10 cột, 5–8 hàng (`BOARD_MIN`, `BOARD_MAX`). Bỏ `BOARD_SIZE`. Câu lỗi đúng bảng Dev Notes. Kiểm cỡ nằm trong `read_layer` (lệch Task 2.4, xem Debug Log).
+- **`BoardView`:** `fit_scale` (bậc `1/k`), `setup` đặt `scale` và canh giữa theo cỡ; `EMPTY_SIZE` thay số 7. Mọi cỡ hợp lệ hiện ô 64 px ở 1280×720. Không sửa hình học, chuột, F1, màn hình lỗi.
+- **Trận thử:** `thu_co_nho.json` (5×5), `thu_co_lon.json` (10×8). **Kịch bản:** `va_cham/day_vao_mep_ban_5x6.json`, tác giả đã duyệt, đạt.
+- **Test:** 406 → **427**, đạt hết. Sửa tại chỗ (không xóa) 4 test câu lỗi cũ; `test_wrong_row_count` đổi tên thành `test_unit_layer_row_count_differs_from_terrain` (bàn 7×6 giờ hợp lệ). Test bố cục và bấm ô chạy trên 4 trận (trận 1, ba tướng, 5×5, 10×8). Thêm test `fit_scale`, bàn thu 1/2 vẫn bấm đúng, chơi tới mép bàn 10×8 bằng chuột thật, F5 đổi cỡ, đi trên bàn 10×8. Không còn `range(7)`/`range(49)` trong `game/tests`.
+- AC 10: không đổi `src/core/`, không đổi 4 trận cũ, không đổi kịch bản đã duyệt nào.
+- Ảnh: `anh/1-9-1-ban-nho.png`, `1-9-2-ban-lon.png`, `1-9-3-ban-lon-chon-khoai.png` (ô sáng, viền `9,4`), `1-9-4-ban-lon-day-mep-phai.png`, `1-9-5-ban-lon-day-mep-duoi-f1.png` (Khoái xám ở `8,6`, `8,7` trống, F1 có `9,7`), `1-9-6-tran-1.png` (giống 1.8), `1-9-7-loi-co-ban.png`.
+
+**Hướng dẫn tác giả tự test**
+
+1. `tools/test.sh`: thấy `Kịch bản luật: 37 đã duyệt · 0 chưa duyệt (0 chưa đạt)` và `✅ 427/427 test đạt`.
+2. `tools/chay.sh`: trận 1 y như trước (so `anh/1-9-6-tran-1.png` với `anh/1-8-1-tran-1.png`).
+3. `tools/chay.sh --dev --tran=thu_co_nho`: bàn 5 cột × 5 hàng nằm giữa vùng bên trái HUD (ảnh `1-9-1`).
+4. `tools/chay.sh --dev --tran=thu_co_lon`: bàn 10 cột × 8 hàng, không đè bảng HUD bên phải (ảnh `1-9-2`).
+   - Bấm Khoái (cột 8, hàng 4), bấm Bộ binh ngay bên phải: Bộ binh bị đẩy vào mép, gục.
+   - `Space`. Bấm Khoái, bấm ô hai bước phía dưới, bấm Bộ binh ở hàng cuối: thấy viền dày và dòng "Bấm lần nữa để đánh". Bấm lần nữa: Bộ binh gục.
+   - F1 (Mac: Fn+F1): tọa độ góc dưới phải là `9,7` (ảnh `1-9-5`).
+   - Bấm sát mép và góc các ô ở cột 9, hàng 7: luôn chọn đúng ô.
+5. Thử báo lỗi: chép `game/data/tran/thu_co_nho.json` thành `thu_hong.json`, xóa một dấu `.` ở dòng 2 của `dia_hinh`, chạy `tools/chay.sh --dev --tran=thu_hong`: thấy `"dia_hinh" dòng 2: có 4 ô, dòng 1 có 5` (ảnh `1-9-7`). Thêm một cột vào mọi dòng của bàn lớn (11 cột): thấy `bàn 11 cột × 8 hàng, chỉ được từ 5 đến 10 cột và từ 5 đến 8 hàng`. **Xóa `thu_hong.json` khi thử xong.**
+6. `tools/xem_kich_ban.sh va_cham --tat_ca`: thấy kịch bản bàn 5×6.
+7. (Web) `python3 -m http.server 8060 -d build/web`, mở `http://localhost:8060/?dev=1&tran=thu_co_lon` trong Chrome. Ctrl+C để tắt.
 
 ### File List
+
+- `game/src/data/board_layers.gd` (sửa)
+- `game/src/data/level_loader.gd` (sửa)
+- `game/src/data/scenario_loader.gd` (sửa)
+- `game/src/battle/board_view.gd` (sửa)
+- `game/data/tran/thu_co_nho.json` (mới)
+- `game/data/tran/thu_co_lon.json` (mới)
+- `game/tests/kich_ban/va_cham/day_vao_mep_ban_5x6.json` (mới)
+- `game/tests/board_fixture.gd` (sửa)
+- `game/tests/test_loaders.gd` (sửa)
+- `game/tests/test_scenario_loader.gd` (sửa)
+- `game/tests/test_board_view.gd` (sửa)
+- `game/tests/test_battle_view.gd` (sửa)
+- `game/tests/test_main.gd` (sửa)
+- `game/tests/test_rules_move.gd` (sửa)
+- `game/tests/test_rules_enemy_phase.gd` (sửa)
+- `game/tests/test_battle_controller.gd` (sửa)
+- `_bmad-output/planning-artifacts/game-architecture.md` (sửa)
+- `_bmad-output/implementation-artifacts/deferred-work.md` (sửa)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (sửa)
+- `_bmad-output/implementation-artifacts/1-9-co-ban-theo-file-tran.md` (mới)
+- `_bmad-output/implementation-artifacts/anh/1-9-1-ban-nho.png` … `1-9-7-loi-co-ban.png` (mới, 7 ảnh)
 
 ### Change Log
 
 - 2026-10-20: Tạo story. Cỡ bàn suy ra từ bàn cờ chữ (5×5 đến 10×8); mọi cỡ hợp lệ vừa ở ô 64 px trong 1280×720.
+- 2026-10-20: Làm story. Bộ nạp suy ra cỡ bàn từ bàn cờ chữ, `BoardView` canh và thu theo bậc nguyên, 2 trận thử, kịch bản mép bàn 5×6 (tác giả đã duyệt). Test 406 → 427, đạt hết. 7 ảnh. Bản web 10,4 MB. Chuyển sang review.
