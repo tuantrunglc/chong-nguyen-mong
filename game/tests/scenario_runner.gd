@@ -186,7 +186,35 @@ static func compare(state: BattleState, scenario: ScenarioData) -> Array[String]
 		problems.append('sau: mong đợi kết cục "%s", thực tế "%s"' % [scenario.after_outcome, _outcome(state)])
 	if scenario.checks_telegraphs:
 		problems.append_array(_compare_telegraphs(state, scenario.after_telegraphs))
+	if scenario.checks_marks:
+		problems.append_array(_compare_marks(state, scenario.after_marks))
 	return problems
+
+
+## So ô đỏ (TelegraphMarks.cells) theo thứ tự đọc bàn: mỗi ô khác một câu.
+static func _compare_marks(state: BattleState, wanted: Dictionary) -> Array[String]:
+	var problems: Array[String] = []
+	var got: Dictionary = TelegraphMarks.cells(state)
+	for r: int in range(state.size.y):
+		for c: int in range(state.size.x):
+			var cell: Vector2i = Vector2i(c, r)
+			var want: Variant = wanted.get(cell)
+			var have: Variant = got.get(cell)
+			if want == have:
+				continue
+			problems.append("sau: ô %s mong đợi %s, thực tế %s"
+				% [BoardText.cell_text(cell), _marks_text(want), _marks_text(have)])
+	return problems
+
+
+## "đỏ (đòn 1·2)" hoặc "không đỏ".
+static func _marks_text(orders: Variant) -> String:
+	if orders == null:
+		return "không đỏ"
+	var parts: PackedStringArray = PackedStringArray()
+	for order: int in orders as Array[int]:
+		parts.append(str(order))
+	return "đỏ (đòn %s)" % "·".join(parts)
 
 
 ## So đòn đã báo theo số thứ tự: mỗi số thứ tự có ở một bên mà khác hoặc thiếu ở bên kia là một câu.

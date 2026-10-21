@@ -88,3 +88,7 @@ var after_outcome: String = ""
 var checks_telegraphs: bool = false
 ## Theo số thứ tự tăng dần.
 var after_telegraphs: Array[ExpectedTelegraph] = []
+## Có kiểm ô đỏ không ("sau.o_do" có ghi, kể cả {}).
+var checks_marks: bool = false
+## Ô -> Array[int] số thứ tự đòn phủ ô đó, tăng dần (Story 2.7).
+var after_marks: Dictionary = {}

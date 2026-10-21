@@ -1,6 +1,10 @@
+---
+baseline_commit: f575cfa
+---
+
 # Story 2.7: Hiển thị báo đòn
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 
@@ -29,18 +33,18 @@ _**Chưa có** (đừng làm ở đây): ra đòn, trừ máu (2.8); hủy đòn
 
 ## Tasks / Subtasks
 
-- [ ] **Task 0: Tác giả chốt 1 câu hỏi** ở "Quyết định của tác giả" (2026-10-21: Kỵ binh tô đường tới vật đầu tiên).
+- [x] **Task 0: Tác giả chốt 1 câu hỏi** ở "Quyết định của tác giả" (2026-10-21: Kỵ binh tô đường tới vật đầu tiên).
 - [ ] **Task 1: Khung, đợt kịch bản 9, dừng chờ duyệt** (AC: 1, 2)
-  - [ ] 1.1 Khung (làm trước để kịch bản nạp và so được):
+  - [x] 1.1 Khung (làm trước để kịch bản nạp và so được):
     - `src/core/telegraph_marks.gd` (MỚI, `class_name TelegraphMarks`, `RefCounted`, hàm `static`): `cells(state) -> Dictionary` và `hit_cell(state, telegraph) -> Vector2i`, `path_cells(state, telegraph) -> Array[Vector2i]`. **Chưa có luật**: `cells` trả `{}`, `hit_cell` trả `Telegraph.NO_CELL`, `path_cells` trả `[]` (kịch bản phải trượt).
     - `src/data/scenario_loader.gd`: khóa mới `o_do` của `sau` (không bắt buộc, thêm vào `AFTER_KEYS`): object `{"cot,hang": [số thứ tự, …]}`. Kiểm: khóa là ô trong bàn, không ghi một ô hai lần (như `mau`); giá trị là danh sách số nguyên ≥ 1, không rỗng, không trùng. Câu lỗi tiếng Việt kèm file, ô và giá trị sai. `{}` là "không ô nào đỏ" (vẫn kiểm). Lưu đã xếp tăng dần.
     - `src/data/scenario_data.gd`: `checks_marks: bool`, `after_marks: Dictionary` (ô → `Array[int]`).
     - `tests/scenario_runner.gd` `compare`: khi `checks_marks`, so `TelegraphMarks.cells(state)` với mong đợi theo thứ tự đọc bàn; mỗi chỗ khác một câu: `sau: ô 3,4 mong đợi đỏ (đòn 1·2), thực tế không đỏ`, `sau: ô 5,3 mong đợi không đỏ, thực tế đỏ (đòn 1)`, `sau: ô 3,3 mong đợi đỏ (đòn 1·2), thực tế đỏ (đòn 1)`.
     - `tests/scenario_viewer.gd`: in thêm bàn thứ ba **"Ô ĐỎ"** cạnh bàn SAU (cùng khung số cột/hàng): ô đỏ ghi số thứ tự (một chữ số); ô có từ hai đòn ghi `*`, rồi dưới bàn một dòng mỗi ô `*`: `3,3: đòn 1·2`. `{}` in "không ô nào đỏ". Chữ qua `tr()` (khóa `scenario.viewer.*`; sinh lại `text.vi.translation`).
     - `tests/test_scenario_loader.gd`: ca nạp `o_do` đúng (một ô, nhiều đòn một ô, `{}`), ca sai (ô ngoài bàn, khóa không phải tọa độ, ô ghi hai lần như `"3,4"` và `"03,4"`, danh sách rỗng, số 0, số trùng, không phải danh sách), ca runner so khác.
-  - [ ] 1.2 Viết 7 file đúng "Đợt kịch bản 9", `"da_duyet": false`. Chép cấu trúc từ `tests/kich_ban/ai/ky_binh_xung_phong_thang_hang.json` (một lệnh `ket_thuc_luot`, `sau.hiep: 2`); kịch bản #5, #6 có thêm lệnh `di` sau `ket_thuc_luot`. Có thể ghi kèm `bao_don` cho người đọc (không bắt buộc).
-  - [ ] 1.3 `tools/xem_kich_ban.sh don_dich`: đọc lại từng bàn và bàn "Ô ĐỎ", khớp `mo_ta`. `tools/test.sh`: `59 đã duyệt · 7 chưa duyệt (7 chưa đạt)`. Ghi Debug Log.
-  - [ ] 1.4 Commit: `Kịch bản ô đỏ báo đòn chờ duyệt (Story 2.7)`.
+  - [x] 1.2 Viết 7 file đúng "Đợt kịch bản 9", `"da_duyet": false`. Chép cấu trúc từ `tests/kich_ban/ai/ky_binh_xung_phong_thang_hang.json` (một lệnh `ket_thuc_luot`, `sau.hiep: 2`); kịch bản #5, #6 có thêm lệnh `di` sau `ket_thuc_luot`. Có thể ghi kèm `bao_don` cho người đọc (không bắt buộc).
+  - [x] 1.3 `tools/xem_kich_ban.sh don_dich`: đọc lại từng bàn và bàn "Ô ĐỎ", khớp `mo_ta`. `tools/test.sh`: `59 đã duyệt · 7 chưa duyệt (7 chưa đạt)`. Ghi Debug Log.
+  - [x] 1.4 Commit: `Kịch bản ô đỏ báo đòn chờ duyệt (Story 2.7)`.
   - [ ] 1.5 **HALT.** Nhắn tác giả tiếng Việt: gõ `tools/xem_kich_ban.sh don_dich`, trả lời "đúng"/"sai: <lý do>" từng cái. Nói rõ: bàn "Ô ĐỎ" là đúng những ô sẽ tô đỏ trong game; số trong ô là số thứ tự đòn; với Kỵ binh, chỉ ô cuối đường đỏ mới có số trong game (bàn "Ô ĐỎ" của công cụ duyệt ghi số ở mọi ô đỏ để dễ đọc đòn nào phủ ô nào).
   - [ ] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng"; `tools/test.sh` phải trượt. Không commit khi đỏ.
 - [ ] **Task 2: Lõi luật `TelegraphMarks`** (AC: 4–7, 11)
@@ -170,8 +174,17 @@ Thư mục mới `tests/kich_ban/don_dich/`. Bàn 7×7 toàn đất trống tr�
 
 ### Debug Log References
 
+- 2026-10-21 Task 1.1–1.3: khung `TelegraphMarks` (trả rỗng), khóa `o_do` (loader, data, runner, viewer có bàn thứ ba "Ô ĐỎ"), 3 khóa `scenario.viewer.marks*`. 7 kịch bản `don_dich/`. `tools/test.sh`: 522/522 đạt, `Kịch bản luật: 59 đã duyệt · 7 chưa duyệt (7 chưa đạt)`; cả 7 trượt dạng `sau: ô … mong đợi đỏ (đòn …), thực tế không đỏ`, khớp bảng. Vị trí quân sau pha chuẩn bị đã đối chiếu bằng mô phỏng luật 2.6: không quân Nguyên nào bị dời khác bảng.
+- Ghi chú: `JSON.stringify` của Godot xếp khóa theo chữ, nên câu lỗi `o_do` trong test ra theo thứ tự khóa đã xếp.
+
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
 
 ### File List
+
+- `game/src/core/telegraph_marks.gd`, `.uid` (mới)
+- `game/src/data/scenario_loader.gd`, `game/src/data/scenario_data.gd`
+- `game/tests/scenario_runner.gd`, `game/tests/scenario_viewer.gd`, `game/tests/test_scenario_loader.gd`
+- `game/i18n/text.csv`, `game/i18n/text.vi.translation`
+- `game/tests/kich_ban/don_dich/*.json` (7 file mới)

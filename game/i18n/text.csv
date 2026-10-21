@@ -73,6 +73,9 @@ scenario.viewer.direction_B,Bắc
 scenario.viewer.direction_D,Đông
 scenario.viewer.direction_N,Nam
 scenario.viewer.direction_T,Tây
+scenario.viewer.marks,Ô ĐỎ
+scenario.viewer.marks_none,Ô đỏ: không ô nào đỏ
+scenario.viewer.marks_many,Ô đỏ %s: đòn %s
 scenario.viewer.unknown_arg,"bỏ qua tham số lạ: ""%s"""
 scenario.viewer.unknown_group,"không có nhóm ""%s"". Các nhóm đang có: %s"
 scenario.viewer.no_groups,(chưa có nhóm nào)

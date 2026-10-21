@@ -152,10 +152,14 @@ static func render(scenario: ScenarioData, stats: Stats) -> String:
 	var left: PackedStringArray = _board(size, scenario.before.terrain, before_units,
 		_t("scenario.viewer.before"))
 	var right: PackedStringArray = _board(size, scenario.after_terrain, after_units, _t("scenario.viewer.after"))
+	# Bàn thứ ba "Ô ĐỎ" khi kịch bản ghi "sau.o_do" (Story 2.7).
+	var marks: PackedStringArray = _marks_board(size, scenario.after_marks) if scenario.checks_marks \
+		else PackedStringArray()
 	for i: int in range(maxi(left.size(), right.size())):
 		var l: String = left[i] if i < left.size() else ""
 		var r: String = right[i] if i < right.size() else ""
-		lines.append((l.rpad(LEFT_WIDTH) + r).strip_edges(false, true))
+		var m: String = marks[i] if i < marks.size() else ""
+		lines.append((l.rpad(LEFT_WIDTH) + r.rpad(LEFT_WIDTH if not m.is_empty() else 0) + m).strip_edges(false, true))
 
 	lines.append_array(_notes_side_by_side(
 		_notes(size, scenario.before.terrain, before_units, stats),
@@ -167,6 +171,11 @@ static func render(scenario: ScenarioData, stats: Stats) -> String:
 	if scenario.checks_telegraphs:
 		lines.append("")
 		lines.append_array(_telegraph_lines(scenario, after_units))
+	if scenario.checks_marks:
+		var notes: PackedStringArray = _marks_lines(size, scenario.after_marks)
+		if not notes.is_empty():
+			lines.append("")
+			lines.append_array(notes)
 	lines.append("")
 	return "\n".join(lines)
 
@@ -236,6 +245,46 @@ static func _board(size: Vector2i, terrain: PackedInt32Array, units: Dictionary,
 			else:
 				cells.append(ScenarioRunner.terrain_symbol(terrain[r * size.x + c]))
 		lines.append("   %d  %s" % [r, " ".join(cells)])
+	return lines
+
+
+## Bàn "Ô ĐỎ": ô đỏ ghi số thứ tự đòn phủ nó (một chữ số), ô có từ hai đòn ghi "*"; ô khác ".".
+static func _marks_board(size: Vector2i, marks: Dictionary) -> PackedStringArray:
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append("      " + _t("scenario.viewer.marks"))
+	var header: PackedStringArray = PackedStringArray()
+	for c: int in range(size.x):
+		header.append(str(c))
+	lines.append("      " + " ".join(header))
+	for r: int in range(size.y):
+		var cells: PackedStringArray = PackedStringArray()
+		for c: int in range(size.x):
+			var orders: Array = marks.get(Vector2i(c, r), []) as Array
+			if orders.is_empty():
+				cells.append(".")
+			elif orders.size() == 1:
+				cells.append(str(orders[0]))
+			else:
+				cells.append("*")
+		lines.append("   %d  %s" % [r, " ".join(cells)])
+	return lines
+
+
+## Dòng dưới bàn "Ô ĐỎ": ô có từ hai đòn ("3,3: đòn 1·2"), hoặc "không ô nào đỏ".
+static func _marks_lines(size: Vector2i, marks: Dictionary) -> PackedStringArray:
+	var lines: PackedStringArray = PackedStringArray()
+	if marks.is_empty():
+		lines.append("  " + _t("scenario.viewer.marks_none"))
+		return lines
+	for r: int in range(size.y):
+		for c: int in range(size.x):
+			var orders: Array = marks.get(Vector2i(c, r), []) as Array
+			if orders.size() < 2:
+				continue
+			var parts: PackedStringArray = PackedStringArray()
+			for order: Variant in orders:
+				parts.append(str(order))
+			lines.append("  " + _t("scenario.viewer.marks_many") % [BoardText.cell_text(Vector2i(c, r)), "·".join(parts)])
 	return lines
 
 

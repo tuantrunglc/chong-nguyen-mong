@@ -1070,3 +1070,58 @@ func test_compare_telegraphs_reports_wrong_and_extra() -> void:
 		ScenarioData.ExpectedTelegraph.new(2, Vector2i(3, 3), Telegraph.Kind.CELL, Vector2i(3, 4))]
 	assert_eq(ScenarioRunner._compare_telegraphs(state, wanted),
 		["sau: đòn 1 mong đợi quân ở 0,3 xung phong hướng N, thực tế quân ở 0,3 xung phong hướng D"] as Array[String])
+
+
+# ---------- Ô đỏ ("sau.o_do", Story 2.7) ----------
+
+func test_after_marks_are_read() -> void:
+	var s: ScenarioData = _scenario(_valid())
+	if s == null:
+		return
+	assert_false(s.checks_marks, "không ghi o_do thì không kiểm")
+	var d: Dictionary = _valid()
+	d["sau"]["o_do"] = {"5,5": [1], "4,4": [3, 1]}
+	s = _scenario(d)
+	if s == null:
+		return
+	assert_true(s.checks_marks)
+	assert_eq(s.after_marks.size(), 2)
+	assert_eq(s.after_marks[Vector2i(5, 5)], [1] as Array[int])
+	assert_eq(s.after_marks[Vector2i(4, 4)], [1, 3] as Array[int], "xếp tăng dần")
+	d["sau"]["o_do"] = {}
+	s = _scenario(d)
+	if s == null:
+		return
+	assert_true(s.checks_marks, "{} vẫn kiểm: không ô nào đỏ")
+	assert_eq(s.after_marks.size(), 0)
+
+
+func test_after_marks_errors() -> void:
+	var d: Dictionary = _valid()
+	d["sau"]["o_do"] = {"9,9": [1], "a": [1], "3,4": [1], "03,4": [2], "1,1": [], "2,2": [0], "3,3": [1, 1],
+		"4,4": 1}
+	var w: String = F + ': "sau.o_do" '
+	var rule: String = " phải là danh sách số thứ tự (số nguyên từ 1, không trùng), đang là "
+	# JSON.stringify xếp khóa theo chữ, nên lỗi ra theo thứ tự khóa đã xếp.
+	assert_eq(_errors(d), [
+		w + "ô 1,1" + rule + "[]",
+		w + "ô 2,2" + rule + "[0]",
+		w + "ô 3,3" + rule + "[1,1]",
+		w + 'ghi ô 3,4 hai lần ("03,4" và "3,4")',
+		w + "ô 4,4" + rule + "1",
+		w + "ô 9,9 nằm ngoài bàn",
+		w + 'có khóa "a" không phải tọa độ "cot,hang"',
+	] as Array[String])
+	d["sau"]["o_do"] = []
+	assert_eq(_errors(d), [F + ': "sau.o_do" phải là một object, đang là []'] as Array[String])
+	d = _valid()
+	d["truoc"]["o_do"] = {}
+	assert_eq(_parse(d).warnings, [F + ': bỏ qua khóa lạ "truoc.o_do"'] as Array[String])
+
+
+func test_runner_compares_marks_only_when_written() -> void:
+	var d: Dictionary = _valid()
+	d["sau"]["o_do"] = {}
+	assert_true(_run(d).passed, "bàn không có đòn, kịch bản ghi {}")
+	d["sau"]["o_do"] = {"5,5": [1, 2]}
+	assert_eq(_run(d).problems, ["sau: ô 5,5 mong đợi đỏ (đòn 1·2), thực tế không đỏ"] as Array[String])

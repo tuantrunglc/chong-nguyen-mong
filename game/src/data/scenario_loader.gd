@@ -12,9 +12,10 @@ const FORMAT_VERSION: int = 1
 
 const ROOT_KEYS: Array[String] = ["phien_ban_dinh_dang", "mo_ta", "da_duyet", "truoc", "hanh_dong", "sau"]
 const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich"]
-## "hiep", "da_di", "da_danh", "ket_qua", "bao_don" không bắt buộc: không ghi thì không kiểm (review Story 1.5, tác
-## giả chốt 2026-10-18; "ket_qua": Story 2.5; "bao_don": Story 2.6).
-const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh", "ket_qua", "bao_don"]
+## "hiep", "da_di", "da_danh", "ket_qua", "bao_don", "o_do" không bắt buộc: không ghi thì không kiểm (review Story 1.5,
+## tác giả chốt 2026-10-18; "ket_qua": Story 2.5; "bao_don": Story 2.6; "o_do": Story 2.7).
+const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh", "ket_qua", "bao_don",
+	"o_do"]
 ## Khóa của một mục "bao_don": "o" (đòn vào ô) hoặc "huong" (xung phong), đúng một trong hai.
 const TELEGRAPH_KEYS: Array[String] = ["thu_tu", "quan", "o", "huong"]
 const DIRECTION_LIST: String = '"B", "D", "N", "T"'
@@ -81,6 +82,8 @@ class Section:
 	var outcome: String = ""
 	## "bao_don" (chỉ "sau"): Array[ScenarioData.ExpectedTelegraph] theo số thứ tự; null là không ghi hoặc sai.
 	var telegraphs: Variant = null
+	## "o_do" (chỉ "sau"): ô -> Array[int] số thứ tự tăng dần; null là không ghi hoặc sai.
+	var marks: Variant = null
 
 
 ## Mọi file .json trong root_dir và thư mục con, sắp theo đường dẫn. Thư mục không có thì [].
@@ -158,6 +161,9 @@ static func parse_scenario(text: String, path: String, root_dir: String, stats: 
 	if after.telegraphs != null:
 		scenario.checks_telegraphs = true
 		scenario.after_telegraphs = after.telegraphs as Array[ScenarioData.ExpectedTelegraph]
+	if after.marks != null:
+		scenario.checks_marks = true
+		scenario.after_marks = after.marks as Dictionary
 	for cell: Vector2i in BoardLayers.reading_order(after.unit_rows, _unit_symbols()):
 		var type: int = BoardText.UNIT_SYMBOLS[BoardLayers.symbol(after.unit_rows, cell)] as int
 		var hp: int = after.hp[cell] as int if after.hp.has(cell) else stats.max_hp(type)
@@ -261,6 +267,8 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 			side.outcome = outcome as String
 	if known.has("bao_don") and section.has("bao_don"):
 		side.telegraphs = _read_telegraphs(section["bao_don"], name + ".bao_don", name + ".quan", side, file, result)
+	if known.has("o_do") and section.has("o_do"):
+		side.marks = _read_marks(section["o_do"], name + ".o_do", side, file, result)
 	return side
 
 
@@ -375,6 +383,56 @@ static func _read_telegraph_cell(d: Dictionary, key: String, where: String, size
 		result.add_error('%s: "%s" là %s, không phải ô trong bàn' % [where, key, JsonFile.show(value)])
 		return null
 	return parsed
+
+
+## "o_do": { "cot,hang": [số thứ tự, …] }: mọi ô đỏ và các đòn phủ ô đó; {} là không ô nào đỏ. Trả ô -> Array[int]
+## tăng dần, hoặc null nếu sai (đã thêm lỗi).
+static func _read_marks(value: Variant, shown: String, side: Section, file: String, result: LoadResult) -> Variant:
+	if not value is Dictionary:
+		result.add_error(JsonFile.type_error(file, shown, "một object", value))
+		return null
+	var errors_before: int = result.errors.size()
+	var board: Rect2i = Rect2i(Vector2i.ZERO, side.size)
+	var marks: Dictionary = {}
+	var seen: Dictionary = {}  # ô -> khóa đầu tiên trỏ tới ô đó
+	var map: Dictionary = value as Dictionary
+	for key: Variant in map.keys():
+		var parsed: Variant = BoardText.parse_cell(key as String) if key is String else null
+		if parsed == null:
+			result.add_error('%s: "%s" có khóa %s không phải tọa độ "cot,hang"' % [file, shown, JsonFile.show(key)])
+			continue
+		var cell: Vector2i = parsed as Vector2i
+		var cell_shown: String = BoardText.cell_text(cell)
+		if seen.has(cell):
+			result.add_error('%s: "%s" ghi ô %s hai lần (%s và %s)'
+				% [file, shown, cell_shown, JsonFile.show(seen[cell]), JsonFile.show(key)])
+			continue
+		seen[cell] = key
+		if side.size != BoardLayers.NO_SIZE and not board.has_point(cell):
+			result.add_error('%s: "%s" ô %s nằm ngoài bàn' % [file, shown, cell_shown])
+			continue
+		var orders: Variant = _read_orders(map[key])
+		if orders == null:
+			result.add_error('%s: "%s" ô %s phải là danh sách số thứ tự (số nguyên từ 1, không trùng), đang là %s'
+				% [file, shown, cell_shown, JsonFile.show(map[key])])
+			continue
+		marks[cell] = orders
+	if result.errors.size() != errors_before:
+		return null
+	return marks
+
+
+## Danh sách số nguyên ≥ 1, không rỗng, không trùng -> Array[int] tăng dần; sai thì null.
+static func _read_orders(value: Variant) -> Variant:
+	if not value is Array or (value as Array).is_empty():
+		return null
+	var orders: Array[int] = []
+	for item: Variant in value as Array:
+		if not JsonFile.is_whole(item) or int(item) < 1 or orders.has(int(item)):
+			return null
+		orders.append(int(item))
+	orders.sort()
+	return orders
 
 
 ## "mau": { "cot,hang": máu } cho quân không đầy máu.
