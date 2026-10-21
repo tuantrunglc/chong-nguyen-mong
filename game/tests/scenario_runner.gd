@@ -184,7 +184,45 @@ static func compare(state: BattleState, scenario: ScenarioData) -> Array[String]
 				% [unit_symbol(type), UNIT_NAMES.get(type, "?"), want, got])
 	if not scenario.after_outcome.is_empty() and _outcome(state) != scenario.after_outcome:
 		problems.append('sau: mong đợi kết cục "%s", thực tế "%s"' % [scenario.after_outcome, _outcome(state)])
+	if scenario.checks_telegraphs:
+		problems.append_array(_compare_telegraphs(state, scenario.after_telegraphs))
 	return problems
+
+
+## So đòn đã báo theo số thứ tự: mỗi số thứ tự có ở một bên mà khác hoặc thiếu ở bên kia là một câu.
+static func _compare_telegraphs(state: BattleState, wanted: Array[ScenarioData.ExpectedTelegraph]) -> Array[String]:
+	var problems: Array[String] = []
+	var got: Dictionary = {}  # thu_tu -> mô tả đòn thực tế
+	var orders: Array[int] = []
+	for t: Telegraph in state.telegraphs:
+		var owner: Unit = state.unit_by_id(t.owner_id)
+		var owner_cell: Vector2i = owner.cell if owner != null else Telegraph.NO_CELL
+		var target: Vector2i = t.target_cell(state) if t.kind == Telegraph.Kind.CELL else t.offset
+		got[t.order] = telegraph_text(owner_cell, t.kind, target)
+		if not orders.has(t.order):
+			orders.append(t.order)
+	for w: ScenarioData.ExpectedTelegraph in wanted:
+		var want_text: String = telegraph_text(w.owner_cell, w.kind, w.target)
+		if not got.has(w.order):
+			problems.append("sau: đòn %d mong đợi %s, thực tế không có đòn %d" % [w.order, want_text, w.order])
+		elif got[w.order] != want_text:
+			problems.append("sau: đòn %d mong đợi %s, thực tế %s" % [w.order, want_text, got[w.order]])
+	orders.sort()
+	for order: int in orders:
+		var listed: bool = false
+		for w: ScenarioData.ExpectedTelegraph in wanted:
+			listed = listed or w.order == order
+		if not listed:
+			problems.append("sau: thừa đòn %d: %s" % [order, got[order]])
+	return problems
+
+
+## "quân ở 3,3 đánh ô 3,4" hoặc "quân ở 0,3 xung phong hướng D" (cho câu so sánh, không qua tr()).
+static func telegraph_text(owner_cell: Vector2i, kind: Telegraph.Kind, target: Vector2i) -> String:
+	if kind == Telegraph.Kind.CELL:
+		return "quân ở %s đánh ô %s" % [BoardText.cell_text(owner_cell), BoardText.cell_text(target)]
+	var code: Variant = BoardText.DIRECTION_CODES.find_key(target)
+	return "quân ở %s xung phong hướng %s" % [BoardText.cell_text(owner_cell), code if code != null else "?"]
 
 
 ## Kết cục của state theo cách kịch bản ghi ("ket_qua").

@@ -1,6 +1,10 @@
+---
+baseline_commit: 4f66e01
+---
+
 # Story 2.6: Địch chuẩn bị: AI đi và chọn mục tiêu
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 
@@ -42,9 +46,9 @@ _**Chưa có** (đừng làm ở đây): vẽ ô đỏ, số thứ tự, mũi t�
 
 ## Tasks / Subtasks
 
-- [ ] **Task 0: Tác giả chốt 3 câu hỏi** ở "Quyết định của tác giả" (2026-10-21: câu 1 tướng ít máu hơn, câu 2 ít bước nhất, câu 3 không báo đòn). Các Task dưới viết đúng theo ba lựa chọn này.
+- [x] **Task 0: Tác giả chốt 3 câu hỏi** ở "Quyết định của tác giả" (2026-10-21: câu 1 tướng ít máu hơn, câu 2 ít bước nhất, câu 3 không báo đòn). Các Task dưới viết đúng theo ba lựa chọn này.
 - [ ] **Task 1: Khung, đợt kịch bản 8, dừng chờ duyệt** (AC: 1, 2, 13)
-  - [ ] 1.1 Khung (không phải code luật, làm trước để kịch bản nạp và so được):
+  - [x] 1.1 Khung (không phải code luật, làm trước để kịch bản nạp và so được):
     - `src/core/telegraph.gd` (MỚI): đúng mẫu M1 của kiến trúc: `class_name Telegraph extends RefCounted`, `enum Kind { CELL, DIRECTION }`, `owner_id`, `kind`, `offset: Vector2i`, `order: int`, gán trong `_init`. Hàm `target_cell(state)` (chỉ cho `CELL`; chủ đòn không còn thì trả `Vector2i(-1, -1)`, không crash) và `clone()`.
     - `src/core/battle_state.gd`: `var telegraphs: Array[Telegraph] = []`; `clone()` chép **từng** telegraph bằng `Telegraph.clone()` (không `duplicate(true)`: luật project-context). `validate()`: số thứ tự (`order`) mỗi đòn từ 1, không trùng.
     - `src/data/scenario_loader.gd`: khóa mới `bao_don` của `sau` (không bắt buộc), thêm vào `AFTER_KEYS`. Mỗi phần tử: `{"thu_tu": <số nguyên ≥ 1>, "quan": "cot,hang", "o": "cot,hang"}` (Bộ binh) **hoặc** `{"thu_tu": …, "quan": …, "huong": "B" | "D" | "N" | "T"}` (Kỵ binh). Kiểm: đúng một trong `o`/`huong`; `quan` trong bàn và có quân Nguyên ở `sau.quan`; `o` trong bàn; `thu_tu` không trùng. Sai thì câu lỗi tiếng Việt kèm file, phần tử thứ mấy và giá trị sai (mẫu câu lỗi của `ket_qua`). `[]` là "không quân nào báo đòn" (vẫn kiểm).
@@ -54,9 +58,9 @@ _**Chưa có** (đừng làm ở đây): vẽ ô đỏ, số thứ tự, mũi t�
     - Hướng trong file: `B`, `D`, `N`, `T` (Bắc, Đông, Nam, Tây; viết không dấu như mọi khóa). Bảng chuyển hướng ↔ `Vector2i` để một chỗ (ví dụ trong `board_text.gd`, cạnh `cell_text`) để loader, runner, viewer, F3 dùng chung.
     - `tests/test_scenario_loader.gd`: ca nạp `bao_don` đúng (ô, hướng, rỗng); ca sai: thiếu cả `o` lẫn `huong`, có cả hai, `huong` lạ, `thu_tu` trùng hoặc < 1, `quan` không có quân Nguyên, ô ngoài bàn.
     - **Chưa** viết `EnemyAI`, chưa sửa `RulesEnemyPhase`: kịch bản nạp được nhưng chạy thì trượt.
-  - [ ] 1.2 Viết 10 file đúng như Dev Notes "Đợt kịch bản 8", `"da_duyet": false`, thư mục mới `tests/kich_ban/ai/`. Chép cấu trúc từ `tests/kich_ban/hiep/ket_thuc_luot_di_lai_duoc.json`. Không đụng 49 kịch bản đã duyệt.
-  - [ ] 1.3 `tools/xem_kich_ban.sh ai`: đọc lại từng bàn trước/sau và mục "Đòn đã báo", khớp `mo_ta`. `tools/test.sh`: xanh, `49 đã duyệt · 10 chưa duyệt (10 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
-  - [ ] 1.4 Commit: `Kịch bản AI quân Nguyên chờ duyệt (Story 2.6)`.
+  - [x] 1.2 Viết 10 file đúng như Dev Notes "Đợt kịch bản 8", `"da_duyet": false`, thư mục mới `tests/kich_ban/ai/`. Chép cấu trúc từ `tests/kich_ban/hiep/ket_thuc_luot_di_lai_duoc.json`. Không đụng 49 kịch bản đã duyệt.
+  - [x] 1.3 `tools/xem_kich_ban.sh ai`: đọc lại từng bàn trước/sau và mục "Đòn đã báo", khớp `mo_ta`. `tools/test.sh`: xanh, `49 đã duyệt · 10 chưa duyệt (10 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
+  - [x] 1.4 Commit: `Kịch bản AI quân Nguyên chờ duyệt (Story 2.6)`.
   - [ ] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh ai`, đọc 10 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ:
     - mọi kịch bản là **một lần Kết thúc lượt**: bàn sau là đầu hiệp 2, sau khi quân Nguyên đã đi và báo đòn; đòn **chưa đánh** (Story 2.8);
     - mục "Đòn đã báo" là thứ sẽ thành ô đỏ và số thứ tự ở Story 2.7;
@@ -283,8 +287,19 @@ _Ba câu GDD chưa nói rõ. Tác giả chốt 2026-10-21._
 
 ### Debug Log References
 
+- 2026-10-21 Task 1.1: khung xong (`Telegraph`, `BattleState.telegraphs` + clone/validate, `BoardText.DIRECTION_CODES`, `bao_don` trong loader/data/runner/viewer, 8 khóa `scenario.viewer.*`). `tools/test.sh`: 489/489 đạt, `49 đã duyệt · 0 chưa duyệt`.
+- 2026-10-21 Task 1.3: 10 kịch bản `ai/`, `tools/test.sh`: 489/489 đạt, `Kịch bản luật: 49 đã duyệt · 10 chưa duyệt (10 chưa đạt)`. Lý do khớp bảng: #2 `sau: đòn 1 mong đợi quân ở 3,3 đánh ô 3,4, thực tế không có đòn 1`; 9 cái còn lại trượt ở ô quân Nguyên (còn ở ô cũ). Bàn sau đã kiểm bằng mô phỏng tay theo "Thuật toán" (khớp bảng cả 10).
+- Lệch nhỏ so với Tasks: công cụ duyệt in "đánh ô" thay cho "chém ô" (một câu chung cho mọi đòn vào ô, Cung kỵ 2.15 dùng lại).
+
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
 
 ### File List
+
+- `game/src/core/telegraph.gd` (mới), `game/src/core/telegraph.gd.uid` (mới)
+- `game/src/core/battle_state.gd`
+- `game/src/data/board_text.gd`, `game/src/data/scenario_data.gd`, `game/src/data/scenario_loader.gd`
+- `game/tests/scenario_runner.gd`, `game/tests/scenario_viewer.gd`, `game/tests/test_scenario_loader.gd`
+- `game/i18n/text.csv`, `game/i18n/text.vi.translation`
+- `game/tests/kich_ban/ai/*.json` (10 file mới)

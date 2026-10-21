@@ -41,6 +41,23 @@ class ExpectedUnit:
 		hp = p_hp
 
 
+## Một đòn mong đợi ở bàn sau ("sau.bao_don", Story 2.6). Chủ đòn chỉ theo ô (bàn sau so theo ô, không theo id).
+class ExpectedTelegraph:
+	extends RefCounted
+
+	var order: int
+	var owner_cell: Vector2i
+	var kind: Telegraph.Kind
+	## CELL: ô bị nhắm (tuyệt đối). DIRECTION: hướng xung phong (một phần tử của Grid.DIRECTIONS).
+	var target: Vector2i
+
+	func _init(p_order: int, p_owner_cell: Vector2i, p_kind: Telegraph.Kind, p_target: Vector2i) -> void:
+		order = p_order
+		owner_cell = p_owner_cell
+		kind = p_kind
+		target = p_target
+
+
 ## Đường res:// (hoặc user:// trong test).
 var path: String = ""
 ## Tính từ thư mục kich_ban, ví dụ "di_chuyen/di_thang_3_o.json".
@@ -67,3 +84,7 @@ var checks_attacked: bool = false
 var after_attacked: Array[int] = []
 ## Kết cục mong đợi ("sau.ket_qua": "dang_choi", "thang", "thua"); "" là không kiểm.
 var after_outcome: String = ""
+## Có kiểm đòn đã báo không ("sau.bao_don" có ghi, kể cả []).
+var checks_telegraphs: bool = false
+## Theo số thứ tự tăng dần.
+var after_telegraphs: Array[ExpectedTelegraph] = []

@@ -970,3 +970,92 @@ func test_viewer_keeps_after_notes_aligned_when_before_notes_are_long() -> void:
 	var width: int = maxi(26, maxi(left_hp.length(), left_under.length()) + 2)
 	assert_eq(hp_line, left_hp.rpad(width) + "  Máu:  5,4 %s 1/3" % tr("scenario.unit.bo_binh"))
 	assert_eq(under_line, left_under, "bàn sau không có quân trên hầm chông nên bên phải trống")
+
+
+# ---------- Đòn đã báo ("sau.bao_don", Story 2.6) ----------
+
+func test_after_telegraphs_are_read_in_order() -> void:
+	var s: ScenarioData = _scenario(_valid())
+	if s == null:
+		return
+	assert_false(s.checks_telegraphs, "không ghi bao_don thì không kiểm")
+	var d: Dictionary = _valid()
+	d["sau"]["bao_don"] = [
+		{"thu_tu": 2, "quan": "5,4", "huong": "T"},
+		{"thu_tu": 1, "quan": "5,4", "o": "5,5"},
+	]
+	s = _scenario(d)
+	if s == null:
+		return
+	assert_true(s.checks_telegraphs)
+	assert_eq(s.after_telegraphs.size(), 2)
+	assert_eq(s.after_telegraphs[0].order, 1, "xếp theo thu_tu")
+	assert_eq(s.after_telegraphs[0].owner_cell, Vector2i(5, 4))
+	assert_eq(s.after_telegraphs[0].kind, Telegraph.Kind.CELL)
+	assert_eq(s.after_telegraphs[0].target, Vector2i(5, 5))
+	assert_eq(s.after_telegraphs[1].kind, Telegraph.Kind.DIRECTION)
+	assert_eq(s.after_telegraphs[1].target, Vector2i(-1, 0))
+	d["sau"]["bao_don"] = []
+	s = _scenario(d)
+	if s == null:
+		return
+	assert_true(s.checks_telegraphs, "[] vẫn kiểm: không quân nào báo đòn")
+	assert_eq(s.after_telegraphs.size(), 0)
+
+
+func test_after_telegraph_errors() -> void:
+	var d: Dictionary = _valid()
+	d["sau"]["bao_don"] = [
+		{"thu_tu": 1, "quan": "5,4"},
+		{"thu_tu": 2, "quan": "5,4", "o": "5,5", "huong": "B"},
+		{"thu_tu": 3, "quan": "5,4", "huong": "Bac"},
+		{"thu_tu": 3, "quan": "5,4", "o": "5,3"},
+		{"thu_tu": 0, "quan": "0,6", "o": "9,9"},
+		{"quan": "5,4", "o": "5,3"},
+		"5,4",
+	]
+	var w: String = F + ': "sau.bao_don" mục '
+	assert_eq(_errors(d), [
+		w + '1: phải có đúng một trong "o" (đòn vào ô) và "huong" (xung phong)',
+		w + '2: phải có đúng một trong "o" (đòn vào ô) và "huong" (xung phong)',
+		w + '3: "huong" là "Bac", chỉ được "B", "D", "N", "T"',
+		w + '4: "thu_tu" 3 trùng với mục 3',
+		w + '5: "thu_tu" phải là số nguyên từ 1 trở lên, đang là 0',
+		w + '5: "quan" ô 0,6 không có quân Nguyên trong "sau.quan"',
+		w + '5: "o" là "9,9", không phải ô trong bàn',
+		w + '6: thiếu khóa "thu_tu"',
+		w + '7 phải là một object, đang là "5,4"',
+	] as Array[String])
+	d["sau"]["bao_don"] = {"thu_tu": 1}
+	assert_eq(_errors(d), [F + ': "sau.bao_don" phải là một danh sách, đang là {"thu_tu":1}'] as Array[String])
+	d = _valid()
+	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,5", "loai": "B"}]
+	assert_eq(_parse(d).warnings, [F + ': "sau.bao_don" mục 1: bỏ qua khóa lạ "loai"'] as Array[String])
+	d = _valid()
+	d["truoc"]["bao_don"] = []
+	assert_eq(_parse(d).warnings, [F + ': bỏ qua khóa lạ "truoc.bao_don"'] as Array[String])
+
+
+func test_runner_compares_telegraphs_only_when_written() -> void:
+	var d: Dictionary = _valid()
+	d["sau"]["bao_don"] = []
+	assert_true(_run(d).passed, "bàn không có đòn, kịch bản ghi []")
+	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,5"}]
+	var result: ScenarioRunner.ScenarioResult = _run(d)
+	assert_eq(result.problems,
+		["sau: đòn 1 mong đợi quân ở 5,4 đánh ô 5,5, thực tế không có đòn 1"] as Array[String])
+
+
+func test_compare_telegraphs_reports_wrong_and_extra() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "B", Vector2i(0, 3): "K", Vector2i(3, 4): "1"})
+	state.telegraphs.append(Telegraph.new(101, Telegraph.Kind.DIRECTION, Vector2i(1, 0), 1))
+	state.telegraphs.append(Telegraph.new(102, Telegraph.Kind.CELL, Vector2i(0, 1), 2))
+	var wanted: Array[ScenarioData.ExpectedTelegraph] = [
+		ScenarioData.ExpectedTelegraph.new(1, Vector2i(0, 3), Telegraph.Kind.DIRECTION, Vector2i(1, 0)),
+	]
+	assert_eq(ScenarioRunner._compare_telegraphs(state, wanted),
+		["sau: thừa đòn 2: quân ở 3,3 đánh ô 3,4"] as Array[String])
+	wanted = [ScenarioData.ExpectedTelegraph.new(1, Vector2i(0, 3), Telegraph.Kind.DIRECTION, Vector2i(0, 1)),
+		ScenarioData.ExpectedTelegraph.new(2, Vector2i(3, 3), Telegraph.Kind.CELL, Vector2i(3, 4))]
+	assert_eq(ScenarioRunner._compare_telegraphs(state, wanted),
+		["sau: đòn 1 mong đợi quân ở 0,3 xung phong hướng N, thực tế quân ở 0,3 xung phong hướng D"] as Array[String])

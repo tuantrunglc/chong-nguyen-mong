@@ -164,8 +164,33 @@ static func render(scenario: ScenarioData, stats: Stats) -> String:
 	if not after_state.is_empty():
 		lines.append("")
 		lines.append("  " + after_state)
+	if scenario.checks_telegraphs:
+		lines.append("")
+		lines.append_array(_telegraph_lines(scenario, after_units))
 	lines.append("")
 	return "\n".join(lines)
+
+
+## "Đòn đã báo:" rồi mỗi đòn một dòng theo số thứ tự ("sau.bao_don", Story 2.6).
+static func _telegraph_lines(scenario: ScenarioData, after_units: Dictionary) -> PackedStringArray:
+	var lines: PackedStringArray = PackedStringArray()
+	if scenario.after_telegraphs.is_empty():
+		lines.append("  " + _t("scenario.viewer.telegraphs_none"))
+		return lines
+	lines.append("  " + _t("scenario.viewer.telegraphs"))
+	for t: ScenarioData.ExpectedTelegraph in scenario.after_telegraphs:
+		var owner: Array = after_units.get(t.owner_cell, [-1, 0]) as Array
+		var name: String = _unit_name(owner[0] as int)
+		var text: String
+		if t.kind == Telegraph.Kind.CELL:
+			text = _t("scenario.viewer.telegraph_cell") % [name, BoardText.cell_text(t.owner_cell),
+				BoardText.cell_text(t.target)]
+		else:
+			var code: String = str(BoardText.DIRECTION_CODES.find_key(t.target))
+			text = _t("scenario.viewer.telegraph_charge") % [name, BoardText.cell_text(t.owner_cell),
+				_t("scenario.viewer.direction_" + code)]
+		lines.append("    %d. %s" % [t.order, text])
+	return lines
 
 
 ## "Sau lệnh: hiệp 2 · đã đi: Nguyễn Khoái · đã đánh: ..." từ "sau.hiep", "sau.da_di", "sau.da_danh"; "" nếu kịch

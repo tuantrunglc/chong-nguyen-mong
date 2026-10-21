@@ -65,6 +65,14 @@ scenario.viewer.after_outcome,kết quả: %s
 scenario.viewer.outcome_dang_choi,đang chơi
 scenario.viewer.outcome_thang,thắng
 scenario.viewer.outcome_thua,thua
+scenario.viewer.telegraphs,Đòn đã báo (chưa đánh):
+scenario.viewer.telegraphs_none,Đòn đã báo: không quân nào báo đòn
+scenario.viewer.telegraph_cell,%s ở %s đánh ô %s
+scenario.viewer.telegraph_charge,%s ở %s xung phong về hướng %s
+scenario.viewer.direction_B,Bắc
+scenario.viewer.direction_D,Đông
+scenario.viewer.direction_N,Nam
+scenario.viewer.direction_T,Tây
 scenario.viewer.unknown_arg,"bỏ qua tham số lạ: ""%s"""
 scenario.viewer.unknown_group,"không có nhóm ""%s"". Các nhóm đang có: %s"
 scenario.viewer.no_groups,(chưa có nhóm nào)

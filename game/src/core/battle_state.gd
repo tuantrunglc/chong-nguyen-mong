@@ -22,6 +22,8 @@ var stats: Stats = null
 var phase: Phase = Phase.PLAYER
 ## Kiểu nhiệm vụ của trận (chép từ file trận). Kịch bản luật không ghi kiểu nên là Tiêu diệt.
 var mission: LevelData.Mission = LevelData.Mission.ELIMINATE
+## Đòn quân Nguyên đã báo trong pha chuẩn bị của hiệp này (Story 2.6), theo số thứ tự.
+var telegraphs: Array[Telegraph] = []
 
 
 ## Tướng: id = vị trí trong UnitType.GENERALS + 1. Quân Nguyên: 101, 102… theo thứ tự level.units
@@ -54,6 +56,8 @@ func clone() -> BattleState:
 	copy.mission = mission
 	for u: Unit in units:
 		copy.units.append(Unit.new(u.id, u.type, u.cell, u.hp, u.has_moved, u.has_attacked))
+	for t: Telegraph in telegraphs:
+		copy.telegraphs.append(t.clone())
 	return copy
 
 
@@ -81,6 +85,14 @@ func validate() -> Array[String]:
 		var max_hp: int = stats.max_hp(u.type)
 		if u.hp < 1 or u.hp > max_hp:
 			problems.append("%s có máu %d, cần từ 1 tới %d" % [where, u.hp, max_hp])
+	var orders: Dictionary = {}
+	for t: Telegraph in telegraphs:
+		if t.order < 1:
+			problems.append("đòn của quân %d có số thứ tự %d, cần từ 1 trở lên" % [t.owner_id, t.order])
+		elif orders.has(t.order):
+			problems.append("đòn số %d bị trùng (quân %d và quân %d)" % [t.order, orders[t.order], t.owner_id])
+		else:
+			orders[t.order] = t.owner_id
 	if phase == Phase.WON and mission == LevelData.Mission.ELIMINATE:
 		for u: Unit in units:
 			if u.faction == Unit.Faction.NGUYEN:

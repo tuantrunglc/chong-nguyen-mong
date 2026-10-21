@@ -26,6 +26,15 @@ const UNIT_SYMBOLS: Dictionary = {
 	"C": UnitType.CUNG_KY,
 }
 
+## Hướng trong kịch bản luật ("bao_don", Story 2.6): Bắc, Đông, Nam, Tây, viết không dấu như mọi khóa.
+## Cùng thứ tự B→Đ→N→T với Grid.DIRECTIONS.
+const DIRECTION_CODES: Dictionary = {
+	"B": Vector2i(0, -1),
+	"D": Vector2i(1, 0),
+	"N": Vector2i(0, 1),
+	"T": Vector2i(-1, 0),
+}
+
 
 ## Tách một dòng thành các ô. Chịu được dấu cách và tab thừa ở đầu, cuối, giữa,
 ## kể cả dấu cách không ngắt (U+00A0, U+3000) hay lẫn vào khi gõ tiếng Việt hoặc chép từ chỗ khác.

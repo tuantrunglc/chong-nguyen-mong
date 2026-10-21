@@ -12,9 +12,12 @@ const FORMAT_VERSION: int = 1
 
 const ROOT_KEYS: Array[String] = ["phien_ban_dinh_dang", "mo_ta", "da_duyet", "truoc", "hanh_dong", "sau"]
 const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich"]
-## "hiep", "da_di", "da_danh", "ket_qua" không bắt buộc: không ghi thì không kiểm (review Story 1.5, tác giả chốt
-## 2026-10-18; "ket_qua": Story 2.5).
-const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh", "ket_qua"]
+## "hiep", "da_di", "da_danh", "ket_qua", "bao_don" không bắt buộc: không ghi thì không kiểm (review Story 1.5, tác
+## giả chốt 2026-10-18; "ket_qua": Story 2.5; "bao_don": Story 2.6).
+const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh", "ket_qua", "bao_don"]
+## Khóa của một mục "bao_don": "o" (đòn vào ô) hoặc "huong" (xung phong), đúng một trong hai.
+const TELEGRAPH_KEYS: Array[String] = ["thu_tu", "quan", "o", "huong"]
+const DIRECTION_LIST: String = '"B", "D", "N", "T"'
 ## Giá trị của "sau.ket_qua": đang chơi, thắng, thua (khớp BattleState.Phase PLAYER, WON, LOST).
 const OUTCOMES: Array[String] = ["dang_choi", "thang", "thua"]
 const OUTCOME_LIST: String = '"dang_choi", "thang", "thua"'
@@ -76,6 +79,8 @@ class Section:
 	var attacked: Variant = null
 	## "ket_qua" (chỉ "sau"): một giá trị của OUTCOMES; "" là không ghi.
 	var outcome: String = ""
+	## "bao_don" (chỉ "sau"): Array[ScenarioData.ExpectedTelegraph] theo số thứ tự; null là không ghi hoặc sai.
+	var telegraphs: Variant = null
 
 
 ## Mọi file .json trong root_dir và thư mục con, sắp theo đường dẫn. Thư mục không có thì [].
@@ -150,6 +155,9 @@ static func parse_scenario(text: String, path: String, root_dir: String, stats: 
 		scenario.checks_attacked = true
 		scenario.after_attacked = after.attacked as Array[int]
 	scenario.after_outcome = after.outcome
+	if after.telegraphs != null:
+		scenario.checks_telegraphs = true
+		scenario.after_telegraphs = after.telegraphs as Array[ScenarioData.ExpectedTelegraph]
 	for cell: Vector2i in BoardLayers.reading_order(after.unit_rows, _unit_symbols()):
 		var type: int = BoardText.UNIT_SYMBOLS[BoardLayers.symbol(after.unit_rows, cell)] as int
 		var hp: int = after.hp[cell] as int if after.hp.has(cell) else stats.max_hp(type)
@@ -251,6 +259,8 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 			result.add_error('%s: "%s.ket_qua" là %s, chỉ được %s' % [file, name, JsonFile.show(outcome), OUTCOME_LIST])
 		else:
 			side.outcome = outcome as String
+	if known.has("bao_don") and section.has("bao_don"):
+		side.telegraphs = _read_telegraphs(section["bao_don"], name + ".bao_don", name + ".quan", side, file, result)
 	return side
 
 
@@ -281,6 +291,80 @@ static func _read_generals(value: Variant, shown: String, units_shown: String, s
 		if seen.has(symbol):
 			moved.append(BoardText.UNIT_SYMBOLS[symbol] as int)
 	return moved
+
+
+## "bao_don": [{"thu_tu": 1, "quan": "3,3", "o": "3,4"}, {"thu_tu": 2, "quan": "0,3", "huong": "D"}]: các đòn quân
+## Nguyên đã báo. [] là không quân nào báo đòn. Trả Array[ExpectedTelegraph] theo số thứ tự, hoặc null nếu sai.
+static func _read_telegraphs(value: Variant, shown: String, units_shown: String, side: Section,
+		file: String, result: LoadResult) -> Variant:
+	if not value is Array:
+		result.add_error(JsonFile.type_error(file, shown, "một danh sách", value))
+		return null
+	var errors_before: int = result.errors.size()
+	var telegraphs: Array[ScenarioData.ExpectedTelegraph] = []
+	var seen_orders: Dictionary = {}  # thu_tu -> mục đầu tiên ghi số đó
+	var items: Array = value as Array
+	for i: int in range(items.size()):
+		var where: String = '%s: "%s" mục %d' % [file, shown, i + 1]
+		if not items[i] is Dictionary:
+			result.add_error("%s phải là một object, đang là %s" % [where, JsonFile.show(items[i])])
+			continue
+		var d: Dictionary = items[i] as Dictionary
+		for key: Variant in d.keys():
+			if not TELEGRAPH_KEYS.has(key):
+				result.add_warning("%s: bỏ qua khóa lạ %s" % [where, JsonFile.show(key)])
+		var item_errors: int = result.errors.size()
+		var order: int = 0
+		if not d.has("thu_tu"):
+			result.add_error('%s: thiếu khóa "thu_tu"' % where)
+		elif not JsonFile.is_whole(d["thu_tu"]) or int(d["thu_tu"]) < 1:
+			result.add_error('%s: "thu_tu" phải là số nguyên từ 1 trở lên, đang là %s'
+				% [where, JsonFile.show(d["thu_tu"])])
+		else:
+			order = int(d["thu_tu"])
+			if seen_orders.has(order):
+				result.add_error('%s: "thu_tu" %d trùng với mục %d' % [where, order, seen_orders[order]])
+			else:
+				seen_orders[order] = i + 1
+		var owner: Variant = _read_telegraph_cell(d, "quan", where, side.size, result)
+		if owner != null and side.units_clean \
+				and not BoardLayers.ENEMY_SYMBOLS.has(BoardLayers.symbol(side.unit_rows, owner as Vector2i)):
+			result.add_error('%s: "quan" ô %s không có quân Nguyên trong "%s"'
+				% [where, BoardText.cell_text(owner as Vector2i), units_shown])
+		var kind: Telegraph.Kind = Telegraph.Kind.CELL
+		var target: Variant = null
+		if d.has("o") == d.has("huong"):
+			result.add_error('%s: phải có đúng một trong "o" (đòn vào ô) và "huong" (xung phong)' % where)
+		elif d.has("o"):
+			target = _read_telegraph_cell(d, "o", where, side.size, result)
+		else:
+			kind = Telegraph.Kind.DIRECTION
+			var code: Variant = d["huong"]
+			if not code is String or not BoardText.DIRECTION_CODES.has(code):
+				result.add_error('%s: "huong" là %s, chỉ được %s' % [where, JsonFile.show(code), DIRECTION_LIST])
+			else:
+				target = BoardText.DIRECTION_CODES[code]
+		if result.errors.size() == item_errors:
+			telegraphs.append(ScenarioData.ExpectedTelegraph.new(order, owner as Vector2i, kind, target as Vector2i))
+	if result.errors.size() != errors_before:
+		return null
+	telegraphs.sort_custom(func(a: ScenarioData.ExpectedTelegraph, b: ScenarioData.ExpectedTelegraph) -> bool:
+		return a.order < b.order)
+	return telegraphs
+
+
+## Ô "cot,hang" trong bàn của một mục "bao_don", hoặc null nếu thiếu hay sai (đã thêm lỗi).
+static func _read_telegraph_cell(d: Dictionary, key: String, where: String, size: Vector2i,
+		result: LoadResult) -> Variant:
+	if not d.has(key):
+		result.add_error('%s: thiếu khóa "%s"' % [where, key])
+		return null
+	var value: Variant = d[key]
+	var parsed: Variant = BoardText.parse_cell(value as String) if value is String else null
+	if parsed == null or (size != BoardLayers.NO_SIZE and not Rect2i(Vector2i.ZERO, size).has_point(parsed as Vector2i)):
+		result.add_error('%s: "%s" là %s, không phải ô trong bàn' % [where, key, JsonFile.show(value)])
+		return null
+	return parsed
 
 
 ## "mau": { "cot,hang": máu } cho quân không đầy máu.
