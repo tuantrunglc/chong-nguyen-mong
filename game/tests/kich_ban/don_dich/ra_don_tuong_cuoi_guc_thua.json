@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Khoái là tướng duy nhất, còn 1 máu: đòn 1 làm Khoái gục, thua ngay; đòn 2 không đánh nữa (Bộ binh 5,6 vẫn đủ máu), không sang hiệp 2.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

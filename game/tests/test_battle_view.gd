@@ -22,6 +22,9 @@ const KEO_LEVEL: String = KEO_DIR + "/tran_01.json"
 const KEO_KEY: Key = KEY_3
 const WIN_DIR: String = PROBE_DIR + "/tran_thang"
 const WIN_LEVEL: String = WIN_DIR + "/tran_01.json"
+## Trận thử cho thua vì đòn địch (Story 2.8).
+const LOSE_DIR: String = PROBE_DIR + "/tran_thua"
+const LOSE_LEVEL: String = LOSE_DIR + "/tran_01.json"
 
 ## Ô sáng mong đợi trên trận 1 (AC 4, AC 5), theo thứ tự đọc bàn.
 const KHOAI_CELLS: Array[Vector2i] = [
@@ -51,7 +54,8 @@ func after_each() -> void:
 		if InputMap.has_action("dev_f%d" % (i + 1)):
 			InputMap.erase_action("dev_f%d" % (i + 1))
 	SaveProbe.path = SaveProbe.DEFAULT_PATH
-	for path: String in [BROKEN_LEVEL, ATTACK_LEVEL, ALLY_LEVEL, LAO_LEVEL, KEO_LEVEL, WIN_LEVEL, PROBE_FILE]:
+	for path: String in [BROKEN_LEVEL, ATTACK_LEVEL, ALLY_LEVEL, LAO_LEVEL, KEO_LEVEL, WIN_LEVEL, LOSE_LEVEL,
+			PROBE_FILE]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(BROKEN_DIR)
@@ -60,6 +64,7 @@ func after_each() -> void:
 	DirAccess.remove_absolute(LAO_DIR)
 	DirAccess.remove_absolute(KEO_DIR)
 	DirAccess.remove_absolute(WIN_DIR)
+	DirAccess.remove_absolute(LOSE_DIR)
 	DirAccess.remove_absolute(PROBE_DIR)
 	Log.clear()
 
@@ -1152,3 +1157,47 @@ func test_no_f3_overlay_without_dev() -> void:
 	var main: Node2D = _make_attack_main()
 	assert_null(main._ai_overlay, "không bật dev thì không có bảng F3")
 
+
+
+# ---------- Quân Nguyên ra đòn (Story 2.8) ----------
+
+## Trận đánh thử: Bộ binh 3,3 (đòn 1) và Kỵ binh 4,4 (đòn 2) nhắm Khoái 3,4; Bộ binh 5,5 (đòn 3) nhắm Lão 5,6.
+func test_end_turn_enemy_attacks_hurt_generals() -> void:
+	var main: Node2D = _make_attack_main()
+	assert_eq(_token(main, 1).hp_text(), "3", "trước: Khoái đủ máu")
+	_press_physical(main, KEY_SPACE)
+	assert_eq(_token(main, 1).hp_text(), "1", "Khoái trúng hai đòn")
+	assert_eq(_token(main, 2).hp_text(), "2", "Lão trúng một đòn")
+	assert_eq(_unit_at(main, Vector2i(3, 4)).id, 1, "đòn địch không đẩy")
+	assert_eq(_hud(main).round_text(), "Hiệp 2")
+	assert_false(_banner(main).is_showing())
+
+
+## Một tướng (Khoái 3 máu) bị ba quân đứng kề báo đòn: Kết thúc lượt thì gục, hiện bảng thua, khóa bàn.
+func _make_lose_main() -> Node2D:
+	return _make_level_main(LOSE_DIR, LOSE_LEVEL, {
+		"phien_ban_dinh_dang": 1,
+		"ten": "Thử thua",
+		"kieu": "tieu_diet",
+		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . . . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"quan": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . B . . .",
+			". . B 1 K . .", ". . . . . . .", ". . . . . . ."],
+		"thu_tu_dich": ["3,3", "2,4", "4,4"],
+		"tiep_vien": [],
+		"muu_ke_mo": [],
+	})
+
+
+func test_enemy_attacks_can_lose_the_battle() -> void:
+	var main: Node2D = _make_lose_main()
+	assert_eq(_controller(main).snapshot().telegraphs.size(), 3, "trước: cả ba quân báo đòn vào Khoái")
+	_press_physical(main, KEY_SPACE)
+	assert_null(_controller(main).snapshot().unit_by_id(1), "Khoái gục")
+	assert_true(_banner(main).is_showing())
+	assert_eq(_banner(main).result_text(), tr("result.lost"))
+	assert_eq(_controller(main).snapshot().phase, BattleState.Phase.LOST)
+	assert_eq(_hud(main).round_text(), "Hiệp 1", "thua giữa pha địch: không sang hiệp")
+	assert_true(_hud(main).end_turn_button().disabled, "khóa bàn")
+	_press_physical(main, KEY_SPACE)
+	assert_eq(_controller(main).snapshot().round_number, 1, "Space không làm gì nữa")

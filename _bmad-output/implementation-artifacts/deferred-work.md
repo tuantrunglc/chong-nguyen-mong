@@ -121,7 +121,7 @@
 
 ## Deferred from: dev of 2-5-mau-guc-thang-va-thua-tieu-diet (2026-10-20)
 
-- Story 2.8 (đòn địch): phải gọi `RulesVictory.check(state, events)` **sau từng đòn địch** (truyền danh sách sự kiện của riêng đòn đó) và dừng pha địch khi `phase` là `WON`/`LOST`, để quân địch còn lại không đánh tiếp khi trận đã hết. Hiện `check` chỉ gọi ở cuối `Rules.resolve`.
+- ~~Story 2.8 (đòn địch): phải gọi `RulesVictory.check(state, events)` **sau từng đòn địch** (truyền danh sách sự kiện của riêng đòn đó) và dừng pha địch khi `phase` là `WON`/`LOST`, để quân địch còn lại không đánh tiếp khi trận đã hết. Hiện `check` chỉ gọi ở cuối `Rules.resolve`.~~ (xong ở Story 2.8)
 - Khi Story 2.8 hoặc 3.4 (hầm chông) cho tướng cuối gục thật bằng một lệnh, thêm kịch bản "thua" và "thắng thua cùng lúc" vào `tests/kich_ban/ket_thuc/` (hiện chỉ có test GUT dựng bằng `Effects.damage`).
 - `RulesVictory._someone_fell` dựa vào `DIED`/`DROWNED`: loại sự kiện gục mới thêm sau này (ví dụ quân tiếp viện, 3.10) phải cập nhật hàm này.
 - Nút "Chơi lại trận" của `ResultBanner` bỏ khi có menu ở Story 4.2.
@@ -134,14 +134,14 @@
 ## Deferred from: dev of 2-6-dich-chuan-bi-ai-di-va-chon-muc-tieu (2026-10-21)
 
 - Story 2.7 (vẽ báo đòn): vẽ từ `BattleState.telegraphs` của bản chụp (`Telegraph.target_cell` cho đòn vào ô; Kỵ binh `kind == DIRECTION`, `offset` là hướng). Sự kiện `TELEGRAPHED` có sẵn cho hoạt ảnh (2.11).
-- Story 2.8 (ra đòn): chèn ra đòn vào đầu `RulesEnemyPhase.end_player_turn` (đã có chú thích), trước khi sang hiệp; `prepare` đang xóa đòn cũ ở đầu pha nên đòn chưa đánh thì mất. Kịch bản `ai/` có `truoc` không có đòn nên vẫn đúng sau 2.8. Có thể cần `truoc.bao_don` để dựng đòn sẵn.
+- ~~Story 2.8 (ra đòn): chèn ra đòn vào đầu `RulesEnemyPhase.end_player_turn` (đã có chú thích), trước khi sang hiệp; `prepare` đang xóa đòn cũ ở đầu pha nên đòn chưa đánh thì mất. Kịch bản `ai/` có `truoc` không có đòn nên vẫn đúng sau 2.8. Có thể cần `truoc.bao_don` để dựng đòn sẵn.~~ (xong ở Story 2.8)
 - Story 2.9: chủ đòn gục thì `Telegraph.target_cell` trả `NO_CELL` (chưa hủy đòn); bảng F3 đã ghi "(đã gục)". Hủy đòn và `TELEGRAPHED`/`TELEGRAPH_CANCELLED` làm ở 2.9.
 - Bố cục các trận thử `thu_lao`, `thu_keo`, `thu_thang`, `thu_co_lon` (và bản chép trong `test_battle_view.gd`) đã đổi để pha địch lúc mở trận không dời quân nào (thêm sông vây góc, đặt tướng kề quân Nguyên). `test_loaders.gd` kiểm điều đó (`_assert_enemies_stay_on_begin`). Khi 2.8 có đòn địch thật, các trận thử này sẽ bị đánh sau Kết thúc lượt: xem lại nếu hướng dẫn tự test cần nhiều hiệp.
 - Ca "hòa ô gần nhất thì ít bước đi hơn" (AC 8) chỉ xảy ra khi có quân cùng phe chiếm ô (tìm 200.000 bàn chỉ có sông thì không ra ca nào); test có ở `test_enemy_ai.gd::test_walks_through_ally_but_never_stops_on_it`.
 
 ## Deferred from: dev of 2-7-hien-thi-bao-don (2026-10-21)
 
-- Story 2.8 (ra đòn): dùng `TelegraphMarks.hit_cell` để biết đòn trúng ô nào (Kỵ binh: vật đầu tiên hoặc trượt khi là ô sát mép trống), để ô đỏ và đòn thật không lệch nhau.
+- ~~Story 2.8 (ra đòn): dùng `TelegraphMarks.hit_cell` để biết đòn trúng ô nào (Kỵ binh: vật đầu tiên hoặc trượt khi là ô sát mép trống), để ô đỏ và đòn thật không lệch nhau.~~ (xong ở Story 2.8)
 - Story 2.9 (hủy đòn): chủ gục hoặc ô đích ngoài bàn thì `TelegraphMarks.cells` đã tự bỏ đòn đó; hủy hẳn trong `state.telegraphs` vẫn là việc của 2.9.
 - Ba đòn trở lên trúng cùng một ô: chuỗi số (`1·2·4`, chữ 28 px) dài hơn một ô, lấn sang ô bên phải (`anh/2-7-hai-ky-binh-ba-so.png`). Vẫn đọc được; xem lại ở E8 nếu cần.
 - Kỵ binh đứng kề mục tiêu: mũi tên vẽ trên mặt đất ở ô đầu đường, nên bị đồng quân ở ô đó che. Ô đỏ và số vẫn thấy.
@@ -158,3 +158,10 @@
 - Số thứ tự chỉ nằm ở ô trúng; ô đỏ giữa đường xung phong không có số. Xem lại ở Story 2.10 (rê chuột xem thông tin).
 - Đòn có ô đích ngoài bàn thì không vẽ gì; Story 2.9 xử lý cùng hủy đòn.
 - `CoordOverlay.CELL_LABEL_OFFSET` đặt số cứng (18, 21), chưa dẫn xuất từ `TILE_SIZE` và `UnitToken.HP_OFFSET`, chưa có test vị trí nhãn F1.
+
+## Deferred from: dev of 2-8-dich-ra-don-theo-thu-tu (2026-10-21)
+
+- Story 2.9: đòn bị bỏ qua lúc ra đòn (chủ đã gục, ô đích ngoài bàn, Kỵ binh sát mép hướng ra ngoài: `TelegraphMarks.hit_cell` trả `NO_CELL`) chưa có sự kiện; thêm `TELEGRAPH_CANCELLED` ở `RulesEnemyPhase._strike_all` (nhánh `continue`) và kịch bản hủy đòn.
+- Story 3.7: Kỵ binh trúng làng, Bộ binh đánh ô làng hiện chỉ phát `ATTACKED` vào ô làng, chưa trừ Lòng dân.
+- Hết trận giữa pha địch: ô đỏ của đòn chưa ra vẫn vẽ theo bàn mới (ví dụ Kỵ binh có đường đỏ kéo qua ô tướng vừa gục, `anh/2-8-thua-sau.png`). Đúng với 2.7 AC 10 ("hết trận vẫn vẽ đòn còn lại"); xem lại khi làm hoạt ảnh 2.11 nếu gây hiểu nhầm.
+- Kịch bản "thắng thua cùng lúc" và "thắng" giữa pha địch chưa dựng được: ở 2.8 quân ra đòn cuối luôn còn sống. Thêm khi có hầm chông (3.4) hoặc tiếp viện (3.10).

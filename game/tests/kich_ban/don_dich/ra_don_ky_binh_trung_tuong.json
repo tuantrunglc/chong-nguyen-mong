@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Kỵ binh xung phong hướng Đông trúng vật đầu tiên là Khoái (mất 1 máu); Lão đứng sau Khoái không sao; Kỵ binh đứng yên.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

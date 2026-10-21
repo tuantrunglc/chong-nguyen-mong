@@ -18,8 +18,9 @@ enum Type {
 	COLLIDED,
 	## Quân Nguyên vào ô sông to_cell và chết đuối (bị nhấc khỏi bàn).
 	DROWNED,
-	## Tướng unit_id ra đòn vào ô to_cell: ô bị đánh (Khoái), ô quân trúng lao (Lão; có thể khác ô được bấm),
-	## ô quân bị kéo trước khi kéo (Dư).
+	## Quân unit_id ra đòn vào ô to_cell. Tướng: ô bị đánh (Khoái), ô quân trúng lao (Lão; có thể khác ô được bấm),
+	## ô quân bị kéo trước khi kéo (Dư). Quân Nguyên (Story 2.8): from_cell là ô nó đứng, to_cell là ô trúng
+	## (TelegraphMarks.hit_cell; Kỵ binh trượt thì ô sát mép), cause ENEMY_STRIKE.
 	ATTACKED,
 	## Hết trận: quân Nguyên cuối gục (thắng). Chỉ RulesVictory sinh, luôn là sự kiện cuối của lệnh (Story 2.5).
 	VICTORY,
@@ -32,7 +33,8 @@ enum Type {
 
 ## Vì sao quân đổi ô hoặc mất máu. STRIKE: đòn có sát thương của tướng (Khoái, Lão).
 ## PULL: đòn kéo của Trần Khánh Dư (Story 2.4); mọi MOVED của đòn kéo mang nguyên nhân này.
-enum Cause { WALK, STRIKE, PUSH, COLLISION, PULL }
+## ENEMY_STRIKE: đòn quân Nguyên đã báo (Story 2.8); tách khỏi STRIKE để mưu kế cộng sát thương tướng không đụng tới.
+enum Cause { WALK, STRIKE, PUSH, COLLISION, PULL, ENEMY_STRIKE }
 
 ## Vì sao lệnh bị từ chối (REJECTED). Kịch bản luật ghi bằng mã "tu_choi" (ScenarioRunner.REJECT_EVENTS).
 enum Reject {
@@ -101,6 +103,11 @@ static func drowned(p_unit_id: int, p_cell: Vector2i) -> BattleEvent:
 
 static func attacked(p_unit_id: int, p_cell: Vector2i) -> BattleEvent:
 	return BattleEvent.new(Type.ATTACKED, p_unit_id, Vector2i.ZERO, p_cell, Cause.STRIKE)
+
+
+## Quân Nguyên unit_id đứng ở p_from ra đòn đã báo, trúng ô p_to (Story 2.8). Hàm riêng để không đổi lời gọi của tướng.
+static func enemy_attacked(p_unit_id: int, p_from: Vector2i, p_to: Vector2i) -> BattleEvent:
+	return BattleEvent.new(Type.ATTACKED, p_unit_id, p_from, p_to, Cause.ENEMY_STRIKE)
 
 
 static func victory() -> BattleEvent:

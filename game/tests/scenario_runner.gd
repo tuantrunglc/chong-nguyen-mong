@@ -46,6 +46,10 @@ class ScenarioResult:
 	extends RefCounted
 
 	var problems: Array[String] = []
+	## Bàn cuối (bản chụp) khi chạy hết các lệnh; null nếu dừng sớm vì lỗi. Cho test tất định (Story 2.8).
+	var final_state: BattleState = null
+	## Sự kiện của từng lệnh đã chạy, theo thứ tự lệnh (mỗi phần tử là Array[BattleEvent]).
+	var step_events: Array[Array] = []
 	var passed: bool:
 		get:
 			return problems.is_empty()
@@ -63,7 +67,9 @@ static func run(scenario: ScenarioData, stats: Stats) -> ScenarioResult:
 	var rolled_back: Array[String] = []
 	controller.rolled_back.connect(func(problems: Array[String]) -> void: rolled_back.append_array(problems))
 	for i: int in range(scenario.steps.size()):
-		var problem: String = _run_step(controller, scenario.steps[i])
+		var step_events: Array[BattleEvent] = []
+		var problem: String = _run_step(controller, scenario.steps[i], step_events)
+		result.step_events.append(step_events)
 		for invariant: String in rolled_back:
 			result.problems.append("bước %d: vi phạm bất biến: %s" % [i + 1, invariant])
 		if not result.passed:
@@ -75,6 +81,7 @@ static func run(scenario: ScenarioData, stats: Stats) -> ScenarioResult:
 			result.problems.append("bước %d: %s" % [i + 1, invariant])
 		if not result.passed:
 			return result
+	result.final_state = controller.snapshot()
 	result.problems.append_array(compare(controller.snapshot(), scenario))
 	return result
 
@@ -108,24 +115,27 @@ static func terrain_symbol(terrain: int) -> String:
 ## Chạy một lệnh trên state. Trả "" nếu chạy được, hoặc câu báo vì sao không chạy được.
 ## Lệnh bị luật từ chối (REJECTED) đúng lý do kịch bản ghi ("tu_choi") vẫn là chạy được: không có gì đổi,
 ## bàn sau so như thường. Bị từ chối mà kịch bản không ghi, sai lý do, hay ghi mà không bị từ chối: trượt.
-static func _run_step(controller: BattleController, step: ScenarioData.ScenarioStep) -> String:
+## events: nhận sự kiện của lệnh (kể cả REJECTED) để test tất định so được.
+static func _run_step(controller: BattleController, step: ScenarioData.ScenarioStep,
+		events: Array[BattleEvent]) -> String:
 	match step.kind:
 		"di":
 			var general: Unit = _general(controller.snapshot(), step.general)
 			if general == null:
 				return 'tướng "%s" không còn trên bàn' % unit_symbol(step.general)
-			return _check_reject(controller.submit(Command.move(general.id, step.cell)), step.reject)
+			events.append_array(controller.submit(Command.move(general.id, step.cell)))
 		"danh":
 			var general: Unit = _general(controller.snapshot(), step.general)
 			if general == null:
 				return 'tướng "%s" không còn trên bàn' % unit_symbol(step.general)
-			return _check_reject(controller.submit(Command.attack(general.id, step.cell)), step.reject)
+			events.append_array(controller.submit(Command.attack(general.id, step.cell)))
 		"ket_thuc_luot":
-			return _check_reject(controller.submit(Command.end_turn()), step.reject)
+			events.append_array(controller.submit(Command.end_turn()))
 		"huy":
-			return _check_reject(controller.undo(), step.reject)
+			events.append_array(controller.undo())
 		_:
 			return 'lệnh "%s" chưa có luật (Story %s)' % [step.kind, PENDING_RULES.get(step.kind, "?")]
+	return _check_reject(events, step.reject)
 
 
 static func _check_reject(events: Array[BattleEvent], expected: String) -> String:

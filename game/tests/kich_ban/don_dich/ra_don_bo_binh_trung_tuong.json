@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Bộ binh đã báo chém ô Khoái: kết thúc lượt thì Khoái mất 1 máu và đứng nguyên chỗ (đòn địch không đẩy).",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

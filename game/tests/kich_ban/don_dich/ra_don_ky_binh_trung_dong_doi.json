@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Bộ binh đứng chắn đường xung phong của Kỵ binh: Bộ binh ăn đòn (mất 1 máu), Khoái không sao; sang hiệp 2 Kỵ binh đi tới 3,3.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

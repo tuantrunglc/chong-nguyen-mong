@@ -2,18 +2,43 @@ class_name RulesEnemyPhase
 extends RefCounted
 ## Pha địch: từ lúc người chơi kết thúc lượt tới đầu lượt người chơi của hiệp sau, và pha chuẩn bị của hiệp 1 lúc mở
 ## trận. Story 1.5: sang hiệp mới, tướng đi và đánh lại được. Story 2.6: pha chuẩn bị (quân Nguyên đi rồi báo đòn).
-## Ra đòn (2.8), cuối hiệp (kho lương, báo tiếp viện, 3.9–3.10) chèn vào end_player_turn; tiếp viện xuất hiện chèn vào
-## đầu prepare (3.10). Chỉ file này và rules_victory.gd được đổi phase.
+## Story 2.8: ra các đòn đã báo trước khi sang hiệp. Cuối hiệp (kho lương, báo tiếp viện, 3.9–3.10) chèn sau ra đòn;
+## tiếp viện xuất hiện chèn vào đầu prepare (3.10). Chỉ file này và rules_victory.gd được đổi phase.
 
 
+## Ra đòn, rồi sang hiệp mới và chuẩn bị. Trận hết giữa lúc ra đòn thì dừng: không sang hiệp, không chuẩn bị.
 static func end_player_turn(state: BattleState, events: Array[BattleEvent]) -> void:
-	# Story 2.8: ra các đòn đã báo ở đây, trước khi sang hiệp mới.
+	_strike_all(state, events)
+	if Rules.is_battle_over(state):
+		return
 	state.round_number += 1
 	for unit: Unit in state.units:
 		unit.has_moved = false
 		unit.has_attacked = false
 	events.append(BattleEvent.round_started(state.round_number))
 	prepare(state, events)
+
+
+## Ra các đòn đã báo theo số thứ tự (state.telegraphs đã xếp). Ô trúng tính lúc đòn ra, theo bàn sau các đòn trước
+## (TelegraphMarks.hit_cell, cùng chỗ tính ô đỏ). NO_CELL (chủ đã gục, ô đích ngoài bàn, Kỵ binh sát mép hướng ra
+## ngoài) thì đòn không ra (sự kiện hủy đòn: Story 2.9). Quân ở ô trúng, bất kỳ phe, mất máu theo sát thương của chủ
+## đòn; không đẩy, chủ đòn không đi. Kiểm thắng/thua sau từng đòn; trận hết thì dừng ngay.
+static func _strike_all(state: BattleState, events: Array[BattleEvent]) -> void:
+	state.phase = BattleState.Phase.ENEMY_ACT
+	for telegraph: Telegraph in state.telegraphs:
+		var hit: Vector2i = TelegraphMarks.hit_cell(state, telegraph)
+		if hit == Telegraph.NO_CELL:
+			continue
+		var owner: Unit = state.unit_by_id(telegraph.owner_id)
+		var strike: Array[BattleEvent] = [BattleEvent.enemy_attacked(owner.id, owner.cell, hit)]
+		var victim: Unit = state.unit_at(hit)
+		if victim != null:
+			Effects.damage(state, victim, state.stats.damage(owner.type), BattleEvent.Cause.ENEMY_STRIKE, strike)
+		# Kiểm trên sự kiện của riêng đòn này rồi mới nối, để VICTORY/DEFEAT là sự kiện cuối của lệnh.
+		RulesVictory.check(state, strike)
+		events.append_array(strike)
+		if Rules.is_battle_over(state):
+			return
 
 
 ## Pha chuẩn bị của hiệp 1 (lệnh BEGIN_BATTLE): không sang hiệp, không ROUND_STARTED.

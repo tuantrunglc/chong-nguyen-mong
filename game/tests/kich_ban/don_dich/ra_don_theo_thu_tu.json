@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Đòn 1 của Bộ binh 2,2 giết Bộ binh 1 máu đang chắn đường, nên đòn 2 của Kỵ binh xung phong tới tận Khoái (mất 1 máu); sang hiệp 2 Bộ binh đi tới 4,2.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

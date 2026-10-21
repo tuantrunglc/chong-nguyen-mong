@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Kỵ binh xung phong trúng rừng trước khi tới Khoái: không ai mất máu; sang hiệp 2 Kỵ binh không đứng thẳng hàng được nên đi tới 2,2.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

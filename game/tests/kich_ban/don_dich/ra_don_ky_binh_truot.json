@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Khoái rời hàng trước khi kết thúc lượt: Kỵ binh xung phong vào hàng trống tới mép, đòn trượt; sang hiệp 2 Kỵ binh đi xuống 0,5.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

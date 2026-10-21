@@ -4,7 +4,7 @@ baseline_commit: 6195636
 
 # Story 2.8: Địch ra đòn theo thứ tự
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -34,7 +34,7 @@ _**Chưa có** (đừng làm ở đây): sự kiện hủy đòn `TELEGRAPH_CANC
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Khung, đợt kịch bản 10, dừng chờ duyệt** (AC: 1, 2)
+- [x] **Task 1: Khung, đợt kịch bản 10, dừng chờ duyệt** (AC: 1, 2)
   - [x] 1.1 Khung (làm trước để kịch bản nạp và so được):
     - `src/data/scenario_loader.gd`: thêm `"bao_don"` vào `BEFORE_KEYS`; đọc bằng **chính** `_read_telegraphs` (tên hiện `truoc.bao_don`, lớp quân `truoc.quan`). Kiểm như `sau.bao_don`: thứ tự không trùng, ô `quan` có quân Nguyên, mỗi quân một đòn, `o` kề `quan`, `huong` hợp lệ. **Thêm cho `truoc`**: số thứ tự phải liền từ 1 (1, 2, 3…), vì `BattleState.validate` đòi vậy; câu lỗi tiếng Việt kèm file và giá trị sai.
     - `src/data/scenario_data.gd`: `before_telegraphs: Array[ExpectedTelegraph]` (rỗng khi không ghi).
@@ -44,30 +44,30 @@ _**Chưa có** (đừng làm ở đây): sự kiện hủy đòn `TELEGRAPH_CANC
   - [x] 1.2 Viết 9 file đúng "Đợt kịch bản 10", `"da_duyet": false`. Chép cấu trúc từ `tests/kich_ban/don_dich/o_do_tuong_khac_buoc_vao.json`. Bàn `sau` đã tính bằng mô phỏng (xem Debug Log của story tạo); **chạy lại mô phỏng** (`BoardFixture` + `Rules.resolve(end_turn)` trên bàn đã trừ máu bằng tay) trước khi viết để chắc.
   - [x] 1.3 `tools/xem_kich_ban.sh don_dich`: đọc lại từng bàn, bàn "Ô ĐỎ" của TRƯỚC, khớp `mo_ta`. `tools/test.sh`: `66 đã duyệt · 9 chưa duyệt (N chưa đạt)`. Ghi Debug Log từng lý do trượt.
   - [x] 1.4 Commit: `Kịch bản quân Nguyên ra đòn chờ duyệt (Story 2.8)`.
-  - [ ] 1.5 **HALT.** Nhắn tác giả tiếng Việt: gõ `tools/xem_kich_ban.sh don_dich` (chỉ cần đọc 9 file `ra_don_*`), trả lời "đúng"/"sai: <lý do>" từng cái. Nói rõ: bàn "Ô ĐỎ" cạnh TRƯỚC là các đòn đã báo sẵn; bàn SAU là sau khi các đòn đánh **và** quân Nguyên đã đi, báo đòn cho hiệp 2 (luật 2.6), nên quân Nguyên có thể đổi chỗ.
-  - [ ] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng"; `tools/test.sh` phải trượt. Không commit khi đỏ.
-- [ ] **Task 2: Test GUT lõi viết trước** (AC: 4–11)
-  - [ ] 2.1 `tests/test_rules_enemy_phase.gd` (thêm, dùng `BoardFixture`, dựng `Telegraph` tay): dãy sự kiện đúng của một đòn Bộ binh trúng tướng (`ATTACKED`, `DAMAGED … ENEMY_STRIKE`) và trước `ROUND_STARTED`; Kỵ binh trúng kho lương và làng (không ai mất máu, có `ATTACKED` vào ô vật); Kỵ binh sát mép hướng ra ngoài (không sự kiện); chủ đòn đã gục trước pha (không sự kiện); đòn 1 giết chủ đòn 2 (đòn 2 không ra); đòn 1 giết quân chắn đường, đòn 2 Kỵ binh đi xa hơn; tướng cuối gục ở đòn 1 → `DEFEAT`, đòn 2 không ra, `round_number` giữ nguyên, không `ROUND_STARTED`, `telegraphs` còn nguyên (không chạy prepare); quân Nguyên giết nhau không thắng nhầm (B1 1 máu, đòn 1 vào ô B2 1 máu; B2 đòn 2 vào ô B1: đòn 1 giết B2, đòn 2 không ra vì chủ đã gục, còn B1 nên không `VICTORY`; ghi chú: ở story này không thể thắng trong pha địch, vì quân ra đòn cuối luôn còn sống — thắng giữa pha có từ hầm chông/tiếp viện về sau); máu không xuống dưới 0; bàn 10×8.
-  - [ ] 2.2 Chạy riêng file: trượt (ghi Debug Log số ca trượt).
-- [ ] **Task 3: Luật ra đòn** (AC: 4–11)
-  - [ ] 3.1 `BattleEvent`: thêm `Cause.ENEMY_STRIKE` (đòn của quân Nguyên; Sát Thát 3.x chỉ cộng cho `STRIKE` của tướng). Sửa chú thích `ATTACKED` (giờ cả quân Nguyên: ô trúng; Kỵ binh trượt: ô sát mép). Không thêm `Type` mới.
-  - [ ] 3.2 `RulesEnemyPhase.end_player_turn`: thay chú thích "Story 2.8" bằng `_strike_all(state, events)` (hàm riêng, cùng file): `state.phase = ENEMY_ACT`; với mỗi `t` trong `state.telegraphs` (theo thứ tự đã xếp): `hit = TelegraphMarks.hit_cell(state, t)`; `NO_CELL` thì bỏ qua; `ATTACKED`; quân ở `hit` (nếu có) mất `state.stats.damage(owner.type)` qua `Effects.damage(..., ENEMY_STRIKE, strike_events)`; nối `strike_events` vào `events`; `RulesVictory.check(state, strike_events)` rồi nối sự kiện kết cục; `Rules.is_battle_over(state)` thì **return** khỏi `end_player_turn` (không sang hiệp). Hết vòng thì làm tiếp phần sang hiệp như cũ (prepare tự đặt `PLAYER`).
-  - [ ] 3.3 **Không** tự tính ô trúng ở đây: chỉ `TelegraphMarks.hit_cell` (2.7 đã tách để ô đỏ và đòn thật không lệch nhau). Không duyệt khóa Dictionary. Không `Node`, `Log`.
-  - [ ] 3.4 `Rules.resolve` vẫn gọi `RulesVictory.check` ở cuối: trận đã hết thì `check` không làm gì (đã có), không sinh `VICTORY`/`DEFEAT` hai lần — có test.
-  - [ ] 3.5 `tools/test.sh`: kịch bản và test 2.1 đạt. **Phá thử** (mỗi lần một chỗ, chạy từng kịch bản, ghi Debug Log): đòn đẩy 1 ô (`ra_don_bo_binh_trung_tuong` trượt); dùng ô trúng tính lúc báo thay vì lúc ra (`ra_don_theo_thu_tu` trượt); ra đòn theo thứ tự ngược (`ra_don_theo_thu_tu` trượt); không dừng khi thua (`ra_don_tuong_cuoi_guc_thua` trượt); bỏ qua quân Nguyên trong ô trúng (`ra_don_bo_binh_trung_dong_doi`, `ra_don_ky_binh_trung_dong_doi` trượt).
-- [ ] **Task 4: Tất định** (AC: 12)
-  - [ ] 4.1 `ScenarioRunner.run` trả thêm bàn cuối và sự kiện từng bước trong `ScenarioResult` (ví dụ `final_state: BattleState` (clone) và `step_events: Array[Array]`), không đổi cách so hiện có.
-  - [ ] 4.2 `tests/test_determinism.gd` (MỚI): với **mọi** file `ScenarioLoader.list_files("res://tests/kich_ban")` nạp được (cả chưa duyệt), chạy hai lần, so `BoardFixture.picture`, `round_number`, `phase`, đòn (`owner_id`, `kind`, `offset`, `order`) và mô tả sự kiện (`BoardFixture.describe` hoặc tương đương đủ trường). Khác thì một câu tiếng Việt nêu kịch bản và chỗ khác.
-  - [ ] 4.3 Phá thử: chèn tạm một chỗ không tất định (ví dụ duyệt quân theo khóa Dictionary băm theo object) → test trượt; bỏ ra. Ghi Debug Log. Nếu không dựng được ca phá thử đáng tin, ghi rõ vì sao.
-- [ ] **Task 5: Giao diện và test qua `main.tscn`** (AC: 13)
-  - [ ] 5.1 Đọc `main.gd`, `battle_view.gd`: kiểm Kết thúc lượt có phase `LOST`/`WON` hiện bảng kết quả (2.5) và khóa bàn như khi thua/thắng trong lượt người chơi. Sửa nếu thiếu, không sửa nếu đã đúng (ghi lý do).
-  - [ ] 5.2 Test (`test_battle_view.gd`, trận thử viết vào `user://` như `_make_attack_main`): mở trận có Bộ binh kề Khoái → Space → Khoái mất 1 máu (`hp_text` của đồng), hiệp 2; trận một tướng 1 máu kề Bộ binh → Space → bảng thua, Hủy và phím đều không làm gì. Rà các test giao diện cũ có Kết thúc lượt: đòn giờ đánh thật, test nào giả định máu không đổi thì sửa test **có ghi lý do** (không sửa kịch bản đã duyệt).
-  - [ ] 5.3 Rà trận thử `data/tran/thu_*.json` và `tran_01`: sau Kết thúc lượt đòn đánh thật; `test_loaders.gd::_assert_enemies_stay_on_begin` vẫn đạt. Không đổi bố cục trận nếu không cần.
-- [ ] **Task 6: Kiểm bằng mắt, tài liệu, commit** (AC: 13)
-  - [ ] 6.1 Chạy `tools/chay.sh --dev --tran=thu_keo`, `thu_lao`, `tran_01`; bấm Kết thúc lượt vài lần. GoPeak `capture_screenshot` (CLAUDE.md "Nhìn game đang chạy"); GoPeak không kết nối thì dùng `img/pixellab-thu/cong-cu/chup.gd` trên bản chép của `game/` ở scratchpad (cách đã dùng ở 2.7, Debug Log 2.7). Lưu `_bmad-output/implementation-artifacts/anh/2-8-*.png` (ít nhất: trước và sau Kết thúc lượt, thấy máu giảm; bảng thua). Không có ảnh thì **không đánh [x]**. Log không ERROR/WARN (trừ WARN tham số lạ của công cụ chụp).
-  - [ ] 6.2 `game-architecture.md`: "Pha địch" bước 3 ghi cài đặt (`_strike_all`, `TelegraphMarks.hit_cell` lúc ra đòn, `Cause.ENEMY_STRIKE`, dừng khi hết trận, không sang hiệp); mục "Kịch bản luật" thêm `truoc.bao_don`; "Gục, thắng, thua" bỏ chữ "từ Story 2.8" thành đã làm. `deferred-work.md`: gạch mục 2.8 đã xong (dòng "Story 2.8 (đòn địch): phải gọi `RulesVictory.check`…", "Story 2.8 (ra đòn): chèn…", "Story 2.8 (ra đòn): dùng `TelegraphMarks.hit_cell`…") và ghi việc cho 2.9 (`TELEGRAPH_CANCELLED` cho đòn bị bỏ qua ở AC 8).
-  - [ ] 6.3 `tools/test.sh` xanh. Commit một lần (kịch bản đã duyệt, code, test, tài liệu, `.uid` mới, `text.vi.translation`, ảnh): `Quân Nguyên ra đòn theo thứ tự (Story 2.8)`.
-  - [ ] 6.4 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes bằng kết quả thật (chạy lại từng bước trên game trước khi ghi; 2.7 từng ghi sai một bước vì viết theo suy đoán).
+  - [x] 1.5 **HALT.** Nhắn tác giả tiếng Việt: gõ `tools/xem_kich_ban.sh don_dich` (chỉ cần đọc 9 file `ra_don_*`), trả lời "đúng"/"sai: <lý do>" từng cái. Nói rõ: bàn "Ô ĐỎ" cạnh TRƯỚC là các đòn đã báo sẵn; bàn SAU là sau khi các đòn đánh **và** quân Nguyên đã đi, báo đòn cho hiệp 2 (luật 2.6), nên quân Nguyên có thể đổi chỗ.
+  - [x] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng"; `tools/test.sh` phải trượt. Không commit khi đỏ.
+- [x] **Task 2: Test GUT lõi viết trước** (AC: 4–11)
+  - [x] 2.1 `tests/test_rules_enemy_phase.gd` (thêm, dùng `BoardFixture`, dựng `Telegraph` tay): dãy sự kiện đúng của một đòn Bộ binh trúng tướng (`ATTACKED`, `DAMAGED … ENEMY_STRIKE`) và trước `ROUND_STARTED`; Kỵ binh trúng kho lương và làng (không ai mất máu, có `ATTACKED` vào ô vật); Kỵ binh sát mép hướng ra ngoài (không sự kiện); chủ đòn đã gục trước pha (không sự kiện); đòn 1 giết chủ đòn 2 (đòn 2 không ra); đòn 1 giết quân chắn đường, đòn 2 Kỵ binh đi xa hơn; tướng cuối gục ở đòn 1 → `DEFEAT`, đòn 2 không ra, `round_number` giữ nguyên, không `ROUND_STARTED`, `telegraphs` còn nguyên (không chạy prepare); quân Nguyên giết nhau không thắng nhầm (B1 1 máu, đòn 1 vào ô B2 1 máu; B2 đòn 2 vào ô B1: đòn 1 giết B2, đòn 2 không ra vì chủ đã gục, còn B1 nên không `VICTORY`; ghi chú: ở story này không thể thắng trong pha địch, vì quân ra đòn cuối luôn còn sống — thắng giữa pha có từ hầm chông/tiếp viện về sau); máu không xuống dưới 0; bàn 10×8.
+  - [x] 2.2 Chạy riêng file: trượt (ghi Debug Log số ca trượt).
+- [x] **Task 3: Luật ra đòn** (AC: 4–11)
+  - [x] 3.1 `BattleEvent`: thêm `Cause.ENEMY_STRIKE` (đòn của quân Nguyên; Sát Thát 3.x chỉ cộng cho `STRIKE` của tướng). Sửa chú thích `ATTACKED` (giờ cả quân Nguyên: ô trúng; Kỵ binh trượt: ô sát mép). Không thêm `Type` mới.
+  - [x] 3.2 `RulesEnemyPhase.end_player_turn`: thay chú thích "Story 2.8" bằng `_strike_all(state, events)` (hàm riêng, cùng file): `state.phase = ENEMY_ACT`; với mỗi `t` trong `state.telegraphs` (theo thứ tự đã xếp): `hit = TelegraphMarks.hit_cell(state, t)`; `NO_CELL` thì bỏ qua; `ATTACKED`; quân ở `hit` (nếu có) mất `state.stats.damage(owner.type)` qua `Effects.damage(..., ENEMY_STRIKE, strike_events)`; nối `strike_events` vào `events`; `RulesVictory.check(state, strike_events)` rồi nối sự kiện kết cục; `Rules.is_battle_over(state)` thì **return** khỏi `end_player_turn` (không sang hiệp). Hết vòng thì làm tiếp phần sang hiệp như cũ (prepare tự đặt `PLAYER`).
+  - [x] 3.3 **Không** tự tính ô trúng ở đây: chỉ `TelegraphMarks.hit_cell` (2.7 đã tách để ô đỏ và đòn thật không lệch nhau). Không duyệt khóa Dictionary. Không `Node`, `Log`.
+  - [x] 3.4 `Rules.resolve` vẫn gọi `RulesVictory.check` ở cuối: trận đã hết thì `check` không làm gì (đã có), không sinh `VICTORY`/`DEFEAT` hai lần — có test.
+  - [x] 3.5 `tools/test.sh`: kịch bản và test 2.1 đạt. **Phá thử** (mỗi lần một chỗ, chạy từng kịch bản, ghi Debug Log): đòn đẩy 1 ô (`ra_don_bo_binh_trung_tuong` trượt); dùng ô trúng tính lúc báo thay vì lúc ra (`ra_don_theo_thu_tu` trượt); ra đòn theo thứ tự ngược (`ra_don_theo_thu_tu` trượt); không dừng khi thua (`ra_don_tuong_cuoi_guc_thua` trượt); bỏ qua quân Nguyên trong ô trúng (`ra_don_bo_binh_trung_dong_doi`, `ra_don_ky_binh_trung_dong_doi` trượt).
+- [x] **Task 4: Tất định** (AC: 12)
+  - [x] 4.1 `ScenarioRunner.run` trả thêm bàn cuối và sự kiện từng bước trong `ScenarioResult` (ví dụ `final_state: BattleState` (clone) và `step_events: Array[Array]`), không đổi cách so hiện có.
+  - [x] 4.2 `tests/test_determinism.gd` (MỚI): với **mọi** file `ScenarioLoader.list_files("res://tests/kich_ban")` nạp được (cả chưa duyệt), chạy hai lần, so `BoardFixture.picture`, `round_number`, `phase`, đòn (`owner_id`, `kind`, `offset`, `order`) và mô tả sự kiện (`BoardFixture.describe` hoặc tương đương đủ trường). Khác thì một câu tiếng Việt nêu kịch bản và chỗ khác.
+  - [x] 4.3 Phá thử: chèn tạm một chỗ không tất định (ví dụ duyệt quân theo khóa Dictionary băm theo object) → test trượt; bỏ ra. Ghi Debug Log. Nếu không dựng được ca phá thử đáng tin, ghi rõ vì sao.
+- [x] **Task 5: Giao diện và test qua `main.tscn`** (AC: 13)
+  - [x] 5.1 Đọc `main.gd`, `battle_view.gd`: kiểm Kết thúc lượt có phase `LOST`/`WON` hiện bảng kết quả (2.5) và khóa bàn như khi thua/thắng trong lượt người chơi. Sửa nếu thiếu, không sửa nếu đã đúng (ghi lý do).
+  - [x] 5.2 Test (`test_battle_view.gd`, trận thử viết vào `user://` như `_make_attack_main`): mở trận có Bộ binh kề Khoái → Space → Khoái mất 1 máu (`hp_text` của đồng), hiệp 2; trận một tướng 1 máu kề Bộ binh → Space → bảng thua, Hủy và phím đều không làm gì. Rà các test giao diện cũ có Kết thúc lượt: đòn giờ đánh thật, test nào giả định máu không đổi thì sửa test **có ghi lý do** (không sửa kịch bản đã duyệt).
+  - [x] 5.3 Rà trận thử `data/tran/thu_*.json` và `tran_01`: sau Kết thúc lượt đòn đánh thật; `test_loaders.gd::_assert_enemies_stay_on_begin` vẫn đạt. Không đổi bố cục trận nếu không cần.
+- [x] **Task 6: Kiểm bằng mắt, tài liệu, commit** (AC: 13)
+  - [x] 6.1 Chạy `tools/chay.sh --dev --tran=thu_keo`, `thu_lao`, `tran_01`; bấm Kết thúc lượt vài lần. GoPeak `capture_screenshot` (CLAUDE.md "Nhìn game đang chạy"); GoPeak không kết nối thì dùng `img/pixellab-thu/cong-cu/chup.gd` trên bản chép của `game/` ở scratchpad (cách đã dùng ở 2.7, Debug Log 2.7). Lưu `_bmad-output/implementation-artifacts/anh/2-8-*.png` (ít nhất: trước và sau Kết thúc lượt, thấy máu giảm; bảng thua). Không có ảnh thì **không đánh [x]**. Log không ERROR/WARN (trừ WARN tham số lạ của công cụ chụp).
+  - [x] 6.2 `game-architecture.md`: "Pha địch" bước 3 ghi cài đặt (`_strike_all`, `TelegraphMarks.hit_cell` lúc ra đòn, `Cause.ENEMY_STRIKE`, dừng khi hết trận, không sang hiệp); mục "Kịch bản luật" thêm `truoc.bao_don`; "Gục, thắng, thua" bỏ chữ "từ Story 2.8" thành đã làm. `deferred-work.md`: gạch mục 2.8 đã xong (dòng "Story 2.8 (đòn địch): phải gọi `RulesVictory.check`…", "Story 2.8 (ra đòn): chèn…", "Story 2.8 (ra đòn): dùng `TelegraphMarks.hit_cell`…") và ghi việc cho 2.9 (`TELEGRAPH_CANCELLED` cho đòn bị bỏ qua ở AC 8).
+  - [x] 6.3 `tools/test.sh` xanh. Commit một lần (kịch bản đã duyệt, code, test, tài liệu, `.uid` mới, `text.vi.translation`, ảnh): `Quân Nguyên ra đòn theo thứ tự (Story 2.8)`.
+  - [x] 6.4 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes bằng kết quả thật (chạy lại từng bước trên game trước khi ghi; 2.7 từng ghi sai một bước vì viết theo suy đoán).
 
 ## Dev Notes
 
@@ -215,8 +215,45 @@ Claude Opus 5.5 (claude-opus-5-5[1m])
 
 - 2026-10-21 Task 1.1–1.3: `truoc.bao_don` (loader dùng chung `_read_telegraphs`, thêm kiểm số thứ tự liền từ 1), `ScenarioData.before_telegraphs`, `BattleController.start(level, stats, telegraphs = [])`, `ScenarioRunner.before_telegraphs` (viewer dùng chung). Viewer: bàn "Ô ĐỎ" của bàn trước đứng giữa TRƯỚC và SAU, danh sách "Đòn đã báo sẵn", dòng `Ô đỏ c,h: đòn 1·2`; ghi chú máu của bàn SAU dời thẳng cột với SAU. 1 khóa mới `scenario.viewer.before_telegraphs`. Test cũ `test_after_telegraph_errors` khẳng định `truoc.bao_don` là khóa lạ: đổi thành không cảnh báo (khóa giờ hợp lệ theo story). 9 kịch bản `don_dich/ra_don_*.json` sinh bằng script từ bảng. `tools/test.sh`: 547/547 đạt, `66 đã duyệt · 9 chưa duyệt (6 chưa đạt)`; 6 lý do trượt khớp bảng (#1, #3, #4, #5: máu 3 thay vì 2; #8: `ô 0,3 mong đợi K, thực tế trống` vì Bộ binh chắn chưa gục nên Kỵ binh đi chỗ khác; #9: Khoái còn ở 3,4).
 
+- 2026-10-21 Task 1.5–1.6: tác giả duyệt "tất cả đúng" 9 kịch bản. Đổi `da_duyet: true`; `tools/test.sh` trượt (`test_approved_scenarios_pass`).
+- Task 2: 9 ca mới trong `test_rules_enemy_phase.gd`; chạy riêng: 7 trượt, 2 ca "không có gì xảy ra" (Kỵ binh sát mép hướng ra ngoài, chủ đòn đã gục trước pha) đạt sẵn vì code cũ cũng không làm gì. Ca "Kỵ binh đi xa hơn khi quân chắn gục" để kịch bản `ra_don_theo_thu_tu` lo (không chép thành GUT).
+- Task 3: `Cause.ENEMY_STRIKE`, `BattleEvent.enemy_attacked(id, from, to)` (hàm riêng thay vì thêm tham số cho `attacked`, để lời gọi của tướng giữ nguyên `from_cell = ZERO`, `cause = STRIKE`), `RulesEnemyPhase._strike_all`. `tools/test.sh`: 556/556, `75 đã duyệt · 0 chưa duyệt`. Không cần sửa `rules.gd` (`check` cuối lệnh không làm gì khi đã hết trận; test `test_last_general_falls_mid_phase_stops_everything` kiểm `DEFEAT` đúng một lần). Phá thử, mỗi lần một chỗ, chạy `test_scenarios.gd`, trả lại bản đúng (`diff` sạch):
+  - đẩy nạn nhân 1 ô → `bo_binh_trung_tuong`, `bo_binh_trung_dong_doi`, `ky_binh_trung_dong_doi`, `theo_thu_tu` trượt;
+  - ô trúng tính một lần lúc bắt đầu pha (như lúc báo) → `theo_thu_tu` trượt (Khoái 3 máu);
+  - ra đòn theo thứ tự ngược → `theo_thu_tu`, `tuong_cuoi_guc_thua` trượt;
+  - không dừng khi thua → `tuong_cuoi_guc_thua` trượt (Bộ binh 5,6 mất máu);
+  - bỏ qua quân Nguyên trong ô trúng → `bo_binh_trung_dong_doi`, `ky_binh_trung_dong_doi`, `theo_thu_tu` trượt.
+- Task 4: `ScenarioResult.final_state`, `step_events`; `_run_step` nhận mảng sự kiện (kể cả lệnh bị từ chối). `test_determinism.gd` so bàn cuối (quân, máu, cờ, hiệp, pha, đòn, ý định AI), mọi trường của từng sự kiện, và câu so sánh. Phá thử: biến đếm `static` trong `_strike_all` đảo thứ tự ra đòn ở lần gọi chẵn → test trượt ở `ra_don_bo_binh_trung_dong_doi`, `ra_don_theo_thu_tu`, `ra_don_tuong_cuoi_guc_thua`; trả lại bản đúng.
+- Task 5: `main.gd` (`_result_banner.show_result(snapshot.phase)`) và `battle_view.gd` (`Rules.is_battle_over(snapshot)`) đã đọc pha của bản chụp sau mọi lệnh, nên thua sau Kết thúc lượt tự hiện bảng và khóa bàn: không sửa. Thêm 2 test giao diện. Không test giao diện cũ nào phải sửa: các trận thử cũ ở hiệp 1 không có test nào kiểm máu sau Space. `_assert_enemies_stay_on_begin` vẫn đạt.
+- Task 6.1: GoPeak không kết nối được; chụp bằng `img/pixellab-thu/cong-cu/chup.gd` trên bản chép `game/` ở scratchpad (trận tạm `thu_thua` chỉ có trong bản chép, bố cục như `_make_lose_main`). Log không ERROR; WARN duy nhất là tham số lạ của công cụ chụp.
+- `tools/test.sh` cuối: 559/559 đạt, `Kịch bản luật: 75 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
+
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Ra đòn nằm ở đầu `end_player_turn`; trận hết giữa pha thì `return` trước phần sang hiệp, nên `phase` giữ `LOST`/`WON`, hiệp giữ nguyên, đòn còn lại vẫn trong `state.telegraphs` (ô đỏ vẫn vẽ, 2.7 AC 10).
+- Kịch bản dùng khóa mới `truoc.bao_don` để đặt đòn sẵn; công cụ duyệt in bàn "Ô ĐỎ" của bàn trước giữa TRƯỚC và SAU.
+- Ảnh: `anh/2-8-thu-keo-truoc.png`, `anh/2-8-thu-keo-sau.png` (hiệp 2: Lão 2 máu, Dư 1 máu), `anh/2-8-thu-keo-hiep-3.png` (Dư đã gục, Lão 1 máu), `anh/2-8-thu-keo-thua.png` (bảng "Thua!" ở hiệp 4), `anh/2-8-tran-01-hiep-5.png` (Lão 1 máu), `anh/2-8-thua-truoc.png`, `anh/2-8-thua-sau.png` (trận tạm: ba quân chém Khoái, thua ở hiệp 1), `anh/2-8-lao-ne-don.png` (bước 5 của hướng dẫn).
+
+**Hướng dẫn tác giả tự test** (đã chạy từng bước trên game trước khi ghi):
+
+1. Gõ `tools/test.sh`. Thấy `559/559 test đạt` và `Kịch bản luật: 75 đã duyệt · 0 chưa duyệt (0 chưa đạt)` là đúng.
+2. Gõ `tools/chay.sh --dev --tran=thu_keo`. Ô Lão có số `1`, ô Dư có `2·3`. Bấm Kết thúc lượt (Space), không làm gì khác. Thấy hiệp 2: chấm máu của Lão còn `2`, của Dư còn `1` (Dư trúng hai đòn); Khoái vẫn `3`; không quân nào bị đẩy.
+3. Bấm Space lần nữa: sang hiệp 3, Dư biến mất (gục), Lão còn `1`.
+4. Bấm Space thêm: tới hiệp 4 hiện bảng **"Thua!"**, nút Kết thúc lượt và Hủy mờ đi, bấm Space không còn tác dụng. Bấm "Chơi lại trận" để chơi lại.
+5. Thử né đòn: mở lại `thu_keo`, chọn Lão (phím 2), bấm ô 1,1 (chéo xuống trái của Lão) cho Lão rời ô đỏ, rồi Space. Thấy hiệp 2: Lão vẫn `3` máu (Bộ binh chém vào ô trống); Dư còn `1`, ô Dư giờ mang `1·2·3`.
+6. Gõ `tools/chay.sh --dev` (trận 1), bấm Kết thúc lượt vài lần: Bộ binh tới kề Lão rồi chém, máu Lão giảm dần mỗi hiệp.
 
 ### File List
+
+- `game/src/core/rules_enemy_phase.gd`, `game/src/core/battle_event.gd`
+- `game/src/battle/battle_controller.gd`
+- `game/src/data/scenario_loader.gd`, `game/src/data/scenario_data.gd`
+- `game/tests/scenario_runner.gd`, `game/tests/scenario_viewer.gd`
+- `game/tests/test_scenario_loader.gd`, `game/tests/test_rules_enemy_phase.gd`, `game/tests/test_battle_view.gd`
+- `game/tests/test_determinism.gd`, `.uid` (mới)
+- `game/tests/kich_ban/don_dich/ra_don_*.json` (9 file mới)
+- `game/i18n/text.csv`, `game/i18n/text.vi.translation`
+- `_bmad-output/planning-artifacts/game-architecture.md`, `_bmad-output/implementation-artifacts/deferred-work.md`
+- `_bmad-output/implementation-artifacts/anh/2-8-*.png` (8 ảnh)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`

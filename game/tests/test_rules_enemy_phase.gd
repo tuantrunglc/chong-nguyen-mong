@@ -175,3 +175,110 @@ func test_charge_blocked_by_later_ally_is_not_telegraphed() -> void:
 	assert_eq(BoardFixture.describe(events), ["MOVED 102 1,3>1,4 WALK", "MOVED 102 1,4>0,4 WALK",
 		"TELEGRAPHED 102 0,4>0,5 #1"] as Array[String])
 	assert_eq(state.validate(), [] as Array[String])
+
+
+# ---------- Ra đòn (Story 2.8) ----------
+# Bàn dựng bằng BoardFixture (id quân Nguyên theo thứ tự đọc bàn), đòn dựng tay rồi Kết thúc lượt.
+
+func _cell_attack(owner_id: int, offset: Vector2i, order: int) -> Telegraph:
+	return Telegraph.new(owner_id, Telegraph.Kind.CELL, offset, order)
+
+
+func _charge(owner_id: int, dir: Vector2i, order: int) -> Telegraph:
+	return Telegraph.new(owner_id, Telegraph.Kind.DIRECTION, dir, order)
+
+
+## Kết thúc lượt; trả mô tả các sự kiện tới trước ROUND_STARTED (gồm cả nó, nếu có).
+func _strike(state: BattleState) -> Array[String]:
+	var events: Array[BattleEvent] = Rules.resolve(state, Command.end_turn())
+	assert_eq(state.validate(), [] as Array[String])
+	var out: Array[String] = []
+	for line: String in BoardFixture.describe(events):
+		out.append(line)
+		if line == "ROUND_STARTED":
+			break
+	return out
+
+
+func test_infantry_hits_general_before_new_round() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "B", Vector2i(3, 4): "1"})
+	state.telegraphs.append(_cell_attack(101, Vector2i(0, 1), 1))
+	assert_eq(_strike(state), ["ATTACKED 101 3,4", "DAMAGED 1 -1 ENEMY_STRIKE", "ROUND_STARTED"] as Array[String])
+	assert_eq(state.unit_by_id(1).cell, Vector2i(3, 4), "không đẩy")
+	assert_eq(state.unit_by_id(1).hp, 2)
+	assert_eq(state.round_number, 2)
+
+
+func test_cavalry_hits_granary_or_village_nobody_hurt() -> void:
+	for symbol: String in ["L", "D"]:
+		var state: BattleState = BoardFixture.state({Vector2i(0, 3): "K", Vector2i(5, 3): "1"},
+			{Vector2i(2, 3): symbol})
+		state.telegraphs.append(_charge(101, Vector2i(1, 0), 1))
+		assert_eq(_strike(state), ["ATTACKED 101 2,3", "ROUND_STARTED"] as Array[String], "trúng ô %s" % symbol)
+		assert_eq(state.unit_by_id(1).hp, 3)
+
+
+func test_cavalry_on_empty_row_misses_at_edge() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(0, 3): "K", Vector2i(6, 6): "1"})
+	state.telegraphs.append(_charge(101, Vector2i(1, 0), 1))
+	assert_eq(_strike(state), ["ATTACKED 101 6,3", "ROUND_STARTED"] as Array[String], "trượt: ô sát mép, không ai mất máu")
+
+
+func test_cavalry_on_large_board_hits_far_general() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(0, 7): "K", Vector2i(9, 7): "1"}, {}, {}, Vector2i(10, 8))
+	state.telegraphs.append(_charge(101, Vector2i(1, 0), 1))
+	assert_eq(_strike(state), ["ATTACKED 101 9,7", "DAMAGED 1 -1 ENEMY_STRIKE", "ROUND_STARTED"] as Array[String])
+
+
+func test_cavalry_at_edge_facing_out_does_nothing() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(0, 3): "K", Vector2i(6, 6): "1"})
+	state.telegraphs.append(_charge(101, Vector2i(-1, 0), 1))
+	assert_eq(_strike(state), ["ROUND_STARTED"] as Array[String])
+
+
+func test_attack_of_owner_fallen_before_phase_is_skipped() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "B", Vector2i(3, 4): "1", Vector2i(0, 0): "B"})
+	state.telegraphs.append(_cell_attack(101, Vector2i(0, 1), 1))
+	state.units.erase(state.unit_by_id(101))
+	assert_eq(_strike(state), ["ROUND_STARTED"] as Array[String])
+	assert_eq(state.unit_by_id(1).hp, 3)
+
+
+func test_attack_killing_next_owner_cancels_its_attack() -> void:
+	# Bộ binh 3,2 (101) chém ô 3,3, nơi Bộ binh 102 (1 máu) đứng; đòn 2 của 102 nhắm Khoái nhưng 102 đã gục.
+	var state: BattleState = BoardFixture.state({Vector2i(3, 2): "B", Vector2i(3, 3): "B", Vector2i(3, 4): "1"},
+		{}, {Vector2i(3, 3): 1})
+	state.telegraphs.append(_cell_attack(101, Vector2i(0, 1), 1))
+	state.telegraphs.append(_cell_attack(102, Vector2i(0, 1), 2))
+	assert_eq(_strike(state), ["ATTACKED 101 3,3", "DAMAGED 102 -1 ENEMY_STRIKE", "DIED 102 3,3", "ROUND_STARTED"]
+		as Array[String])
+	assert_eq(state.unit_by_id(1).hp, 3, "đòn 2 không ra")
+
+
+func test_enemies_killing_each_other_is_not_victory() -> void:
+	# Ở story này không thể thắng trong pha địch: quân ra đòn cuối luôn còn sống.
+	var state: BattleState = BoardFixture.state({Vector2i(0, 0): "1", Vector2i(3, 3): "B", Vector2i(3, 4): "B"},
+		{}, {Vector2i(3, 3): 1, Vector2i(3, 4): 1})
+	state.telegraphs.append(_cell_attack(101, Vector2i(0, 1), 1))
+	state.telegraphs.append(_cell_attack(102, Vector2i(0, -1), 2))
+	var events: Array[String] = BoardFixture.describe(Rules.resolve(state, Command.end_turn()))
+	assert_eq(events.slice(0, 4), ["ATTACKED 101 3,4", "DAMAGED 102 -1 ENEMY_STRIKE", "DIED 102 3,4", "ROUND_STARTED"]
+		as Array[String])
+	assert_does_not_have(events, "VICTORY")
+	assert_eq(state.phase, BattleState.Phase.PLAYER)
+	assert_not_null(state.unit_by_id(101))
+
+
+func test_last_general_falls_mid_phase_stops_everything() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "B", Vector2i(3, 4): "1", Vector2i(5, 5): "B",
+		Vector2i(5, 6): "B"}, {}, {Vector2i(3, 4): 1})
+	state.telegraphs.append(_cell_attack(101, Vector2i(0, 1), 1))
+	state.telegraphs.append(_cell_attack(102, Vector2i(0, 1), 2))
+	var events: Array[String] = BoardFixture.describe(Rules.resolve(state, Command.end_turn()))
+	assert_eq(events, ["ATTACKED 101 3,4", "DAMAGED 1 -1 ENEMY_STRIKE", "DIED 1 3,4", "DEFEAT"] as Array[String],
+		"thua là sự kiện cuối, có đúng một lần; đòn 2 không ra; không sang hiệp")
+	assert_eq(state.phase, BattleState.Phase.LOST)
+	assert_eq(state.round_number, 1)
+	assert_eq(state.unit_by_id(103).hp, 3, "Bộ binh 5,6 không trúng đòn 2")
+	assert_eq(state.telegraphs.size(), 2, "không chạy pha chuẩn bị: đòn còn nguyên")
+	assert_eq(state.validate(), [] as Array[String])
