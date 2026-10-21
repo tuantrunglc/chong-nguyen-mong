@@ -67,6 +67,8 @@ var group: String = ""
 var description: String = ""
 var approved: bool = false
 var before: LevelData = null
+## Đòn đã báo sẵn ở bàn trước ("truoc.bao_don", Story 2.8), theo số thứ tự; rỗng là không có đòn.
+var before_telegraphs: Array[ExpectedTelegraph] = []
 var steps: Array[ScenarioStep] = []
 ## Theo hàng: index = hang * size.x + cot (như LevelData).
 var after_terrain: PackedInt32Array = PackedInt32Array()

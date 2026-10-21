@@ -4,7 +4,7 @@ baseline_commit: 6195636
 
 # Story 2.8: Địch ra đòn theo thứ tự
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 
@@ -35,15 +35,15 @@ _**Chưa có** (đừng làm ở đây): sự kiện hủy đòn `TELEGRAPH_CANC
 ## Tasks / Subtasks
 
 - [ ] **Task 1: Khung, đợt kịch bản 10, dừng chờ duyệt** (AC: 1, 2)
-  - [ ] 1.1 Khung (làm trước để kịch bản nạp và so được):
+  - [x] 1.1 Khung (làm trước để kịch bản nạp và so được):
     - `src/data/scenario_loader.gd`: thêm `"bao_don"` vào `BEFORE_KEYS`; đọc bằng **chính** `_read_telegraphs` (tên hiện `truoc.bao_don`, lớp quân `truoc.quan`). Kiểm như `sau.bao_don`: thứ tự không trùng, ô `quan` có quân Nguyên, mỗi quân một đòn, `o` kề `quan`, `huong` hợp lệ. **Thêm cho `truoc`**: số thứ tự phải liền từ 1 (1, 2, 3…), vì `BattleState.validate` đòi vậy; câu lỗi tiếng Việt kèm file và giá trị sai.
     - `src/data/scenario_data.gd`: `before_telegraphs: Array[ExpectedTelegraph]` (rỗng khi không ghi).
     - `tests/scenario_runner.gd` `run`: sau `controller.start(...)`, dựng `Telegraph` từ `before_telegraphs` (chủ đòn = `unit_at(owner_cell).id`; CELL: `offset = target - owner_cell`; DIRECTION: `offset = target`) và đưa vào state của controller **trước** `validate()` "trước:". Cách đưa: thêm tham số không bắt buộc `telegraphs: Array[Telegraph] = []` cho `BattleController.start` (chép sâu vào `_state.telegraphs`), không mở đường sửa state sống nào khác.
     - `tests/scenario_viewer.gd`: phần `truoc` có `bao_don` thì in thêm bàn **"Ô ĐỎ"** cạnh bàn TRƯỚC (cùng cách in với bàn "Ô ĐỎ" của `sau`, Story 2.7), tính bằng `TelegraphMarks.cells` trên state dựng từ `truoc`; và in danh sách đòn dạng `Đòn 1: Bộ binh 3,3 đánh ô 3,4`, `Đòn 2: Kỵ binh 0,3 xung phong hướng Đông`. Chữ qua `tr()` (khóa `scenario.viewer.*`; sinh lại `text.vi.translation`).
     - `tests/test_scenario_loader.gd`: ca nạp `truoc.bao_don` đúng; ca sai (thứ tự không liền `[1, 3]`, ô `quan` không có quân Nguyên, `o` không kề); ca runner dựng đòn đúng chủ, đúng offset.
-  - [ ] 1.2 Viết 9 file đúng "Đợt kịch bản 10", `"da_duyet": false`. Chép cấu trúc từ `tests/kich_ban/don_dich/o_do_tuong_khac_buoc_vao.json`. Bàn `sau` đã tính bằng mô phỏng (xem Debug Log của story tạo); **chạy lại mô phỏng** (`BoardFixture` + `Rules.resolve(end_turn)` trên bàn đã trừ máu bằng tay) trước khi viết để chắc.
-  - [ ] 1.3 `tools/xem_kich_ban.sh don_dich`: đọc lại từng bàn, bàn "Ô ĐỎ" của TRƯỚC, khớp `mo_ta`. `tools/test.sh`: `66 đã duyệt · 9 chưa duyệt (N chưa đạt)`. Ghi Debug Log từng lý do trượt.
-  - [ ] 1.4 Commit: `Kịch bản quân Nguyên ra đòn chờ duyệt (Story 2.8)`.
+  - [x] 1.2 Viết 9 file đúng "Đợt kịch bản 10", `"da_duyet": false`. Chép cấu trúc từ `tests/kich_ban/don_dich/o_do_tuong_khac_buoc_vao.json`. Bàn `sau` đã tính bằng mô phỏng (xem Debug Log của story tạo); **chạy lại mô phỏng** (`BoardFixture` + `Rules.resolve(end_turn)` trên bàn đã trừ máu bằng tay) trước khi viết để chắc.
+  - [x] 1.3 `tools/xem_kich_ban.sh don_dich`: đọc lại từng bàn, bàn "Ô ĐỎ" của TRƯỚC, khớp `mo_ta`. `tools/test.sh`: `66 đã duyệt · 9 chưa duyệt (N chưa đạt)`. Ghi Debug Log từng lý do trượt.
+  - [x] 1.4 Commit: `Kịch bản quân Nguyên ra đòn chờ duyệt (Story 2.8)`.
   - [ ] 1.5 **HALT.** Nhắn tác giả tiếng Việt: gõ `tools/xem_kich_ban.sh don_dich` (chỉ cần đọc 9 file `ra_don_*`), trả lời "đúng"/"sai: <lý do>" từng cái. Nói rõ: bàn "Ô ĐỎ" cạnh TRƯỚC là các đòn đã báo sẵn; bàn SAU là sau khi các đòn đánh **và** quân Nguyên đã đi, báo đòn cho hiệp 2 (luật 2.6), nên quân Nguyên có thể đổi chỗ.
   - [ ] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng"; `tools/test.sh` phải trượt. Không commit khi đỏ.
 - [ ] **Task 2: Test GUT lõi viết trước** (AC: 4–11)
@@ -207,9 +207,13 @@ Giống hệt `sau.bao_don` (Story 2.6): `[{"thu_tu": 1, "quan": "3,3", "o": "3,
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5[1m])
+
 ### Debug Log References
 
 - 2026-10-21 (tạo story): bàn `sau` của "Đợt kịch bản 10" tính bằng script tạm (`BoardFixture.state` với máu đã trừ tay theo luật 2.8, rồi `Rules.resolve(Command.end_turn())` của code ở `6195636`, chưa ra đòn): in bàn cuối, máu, đòn hiệp 2. #9 không cần mô phỏng (hết trận, không chạy pha chuẩn bị). Đã kiểm 66 kịch bản cũ: không file nào có hai `ket_thuc_luot`, `truoc` không có đòn, nên ra đòn không đổi kết quả của chúng.
+
+- 2026-10-21 Task 1.1–1.3: `truoc.bao_don` (loader dùng chung `_read_telegraphs`, thêm kiểm số thứ tự liền từ 1), `ScenarioData.before_telegraphs`, `BattleController.start(level, stats, telegraphs = [])`, `ScenarioRunner.before_telegraphs` (viewer dùng chung). Viewer: bàn "Ô ĐỎ" của bàn trước đứng giữa TRƯỚC và SAU, danh sách "Đòn đã báo sẵn", dòng `Ô đỏ c,h: đòn 1·2`; ghi chú máu của bàn SAU dời thẳng cột với SAU. 1 khóa mới `scenario.viewer.before_telegraphs`. Test cũ `test_after_telegraph_errors` khẳng định `truoc.bao_don` là khóa lạ: đổi thành không cảnh báo (khóa giờ hợp lệ theo story). 9 kịch bản `don_dich/ra_don_*.json` sinh bằng script từ bảng. `tools/test.sh`: 547/547 đạt, `66 đã duyệt · 9 chưa duyệt (6 chưa đạt)`; 6 lý do trượt khớp bảng (#1, #3, #4, #5: máu 3 thay vì 2; #8: `ô 0,3 mong đợi K, thực tế trống` vì Bộ binh chắn chưa gục nên Kỵ binh đi chỗ khác; #9: Khoái còn ở 3,4).
 
 ### Completion Notes List
 

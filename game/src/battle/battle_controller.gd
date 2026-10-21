@@ -16,8 +16,11 @@ var _state: BattleState = null
 var _undo_snapshot: BattleState = null
 
 
-func start(level: LevelData, stats: Stats) -> void:
+## telegraphs: đòn đã báo sẵn (chỉ bộ chạy kịch bản dùng, "truoc.bao_don", Story 2.8); chép sâu, theo số thứ tự.
+func start(level: LevelData, stats: Stats, telegraphs: Array[Telegraph] = []) -> void:
 	_state = BattleState.from_level(level, stats)
+	for t: Telegraph in telegraphs:
+		_state.telegraphs.append(t.clone())
 	_undo_snapshot = null
 	# Bộ nạp đã chặn các lỗi này; đây chỉ là lưới an toàn.
 	for problem: String in _state.validate():

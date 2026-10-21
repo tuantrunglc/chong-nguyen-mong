@@ -54,7 +54,7 @@ class ScenarioResult:
 static func run(scenario: ScenarioData, stats: Stats) -> ScenarioResult:
 	var result: ScenarioResult = ScenarioResult.new()
 	var controller: BattleController = BattleController.new()
-	controller.start(scenario.before, stats)
+	controller.start(scenario.before, stats, before_telegraphs(scenario, stats))
 	for problem: String in controller.snapshot().validate():
 		result.problems.append("trước: %s" % problem)
 	if not result.passed:
@@ -77,6 +77,20 @@ static func run(scenario: ScenarioData, stats: Stats) -> ScenarioResult:
 			return result
 	result.problems.append_array(compare(controller.snapshot(), scenario))
 	return result
+
+
+## Đòn đã báo sẵn ở bàn trước ("truoc.bao_don", Story 2.8): chủ đòn là quân đứng ở ô "quan" của bàn trước.
+## CELL: offset = ô bị nhắm - ô chủ đòn; DIRECTION: offset là hướng. Bộ nạp đã kiểm ô có quân Nguyên.
+static func before_telegraphs(scenario: ScenarioData, stats: Stats) -> Array[Telegraph]:
+	var out: Array[Telegraph] = []
+	if scenario.before_telegraphs.is_empty():
+		return out
+	var state: BattleState = BattleState.from_level(scenario.before, stats)
+	for t: ScenarioData.ExpectedTelegraph in scenario.before_telegraphs:
+		var owner: Unit = state.unit_at(t.owner_cell)
+		var offset: Vector2i = t.target - t.owner_cell if t.kind == Telegraph.Kind.CELL else t.target
+		out.append(Telegraph.new(owner.id, t.kind, offset, t.order))
+	return out
 
 
 ## Ký hiệu của UnitType trên bàn cờ chữ (bảng ngược của BoardText.UNIT_SYMBOLS).

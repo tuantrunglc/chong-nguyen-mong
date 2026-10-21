@@ -66,6 +66,7 @@ scenario.viewer.outcome_dang_choi,đang chơi
 scenario.viewer.outcome_thang,thắng
 scenario.viewer.outcome_thua,thua
 scenario.viewer.telegraphs,Đòn đã báo (chưa đánh):
+scenario.viewer.before_telegraphs,Đòn đã báo sẵn (đánh khi kết thúc lượt):
 scenario.viewer.telegraphs_none,Đòn đã báo: không quân nào báo đòn
 scenario.viewer.telegraph_cell,%s ở %s đánh ô %s
 scenario.viewer.telegraph_charge,%s ở %s xung phong về hướng %s

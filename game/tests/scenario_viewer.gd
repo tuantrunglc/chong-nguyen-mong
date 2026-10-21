@@ -152,25 +152,43 @@ static func render(scenario: ScenarioData, stats: Stats) -> String:
 	var left: PackedStringArray = _board(size, scenario.before.terrain, before_units,
 		_t("scenario.viewer.before"))
 	var right: PackedStringArray = _board(size, scenario.after_terrain, after_units, _t("scenario.viewer.after"))
-	# Bàn thứ ba "Ô ĐỎ" khi kịch bản ghi "sau.o_do" (Story 2.7).
-	var marks: PackedStringArray = _marks_board(size, scenario.after_marks) if scenario.checks_marks \
-		else PackedStringArray()
-	for i: int in range(maxi(left.size(), right.size())):
-		var l: String = left[i] if i < left.size() else ""
-		var r: String = right[i] if i < right.size() else ""
-		var m: String = marks[i] if i < marks.size() else ""
-		lines.append((l.rpad(LEFT_WIDTH) + r.rpad(LEFT_WIDTH if not m.is_empty() else 0) + m).strip_edges(false, true))
+	# Bàn "Ô ĐỎ" cạnh TRƯỚC khi kịch bản đặt sẵn đòn ("truoc.bao_don", Story 2.8): ô đỏ như game vẽ ở bàn trước.
+	var boards: Array[PackedStringArray] = [left]
+	var before_marks: Dictionary = _before_marks(scenario, stats)
+	if not scenario.before_telegraphs.is_empty():
+		boards.append(_marks_board(size, before_marks))
+	boards.append(right)
+	# Bàn "Ô ĐỎ" cạnh SAU khi kịch bản ghi "sau.o_do" (Story 2.7).
+	if scenario.checks_marks:
+		boards.append(_marks_board(size, scenario.after_marks))
+	var rows: int = 0
+	for board: PackedStringArray in boards:
+		rows = maxi(rows, board.size())
+	for i: int in range(rows):
+		var line: String = ""
+		for b: int in range(boards.size()):
+			var cell: String = boards[b][i] if i < boards[b].size() else ""
+			line += cell if b == boards.size() - 1 else cell.rpad(LEFT_WIDTH)
+		lines.append(line.strip_edges(false, true))
 
 	lines.append_array(_notes_side_by_side(
 		_notes(size, scenario.before.terrain, before_units, stats),
-		_notes(size, scenario.after_terrain, after_units, stats)))
+		_notes(size, scenario.after_terrain, after_units, stats),
+		NOTE_WIDTH + (LEFT_WIDTH if not scenario.before_telegraphs.is_empty() else 0)))
 	var after_state: String = _after_state(scenario)
 	if not after_state.is_empty():
 		lines.append("")
 		lines.append("  " + after_state)
+	if not scenario.before_telegraphs.is_empty():
+		lines.append("")
+		lines.append_array(_telegraph_lines(scenario.before_telegraphs, before_units,
+			"scenario.viewer.before_telegraphs", "scenario.viewer.telegraphs_none"))
+		if not before_marks.is_empty():
+			lines.append_array(_marks_lines(size, before_marks))
 	if scenario.checks_telegraphs:
 		lines.append("")
-		lines.append_array(_telegraph_lines(scenario, after_units))
+		lines.append_array(_telegraph_lines(scenario.after_telegraphs, after_units, "scenario.viewer.telegraphs",
+			"scenario.viewer.telegraphs_none"))
 	if scenario.checks_marks:
 		var notes: PackedStringArray = _marks_lines(size, scenario.after_marks)
 		if not notes.is_empty():
@@ -180,15 +198,24 @@ static func render(scenario: ScenarioData, stats: Stats) -> String:
 	return "\n".join(lines)
 
 
-## "Đòn đã báo:" rồi mỗi đòn một dòng theo số thứ tự ("sau.bao_don", Story 2.6).
-static func _telegraph_lines(scenario: ScenarioData, after_units: Dictionary) -> PackedStringArray:
+## Ô đỏ của bàn trước (Story 2.8): dựng bàn trước với đòn đặt sẵn, tính như game (TelegraphMarks).
+static func _before_marks(scenario: ScenarioData, stats: Stats) -> Dictionary:
+	var state: BattleState = BattleState.from_level(scenario.before, stats)
+	state.telegraphs = ScenarioRunner.before_telegraphs(scenario, stats)
+	return TelegraphMarks.cells(state)
+
+
+## Tiêu đề (header) rồi mỗi đòn một dòng theo số thứ tự ("truoc.bao_don" Story 2.8, "sau.bao_don" Story 2.6).
+## units: ô -> [loại, máu] của bàn chứa chủ đòn.
+static func _telegraph_lines(telegraphs: Array[ScenarioData.ExpectedTelegraph], units: Dictionary, header: String,
+		none: String) -> PackedStringArray:
 	var lines: PackedStringArray = PackedStringArray()
-	if scenario.after_telegraphs.is_empty():
-		lines.append("  " + _t("scenario.viewer.telegraphs_none"))
+	if telegraphs.is_empty():
+		lines.append("  " + _t(none))
 		return lines
-	lines.append("  " + _t("scenario.viewer.telegraphs"))
-	for t: ScenarioData.ExpectedTelegraph in scenario.after_telegraphs:
-		var owner: Array = after_units.get(t.owner_cell, [-1, 0]) as Array
+	lines.append("  " + _t(header))
+	for t: ScenarioData.ExpectedTelegraph in telegraphs:
+		var owner: Array = units.get(t.owner_cell, [-1, 0]) as Array
 		var name: String = _unit_name(owner[0] as int)
 		var text: String
 		if t.kind == Telegraph.Kind.CELL:
@@ -310,7 +337,9 @@ static func _notes(size: Vector2i, terrain: PackedInt32Array, units: Dictionary,
 
 
 ## Ghi chú hai bàn đặt cạnh nhau, cùng loại cùng dòng (Máu cạnh Máu). Ghi chú bàn sau luôn thẳng cột với nhau.
-static func _notes_side_by_side(left: Array[PackedStringArray], right: Array[PackedStringArray]) -> PackedStringArray:
+## min_width: cột bắt đầu ghi chú bàn sau (rộng thêm LEFT_WIDTH khi có bàn "Ô ĐỎ" đứng giữa TRƯỚC và SAU).
+static func _notes_side_by_side(left: Array[PackedStringArray], right: Array[PackedStringArray],
+		min_width: int = NOTE_WIDTH) -> PackedStringArray:
 	var pairs: Array[PackedStringArray] = []  # [trái, phải]
 	for k: int in range(NOTE_KINDS.size()):
 		var label: String = _t(NOTE_KINDS[k][0] as String)
@@ -319,7 +348,7 @@ static func _notes_side_by_side(left: Array[PackedStringArray], right: Array[Pac
 			pairs.append(PackedStringArray([_note_line(label, gap, left[k], i), _note_line(label, gap, right[k], i)]))
 	if pairs.is_empty():
 		return PackedStringArray()
-	var width: int = NOTE_WIDTH
+	var width: int = min_width
 	for pair: PackedStringArray in pairs:
 		width = maxi(width, pair[0].length() + NOTE_GAP)
 	var lines: PackedStringArray = PackedStringArray([""])

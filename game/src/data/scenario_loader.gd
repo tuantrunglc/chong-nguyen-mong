@@ -11,7 +11,8 @@ const SIZE_LAYER: String = "truoc.dia_hinh"
 const FORMAT_VERSION: int = 1
 
 const ROOT_KEYS: Array[String] = ["phien_ban_dinh_dang", "mo_ta", "da_duyet", "truoc", "hanh_dong", "sau"]
-const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich"]
+## "bao_don" của "truoc": đòn quân Nguyên đã báo sẵn khi kịch bản bắt đầu (Story 2.8), không bắt buộc.
+const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich", "bao_don"]
 ## "hiep", "da_di", "da_danh", "ket_qua", "bao_don", "o_do" không bắt buộc: không ghi thì không kiểm (review Story 1.5,
 ## tác giả chốt 2026-10-18; "ket_qua": Story 2.5; "bao_don": Story 2.6; "o_do": Story 2.7).
 const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh", "ket_qua", "bao_don",
@@ -148,6 +149,8 @@ static func parse_scenario(text: String, path: String, root_dir: String, stats: 
 	scenario.description = description
 	scenario.approved = approved
 	scenario.before = _build_level(before, scenario.id)
+	if before.telegraphs != null:
+		scenario.before_telegraphs = before.telegraphs as Array[ScenarioData.ExpectedTelegraph]
 	scenario.steps = steps
 	scenario.after_terrain = BoardLayers.terrain_values(after.terrain_rows)
 	scenario.after_round = after.round_number
@@ -267,9 +270,25 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 			side.outcome = outcome as String
 	if known.has("bao_don") and section.has("bao_don"):
 		side.telegraphs = _read_telegraphs(section["bao_don"], name + ".bao_don", name + ".quan", side, file, result)
+		if name == "truoc" and side.telegraphs != null:
+			_check_orders_from_one(side.telegraphs as Array[ScenarioData.ExpectedTelegraph], name + ".bao_don",
+				file, result)
 	if known.has("o_do") and section.has("o_do"):
 		side.marks = _read_marks(section["o_do"], name + ".o_do", side, file, result)
 	return side
+
+
+## Đòn dựng sẵn ("truoc.bao_don") phải đánh số liền từ 1, như BattleState.validate đòi. telegraphs đã xếp tăng dần.
+static func _check_orders_from_one(telegraphs: Array[ScenarioData.ExpectedTelegraph], shown: String,
+		file: String, result: LoadResult) -> void:
+	var orders: Array[int] = []
+	for t: ScenarioData.ExpectedTelegraph in telegraphs:
+		orders.append(t.order)
+	for i: int in range(orders.size()):
+		if orders[i] != i + 1:
+			result.add_error('%s: "%s" phải đánh số thứ tự liền từ 1 (1, 2, 3…), đang là %s'
+				% [file, shown, JsonFile.show(orders)])
+			return
 
 
 ## "da_di": ["1", "2"] là các tướng đã đi trong lượt; [] là chưa tướng nào đi ("da_danh" cũng vậy). Trả Array[int]

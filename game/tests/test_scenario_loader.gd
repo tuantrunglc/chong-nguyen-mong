@@ -1044,7 +1044,62 @@ func test_after_telegraph_errors() -> void:
 	assert_eq(_parse(d).warnings, [F + ': "sau.bao_don" mục 1: bỏ qua khóa lạ "loai"'] as Array[String])
 	d = _valid()
 	d["truoc"]["bao_don"] = []
-	assert_eq(_parse(d).warnings, [F + ': bỏ qua khóa lạ "truoc.bao_don"'] as Array[String])
+	assert_eq(_parse(d).warnings, [] as Array[String], "từ Story 2.8 truoc.bao_don là khóa hợp lệ")
+
+
+# ---------- Đòn đặt sẵn ("truoc.bao_don", Story 2.8) ----------
+
+## Bàn trước của _valid() thêm Kỵ binh ở 6,4: Bộ binh 5,4 (id 101) và Kỵ binh 6,4 (id 102).
+func _with_two_enemies() -> Dictionary:
+	var d: Dictionary = _valid()
+	d["truoc"]["quan"][4] = ". . . . . B K"
+	d["sau"]["quan"][4] = ". . . . . B K"
+	return d
+
+
+func test_before_telegraphs_are_read_and_built() -> void:
+	var s: ScenarioData = _scenario(_valid())
+	if s == null:
+		return
+	assert_eq(s.before_telegraphs.size(), 0, "không ghi thì bàn trước không có đòn")
+	var d: Dictionary = _with_two_enemies()
+	d["truoc"]["bao_don"] = [
+		{"thu_tu": 2, "quan": "6,4", "huong": "N"},
+		{"thu_tu": 1, "quan": "5,4", "o": "4,4"},
+	]
+	s = _scenario(d)
+	if s == null:
+		return
+	assert_eq(s.before_telegraphs.size(), 2)
+	assert_eq(s.before_telegraphs[0].order, 1, "xếp theo thu_tu")
+	var built: Array[Telegraph] = ScenarioRunner.before_telegraphs(s, _stats())
+	assert_eq(built.size(), 2)
+	assert_eq([built[0].owner_id, built[0].kind, built[0].offset, built[0].order],
+		[101, Telegraph.Kind.CELL, Vector2i(-1, 0), 1], "Bộ binh 5,4 đánh ô 4,4: offset Tây")
+	assert_eq([built[1].owner_id, built[1].kind, built[1].offset, built[1].order],
+		[102, Telegraph.Kind.DIRECTION, Vector2i(0, 1), 2], "Kỵ binh 6,4 xung phong Nam")
+
+
+func test_runner_starts_with_before_telegraphs() -> void:
+	var d: Dictionary = _with_two_enemies()
+	d["truoc"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "4,4"}]
+	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "4,4"}]
+	assert_true(_run(d).passed, "không có lệnh: đòn đặt sẵn còn nguyên ở bàn sau")
+
+
+func test_before_telegraph_errors() -> void:
+	var d: Dictionary = _with_two_enemies()
+	d["truoc"]["bao_don"] = [
+		{"thu_tu": 1, "quan": "5,4", "o": "4,4"},
+		{"thu_tu": 3, "quan": "6,4", "huong": "N"},
+	]
+	assert_eq(_errors(d), [F + ': "truoc.bao_don" phải đánh số thứ tự liền từ 1 (1, 2, 3…), đang là [1,3]']
+		as Array[String])
+	d["truoc"]["bao_don"] = [{"thu_tu": 1, "quan": "0,6", "o": "1,6"}]
+	assert_eq(_errors(d), [F + ': "truoc.bao_don" mục 1: "quan" ô 0,6 không có quân Nguyên trong "truoc.quan"']
+		as Array[String])
+	d["truoc"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "3,4"}]
+	assert_eq(_errors(d), [F + ': "truoc.bao_don" mục 1: "o" ô 3,4 không kề "quan" ô 5,4'] as Array[String])
 
 
 func test_runner_compares_telegraphs_only_when_written() -> void:
@@ -1125,3 +1180,21 @@ func test_runner_compares_marks_only_when_written() -> void:
 	assert_true(_run(d).passed, "bàn không có đòn, kịch bản ghi {}")
 	d["sau"]["o_do"] = {"5,5": [1, 2]}
 	assert_eq(_run(d).problems, ["sau: ô 5,5 mong đợi đỏ (đòn 1·2), thực tế không đỏ"] as Array[String])
+
+
+## Công cụ duyệt (Story 2.8): bàn "Ô ĐỎ" của bàn trước đứng giữa TRƯỚC và SAU, kèm danh sách đòn đặt sẵn.
+func test_viewer_shows_before_telegraphs() -> void:
+	var d: Dictionary = _with_two_enemies()
+	d["truoc"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "4,4"}]
+	var s: ScenarioData = _scenario(d)
+	if s == null:
+		return
+	var text: String = ScenarioViewer.render(s, _stats())
+	var header: String = ""
+	for line: String in text.split("\n"):
+		if line.contains(tr("scenario.viewer.before")) and line.contains(tr("scenario.viewer.after")):
+			header = line
+	assert_true(header.find(tr("scenario.viewer.marks")) > header.find(tr("scenario.viewer.before")), "Ô ĐỎ sau TRƯỚC")
+	assert_true(header.find(tr("scenario.viewer.marks")) < header.find(tr("scenario.viewer.after")), "Ô ĐỎ trước SAU")
+	assert_string_contains(text, tr("scenario.viewer.before_telegraphs"))
+	assert_string_contains(text, "1. " + tr("scenario.viewer.telegraph_cell") % [tr("scenario.unit.bo_binh"), "5,4", "4,4"])
