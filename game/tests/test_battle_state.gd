@@ -180,6 +180,36 @@ func test_clone_copies_phase_and_mission() -> void:
 	assert_eq(original.mission, LevelData.Mission.HOLD_PASS, "bản gốc không đổi")
 
 
+## Story 2.6: đòn đã báo và ý định AI chép sâu (sửa bản sao không đổi bản gốc).
+func test_clone_copies_telegraphs_and_intents_deeply() -> void:
+	var original: BattleState = BoardFixture.state({Vector2i(3, 3): "B", Vector2i(3, 4): "1"})
+	var events: Array[BattleEvent] = []
+	RulesEnemyPhase.prepare(original, events)
+	var copy: BattleState = original.clone()
+	assert_eq(copy.telegraphs.size(), 1)
+	assert_ne(copy.telegraphs[0], original.telegraphs[0], "đối tượng mới, không dùng chung")
+	assert_eq(copy.telegraphs[0].target_cell(copy), Vector2i(3, 4))
+	assert_eq(copy.enemy_intents.size(), 1)
+	assert_ne(copy.enemy_intents[0], original.enemy_intents[0])
+	assert_eq(copy.enemy_intents[0].order, 1)
+	copy.telegraphs.clear()
+	copy.enemy_intents[0].order = 9
+	assert_eq(original.telegraphs.size(), 1, "bản gốc không đổi")
+	assert_eq(original.enemy_intents[0].order, 1, "bản gốc không đổi")
+
+
+func test_validate_reports_bad_telegraph_order() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "B", Vector2i(5, 5): "B", Vector2i(3, 4): "1"})
+	state.telegraphs.append(Telegraph.new(101, Telegraph.Kind.CELL, Vector2i(0, 1), 1))
+	assert_eq(state.validate(), [] as Array[String])
+	state.telegraphs.append(Telegraph.new(102, Telegraph.Kind.CELL, Vector2i(0, 1), 1))
+	state.telegraphs.append(Telegraph.new(102, Telegraph.Kind.CELL, Vector2i(0, 1), 0))
+	assert_eq(state.validate(), [
+		"đòn số 1 bị trùng (quân 101 và quân 102)",
+		"đòn của quân 102 có số thứ tự 0, cần từ 1 trở lên",
+	] as Array[String])
+
+
 func test_from_level_copies_mission() -> void:
 	var level: LevelData = LevelData.new()
 	level.size = Vector2i(5, 5)

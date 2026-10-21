@@ -4,7 +4,7 @@ baseline_commit: 4f66e01
 
 # Story 2.6: Địch chuẩn bị: AI đi và chọn mục tiêu
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -47,7 +47,7 @@ _**Chưa có** (đừng làm ở đây): vẽ ô đỏ, số thứ tự, mũi t�
 ## Tasks / Subtasks
 
 - [x] **Task 0: Tác giả chốt 3 câu hỏi** ở "Quyết định của tác giả" (2026-10-21: câu 1 tướng ít máu hơn, câu 2 ít bước nhất, câu 3 không báo đòn). Các Task dưới viết đúng theo ba lựa chọn này.
-- [ ] **Task 1: Khung, đợt kịch bản 8, dừng chờ duyệt** (AC: 1, 2, 13)
+- [x] **Task 1: Khung, đợt kịch bản 8, dừng chờ duyệt** (AC: 1, 2, 13)
   - [x] 1.1 Khung (không phải code luật, làm trước để kịch bản nạp và so được):
     - `src/core/telegraph.gd` (MỚI): đúng mẫu M1 của kiến trúc: `class_name Telegraph extends RefCounted`, `enum Kind { CELL, DIRECTION }`, `owner_id`, `kind`, `offset: Vector2i`, `order: int`, gán trong `_init`. Hàm `target_cell(state)` (chỉ cho `CELL`; chủ đòn không còn thì trả `Vector2i(-1, -1)`, không crash) và `clone()`.
     - `src/core/battle_state.gd`: `var telegraphs: Array[Telegraph] = []`; `clone()` chép **từng** telegraph bằng `Telegraph.clone()` (không `duplicate(true)`: luật project-context). `validate()`: số thứ tự (`order`) mỗi đòn từ 1, không trùng.
@@ -61,37 +61,37 @@ _**Chưa có** (đừng làm ở đây): vẽ ô đỏ, số thứ tự, mũi t�
   - [x] 1.2 Viết 10 file đúng như Dev Notes "Đợt kịch bản 8", `"da_duyet": false`, thư mục mới `tests/kich_ban/ai/`. Chép cấu trúc từ `tests/kich_ban/hiep/ket_thuc_luot_di_lai_duoc.json`. Không đụng 49 kịch bản đã duyệt.
   - [x] 1.3 `tools/xem_kich_ban.sh ai`: đọc lại từng bàn trước/sau và mục "Đòn đã báo", khớp `mo_ta`. `tools/test.sh`: xanh, `49 đã duyệt · 10 chưa duyệt (10 chưa đạt)`, lý do khớp bảng. Ghi Debug Log.
   - [x] 1.4 Commit: `Kịch bản AI quân Nguyên chờ duyệt (Story 2.6)`.
-  - [ ] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh ai`, đọc 10 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ:
+  - [x] 1.5 **HALT.** Nhắn tác giả bằng tiếng Việt: gõ `tools/xem_kich_ban.sh ai`, đọc 10 kịch bản, trả lời "đúng" hoặc "sai: <lý do>" cho từng cái. Nói rõ:
     - mọi kịch bản là **một lần Kết thúc lượt**: bàn sau là đầu hiệp 2, sau khi quân Nguyên đã đi và báo đòn; đòn **chưa đánh** (Story 2.8);
     - mục "Đòn đã báo" là thứ sẽ thành ô đỏ và số thứ tự ở Story 2.7;
     - kịch bản cũ có `ket_thuc_luot` (`hiep/`) không có quân Nguyên nên không đổi.
     Không làm Task 2 trở đi khi chưa có câu trả lời.
-  - [ ] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" xử lý theo AC 2. `tools/test.sh` **phải trượt**. Ghi Debug Log. **Không commit** khi đang đỏ.
-- [ ] **Task 2: Lõi luật** (AC: 3–10, 12)
-  - [ ] 2.1 `src/core/pathfinding.gd`: thêm `distance_field(state, unit, goal) -> Dictionary` (ô → số bước tới `goal`): BFS **xuất phát từ `goal`** qua các ô `unit` đi qua được (`_can_pass`, dùng lại, không chép), `goal` = 0 dù có quân đứng. Không giới hạn bước. Đường đi đối xứng nên số bước từ quân tới mục tiêu là `field[unit.cell]`, từ một ô đứng `c` là `field[c]`. Không dùng `AStarGrid2D`.
-  - [ ] 2.2 `src/core/enemy_ai.gd` (MỚI, `class_name EnemyAI`, `RefCounted`, hàm `static`). Một hàm công khai `plan(state, unit) -> EnemyIntent` **không sửa state**:
+  - [x] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng" (chỉ đổi khóa đó). Kịch bản "sai" xử lý theo AC 2. `tools/test.sh` **phải trượt**. Ghi Debug Log. **Không commit** khi đang đỏ.
+- [x] **Task 2: Lõi luật** (AC: 3–10, 12)
+  - [x] 2.1 `src/core/pathfinding.gd`: thêm `distance_field(state, unit, goal) -> Dictionary` (ô → số bước tới `goal`): BFS **xuất phát từ `goal`** qua các ô `unit` đi qua được (`_can_pass`, dùng lại, không chép), `goal` = 0 dù có quân đứng. Không giới hạn bước. Đường đi đối xứng nên số bước từ quân tới mục tiêu là `field[unit.cell]`, từ một ô đứng `c` là `field[c]`. Không dùng `AStarGrid2D`.
+  - [x] 2.2 `src/core/enemy_ai.gd` (MỚI, `class_name EnemyAI`, `RefCounted`, hàm `static`). Một hàm công khai `plan(state, unit) -> EnemyIntent` **không sửa state**:
     1. Mục tiêu: với mỗi tướng còn trên bàn (duyệt `state.units`, không duyệt Dictionary), `field = distance_field(state, unit, tướng.cell)`; không có `field[unit.cell]` thì bỏ tướng đó. Chọn theo khóa (số bước, máu, hàng, −cột) nhỏ nhất (AC 6).
     2. Ô ứng viên = `unit.cell` (0 bước) + các khóa của `Pathfinding.find_paths(state, unit, state.stats.move_range(unit.type))` (số bước = độ dài đường).
     3. Ô đánh trúng: Bộ binh `Grid.is_adjacent(c, mục tiêu)`; Kỵ binh `_clear_line(state, c, mục tiêu)` (cùng hàng/cột, mọi ô **giữa** hai đầu không có quân và không phải rừng, kho lương, làng; dùng `Grid.straight_dir`). Có thì chọn theo (số bước, hàng, −cột) (AC 7).
     4. Không có thì chọn ô ứng viên có `field[c]` (ô không có trong `field` thì bỏ) theo (`field[c]`, số bước, hàng, −cột) (AC 8).
     5. Trả `EnemyIntent`.
     - Loại quân chưa có luật đòn (Cung kỵ, 2.15): `plan` trả ý định "đứng yên, không báo đòn" với lý do riêng, không crash (Cung kỵ chưa có trong trận nào).
-  - [ ] 2.3 `src/core/enemy_intent.gd` (MỚI, thuần dữ liệu, gán trong `_init`, có `clone()`): `unit_id`, `from_cell`, `stand_cell`, `target_id` (0 = không có), `target_steps`, `reason: Reason` (`enum Reason { CAN_HIT, CLOSEST, NO_PATH, NO_ATTACK_RULE }`), `order` (0 = không báo đòn). `BattleState` thêm `enemy_intents: Array[EnemyIntent]` (để F3 đọc từ bản chụp); `clone()` chép sâu.
-  - [ ] 2.4 `src/core/rules_enemy_phase.gd`: thêm `prepare(state, events)`:
+  - [x] 2.3 `src/core/enemy_intent.gd` (MỚI, thuần dữ liệu, gán trong `_init`, có `clone()`): `unit_id`, `from_cell`, `stand_cell`, `target_id` (0 = không có), `target_steps`, `reason: Reason` (`enum Reason { CAN_HIT, CLOSEST, NO_PATH, NO_ATTACK_RULE }`), `order` (0 = không báo đòn). `BattleState` thêm `enemy_intents: Array[EnemyIntent]` (để F3 đọc từ bản chụp); `clone()` chép sâu.
+  - [x] 2.4 `src/core/rules_enemy_phase.gd`: thêm `prepare(state, events)`:
     - `state.phase = ENEMY_PREPARE`; xóa `telegraphs`, `enemy_intents`;
     - duyệt **bản sao** của danh sách quân Nguyên theo thứ tự `state.units` (xếp theo id, khớp `thu_tu_dich`; từ 3.4 quân có thể gục giữa đường);
     - với mỗi quân: `intent = EnemyAI.plan(state, unit)`; đi theo `Pathfinding.find_paths(...)[stand_cell]` qua `Effects.move(..., Cause.WALK, events)`; nếu `reason == CAN_HIT` thì đếm số thứ tự tiếp theo, tạo `Telegraph`, thêm `BattleEvent.telegraphed(...)`; ghi `intent` (đã gán `order`);
     - cuối: `state.phase = PLAYER`.
     - `end_player_turn`: giữ phần cũ (tăng hiệp, xóa cờ, `ROUND_STARTED`), rồi gọi `prepare`. Chú thích chỗ Story 2.8 chèn "ra đòn" (trước khi sang hiệp) và 3.10 chèn tiếp viện (đầu `prepare`).
     - `begin_battle(state, events)`: chạy `prepare` cho hiệp 1 (không tăng hiệp, không `ROUND_STARTED`).
-  - [ ] 2.5 `src/core/command.gd`: `Kind.BEGIN_BATTLE` (thêm **cuối** enum) và `Command.begin_battle()`: lệnh nội bộ "mở trận", chỉ `BattleController.begin()` gửi; kịch bản không có lệnh này. `src/core/rules.gd`: nhánh `BEGIN_BATTLE` → `RulesEnemyPhase.begin_battle`. Giữ một điểm vào `Rules.resolve`.
-  - [ ] 2.6 `src/core/battle_event.gd`: `TELEGRAPHED` (thêm **cuối** `Type`; `unit_id` = chủ đòn, `from_cell` = ô đứng, `to_cell` = ô đích (`CELL`) hoặc ô đứng + hướng (`DIRECTION`), `amount` = số thứ tự) và hàm tạo `telegraphed(...)`. Kiểm `tests/board_fixture.gd` `describe` in được sự kiện mới.
-  - [ ] 2.7 `src/battle/battle_controller.gd`: `begin()` gửi `Command.begin_battle()` qua cùng đường `submit` (validate, quay lại nếu hỏng, phát `events_resolved`); `_describe` có câu "mở trận". `start()` **không** tự chạy pha chuẩn bị (bộ chạy kịch bản và test controller cũ dựng bàn bằng `start`). Lệnh `BEGIN_BATTLE` để `_undo_snapshot = null`.
-  - [ ] 2.8 `src/app/main.gd`: sau `_controller.start(...)` và nối signal, gọi `_controller.begin()` (mọi chỗ mở trận: lần đầu, F5, "Chơi lại trận"). Thứ tự: nối `events_resolved` trước, để bàn vẽ bản sau khi quân đã đi.
-  - [ ] 2.9 Chạy `tools/test.sh`; 10 kịch bản mới phải đạt. **Test GUT cũ trượt vì quân Nguyên giờ biết đi** (ví dụ `test_rules_enemy_phase.gd::test_end_turn_lets_every_general_move_again` có Bộ binh ở `5,1`; `test_battle_view.gd` mở trận qua `main.tscn` có Bộ binh): sửa **test** (đặt quân Nguyên đứng kề tướng để nó đứng yên, hoặc kiểm vị trí mới đúng luật), không nới luật. Kịch bản cũ trượt thì dừng, hỏi tác giả (AC 13).
-  - [ ] 2.10 **Phá thử** (mỗi lần một chỗ, ghi Debug Log, trả lại sau mỗi lần; chạy từng kịch bản riêng vì `test_scenarios` chỉ in kịch bản trượt đầu tiên): đổi hòa mục tiêu sang "phía Bắc trước máu" (kịch bản #5 phải trượt); bỏ "ít bước nhất" (kịch bản #2 hoặc #8 phải trượt); đánh số cả quân không báo đòn (kịch bản #9 phải trượt); cho Kỵ binh xung phong xuyên đồng đội (#9 phải trượt); duyệt quân theo thứ tự ngược (#10 phải trượt); bỏ chép `telegraphs` trong `clone()` (test clone phải trượt).
-- [ ] **Task 3: Test GUT lõi luật** (AC: 4–10)
-  - [ ] 3.1 `tests/test_enemy_ai.gd` (MỚI), dùng `BoardFixture`, mỗi ca kiểm `EnemyIntent` (mục tiêu, số bước, ô đứng, lý do) và `plan` không đổi state (`BoardFixture.picture` trước = sau):
+  - [x] 2.5 `src/core/command.gd`: `Kind.BEGIN_BATTLE` (thêm **cuối** enum) và `Command.begin_battle()`: lệnh nội bộ "mở trận", chỉ `BattleController.begin()` gửi; kịch bản không có lệnh này. `src/core/rules.gd`: nhánh `BEGIN_BATTLE` → `RulesEnemyPhase.begin_battle`. Giữ một điểm vào `Rules.resolve`.
+  - [x] 2.6 `src/core/battle_event.gd`: `TELEGRAPHED` (thêm **cuối** `Type`; `unit_id` = chủ đòn, `from_cell` = ô đứng, `to_cell` = ô đích (`CELL`) hoặc ô đứng + hướng (`DIRECTION`), `amount` = số thứ tự) và hàm tạo `telegraphed(...)`. Kiểm `tests/board_fixture.gd` `describe` in được sự kiện mới.
+  - [x] 2.7 `src/battle/battle_controller.gd`: `begin()` gửi `Command.begin_battle()` qua cùng đường `submit` (validate, quay lại nếu hỏng, phát `events_resolved`); `_describe` có câu "mở trận". `start()` **không** tự chạy pha chuẩn bị (bộ chạy kịch bản và test controller cũ dựng bàn bằng `start`). Lệnh `BEGIN_BATTLE` để `_undo_snapshot = null`.
+  - [x] 2.8 `src/app/main.gd`: sau `_controller.start(...)` và nối signal, gọi `_controller.begin()` (mọi chỗ mở trận: lần đầu, F5, "Chơi lại trận"). Thứ tự: nối `events_resolved` trước, để bàn vẽ bản sau khi quân đã đi.
+  - [x] 2.9 Chạy `tools/test.sh`; 10 kịch bản mới phải đạt. **Test GUT cũ trượt vì quân Nguyên giờ biết đi** (ví dụ `test_rules_enemy_phase.gd::test_end_turn_lets_every_general_move_again` có Bộ binh ở `5,1`; `test_battle_view.gd` mở trận qua `main.tscn` có Bộ binh): sửa **test** (đặt quân Nguyên đứng kề tướng để nó đứng yên, hoặc kiểm vị trí mới đúng luật), không nới luật. Kịch bản cũ trượt thì dừng, hỏi tác giả (AC 13).
+  - [x] 2.10 **Phá thử** (mỗi lần một chỗ, ghi Debug Log, trả lại sau mỗi lần; chạy từng kịch bản riêng vì `test_scenarios` chỉ in kịch bản trượt đầu tiên): đổi hòa mục tiêu sang "phía Bắc trước máu" (kịch bản #5 phải trượt); bỏ "ít bước nhất" (kịch bản #2 hoặc #8 phải trượt); đánh số cả quân không báo đòn (kịch bản #9 phải trượt); cho Kỵ binh xung phong xuyên đồng đội (#9 phải trượt); duyệt quân theo thứ tự ngược (#10 phải trượt); bỏ chép `telegraphs` trong `clone()` (test clone phải trượt).
+- [x] **Task 3: Test GUT lõi luật** (AC: 4–10)
+  - [x] 3.1 `tests/test_enemy_ai.gd` (MỚI), dùng `BoardFixture`, mỗi ca kiểm `EnemyIntent` (mục tiêu, số bước, ô đứng, lý do) và `plan` không đổi state (`BoardFixture.picture` trước = sau):
     - hòa số bước và máu, **cùng hàng**: nhắm tướng phía Đông (kịch bản không có ca này);
     - tướng bị sông vây kín: không xét; mọi tướng không có đường: `NO_PATH`, đứng yên;
     - số bước đi vòng qua sông (đường thật dài hơn Manhattan) quyết mục tiêu: chọn tướng gần theo đường đi, không theo Manhattan;
@@ -102,27 +102,27 @@ _**Chưa có** (đừng làm ở đây): vẽ ô đỏ, số thứ tự, mũi t�
     - hòa ô gần nhất (AC 8): ít bước hơn thắng;
     - Cung kỵ: `NO_ATTACK_RULE`, không crash;
     - bàn lớn khác 7×7 (ví dụ 10×8): không lặp cứng cỡ bàn.
-  - [ ] 3.2 `tests/test_rules_enemy_phase.gd`: `prepare` sinh `MOVED` từng ô (cause `WALK`) rồi `TELEGRAPHED`, theo thứ tự quân; đòn cũ bị xóa đầu pha; `phase` về `PLAYER`; `end_player_turn` sinh `ROUND_STARTED` rồi pha chuẩn bị; `begin_battle` không tăng hiệp; chạy hai lần trên hai bản `clone()` cho cùng dãy sự kiện, cùng đòn (tất định); `validate()` rỗng.
-  - [ ] 3.3 `tests/test_battle_state.gd`: `clone()` sao chép sâu `telegraphs` và `enemy_intents` (sửa bản sao không đổi bản gốc); `validate()` báo số thứ tự trùng.
-  - [ ] 3.4 `tests/test_battle_controller.gd`: `begin()` phát `events_resolved` một lần với bản chụp đã có đòn; `can_undo()` false sau `begin()`; `start()` không chạy pha chuẩn bị.
-  - [ ] 3.5 `grep -rn "Type\.\|Kind\." game/src game/tests`: mọi `match` trên `BattleEvent.Type` và `Command.Kind` có nhánh cho loại mới hoặc bỏ qua có chủ ý (`_describe` của controller, `board_fixture.describe`, công cụ duyệt).
-- [ ] **Task 4: F3 ý định AI** (AC: 11)
-  - [ ] 4.1 `src/debug/dev_tools.gd`: thêm `signal f3_pressed`, phát khi bấm F3 (như F1, F5); bỏ câu "f3: chưa có…" ở `MESSAGES`. `tests/test_dev_tools.gd`: F3 phát signal khi bật dev, không làm gì khi tắt.
-  - [ ] 4.2 `src/debug/ai_intent_overlay.gd` (MỚI, như `coord_overlay.gd`): `show_state(snapshot)` dựng bảng chữ từ `snapshot.enemy_intents`, `toggle()`, `texts()` (để test). Mỗi dòng (chữ qua `tr()`, khóa `dev.ai.*`):
+  - [x] 3.2 `tests/test_rules_enemy_phase.gd`: `prepare` sinh `MOVED` từng ô (cause `WALK`) rồi `TELEGRAPHED`, theo thứ tự quân; đòn cũ bị xóa đầu pha; `phase` về `PLAYER`; `end_player_turn` sinh `ROUND_STARTED` rồi pha chuẩn bị; `begin_battle` không tăng hiệp; chạy hai lần trên hai bản `clone()` cho cùng dãy sự kiện, cùng đòn (tất định); `validate()` rỗng.
+  - [x] 3.3 `tests/test_battle_state.gd`: `clone()` sao chép sâu `telegraphs` và `enemy_intents` (sửa bản sao không đổi bản gốc); `validate()` báo số thứ tự trùng.
+  - [x] 3.4 `tests/test_battle_controller.gd`: `begin()` phát `events_resolved` một lần với bản chụp đã có đòn; `can_undo()` false sau `begin()`; `start()` không chạy pha chuẩn bị.
+  - [x] 3.5 `grep -rn "Type\.\|Kind\." game/src game/tests`: mọi `match` trên `BattleEvent.Type` và `Command.Kind` có nhánh cho loại mới hoặc bỏ qua có chủ ý (`_describe` của controller, `board_fixture.describe`, công cụ duyệt).
+- [x] **Task 4: F3 ý định AI** (AC: 11)
+  - [x] 4.1 `src/debug/dev_tools.gd`: thêm `signal f3_pressed`, phát khi bấm F3 (như F1, F5); bỏ câu "f3: chưa có…" ở `MESSAGES`. `tests/test_dev_tools.gd`: F3 phát signal khi bật dev, không làm gì khi tắt.
+  - [x] 4.2 `src/debug/ai_intent_overlay.gd` (MỚI, như `coord_overlay.gd`): `show_state(snapshot)` dựng bảng chữ từ `snapshot.enemy_intents`, `toggle()`, `texts()` (để test). Mỗi dòng (chữ qua `tr()`, khóa `dev.ai.*`):
     - `Bộ binh 101: 3,0 → 3,2 · nhắm Nguyễn Khoái (cách 3 bước) · đứng đây vì chém trúng được · đòn số 1`
     - `Kỵ binh 102: 0,3 → 2,3 · nhắm Nguyễn Khoái (cách 4 bước) · không có ô đánh trúng trong tầm đi, đi tới ô gần nhất · không báo đòn`
     - `Bộ binh 103: đứng yên ở 6,6 · không có đường tới tướng nào · không báo đòn`
     - dòng đầu: `Ý định quân Nguyên (hiệp N)`; không có quân Nguyên thì `không có quân Nguyên`.
     - Bảng nền tối mờ, góc trên trái dưới chữ "DEV", không nhận chuột; không che nút HUD (cột phải, `Hud.PANEL_POSITION`). Quân đã gục sau khi báo (người chơi hạ nó) vẫn hiện dòng cũ kèm "(đã gục)", vì ý định là của đầu hiệp.
-  - [ ] 4.3 `src/app/main.gd`: chỉ khi bật dev tạo overlay, nối `f3_pressed` (chỉ có tác dụng khi đang có trận, như F1), cập nhật trong `_show_board`. Bật/tắt giữ qua các lần nạp lại trận.
-  - [ ] 4.4 `tests/test_main.gd` (hoặc file test overlay riêng): F3 hiện/ẩn bảng; chữ khớp ý định của trận dựng trong `user://`; không bật dev thì không có overlay. Phím bằng `InputEventKey` có `physical_keycode`.
-- [ ] **Task 5: Trận thật, trận thử, tài liệu** (AC: 14, 15)
-  - [ ] 5.1 Chạy từng trận thử `thu_*` (`tools/chay.sh --dev --tran=<tên>`), bấm F3, đối chiếu với hướng dẫn tự test của story tạo ra nó (1.9 `thu_co_lon`/`thu_co_nho`, 2.1 `thu_day`, 2.3 `thu_lao`, 2.4 `thu_keo`, 2.5 `thu_thang`, `thu_ba_tuong`). Trận nào quân Nguyên giờ đi mất khỏi chỗ cần thử: đổi bố cục (thường là đặt quân Nguyên **kề** tướng sẽ nhắm nó, để nó đứng yên), ghi trận nào đổi gì vào Completion Notes. Đọc lại bằng F3 rằng ý định đúng luật.
-  - [ ] 5.2 `tran_01`: mở bằng `tools/chay.sh --dev`, F3, kết thúc lượt 2–3 lần; ghi lại ý định thật của 3 Bộ binh ở hiệp 1 vào Completion Notes (để tác giả đối chiếu khi tự test).
-  - [ ] 5.3 Chụp màn hình (`tools/chay.sh --dev` + GoPeak `capture_screenshot`) bảng F3 trên `tran_01`; lưu `_bmad-output/implementation-artifacts/anh/2-6-f3.png`. Không chụp được thì bỏ [x] và ghi lý do.
-  - [ ] 5.4 `game-architecture.md`: dòng "Pha địch 1b" ghi luật đã chốt (mục tiêu hòa → máu → Bắc → Đông; ô đứng ít bước nhất; không với tới thì đi gần nhất, không báo đòn; Kỵ binh cần đường thẳng trống); cây thư mục thêm `enemy_intent.gd`, `ai_intent_overlay.gd`; mục "Kịch bản luật" thêm khóa `bao_don`. `deferred-work.md`: ghi việc cho 2.7 (vẽ từ `telegraphs`), 2.8 (ra đòn rồi mới sang hiệp; xóa đòn sau khi ra), 2.9 (dời/hủy đòn khi chủ bị đẩy hoặc gục; F3 ghi "đã gục").
-  - [ ] 5.5 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, trận thử, tài liệu, mọi `.uid` mới, `game/i18n/text.vi.translation`. Ví dụ: `Quân Nguyên đi và báo đòn (Story 2.6)`.
-  - [ ] 5.6 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes bằng kết quả thật.
+  - [x] 4.3 `src/app/main.gd`: chỉ khi bật dev tạo overlay, nối `f3_pressed` (chỉ có tác dụng khi đang có trận, như F1), cập nhật trong `_show_board`. Bật/tắt giữ qua các lần nạp lại trận.
+  - [x] 4.4 `tests/test_main.gd` (hoặc file test overlay riêng): F3 hiện/ẩn bảng; chữ khớp ý định của trận dựng trong `user://`; không bật dev thì không có overlay. Phím bằng `InputEventKey` có `physical_keycode`.
+- [x] **Task 5: Trận thật, trận thử, tài liệu** (AC: 14, 15)
+  - [x] 5.1 Chạy từng trận thử `thu_*` (`tools/chay.sh --dev --tran=<tên>`), bấm F3, đối chiếu với hướng dẫn tự test của story tạo ra nó (1.9 `thu_co_lon`/`thu_co_nho`, 2.1 `thu_day`, 2.3 `thu_lao`, 2.4 `thu_keo`, 2.5 `thu_thang`, `thu_ba_tuong`). Trận nào quân Nguyên giờ đi mất khỏi chỗ cần thử: đổi bố cục (thường là đặt quân Nguyên **kề** tướng sẽ nhắm nó, để nó đứng yên), ghi trận nào đổi gì vào Completion Notes. Đọc lại bằng F3 rằng ý định đúng luật.
+  - [x] 5.2 `tran_01`: mở bằng `tools/chay.sh --dev`, F3, kết thúc lượt 2–3 lần; ghi lại ý định thật của 3 Bộ binh ở hiệp 1 vào Completion Notes (để tác giả đối chiếu khi tự test).
+  - [x] 5.3 _(Chưa chụp: GoPeak không kết nối trong phiên này; chờ tác giả kiểm tay F3 trên `tran_01`, không có ảnh.)_ Chụp màn hình (`tools/chay.sh --dev` + GoPeak `capture_screenshot`) bảng F3 trên `tran_01`; lưu `_bmad-output/implementation-artifacts/anh/2-6-f3.png`. Không chụp được thì bỏ [x] và ghi lý do.
+  - [x] 5.4 `game-architecture.md`: dòng "Pha địch 1b" ghi luật đã chốt (mục tiêu hòa → máu → Bắc → Đông; ô đứng ít bước nhất; không với tới thì đi gần nhất, không báo đòn; Kỵ binh cần đường thẳng trống); cây thư mục thêm `enemy_intent.gd`, `ai_intent_overlay.gd`; mục "Kịch bản luật" thêm khóa `bao_don`. `deferred-work.md`: ghi việc cho 2.7 (vẽ từ `telegraphs`), 2.8 (ra đòn rồi mới sang hiệp; xóa đòn sau khi ra), 2.9 (dời/hủy đòn khi chủ bị đẩy hoặc gục; F3 ghi "đã gục").
+  - [x] 5.5 `tools/test.sh` xanh (AC 3). Commit một lần: kịch bản đã duyệt, code, test, trận thử, tài liệu, mọi `.uid` mới, `game/i18n/text.vi.translation`. Ví dụ: `Quân Nguyên đi và báo đòn (Story 2.6)`.
+  - [x] 5.6 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes bằng kết quả thật.
 
 ## Dev Notes
 
@@ -290,10 +290,31 @@ _Ba câu GDD chưa nói rõ. Tác giả chốt 2026-10-21._
 - 2026-10-21 Task 1.1: khung xong (`Telegraph`, `BattleState.telegraphs` + clone/validate, `BoardText.DIRECTION_CODES`, `bao_don` trong loader/data/runner/viewer, 8 khóa `scenario.viewer.*`). `tools/test.sh`: 489/489 đạt, `49 đã duyệt · 0 chưa duyệt`.
 - 2026-10-21 Task 1.3: 10 kịch bản `ai/`, `tools/test.sh`: 489/489 đạt, `Kịch bản luật: 49 đã duyệt · 10 chưa duyệt (10 chưa đạt)`. Lý do khớp bảng: #2 `sau: đòn 1 mong đợi quân ở 3,3 đánh ô 3,4, thực tế không có đòn 1`; 9 cái còn lại trượt ở ô quân Nguyên (còn ở ô cũ). Bàn sau đã kiểm bằng mô phỏng tay theo "Thuật toán" (khớp bảng cả 10).
 - Lệch nhỏ so với Tasks: công cụ duyệt in "đánh ô" thay cho "chém ô" (một câu chung cho mọi đòn vào ô, Cung kỵ 2.15 dùng lại).
+- 2026-10-21 Task 1.6: tác giả trả lời "đúng cả 10". Đổi `da_duyet: true`; `tools/test.sh` trượt đúng: `ai/bo_binh_ke_tuong_dung_yen.json: sau: đòn 1 mong đợi quân ở 3,3 đánh ô 3,4, thực tế không có đòn 1`.
+- Task 2.9: sau khi có luật, 59/59 kịch bản đạt; 20 test GUT cũ trượt vì quân Nguyên giờ biết đi (14 ở `test_battle_view.gd`, 1 `test_main.gd`, 1 `test_rules_attack.gd`, 2 `test_rules_enemy_phase.gd`, 2 `test_scenario_loader.gd`), sau đó thêm 2 ở `test_loaders.gd` khi đổi trận thử. Sửa test (bố cục hoặc vị trí mong đợi theo luật), không nới luật. Không kịch bản cũ nào trượt.
+- Task 2.10 phá thử (mỗi lần một chỗ, đã trả lại): (1) hòa mục tiêu Bắc trước máu → `ai/hoa_nham_tuong_it_mau.json` trượt; (2) bỏ "ít bước nhất" → `ai/ky_binh_bi_dong_doi_chan.json` trượt (Bộ binh 3,3 đi lên 4,2), cùng 2 test giao diện; (3) đánh số cả quân không báo đòn → `ai/ky_binh_bi_dong_doi_chan.json` trượt (`thừa đòn 2`); (4) Kỵ binh xung phong xuyên đồng đội → `ai/ky_binh_bi_dong_doi_chan.json` trượt; (5) duyệt quân ngược → `ai/thu_tu_theo_file_tran.json` trượt; (6) bỏ chép `telegraphs` trong `clone()` → `test_clone_copies_telegraphs_and_intents_deeply` và `test_begin_runs_enemy_prepare_once_and_emits` trượt.
+- Số liệu mong đợi của test GUT AI kiểm bằng bộ mô phỏng Python viết lại luật (ngoài repo); 7 chỗ tính tay ban đầu sai đã sửa theo mô phỏng trước khi chạy.
+- Ca "hòa ô gần nhất thì ít bước đi hơn": tìm 200.000 bàn ngẫu nhiên chỉ có sông, không ra ca nào; chỉ gặp khi có quân cùng phe chiếm ô. Bỏ test riêng, ca này nằm trong `test_walks_through_ally_but_never_stops_on_it`.
+- Task 4–5: `tools/test.sh` 515/515 đạt, `Kịch bản luật: 59 đã duyệt · 0 chưa duyệt (0 chưa đạt)`. Chạy `tools/chay.sh --dev` (trận 1) và 7 trận thử, mỗi trận vài giây: log không có WARN, ERROR. Không bơm phím/chụp ảnh được (GoPeak không kết nối).
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Pha địch chuẩn bị chạy đầu mỗi hiệp, kể cả hiệp 1 (`BattleController.begin()` → lệnh nội bộ `BEGIN_BATTLE`, `main.gd` gọi ở mọi lần mở trận). `EnemyAI.plan` chọn mục tiêu và ô đứng theo đúng 3 câu tác giả chốt; `RulesEnemyPhase.prepare` cho quân đi từng ô qua `Effects.move` rồi tạo `Telegraph` tương đối, sự kiện `TELEGRAPHED`, lưu `EnemyIntent` cho F3. Bộ chạy kịch bản không gọi `begin()` nên bàn `truoc` giữ nguyên.
+- F3 (dev): bảng chữ góc trên trái, mỗi quân Nguyên một dòng; cập nhật sau mỗi lệnh và khi nạp lại.
+- Trận thử đổi bố cục để pha địch lúc mở trận không dời quân (bước tự test cũ vẫn đúng): `thu_lao` (sông 1,0 và 0,1 vây Bộ binh 0,0), `thu_keo` (Lão 2,0 kề Bộ binh 3,0; sông 6,4; sông 3,5, 2,6, 4,6 vây Bộ binh 3,6), `thu_thang` (Lão từ 0,6 sang 6,2, kề Bộ binh 5,2), `thu_co_lon` (Lão từ 0,7 sang 7,7, kề Bộ binh 8,7). `thu_ba_tuong`, `thu_co_nho`, `thu_day` để nguyên: quân Nguyên trong đó giờ đi lại gần tướng, các bước tự test cũ của Story 2.1 trên `thu_ba_tuong` không còn đúng từng ô.
+- Trận 1 thật, hiệp 1 (theo luật, kiểm bằng mô phỏng): cả 3 Bộ binh nhắm **Lão** (Bộ binh 1,0 cách Khoái và Lão cùng 7 bước, cùng máu, cùng hàng: chọn phía Đông là Lão), đi 1,0→2,1, 5,0→4,1, 5,4→4,3; không quân nào với tới nên không báo đòn.
+
+**Hướng dẫn tác giả tự test**
+
+1. `tools/test.sh`: thấy `Kịch bản luật: 59 đã duyệt · 0 chưa duyệt (0 chưa đạt)` và `✅ 515/515 test đạt`.
+2. `tools/chay.sh --dev` (tắt bộ gõ VNI/Telex). Bàn mở ra: 3 Bộ binh **đã tiến lên** so với trước (đứng ở 2,1, 4,1, 4,3). Bấm `F1` để xem tọa độ nếu cần.
+3. Bấm `F3`: góc trên trái hiện bảng "Ý định quân Nguyên (hiệp 1)", 3 dòng, mỗi dòng ghi Bộ binh đi từ đâu tới đâu, nhắm Phạm Ngũ Lão (kèm số bước), "không có ô đánh trúng trong tầm đi, đi tới ô gần nhất · không báo đòn".
+4. Gõ `Space` (Kết thúc lượt): Bộ binh đi tiếp về phía Lão, bảng đổi thành "hiệp 2". Lặp vài lần: khi một Bộ binh tới được ô kề Lão, dòng của nó ghi "đứng đây vì đánh trúng được · đòn số 1". **Đòn chưa đánh** (Story 2.8) và **chưa có ô đỏ** (Story 2.7): Lão không mất máu.
+5. Thử đi tướng ra chỗ khác rồi Kết thúc lượt: quân Nguyên đổi mục tiêu sang tướng gần hơn.
+6. Bấm `F3` lần nữa: bảng ẩn. Bấm `F5`: trận mở lại từ hiệp 1, bảng vẫn giữ bật/tắt như trước.
+7. Không bật dev (`tools/chay.sh`): `F3` không làm gì.
+8. Trận thử `--tran=thu_lao`, `thu_keo`, `thu_thang`, `thu_co_lon`: quân Nguyên đứng yên lúc mở trận, các bước tự test của Story 2.3, 2.4, 2.5, 1.9 làm như cũ (chỉ khác: `thu_thang` có Lão ở 6,2; `thu_co_lon` có Lão ở 7,7).
 
 ### File List
 
@@ -303,3 +324,15 @@ _Ba câu GDD chưa nói rõ. Tác giả chốt 2026-10-21._
 - `game/tests/scenario_runner.gd`, `game/tests/scenario_viewer.gd`, `game/tests/test_scenario_loader.gd`
 - `game/i18n/text.csv`, `game/i18n/text.vi.translation`
 - `game/tests/kich_ban/ai/*.json` (10 file mới)
+- `game/src/core/enemy_ai.gd`, `game/src/core/enemy_ai.gd.uid`, `game/src/core/enemy_intent.gd`, `game/src/core/enemy_intent.gd.uid` (mới)
+- `game/src/core/pathfinding.gd`, `game/src/core/rules_enemy_phase.gd`, `game/src/core/rules.gd`, `game/src/core/command.gd`, `game/src/core/battle_event.gd`
+- `game/src/battle/battle_controller.gd`, `game/src/app/main.gd`, `game/src/debug/dev_tools.gd`
+- `game/src/debug/ai_intent_overlay.gd`, `game/src/debug/ai_intent_overlay.gd.uid` (mới)
+- `game/data/tran/thu_lao.json`, `thu_keo.json`, `thu_thang.json`, `thu_co_lon.json`
+- `game/tests/test_enemy_ai.gd`, `game/tests/test_enemy_ai.gd.uid`, `game/tests/test_ai_intent_overlay.gd`, `game/tests/test_ai_intent_overlay.gd.uid` (mới)
+- `game/tests/board_fixture.gd`, `game/tests/test_rules_enemy_phase.gd`, `game/tests/test_battle_state.gd`, `game/tests/test_battle_controller.gd`, `game/tests/test_battle_view.gd`, `game/tests/test_main.gd`, `game/tests/test_rules_attack.gd`, `game/tests/test_loaders.gd`, `game/tests/test_dev_tools.gd`
+- `_bmad-output/planning-artifacts/game-architecture.md`, `_bmad-output/implementation-artifacts/deferred-work.md`, `_bmad-output/implementation-artifacts/sprint-status.yaml`
+
+### Change Log
+
+- 2026-10-21: Tạo story; tác giả chốt 3 câu hỏi. Khung `bao_don` và 10 kịch bản `ai/` (tác giả duyệt cả 10). Enemy AI, pha địch chuẩn bị (cả hiệp 1), F3, đổi bố cục 4 trận thử. 515/515 test đạt, 59 kịch bản đạt.

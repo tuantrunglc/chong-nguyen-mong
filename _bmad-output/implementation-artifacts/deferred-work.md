@@ -130,3 +130,12 @@
 
 - `ResultBanner` (`game/src/ui/result_banner.gd`) chép lại hằng màu nền và viền của `error_screen.gd` thay vì dùng chung; gom vào theme khi có màn thứ ba cần dùng.
 - Trận Tiêu diệt còn `tiep_vien` chưa vào bàn: luật hiện tại cho thắng khi quân Nguyên trên bàn gục hết, kể cả khi còn tiếp viện. Story 3.10 (tiếp viện) phải xét điều kiện thắng cùng tiếp viện. Trận không có quân Nguyên nào thì đã có lỗi nạp (quyết định 1a).
+
+## Deferred from: dev of 2-6-dich-chuan-bi-ai-di-va-chon-muc-tieu (2026-10-21)
+
+- Story 2.7 (vẽ báo đòn): vẽ từ `BattleState.telegraphs` của bản chụp (`Telegraph.target_cell` cho đòn vào ô; Kỵ binh `kind == DIRECTION`, `offset` là hướng). Sự kiện `TELEGRAPHED` có sẵn cho hoạt ảnh (2.11).
+- Story 2.8 (ra đòn): chèn ra đòn vào đầu `RulesEnemyPhase.end_player_turn` (đã có chú thích), trước khi sang hiệp; `prepare` đang xóa đòn cũ ở đầu pha nên đòn chưa đánh thì mất. Kịch bản `ai/` có `truoc` không có đòn nên vẫn đúng sau 2.8. Có thể cần `truoc.bao_don` để dựng đòn sẵn.
+- Story 2.9: chủ đòn gục thì `Telegraph.target_cell` trả `NO_CELL` (chưa hủy đòn); bảng F3 đã ghi "(đã gục)". Hủy đòn và `TELEGRAPHED`/`TELEGRAPH_CANCELLED` làm ở 2.9.
+- Bố cục các trận thử `thu_lao`, `thu_keo`, `thu_thang`, `thu_co_lon` (và bản chép trong `test_battle_view.gd`) đã đổi để pha địch lúc mở trận không dời quân nào (thêm sông vây góc, đặt tướng kề quân Nguyên). `test_loaders.gd` kiểm điều đó (`_assert_enemies_stay_on_begin`). Khi 2.8 có đòn địch thật, các trận thử này sẽ bị đánh sau Kết thúc lượt: xem lại nếu hướng dẫn tự test cần nhiều hiệp.
+- Ca "hòa ô gần nhất thì ít bước đi hơn" (AC 8) chỉ xảy ra khi có quân cùng phe chiếm ô (tìm 200.000 bàn chỉ có sông thì không ra ca nào); test có ở `test_enemy_ai.gd::test_walks_through_ally_but_never_stops_on_it`.
+

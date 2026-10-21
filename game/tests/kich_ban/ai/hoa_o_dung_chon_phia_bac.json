@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Hai ô kề Nguyễn Khoái (2,1 phía Bắc và 1,2 phía Tây) đều cách Bộ binh 1 bước: Bộ binh đứng ô phía Bắc hơn.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

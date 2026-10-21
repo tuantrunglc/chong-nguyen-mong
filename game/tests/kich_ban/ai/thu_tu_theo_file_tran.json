@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Hai Bộ binh cùng nhắm Khoái, đi theo thứ tự trong file trận: quân thứ nhất lấy ô 3,2; quân thứ hai không đứng được ô đó nữa nên đứng 4,3. Hai đòn đều chém ô Khoái, số 1 và số 2.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

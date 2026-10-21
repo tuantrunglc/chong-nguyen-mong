@@ -345,7 +345,7 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
 |---|---|
 | `truoc` | Bàn cờ và máu ban đầu |
 | `hanh_dong` | Danh sách lệnh dạng object, ví dụ `{"tuong": "3", "lenh": "danh", "o": "4,2"}`. Lệnh `{"lenh": "ket_thuc_luot"}` chạy luôn pha địch. Lệnh luật phải từ chối thì ghi thêm `"tu_choi": "<mã lý do>"` (`khong_co_quan`, `khong_phai_tuong`, `da_dung_o_do`, `khong_toi_duoc`, `da_di_roi`, `khong_con_nuoc_di`, `da_danh_roi`, `khong_ke`, `khong_co_dich`, `ngoai_tam`, `tran_da_het`; lệnh `huy` cũng nhận `tu_choi`; mỗi lệnh chỉ nhận mã của luật lệnh đó; `tran_da_het` (trận đã thắng hoặc thua, Story 2.5) nhận ở `di`, `danh`, `huy`); lệnh bị từ chối mà không ghi, hoặc ghi mà không bị từ chối, là kịch bản trượt |
-| `sau` | Bàn cờ và máu mong đợi. Không bắt buộc: `"hiep": 2` (hiệp mong đợi) và `"da_di": ["1"]` (các tướng đã đi trong lượt; `[]` là chưa tướng nào đi, tướng không ghi phải chưa đi), `"da_danh": ["1"]` (như `da_di`, các tướng đã đánh; Story 2.1), `"ket_qua": "dang_choi" | "thang" | "thua"` (kết cục của trận, Story 2.5); không ghi thì không kiểm (tác giả chốt 2026-10-18). Có thể ghi thêm vài sự kiện chính (ví dụ `chet_duoi`) khi đó chính là điều cần kiểm |
+| `sau` | Bàn cờ và máu mong đợi. Không bắt buộc: `"hiep": 2` (hiệp mong đợi) và `"da_di": ["1"]` (các tướng đã đi trong lượt; `[]` là chưa tướng nào đi, tướng không ghi phải chưa đi), `"da_danh": ["1"]` (như `da_di`, các tướng đã đánh; Story 2.1), `"ket_qua": "dang_choi" | "thang" | "thua"` (kết cục của trận, Story 2.5), `"bao_don": [{"thu_tu": 1, "quan": "3,3", "o": "3,4"}, {"thu_tu": 2, "quan": "0,3", "huong": "D"}]` (đòn quân Nguyên đã báo: ô chủ đòn ở bàn sau, ô bị nhắm hoặc hướng xung phong B/D/N/T; `[]` là không quân nào báo đòn; Story 2.6); không ghi thì không kiểm (tác giả chốt 2026-10-18). Có thể ghi thêm vài sự kiện chính (ví dụ `chet_duoi`) khi đó chính là điều cần kiểm |
 
 Mỗi khi chốt một luật, AI viết kịch bản, tác giả đọc rồi trả lời "đúng" hoặc "sai". Một lệnh chạy toàn bộ kịch bản và in kết quả đạt/trượt bằng tiếng Việt.
 
@@ -564,6 +564,7 @@ chong-nguyen-mong/                    # repo
 │   │   │   ├── rules_stratagem.gd    # Sát Thát, Vườn không nhà trống
 │   │   │   ├── rules_victory.gd      # Tiêu diệt, Giữ ải
 │   │   │   ├── enemy_ai.gd           # chọn mục tiêu, chọn ô đứng, hòa điểm B→Đ→N→T
+│   │   │   ├── enemy_intent.gd       # ý định một quân Nguyên (mục tiêu, ô đứng, lý do), F3 đọc (Story 2.6)
 │   │   │   ├── pathfinding.gd        # BFS tự viết
 │   │   │   └── campaign_progress.gd  # tiến độ chiến dịch, mưu kế đã mở
 │   │   ├── data/                     # NẠP VÀ KIỂM TRA DỮ LIỆU: không Node; được dùng FileAccess
@@ -597,6 +598,7 @@ chong-nguyen-mong/                    # repo
 │   │   └── debug/
 │   │       ├── log.gd                # class_name Log (static, không autoload)
 │   │       ├── dev_tools.gd          # F1/F2/F3/F5, chỉ chạy khi bật dev
+│   │       ├── ai_intent_overlay.gd  # F3: bảng ý định quân Nguyên (Story 2.6)
 │   │       └── bug_report.gd         # dựng nội dung F2
 │   ├── scenes/                       # scene nhỏ và phẳng: chỉ là khung
 │   │   ├── main.tscn
@@ -836,7 +838,7 @@ Mọi luật đều đi qua đúng quy trình này. Không có ngoại lệ.
 | Bước | Luật |
 |---|---|
 | 1a. Tiếp viện | Xử lý theo thứ tự trong file trận. Ô có quân đứng (**bất kể phe nào**): quân đó mất 1 máu, quân tiếp viện bị hủy |
-| 1b. Chuẩn bị | Từng quân theo thứ tự (quân cũ theo `thu_tu_dich`, rồi tới quân tiếp viện theo thứ tự xuất hiện): đi, rồi báo đòn. Gục trên hầm chông khi đang đi thì không báo đòn. Trận Tiêu diệt có làng: Bộ binh và Kỵ binh nhắm tướng hoặc làng gần nhất, hòa thì ưu tiên làng **(mặc định)**; Cung kỵ chỉ nhắm tướng |
+| 1b. Chuẩn bị | Chạy cả ở hiệp 1, trước lượt đầu của người chơi (lệnh nội bộ `BEGIN_BATTLE`, Story 2.6). Từng quân theo thứ tự (quân cũ theo `thu_tu_dich`, rồi tới quân tiếp viện theo thứ tự xuất hiện): đi, rồi báo đòn. Gục trên hầm chông khi đang đi thì không báo đòn. **Mục tiêu:** tướng gần nhất theo số bước đi (đi xuyên quân Nguyên khác; sông, rừng, kho lương, làng, tướng khác chặn); hòa thì tướng **ít máu hơn**, rồi phía Bắc hơn, rồi phía Đông hơn; tướng không có đường tới thì bỏ qua. **Ô đứng:** trong tầm đi (kể cả đứng yên), ô mà từ đó đòn trúng mục tiêu, cần **ít bước nhất**; hòa thì Bắc, rồi Đông. Bộ binh: ô kề; Kỵ binh: cùng hàng/cột, giữa không có quân, rừng, kho lương, làng (sông không chắn), không giới hạn xa. **Không có ô như vậy:** đi tới ô gần mục tiêu nhất (số bước; hòa thì ít bước đi hơn, Bắc, Đông) và **không báo đòn**; số thứ tự chỉ đếm quân có đòn. Không có đường tới tướng nào: đứng yên (tác giả chốt 2026-10-21). Trận Tiêu diệt có làng: Bộ binh và Kỵ binh nhắm tướng hoặc làng gần nhất, hòa thì ưu tiên làng **(mặc định)**; Cung kỵ chỉ nhắm tướng |
 | 3. Ra đòn | Theo số thứ tự đã báo. Chủ đòn đã gục thì đòn bị hủy. Đòn địch chỉ gây sát thương, không đẩy |
 | Kỵ binh | Đứng yên, trúng vật đầu tiên theo hướng đã báo. Rừng/kho lương chặn (trúng vật cản thì không ai mất máu). Trúng làng thì **Lòng dân −1**. Sông không chặn. Hàng trống tới mép thì **trượt** **(mặc định)** |
 | Cung kỵ | Ô đích phải **thẳng hàng**, cách 2–3 ô **(mặc định)**. Tên bay qua quân; chỉ rừng, kho lương hoặc làng nằm giữa mới chặn. Bị làng chặn thì **Lòng dân −1** **(mặc định)** |

@@ -315,3 +315,37 @@ func test_battle_over_shows_no_cells() -> void:
 	assert_eq(c.snapshot().phase, BattleState.Phase.WON, "điều kiện trước: đã thắng")
 	assert_eq(c.reachable(2), [] as Array[Vector2i], "hết trận: không còn ô đi")
 	assert_eq(c.attack_targets(2), [] as Array[Vector2i], "hết trận: không còn ô đánh")
+
+
+# ---------- Mở trận (Story 2.6) ----------
+
+func _enemy_level() -> LevelData:
+	var level: LevelData = _level()
+	level.units.append(LevelData.UnitPlacement.new(UnitType.BO_BINH, Vector2i(0, 3)))
+	return level
+
+
+func test_start_does_not_run_enemy_prepare() -> void:
+	var controller: BattleController = BattleController.new()
+	controller.start(_enemy_level(), BoardFixture.stats())
+	assert_eq(_cell(controller, 101), Vector2i(0, 3), "start() không cho quân Nguyên đi (bàn kịch bản giữ nguyên)")
+	assert_eq(controller.snapshot().telegraphs.size(), 0)
+
+
+func test_begin_runs_enemy_prepare_once_and_emits() -> void:
+	var controller: BattleController = BattleController.new()
+	controller.start(_enemy_level(), BoardFixture.stats())
+	var seen: Array = []
+	controller.events_resolved.connect(func(events: Array[BattleEvent], snapshot: BattleState) -> void:
+		seen.append([events, snapshot]))
+	controller.begin()
+	assert_eq(seen.size(), 1, "phát events_resolved một lần")
+	if seen.size() != 1:
+		return
+	var snapshot: BattleState = seen[0][1] as BattleState
+	assert_eq(snapshot.unit_by_id(101).cell, Vector2i(0, 5), "Bộ binh đi 2 bước tới ô kề Khoái 0,6")
+	assert_eq(snapshot.telegraphs.size(), 1, "bản chụp đã có đòn")
+	assert_eq(snapshot.round_number, 1)
+	assert_false(controller.can_undo(), "mở trận không để lại gì để hủy")
+	assert_eq(BattleController._describe(Command.begin_battle()), "mở trận", "câu log của lệnh")
+

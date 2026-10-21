@@ -764,17 +764,19 @@ func test_runner_end_turn_lets_general_move_again() -> void:
 		{"lenh": "ket_thuc_luot"},
 		{"lenh": "di", "tuong": "1", "o": "0,4"},
 	]
-	d["sau"]["quan"] = _units()
-	d["sau"]["quan"][6] = EMPTY_ROW
-	d["sau"]["quan"][4] = "1 . . . . B ."
+	# Kết thúc lượt chạy pha địch (Story 2.6): Bộ binh 5,4 đi về phía Khoái (0,5), qua chỗ cạn của sông, tới 3,3.
+	d["sau"]["quan"] = _rows(6, EMPTY_ROW)
+	d["sau"]["quan"][3] = ". . . B . . ."
+	d["sau"]["quan"][4] = "1 . . . . . ."
 	assert_eq(_run(d).problems, [] as Array[String])
 
 
 func test_runner_checks_round_and_moved() -> void:
 	var d: Dictionary = _valid()
 	d["hanh_dong"] = [{"lenh": "di", "tuong": "1", "o": "0,5"}, {"lenh": "ket_thuc_luot"}]
-	d["sau"]["quan"] = _units()
-	d["sau"]["quan"][6] = EMPTY_ROW
+	# Pha địch (Story 2.6): Bộ binh 5,4 đi tới 3,3 (như test trên).
+	d["sau"]["quan"] = _rows(6, EMPTY_ROW)
+	d["sau"]["quan"][3] = ". . . B . . ."
 	d["sau"]["quan"][5] = "1 . . . . . ."
 	d["sau"]["hiep"] = 2
 	d["sau"]["da_di"] = []

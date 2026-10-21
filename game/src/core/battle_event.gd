@@ -25,6 +25,9 @@ enum Type {
 	VICTORY,
 	## Hết trận: mọi tướng trên bàn đã gục (thua).
 	DEFEAT,
+	## Quân Nguyên unit_id báo đòn (Story 2.6): from_cell là ô nó đứng; to_cell là ô bị nhắm (đòn vào ô) hoặc ô ngay
+	## trước mặt theo hướng xung phong (Kỵ binh); amount là số thứ tự ra đòn.
+	TELEGRAPHED,
 }
 
 ## Vì sao quân đổi ô hoặc mất máu. STRIKE: đòn có sát thương của tướng (Khoái, Lão).
@@ -106,3 +109,7 @@ static func victory() -> BattleEvent:
 
 static func defeat() -> BattleEvent:
 	return BattleEvent.new(Type.DEFEAT)
+
+
+static func telegraphed(p_unit_id: int, p_stand: Vector2i, p_to: Vector2i, p_order: int) -> BattleEvent:
+	return BattleEvent.new(Type.TELEGRAPHED, p_unit_id, p_stand, p_to, Cause.WALK, Reject.NONE, "", 0, p_order)

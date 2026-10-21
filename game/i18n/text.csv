@@ -81,3 +81,15 @@ scenario.viewer.none_pending,Không có kịch bản nào chờ duyệt.
 scenario.viewer.total_all,Tổng: %d kịch bản (%d chờ duyệt).
 scenario.viewer.total_pending,Tổng: %d kịch bản chờ duyệt.
 scenario.viewer.how_to_approve,"Duyệt: thấy đúng thì đổi ""da_duyet"": false thành true trong file, hoặc nhắn AI ""đúng""/""sai: <lý do>""."
+dev.ai.title,Ý định quân Nguyên (hiệp %d)
+dev.ai.none,không có quân Nguyên
+dev.ai.moved,%s: %s → %s
+dev.ai.stayed,%s: đứng yên ở %s
+dev.ai.target,nhắm %s (cách %d bước)
+dev.ai.can_hit,đứng đây vì đánh trúng được
+dev.ai.closest,"không có ô đánh trúng trong tầm đi, đi tới ô gần nhất"
+dev.ai.no_path,không có đường tới tướng nào
+dev.ai.no_rule,chưa có luật đòn cho loại quân này
+dev.ai.order,đòn số %d
+dev.ai.no_attack,không báo đòn
+dev.ai.fallen,(đã gục)

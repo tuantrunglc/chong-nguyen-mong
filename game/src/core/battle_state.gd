@@ -6,8 +6,8 @@ extends RefCounted
 ## Id quân Nguyên đầu tiên; tướng lấy id theo ký hiệu 1, 2, 3.
 const FIRST_ENEMY_ID: int = 101
 
-## Pha trận (kiến trúc "Mẫu trạng thái"). Story 2.5 chỉ dùng PLAYER, WON, LOST; các pha còn lại để pha địch
-## (Story 2.6–2.8) dùng. Chỉ rules_enemy_phase.gd và rules_victory.gd được đổi pha.
+## Pha trận (kiến trúc "Mẫu trạng thái"). ENEMY_PREPARE chỉ có trong lúc RulesEnemyPhase.prepare chạy (Story 2.6);
+## ENEMY_ACT, END_OF_ROUND để Story 2.8 dùng. Chỉ rules_enemy_phase.gd và rules_victory.gd được đổi pha.
 enum Phase { ENEMY_PREPARE, PLAYER, ENEMY_ACT, END_OF_ROUND, WON, LOST }
 
 var size: Vector2i = Vector2i.ZERO
@@ -24,6 +24,8 @@ var phase: Phase = Phase.PLAYER
 var mission: LevelData.Mission = LevelData.Mission.ELIMINATE
 ## Đòn quân Nguyên đã báo trong pha chuẩn bị của hiệp này (Story 2.6), theo số thứ tự.
 var telegraphs: Array[Telegraph] = []
+## Ý định của từng quân Nguyên trong pha chuẩn bị vừa rồi, theo thứ tự hành động (để F3 đọc từ bản chụp).
+var enemy_intents: Array[EnemyIntent] = []
 
 
 ## Tướng: id = vị trí trong UnitType.GENERALS + 1. Quân Nguyên: 101, 102… theo thứ tự level.units
@@ -58,6 +60,8 @@ func clone() -> BattleState:
 		copy.units.append(Unit.new(u.id, u.type, u.cell, u.hp, u.has_moved, u.has_attacked))
 	for t: Telegraph in telegraphs:
 		copy.telegraphs.append(t.clone())
+	for intent: EnemyIntent in enemy_intents:
+		copy.enemy_intents.append(intent.clone())
 	return copy
 
 

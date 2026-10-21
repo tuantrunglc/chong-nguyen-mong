@@ -24,6 +24,12 @@ func start(level: LevelData, stats: Stats) -> void:
 		Log.error("battle", problem)
 
 
+## Mở trận: pha địch chuẩn bị của hiệp 1 (quân Nguyên đi và báo đòn), qua cùng đường với lệnh của người chơi.
+## start() không tự gọi để bộ chạy kịch bản dựng được bàn "truoc" là đầu lượt người chơi (Story 2.6).
+func begin() -> Array[BattleEvent]:
+	return submit(Command.begin_battle())
+
+
 func snapshot() -> BattleState:
 	return _state.clone()
 
@@ -52,6 +58,8 @@ func submit(command: Command) -> Array[BattleEvent]:
 			_undo_snapshot = null  # đánh xóa lịch sử hủy (FR10); E3: mưu kế cũng xóa
 		Command.Kind.END_TURN:
 			Log.debug("battle", "sang hiệp %d" % _state.round_number)
+			_undo_snapshot = null
+		Command.Kind.BEGIN_BATTLE:
 			_undo_snapshot = null
 	events_resolved.emit(events, _state.clone())
 	return events
@@ -117,6 +125,8 @@ static func _describe(command: Command) -> String:
 			return "quân %d đánh ô %d,%d" % [command.unit_id, command.cell.x, command.cell.y]
 		Command.Kind.END_TURN:
 			return "kết thúc lượt"
+		Command.Kind.BEGIN_BATTLE:
+			return "mở trận"
 	return str(command.kind)
 
 

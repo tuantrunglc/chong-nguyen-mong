@@ -306,7 +306,8 @@ func test_level_1_shows_terrain_and_units() -> void:
 	assert_eq(tokens.keys(), [1, 2, 101, 102, 103], "2 tướng và 3 quân Nguyên")
 	if tokens.size() != 5:
 		return
-	assert_eq((tokens[101] as UnitToken).position, BoardView.cell_center(Vector2i(1, 0)))
+	# Hiệp 1 mở bằng pha địch chuẩn bị (Story 2.6): Bộ binh 1,0 đã đi 2 bước về phía Lão (2,6), tới 2,1.
+	assert_eq((tokens[101] as UnitToken).position, BoardView.cell_center(Vector2i(2, 1)))
 	assert_eq((tokens[1] as UnitToken).position, BoardView.cell_center(Vector2i(0, 6)))
 	assert_eq((tokens[1] as UnitToken).name_text(), tr("unit.nguyen_khoai"))
 	assert_eq((tokens[2] as UnitToken).name_text(), tr("unit.pham_ngu_lao"))

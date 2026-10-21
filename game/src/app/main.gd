@@ -22,6 +22,8 @@ var _level: LevelData = null
 var _controller: BattleController = null
 ## Chỉ có khi bật dev (F1).
 var _coord_overlay: CoordOverlay = null
+## Chỉ có khi bật dev (F3, Story 2.6).
+var _ai_overlay: AiIntentOverlay = null
 var _error_screen: ErrorScreen = null
 var _title_label: Label
 var _board_view: BoardView
@@ -79,6 +81,9 @@ func _ready() -> void:
 		_coord_overlay = CoordOverlay.new()
 		_board_view.add_child(_coord_overlay)
 		dev_tools.f1_pressed.connect(_toggle_coords)
+		_ai_overlay = AiIntentOverlay.new()
+		add_child(_ai_overlay)
+		dev_tools.f3_pressed.connect(_toggle_ai_intents)
 		dev_tools.f5_pressed.connect(_reload_data)
 
 	# Công cụ AI (Story 0.6): chỉ khi bật dev trên desktop có cửa sổ.
@@ -119,6 +124,8 @@ func _start_battle() -> void:
 	_controller.events_resolved.connect(_on_events_resolved)
 	_show_board(_controller.snapshot())
 	_battle_view.start(_controller)
+	# Hiệp 1 cũng bắt đầu bằng pha địch chuẩn bị (Story 2.6): bàn người chơi thấy là bàn sau khi quân Nguyên đã đi.
+	_controller.begin()
 	_hide_error()
 	_screen = Screen.BATTLE
 
@@ -170,6 +177,8 @@ func _show_board(snapshot: BattleState) -> void:
 	_board_view.show_state(snapshot)
 	if _coord_overlay != null:
 		_coord_overlay.show_state(snapshot)
+	if _ai_overlay != null:
+		_ai_overlay.show_state(snapshot)
 
 
 ## Chỉ khi đang có trận: màn hình lỗi và menu không có gì để hiện (tác giả chốt 2026-10-18).
@@ -179,6 +188,14 @@ func _toggle_coords() -> void:
 		return
 	var shown: bool = _coord_overlay.toggle()
 	Log.debug("dev", "f1: hiện tọa độ" if shown else "f1: ẩn tọa độ")
+
+
+## F3: như F1, chỉ khi đang có trận. Bật/tắt giữ qua các lần nạp lại trận.
+func _toggle_ai_intents() -> void:
+	if _screen != Screen.BATTLE:
+		return
+	var shown: bool = _ai_overlay.toggle()
+	Log.debug("dev", "f3: hiện ý định ai" if shown else "f3: ẩn ý định ai")
 
 
 ## Bỏ màn hình lỗi (nếu có) và hiện lại bàn cờ.

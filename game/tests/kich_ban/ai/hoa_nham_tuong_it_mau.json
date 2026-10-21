@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Khoái và Lão cùng cách Bộ binh 3 bước, Lão chỉ còn 2 máu: Bộ binh nhắm Lão (ít máu hơn), dù Khoái ở phía Bắc.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

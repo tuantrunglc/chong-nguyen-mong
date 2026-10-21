@@ -536,7 +536,8 @@ func test_mouse_events_map_screen_pixels_to_cells() -> void:
 
 # ---------- Đánh (Story 2.1) ----------
 
-## Khoái ở 3,4 kề Bộ binh 3,3 (Bắc) và Kỵ binh 4,4 (Đông); Lão ở 0,6; thêm Bộ binh 5,5.
+## Khoái ở 3,4 kề Bộ binh 3,3 (Bắc) và Kỵ binh 4,4 (Đông); thêm Bộ binh 5,5 kề Lão 5,6. Mọi quân Nguyên đã đứng kề
+## tướng nó nhắm nên pha địch chuẩn bị lúc mở trận (Story 2.6) không dời quân nào.
 func _make_attack_main() -> Node2D:
 	return _make_level_main(ATTACK_DIR, ATTACK_LEVEL, {
 		"phien_ban_dinh_dang": 1,
@@ -545,7 +546,7 @@ func _make_attack_main() -> Node2D:
 		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . . . .",
 			". . . . . . .", ". . . . . . .", ". . . . . . ."],
 		"quan": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . B . . .",
-			". . . 1 K . .", ". . . . . B .", "2 . . . . . ."],
+			". . . 1 K . .", ". . . . . B .", ". . . . . 2 ."],
 		"thu_tu_dich": ["3,3", "4,4", "5,5"],
 		"tiep_vien": [],
 		"muu_ke_mo": [],
@@ -636,11 +637,11 @@ func test_click_elsewhere_cancels_confirm() -> void:
 func test_attack_clears_undo_in_game() -> void:
 	var main: Node2D = _make_attack_main()
 	_press_physical(main, KEY_2)
-	_click(main, Vector2i(0, 5))
+	_click(main, Vector2i(6, 6))
 	_press_physical(main, KEY_1)
 	_click(main, Vector2i(3, 3))
 	_press_physical(main, KEY_Z)
-	assert_eq(_unit_cell(main, 2), Vector2i(0, 5), "Lão vẫn ở ô mới")
+	assert_eq(_unit_cell(main, 2), Vector2i(6, 6), "Lão vẫn ở ô mới")
 	assert_eq(_unit_at(main, Vector2i(3, 2)).hp, 1, "đòn đánh không bị hủy")
 
 
@@ -652,19 +653,21 @@ func test_end_turn_lets_general_attack_again() -> void:
 	assert_false(_token(main, 1).is_attacked())
 	_press_physical(main, KEY_1)
 	assert_eq(_view(main).selected_id(), 1)
-	assert_eq(_view(main).target_cells(), [Vector2i(4, 4)] as Array[Vector2i], "Bộ binh đã bị đẩy ra xa")
+	# Pha địch (Story 2.6): Bộ binh bị đẩy ra 3,2 đi lại về ô kề Khoái.
+	assert_eq(_view(main).target_cells(), [Vector2i(3, 3), Vector2i(4, 4)] as Array[Vector2i])
 
 
 # ---------- Không chọn tướng mình làm mục tiêu (Story 2.2, FR16) ----------
 
-## Khoái ở 3,4, Lão kề Tây 2,4, Bộ binh kề Bắc 3,3; thêm Bộ binh 6,6.
+## Khoái ở 3,4, Lão kề Tây 2,4, Bộ binh kề Bắc 3,3; thêm Bộ binh 6,6 trong góc bị sông 6,5 và 5,6 vây (không có đường
+## tới tướng nào nên đứng yên khi pha địch chạy, Story 2.6).
 func _make_ally_main() -> Node2D:
 	return _make_level_main(ALLY_DIR, ALLY_LEVEL, {
 		"phien_ban_dinh_dang": 1,
 		"ten": "Thử tướng mình kề bên",
 		"kieu": "tieu_diet",
 		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . . . .",
-			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+			". . . . . . .", ". . . . . . ~", ". . . . . ~ ."],
 		"quan": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . B . . .",
 			". . 2 1 . . .", ". . . . . . .", ". . . . . . B"],
 		"thu_tu_dich": ["3,3", "6,6"],
@@ -718,13 +721,14 @@ func test_click_ally_while_confirming_cancels_confirm() -> void:
 # ---------- Lao của Phạm Ngũ Lão (Story 2.3) ----------
 
 ## Giống data/tran/thu_lao.json. Lão ở 3,3: Bộ binh kề Bắc 3,2, Bộ binh 3,1; Kỵ binh 6,3 (Đông, ô 3, sông 4,3 và
-## 5,3 nằm giữa); Khoái 3,5 chắn trước Bộ binh 3,6; Bộ binh 0,0.
+## 5,3 nằm giữa); Khoái 3,5 chắn trước Bộ binh 3,6; Bộ binh 0,0 trong góc bị sông 1,0 và 0,1 vây. Pha địch lúc mở
+## trận (Story 2.6) không dời quân nào.
 func _make_lao_main() -> Node2D:
 	return _make_level_main(LAO_DIR, LAO_LEVEL, {
 		"phien_ban_dinh_dang": 1,
 		"ten": "Thử lao",
 		"kieu": "tieu_diet",
-		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . ~ ~ .",
+		"dia_hinh": [". ~ . . . . .", "~ . . . . . .", ". . . . . . .", ". . . . ~ ~ .",
 			". . . . . . .", ". . . . . . .", ". . . . . . ."],
 		"quan": ["B . . . . . .", ". . . B . . .", ". . . B . . .", ". . . 2 . . K",
 			". . . . . . .", ". . . 1 . . .", ". . . B . . ."],
@@ -820,15 +824,16 @@ func test_key_of_spent_general_cancels_confirm() -> void:
 # ---------- Kéo của Trần Khánh Dư (Story 2.4) ----------
 
 ## Giống data/tran/thu_keo.json. Dư ở 3,3: Bộ binh 3,0 (Bắc, ô 3); Kỵ binh 6,3 (Đông, ô 3, sông 4,3 và 5,3 giữa);
-## Khoái 3,4 kề Nam chắn Bộ binh 3,6; Bộ binh 2,3 kề Tây chắn Bộ binh 1,3.
+## Khoái 3,4 kề Nam chắn Bộ binh 3,6; Bộ binh 2,3 kề Tây chắn Bộ binh 1,3. Để pha địch lúc mở trận (Story 2.6) không
+## dời quân nào: Lão 2,0 kề Bộ binh 3,0; sông 6,4 buộc Kỵ binh nhắm Dư (đã thẳng hàng); Bộ binh 3,6 bị sông vây.
 func _make_keo_main() -> Node2D:
 	return _make_level_main(KEO_DIR, KEO_LEVEL, {
 		"phien_ban_dinh_dang": 1,
 		"ten": "Thử kéo",
 		"kieu": "tieu_diet",
 		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . ~ ~ .",
-			". . . . . . .", ". . . . . . .", ". . . . . . ."],
-		"quan": [". . . B . . .", ". . . . . . .", ". . . . . . .", ". B B 3 . . K",
+			". . . . . . ~", ". . . ~ . . .", ". . ~ . ~ . ."],
+		"quan": [". . 2 B . . .", ". . . . . . .", ". . . . . . .", ". B B 3 . . K",
 			". . . 1 . . .", ". . . . . . .", ". . . B . . ."],
 		"thu_tu_dich": ["3,0", "1,3", "2,3", "6,3", "3,6"],
 		"tiep_vien": [],
@@ -960,7 +965,8 @@ func test_large_board_edge_push_and_f1() -> void:
 
 # ---------- Thắng và thua (Story 2.5) ----------
 
-## Giống data/tran/thu_thang.json (Lão chưa đánh ở 0,6 để thử khóa bàn). Khoái 1,2 đẩy Bộ binh 2,2 xuống sông
+## Giống data/tran/thu_thang.json (Lão chưa đánh ở 6,2 để thử khóa bàn; Lão kề Bộ binh 5,2 để nó đứng yên khi pha
+## địch chạy, Story 2.6). Khoái 1,2 đẩy Bộ binh 2,2 xuống sông
 ## 3,2; Dư 5,5 kéo Bộ binh 5,2 (cách 3 ô) xuống sông 5,4. Hai đòn độc lập: hết quân Nguyên sau đòn thứ hai.
 func _make_win_main() -> Node2D:
 	return _make_level_main(WIN_DIR, WIN_LEVEL, {
@@ -969,8 +975,8 @@ func _make_win_main() -> Node2D:
 		"kieu": "tieu_diet",
 		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . ~ . . .", ". . . . . . .",
 			". . . . . ~ .", ". . . . . . .", ". . . . . . ."],
-		"quan": [". . . . . . .", ". . . . . . .", ". 1 B . . B .", ". . . . . . .",
-			". . . . . . .", ". . . . . 3 .", "2 . . . . . ."],
+		"quan": [". . . . . . .", ". . . . . . .", ". 1 B . . B 2", ". . . . . . .",
+			". . . . . . .", ". . . . . 3 .", ". . . . . . ."],
 		"thu_tu_dich": ["2,2", "5,2"],
 		"tiep_vien": [],
 		"muu_ke_mo": [],
@@ -1027,12 +1033,12 @@ func test_win_shows_banner_and_locks_the_board() -> void:
 	assert_eq(_unit_cell(main, 3), Vector2i(5, 5), "Dư không dời")
 	assert_eq(_view(main).selected_id(), BattleView.NONE, "bấm ô sáng cũ không chọn gì")
 	# Bấm tướng: Lão chưa đánh, nếu bàn không khóa thì bấm vào Lão (hay phím 2) là chọn được.
-	_click_by_mouse(main, Vector2i(0, 6))
+	_click_by_mouse(main, Vector2i(6, 2))
 	assert_eq(_view(main).selected_id(), BattleView.NONE, "bấm vào Lão không chọn được")
 	_press_physical(main, KEY_2)
 	assert_eq(_view(main).selected_id(), BattleView.NONE, "phím 2 không chọn được")
-	_click_by_mouse(main, Vector2i(0, 5))
-	assert_eq(_unit_cell(main, 2), Vector2i(0, 6), "Lão không dời")
+	_click_by_mouse(main, Vector2i(6, 1))
+	assert_eq(_unit_cell(main, 2), Vector2i(6, 2), "Lão không dời")
 	_press_physical(main, KEY_SPACE)
 	_hud(main).end_turn_button().pressed.emit()
 	_view(main)._on_undo()
@@ -1070,3 +1076,45 @@ func _assert_fresh_win_battle(main: Node2D) -> void:
 	_press_physical(main, KEY_1)
 	assert_eq(_view(main).selected_id(), 1, "chơi tiếp được")
 	assert_eq(_view(main).target_cells(), [Vector2i(2, 2)] as Array[Vector2i])
+
+
+# ---------- F3 ý định AI (Story 2.6) ----------
+
+## Phím dev đi vào DevTools (không qua BattleInput).
+func _press_dev(main: Node2D, key: Key) -> void:
+	var ev: InputEventKey = InputEventKey.new()
+	ev.physical_keycode = key
+	ev.pressed = true
+	for node: Node in main.get_children():
+		if node is DevTools:
+			(node as DevTools)._unhandled_input(ev)
+
+
+func test_f3_shows_ai_intents_and_follows_reload() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_attack_main()
+	var overlay: AiIntentOverlay = main._ai_overlay as AiIntentOverlay
+	assert_not_null(overlay, "bật dev thì có bảng F3")
+	if overlay == null:
+		return
+	assert_false(overlay.visible, "mặc định ẩn")
+	_press_dev(main, KEY_F3)
+	assert_true(overlay.visible, "F3 hiện bảng")
+	var lines: Array[String] = overlay.texts()
+	assert_eq(lines.size(), 4, "tiêu đề và 3 quân Nguyên")
+	assert_eq(lines[0], "Ý định quân Nguyên (hiệp 1)")
+	assert_true(lines[1].begins_with("Bộ binh 101: đứng yên ở 3,3 · nhắm Nguyễn Khoái"), lines[1])
+	_press_physical(main, KEY_SPACE)
+	assert_eq(overlay.texts()[0], "Ý định quân Nguyên (hiệp 2)", "cập nhật sau lệnh")
+	main._reload_data()
+	assert_true(overlay.visible, "nạp lại vẫn giữ bật")
+	assert_eq(overlay.texts()[0], "Ý định quân Nguyên (hiệp 1)", "trận mở lại từ đầu")
+	_press_dev(main, KEY_F3)
+	assert_false(overlay.visible, "F3 lần hai ẩn")
+
+
+func test_no_f3_overlay_without_dev() -> void:
+	AppState.launch.dev = false
+	var main: Node2D = _make_attack_main()
+	assert_null(main._ai_overlay, "không bật dev thì không có bảng F3")
+

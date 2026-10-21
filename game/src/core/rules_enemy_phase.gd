@@ -1,13 +1,54 @@
 class_name RulesEnemyPhase
 extends RefCounted
-## Từ lúc người chơi kết thúc lượt tới đầu lượt người chơi của hiệp sau. Story 1.5 chỉ có phần cuối hiệp
-## (sang hiệp mới, tướng đi và đánh lại được). Pha địch ra đòn, cuối hiệp (kho lương, tiếp viện), địch chuẩn bị
-## và Phase chèn vào đây ở E2–E3 (kiến trúc: "Mẫu trạng thái").
+## Pha địch: từ lúc người chơi kết thúc lượt tới đầu lượt người chơi của hiệp sau, và pha chuẩn bị của hiệp 1 lúc mở
+## trận. Story 1.5: sang hiệp mới, tướng đi và đánh lại được. Story 2.6: pha chuẩn bị (quân Nguyên đi rồi báo đòn).
+## Ra đòn (2.8), cuối hiệp (kho lương, báo tiếp viện, 3.9–3.10) chèn vào end_player_turn; tiếp viện xuất hiện chèn vào
+## đầu prepare (3.10). Chỉ file này và rules_victory.gd được đổi phase.
 
 
 static func end_player_turn(state: BattleState, events: Array[BattleEvent]) -> void:
+	# Story 2.8: ra các đòn đã báo ở đây, trước khi sang hiệp mới.
 	state.round_number += 1
 	for unit: Unit in state.units:
 		unit.has_moved = false
 		unit.has_attacked = false
 	events.append(BattleEvent.round_started(state.round_number))
+	prepare(state, events)
+
+
+## Pha chuẩn bị của hiệp 1 (lệnh BEGIN_BATTLE): không sang hiệp, không ROUND_STARTED.
+static func begin_battle(state: BattleState, events: Array[BattleEvent]) -> void:
+	prepare(state, events)
+
+
+## Pha địch chuẩn bị: xóa đòn cũ, rồi từng quân Nguyên theo thứ tự (id, tức thu_tu_dich) chọn mục tiêu và ô đứng
+## (EnemyAI.plan), đi từng ô tới đó, rồi báo đòn nếu đánh trúng được. Số thứ tự chỉ đếm quân có đòn. Xong về PLAYER.
+static func prepare(state: BattleState, events: Array[BattleEvent]) -> void:
+	state.phase = BattleState.Phase.ENEMY_PREPARE
+	state.telegraphs.clear()
+	state.enemy_intents.clear()
+	var enemies: Array[Unit] = []
+	for unit: Unit in state.units:
+		if unit.faction == Unit.Faction.NGUYEN:
+			enemies.append(unit)
+	enemies.sort_custom(func(a: Unit, b: Unit) -> bool: return a.id < b.id)
+	var next_order: int = 1
+	for unit: Unit in enemies:
+		# Từ Story 3.4 quân có thể gục trên hầm chông khi đang đi: quân đã rời bàn thì bỏ qua.
+		if state.unit_by_id(unit.id) == null:
+			continue
+		var intent: EnemyIntent = EnemyAI.plan(state, unit)
+		if intent.stand_cell != unit.cell:
+			var path: Array[Vector2i] = Pathfinding.find_paths(state, unit,
+				state.stats.move_range(unit.type))[intent.stand_cell] as Array[Vector2i]
+			for step: Vector2i in path:
+				Effects.move(state, unit, step, BattleEvent.Cause.WALK, events)
+		if intent.reason == EnemyIntent.Reason.CAN_HIT and unit.is_alive():
+			var target: Unit = state.unit_by_id(intent.target_id)
+			var telegraph: Telegraph = EnemyAI.telegraph_for(unit, unit.cell, target.cell, next_order)
+			state.telegraphs.append(telegraph)
+			intent.order = next_order
+			events.append(BattleEvent.telegraphed(unit.id, unit.cell, telegraph.target_cell(state), next_order))
+			next_order += 1
+		state.enemy_intents.append(intent)
+	state.phase = BattleState.Phase.PLAYER

@@ -41,6 +41,26 @@ static func find_paths(state: BattleState, unit: Unit, max_steps: int) -> Dictio
 	return paths
 
 
+## Số bước từ mỗi ô tới goal, đếm như unit đi (4 hướng, đi xuyên quân cùng phe; ô không đi vào được, quân khác phe
+## chặn), không giới hạn bước: ô -> số bước, goal = 0 dù goal có quân đứng. BFS xuất phát từ goal: ô đi qua được
+## không phụ thuộc hướng đi, nên field[a] là số bước từ a tới goal. Ô không có trong field là không có đường tới goal.
+## Enemy AI (Story 2.6) dùng để chọn tướng gần nhất và ô gần mục tiêu nhất.
+static func distance_field(state: BattleState, unit: Unit, goal: Vector2i) -> Dictionary:
+	var field: Dictionary = {goal: 0}
+	var queue: Array[Vector2i] = [goal]
+	var head: int = 0
+	while head < queue.size():
+		var current: Vector2i = queue[head]
+		head += 1
+		for dir: Vector2i in Grid.DIRECTIONS:
+			var next: Vector2i = current + dir
+			if field.has(next) or not _can_pass(state, unit, next):
+				continue
+			field[next] = (field[current] as int) + 1
+			queue.append(next)
+	return field
+
+
 ## in_bounds trước: terrain_at không tự kiểm biên.
 static func _can_pass(state: BattleState, unit: Unit, cell: Vector2i) -> bool:
 	if not state.in_bounds(cell) or not Terrain.is_walkable(state.terrain_at(cell)):

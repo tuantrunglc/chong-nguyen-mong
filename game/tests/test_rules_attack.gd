@@ -112,7 +112,8 @@ func test_end_turn_clears_attacked() -> void:
 	_attack(state, 1, Vector2i(3, 3))
 	Rules.resolve(state, Command.end_turn())
 	assert_false(state.unit_by_id(1).has_attacked)
-	assert_eq(RulesAttack.targets(state, state.unit_by_id(1)), [] as Array[Vector2i], "Bộ binh đã bị đẩy ra xa")
+	# Pha địch (Story 2.6): Bộ binh bị đẩy ra 3,2 đi lại về ô kề Khoái, nên Khoái đánh lại được.
+	assert_eq(RulesAttack.targets(state, state.unit_by_id(1)), [Vector2i(3, 3)] as Array[Vector2i])
 
 
 func test_stats_read_damage_and_push_distance() -> void:

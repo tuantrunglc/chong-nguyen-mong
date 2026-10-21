@@ -79,6 +79,9 @@ static func describe(events: Array[BattleEvent]) -> Array[String]:
 				out.append("DROWNED %d %s" % [e.unit_id, BoardText.cell_text(e.to_cell)])
 			BattleEvent.Type.ATTACKED:
 				out.append("ATTACKED %d %s" % [e.unit_id, BoardText.cell_text(e.to_cell)])
+			BattleEvent.Type.TELEGRAPHED:
+				out.append("TELEGRAPHED %d %s>%s #%d" % [e.unit_id, BoardText.cell_text(e.from_cell),
+					BoardText.cell_text(e.to_cell), e.amount])
 			BattleEvent.Type.REJECTED:
 				out.append("REJECTED %s" % BattleEvent.Reject.find_key(e.reject))
 			_:

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Bộ binh đứng chắn giữa Kỵ binh và Khoái nên Kỵ binh không xung phong được: nó đi tới ô gần Khoái nhất và không báo đòn; Bộ binh kề Khoái đứng yên, đòn của nó là đòn số 1.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

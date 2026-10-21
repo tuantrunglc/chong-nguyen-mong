@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Khoái cách Bộ binh 3 bước, Lão cách 6 bước: Bộ binh nhắm Khoái, đứng ô kề cần ít bước nhất (1,1) và chém ô Khoái.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

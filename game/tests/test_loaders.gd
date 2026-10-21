@@ -779,6 +779,7 @@ func test_real_lance_trial_level_loads() -> void:
 	for p: LevelData.UnitPlacement in level.units:
 		actual[p.cell] = p.type
 	assert_eq(actual, expected)
+	_assert_enemies_stay_on_begin(level)
 	assert_eq(level.terrain_at(Vector2i(4, 3)), Terrain.RIVER, "lao bay qua sông tới Kỵ binh 6,3")
 	assert_eq(level.terrain_at(Vector2i(5, 3)), Terrain.RIVER)
 
@@ -795,12 +796,13 @@ func test_real_pull_trial_level_loads() -> void:
 	var expected: Dictionary = {
 		Vector2i(3, 3): UnitType.TRAN_KHANH_DU, Vector2i(3, 4): UnitType.NGUYEN_KHOAI,
 		Vector2i(3, 0): UnitType.BO_BINH, Vector2i(1, 3): UnitType.BO_BINH, Vector2i(2, 3): UnitType.BO_BINH,
-		Vector2i(6, 3): UnitType.KY_BINH, Vector2i(3, 6): UnitType.BO_BINH,
+		Vector2i(6, 3): UnitType.KY_BINH, Vector2i(3, 6): UnitType.BO_BINH, Vector2i(2, 0): UnitType.PHAM_NGU_LAO,
 	}
 	var actual: Dictionary = {}
 	for p: LevelData.UnitPlacement in level.units:
 		actual[p.cell] = p.type
 	assert_eq(actual, expected)
+	_assert_enemies_stay_on_begin(level)
 	assert_eq(level.terrain_at(Vector2i(4, 3)), Terrain.RIVER, "Kỵ binh 6,3 bị kéo qua sông")
 	assert_eq(level.terrain_at(Vector2i(5, 3)), Terrain.RIVER)
 	assert_eq(level.size, Vector2i(7, 7))
@@ -816,13 +818,14 @@ func test_real_win_trial_level_loads() -> void:
 		return
 	# Các bước tác giả tự test (Story 2.5) dựa vào đúng chỗ đứng này.
 	var expected: Dictionary = {
-		Vector2i(1, 2): UnitType.NGUYEN_KHOAI, Vector2i(0, 6): UnitType.PHAM_NGU_LAO,
+		Vector2i(1, 2): UnitType.NGUYEN_KHOAI, Vector2i(6, 2): UnitType.PHAM_NGU_LAO,
 		Vector2i(5, 5): UnitType.TRAN_KHANH_DU, Vector2i(2, 2): UnitType.BO_BINH, Vector2i(5, 2): UnitType.BO_BINH,
 	}
 	var actual: Dictionary = {}
 	for p: LevelData.UnitPlacement in level.units:
 		actual[p.cell] = p.type
 	assert_eq(actual, expected)
+	_assert_enemies_stay_on_begin(level)
 	assert_eq(level.terrain_at(Vector2i(3, 2)), Terrain.RIVER, "Bộ binh 2,2 bị đẩy xuống sông")
 	assert_eq(level.terrain_at(Vector2i(5, 4)), Terrain.RIVER, "Bộ binh 5,2 bị kéo xuống sông")
 	assert_eq(level.size, Vector2i(7, 7))
@@ -839,6 +842,7 @@ func test_real_win_trial_level_can_be_won_in_one_turn() -> void:
 		return
 	var controller: BattleController = BattleController.new()
 	controller.start(level, stats)
+	controller.begin()
 	assert_eq(controller.snapshot().phase, BattleState.Phase.PLAYER, "trước: đang chơi")
 	var first: Array[BattleEvent] = controller.submit(Command.attack(1, Vector2i(2, 2)))
 	assert_eq(first.filter(func(e: BattleEvent) -> bool: return e.type == BattleEvent.Type.VICTORY).size(), 0)
@@ -848,3 +852,14 @@ func test_real_win_trial_level_can_be_won_in_one_turn() -> void:
 	assert_eq(controller.snapshot().phase, BattleState.Phase.WON)
 	assert_eq(controller.snapshot().units.size(), 3, "còn ba tướng")
 	assert_eq(controller.snapshot().validate(), [] as Array[String])
+
+
+## Trận thử dựng sao cho pha địch chuẩn bị lúc mở trận (Story 2.6) không dời quân nào: các bước tác giả tự test
+## của story cũ vẫn đúng (chỉ số thật của chi_so.json).
+func _assert_enemies_stay_on_begin(level: LevelData) -> void:
+	var stats: Stats = StatsLoader.load_stats("res://data/chi_so.json").data as Stats
+	var controller: BattleController = BattleController.new()
+	controller.start(level, stats)
+	var before: Array[String] = BoardFixture.picture(controller.snapshot())
+	controller.begin()
+	assert_eq(BoardFixture.picture(controller.snapshot()), before, "mở trận: quân Nguyên đứng yên")
