@@ -91,6 +91,8 @@ var _terrain_labels: Node2D
 var _world: Node2D
 ## Viền mục tiêu, vẽ trên đồng quân để thấy đủ 4 cạnh (tác giả chốt 2026-10-20, review 1.8).
 var _target_layer: Node2D
+## Ô đỏ báo đòn (dưới đồng quân) và lớp số thứ tự của nó (trên cùng, trừ F1) (Story 2.7).
+var _telegraph: TelegraphView
 ## id quân -> UnitToken
 var _tokens: Dictionary = {}
 ## Tướng đang chọn: ô của nó (NO_CELL là không chọn), các ô sáng, đường đi đang vẽ (không gồm ô tướng).
@@ -245,7 +247,10 @@ func setup(new_cols: int = EMPTY_SIZE.x, new_rows: int = EMPTY_SIZE.y) -> void:
 
 
 func _ready() -> void:
-	# Thứ tự con: chữ ô phẳng, khối và đồng quân, viền mục tiêu. Overlay F1 do main.gd thêm vào sau cùng.
+	# Thứ tự con: ô đỏ báo đòn, chữ ô phẳng, khối và đồng quân, viền mục tiêu, số thứ tự đòn. Overlay F1 do
+	# main.gd thêm vào sau cùng. Ô đỏ đứng trước chữ ô phẳng để chữ địa hình vẫn đọc được.
+	_telegraph = TelegraphView.new()
+	add_child(_telegraph)
 	_terrain_labels = Node2D.new()
 	add_child(_terrain_labels)
 	_world = Node2D.new()
@@ -254,6 +259,7 @@ func _ready() -> void:
 	_target_layer = Node2D.new()
 	_target_layer.draw.connect(_draw_targets)
 	add_child(_target_layer)
+	add_child(_telegraph.numbers)
 	setup(cols, rows)
 
 
@@ -265,7 +271,13 @@ func show_state(state: BattleState) -> void:
 		clear_selection()
 	_rebuild_terrain()
 	_sync_tokens()
+	_telegraph.show_state(state)
 	_redraw()
+
+
+## Ô đỏ báo đòn đang vẽ.
+func telegraph_view() -> TelegraphView:
+	return _telegraph
 
 
 ## Đồng quân đang hiện, theo id.

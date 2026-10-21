@@ -139,6 +139,13 @@
 - Bố cục các trận thử `thu_lao`, `thu_keo`, `thu_thang`, `thu_co_lon` (và bản chép trong `test_battle_view.gd`) đã đổi để pha địch lúc mở trận không dời quân nào (thêm sông vây góc, đặt tướng kề quân Nguyên). `test_loaders.gd` kiểm điều đó (`_assert_enemies_stay_on_begin`). Khi 2.8 có đòn địch thật, các trận thử này sẽ bị đánh sau Kết thúc lượt: xem lại nếu hướng dẫn tự test cần nhiều hiệp.
 - Ca "hòa ô gần nhất thì ít bước đi hơn" (AC 8) chỉ xảy ra khi có quân cùng phe chiếm ô (tìm 200.000 bàn chỉ có sông thì không ra ca nào); test có ở `test_enemy_ai.gd::test_walks_through_ally_but_never_stops_on_it`.
 
+## Deferred from: dev of 2-7-hien-thi-bao-don (2026-10-21)
+
+- Story 2.8 (ra đòn): dùng `TelegraphMarks.hit_cell` để biết đòn trúng ô nào (Kỵ binh: vật đầu tiên hoặc trượt khi là ô sát mép trống), để ô đỏ và đòn thật không lệch nhau.
+- Story 2.9 (hủy đòn): chủ gục hoặc ô đích ngoài bàn thì `TelegraphMarks.cells` đã tự bỏ đòn đó; hủy hẳn trong `state.telegraphs` vẫn là việc của 2.9.
+- Ba đòn trở lên trúng cùng một ô: chuỗi số (`1·2·4`, chữ 28 px) dài hơn một ô, lấn sang ô bên phải (`anh/2-7-hai-ky-binh-ba-so.png`). Vẫn đọc được; xem lại ở E8 nếu cần.
+- Kỵ binh đứng kề mục tiêu: mũi tên vẽ trên mặt đất ở ô đầu đường, nên bị đồng quân ở ô đó che. Ô đỏ và số vẫn thấy.
+
 ## Deferred from: code review of story 2-6-dich-chuan-bi-ai-di-va-chon-muc-tieu (2026-10-21)
 
 - `AiIntentOverlay.line_for` tra tướng bằng `UnitType.GENERALS[intent.target_id - 1]`; Story 3.7 (nhắm làng) phải đổi sang tra theo loại mục tiêu.

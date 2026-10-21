@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Kỵ binh đã báo xung phong vào hàng của Khoái, rồi Khoái đi xuống 4,5: hàng trống, đường đỏ trải tới mép bàn (đòn sẽ trượt).",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

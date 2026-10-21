@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Sông nằm giữa Kỵ binh và Khoái không chắn xung phong: đường đỏ đi qua ô sông tới Khoái.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Kỵ binh nhắm Khoái (5,3); Phạm Ngũ Lão bước vào hàng ở 2,3: đường đỏ dừng ở ô Lão, vì Lão giờ là vật đầu tiên trên hàng.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

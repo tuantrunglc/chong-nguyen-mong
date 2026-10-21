@@ -1,13 +1,15 @@
 class_name CoordOverlay
 extends Node2D
-## F1 (chỉ khi bật dev): tọa độ "cot,hang" ở góc dưới trái mỗi ô (ngoài đồng quân, không đè tên quân), id quân ở
-## bên phải đầu đồng quân.
+## F1 (chỉ khi bật dev): tọa độ "cot,hang" ở góc dưới phải mỗi ô, dưới chấm máu (ngoài đồng quân, không đè tên
+## quân; góc dưới trái để số thứ tự đòn, Story 2.7), id quân ở bên phải đầu đồng quân.
 ## main.gd đặt node này làm con cuối của BoardView, nên nó nằm trên đồng quân và ẩn theo bàn cờ.
 ## Vị trí chỉ tính qua BoardView.top_center (bàn nhìn chếch, Story 1.8). Nhãn không nhận chuột: bấm xuyên xuống bàn.
 
 const FONT_SIZE: int = 12
 const TEXT_COLOR: Color = Color(1.0, 1.0, 1.0)
 const BACKGROUND_COLOR: Color = Color(0.0, 0.0, 0.0, 0.55)
+## Tâm nhãn tọa độ, tính từ tâm mặt ô: góc dưới phải, dưới chấm máu (UnitToken.HP_OFFSET).
+const CELL_LABEL_OFFSET: Vector2 = Vector2(18, 21)
 
 
 func _ready() -> void:
@@ -25,7 +27,7 @@ func show_state(state: BattleState) -> void:
 		for c: int in range(state.size.x):
 			var cell: Vector2i = Vector2i(c, r)
 			var corner: Vector2 = BoardView.top_center(cell, state.terrain_at(cell)) \
-				+ Vector2(-BoardView.TILE_SIZE / 4.0, BoardView.TILE_SIZE / 4.0)
+				+ CELL_LABEL_OFFSET
 			_add_label("%d,%d" % [c, r], corner, true)
 	for unit: Unit in state.units:
 		var feet: Vector2 = BoardView.top_center(unit.cell, state.terrain_at(unit.cell))

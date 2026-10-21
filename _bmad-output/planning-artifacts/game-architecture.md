@@ -345,7 +345,7 @@ Bước này là save point đầu tiên, phải xong trước khi viết luật
 |---|---|
 | `truoc` | Bàn cờ và máu ban đầu |
 | `hanh_dong` | Danh sách lệnh dạng object, ví dụ `{"tuong": "3", "lenh": "danh", "o": "4,2"}`. Lệnh `{"lenh": "ket_thuc_luot"}` chạy luôn pha địch. Lệnh luật phải từ chối thì ghi thêm `"tu_choi": "<mã lý do>"` (`khong_co_quan`, `khong_phai_tuong`, `da_dung_o_do`, `khong_toi_duoc`, `da_di_roi`, `khong_con_nuoc_di`, `da_danh_roi`, `khong_ke`, `khong_co_dich`, `ngoai_tam`, `tran_da_het`; lệnh `huy` cũng nhận `tu_choi`; mỗi lệnh chỉ nhận mã của luật lệnh đó; `tran_da_het` (trận đã thắng hoặc thua, Story 2.5) nhận ở `di`, `danh`, `huy`); lệnh bị từ chối mà không ghi, hoặc ghi mà không bị từ chối, là kịch bản trượt |
-| `sau` | Bàn cờ và máu mong đợi. Không bắt buộc: `"hiep": 2` (hiệp mong đợi) và `"da_di": ["1"]` (các tướng đã đi trong lượt; `[]` là chưa tướng nào đi, tướng không ghi phải chưa đi), `"da_danh": ["1"]` (như `da_di`, các tướng đã đánh; Story 2.1), `"ket_qua": "dang_choi" | "thang" | "thua"` (kết cục của trận, Story 2.5), `"bao_don": [{"thu_tu": 1, "quan": "3,3", "o": "3,4"}, {"thu_tu": 2, "quan": "0,3", "huong": "D"}]` (đòn quân Nguyên đã báo: ô chủ đòn ở bàn sau, ô bị nhắm hoặc hướng xung phong B/D/N/T; `[]` là không quân nào báo đòn; Story 2.6); không ghi thì không kiểm (tác giả chốt 2026-10-18). Có thể ghi thêm vài sự kiện chính (ví dụ `chet_duoi`) khi đó chính là điều cần kiểm |
+| `sau` | Bàn cờ và máu mong đợi. Không bắt buộc: `"hiep": 2` (hiệp mong đợi) và `"da_di": ["1"]` (các tướng đã đi trong lượt; `[]` là chưa tướng nào đi, tướng không ghi phải chưa đi), `"da_danh": ["1"]` (như `da_di`, các tướng đã đánh; Story 2.1), `"ket_qua": "dang_choi" | "thang" | "thua"` (kết cục của trận, Story 2.5), `"bao_don": [{"thu_tu": 1, "quan": "3,3", "o": "3,4"}, {"thu_tu": 2, "quan": "0,3", "huong": "D"}]` (đòn quân Nguyên đã báo: ô chủ đòn ở bàn sau, ô bị nhắm hoặc hướng xung phong B/D/N/T; `[]` là không quân nào báo đòn; Story 2.6), `"o_do": {"3,4": [1, 2]}` (ô đỏ báo đòn: ô → số thứ tự các đòn phủ ô đó; `{}` là không ô nào đỏ; Story 2.7); không ghi thì không kiểm (tác giả chốt 2026-10-18). Có thể ghi thêm vài sự kiện chính (ví dụ `chet_duoi`) khi đó chính là điều cần kiểm |
 
 Mỗi khi chốt một luật, AI viết kịch bản, tác giả đọc rồi trả lời "đúng" hoặc "sai". Một lệnh chạy toàn bộ kịch bản và in kết quả đạt/trượt bằng tiếng Việt.
 
@@ -552,6 +552,7 @@ chong-nguyen-mong/                    # repo
 │   │   │   ├── battle_state.gd       # BattleState: clone(), validate()
 │   │   │   ├── unit.gd               # quân: id, phe, loại, vị trí, máu, cờ đã đi/đã đánh
 │   │   │   ├── telegraph.gd          # đòn đã báo: ô hoặc hướng, thứ tự, chủ đòn
+│   │   │   ├── telegraph_marks.gd    # ô đỏ: ô đòn phủ, ô đòn trúng (Story 2.7)
 │   │   │   ├── command.gd            # Move / Attack / UseStratagem / EndTurn
 │   │   │   ├── battle_event.gd       # BattleEvent + enum Type
 │   │   │   ├── stats.gd              # chỉ số đã nạp từ chi_so.json (chỉ đọc)
@@ -739,6 +740,8 @@ Mọi phiên AI phải theo các mẫu dưới đây.
 2. Người chơi đẩy hoặc kéo chủ đòn. Ô đích tự dịch theo, và lõi luật phát sự kiện `TELEGRAPH_SHIFTED` để phần trình bày vẽ lại.
 3. Nếu ô đích mới nằm ngoài bàn, đòn bị hủy (sự kiện `TELEGRAPH_CANCELLED`).
 4. Pha ra đòn: đòn được tính theo vị trí **lúc ra đòn**.
+
+**Ô đỏ (Story 2.7):** `src/core/telegraph_marks.gd` (`TelegraphMarks`) tính từ bản chụp, sau mỗi lệnh: `path_cells` (các ô đòn phủ), `hit_cell` (ô đòn sẽ trúng), `cells` (ô → các số thứ tự, tăng dần). Đòn vào ô: chỉ ô đích. Kỵ binh: từ ô trước mặt tới **vật đầu tiên** trên hàng (quân bất kỳ phe, `EnemyAI.CHARGE_BLOCKERS`; sông không chắn), **gồm ô vật đó**; hàng trống thì tới mép, trúng ô sát mép. Chủ đòn gục hoặc ô đích ngoài bàn thì không có ô nào. `telegraph_view.gd` chỉ vẽ theo các hàm này; số thứ tự chỉ ở `hit_cell`.
 
 ```gdscript
 # src/core/telegraph.gd

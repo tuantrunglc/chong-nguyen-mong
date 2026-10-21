@@ -335,3 +335,103 @@ func test_target_outline_and_pending_are_cleared() -> void:
 	assert_eq(board.pending_cell(), BoardView.NO_CELL)
 	board.show_selection(Vector2i(0, 6), [] as Array[Vector2i], [Vector2i(0, 5)] as Array[Vector2i])
 	assert_eq(board.pending_cell(), BoardView.NO_CELL, "chọn lại thì bỏ chờ")
+
+
+# ---------- Ô đỏ báo đòn (Story 2.7) ----------
+
+## BoardView đứng riêng (không qua main), vẽ bản chụp dựng tay.
+func _telegraph_board(state: BattleState) -> BoardView:
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	board.show_state(state)
+	return board
+
+
+func _label_texts(view: TelegraphView) -> Dictionary:
+	var out: Dictionary = {}
+	var labels: Dictionary = view.number_labels()
+	for cell: Vector2i in labels:
+		out[cell] = (labels[cell] as Label).text
+	return out
+
+
+## Kỵ binh 0,3 xung phong Đông vào Khoái 4,3; Bộ binh 4,2 chém Khoái (như kịch bản o_do_ky_binh_va_bo_binh).
+func _charge_and_infantry() -> BattleState:
+	var state: BattleState = BoardFixture.state({Vector2i(0, 3): "K", Vector2i(4, 2): "B", Vector2i(4, 3): "1"})
+	# Quân Nguyên đánh id theo thứ tự đọc bàn: Bộ binh 4,2 là 101, Kỵ binh 0,3 là 102.
+	state.telegraphs.append(Telegraph.new(102, Telegraph.Kind.DIRECTION, Vector2i(1, 0), 1))
+	state.telegraphs.append(Telegraph.new(101, Telegraph.Kind.CELL, Vector2i(0, 1), 2))
+	return state
+
+
+func test_telegraphs_draw_red_cells_numbers_and_arrow() -> void:
+	var view: TelegraphView = _telegraph_board(_charge_and_infantry()).telegraph_view()
+	var red: Dictionary = {}
+	for x: int in range(1, 4):
+		red[Vector2i(x, 3)] = [1] as Array[int]
+	red[Vector2i(4, 3)] = [1, 2] as Array[int]
+	assert_eq(view.red_cells(), red, "đường Kỵ binh tới Khoái, ô Khoái có cả đòn Bộ binh")
+	assert_eq(_label_texts(view), {Vector2i(4, 3): "1·2"}, "số chỉ ở ô đòn trúng")
+	assert_eq(view.arrows(), {Vector2i(1, 3): Vector2i(1, 0)}, "mũi tên ở ô đầu đường, chỉ Đông")
+
+
+func test_no_telegraphs_draws_nothing() -> void:
+	var view: TelegraphView = _telegraph_board(BoardFixture.state({Vector2i(0, 3): "K", Vector2i(4, 3): "1"})) \
+		.telegraph_view()
+	assert_eq(view.red_cells(), {})
+	assert_eq(view.number_labels(), {})
+	assert_eq(view.arrows(), {})
+	var board: BoardView = view.get_parent() as BoardView
+	board.show_state(_charge_and_infantry())
+	board.show_state(null)
+	assert_eq(view.red_cells(), {}, "bàn trống: hết ô đỏ")
+	assert_eq(view.number_labels(), {}, "bàn trống: hết số")
+
+
+func test_red_path_redrawn_when_general_leaves_row() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(0, 3): "K", Vector2i(4, 3): "1"})
+	state.telegraphs.append(Telegraph.new(101, Telegraph.Kind.DIRECTION, Vector2i(1, 0), 1))
+	var board: BoardView = _telegraph_board(state)
+	assert_eq(_label_texts(board.telegraph_view()), {Vector2i(4, 3): "1"})
+	var moved: BattleState = state.clone()
+	moved.unit_by_id(1).cell = Vector2i(4, 5)
+	board.show_state(moved)
+	assert_eq(board.telegraph_view().red_cells().size(), 6, "hàng trống: đỏ tới mép")
+	assert_eq(_label_texts(board.telegraph_view()), {Vector2i(6, 3): "1"}, "số ở ô sát mép")
+
+
+## Số thứ tự nằm dưới đồng quân và chấm máu, trong mặt ô; nhãn không nuốt chuột.
+func test_number_clear_of_token_and_hp_dot() -> void:
+	var board: BoardView = _telegraph_board(_charge_and_infantry())
+	var view: TelegraphView = board.telegraph_view()
+	var label: Label = view.number_labels()[Vector2i(4, 3)] as Label
+	var glyphs: Rect2 = view.number_glyph_rect(label)
+	var feet: Vector2 = BoardView.cell_center(Vector2i(4, 3))
+	var coin: Vector2 = feet - Vector2(0, UnitToken.TOKEN_LIFT)
+	assert_gt(glyphs.position.y, coin.y + UnitToken.RADIUS, "chữ số dưới mặt đồng")
+	assert_gt(glyphs.position.y, coin.y + UnitToken.HP_OFFSET.y + UnitToken.HP_RADIUS, "chữ số dưới chấm máu")
+	assert_true(BoardView.cell_rect(Vector2i(4, 3)).encloses(glyphs), "chữ số trong ô")
+	assert_gte(TelegraphView.NUMBER_FONT_SIZE, 28, "chữ lớn")
+	assert_eq(label.mouse_filter, Control.MOUSE_FILTER_IGNORE)
+
+
+## Lớp đỏ dưới đồng quân, lớp số trên đồng quân và viền mục tiêu; F1 vẫn trên cùng.
+func test_telegraph_layers_order() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main()
+	var board: BoardView = _board(main)
+	var view: TelegraphView = board.telegraph_view()
+	assert_lt(view.get_index(), board._terrain_labels.get_index(), "ô đỏ dưới chữ địa hình")
+	assert_gt(view.numbers.get_index(), board._target_layer.get_index(), "số trên viền mục tiêu")
+	assert_gt((main._coord_overlay as Node).get_index(), view.numbers.get_index(), "F1 vẫn trên cùng")
+
+
+## Rừng là vật đầu tiên: ô rừng đỏ và có số, vẽ trên lớp số (khối không che).
+func test_red_on_forest_block() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(0, 3): "K", Vector2i(6, 6): "1"}, {Vector2i(3, 3): "#"})
+	state.telegraphs.append(Telegraph.new(101, Telegraph.Kind.DIRECTION, Vector2i(1, 0), 1))
+	var view: TelegraphView = _telegraph_board(state).telegraph_view()
+	assert_eq(view.red_cells().size(), 3)
+	assert_eq(_label_texts(view), {Vector2i(3, 3): "1"})
+	var face: Rect2 = view.top_rect(Vector2i(3, 3))
+	assert_eq(face.position.y, BoardView.cell_rect(Vector2i(3, 3)).position.y - BoardView.BLOCK_HEIGHT, "mặt trên khối")

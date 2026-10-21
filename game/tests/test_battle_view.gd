@@ -566,6 +566,22 @@ func _unit_at(main: Node2D, cell: Vector2i) -> Unit:
 	return _controller(main).snapshot().unit_at(cell)
 
 
+## Mở trận: Bộ binh 3,3 (đòn 1) và Kỵ binh 4,4 (đòn 2, xung phong Tây) cùng nhắm Khoái 3,4; Bộ binh 5,5 (đòn 3)
+## chém Lão 5,6 (Story 2.7). Khoái đánh đẩy Bộ binh lên 3,2: ô đỏ của nó dịch theo, lên 3,3.
+func test_telegraphs_drawn_on_open_and_follow_pushed_owner() -> void:
+	var main: Node2D = _make_attack_main()
+	var view: TelegraphView = _board(main).telegraph_view()
+	assert_eq(view.red_cells(), {Vector2i(3, 4): [1, 2] as Array[int], Vector2i(5, 6): [3] as Array[int]})
+	var labels: Dictionary = view.number_labels()
+	assert_eq((labels[Vector2i(3, 4)] as Label).text, "1·2")
+	assert_eq((labels[Vector2i(5, 6)] as Label).text, "3")
+	assert_eq(view.arrows(), {Vector2i(3, 4): Vector2i(-1, 0)}, "mũi tên Kỵ binh chỉ Tây")
+	_press_physical(main, KEY_1)
+	_click_by_mouse(main, Vector2i(3, 3))
+	assert_eq(view.red_cells(), {Vector2i(3, 3): [1] as Array[int], Vector2i(3, 4): [2] as Array[int],
+		Vector2i(5, 6): [3] as Array[int]}, "đòn 1 dịch theo Bộ binh bị đẩy")
+
+
 func test_selecting_khoai_outlines_targets() -> void:
 	var main: Node2D = _make_attack_main()
 	_press_physical(main, KEY_1)

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Kỵ binh cùng hàng với Khoái báo xung phong về hướng Đông: tô đỏ cả đường từ ô trước mặt Kỵ binh tới ô Khoái, gồm ô Khoái.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

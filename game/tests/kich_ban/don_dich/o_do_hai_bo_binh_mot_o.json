@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Hai Bộ binh đi tới hai ô kề Khoái và cùng chém ô Khoái: một ô đỏ mang hai số 1·2.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

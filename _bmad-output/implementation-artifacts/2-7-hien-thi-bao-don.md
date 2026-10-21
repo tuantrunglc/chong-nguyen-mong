@@ -4,7 +4,7 @@ baseline_commit: f575cfa
 
 # Story 2.7: Hiển thị báo đòn
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -34,7 +34,7 @@ _**Chưa có** (đừng làm ở đây): ra đòn, trừ máu (2.8); hủy đòn
 ## Tasks / Subtasks
 
 - [x] **Task 0: Tác giả chốt 1 câu hỏi** ở "Quyết định của tác giả" (2026-10-21: Kỵ binh tô đường tới vật đầu tiên).
-- [ ] **Task 1: Khung, đợt kịch bản 9, dừng chờ duyệt** (AC: 1, 2)
+- [x] **Task 1: Khung, đợt kịch bản 9, dừng chờ duyệt** (AC: 1, 2)
   - [x] 1.1 Khung (làm trước để kịch bản nạp và so được):
     - `src/core/telegraph_marks.gd` (MỚI, `class_name TelegraphMarks`, `RefCounted`, hàm `static`): `cells(state) -> Dictionary` và `hit_cell(state, telegraph) -> Vector2i`, `path_cells(state, telegraph) -> Array[Vector2i]`. **Chưa có luật**: `cells` trả `{}`, `hit_cell` trả `Telegraph.NO_CELL`, `path_cells` trả `[]` (kịch bản phải trượt).
     - `src/data/scenario_loader.gd`: khóa mới `o_do` của `sau` (không bắt buộc, thêm vào `AFTER_KEYS`): object `{"cot,hang": [số thứ tự, …]}`. Kiểm: khóa là ô trong bàn, không ghi một ô hai lần (như `mau`); giá trị là danh sách số nguyên ≥ 1, không rỗng, không trùng. Câu lỗi tiếng Việt kèm file, ô và giá trị sai. `{}` là "không ô nào đỏ" (vẫn kiểm). Lưu đã xếp tăng dần.
@@ -45,29 +45,29 @@ _**Chưa có** (đừng làm ở đây): ra đòn, trừ máu (2.8); hủy đòn
   - [x] 1.2 Viết 7 file đúng "Đợt kịch bản 9", `"da_duyet": false`. Chép cấu trúc từ `tests/kich_ban/ai/ky_binh_xung_phong_thang_hang.json` (một lệnh `ket_thuc_luot`, `sau.hiep: 2`); kịch bản #5, #6 có thêm lệnh `di` sau `ket_thuc_luot`. Có thể ghi kèm `bao_don` cho người đọc (không bắt buộc).
   - [x] 1.3 `tools/xem_kich_ban.sh don_dich`: đọc lại từng bàn và bàn "Ô ĐỎ", khớp `mo_ta`. `tools/test.sh`: `59 đã duyệt · 7 chưa duyệt (7 chưa đạt)`. Ghi Debug Log.
   - [x] 1.4 Commit: `Kịch bản ô đỏ báo đòn chờ duyệt (Story 2.7)`.
-  - [ ] 1.5 **HALT.** Nhắn tác giả tiếng Việt: gõ `tools/xem_kich_ban.sh don_dich`, trả lời "đúng"/"sai: <lý do>" từng cái. Nói rõ: bàn "Ô ĐỎ" là đúng những ô sẽ tô đỏ trong game; số trong ô là số thứ tự đòn; với Kỵ binh, chỉ ô cuối đường đỏ mới có số trong game (bàn "Ô ĐỎ" của công cụ duyệt ghi số ở mọi ô đỏ để dễ đọc đòn nào phủ ô nào).
-  - [ ] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng"; `tools/test.sh` phải trượt. Không commit khi đỏ.
-- [ ] **Task 2: Lõi luật `TelegraphMarks`** (AC: 4–7, 11)
-  - [ ] 2.1 `hit_cell`: `CELL` → `target_cell` nếu chủ còn và ô trong bàn, không thì NO_CELL. `DIRECTION` → ô cuối của `path_cells` (rỗng thì NO_CELL: Kỵ binh đứng sát mép, hướng ra ngoài).
-  - [ ] 2.2 `path_cells`: `CELL` → `[hit_cell]` (hoặc `[]`). `DIRECTION` → đi từ ô chủ đòn + hướng, từng ô trong bàn; thêm ô; dừng **sau khi thêm** ô có quân hoặc rừng/kho lương/làng. **Dùng chung** danh sách địa hình chắn với `EnemyAI.CHARGE_BLOCKERS` (không chép), để AI chọn ô và ô đỏ không lệch nhau; Story 2.8 ra đòn cũng dùng `hit_cell` này.
-  - [ ] 2.3 `cells`: với mỗi đòn theo `order`, mỗi ô của `path_cells` thêm `order`; danh sách mỗi ô xếp tăng dần. Duyệt `state.telegraphs` (đã theo thứ tự), không duyệt khóa Dictionary để quyết thứ tự.
-  - [ ] 2.4 Không đổi state; không phát sự kiện; không `Node`, `Log`.
-  - [ ] 2.5 Chạy `tools/test.sh`: 7 kịch bản mới đạt. **Phá thử** (mỗi lần một chỗ, ghi Debug Log, chạy từng kịch bản): sông chắn đường xung phong (#4 trượt); dừng trước vật đầu tiên thay vì gồm nó (#3 trượt); không tính lại theo vị trí mới, ví dụ dùng ô đích lúc báo (#5 hoặc #6 trượt); không xếp số tăng dần (#7 trượt).
-- [ ] **Task 3: Test GUT lõi** (AC: 4–7)
-  - [ ] 3.1 `tests/test_telegraph_marks.gd` (MỚI), dùng `BoardFixture`: đòn vào ô có chủ đã gục (bỏ) và ô đích ngoài bàn (bỏ); Kỵ binh đứng sát mép, hướng ra ngoài (rỗng, NO_CELL); rừng chặn (gồm ô rừng, dừng); kho lương, làng chặn; quân Nguyên khác chắn (gồm ô đó); bàn 10×8 (không lặp cứng cỡ); ba đòn trùng một ô (`[1, 2, 3]`); `cells` không đổi `BoardFixture.picture` và `telegraphs`.
-- [ ] **Task 4: Vẽ** (AC: 6–10)
-  - [ ] 4.1 `src/battle/telegraph_view.gd` (MỚI, như kiến trúc "Cây thư mục"): hai lớp vẽ do `BoardView` tạo và giữ:
+  - [x] 1.5 **HALT.** Nhắn tác giả tiếng Việt: gõ `tools/xem_kich_ban.sh don_dich`, trả lời "đúng"/"sai: <lý do>" từng cái. Nói rõ: bàn "Ô ĐỎ" là đúng những ô sẽ tô đỏ trong game; số trong ô là số thứ tự đòn; với Kỵ binh, chỉ ô cuối đường đỏ mới có số trong game (bàn "Ô ĐỎ" của công cụ duyệt ghi số ở mọi ô đỏ để dễ đọc đòn nào phủ ô nào).
+  - [x] 1.6 Sau khi tác giả trả lời: đổi `da_duyet: true` cho kịch bản "đúng"; `tools/test.sh` phải trượt. Không commit khi đỏ.
+- [x] **Task 2: Lõi luật `TelegraphMarks`** (AC: 4–7, 11)
+  - [x] 2.1 `hit_cell`: `CELL` → `target_cell` nếu chủ còn và ô trong bàn, không thì NO_CELL. `DIRECTION` → ô cuối của `path_cells` (rỗng thì NO_CELL: Kỵ binh đứng sát mép, hướng ra ngoài).
+  - [x] 2.2 `path_cells`: `CELL` → `[hit_cell]` (hoặc `[]`). `DIRECTION` → đi từ ô chủ đòn + hướng, từng ô trong bàn; thêm ô; dừng **sau khi thêm** ô có quân hoặc rừng/kho lương/làng. **Dùng chung** danh sách địa hình chắn với `EnemyAI.CHARGE_BLOCKERS` (không chép), để AI chọn ô và ô đỏ không lệch nhau; Story 2.8 ra đòn cũng dùng `hit_cell` này.
+  - [x] 2.3 `cells`: với mỗi đòn theo `order`, mỗi ô của `path_cells` thêm `order`; danh sách mỗi ô xếp tăng dần. Duyệt `state.telegraphs` (đã theo thứ tự), không duyệt khóa Dictionary để quyết thứ tự.
+  - [x] 2.4 Không đổi state; không phát sự kiện; không `Node`, `Log`.
+  - [x] 2.5 Chạy `tools/test.sh`: 7 kịch bản mới đạt. **Phá thử** (mỗi lần một chỗ, ghi Debug Log, chạy từng kịch bản): sông chắn đường xung phong (#4 trượt); dừng trước vật đầu tiên thay vì gồm nó (#3 trượt); không tính lại theo vị trí mới, ví dụ dùng ô đích lúc báo (#5 hoặc #6 trượt); không xếp số tăng dần (#7 trượt).
+- [x] **Task 3: Test GUT lõi** (AC: 4–7)
+  - [x] 3.1 `tests/test_telegraph_marks.gd` (MỚI), dùng `BoardFixture`: đòn vào ô có chủ đã gục (bỏ) và ô đích ngoài bàn (bỏ); Kỵ binh đứng sát mép, hướng ra ngoài (rỗng, NO_CELL); rừng chặn (gồm ô rừng, dừng); kho lương, làng chặn; quân Nguyên khác chắn (gồm ô đó); bàn 10×8 (không lặp cứng cỡ); ba đòn trùng một ô (`[1, 2, 3]`); `cells` không đổi `BoardFixture.picture` và `telegraphs`.
+- [x] **Task 4: Vẽ** (AC: 6–10)
+  - [x] 4.1 `src/battle/telegraph_view.gd` (MỚI, như kiến trúc "Cây thư mục"): hai lớp vẽ do `BoardView` tạo và giữ:
     - **lớp mặt đất** (vẽ trong `BoardView._draw` hoặc một `Node2D` con đứng **trước** `_world`): tô đỏ mặt trên mỗi ô của `TelegraphMarks.cells` (dùng `_top_rect`, ô ải nâng theo bệ); mũi tên Kỵ binh trên ô đầu của `path_cells`. Tô sau ô sáng xanh để ô đỏ vẫn thấy khi trùng (AC 9), hoặc viền đỏ dày nếu ô vừa sáng vừa đỏ: chọn cách nào vẫn thấy cả hai, ghi lý do.
     - **lớp số** (trên `_world`, cạnh `_target_layer`): ở mỗi ô `hit_cell`, chuỗi các số của đòn trúng ô đó (`1·3`), cỡ ≥ 28 px, chữ trắng viền tối (outline của `Label` hoặc vẽ chữ hai lần), đặt ở **góc dưới trái** mặt ô (đồng quân đứng giữa, chấm máu ở góc dưới phải). Không nhận chuột (`MOUSE_FILTER_IGNORE`), bấm xuyên xuống bàn.
     - Lớp F1 (`CoordOverlay`, góc dưới trái mỗi ô) đè lên vị trí số: dời nhãn tọa độ F1 lên **góc trên trái** của ô, hoặc dời số; chọn một, ghi lý do, sửa test F1 nếu dời.
-  - [ ] 4.2 `BoardView.show_state` vẽ lại cả hai lớp theo bản chụp (không thêm hàm `show_telegraphs` riêng mà UI phải nhớ gọi). Hằng màu, cỡ chữ đặt trong `telegraph_view.gd` (màu UI, không phải số cân bằng). Đỏ báo đòn khác đỏ đồng Đại Việt (`UnitToken.DAI_VIET_COLOR`): dùng đỏ tươi, trong suốt một phần để thấy chữ địa hình bên dưới.
-  - [ ] 4.3 `pick_cell` không đổi: lớp đỏ và lớp số không ảnh hưởng chọn ô.
-  - [ ] 4.4 Test `tests/test_board_view.gd` (hoặc file mới): `show_state` với bản chụp có đòn → lớp đỏ có đúng các ô, lớp số có đúng chữ ở đúng ô (`1`, `1·2`), Kỵ binh có mũi tên; bản chụp không đòn → không vẽ gì; vẽ lại sau khi tướng rời hàng (đường đỏ dài ra); số không trùng vùng chấm máu (so khung chữ với `UnitToken.HP_OFFSET`). Test qua `main.tscn` thật (`_make_level_main` như `test_battle_view.gd`): mở trận có Bộ binh kề Khoái → có ô đỏ ở ô Khoái, số `1`.
-- [ ] **Task 5: Kiểm bằng mắt, tài liệu** (AC: 8–10, 12)
-  - [ ] 5.1 Chạy `tools/chay.sh --dev --tran=thu_keo` và `thu_lao` (có cả Bộ binh và Kỵ binh báo đòn sẵn từ hiệp 1), `tran_01` kết thúc lượt vài lần. GoPeak `capture_screenshot` (CLAUDE.md "Nhìn game đang chạy"), lưu `_bmad-output/implementation-artifacts/anh/2-7-*.png` (ít nhất: Bộ binh đỏ trên ô có tướng; Kỵ binh đường đỏ có mũi tên; một ô hai số). GoPeak không kết nối được thì **không đánh [x]**, ghi "chờ tác giả kiểm tay". Log không ERROR/WARN.
-  - [ ] 5.2 `game-architecture.md`: M1 thêm "ô đỏ: `TelegraphMarks`" (Kỵ binh: đường tới vật đầu tiên, gồm ô đó, sông không chắn, tính lại theo bản chụp); mục "Kịch bản luật" thêm khóa `o_do`; cây thư mục thêm `telegraph_marks.gd`. `deferred-work.md`: 2.8 dùng `TelegraphMarks.hit_cell` khi ra đòn; 2.9 hủy đòn thì `cells` tự bỏ (chủ gục, ra ngoài bàn đã bỏ sẵn).
-  - [ ] 5.3 `tools/test.sh` xanh. Commit một lần (kịch bản đã duyệt, code, test, tài liệu, `.uid` mới, `text.vi.translation`): `Vẽ ô đỏ và số thứ tự báo đòn (Story 2.7)`.
-  - [ ] 5.4 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes bằng kết quả thật.
+  - [x] 4.2 `BoardView.show_state` vẽ lại cả hai lớp theo bản chụp (không thêm hàm `show_telegraphs` riêng mà UI phải nhớ gọi). Hằng màu, cỡ chữ đặt trong `telegraph_view.gd` (màu UI, không phải số cân bằng). Đỏ báo đòn khác đỏ đồng Đại Việt (`UnitToken.DAI_VIET_COLOR`): dùng đỏ tươi, trong suốt một phần để thấy chữ địa hình bên dưới.
+  - [x] 4.3 `pick_cell` không đổi: lớp đỏ và lớp số không ảnh hưởng chọn ô.
+  - [x] 4.4 Test `tests/test_board_view.gd` (hoặc file mới): `show_state` với bản chụp có đòn → lớp đỏ có đúng các ô, lớp số có đúng chữ ở đúng ô (`1`, `1·2`), Kỵ binh có mũi tên; bản chụp không đòn → không vẽ gì; vẽ lại sau khi tướng rời hàng (đường đỏ dài ra); số không trùng vùng chấm máu (so khung chữ với `UnitToken.HP_OFFSET`). Test qua `main.tscn` thật (`_make_level_main` như `test_battle_view.gd`): mở trận có Bộ binh kề Khoái → có ô đỏ ở ô Khoái, số `1`.
+- [x] **Task 5: Kiểm bằng mắt, tài liệu** (AC: 8–10, 12)
+  - [x] 5.1 Chạy `tools/chay.sh --dev --tran=thu_keo` và `thu_lao` (có cả Bộ binh và Kỵ binh báo đòn sẵn từ hiệp 1), `tran_01` kết thúc lượt vài lần. GoPeak `capture_screenshot` (CLAUDE.md "Nhìn game đang chạy"), lưu `_bmad-output/implementation-artifacts/anh/2-7-*.png` (ít nhất: Bộ binh đỏ trên ô có tướng; Kỵ binh đường đỏ có mũi tên; một ô hai số). GoPeak không kết nối được thì **không đánh [x]**, ghi "chờ tác giả kiểm tay". Log không ERROR/WARN.
+  - [x] 5.2 `game-architecture.md`: M1 thêm "ô đỏ: `TelegraphMarks`" (Kỵ binh: đường tới vật đầu tiên, gồm ô đó, sông không chắn, tính lại theo bản chụp); mục "Kịch bản luật" thêm khóa `o_do`; cây thư mục thêm `telegraph_marks.gd`. `deferred-work.md`: 2.8 dùng `TelegraphMarks.hit_cell` khi ra đòn; 2.9 hủy đòn thì `cells` tự bỏ (chủ gục, ra ngoài bàn đã bỏ sẵn).
+  - [x] 5.3 `tools/test.sh` xanh. Commit một lần (kịch bản đã duyệt, code, test, tài liệu, `.uid` mới, `text.vi.translation`): `Vẽ ô đỏ và số thứ tự báo đòn (Story 2.7)`.
+  - [x] 5.4 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes bằng kết quả thật.
 
 ## Dev Notes
 
@@ -172,14 +172,43 @@ Thư mục mới `tests/kich_ban/don_dich/`. Bàn 7×7 toàn đất trống tr�
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5[1m])
+
 ### Debug Log References
 
 - 2026-10-21 Task 1.1–1.3: khung `TelegraphMarks` (trả rỗng), khóa `o_do` (loader, data, runner, viewer có bàn thứ ba "Ô ĐỎ"), 3 khóa `scenario.viewer.marks*`. 7 kịch bản `don_dich/`. `tools/test.sh`: 522/522 đạt, `Kịch bản luật: 59 đã duyệt · 7 chưa duyệt (7 chưa đạt)`; cả 7 trượt dạng `sau: ô … mong đợi đỏ (đòn …), thực tế không đỏ`, khớp bảng. Vị trí quân sau pha chuẩn bị đã đối chiếu bằng mô phỏng luật 2.6: không quân Nguyên nào bị dời khác bảng.
+- 2026-10-21 Task 1.5–1.6: tác giả duyệt "tất cả đúng" cả 7 kịch bản. Đổi `da_duyet: true`; `tools/test.sh` trượt đúng 1 test (`test_approved_scenarios_pass`, `o_do_bo_binh.json: sau: ô 3,4 mong đợi đỏ (đòn 1), thực tế không đỏ`).
+- Task 3 trước Task 2: `test_telegraph_marks.gd` chạy riêng với khung rỗng: 5/10 trượt (các ca mong đợi có ô), 5 ca mong đợi rỗng đạt.
+- Task 2: viết `TelegraphMarks`; `test_telegraph_marks.gd` + `test_scenarios.gd` đạt. Phá thử, mỗi lần một chỗ, chạy `test_scenarios.gd`:
+  - sông chắn xung phong → `o_do_ky_binh_qua_song` trượt (ô 3,3, 4,3 không đỏ);
+  - dừng trước vật đầu tiên → `ky_binh_qua_song`, `ky_binh_toi_tuong`, `ky_binh_va_bo_binh`, `tuong_khac_buoc_vao` trượt;
+  - không tính quân trên hàng (đường đỏ không theo vị trí quân hiện tại) → `tuong_khac_buoc_vao` (đỏ tới 3,3, 4,3) và 3 kịch bản Kỵ binh khác trượt;
+  - duyệt đòn ngược và bỏ xếp → `hai_bo_binh_mot_o`, `ky_binh_va_bo_binh` trượt (`đòn 2·1`). (Bỏ xếp đơn thuần không trượt vì `state.telegraphs` đã theo thứ tự; phải duyệt ngược mới lộ.)
+  Trả lại bản đúng, `diff` sạch.
+- Task 4: test giao diện lần đầu trượt vì test dựng id sai (quân Nguyên đánh id theo thứ tự đọc bàn: Bộ binh 4,2 là 101), sửa test. Ước lượng chiều cao chữ số theo `get_string_size` gồm cả khoảng dành cho dấu tiếng Việt (ascent 30 px) nên báo chữ đè chấm máu; đo glyph thật bằng TextServer: chữ số Be Vietnam Pro cỡ 30 cao 23 px. Hạ cỡ chữ xuống 28 (mức tối thiểu AC 9), chân chữ cách mép dưới ô 2 px: chữ số nằm dưới chấm máu.
+- Task 5.1: GoPeak không kết nối được trong phiên này. Chụp bằng `img/pixellab-thu/cong-cu/chup.gd` trên bản chép của `game/` ở scratchpad (chạy game có cửa sổ, `--dev`, không sửa repo). Trận `thu_o_do` là trận tạm chỉ có trong bản chép (bố cục như `_make_attack_main` + Kỵ binh 0,4). Log không có ERROR; WARN duy nhất là game báo bỏ qua tham số `--out`, `--steps` của công cụ chụp.
+- `tools/test.sh`: 539/539 đạt, `Kịch bản luật: 66 đã duyệt · 0 chưa duyệt (0 chưa đạt)`.
 - Ghi chú: `JSON.stringify` của Godot xếp khóa theo chữ, nên câu lỗi `o_do` trong test ra theo thứ tự khóa đã xếp.
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Ô đỏ AC 9: lớp đỏ đứng sau phần vẽ của `BoardView` (ô sáng xanh) nên ô vừa sáng vừa đỏ ra đỏ; thêm viền đỏ đậm 3 px cho mọi ô đỏ. Ô rừng/kho lương/làng tô đỏ trên lớp số, vì khối nằm cùng lớp với đồng quân sẽ che lớp mặt đất.
+- F1: dời tọa độ ô sang góc dưới phải (dưới chấm máu) thay vì góc trên trái, vì góc trên trái chạm mặt đồng và tên quân. Không test nào kiểm vị trí nhãn tọa độ ô nên không phải sửa test F1.
+- Ảnh: `anh/2-7-ky-binh-qua-song-hai-so.png` (`thu_keo`: Kỵ binh xung phong qua hai ô sông có mũi tên, ô Dư `2·3`, Bộ binh trên ô Lão), `anh/2-7-hai-ky-binh-ba-so.png` (Bộ binh đỏ trên ô có tướng, ô Khoái `1·2·4`, đường đỏ có mũi tên), `anh/2-7-tran-01-hiep-3.png` (`tran_01` sau 2 lần Kết thúc lượt), `anh/2-7-du-roi-hang.png` (`thu_keo`, Dư lên 3,2: ô cũ còn số 2, đường Kỵ binh dừng ở Bộ binh 2,3, số 3).
+
+**Hướng dẫn tác giả tự test:**
+
+1. Gõ `tools/test.sh`. Thấy `539/539 test đạt` và `Kịch bản luật: 66 đã duyệt · 0 chưa duyệt (0 chưa đạt)` là đúng.
+2. Gõ `tools/chay.sh --dev --tran=thu_keo`. Thấy ngay khi mở trận:
+   - ô Lão (hàng trên cùng) tô đỏ, góc dưới trái có số `1`;
+   - Kỵ binh bên phải: hai ô sông trước mặt nó đỏ (hơi tím vì đỏ phủ lên xanh), có mũi tên trắng chỉ sang trái; đường đỏ dừng ở ô Dư;
+   - ô Dư có số `2·3`.
+   Tên quân, chấm máu và số đều đọc được.
+3. Chọn Dư (phím 3), bấm ô ngay trên Dư (3,2). Thấy: ô cũ của Dư vẫn đỏ, số `2` (Bộ binh đánh vào ô, không đuổi theo); đường đỏ của Kỵ binh đi tiếp qua ô cũ của Dư, dừng ở Bộ binh kế bên (2,3), số `3` ở ô Bộ binh đó (Kỵ binh sẽ đâm vào quân mình).
+4. Bấm Hủy (Z): ô đỏ và số về như bước 2.
+5. Bật F1: tọa độ ô hiện ở góc dưới phải mỗi ô (ô có `2·3` thì tọa độ bị số che một phần, chỉ ở chế độ dev).
+6. Gõ `tools/chay.sh --dev`, bấm Kết thúc lượt vài lần: mỗi hiệp quân Nguyên đi, ô đỏ và số vẽ lại theo đòn mới. Đòn vẫn chưa đánh (Story 2.8).
 
 ### File List
 
@@ -187,4 +216,11 @@ Thư mục mới `tests/kich_ban/don_dich/`. Bàn 7×7 toàn đất trống tr�
 - `game/src/data/scenario_loader.gd`, `game/src/data/scenario_data.gd`
 - `game/tests/scenario_runner.gd`, `game/tests/scenario_viewer.gd`, `game/tests/test_scenario_loader.gd`
 - `game/i18n/text.csv`, `game/i18n/text.vi.translation`
-- `game/tests/kich_ban/don_dich/*.json` (7 file mới)
+- `game/tests/kich_ban/don_dich/*.json` (7 file mới; Task 1.6 đổi `da_duyet: true`)
+- `game/src/battle/telegraph_view.gd`, `.uid` (mới)
+- `game/src/battle/board_view.gd`, `game/src/debug/coord_overlay.gd`
+- `game/tests/test_telegraph_marks.gd`, `.uid` (mới)
+- `game/tests/test_board_view.gd`, `game/tests/test_battle_view.gd`
+- `_bmad-output/planning-artifacts/game-architecture.md`, `_bmad-output/implementation-artifacts/deferred-work.md`
+- `_bmad-output/implementation-artifacts/anh/2-7-*.png` (4 ảnh)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`

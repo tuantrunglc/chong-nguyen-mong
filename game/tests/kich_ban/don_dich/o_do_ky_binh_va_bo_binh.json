@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Kỵ binh (đòn 1) xung phong vào Khoái và Bộ binh kề trên (đòn 2) chém Khoái: ô Khoái mang hai số 1·2, các ô còn lại của đường Kỵ binh chỉ có số 1.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",
