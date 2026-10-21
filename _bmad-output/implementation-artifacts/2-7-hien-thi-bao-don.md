@@ -4,7 +4,7 @@ baseline_commit: f575cfa
 
 # Story 2.7: Hiển thị báo đòn
 
-Status: review
+Status: in-progress
 
 ## Story
 
@@ -59,15 +59,30 @@ _**Chưa có** (đừng làm ở đây): ra đòn, trừ máu (2.8); hủy đòn
   - [x] 4.1 `src/battle/telegraph_view.gd` (MỚI, như kiến trúc "Cây thư mục"): hai lớp vẽ do `BoardView` tạo và giữ:
     - **lớp mặt đất** (vẽ trong `BoardView._draw` hoặc một `Node2D` con đứng **trước** `_world`): tô đỏ mặt trên mỗi ô của `TelegraphMarks.cells` (dùng `_top_rect`, ô ải nâng theo bệ); mũi tên Kỵ binh trên ô đầu của `path_cells`. Tô sau ô sáng xanh để ô đỏ vẫn thấy khi trùng (AC 9), hoặc viền đỏ dày nếu ô vừa sáng vừa đỏ: chọn cách nào vẫn thấy cả hai, ghi lý do.
     - **lớp số** (trên `_world`, cạnh `_target_layer`): ở mỗi ô `hit_cell`, chuỗi các số của đòn trúng ô đó (`1·3`), cỡ ≥ 28 px, chữ trắng viền tối (outline của `Label` hoặc vẽ chữ hai lần), đặt ở **góc dưới trái** mặt ô (đồng quân đứng giữa, chấm máu ở góc dưới phải). Không nhận chuột (`MOUSE_FILTER_IGNORE`), bấm xuyên xuống bàn.
-    - Lớp F1 (`CoordOverlay`, góc dưới trái mỗi ô) đè lên vị trí số: dời nhãn tọa độ F1 lên **góc trên trái** của ô, hoặc dời số; chọn một, ghi lý do, sửa test F1 nếu dời.
+    - Lớp F1 (`CoordOverlay`, góc dưới trái mỗi ô) đè lên vị trí số: dời nhãn tọa độ F1 lên **góc trên trái** của ô, hoặc dời số (dev chọn dời F1 sang góc dưới phải, dưới chấm máu; lý do ở Completion Notes); chọn một, ghi lý do, sửa test F1 nếu dời.
   - [x] 4.2 `BoardView.show_state` vẽ lại cả hai lớp theo bản chụp (không thêm hàm `show_telegraphs` riêng mà UI phải nhớ gọi). Hằng màu, cỡ chữ đặt trong `telegraph_view.gd` (màu UI, không phải số cân bằng). Đỏ báo đòn khác đỏ đồng Đại Việt (`UnitToken.DAI_VIET_COLOR`): dùng đỏ tươi, trong suốt một phần để thấy chữ địa hình bên dưới.
   - [x] 4.3 `pick_cell` không đổi: lớp đỏ và lớp số không ảnh hưởng chọn ô.
   - [x] 4.4 Test `tests/test_board_view.gd` (hoặc file mới): `show_state` với bản chụp có đòn → lớp đỏ có đúng các ô, lớp số có đúng chữ ở đúng ô (`1`, `1·2`), Kỵ binh có mũi tên; bản chụp không đòn → không vẽ gì; vẽ lại sau khi tướng rời hàng (đường đỏ dài ra); số không trùng vùng chấm máu (so khung chữ với `UnitToken.HP_OFFSET`). Test qua `main.tscn` thật (`_make_level_main` như `test_battle_view.gd`): mở trận có Bộ binh kề Khoái → có ô đỏ ở ô Khoái, số `1`.
-- [x] **Task 5: Kiểm bằng mắt, tài liệu** (AC: 8–10, 12)
-  - [x] 5.1 Chạy `tools/chay.sh --dev --tran=thu_keo` và `thu_lao` (có cả Bộ binh và Kỵ binh báo đòn sẵn từ hiệp 1), `tran_01` kết thúc lượt vài lần. GoPeak `capture_screenshot` (CLAUDE.md "Nhìn game đang chạy"), lưu `_bmad-output/implementation-artifacts/anh/2-7-*.png` (ít nhất: Bộ binh đỏ trên ô có tướng; Kỵ binh đường đỏ có mũi tên; một ô hai số). GoPeak không kết nối được thì **không đánh [x]**, ghi "chờ tác giả kiểm tay". Log không ERROR/WARN.
+- [ ] **Task 5: Kiểm bằng mắt, tài liệu** (AC: 8–10, 12)
+  - [ ] 5.1 Chạy `tools/chay.sh --dev --tran=thu_keo` và `thu_lao` (có cả Bộ binh và Kỵ binh báo đòn sẵn từ hiệp 1), `tran_01` kết thúc lượt vài lần. GoPeak `capture_screenshot` (CLAUDE.md "Nhìn game đang chạy"), lưu `_bmad-output/implementation-artifacts/anh/2-7-*.png` (ít nhất: Bộ binh đỏ trên ô có tướng; Kỵ binh đường đỏ có mũi tên; một ô hai số). GoPeak không kết nối được thì **không đánh [x]**, ghi "chờ tác giả kiểm tay". Log không ERROR/WARN.
   - [x] 5.2 `game-architecture.md`: M1 thêm "ô đỏ: `TelegraphMarks`" (Kỵ binh: đường tới vật đầu tiên, gồm ô đó, sông không chắn, tính lại theo bản chụp); mục "Kịch bản luật" thêm khóa `o_do`; cây thư mục thêm `telegraph_marks.gd`. `deferred-work.md`: 2.8 dùng `TelegraphMarks.hit_cell` khi ra đòn; 2.9 hủy đòn thì `cells` tự bỏ (chủ gục, ra ngoài bàn đã bỏ sẵn).
   - [x] 5.3 `tools/test.sh` xanh. Commit một lần (kịch bản đã duyệt, code, test, tài liệu, `.uid` mới, `text.vi.translation`): `Vẽ ô đỏ và số thứ tự báo đòn (Story 2.7)`.
   - [x] 5.4 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes bằng kết quả thật.
+
+### Review Findings
+
+- [x] [Review][Patch] (tác giả chọn a: vẽ mũi tên ở lớp trên đồng quân khi ô đầu đường có quân) Mũi tên xung phong của Kỵ binh bị đồng quân che khi mục tiêu kề sát (đường chỉ 1 ô): mũi tên vẽ ở lớp mặt đất, dưới đồng quân, nên đúng ca "sắp húc trúng quân" lại không thấy mũi tên (AC 6 không có ngoại lệ; dev chỉ ghi deferred, chưa hỏi tác giả). Chọn: (a) vẽ mũi tên ở lớp `numbers` (trên đồng quân) khi ô đầu đường có quân, (b) dời mũi tên lùi về phía Kỵ binh, (c) giữ, sửa AC 6 cho phép ngoại lệ. [telegraph_view.gd:_draw, _arrows]
+- [x] [Review][Patch] (tác giả chọn a: tự giảm cỡ chữ cho vừa ô) Ba đòn trở lên vào một ô: chuỗi `1·2·4` (chữ 28 px) rộng hơn ô, lấn sang ô bên phải (AC 8; dev ghi deferred "xem lại ở E8"). Chọn: (a) tự giảm cỡ chữ cho vừa ô, (b) rút gọn khi từ 3 số (ví dụ `1+3` hoặc `×3`), (c) giữ tới E8. [telegraph_view.gd:_add_number]
+- [x] [Review][Patch] Task 5.1 đánh `[x]` dù GoPeak không kết nối: ảnh chụp từ trận tạm `thu_o_do` trên bản chép ngoài repo, chưa chạy `tools/chay.sh --dev --tran=thu_keo`. Bỏ `[x]`, ghi "chờ tác giả kiểm tay"; bước 2–3 của hướng dẫn tự test chưa được kiểm trên repo. [story: Task 5.1, Debug Log]
+- [x] [Review][Patch] Hai Kỵ binh có chung ô đầu đường (khác hướng) thì `_arrows[path[0]]` bị ghi đè, mất một mũi tên. Lưu danh sách hướng cho mỗi ô; thêm test. [telegraph_view.gd:57]
+- [x] [Review][Patch] `_compare_marks` chỉ duyệt ô trong bàn, nên ô `o_do` kỳ vọng nằm ngoài bàn (khi `sau` không có kích thước) không bao giờ bị báo và kịch bản vẫn đạt. Báo lỗi mọi khóa `wanted` mà `not state.in_bounds`. [scenario_runner.gd:_compare_marks, scenario_loader.gd:_read_marks]
+- [x] [Review][Patch] Viewer: ô có một đòn với số thứ tự từ 10 trở lên in 2 ký tự, lệch cột bảng "Ô ĐỎ"; in `*` như ô nhiều đòn. [scenario_viewer.gd:_marks_board]
+- [x] [Review][Patch] AC 10 chưa có test vẽ lại ô đỏ sau Hủy, F5 và Chơi lại trận (hiện chỉ test lúc mở trận, đi/đánh, tướng rời hàng). Thêm test. [test_board_view.gd, test_battle_view.gd]
+- [x] [Review][Patch] Ghi chép lệch: Task 4.1 văn bản nói F1 dời "lên góc trên trái", Completion Notes ghi "góc dưới phải"; còn sót dòng mẫu "Ultimate context engine analysis completed" trong Completion Notes. Sửa cho khớp. [story: Task 4.1, Completion Notes]
+- [x] [Review][Defer] `TelegraphView.numbers` rò node nếu dùng riêng ngoài `BoardView` (chỉ test) — deferred [telegraph_view.gd:_init]
+- [x] [Review][Defer] Nhãn số chỉ đặt ở ô trúng, ô đỏ đi qua (giữa đường xung phong) không có số; đúng ý spec nhưng người test có thể hiểu nhầm — deferred, xem lại ở 2.10 (rê chuột xem thông tin) [telegraph_view.gd:59-62]
+- [x] [Review][Defer] Đòn có ô đích ngoài bàn thì vô hình, không có tín hiệu nào — deferred, 2.9 xử lý hủy đòn [telegraph_marks.gd:33-40]
+- [x] [Review][Defer] `CELL_LABEL_OFFSET` của nhãn F1 đặt số cứng, không dẫn xuất từ `TILE_SIZE`/`UnitToken.HP_OFFSET`; không test vị trí nhãn F1 — deferred [coord_overlay.gd]
 
 ## Dev Notes
 
@@ -192,7 +207,6 @@ Claude Opus 5.5 (claude-opus-5-5[1m])
 
 ### Completion Notes List
 
-- Ultimate context engine analysis completed - comprehensive developer guide created.
 - Ô đỏ AC 9: lớp đỏ đứng sau phần vẽ của `BoardView` (ô sáng xanh) nên ô vừa sáng vừa đỏ ra đỏ; thêm viền đỏ đậm 3 px cho mọi ô đỏ. Ô rừng/kho lương/làng tô đỏ trên lớp số, vì khối nằm cùng lớp với đồng quân sẽ che lớp mặt đất.
 - F1: dời tọa độ ô sang góc dưới phải (dưới chấm máu) thay vì góc trên trái, vì góc trên trái chạm mặt đồng và tên quân. Không test nào kiểm vị trí nhãn tọa độ ô nên không phải sửa test F1.
 - Ảnh: `anh/2-7-ky-binh-qua-song-hai-so.png` (`thu_keo`: Kỵ binh xung phong qua hai ô sông có mũi tên, ô Dư `2·3`, Bộ binh trên ô Lão), `anh/2-7-hai-ky-binh-ba-so.png` (Bộ binh đỏ trên ô có tướng, ô Khoái `1·2·4`, đường đỏ có mũi tên), `anh/2-7-tran-01-hiep-3.png` (`tran_01` sau 2 lần Kết thúc lượt), `anh/2-7-du-roi-hang.png` (`thu_keo`, Dư lên 3,2: ô cũ còn số 2, đường Kỵ binh dừng ở Bộ binh 2,3, số 3).
@@ -224,3 +238,4 @@ Claude Opus 5.5 (claude-opus-5-5[1m])
 - `_bmad-output/planning-artifacts/game-architecture.md`, `_bmad-output/implementation-artifacts/deferred-work.md`
 - `_bmad-output/implementation-artifacts/anh/2-7-*.png` (4 ảnh)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- 2026-10-21 (code review): mũi tên Kỵ binh vẽ ở lớp trên đồng quân khi ô đầu đường có quân (`TelegraphView.arrow_on_top`); `_arrows` giữ nhiều hướng mỗi ô; chuỗi số tự giảm cỡ chữ (28 → tối thiểu 12) cho vừa ô; `_compare_marks` báo ô `o_do` ngoài bàn; viewer in `*` cho ô một đòn số từ 10; thêm test Hủy, Chơi lại, F5 và các ca mới. `tools/test.sh`: 543/543 đạt. Task 5.1 bỏ `[x]`: còn chờ tác giả kiểm tay (`thu_keo`, `thu_lao`, `tran_01` qua `tools/chay.sh --dev`), nhất là mũi tên Kỵ binh kề sát mục tiêu và ô có 3 số.

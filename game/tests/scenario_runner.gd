@@ -204,6 +204,15 @@ static func _compare_marks(state: BattleState, wanted: Dictionary) -> Array[Stri
 				continue
 			problems.append("sau: ô %s mong đợi %s, thực tế %s"
 				% [BoardText.cell_text(cell), _marks_text(want), _marks_text(have)])
+	# Ô kỳ vọng ngoài bàn (loader không kiểm được khi "sau" không có cỡ bàn) không bao giờ khớp.
+	var outside: Array[Vector2i] = []
+	for key: Variant in wanted.keys():
+		if not state.in_bounds(key as Vector2i):
+			outside.append(key as Vector2i)
+	outside.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.y < b.y or (a.y == b.y and a.x < b.x))
+	for cell: Vector2i in outside:
+		problems.append("sau: ô %s mong đợi %s nhưng nằm ngoài bàn"
+			% [BoardText.cell_text(cell), _marks_text(wanted[cell])])
 	return problems
 
 

@@ -372,7 +372,46 @@ func test_telegraphs_draw_red_cells_numbers_and_arrow() -> void:
 	red[Vector2i(4, 3)] = [1, 2] as Array[int]
 	assert_eq(view.red_cells(), red, "đường Kỵ binh tới Khoái, ô Khoái có cả đòn Bộ binh")
 	assert_eq(_label_texts(view), {Vector2i(4, 3): "1·2"}, "số chỉ ở ô đòn trúng")
-	assert_eq(view.arrows(), {Vector2i(1, 3): Vector2i(1, 0)}, "mũi tên ở ô đầu đường, chỉ Đông")
+	assert_eq(view.arrows(), {Vector2i(1, 3): [Vector2i(1, 0)] as Array[Vector2i]}, "mũi tên ở ô đầu đường, chỉ Đông")
+
+
+## Kỵ binh kề mục tiêu: ô đầu đường có quân nên mũi tên vẽ ở lớp trên đồng quân; ô đầu đường trống thì ở lớp dưới.
+func test_arrow_over_token_when_first_cell_has_unit() -> void:
+	var near: BattleState = BoardFixture.state({Vector2i(3, 3): "K", Vector2i(4, 3): "1"})
+	near.telegraphs.append(Telegraph.new(near.unit_at(Vector2i(3, 3)).id, Telegraph.Kind.DIRECTION, Vector2i(1, 0), 1))
+	var view: TelegraphView = _telegraph_board(near).telegraph_view()
+	assert_eq(view.arrows(), {Vector2i(4, 3): [Vector2i(1, 0)] as Array[Vector2i]})
+	assert_true(view.arrow_on_top(Vector2i(4, 3)), "ô đầu đường có Khoái: mũi tên trên đồng quân")
+	var far: TelegraphView = _telegraph_board(_charge_and_infantry()).telegraph_view()
+	assert_false(far.arrow_on_top(Vector2i(1, 3)), "ô đầu đường trống: mũi tên ở lớp mặt đất")
+
+
+## Hai Kỵ binh khác hướng cùng bắt đầu ở ô 2,1: giữ cả hai mũi tên.
+func test_two_cavalry_sharing_first_cell_keep_both_arrows() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(2, 0): "K", Vector2i(1, 1): "K"})
+	state.telegraphs.append(Telegraph.new(state.unit_at(Vector2i(2, 0)).id, Telegraph.Kind.DIRECTION, Vector2i(0, 1), 1))
+	state.telegraphs.append(Telegraph.new(state.unit_at(Vector2i(1, 1)).id, Telegraph.Kind.DIRECTION, Vector2i(1, 0), 2))
+	var view: TelegraphView = _telegraph_board(state).telegraph_view()
+	var dirs: Array[Vector2i] = [Vector2i(0, 1), Vector2i(1, 0)]
+	assert_eq(view.arrows(), {Vector2i(2, 1): dirs})
+
+
+## Ba đòn vào một ô: chuỗi `1·2·3` tự giảm cỡ chữ cho nằm trong mặt ô.
+func test_many_numbers_shrink_to_fit_the_cell() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 2): "B", Vector2i(2, 3): "B", Vector2i(4, 3): "B",
+		Vector2i(3, 3): "1"})
+	state.telegraphs.append(Telegraph.new(state.unit_at(Vector2i(3, 2)).id, Telegraph.Kind.CELL, Vector2i(0, 1), 1))
+	state.telegraphs.append(Telegraph.new(state.unit_at(Vector2i(2, 3)).id, Telegraph.Kind.CELL, Vector2i(1, 0), 2))
+	state.telegraphs.append(Telegraph.new(state.unit_at(Vector2i(4, 3)).id, Telegraph.Kind.CELL, Vector2i(-1, 0), 3))
+	var view: TelegraphView = _telegraph_board(state).telegraph_view()
+	var label: Label = view.number_labels()[Vector2i(3, 3)] as Label
+	assert_eq(label.text, "1·2·3")
+	assert_lt(label.get_meta("font_size") as int, TelegraphView.NUMBER_FONT_SIZE, "chuỗi dài thì giảm cỡ chữ")
+	assert_gte(label.get_meta("font_size") as int, TelegraphView.NUMBER_MIN_FONT_SIZE)
+	assert_true(BoardView.cell_rect(Vector2i(3, 3)).encloses(view.number_glyph_rect(label)), "chữ nằm trong ô")
+	var one: TelegraphView = _telegraph_board(_charge_and_infantry()).telegraph_view()
+	assert_eq((one.number_labels()[Vector2i(4, 3)] as Label).get_meta("font_size"), TelegraphView.NUMBER_FONT_SIZE,
+		"chuỗi ngắn giữ cỡ chữ lớn")
 
 
 func test_no_telegraphs_draws_nothing() -> void:

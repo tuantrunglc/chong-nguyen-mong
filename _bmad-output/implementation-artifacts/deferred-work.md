@@ -151,3 +151,10 @@
 - `AiIntentOverlay.line_for` tra tướng bằng `UnitType.GENERALS[intent.target_id - 1]`; Story 3.7 (nhắm làng) phải đổi sang tra theo loại mục tiêu.
 - `AiIntentOverlay` mượn khóa `scenario.unit.*` của công cụ duyệt kịch bản để gọi tên quân; gom về một nhóm khóa `unit.*` khi dọn i18n.
 - `main._start_battle` bỏ qua kết quả của `BattleController.begin()`; nếu lệnh mở trận bị từ chối thì chưa báo lỗi. Xử lý cùng màn lỗi ở E4.
+
+## Deferred from: code review of story 2-7-hien-thi-bao-don (2026-10-21)
+
+- `TelegraphView.numbers` do `BoardView` thêm vào cây; dùng `TelegraphView` riêng ngoài `BoardView` (chỉ trong test) thì `numbers` rò node.
+- Số thứ tự chỉ nằm ở ô trúng; ô đỏ giữa đường xung phong không có số. Xem lại ở Story 2.10 (rê chuột xem thông tin).
+- Đòn có ô đích ngoài bàn thì không vẽ gì; Story 2.9 xử lý cùng hủy đòn.
+- `CoordOverlay.CELL_LABEL_OFFSET` đặt số cứng (18, 21), chưa dẫn xuất từ `TILE_SIZE` và `UnitToken.HP_OFFSET`, chưa có test vị trí nhãn F1.

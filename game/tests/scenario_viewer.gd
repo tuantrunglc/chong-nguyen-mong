@@ -262,7 +262,7 @@ static func _marks_board(size: Vector2i, marks: Dictionary) -> PackedStringArray
 			var orders: Array = marks.get(Vector2i(c, r), []) as Array
 			if orders.is_empty():
 				cells.append(".")
-			elif orders.size() == 1:
+			elif orders.size() == 1 and (orders[0] as int) < 10:
 				cells.append(str(orders[0]))
 			else:
 				cells.append("*")

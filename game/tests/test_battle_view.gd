@@ -575,11 +575,29 @@ func test_telegraphs_drawn_on_open_and_follow_pushed_owner() -> void:
 	var labels: Dictionary = view.number_labels()
 	assert_eq((labels[Vector2i(3, 4)] as Label).text, "1·2")
 	assert_eq((labels[Vector2i(5, 6)] as Label).text, "3")
-	assert_eq(view.arrows(), {Vector2i(3, 4): Vector2i(-1, 0)}, "mũi tên Kỵ binh chỉ Tây")
+	assert_eq(view.arrows(), {Vector2i(3, 4): [Vector2i(-1, 0)] as Array[Vector2i]}, "mũi tên Kỵ binh chỉ Tây")
 	_press_physical(main, KEY_1)
 	_click_by_mouse(main, Vector2i(3, 3))
 	assert_eq(view.red_cells(), {Vector2i(3, 3): [1] as Array[int], Vector2i(3, 4): [2] as Array[int],
 		Vector2i(5, 6): [3] as Array[int]}, "đòn 1 dịch theo Bộ binh bị đẩy")
+
+
+## Ô đỏ vẽ lại đúng sau Hủy nước đi, Chơi lại trận và F5 (Story 2.7, AC 10).
+func test_red_cells_redrawn_after_undo_restart_and_reload() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_attack_main()
+	var opening: Dictionary = _board(main).telegraph_view().red_cells().duplicate(true)
+	assert_false(opening.is_empty(), "điều kiện trước: trận mở đã có ô đỏ")
+	_press_physical(main, KEY_1)
+	_click_by_mouse(main, Vector2i(2, 4))
+	_press_physical(main, KEY_Z)
+	assert_eq(_unit_cell(main, 1), Vector2i(3, 4), "điều kiện trước: đã hủy nước đi")
+	assert_eq(_board(main).telegraph_view().red_cells(), opening, "sau Hủy")
+	main._start_battle()
+	assert_eq(_board(main).telegraph_view().red_cells(), opening, "sau Chơi lại trận")
+	main._reload_data()
+	assert_eq(_board(main).telegraph_view().red_cells(), opening, "sau F5")
+	assert_eq(_board(main).telegraph_view().number_labels().size(), 2, "số cũng vẽ lại, không dồn thêm")
 
 
 func test_selecting_khoai_outlines_targets() -> void:
