@@ -91,6 +91,9 @@ func validate() -> Array[String]:
 			problems.append("%s có máu %d, cần từ 1 tới %d" % [where, u.hp, max_hp])
 	var orders: Dictionary = {}
 	for t: Telegraph in telegraphs:
+		var shape: String = _telegraph_shape_problem(t)
+		if not shape.is_empty():
+			problems.append("đòn của quân %d %s" % [t.owner_id, shape])
 		if t.order < 1:
 			problems.append("đòn của quân %d có số thứ tự %d, cần từ 1 trở lên" % [t.owner_id, t.order])
 		elif orders.has(t.order):
@@ -102,6 +105,22 @@ func validate() -> Array[String]:
 			if u.faction == Unit.Faction.NGUYEN:
 				problems.append("đã thắng (Tiêu diệt) mà còn quân Nguyên %d" % u.id)
 	return problems
+
+
+## Hình dạng đòn đã báo; rỗng là hợp lệ. Chủ đòn đã gục vẫn hợp lệ (hủy đòn ở Story 2.9), nhưng phải từng là quân
+## Nguyên: không có quân nào mang id đó thì chỉ kiểm hình dạng.
+func _telegraph_shape_problem(t: Telegraph) -> String:
+	var owner: Unit = unit_by_id(t.owner_id)
+	if owner != null and owner.faction != Unit.Faction.NGUYEN:
+		return "thuộc quân không phải quân Nguyên"
+	match t.kind:
+		Telegraph.Kind.DIRECTION:
+			if not Grid.DIRECTIONS.has(t.offset):
+				return "xung phong theo hướng %d,%d không hợp lệ" % [t.offset.x, t.offset.y]
+		Telegraph.Kind.CELL:
+			if absi(t.offset.x) + absi(t.offset.y) != 1:
+				return "đánh ô cách %d,%d, cần đúng một ô kề" % [t.offset.x, t.offset.y]
+	return ""
 
 
 func in_bounds(cell: Vector2i) -> bool:

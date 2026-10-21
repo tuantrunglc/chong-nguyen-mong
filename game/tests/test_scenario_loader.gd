@@ -983,9 +983,10 @@ func test_after_telegraphs_are_read_in_order() -> void:
 	assert_false(s.checks_telegraphs, "không ghi bao_don thì không kiểm")
 	var d: Dictionary = _valid()
 	d["sau"]["bao_don"] = [
-		{"thu_tu": 2, "quan": "5,4", "huong": "T"},
+		{"thu_tu": 2, "quan": "6,4", "huong": "T"},
 		{"thu_tu": 1, "quan": "5,4", "o": "5,5"},
 	]
+	d["sau"]["quan"][4] = ". . . . . B B"
 	s = _scenario(d)
 	if s == null:
 		return
@@ -1017,17 +1018,25 @@ func test_after_telegraph_errors() -> void:
 		"5,4",
 	]
 	var w: String = F + ': "sau.bao_don" mục '
+	var dup: String = '"quan" ô 5,4 trùng với mục 1 (mỗi quân chỉ báo một đòn)'
+	var either: String = 'phải có đúng một trong "o" (đòn vào ô) và "huong" (xung phong)'
 	assert_eq(_errors(d), [
-		w + '1: phải có đúng một trong "o" (đòn vào ô) và "huong" (xung phong)',
-		w + '2: phải có đúng một trong "o" (đòn vào ô) và "huong" (xung phong)',
+		w + '1: ' + either,
+		w + '2: ' + dup,
+		w + '2: ' + either,
+		w + '3: ' + dup,
 		w + '3: "huong" là "Bac", chỉ được "B", "D", "N", "T"',
 		w + '4: "thu_tu" 3 trùng với mục 3',
+		w + '4: ' + dup,
 		w + '5: "thu_tu" phải là số nguyên từ 1 trở lên, đang là 0',
 		w + '5: "quan" ô 0,6 không có quân Nguyên trong "sau.quan"',
 		w + '5: "o" là "9,9", không phải ô trong bàn',
 		w + '6: thiếu khóa "thu_tu"',
+		w + '6: ' + dup,
 		w + '7 phải là một object, đang là "5,4"',
 	] as Array[String])
+	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,2"}]
+	assert_eq(_errors(d), [w + '1: "o" ô 5,2 không kề "quan" ô 5,4'] as Array[String])
 	d["sau"]["bao_don"] = {"thu_tu": 1}
 	assert_eq(_errors(d), [F + ': "sau.bao_don" phải là một danh sách, đang là {"thu_tu":1}'] as Array[String])
 	d = _valid()

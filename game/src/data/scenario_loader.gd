@@ -303,6 +303,7 @@ static func _read_telegraphs(value: Variant, shown: String, units_shown: String,
 	var errors_before: int = result.errors.size()
 	var telegraphs: Array[ScenarioData.ExpectedTelegraph] = []
 	var seen_orders: Dictionary = {}  # thu_tu -> mục đầu tiên ghi số đó
+	var seen_owners: Dictionary = {}  # ô "quan" -> mục đầu tiên ghi ô đó
 	var items: Array = value as Array
 	for i: int in range(items.size()):
 		var where: String = '%s: "%s" mục %d' % [file, shown, i + 1]
@@ -331,12 +332,21 @@ static func _read_telegraphs(value: Variant, shown: String, units_shown: String,
 				and not BoardLayers.ENEMY_SYMBOLS.has(BoardLayers.symbol(side.unit_rows, owner as Vector2i)):
 			result.add_error('%s: "quan" ô %s không có quân Nguyên trong "%s"'
 				% [where, BoardText.cell_text(owner as Vector2i), units_shown])
+		if owner != null:
+			if seen_owners.has(owner):
+				result.add_error('%s: "quan" ô %s trùng với mục %d (mỗi quân chỉ báo một đòn)'
+					% [where, BoardText.cell_text(owner as Vector2i), seen_owners[owner]])
+			else:
+				seen_owners[owner] = i + 1
 		var kind: Telegraph.Kind = Telegraph.Kind.CELL
 		var target: Variant = null
 		if d.has("o") == d.has("huong"):
 			result.add_error('%s: phải có đúng một trong "o" (đòn vào ô) và "huong" (xung phong)' % where)
 		elif d.has("o"):
 			target = _read_telegraph_cell(d, "o", where, side.size, result)
+			if owner != null and target != null and not Grid.is_adjacent(owner as Vector2i, target as Vector2i):
+				result.add_error('%s: "o" ô %s không kề "quan" ô %s'
+					% [where, BoardText.cell_text(target as Vector2i), BoardText.cell_text(owner as Vector2i)])
 		else:
 			kind = Telegraph.Kind.DIRECTION
 			var code: Variant = d["huong"]

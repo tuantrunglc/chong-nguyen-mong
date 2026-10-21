@@ -210,6 +210,25 @@ func test_validate_reports_bad_telegraph_order() -> void:
 	] as Array[String])
 
 
+func test_validate_reports_bad_telegraph_shape() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "B", Vector2i(3, 4): "1"})
+	state.telegraphs.append(Telegraph.new(101, Telegraph.Kind.DIRECTION, Vector2i(0, 1), 1))
+	assert_eq(state.validate(), [] as Array[String], "hướng hợp lệ")
+	state.telegraphs.clear()
+	state.telegraphs.append(Telegraph.new(101, Telegraph.Kind.DIRECTION, Vector2i(1, 1), 1))
+	assert_eq(state.validate(), ["đòn của quân 101 xung phong theo hướng 1,1 không hợp lệ"] as Array[String])
+	state.telegraphs.clear()
+	state.telegraphs.append(Telegraph.new(101, Telegraph.Kind.CELL, Vector2i(0, 2), 1))
+	assert_eq(state.validate(), ["đòn của quân 101 đánh ô cách 0,2, cần đúng một ô kề"] as Array[String])
+	state.telegraphs.clear()
+	state.telegraphs.append(Telegraph.new(7, Telegraph.Kind.CELL, Vector2i(0, 1), 1))
+	assert_eq(state.validate(), [] as Array[String], "chủ đòn đã gục (không còn trên bàn) vẫn hợp lệ")
+	state.telegraphs.clear()
+	var general_id: int = state.units[0].id
+	state.telegraphs.append(Telegraph.new(general_id, Telegraph.Kind.CELL, Vector2i(0, 1), 1))
+	assert_eq(state.validate(), ["đòn của quân %d thuộc quân không phải quân Nguyên" % general_id] as Array[String])
+
+
 func test_from_level_copies_mission() -> void:
 	var level: LevelData = LevelData.new()
 	level.size = Vector2i(5, 5)

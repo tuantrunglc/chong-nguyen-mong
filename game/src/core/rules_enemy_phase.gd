@@ -17,12 +17,17 @@ static func end_player_turn(state: BattleState, events: Array[BattleEvent]) -> v
 
 
 ## Pha chuẩn bị của hiệp 1 (lệnh BEGIN_BATTLE): không sang hiệp, không ROUND_STARTED.
+## Chỉ chạy được một lần, ở hiệp 1 khi chưa có đòn hay ý định nào; ngoài ra không làm gì và không phát sự kiện
+## (lệnh nội bộ gọi sai chỗ, lưới an toàn).
 static func begin_battle(state: BattleState, events: Array[BattleEvent]) -> void:
+	if state.round_number != 1 or not state.telegraphs.is_empty() or not state.enemy_intents.is_empty():
+		return
 	prepare(state, events)
 
 
 ## Pha địch chuẩn bị: xóa đòn cũ, rồi từng quân Nguyên theo thứ tự (id, tức thu_tu_dich) chọn mục tiêu và ô đứng
-## (EnemyAI.plan), đi từng ô tới đó, rồi báo đòn nếu đánh trúng được. Số thứ tự chỉ đếm quân có đòn. Xong về PLAYER.
+## (EnemyAI.plan) và đi từng ô tới đó. Đi hết cả bọn rồi mới báo đòn, theo bàn cuối cùng: Kỵ binh đã báo xung phong
+## mà quân id lớn hơn đi chắn đường thì không báo (reason về CLOSEST). Số thứ tự chỉ đếm quân có đòn. Xong về PLAYER.
 static func prepare(state: BattleState, events: Array[BattleEvent]) -> void:
 	state.phase = BattleState.Phase.ENEMY_PREPARE
 	state.telegraphs.clear()
@@ -32,7 +37,6 @@ static func prepare(state: BattleState, events: Array[BattleEvent]) -> void:
 		if unit.faction == Unit.Faction.NGUYEN:
 			enemies.append(unit)
 	enemies.sort_custom(func(a: Unit, b: Unit) -> bool: return a.id < b.id)
-	var next_order: int = 1
 	for unit: Unit in enemies:
 		# Từ Story 3.4 quân có thể gục trên hầm chông khi đang đi: quân đã rời bàn thì bỏ qua.
 		if state.unit_by_id(unit.id) == null:
@@ -43,12 +47,23 @@ static func prepare(state: BattleState, events: Array[BattleEvent]) -> void:
 				state.stats.move_range(unit.type))[intent.stand_cell] as Array[Vector2i]
 			for step: Vector2i in path:
 				Effects.move(state, unit, step, BattleEvent.Cause.WALK, events)
-		if intent.reason == EnemyIntent.Reason.CAN_HIT and unit.is_alive():
-			var target: Unit = state.unit_by_id(intent.target_id)
-			var telegraph: Telegraph = EnemyAI.telegraph_for(unit, unit.cell, target.cell, next_order)
-			state.telegraphs.append(telegraph)
-			intent.order = next_order
-			events.append(BattleEvent.telegraphed(unit.id, unit.cell, telegraph.target_cell(state), next_order))
-			next_order += 1
+				if state.unit_by_id(unit.id) == null:
+					break
 		state.enemy_intents.append(intent)
+	var next_order: int = 1
+	for intent: EnemyIntent in state.enemy_intents:
+		if intent.reason != EnemyIntent.Reason.CAN_HIT:
+			continue
+		var unit: Unit = state.unit_by_id(intent.unit_id)
+		var target: Unit = state.unit_by_id(intent.target_id)
+		if unit == null or target == null:
+			continue
+		if not EnemyAI.can_hit_from(state, unit, unit.cell, target.cell):
+			intent.reason = EnemyIntent.Reason.CLOSEST
+			continue
+		var telegraph: Telegraph = EnemyAI.telegraph_for(unit, unit.cell, target.cell, next_order)
+		state.telegraphs.append(telegraph)
+		intent.order = next_order
+		events.append(BattleEvent.telegraphed(unit.id, unit.cell, telegraph.target_cell(state), next_order))
+		next_order += 1
 	state.phase = BattleState.Phase.PLAYER

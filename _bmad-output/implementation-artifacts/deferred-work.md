@@ -139,3 +139,8 @@
 - Bố cục các trận thử `thu_lao`, `thu_keo`, `thu_thang`, `thu_co_lon` (và bản chép trong `test_battle_view.gd`) đã đổi để pha địch lúc mở trận không dời quân nào (thêm sông vây góc, đặt tướng kề quân Nguyên). `test_loaders.gd` kiểm điều đó (`_assert_enemies_stay_on_begin`). Khi 2.8 có đòn địch thật, các trận thử này sẽ bị đánh sau Kết thúc lượt: xem lại nếu hướng dẫn tự test cần nhiều hiệp.
 - Ca "hòa ô gần nhất thì ít bước đi hơn" (AC 8) chỉ xảy ra khi có quân cùng phe chiếm ô (tìm 200.000 bàn chỉ có sông thì không ra ca nào); test có ở `test_enemy_ai.gd::test_walks_through_ally_but_never_stops_on_it`.
 
+## Deferred from: code review of story 2-6-dich-chuan-bi-ai-di-va-chon-muc-tieu (2026-10-21)
+
+- `AiIntentOverlay.line_for` tra tướng bằng `UnitType.GENERALS[intent.target_id - 1]`; Story 3.7 (nhắm làng) phải đổi sang tra theo loại mục tiêu.
+- `AiIntentOverlay` mượn khóa `scenario.unit.*` của công cụ duyệt kịch bản để gọi tên quân; gom về một nhóm khóa `unit.*` khi dọn i18n.
+- `main._start_battle` bỏ qua kết quả của `BattleController.begin()`; nếu lệnh mở trận bị từ chối thì chưa báo lỗi. Xử lý cùng màn lỗi ở E4.

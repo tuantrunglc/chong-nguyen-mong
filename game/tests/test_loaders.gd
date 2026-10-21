@@ -750,15 +750,17 @@ func test_real_push_trial_level_loads() -> void:
 	# Các bước tác giả tự test (Story 2.2) dựa vào đúng chỗ đứng này.
 	var expected: Dictionary = {
 		Vector2i(0, 3): UnitType.PHAM_NGU_LAO, Vector2i(1, 3): UnitType.NGUYEN_KHOAI,
-		Vector2i(1, 5): UnitType.TRAN_KHANH_DU, Vector2i(2, 2): UnitType.BO_BINH,
-		Vector2i(1, 4): UnitType.BO_BINH, Vector2i(6, 6): UnitType.BO_BINH,
+		Vector2i(1, 5): UnitType.TRAN_KHANH_DU, Vector2i(2, 3): UnitType.BO_BINH,
+		Vector2i(1, 4): UnitType.BO_BINH, Vector2i(2, 5): UnitType.BO_BINH,
 	}
 	var actual: Dictionary = {}
 	for p: LevelData.UnitPlacement in level.units:
 		actual[p.cell] = p.type
 	assert_eq(actual, expected)
 	assert_eq(level.terrain_at(Vector2i(3, 1)), Terrain.RIVER)
-	assert_eq(level.terrain_at(Vector2i(3, 2)), Terrain.RIVER, "Bộ binh 2,2 bị đẩy sang Đông thì xuống sông")
+	assert_eq(level.terrain_at(Vector2i(3, 2)), Terrain.RIVER)
+	assert_eq(level.terrain_at(Vector2i(3, 3)), Terrain.RIVER, "Bộ binh 2,3 bị đẩy sang Đông thì xuống sông")
+	_assert_enemies_stay_on_begin(level)
 
 
 func test_real_lance_trial_level_loads() -> void:
@@ -782,6 +784,18 @@ func test_real_lance_trial_level_loads() -> void:
 	_assert_enemies_stay_on_begin(level)
 	assert_eq(level.terrain_at(Vector2i(4, 3)), Terrain.RIVER, "lao bay qua sông tới Kỵ binh 6,3")
 	assert_eq(level.terrain_at(Vector2i(5, 3)), Terrain.RIVER)
+
+
+## Ba trận thử còn lại (Story 2.1, 1.9): bố cục đổi ở Story 2.6 để pha địch lúc mở trận không dời quân nào.
+func test_other_real_trial_levels_keep_enemies_still_on_begin() -> void:
+	for file: String in ["thu_ba_tuong", "thu_co_nho", "thu_day"]:
+		var r: LoadResult = LevelLoader.load_level("res://data/tran/%s.json" % file)
+		assert_eq(r.errors, [] as Array[String], file)
+		assert_eq(r.warnings, [] as Array[String], file)
+		var level: LevelData = r.data as LevelData
+		assert_not_null(level, file)
+		if level != null:
+			_assert_enemies_stay_on_begin(level)
 
 
 func test_real_pull_trial_level_loads() -> void:

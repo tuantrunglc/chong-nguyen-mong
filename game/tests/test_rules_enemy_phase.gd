@@ -69,8 +69,9 @@ func test_prepare_moves_then_telegraphs_in_order() -> void:
 	var events: Array[BattleEvent] = []
 	RulesEnemyPhase.prepare(state, events)
 	assert_eq(BoardFixture.describe(events), [
-		"MOVED 101 3,0>3,1 WALK", "MOVED 101 3,1>3,2 WALK", "TELEGRAPHED 101 3,2>3,3 #1",
-		"MOVED 102 5,2>5,3 WALK", "MOVED 102 5,3>4,3 WALK", "TELEGRAPHED 102 4,3>3,3 #2",
+		"MOVED 101 3,0>3,1 WALK", "MOVED 101 3,1>3,2 WALK",
+		"MOVED 102 5,2>5,3 WALK", "MOVED 102 5,3>4,3 WALK",
+		"TELEGRAPHED 101 3,2>3,3 #1", "TELEGRAPHED 102 4,3>3,3 #2",
 	] as Array[String])
 	assert_eq(state.phase, BattleState.Phase.PLAYER)
 	assert_eq(state.telegraphs.size(), 2)
@@ -120,5 +121,57 @@ func test_prepare_is_deterministic() -> void:
 	RulesEnemyPhase.prepare(b, eb)
 	assert_eq(BoardFixture.describe(ea), BoardFixture.describe(eb))
 	assert_eq(BoardFixture.picture(a), BoardFixture.picture(b))
-	assert_eq(a.telegraphs.size(), b.telegraphs.size())
+	assert_eq(_telegraph_lines(a), _telegraph_lines(b))
+	assert_eq(_intent_lines(a), _intent_lines(b))
+	assert_gt(a.telegraphs.size(), 0, "ca này có đòn để so")
 	assert_eq(a.validate(), [] as Array[String])
+
+
+func _telegraph_lines(state: BattleState) -> Array[String]:
+	var out: Array[String] = []
+	for t: Telegraph in state.telegraphs:
+		out.append("%d %d %s #%d" % [t.owner_id, t.kind, t.offset, t.order])
+	return out
+
+
+func _intent_lines(state: BattleState) -> Array[String]:
+	var out: Array[String] = []
+	for i: EnemyIntent in state.enemy_intents:
+		out.append("%d %s>%s %d %d #%d" % [i.unit_id, i.from_cell, i.stand_cell, i.target_id, i.reason, i.order])
+	return out
+
+
+func test_begin_battle_runs_only_once() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 0): "B", Vector2i(3, 3): "1"})
+	var first: Array[BattleEvent] = []
+	RulesEnemyPhase.begin_battle(state, first)
+	assert_gt(first.size(), 0)
+	var before: Array[String] = BoardFixture.picture(state)
+	var telegraphs_before: Array[String] = _telegraph_lines(state)
+	var again: Array[BattleEvent] = []
+	RulesEnemyPhase.begin_battle(state, again)
+	assert_eq(again.size(), 0, "gọi lại thì không làm gì")
+	assert_eq(BoardFixture.picture(state), before)
+	assert_eq(_telegraph_lines(state), telegraphs_before, "đòn đã báo không bị xóa")
+	state.round_number = 2
+	state.telegraphs.clear()
+	state.enemy_intents.clear()
+	RulesEnemyPhase.begin_battle(state, again)
+	assert_eq(again.size(), 0, "giữa trận (hiệp 2) cũng không chạy")
+
+
+func test_charge_blocked_by_later_ally_is_not_telegraphed() -> void:
+	# Kỵ binh 101 ở 0,0 thấy đường thẳng xuống tướng 0,5 còn trống, nên chọn đứng yên. Bộ binh 102 (id lớn hơn, đi
+	# sau) đi tới 0,4 (ô kề tướng, Bắc hơn 1,5) nên chắn đường: chỉ còn đòn của 102, 101 không báo.
+	var state: BattleState = BoardFixture.state({Vector2i(0, 0): "K", Vector2i(1, 3): "B", Vector2i(0, 5): "1"})
+	var events: Array[BattleEvent] = []
+	RulesEnemyPhase.prepare(state, events)
+	assert_eq(state.unit_by_id(102).cell, Vector2i(0, 4), "Bộ binh đứng vào đường xung phong")
+	assert_eq(state.unit_by_id(101).cell, Vector2i(0, 0))
+	assert_eq(_telegraph_lines(state), ["102 0 (0, 1) #1"] as Array[String], "chỉ Bộ binh báo đòn, đánh số từ 1")
+	assert_eq(state.enemy_intents[0].reason, EnemyIntent.Reason.CLOSEST, "Kỵ binh bị chắn: không còn là CAN_HIT")
+	assert_eq(state.enemy_intents[0].order, 0)
+	assert_eq(state.enemy_intents[1].order, 1)
+	assert_eq(BoardFixture.describe(events), ["MOVED 102 1,3>1,4 WALK", "MOVED 102 1,4>0,4 WALK",
+		"TELEGRAPHED 102 0,4>0,5 #1"] as Array[String])
+	assert_eq(state.validate(), [] as Array[String])
