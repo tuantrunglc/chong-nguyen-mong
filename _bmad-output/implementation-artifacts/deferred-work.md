@@ -165,3 +165,9 @@
 - Story 3.7: Kỵ binh trúng làng, Bộ binh đánh ô làng hiện chỉ phát `ATTACKED` vào ô làng, chưa trừ Lòng dân.
 - Hết trận giữa pha địch: ô đỏ của đòn chưa ra vẫn vẽ theo bàn mới (ví dụ Kỵ binh có đường đỏ kéo qua ô tướng vừa gục, `anh/2-8-thua-sau.png`). Đúng với 2.7 AC 10 ("hết trận vẫn vẽ đòn còn lại"); xem lại khi làm hoạt ảnh 2.11 nếu gây hiểu nhầm.
 - Kịch bản "thắng thua cùng lúc" và "thắng" giữa pha địch chưa dựng được: ở 2.8 quân ra đòn cuối luôn còn sống. Thêm khi có hầm chông (3.4) hoặc tiếp viện (3.10).
+
+## Deferred from: code review of story 2-8-dich-ra-don-theo-thu-tu (2026-10-21)
+
+- Công cụ duyệt kịch bản (`scenario_viewer.gd`): kịch bản có cả `truoc.bao_don` và `sau.o_do` thì tối đa 3 bàn cạnh nhau, cột có thể lệch vì `LEFT_WIDTH` cộng cứng; xem lại khi có kịch bản thật như vậy.
+- Story 2.11 (hoạt ảnh): Kỵ binh xung phong không đổi ô lúc ra đòn (AC 5); hoạt ảnh tự suy đường lao từ `from_cell` tới `to_cell` của `ATTACKED`.
+- Story 3.5 (giới hạn hiệp): điểm chèn kiểm hiệp cuối nằm sau `_strike_all` và trước `round_number += 1`, để đòn cuối hiệp vẫn ra.

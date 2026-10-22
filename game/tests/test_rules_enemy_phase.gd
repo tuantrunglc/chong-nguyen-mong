@@ -209,6 +209,21 @@ func test_infantry_hits_general_before_new_round() -> void:
 	assert_eq(state.round_number, 2)
 
 
+## Sát thương lớn hơn máu còn lại: chỉ mất đúng số máu còn lại, quân gục (máu không xuống dưới 0).
+func test_damage_larger_than_hp_only_takes_remaining_hp() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "B", Vector2i(3, 4): "K", Vector2i(6, 6): "1"})
+	var values: Dictionary = {
+		UnitType.NGUYEN_KHOAI: {"mau": 3, "tam_di": 3, "sat_thuong": 2, "do_day": 1},
+		UnitType.BO_BINH: {"mau": 3, "tam_di": 2, "sat_thuong": 5},
+		UnitType.KY_BINH: {"mau": 2, "tam_di": 3, "sat_thuong": 1},
+	}
+	state.stats = Stats.new(values)
+	state.telegraphs.append(_cell_attack(state.unit_at(Vector2i(3, 3)).id, Vector2i(0, 1), 1))
+	assert_eq(_strike(state), ["ATTACKED 101 3,4", "DAMAGED 102 -2 ENEMY_STRIKE", "DIED 102 3,4", "ROUND_STARTED"] as Array[String],
+		"Kỵ binh 2 máu chịu sát thương 5: mất 2, không âm")
+	assert_null(state.unit_by_id(102))
+
+
 func test_cavalry_hits_granary_or_village_nobody_hurt() -> void:
 	for symbol: String in ["L", "D"]:
 		var state: BattleState = BoardFixture.state({Vector2i(0, 3): "K", Vector2i(5, 3): "1"},
