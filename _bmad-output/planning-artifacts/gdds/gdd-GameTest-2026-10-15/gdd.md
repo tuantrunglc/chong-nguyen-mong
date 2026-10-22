@@ -400,7 +400,7 @@ Ngày 2026-10-18: thêm giới hạn hiệp, làng và trận 4 "Bảo vệ làn
 - E5 Bản đồ roguelite
 - E6 Phần thưởng & mở khóa
 - E7 Trận Bạch Đằng (thủy triều, bãi cọc, thuyền)
-- E8 Hình ảnh & âm thanh
+- E8 Hình ảnh & âm thanh (gồm cả bảng thông tin tướng khi bấm vào tướng, chốt 2026-10-21, xem decision-log)
 - E8b Nội dung chữ (giới thiệu trận, sự kiện, mô tả tướng)
 - E9 Phát hành web
 

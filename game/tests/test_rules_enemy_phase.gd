@@ -295,7 +295,7 @@ func test_last_general_falls_mid_phase_stops_everything() -> void:
 	assert_eq(state.phase, BattleState.Phase.LOST)
 	assert_eq(state.round_number, 1)
 	assert_eq(state.unit_by_id(103).hp, 3, "Bộ binh 5,6 không trúng đòn 2")
-	assert_eq(state.telegraphs.size(), 2, "không chạy pha chuẩn bị: đòn còn nguyên")
+	assert_eq(state.telegraphs.size(), 0, "hết trận: bỏ đòn chưa ra, không chạy pha chuẩn bị")
 	assert_eq(state.validate(), [] as Array[String])
 
 # ---------- Hủy đòn (Story 2.9) ----------

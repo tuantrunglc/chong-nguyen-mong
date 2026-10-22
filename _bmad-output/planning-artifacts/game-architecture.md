@@ -855,6 +855,7 @@ Mọi luật đều đi qua đúng quy trình này. Không có ngoại lệ.
 - Quân Nguyên gục thì bị nhấc khỏi bàn. **Tướng gục cũng bị nhấc khỏi bàn**, không chiếm ô. **(mặc định)** **[KIỂM TRA KHI PLAYTEST E4]**: phương án thay thế là để xác lại làm vật cản.
 - Kiểm tra thắng/thua **sau mỗi sự kiện gây gục**, cả trong lượt người chơi lẫn trong pha địch. Cài đặt (Story 2.5): `RulesVictory.check` gọi ở **cuối `Rules.resolve`** (và sau từng đòn địch, Story 2.8), chỉ khi lệnh có `DIED` hoặc `DROWNED`; kết cục xét theo trạng thái cuối lệnh; ghi vào `BattleState.phase` (`WON`/`LOST`) và sự kiện `VICTORY`/`DEFEAT`.
 - Trận Tiêu diệt phải có ít nhất một quân Nguyên trong `quan`, nếu không `LevelLoader` báo lỗi (tác giả chốt 2026-10-20, review Story 2.5): bàn trống quân Nguyên thì lần gục đầu tiên cho thắng ngay.
+- **Hết trận thì bỏ đòn đã báo còn lại** (tác giả chốt 2026-10-22, Story 2.9): `Rules.resolve` xóa `telegraphs` khi `phase` là `WON`/`LOST`, nên ô đỏ và số thứ tự không còn nằm trên bàn sau bảng thắng/thua. Thay cho hành vi cũ của Story 2.7 (vẫn vẽ đòn còn lại sau khi hết trận).
 - **Hết trận thì khóa** (tác giả chốt 2026-10-20): khi `phase` là `WON`/`LOST`, mọi lệnh và cả Hủy bị từ chối với `Reject.BATTLE_OVER` (mã kịch bản `tran_da_het`).
 - Thắng và thua xảy ra cùng lúc (ví dụ quân Nguyên cuối cùng và tướng cuối cùng cùng gục vì va chạm): **thắng được ưu tiên**. **(mặc định)**
 - Giữ ải: quân Nguyên vào ô ải **bằng bất kỳ cách nào**, kể cả do bị người chơi kéo vào, thì thua ngay. **(mặc định)**

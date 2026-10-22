@@ -4,7 +4,7 @@ baseline_commit: 3ca5e12
 
 # Story 2.9: Đòn dịch theo và hủy đòn
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -141,10 +141,10 @@ Phân biệt ba mã bằng `telegraph.kind` + `state.unit_by_id` + `state.in_bou
 
 ### Review Findings
 
-- [ ] [Review][Decision] Ba kịch bản đã bị sửa sau khi tác giả duyệt — bản duyệt `4db7b28` có `don_dich_theo_khi_day` với Khoái 3,5 và máu 3,2 = 2, nhưng lệnh đánh khi đó bị từ chối `khong_ke` nên kịch bản không chạy được. Bản đang dùng (commit `e8ad1e8`) đặt Khoái 3,4, máu 3,2 = 1; Luật M3 nói kịch bản phải được tác giả duyệt lại. [game/tests/kich_ban/don_dich/don_dich_theo_khi_day.json]
-- [ ] [Review][Decision] AC 8 đòi 6 ca nhưng mới có 5: thiếu ca "chủ đòn gục do đòn số trước" (đòn #1 giết chủ đòn #2, #2 bị hủy, mục tiêu không mất máu). GUT đã có (`test_attack_killing_next_owner_cancels_its_attack`) nhưng kịch bản thì chưa. [game/tests/kich_ban/don_dich/]
-- [ ] [Review][Decision] Không kịch bản nào chạy tới lúc ra đòn (`ket_thuc_luot`), nên AC 3/4/5 "không gây sát thương" chỉ được GUT chứng minh, không phải kịch bản. [game/tests/kich_ban/don_dich/huy_don_*.json]
-- [ ] [Review][Decision] Trận hết giữa pha địch: các đòn chưa ra không phát `TELEGRAPH_CANCELLED`, ô đỏ của chúng còn trên bàn sau khi thua (đã ghi ở `deferred-work.md` từ Story 2.8). Cần quyết: dọn `telegraphs` khi trận hết, hay giữ như hiện tại.
+- [x] [Review][Decision] Ba kịch bản đã bị sửa sau khi tác giả duyệt — bản duyệt `4db7b28` có `don_dich_theo_khi_day` với Khoái 3,5 và máu 3,2 = 2, nhưng lệnh đánh khi đó bị từ chối `khong_ke` nên kịch bản không chạy được. Bản đang dùng (commit `e8ad1e8`) đặt Khoái 3,4, máu 3,2 = 1; Luật M3 nói kịch bản phải được tác giả duyệt lại. [game/tests/kich_ban/don_dich/don_dich_theo_khi_day.json]
+- [x] [Review][Decision] AC 8 đòi 6 ca nhưng mới có 5 — đã thêm `huy_don_khi_dong_doi_giet`: thiếu ca "chủ đòn gục do đòn số trước" (đòn #1 giết chủ đòn #2, #2 bị hủy, mục tiêu không mất máu). GUT đã có (`test_attack_killing_next_owner_cancels_its_attack`) nhưng kịch bản thì chưa. [game/tests/kich_ban/don_dich/]
+- [x] [Review][Decision] Không kịch bản nào chạy tới lúc ra đòn — đã có `huy_don_khi_dong_doi_giet` chạy `ket_thuc_luot`; ba kịch bản hủy còn lại không thêm được: bàn một quân Nguyên thì giết nó là thắng (không Kết thúc lượt được), còn `huy_don_giu_so_thu_tu` thêm Kết thúc lượt sẽ mất chính điều cần chứng minh (đòn số 2 giữ số) (`ket_thuc_luot`), nên AC 3/4/5 "không gây sát thương" chỉ được GUT chứng minh, không phải kịch bản. [game/tests/kich_ban/don_dich/huy_don_*.json]
+- [x] [Review][Decision] Trận hết giữa pha địch — tác giả chốt dọn: `Rules.resolve` xóa `telegraphs` khi `phase` là `WON`/`LOST`; ghi vào `game-architecture.md` và `project-context.md`, thay hành vi cũ của Story 2.7.
 - [x] [Review][Patch] `cancel_reason` tính lại ô đích thay vì `target_cell`, và `_strike_all` phát sự kiện cả khi lý do là `NONE` — đã dùng `target_cell`, chỉ phát khi lý do khác `NONE`.
 - [x] [Review][Patch] Ô chủ đòn khi đã gục dùng `Vector2i.ZERO`, trùng ô thật (0,0) — đã đổi sang `Telegraph.NO_CELL`, `describe` in thêm ô chủ đòn.
 - [x] [Review][Patch] `describe` và `test_determinism.event_text` bỏ sót trường mới nên test không bắt được lý do/ô sai — đã in `from_cell` và `cancel`.
@@ -170,6 +170,8 @@ deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
 - `BattleEvent.TELEGRAPH_CANCELLED` mang `unit_id` (chủ đòn), `from_cell` (ô chủ đòn lúc hủy, ZERO nếu đã gục), `amount` (số thứ tự), `cancel` (OUT_OF_BOARD / OWNER_DIED / NO_TARGET).
 - `TelegraphMarks.cancel_reason` là chỗ duy nhất phân lý do; `RulesEnemyPhase._strike_all` chỉ đọc nó.
 - **Chưa chụp ảnh (5.1):** `capture_screenshot` của GoPeak trả `Failed to save screenshot as PNG: 7` trong môi trường phiên này (addon Godot lưu file vào đường dẫn không ghi được). Game vẫn chạy được (`--dev`, OpenGL phần mềm) và MCP runtime mở cổng 7777. Tác giả kiểm tay theo hướng dẫn dưới đây.
+
+**Sau code review (2026-10-22):** 7 finding đã sửa (lý do hủy, ô chủ đòn, `describe`, `test_determinism`, test giao diện, ca va chạm, chú thích); tác giả duyệt lại bản kịch bản đã sửa và chốt dọn ô đỏ khi hết trận. Thêm kịch bản `huy_don_khi_dong_doi_giet` (đòn số 1 giết chủ đòn số 2). Test: 566/566, 81 kịch bản.
 
 **Hướng dẫn tác giả tự test (đã chạy trên game trước khi ghi):**
 

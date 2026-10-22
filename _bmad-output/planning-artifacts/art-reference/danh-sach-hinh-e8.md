@@ -42,6 +42,8 @@ Lập 2026-10-19. Dùng khi làm E8 (Hình ảnh & âm thanh). Danh sách âm th
 
 ## A. Địa hình (P1)
 
+**Tình trạng 2026-10-21:** đã có bản thử đủ A1–A8 (xem `ban-giao-asset.md`, mục Nhóm A). Chưa đổi về bảng màu, chưa sửa tay, chưa đưa vào `game/assets/`.
+
 Nguồn đề xuất: gói CC0 (ví dụ "Ninja Adventure", Kenney), đổi màu theo bảng chung.
 
 | # | Ô | Ký hiệu | Kích thước | Biến thể, trạng thái | Ghi chú |
@@ -109,6 +111,8 @@ Mỗi quân cần (khung 64×64, hai phe tách màu rõ: Đại Việt đỏ, Ng
 | D7 | Con trỏ chuột | Thường, chọn được, đánh được |
 
 ## E. Chân dung (P3)
+
+**Tình trạng 2026-10-21:** đã có bản thử 96×96 cho E1–E3 (`img/chan_dung/`). **Tác giả chọn:** Khoái phương án 3, Lão phương án 2, Dư phương án 2 (chép thành `chot_khoai.png`, `chot_lao.png`, `chot_du.png`).
 
 | # | Nhân vật | Kích thước | Ghi chú |
 |---|---|---|---|

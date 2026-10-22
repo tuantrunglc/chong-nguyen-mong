@@ -15,6 +15,15 @@ Cập nhật 2026-10-20. Đọc file này khi bắt đầu một phiên mới đ
 - **Chốt kiểu Đại Việt** theo `tu-lieu-trang-phuc-dai-viet.md` (búi tóc, khăn đỏ, giáp ngực đen viền đồng, trần tay, chân đất; Dư đội nón Ma Lôi chóp nhọn). Ba tướng vẽ lại bằng v3 cho cùng nét.
 - **Đồng ý cả hai đề xuất của AI:** hình không vẽ bóng đổ, game thêm bóng, ánh sáng từ trên bên trái; Phạm Ngũ Lão cầm giáo dựng đứng.
 
+## Tác giả chốt thêm (2026-10-21)
+
+- **Nền bàn cờ: trộn.** Trận trên đất liền và sông dùng ô ghép Tier 1 (`create_tiles_pro`, 15 lượt một bộ). Trận trên biển (như Vân Đồn) vẽ liền một tấm. Vật trên bàn (thuyền, kho, nhà) vẫn là hình rời. Mục 3 dưới đây coi như đã quyết.
+
+## Tác giả chốt thêm (2026-10-21)
+
+- Chân dung: Khoái phương án 3, Lão 2, Dư 2 (`img/chan_dung/chot_*.png`).
+- **Bảng thông tin tướng gộp vào E8**, nội dung như ảnh mẫu `img/thu-bang-thong-tin-*.png`. Cách ghi chỉ số của Lão và giai thoại "ngồi đan sọt" tạm giữ, xét lại khi làm E8. Đã ghi vào `decision-log.md` của GDD.
+
 ## Còn chờ tác giả
 
 1. **Có lưu ảnh Gemini thành `mau-03-bach-dang.png`** (kèm ghi chú như hai ảnh mẫu trước) không.
@@ -42,7 +51,7 @@ Cập nhật 2026-10-20. Đọc file này khi bắt đầu một phiên mới đ
 ## PixelLab MCP
 
 - **Cài:** đã chạy `claude mcp add pixellab https://api.pixellab.ai/mcp -t http -H "Authorization: Bearer …"` (cấu hình local của dự án, trong `~/.claude.json`). Từ phiên mới, các công cụ `mcp__pixellab__*` có sẵn. Nếu không thấy, tìm bằng ToolSearch với từ khóa "pixellab".
-- **Tài khoản:** gói dùng thử miễn phí, 40 lượt, **còn 11** (2026-10-20, sau phiên 2). Mỗi ngày được thêm lượt thưởng. Kiểm bằng `get_balance`. **Gói miễn phí chỉ chạy 1 việc một lúc.**
+- **Tài khoản:** tác giả lên **Tier 1** ngày 2026-10-20: 2.000 lượt mỗi tháng, làm mới ngày 20 hằng tháng, chạy 8 việc cùng lúc. **Còn 1.825** sau khi tạo Bộ binh Nguyên v3 (2026-10-22). Kiểm bằng `get_balance`.
 - **Chi phí đã đo:**
   - `create_character` mode standard: 1 lượt.
   - `create_image_pixen`: 1 lượt.
@@ -84,6 +93,13 @@ Cập nhật 2026-10-20. Đọc file này khi bắt đầu một phiên mới đ
 | Thuyền chiến Đại Việt lần 1 | `create_image_pixen` 64×64 nhìn thẳng từ trên (`van_don/_thuyen_dai_viet_hong.png`) | Không đạt: mái chèo xanh như lông chim, khác góc nhìn thuyền lương |
 | Thuyền chiến Đại Việt, chiến thuyền Nguyên | `create_image_pixflux` lấy **thuyền lương làm khuôn** (`init_image_url` = link tải thuyền lương, strength 90) (`van_don/thuyen_dai_viet.png`, `thuyen_chien_nguyen.png`) | Đạt: cùng góc nhìn, cùng nét với thuyền lương. Thuyền Đại Việt thân đỏ sẫm, buồm đen, mái chèo; thuyền Nguyên buồm xám xanh, khiên dọc mạn. Thuyền Đại Việt hơi mảnh, nhìn xa khó thấy màu đỏ. **Cách lấy hình có sẵn làm khuôn giữ đồng bộ tốt, nên dùng cho mọi biến thể** |
 | Viền quanh bàn | `cong-cu/them_vien.py`: phản chiếu mép tranh ra ngoài 48 px rồi làm tối | Sửa được chỗ đầu quân hàng trên, vũ khí ở cột ngoài cùng lọt ra ngoài bàn. Phản chiếu nên viền lặp lại hình đảo ở mép; về sau nên thay bằng viền vẽ riêng (A8 trong `danh-sach-hinh-e8.md`) |
+| **Tier 1:** bộ ô cỏ–sông, cát–biển | `create_tiles_pro`, `square_topdown`, size 64, view `top-down`, `tile_feature: tileset`, `outline_mode: segmentation`. **15 lượt mỗi bộ**, 16 ô ghép theo góc. Hình ở `img/pixellab-thu/o_tier1/`; lát lên bàn bằng `cong-cu/lat_o.py` (lưới lệch nửa ô) | **Cỏ–sông: đạt rất tốt** (`img/thu-tier1-co-song-tren-ban-phong-to.png`): bờ bùn uốn mềm, ô lội nối hai bờ tự nhiên, không lộ đường nối. **Cát–biển: bãi đẹp nhưng biển sâu quá tối, phẳng**; đảo đá đặt lên như khối thì thiếu viền sóng nên trông như dán (`img/thu-tier1-cat-bien-tren-ban.png`). Biển Vân Đồn vẫn nên dùng bản vẽ liền |
+| **Tier 1:** ô lẻ | `create_tiles_pro` 6 loại đánh số, 15 lượt, ra 16 ô (`o_tier1/o_le/`) | Cỏ 3 kiểu, đất, ruộng lúa ngập nước, bùn, nước, hố chông. Đẹp, dùng làm ô nền và ô đặc biệt. Hố chông dán nguyên ô nên viền vuông |
+| **Tier 1:** áo Dư | `inpaint_image` vùng thân (16,28, 30×20) trên hình hướng nam, 10 lượt (`du_v3/south_ao_do.png`) | Đạt: áo đỏ sẫm, thắt lưng đỏ, phần khác giữ nguyên. Mới sửa hướng nam; 7 hướng còn lại phải sửa từng hướng (10 lượt mỗi hướng) hoặc vẽ lại cả nhân vật bằng v3 (2 lượt) |
+| **Nhóm A** (2026-10-21), hình ở `img/pixellab-thu/nhom_a/`, ảnh bàn `img/thu-nhom-a-tren-ban-phong-to.png` | Rừng 2, làng 2, kho cháy: `create_image_pixflux` lấy hình cũ làm khuôn (upload rồi `init_image_url`). Strength 60 ra lệch kiểu (làng thành nhà khung gỗ, rừng xanh tươi); **strength 110 giữ đúng kiểu**; kho cháy cần strength 25 mới bỏ được mái. Khói: `create_image_pixen` 64×96 vẽ riêng, đặt chồng lên nhà (pixflux có nền trong suốt xóa mất khói). Ô ải: `create_tiles_pro` view `top-down` (view `high top-down` ép mặt trên còn 32 px, sai tỉ lệ bàn). Hầm chông và viền: `create_tiles_pro` với `style_images` = ô cỏ của bộ cỏ–sông nên cùng màu. Ghép nền: `cong-cu/nen_dat_lien.py`; biến thể từng ô: `mock/o_rieng.json` | Đạt: rừng 2 (`rung_v2b`), làng 2 (`lang_v2b`, còn ống khói trên mái phải xóa tay), làng bị trúng (`lang_khoi_ghep` = làng + `khoi`), kho cháy (`kho_chay_b`), ô ải (`o_ai2/`, 4 kiểu: đá xếp, đất khung gỗ, đá phiến, có cọc rào), hầm chông viền cỏ và hố bẫy phủ lá (`vien_chong/` 0–3, 12–15), viền rừng rậm, đá, lau (`vien_chong/` 4–11). Ô hầm chông còn hơi lộ khung vuông |
+| **Avatar ba tướng** (2026-10-21) | `create_image_pro` 160×160, 3 hình tham chiếu (3 tướng v3), 15 lượt, ra 4 phương án (`img/avatar/`, bản 640 px để làm avatar) | Đạt cả 4. Phương án 3 đẹp nhất (giáo dựng đứng, cờ đỏ, hoàng hôn); phương án 2 Lão cầm giáo chéo |
+| **Chân dung E1–E3** (2026-10-21) | `create_image_pro` 96×96, tham chiếu = avatar phương án 3 (nét vẽ, mặt) + hình tướng v3 (trang phục), 10 lượt mỗi tướng, ra 4 phương án mỗi tướng (`img/chan_dung/`, bảng `_tat_ca.png`) | Đạt: cùng nét với avatar, nền nâu tối đồng bộ. **Tác giả chọn Khoái 3, Lão 2, Dư 2** (`img/chan_dung/chot_*.png`). Ảnh mẫu bảng thông tin khi bấm vào tướng: `img/thu-bang-thong-tin-{khoai,lao,du}.png` (chỉ ghép ảnh, chưa có trong game; nội dung bảng chờ tác giả chốt) |
+| **Bộ binh Nguyên v3** (2026-10-22) | `create_character` mode **v3**, size 64, high top-down, 2 lượt, id `1d7e8b91-2b67-4c5f-aa61-beee8d934860`. Hình gốc ở `img/pixellab-thu/nguyen_v3/`, bản tối ưu ở `img/pixellab-thu/toi_uu/nguyen_v3/` | **Đạt rất tốt**: Đủ 8 hướng khung 64×64, chiều cao 59 px (đồng bộ tuyệt đối với 3 tướng), cầm đao cong Mông Cổ và khiên tròn, mũ viền lông, giáp phiến da nâu, không có màu đỏ. Đã lượng tử hóa 100% về Resurrect 64 và viền #2e222f. Thay thế hoàn toàn bản v2 cũ |
 
 - **Ảnh chụp bàn phiên 2:** `img/thu-pixellab-tren-ban-v2.png` (ô nền vẫn là hình tạm vẽ bằng code). Ảnh `img/thu-dai-viet-tren-ban.png` thêm `khoai.png`, `du.png` vào `mock/`; bản chép sửa `unit_token.gd` chọn hình theo `unit_type` (Khoái, Dư) rồi mới theo phe. Lính Nguyên cao hơn 64 px nên khi chụp, bản chép sửa `unit_token.gd` để neo chân hình theo đáy: `Vector2(-32, -58 - (tex.get_height() - 64))`; hình cắt ở `(16, 11, 80, 84)` của khung 92×92.
 - **Đổi màu:** đổi về Resurrect 64 bằng cách thay mỗi màu bằng màu gần nhất làm hỏng màu (cỏ thành hồng xám). Nên thử `reduce_colors` của PixelLab (0,1 lượt, nhận `palette_image`) hoặc sửa tay.

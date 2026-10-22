@@ -21,6 +21,10 @@ static func resolve(state: BattleState, command: Command) -> Array[BattleEvent]:
 	# Lệnh bị từ chối thì không có gì đổi, nên không kiểm kết cục.
 	if not _was_rejected(events):
 		RulesVictory.check(state, events)
+	# Hết trận thì bỏ đòn đã báo còn lại: không còn lượt nào để chúng ra đòn, giữ lại thì ô đỏ nằm trên
+	# bàn sau bảng thắng/thua (tác giả chốt 2026-10-22, Story 2.9).
+	if is_battle_over(state):
+		state.telegraphs.clear()
 	return events
 
 
