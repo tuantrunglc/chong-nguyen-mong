@@ -4,7 +4,7 @@ baseline_commit: 47651f3
 
 # Story 2.15: Cung kỵ (cắt được nếu trễ)
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -65,39 +65,39 @@ tôi muốn có Cung kỵ yếu máu nhưng bắn xa,
   - [x] 2.4 Test GUT cho hai chỗ trên (xem mục Testing): `test_scenario_loader.gd` (thêm ca Cung kỵ), `test_battle_state.gd` (hình dạng đòn). **Thêm `tam_ban_gan`/`tam_ban_xa` cho CUNG_KY trong `_stats()` của cả `test_battle_state.gd` lẫn `test_scenario_loader.gd`** — `validate()` gọi `Stats.value` nên thiếu khóa là assert nổ ngay.
   - [x] 2.5 Chạy `tools/test.sh`: phải **xanh** (kịch bản Task 1 lúc này còn `da_duyet: false` và chưa đạt — bình thường; điều cần là không còn lỗi "sai định dạng"). Commit riêng phần định dạng: `Mở định dạng đòn bắn xa (Story 2.15)`.
 
-- [ ] **Task 3: Tác giả xem và duyệt kịch bản** (AC: 3)
-  - [ ] 3.1 `tools/xem_kich_ban.sh ai` rồi `tools/xem_kich_ban.sh don_dich`, đưa tác giả xem **bàn trước / bàn sau** cùng `mo_ta`. **Dừng, chờ tác giả duyệt.**
-  - [ ] 3.2 Chỉ khi tác giả nói "duyệt": đổi `"da_duyet": true` cho đúng các file đã duyệt. Không đánh dấu file chưa được xem.
-  - [ ] 3.3 Commit riêng phần kịch bản đã duyệt (mẫu commit của 2.8/2.9).
+- [x] **Task 3: Tác giả xem và duyệt kịch bản** (AC: 3)
+  - [x] 3.1 `tools/xem_kich_ban.sh ai` rồi `tools/xem_kich_ban.sh don_dich`, đưa tác giả xem **bàn trước / bàn sau** cùng `mo_ta`. **Dừng, chờ tác giả duyệt.**
+  - [x] 3.2 Chỉ khi tác giả nói "duyệt": đổi `"da_duyet": true` cho đúng các file đã duyệt. Không đánh dấu file chưa được xem.
+  - [x] 3.3 Commit riêng phần kịch bản đã duyệt (mẫu commit của 2.8/2.9).
 
-- [ ] **Task 4: Chứng minh kịch bản trượt đúng lý do** (AC: 1, 2)
-  - [ ] 4.1 `tools/test.sh` (hoặc chỉ file `test_scenarios.gd`): **trước Task 5**, các ca `ai/cung_ky_*` phải trượt với lý do thiếu đòn (`sau: đòn 1 mong đợi quân ở 3,3 đánh ô 3,6, thực tế không có đòn 1`), không phải lỗi định dạng. Hai ca `don_dich/ra_don_cung_ky_trung_tuong` và `don_dich/ra_don_cung_ky_bay_qua_quan` cũng trượt vì phần chuẩn bị sau khi ra đòn chưa có đòn của Cung kỵ.
-  - [ ] 4.2 Ba ca `o_do_cung_ky_khong_di_theo_tuong`, `don_cung_ky_dich_theo_khi_keo`, `huy_don_cung_ky_khi_chu_don_guc` **đạt ngay sau Task 2**. Đó là điều mong đợi: chúng chốt hành vi **đã có** của đòn `CELL` (ô đỏ gắn với ô, dịch theo chủ đòn, hủy khi chủ gục), không chờ luật mới. **Đừng sửa kịch bản cho nó trượt.**
-  - [ ] 4.3 Ghi vào Debug Log dòng trượt đầu tiên của một kịch bản `ai/` và của một kịch bản `don_dich/`.
+- [x] **Task 4: Chứng minh kịch bản trượt đúng lý do** (AC: 1, 2)
+  - [x] 4.1 `tools/test.sh` (hoặc chỉ file `test_scenarios.gd`): **trước Task 5**, các ca `ai/cung_ky_*` phải trượt với lý do thiếu đòn (`sau: đòn 1 mong đợi quân ở 3,3 đánh ô 3,6, thực tế không có đòn 1`), không phải lỗi định dạng. Hai ca `don_dich/ra_don_cung_ky_trung_tuong` và `don_dich/ra_don_cung_ky_bay_qua_quan` cũng trượt vì phần chuẩn bị sau khi ra đòn chưa có đòn của Cung kỵ.
+  - [x] 4.2 Ba ca `o_do_cung_ky_khong_di_theo_tuong`, `don_cung_ky_dich_theo_khi_keo`, `huy_don_cung_ky_khi_chu_don_guc` **đạt ngay sau Task 2**. Đó là điều mong đợi: chúng chốt hành vi **đã có** của đòn `CELL` (ô đỏ gắn với ô, dịch theo chủ đòn, hủy khi chủ gục), không chờ luật mới. **Đừng sửa kịch bản cho nó trượt.**
+  - [x] 4.3 Ghi vào Debug Log dòng trượt đầu tiên của một kịch bản `ai/` và của một kịch bản `don_dich/`.
 
-- [ ] **Task 5: Luật AI + báo đòn** (AC: 1, 2)
-  - [ ] 5.1 `game/src/core/enemy_ai.gd`:
+- [x] **Task 5: Luật AI + báo đòn** (AC: 1, 2)
+  - [x] 5.1 `game/src/core/enemy_ai.gd`:
     - `_has_attack_rule`: thêm `UnitType.CUNG_KY`.
     - `can_hit_from`, nhánh `UnitType.CUNG_KY`: `Grid.straight_dir(cell, target) != Vector2i.ZERO` và `Grid.distance` trong `[stats.shoot_min_range, stats.shoot_max_range]`. **Không** xét quân hay địa hình ở giữa (tên bay qua; chặn tên là Story 3.1).
     - `telegraph_for`: **không sửa** — nhánh mặc định đã trả `CELL` với `target - stand`.
     - Cập nhật comment đầu file: bỏ câu "luật Cung kỵ (2.15) thêm nhánh ở đây", ghi luật Cung kỵ.
-  - [ ] 5.2 `game/src/core/enemy_intent.gd`: comment `Reason.NO_ATTACK_RULE` — từ story này **không loại quân nào** dùng; giữ enum (F3 và bản dịch còn tham chiếu), đừng xoá.
-  - [ ] 5.3 `game/src/core/telegraph.gd`: comment `CELL` đã đúng ("Bộ binh; Cung kỵ ở Story 2.15") — chỉ sửa nếu thấy sai.
-  - [ ] 5.4 `TelegraphMarks` **không sửa**: `path_cells` của `CELL` chỉ trả ô đích, `hit_cell` = ô đích, nên "tên bay qua quân" và "ô đỏ chỉ ở ô đích" đã đúng sẵn. Nếu định sửa file này, dừng lại: đó là dấu hiệu hiểu sai luật.
+  - [x] 5.2 `game/src/core/enemy_intent.gd`: comment `Reason.NO_ATTACK_RULE` — từ story này **không loại quân nào** dùng; giữ enum (F3 và bản dịch còn tham chiếu), đừng xoá.
+  - [x] 5.3 `game/src/core/telegraph.gd`: comment `CELL` đã đúng ("Bộ binh; Cung kỵ ở Story 2.15") — chỉ sửa nếu thấy sai.
+  - [x] 5.4 `TelegraphMarks` **không sửa**: `path_cells` của `CELL` chỉ trả ô đích, `hit_cell` = ô đích, nên "tên bay qua quân" và "ô đỏ chỉ ở ô đích" đã đúng sẵn. Nếu định sửa file này, dừng lại: đó là dấu hiệu hiểu sai luật.
 
-- [ ] **Task 6: Sửa test cũ đang khẳng định "Cung kỵ đứng yên"** (AC: 1, 3)
-  - [ ] 6.1 `game/tests/test_enemy_ai.gd::test_archer_has_no_attack_rule_yet` — thay bằng các test mới: đứng yên bắn (cách 3) → `CAN_HIT`; đi tới ô bắn được (cách 6) → `CAN_HIT` + ô đứng đúng; đứng kề → `CLOSEST`, không báo đòn; `can_hit_from` = true khi có quân đứng giữa.
-  - [ ] 6.2 `game/tests/test_ai_intent_overlay.gd::test_no_enemy_and_archer` — dòng của Cung kỵ đổi từ "chưa có luật đòn cho loại quân này" sang "đứng đây vì đánh trúng được · đòn số 1" và ô đứng mới; lấy câu đúng bằng cách chạy test rồi dán, **không đoán**.
-  - [ ] 6.3 `game/tests/test_battle_state.gd`: ca `(0,2)` với chủ đòn 101 là Bộ binh vẫn phải ra câu cũ; thêm ca Cung kỵ (xem Testing).
-  - [ ] 6.4 Rà `grep -rn "chưa có luật đòn\|NO_ATTACK_RULE" game/` — chỗ nào còn nói Cung kỵ chưa có luật thì sửa.
+- [x] **Task 6: Sửa test cũ đang khẳng định "Cung kỵ đứng yên"** (AC: 1, 3)
+  - [x] 6.1 `game/tests/test_enemy_ai.gd::test_archer_has_no_attack_rule_yet` — thay bằng các test mới: đứng yên bắn (cách 3) → `CAN_HIT`; đi tới ô bắn được (cách 6) → `CAN_HIT` + ô đứng đúng; đứng kề → `CLOSEST`, không báo đòn; `can_hit_from` = true khi có quân đứng giữa.
+  - [x] 6.2 `game/tests/test_ai_intent_overlay.gd::test_no_enemy_and_archer` — dòng của Cung kỵ đổi từ "chưa có luật đòn cho loại quân này" sang "đứng đây vì đánh trúng được · đòn số 1" và ô đứng mới; lấy câu đúng bằng cách chạy test rồi dán, **không đoán**.
+  - [x] 6.3 `game/tests/test_battle_state.gd`: ca `(0,2)` với chủ đòn 101 là Bộ binh vẫn phải ra câu cũ; thêm ca Cung kỵ (xem Testing).
+  - [x] 6.4 Rà `grep -rn "chưa có luật đòn\|NO_ATTACK_RULE" game/` — chỗ nào còn nói Cung kỵ chưa có luật thì sửa.
 
-- [ ] **Task 7: Xanh, kiểm ngược, chạy thử** (AC: 1, 2, 3, 5)
-  - [ ] 7.1 `tools/test.sh` xanh; trong phiên AI dùng `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh`.
-  - [ ] 7.2 Kiểm ngược: (a) đổi `tam_ban_gan` thành 3 trong một bản sao `chi_so.json` → kịch bản bắn phải trượt; (b) đổi `o` của một kịch bản sang ô kề → bộ nạp phải báo lỗi; (c) bỏ `_has_attack_rule` CUNG_KY → kịch bản `ai/` trượt. Khôi phục, ghi Debug Log.
-  - [ ] 7.3 Chạy tay: `tools/chay.sh --tran=thu_ba_tuong --dev` (bàn này **đã có** `C` ở (5,2)) — Cung kỵ phải đi và báo đòn; vẽ ô đỏ đúng, số thứ tự đúng. Chụp màn hình nếu GoPeak nối được; không thì ghi "chưa chụp".
-  - [ ] 7.4 Ghi vào Completion Notes: story này **không** đụng trận 3/trận 6 (chưa có), nên AC 4 chỉ là ghi chú; và **không** thêm chặn tên (AC 5).
+- [x] **Task 7: Xanh, kiểm ngược, chạy thử** (AC: 1, 2, 3, 5)
+  - [x] 7.1 `tools/test.sh` xanh; trong phiên AI dùng `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh`.
+  - [x] 7.2 Kiểm ngược: (a) đổi `tam_ban_gan` thành 3 trong một bản sao `chi_so.json` → kịch bản bắn phải trượt; (b) đổi `o` của một kịch bản sang ô kề → bộ nạp phải báo lỗi; (c) bỏ `_has_attack_rule` CUNG_KY → kịch bản `ai/` trượt. Khôi phục, ghi Debug Log.
+  - [x] 7.3 Chạy tay: `tools/chay.sh --tran=thu_ba_tuong --dev` (bàn này **đã có** `C` ở (5,2)) — Cung kỵ phải đi và báo đòn; vẽ ô đỏ đúng, số thứ tự đúng. Chụp màn hình nếu GoPeak nối được; không thì ghi "chưa chụp".
+  - [x] 7.4 Ghi vào Completion Notes: story này **không** đụng trận 3/trận 6 (chưa có), nên AC 4 chỉ là ghi chú; và **không** thêm chặn tên (AC 5).
 
-- [ ] **Task 8: Commit** (AC: 3)
+- [x] **Task 8: Commit** (AC: 3)
   - [ ] 8.1 Commit kịch bản đã duyệt (Task 3) và phần luật (Task 5–7) **riêng**; phần định dạng đã commit ở Task 2.5. Lời tiếng Việt, kết `(Story 2.15)`. Không gộp `img/` và thay đổi của story khác.
 
 ## Dev Notes
