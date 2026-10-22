@@ -14,6 +14,14 @@ const NOTHING_TO_UNDO_REASON: String = "không còn nước đi nào để hủy
 var _state: BattleState = null
 ## Bản chụp ngay trước nước đi gần nhất; null là không có gì để hủy. Chỉ giữ một (tác giả chốt 2026-10-18).
 var _undo_snapshot: BattleState = null
+## Bàn đầu hiệp và các lệnh từ đó tới giờ, cho báo cáo F2 (Story 2.13). Phát lại hai thứ này ra đúng bàn đang sống.
+## Mục lệnh: {"lenh": "di"|"danh"|"ket_thuc_luot"|"huy", "tuong": int, "o": Vector2i, "tu_choi": Reject}.
+var _round_start: BattleState = null
+var _round_commands: Array[Dictionary] = []
+## Hiệp trước, giữ lại khi vừa kết thúc lượt: F2 rơi đúng lúc pha địch vừa chạy xong (chưa ra lệnh nào ở hiệp mới)
+## thì báo cáo vẫn phải phát lại được pha địch, nên dùng bàn đầu hiệp cũ + lệnh, gồm cả `ket_thuc_luot`.
+var _prev_round_start: BattleState = null
+var _prev_round_commands: Array[Dictionary] = []
 
 
 ## telegraphs: đòn đã báo sẵn (chỉ bộ chạy kịch bản dùng, "truoc.bao_don", Story 2.8); chép sâu, theo số thứ tự.
@@ -22,6 +30,11 @@ func start(level: LevelData, stats: Stats, telegraphs: Array[Telegraph] = []) ->
 	for t: Telegraph in telegraphs:
 		_state.telegraphs.append(t.clone())
 	_undo_snapshot = null
+	# Đầu hiệp 1 là bàn "truoc" của trận; begin() sẽ dời mốc sang bàn sau pha chuẩn bị (Story 2.13).
+	_round_start = _state.clone()
+	_round_commands = []
+	_prev_round_start = null
+	_prev_round_commands = []
 	# Bộ nạp đã chặn các lỗi này; đây chỉ là lưới an toàn.
 	for problem: String in _state.validate():
 		Log.error("battle", problem)
@@ -74,6 +87,7 @@ func submit(command: Command) -> Array[BattleEvent]:
 	var rejected: BattleEvent = _rejection(events)
 	if rejected != null:
 		Log.debug("battle", "lệnh bị từ chối: %s" % rejected.reason)
+		_record(command, rejected.reject)
 		return events
 	var problems: Array[String] = _state.validate()
 	if not problems.is_empty():
@@ -92,6 +106,11 @@ func submit(command: Command) -> Array[BattleEvent]:
 			_undo_snapshot = null
 		Command.Kind.BEGIN_BATTLE:
 			_undo_snapshot = null
+	_record(command, BattleEvent.Reject.NONE)
+	# Sang hiệp (hoặc mở trận): mốc "đầu hiệp" dời sang bàn mới. Mở trận không giữ hiệp trước (bàn trước khi quân
+	# Nguyên đi không phải thứ người chơi báo lỗi).
+	if command.kind == Command.Kind.BEGIN_BATTLE or command.kind == Command.Kind.END_TURN:
+		_start_round(command.kind == Command.Kind.END_TURN)
 	events_resolved.emit(events, _state.clone())
 	return events
 
@@ -101,13 +120,16 @@ func submit(command: Command) -> Array[BattleEvent]:
 func undo() -> Array[BattleEvent]:
 	if Rules.is_battle_over(_state):
 		Log.debug("battle", "hủy: trận đã kết thúc")
+		_record_undo(BattleEvent.Reject.BATTLE_OVER)
 		return [BattleEvent.rejected(BattleEvent.Reject.BATTLE_OVER, "trận đã kết thúc")]
 	if _undo_snapshot == null:
 		Log.debug("battle", "hủy: %s" % NOTHING_TO_UNDO_REASON)
+		_record_undo(BattleEvent.Reject.NOTHING_TO_UNDO)
 		return [BattleEvent.rejected(BattleEvent.Reject.NOTHING_TO_UNDO, NOTHING_TO_UNDO_REASON)]
 	# Bản chụp là bản riêng, không ai khác giữ, nên gán thẳng được.
 	_state = _undo_snapshot
 	_undo_snapshot = null
+	_record_undo(BattleEvent.Reject.NONE)
 	Log.debug("battle", "hủy nước đi gần nhất")
 	var events: Array[BattleEvent] = []
 	events_resolved.emit(events, _state.clone())
@@ -116,6 +138,71 @@ func undo() -> Array[BattleEvent]:
 
 func can_undo() -> bool:
 	return _undo_snapshot != null
+
+
+## Đầu hiệp để báo cáo F2 phát lại được (Story 2.13): bàn đầu hiệp hiện tại, hoặc bàn đầu hiệp trước khi vừa kết
+## thúc lượt mà chưa ra lệnh nào (giữ được pha địch vừa chạy). Null khi chưa mở trận.
+func round_start_snapshot() -> BattleState:
+	if _use_previous_round():
+		return _prev_round_start.clone()
+	return _round_start.clone() if _round_start != null else null
+
+
+## Các lệnh của hiệp tương ứng với `round_start_snapshot()`, theo thứ tự đã bấm (đã chép sâu).
+func round_commands() -> Array[Dictionary]:
+	var source: Array[Dictionary] = []
+	if _use_previous_round():
+		source = _prev_round_commands
+	else:
+		source = _round_commands
+	var out: Array[Dictionary] = []
+	for entry: Dictionary in source:
+		out.append(entry.duplicate(true))
+	return out
+
+
+## Ghi lại một lệnh cho báo cáo F2. Bị từ chối vẫn ghi (kèm mã `tu_choi`) vì đó thường chính là lỗi đang báo.
+func _record(command: Command, reject: BattleEvent.Reject) -> void:
+	# BEGIN_BATTLE không phải lệnh người chơi và `hanh_dong` không có nó. END_TURN bị từ chối cũng không có chỗ ghi
+	# `tu_choi` trong định dạng kịch bản (`"ket_thuc_luot": []`).
+	if command.kind == Command.Kind.BEGIN_BATTLE:
+		return
+	if command.kind == Command.Kind.END_TURN and reject != BattleEvent.Reject.NONE:
+		return
+	_round_commands.append({"lenh": _command_code(command), "tuong": command.unit_id,
+		"o": command.cell, "tu_choi": reject})
+
+
+func _record_undo(reject: BattleEvent.Reject) -> void:
+	_round_commands.append({"lenh": "huy", "tuong": 0, "o": Vector2i.ZERO, "tu_choi": reject})
+
+
+static func _command_code(command: Command) -> String:
+	match command.kind:
+		Command.Kind.MOVE:
+			return "di"
+		Command.Kind.ATTACK:
+			return "danh"
+		Command.Kind.END_TURN:
+			return "ket_thuc_luot"
+	return ""
+
+
+## Dời mốc đầu hiệp sang bàn hiện tại (sau BEGIN_BATTLE/END_TURN). keep_previous giữ hiệp vừa xong cho báo cáo F2.
+func _start_round(keep_previous: bool) -> void:
+	if keep_previous:
+		_prev_round_start = _round_start
+		_prev_round_commands = _round_commands
+	else:
+		_prev_round_start = null
+		_prev_round_commands = []
+	_round_start = _state.clone()
+	_round_commands = []
+
+
+## Báo cáo dùng hiệp trước khi hiệp này chưa có lệnh nào — đúng cửa sổ ngay sau khi kết thúc lượt.
+func _use_previous_round() -> bool:
+	return _round_commands.is_empty() and _prev_round_start != null
 
 
 ## Các ô quân unit_id dừng được, theo thứ tự đọc bàn. Không có quân đó, hoặc trận đã hết, thì [].

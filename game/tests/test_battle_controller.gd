@@ -351,6 +351,50 @@ func test_begin_runs_enemy_prepare_once_and_emits() -> void:
 
 
 
+## Nhật ký lệnh cho báo cáo F2 (Story 2.13): ghi lệnh chạy được, lệnh bị từ chối (kèm lý do) và hủy.
+func test_round_commands_record_accepted_rejected_and_undo() -> void:
+	var c: BattleController = _controller()
+	c.begin()
+	assert_eq(c.round_commands().size(), 0, "mở trận không để lệnh nào")
+	c.submit(Command.move(1, Vector2i(0, 5)))
+	var commands: Array[Dictionary] = c.round_commands()
+	assert_eq(commands.size(), 1)
+	assert_eq(str(commands[0]["lenh"]), "di")
+	assert_eq(int(commands[0]["tuong"]), 1)
+	assert_eq(int(commands[0]["tu_choi"]), BattleEvent.Reject.NONE)
+	c.submit(Command.attack(1, Vector2i(6, 0)))
+	commands = c.round_commands()
+	assert_eq(commands.size(), 2, "lệnh bị từ chối vẫn ghi")
+	assert_ne(int(commands[1]["tu_choi"]), BattleEvent.Reject.NONE, "có mã lý do")
+	c.undo()
+	commands = c.round_commands()
+	assert_eq(commands.size(), 3)
+	assert_eq(str(commands[2]["lenh"]), "huy")
+	assert_eq(int(commands[2]["tu_choi"]), BattleEvent.Reject.NONE, "hủy chạy được")
+
+
+## Sau khi kết thúc lượt mà chưa ra lệnh nào ở hiệp mới, báo cáo dùng hiệp TRƯỚC + `ket_thuc_luot` (pha địch phát
+## lại được). Ra lệnh đầu tiên ở hiệp mới thì mốc dời sang hiệp mới, danh sách lệnh rỗng lại.
+func test_round_start_and_commands_follow_the_round_boundary() -> void:
+	var c: BattleController = _controller()
+	c.begin()
+	var round_one_start: Array[String] = BoardFixture.picture(c.snapshot())
+	c.submit(Command.move(1, Vector2i(0, 5)))
+	assert_eq(BoardFixture.picture(c.round_start_snapshot()), round_one_start, "giữa hiệp: mốc là bàn đầu hiệp")
+	c.submit(Command.end_turn())
+	# Cửa sổ "vừa phát xong": báo cáo dùng hiệp trước, lệnh cuối là kết thúc lượt.
+	var commands: Array[Dictionary] = c.round_commands()
+	assert_eq(commands.size(), 2, "hai lệnh của hiệp trước")
+	assert_eq(str(commands[1]["lenh"]), "ket_thuc_luot")
+	assert_eq(BoardFixture.picture(c.round_start_snapshot()), round_one_start, "mốc vẫn là bàn đầu hiệp cũ")
+	# Ra lệnh đầu tiên ở hiệp mới: mốc dời sang hiệp mới, danh sách lệnh rỗng lại.
+	var new_round_start: Array[String] = BoardFixture.picture(c.snapshot())
+	c.submit(Command.move(2, Vector2i(1, 5)))
+	assert_eq(c.round_commands().size(), 1, "chỉ lệnh của hiệp mới")
+	assert_eq(str((c.round_commands()[0] as Dictionary)["lenh"]), "di")
+	assert_eq(BoardFixture.picture(c.round_start_snapshot()), new_round_start, "mốc dời sang bàn đầu hiệp mới")
+
+
 ## Xem trước chạy trên bản sao: không đổi trạng thái sống, không phát signal, không tạo bản chụp hủy (Story 2.12).
 func test_preview_does_not_touch_live_state() -> void:
 	var c: BattleController = _attack_controller()

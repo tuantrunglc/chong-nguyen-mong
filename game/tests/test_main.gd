@@ -564,3 +564,44 @@ func test_f5_needs_dev() -> void:
 	for line: String in Log.get_lines():
 		assert_false(line.contains("][dev]"), line)
 	Log.debug_enabled = false
+
+
+## F2 (Story 2.13): chỉ khi bật dev, ghi clipboard qua seam test, hiện thông báo, và báo cáo có đủ phần.
+func test_f2_copies_report_only_with_dev() -> void:
+	AppState.launch.dev = true
+	Log.debug_enabled = true
+	var main: Node2D = _make_main()
+	var copied: Array[String] = []
+	main.clipboard_writer = func(text: String) -> void: copied.append(text)
+	_dev_tools(main).f2_pressed.emit()
+	assert_eq(copied.size(), 1, "ghi clipboard đúng một lần")
+	assert_string_contains(copied[0], "\"phien_ban_dinh_dang\": 1")
+	assert_string_contains(copied[0], "trận: tran_01")
+	assert_string_contains(copied[0], "## Bàn hiện tại")
+	assert_string_contains(copied[0], "## Nhật ký")
+	assert_true(main.notice().is_shown(), "hiện thông báo")
+	assert_eq(main.notice().text(), tr("dev.copied"))
+	assert_has(Log.get_lines(), "[DEBUG][dev] f2: đã sao chép báo lỗi (%d ký tự)" % copied[0].length())
+	Log.debug_enabled = false
+
+
+func test_f2_is_not_wired_without_dev() -> void:
+	var main: Node2D = _make_main()
+	var copied: Array[String] = []
+	main.clipboard_writer = func(text: String) -> void: copied.append(text)
+	_dev_tools(main).f2_pressed.emit()
+	assert_eq(copied.size(), 0, "không bật dev thì không nối F2")
+	assert_false(main.notice().is_shown())
+
+
+func test_f2_still_copies_on_error_screen() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main(_broken_level_dir())
+	var copied: Array[String] = []
+	main.clipboard_writer = func(text: String) -> void: copied.append(text)
+	_dev_tools(main).f2_pressed.emit()
+	assert_eq(copied.size(), 1, "màn hình lỗi vẫn chép được")
+	assert_string_contains(copied[0], "trận: (không có trận)")
+	assert_string_contains(copied[0], "## Nhật ký")
+	assert_false(copied[0].contains("```json"), "không có trận thì không có kịch bản")
+	assert_eq(main.notice().text(), tr("dev.copied_no_battle"))

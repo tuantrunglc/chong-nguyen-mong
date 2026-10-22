@@ -32,7 +32,14 @@ var _battle_view: BattleView
 var _hud: Hud
 var _tooltip: Tooltip
 var _result_banner: ResultBanner
+var _notice: Notice
 var _version_label: Label
+## Số lần mở game (SaveProbe) — báo cáo F2 ghi kèm.
+var _opens: int = 0
+## Id trận đang mở ("tran_01"), cho báo cáo F2.
+var _level_id: String = ""
+## Test thay được để bắt chuỗi thay vì ghi clipboard thật (headless không có clipboard). Callable() = dùng DisplayServer.
+var clipboard_writer: Callable = Callable()
 
 
 func _ready() -> void:
@@ -58,6 +65,9 @@ func _ready() -> void:
 	_result_banner = ResultBanner.new()
 	_result_banner.retry_pressed.connect(_start_battle)
 	add_child(_result_banner)
+	_notice = Notice.new()
+	_notice.name = "Notice"
+	add_child(_notice)
 	_battle_view = BattleView.new()
 	_battle_view.setup(_board_view, _battle_input, _hud, _tooltip)
 	# Hoạt ảnh phát xong mới vẽ bản chụp cuối (Story 2.11).
@@ -75,11 +85,11 @@ func _ready() -> void:
 
 	# Thử lưu user:// (Story 0.5): luôn đếm và ghi log, vì trên itch.io không bật được dev trong iframe
 	# (tác giả chốt 2026-10-17). Xem bằng F12 → Console. Chữ trên màn hình chỉ hiện khi bật dev.
-	var opens: int = SaveProbe.bump(SaveProbe.path)
-	Log.info("luu_thu", "lần mở thứ %d, user:// bền: %s" % [opens, OS.is_userfs_persistent()])
+	_opens = SaveProbe.bump(SaveProbe.path)
+	Log.info("luu_thu", "lần mở thứ %d, user:// bền: %s" % [_opens, OS.is_userfs_persistent()])
 
 	var dev_tools: DevTools = DevTools.new()
-	dev_tools.setup(AppState.launch.dev, opens)
+	dev_tools.setup(AppState.launch.dev, _opens)
 	add_child(dev_tools)
 	if AppState.launch.dev:
 		# Con cuối của bàn cờ: nằm trên đồng quân, ẩn theo bàn cờ khi có màn hình lỗi.
@@ -90,6 +100,7 @@ func _ready() -> void:
 		add_child(_ai_overlay)
 		dev_tools.f3_pressed.connect(_toggle_ai_intents)
 		dev_tools.f5_pressed.connect(_reload_data)
+		dev_tools.f2_pressed.connect(_on_f2)
 
 	# Công cụ AI (Story 0.6): chỉ khi bật dev trên desktop có cửa sổ.
 	McpRuntime.start_if_enabled(self, AppState.launch.dev)
@@ -102,6 +113,7 @@ func _start_battle() -> void:
 	var level_id: String = AppState.launch.level_id()
 	if level_id.is_empty():
 		level_id = "tran_%02d" % DEFAULT_TRAN
+	_level_id = level_id
 	var stats_result: LoadResult = StatsLoader.load_stats(stats_path)
 	var level_result: LoadResult = LevelLoader.load_level("%s/%s.json" % [level_dir, level_id])
 
@@ -139,6 +151,46 @@ func _start_battle() -> void:
 func _reload_data() -> void:
 	Log.info("dev", "f5: nạp lại chi_so.json và file trận")
 	_start_battle()
+
+
+## F2 (chỉ khi bật dev): sao chép báo lỗi vào clipboard rồi báo trên màn hình (Story 2.13).
+## Không có trận (màn hình lỗi/menu) vẫn chép nhật ký + phiên bản — lỗi nạp dữ liệu là lúc cần báo cáo nhất.
+func _on_f2() -> void:
+	var meta: Dictionary = _report_meta()
+	if _controller == null:
+		var no_commands: Array[Dictionary] = []
+		_copy_to_clipboard(BugReport.build(null, null, no_commands, Log.get_lines(), meta))
+		Log.debug("dev", "f2: đã sao chép báo lỗi (không có trận)")
+		_notice.show_text(tr("dev.copied_no_battle"))
+		return
+	var text: String = BugReport.build(_controller.snapshot(), _controller.round_start_snapshot(),
+		_controller.round_commands(), Log.get_lines(), meta)
+	_copy_to_clipboard(text)
+	Log.debug("dev", "f2: đã sao chép báo lỗi (%d ký tự)" % text.length())
+	_notice.show_text(tr("dev.copied"))
+
+
+## Ghi clipboard; test thay `clipboard_writer` để bắt chuỗi (máy chạy test không có clipboard).
+func _copy_to_clipboard(text: String) -> void:
+	if clipboard_writer.is_valid():
+		clipboard_writer.call(text)
+	else:
+		DisplayServer.clipboard_set(text)
+
+
+## Thông báo ngắn (để test).
+func notice() -> Notice:
+	return _notice
+
+
+func _report_meta() -> Dictionary:
+	return {
+		"build": "v%s · %s" % [_read_version(), BuildInfo.read_commit(BUILD_INFO_PATH)],
+		"tran": _level_id,
+		"ten_tran": _level.name if _level != null else "",
+		"luc": Time.get_datetime_string_from_system(),
+		"lan_mo": _opens,
+	}
 
 
 ## Hoạt ảnh của lệnh vừa phát xong: vẽ bản chụp cuối và bảng kết quả (Story 2.11).

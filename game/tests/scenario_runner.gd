@@ -100,16 +100,14 @@ static func before_telegraphs(scenario: ScenarioData, stats: Stats) -> Array[Tel
 	return out
 
 
-## Ký hiệu của UnitType trên bàn cờ chữ (bảng ngược của BoardText.UNIT_SYMBOLS).
+## Ký hiệu của UnitType trên bàn cờ chữ (như BoardText.unit_symbol; giữ hàm này cho test cũ).
 static func unit_symbol(type: int) -> String:
-	var symbol: Variant = BoardText.UNIT_SYMBOLS.find_key(type)
-	return symbol as String if symbol != null else "?"
+	return BoardText.unit_symbol(type)
 
 
-## Ký hiệu của Terrain trên bàn cờ chữ (bảng ngược của BoardText.TERRAIN_SYMBOLS).
+## Ký hiệu của Terrain trên bàn cờ chữ (như BoardText.terrain_symbol; giữ hàm này cho test cũ).
 static func terrain_symbol(terrain: int) -> String:
-	var symbol: Variant = BoardText.TERRAIN_SYMBOLS.find_key(terrain)
-	return symbol as String if symbol != null else "?"
+	return BoardText.terrain_symbol(terrain)
 
 
 ## Chạy một lệnh trên state. Trả "" nếu chạy được, hoặc câu báo vì sao không chạy được.

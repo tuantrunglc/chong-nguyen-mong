@@ -3,10 +3,11 @@ extends Node2D
 ## Công cụ dev: chữ "DEV" ở góc trên trái và phím F1–F5. Không bật dev thì không làm gì.
 ## Phím đăng ký vào InputMap bằng code, chỉ khi bật dev.
 ## Bật dev thì chữ DEV kèm số lần mở do main.gd đếm (SaveProbe): tải lại trang mà số tăng là user:// lưu được.
-## F1 phát f1_pressed (main.gd bật/tắt tọa độ), F3 phát f3_pressed (main.gd bật/tắt ý định AI, Story 2.6), F5 phát
-## f5_pressed (main.gd nạp lại dữ liệu); F2, F4 mới chỉ ghi log.
+## F1 phát f1_pressed (main.gd bật/tắt tọa độ), F2 phát f2_pressed (main.gd sao chép báo lỗi, Story 2.13),
+## F3 phát f3_pressed (main.gd bật/tắt ý định AI, Story 2.6), F5 phát f5_pressed (main.gd nạp lại dữ liệu); F4 mới chỉ ghi log.
 
 signal f1_pressed
+signal f2_pressed
 signal f3_pressed
 signal f5_pressed
 
@@ -15,10 +16,10 @@ const BADGE_FONT_SIZE: int = 20
 const BADGE_COLOR: Color = Color(0.85, 0.1, 0.1)
 const KEYS: Array[Key] = [KEY_F1, KEY_F2, KEY_F3, KEY_F4, KEY_F5]
 ## Câu log khi bấm phím, theo thứ tự F1–F5. Công cụ thật làm ở các story ghi trong ngoặc.
-## F1, F3, F5 đã có công cụ (f1_pressed, f3_pressed, f5_pressed) nên không có câu.
+## F1, F2, F3, F5 đã có công cụ (f1_pressed, f2_pressed, f3_pressed, f5_pressed) nên không có câu.
 const MESSAGES: Array[String] = [
 	"",
-	"f2: chưa có sao chép báo lỗi (story 2.13)",
+	"",
 	"",
 	"f4: không dùng",
 	"",
@@ -61,6 +62,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed(_action(i), false, true):
 			if i == 0:
 				f1_pressed.emit()
+			elif i == 1:
+				f2_pressed.emit()
 			elif i == 2:
 				f3_pressed.emit()
 			elif i == 4:

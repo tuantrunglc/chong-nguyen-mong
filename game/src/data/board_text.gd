@@ -62,3 +62,21 @@ static func parse_cell(text: String) -> Variant:
 
 static func cell_text(cell: Vector2i) -> String:
 	return "%d,%d" % [cell.x, cell.y]
+
+
+## Ký hiệu của một loại quân (chiều ngược của UNIT_SYMBOLS). Loại lạ trả "?".
+static func unit_symbol(type: int) -> String:
+	var symbol: Variant = UNIT_SYMBOLS.find_key(type)
+	return symbol as String if symbol != null else "?"
+
+
+## Ký hiệu của một loại địa hình (chiều ngược của TERRAIN_SYMBOLS). Loại lạ trả "?".
+static func terrain_symbol(kind: int) -> String:
+	var symbol: Variant = TERRAIN_SYMBOLS.find_key(kind)
+	return symbol as String if symbol != null else "?"
+
+
+## Mã hướng của một vector đơn vị (chiều ngược của DIRECTION_CODES): "B", "D", "N", "T". Vector lạ trả "".
+static func direction_code(dir: Vector2i) -> String:
+	var code: Variant = DIRECTION_CODES.find_key(dir)
+	return code as String if code != null else ""

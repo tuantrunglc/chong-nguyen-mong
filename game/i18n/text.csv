@@ -117,3 +117,5 @@ tooltip.hp,Máu %d/%d
 tooltip.attack_cell,"Đánh ô %s, đòn số %d"
 tooltip.attack_charge,"Xung phong hướng %s, đòn số %d"
 tooltip.no_attack,Không có đòn nào
+dev.copied,Đã sao chép báo lỗi
+dev.copied_no_battle,Đã sao chép báo lỗi (không có trận)

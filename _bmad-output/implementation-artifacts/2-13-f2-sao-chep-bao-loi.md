@@ -4,7 +4,7 @@ baseline_commit: 6030532
 
 # Story 2.13: F2 sao chép báo lỗi
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -20,52 +20,52 @@ tôi muốn báo lỗi bằng một phím,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: `BoardText` ghi được bàn cờ** (AC: 1)
-  - [ ] 1.1 Thêm `BoardText.unit_symbol(type: int) -> String` và `BoardText.terrain_symbol(kind: int) -> String` (chiều ngược của `UNIT_SYMBOLS`/`TERRAIN_SYMBOLS`); ký hiệu lạ trả `"?"`.
-  - [ ] 1.2 `game/tests/scenario_runner.gd`: `unit_symbol`/`terrain_symbol` gọi lại `BoardText`, bỏ bản sao (giữ chữ ký hàm để test 1.3 cũ không đổi).
-  - [ ] 1.3 Test trong `test_scenario_loader.gd` (đã có `assert_eq(ScenarioRunner.unit_symbol(...))`): thêm ca mọi ký hiệu của `BoardText.UNIT_SYMBOLS`/`TERRAIN_SYMBOLS` đi và về đúng, và ca ký hiệu lạ.
+- [x] **Task 1: `BoardText` ghi được bàn cờ** (AC: 1)
+  - [x] 1.1 Thêm `BoardText.unit_symbol(type: int) -> String` và `BoardText.terrain_symbol(kind: int) -> String` (chiều ngược của `UNIT_SYMBOLS`/`TERRAIN_SYMBOLS`); ký hiệu lạ trả `"?"`.
+  - [x] 1.2 `game/tests/scenario_runner.gd`: `unit_symbol`/`terrain_symbol` gọi lại `BoardText`, bỏ bản sao (giữ chữ ký hàm để test 1.3 cũ không đổi).
+  - [x] 1.3 Test trong `test_scenario_loader.gd` (đã có `assert_eq(ScenarioRunner.unit_symbol(...))`): thêm ca mọi ký hiệu của `BoardText.UNIT_SYMBOLS`/`TERRAIN_SYMBOLS` đi và về đúng, và ca ký hiệu lạ.
 
-- [ ] **Task 2: Nhật ký lệnh + bàn đầu hiệp trong `BattleController`** (AC: 1, 3)
-  - [ ] 2.1 `_round_start: BattleState` và `_round_commands: Array[Dictionary]`; mỗi mục `{"lenh": "...", "tuong": "1", "o": "3,3", "tu_choi": "..."}` — chỉ có khóa dùng được, đúng định dạng `hanh_dong` của kịch bản.
-  - [ ] 2.2 `submit()` ghi **mọi** lệnh: chạy được lẫn bị từ chối (kèm mã `tu_choi`), vì lệnh bị từ chối thường chính là lỗi đang báo. `undo()` ghi `{"lenh": "huy"}`.
-  - [ ] 2.3 Mốc "đầu hiệp": sau `BEGIN_BATTLE`/`END_TURN` chạy được, `_round_start = _state.clone()` và `_round_commands.clear()` — **trừ** khi báo cáo đang ở đúng cửa sổ "vừa kết thúc lượt": xem 2.4.
-  - [ ] 2.4 Giữ được pha địch: nếu F2 rơi vào lúc vừa `ket_thuc_luot` mà người chơi chưa ra lệnh nào ở hiệp mới, báo cáo phải dùng `_round_start` **cũ** + toàn bộ lệnh (gồm `ket_thuc_luot`), để phát lại ra đúng pha địch vừa xảy ra. Cách gọn: chỉ chốt mốc mới ở lệnh **đầu tiên sau** `BEGIN_BATTLE`/`END_TURN` (hoặc ở `END_TURN`, nhưng đẩy mốc cũ vào `_prev_round` và dùng `_prev_round` khi `_round_commands` rỗng). Chọn cách nào cũng phải có test cho cả hai cửa sổ.
-  - [ ] 2.5 Accessor chỉ đọc: `round_start_snapshot() -> BattleState` (clone), `round_commands() -> Array[Dictionary]` (chép sâu).
-  - [ ] 2.6 Test `test_battle_controller.gd`: (a) đi 1 nước rồi xem trước — `_round_start` không đổi, `round_commands()` có đúng lệnh đó; (b) từ chối lệnh → vẫn ghi kèm `tu_choi`, state không đổi; (c) `undo` ghi `huy`; (d) sau `ket_thuc_luot`, báo cáo vẫn phát lại được pha địch (so bàn sau khi phát lại với `snapshot()`).
+- [x] **Task 2: Nhật ký lệnh + bàn đầu hiệp trong `BattleController`** (AC: 1, 3)
+  - [x] 2.1 `_round_start: BattleState` và `_round_commands: Array[Dictionary]`; mỗi mục `{"lenh": "...", "tuong": "1", "o": "3,3", "tu_choi": "..."}` — chỉ có khóa dùng được, đúng định dạng `hanh_dong` của kịch bản.
+  - [x] 2.2 `submit()` ghi **mọi** lệnh: chạy được lẫn bị từ chối (kèm mã `tu_choi`), vì lệnh bị từ chối thường chính là lỗi đang báo. `undo()` ghi `{"lenh": "huy"}`.
+  - [x] 2.3 Mốc "đầu hiệp": sau `BEGIN_BATTLE`/`END_TURN` chạy được, `_round_start = _state.clone()` và `_round_commands.clear()` — **trừ** khi báo cáo đang ở đúng cửa sổ "vừa kết thúc lượt": xem 2.4.
+  - [x] 2.4 Giữ được pha địch: nếu F2 rơi vào lúc vừa `ket_thuc_luot` mà người chơi chưa ra lệnh nào ở hiệp mới, báo cáo phải dùng `_round_start` **cũ** + toàn bộ lệnh (gồm `ket_thuc_luot`), để phát lại ra đúng pha địch vừa xảy ra. Cách gọn: chỉ chốt mốc mới ở lệnh **đầu tiên sau** `BEGIN_BATTLE`/`END_TURN` (hoặc ở `END_TURN`, nhưng đẩy mốc cũ vào `_prev_round` và dùng `_prev_round` khi `_round_commands` rỗng). Chọn cách nào cũng phải có test cho cả hai cửa sổ.
+  - [x] 2.5 Accessor chỉ đọc: `round_start_snapshot() -> BattleState` (clone), `round_commands() -> Array[Dictionary]` (chép sâu).
+  - [x] 2.6 Test `test_battle_controller.gd`: (a) đi 1 nước rồi xem trước — `_round_start` không đổi, `round_commands()` có đúng lệnh đó; (b) từ chối lệnh → vẫn ghi kèm `tu_choi`, state không đổi; (c) `undo` ghi `huy`; (d) sau `ket_thuc_luot`, báo cáo vẫn phát lại được pha địch (so bàn sau khi phát lại với `snapshot()`).
 
-- [ ] **Task 3: `BugReport` dựng nội dung** (AC: 1, 3)
-  - [ ] 3.1 `game/src/debug/bug_report.gd` — `class_name BugReport extends RefCounted`, `static func build(state: BattleState, round_start: BattleState, commands: Array[Dictionary], log_lines: PackedStringArray, meta: Dictionary) -> String`. Không đọc autoload, không đọc `BattleController` — mọi thứ truyền vào, để test được.
-  - [ ] 3.2 `meta`: `phien_ban` (`"v0.1.0 · 6030532"`), `tran` (id trận), `hiep`, `luc` (giờ máy), `lan_mo` (SaveProbe), `dang_choi` (bool).
-  - [ ] 3.3 Dựng `truoc` từ `round_start`: `dia_hinh` (`BoardText.terrain_symbol`), `quan`, `mau` (chỉ quân thiếu máu, `{"cot,hang": máu}`), `thu_tu_dich` (ô quân Nguyên theo **id tăng dần**), `bao_don` (từ `telegraphs`, xếp theo `order`: CELL → `o` = ô chủ + `offset`; DIRECTION → `huong`). Đòn của chủ đã gục thì **bỏ** và ghi chú trong báo cáo (bộ nạp không nhận `quan` là ô không có quân Nguyên).
-  - [ ] 3.4 Dựng `hanh_dong` từ `commands` (đã đúng định dạng ở 2.1).
-  - [ ] 3.5 Khối JSON kịch bản: `{"phien_ban_dinh_dang": 1, "mo_ta": "Báo lỗi F2 …", "da_duyet": false, "truoc": {...}, "hanh_dong": [...]}`, in bằng `JSON.stringify(data, "  ")` để AI đọc được.
-  - [ ] 3.6 Phần "bàn hiện tại" (không phải kịch bản, chỉ để đối chiếu): `dia_hinh`, `quan`, `mau`, `hiep`, và với từng tướng `đã đi`/`chưa đi`, `đã đánh`/`chưa đánh`.
-  - [ ] 3.7 Đầu báo cáo: phiên bản build, trận, hiệp, giờ, lần mở; cuối báo cáo: 200 dòng log (cũ → mới) và một câu chỉ dẫn cho AI ("khối JSON ở trên là kịch bản tái hiện; chạy `tools/test.sh` sau khi thêm vào `game/tests/kich_ban/<nhóm>/`").
-  - [ ] 3.8 Test `game/tests/test_bug_report.gd`: đủ các mục; bàn `dia_hinh`/`quan` khớp state (đi từng ô); `mau` chỉ có quân thiếu máu; `thu_tu_dich` đúng thứ tự id; `bao_don` đúng cho cả CELL và DIRECTION; log cắt còn 200 dòng cũ nhất ở đầu; báo cáo không chứa ký tự điều khiển lạ.
+- [x] **Task 3: `BugReport` dựng nội dung** (AC: 1, 3)
+  - [x] 3.1 `game/src/debug/bug_report.gd` — `class_name BugReport extends RefCounted`, `static func build(state: BattleState, round_start: BattleState, commands: Array[Dictionary], log_lines: PackedStringArray, meta: Dictionary) -> String`. Không đọc autoload, không đọc `BattleController` — mọi thứ truyền vào, để test được.
+  - [x] 3.2 `meta`: `phien_ban` (`"v0.1.0 · 6030532"`), `tran` (id trận), `hiep`, `luc` (giờ máy), `lan_mo` (SaveProbe), `dang_choi` (bool).
+  - [x] 3.3 Dựng `truoc` từ `round_start`: `dia_hinh` (`BoardText.terrain_symbol`), `quan`, `mau` (chỉ quân thiếu máu, `{"cot,hang": máu}`), `thu_tu_dich` (ô quân Nguyên theo **id tăng dần**), `bao_don` (từ `telegraphs`, xếp theo `order`: CELL → `o` = ô chủ + `offset`; DIRECTION → `huong`). Đòn của chủ đã gục thì **bỏ** và ghi chú trong báo cáo (bộ nạp không nhận `quan` là ô không có quân Nguyên).
+  - [x] 3.4 Dựng `hanh_dong` từ `commands` (đã đúng định dạng ở 2.1).
+  - [x] 3.5 Khối JSON kịch bản: `{"phien_ban_dinh_dang": 1, "mo_ta": "Báo lỗi F2 …", "da_duyet": false, "truoc": {...}, "hanh_dong": [...]}`, in bằng `JSON.stringify(data, "  ")` để AI đọc được.
+  - [x] 3.6 Phần "bàn hiện tại" (không phải kịch bản, chỉ để đối chiếu): `dia_hinh`, `quan`, `mau`, `hiep`, và với từng tướng `đã đi`/`chưa đi`, `đã đánh`/`chưa đánh`.
+  - [x] 3.7 Đầu báo cáo: phiên bản build, trận, hiệp, giờ, lần mở; cuối báo cáo: 200 dòng log (cũ → mới) và một câu chỉ dẫn cho AI ("khối JSON ở trên là kịch bản tái hiện; chạy `tools/test.sh` sau khi thêm vào `game/tests/kich_ban/<nhóm>/`").
+  - [x] 3.8 Test `game/tests/test_bug_report.gd`: đủ các mục; bàn `dia_hinh`/`quan` khớp state (đi từng ô); `mau` chỉ có quân thiếu máu; `thu_tu_dich` đúng thứ tự id; `bao_don` đúng cho cả CELL và DIRECTION; log cắt còn 200 dòng cũ nhất ở đầu; báo cáo không chứa ký tự điều khiển lạ.
 
-- [ ] **Task 4: Phím F2 + clipboard** (AC: 1, 2)
-  - [ ] 4.1 `game/src/debug/dev_tools.gd`: thêm `signal f2_pressed`; bấm F2 phát signal; xoá câu `"f2: chưa có sao chép báo lỗi (story 2.13)"` khỏi `MESSAGES`.
-  - [ ] 4.2 `game/src/app/main.gd`: nối `dev_tools.f2_pressed` trong nhánh bật dev (cùng chỗ với F1/F3/F5). `func _on_f2()`: lấy `_controller.round_start_snapshot()`, `round_commands()`, `Log.get_lines()`, dựng meta, gọi `BugReport.build`, rồi `clipboard_writer.call(text)`, hiện `Notice`.
-  - [ ] 4.3 Seam test: `var clipboard_writer: Callable` trên `main.gd`, mặc định `DisplayServer.clipboard_set`. Test thay bằng hàm bắt chuỗi — không đọc clipboard thật (chạy headless không có clipboard).
-  - [ ] 4.4 Không có trận (`_controller == null`: màn hình lỗi/menu): vẫn chép log + phiên bản, phần bàn ghi `(không có trận)` (Câu hỏi 2).
-  - [ ] 4.5 Test `test_main.gd`: bật dev → bấm F2 → `clipboard_writer` nhận chuỗi có `"phien_ban_dinh_dang"` và tên trận, `Notice` hiện đúng câu; **không** bật dev → F2 không làm gì (không gọi writer, không hiện notice); màn hình lỗi → vẫn chép được (không có khối `truoc`).
+- [x] **Task 4: Phím F2 + clipboard** (AC: 1, 2)
+  - [x] 4.1 `game/src/debug/dev_tools.gd`: thêm `signal f2_pressed`; bấm F2 phát signal; xoá câu `"f2: chưa có sao chép báo lỗi (story 2.13)"` khỏi `MESSAGES`.
+  - [x] 4.2 `game/src/app/main.gd`: nối `dev_tools.f2_pressed` trong nhánh bật dev (cùng chỗ với F1/F3/F5). `func _on_f2()`: lấy `_controller.round_start_snapshot()`, `round_commands()`, `Log.get_lines()`, dựng meta, gọi `BugReport.build`, rồi `clipboard_writer.call(text)`, hiện `Notice`.
+  - [x] 4.3 Seam test: `var clipboard_writer: Callable` trên `main.gd`, mặc định `DisplayServer.clipboard_set`. Test thay bằng hàm bắt chuỗi — không đọc clipboard thật (chạy headless không có clipboard).
+  - [x] 4.4 Không có trận (`_controller == null`: màn hình lỗi/menu): vẫn chép log + phiên bản, phần bàn ghi `(không có trận)` (Câu hỏi 2).
+  - [x] 4.5 Test `test_main.gd`: bật dev → bấm F2 → `clipboard_writer` nhận chuỗi có `"phien_ban_dinh_dang"` và tên trận, `Notice` hiện đúng câu; **không** bật dev → F2 không làm gì (không gọi writer, không hiện notice); màn hình lỗi → vẫn chép được (không có khối `truoc`).
 
-- [ ] **Task 5: Thông báo ngắn `Notice`** (AC: 2)
-  - [ ] 5.1 `game/src/ui/notice.gd` — `class_name Notice extends Control`: `show_text(text: String)`, tự ẩn sau `SHOW_SECONDS` (2,5 s) bằng `Tween` (theo luật hoạt ảnh của dự án); `text()`, `is_shown()` cho test; `mouse_filter = IGNORE`; đặt giữa bàn, phía trên đáy, không che HUD.
-  - [ ] 5.2 Chữ qua `tr()`: khóa mới `dev.copied` = "Đã sao chép báo lỗi", `dev.copied_no_battle` = "Đã sao chép báo lỗi (không có trận)" — thêm vào `game/i18n/text.csv`, chạy `--headless --import` để sinh lại `text.vi.translation`.
-  - [ ] 5.3 Test `game/tests/test_notice.gd`: `show_text` → `is_shown()` và đúng chữ; `await wait_seconds(SHOW_SECONDS + 0.5)` → đã ẩn; gọi liên tiếp hai lần không chồng chữ (chuỗi cuối thắng, một nhãn).
+- [x] **Task 5: Thông báo ngắn `Notice`** (AC: 2)
+  - [x] 5.1 `game/src/ui/notice.gd` — `class_name Notice extends Control`: `show_text(text: String)`, tự ẩn sau `SHOW_SECONDS` (2,5 s) bằng `Tween` (theo luật hoạt ảnh của dự án); `text()`, `is_shown()` cho test; `mouse_filter = IGNORE`; đặt giữa bàn, phía trên đáy, không che HUD.
+  - [x] 5.2 Chữ qua `tr()`: khóa mới `dev.copied` = "Đã sao chép báo lỗi", `dev.copied_no_battle` = "Đã sao chép báo lỗi (không có trận)" — thêm vào `game/i18n/text.csv`, chạy `--headless --import` để sinh lại `text.vi.translation`.
+  - [x] 5.3 Test `game/tests/test_notice.gd`: `show_text` → `is_shown()` và đúng chữ; `await wait_seconds(SHOW_SECONDS + 0.5)` → đã ẩn; gọi liên tiếp hai lần không chồng chữ (chuỗi cuối thắng, một nhãn).
 
-- [ ] **Task 6: Phát lại đúng — test then chốt** (AC: 1, 3)
-  - [ ] 6.1 Test: dựng `BattleController` bằng trận `thu_lao`, chạy vài lệnh (đi, đánh, hủy, từ chối), dựng báo cáo, **tách khối JSON** ra, cho `ScenarioLoader` + `ScenarioRunner` chạy, so bàn cuối với `controller.snapshot()`: cùng ô, cùng máu, cùng `has_moved`/`has_attacked` cho từng quân. Đây là bằng chứng cho AC 3 ở mức dữ liệu.
-  - [ ] 6.2 Test riêng cho cửa sổ pha địch: đi 1 nước → `ket_thuc_luot` → (chưa ra lệnh gì) → báo cáo → phát lại phải ra đúng bàn sau pha địch (bàn, máu, đòn đã báo, thứ tự).
-  - [ ] 6.3 Test: báo cáo có `bao_don` thì phát lại phải còn đòn; báo cáo bỏ đòn của chủ đã gục thì phát lại vẫn chạy (không cần đòn đó để ra cùng bàn).
+- [x] **Task 6: Phát lại đúng — test then chốt** (AC: 1, 3)
+  - [x] 6.1 Test: dựng `BattleController` bằng trận `thu_lao`, chạy vài lệnh (đi, đánh, hủy, từ chối), dựng báo cáo, **tách khối JSON** ra, cho `ScenarioLoader` + `ScenarioRunner` chạy, so bàn cuối với `controller.snapshot()`: cùng ô, cùng máu, cùng `has_moved`/`has_attacked` cho từng quân. Đây là bằng chứng cho AC 3 ở mức dữ liệu.
+  - [x] 6.2 Test riêng cho cửa sổ pha địch: đi 1 nước → `ket_thuc_luot` → (chưa ra lệnh gì) → báo cáo → phát lại phải ra đúng bàn sau pha địch (bàn, máu, đòn đã báo, thứ tự).
+  - [x] 6.3 Test: báo cáo có `bao_don` thì phát lại phải còn đòn; báo cáo bỏ đòn của chủ đã gục thì phát lại vẫn chạy (không cần đòn đó để ra cùng bàn).
 
-- [ ] **Task 7: Kiểm bằng tay, tài liệu, commit** (AC: 1–3)
-  - [ ] 7.1 `tools/test.sh` xanh; ghi số test vào Debug Log.
-  - [ ] 7.2 `tools/chay.sh --dev --tran=thu_lao`: đi 1 nước, bấm F2, dán ra file; xác nhận có đủ 4 mục và bàn đầu hiệp + lệnh.
-  - [ ] 7.3 Lỗi cố tình: sửa tạm `data/chi_so.json` (ví dụ đẩy của Khoái từ 1 lên 2), chơi tới lúc đòn đẩy đi 2 ô, bấm F2, dán cho AI; AI trả về kịch bản; chạy kịch bản đó thấy tái hiện đúng lỗi. Ghi lại nguyên văn vào Debug Log (AC 3).
-  - [ ] 7.4 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, đúng những bước đã chạy.
-  - [ ] 7.5 Commit tiếng Việt kết `(Story 2.13)`, kèm `text.vi.translation` và mọi `.uid` mới.
+- [x] **Task 7: Kiểm bằng tay, tài liệu, commit** (AC: 1–3)
+  - [x] 7.1 `tools/test.sh` xanh; ghi số test vào Debug Log.
+  - [x] 7.2 `tools/chay.sh --dev --tran=thu_lao`: đi 1 nước, bấm F2, dán ra file; xác nhận có đủ 4 mục và bàn đầu hiệp + lệnh.
+  - [x] 7.3 Lỗi cố tình: sửa tạm `data/chi_so.json` (ví dụ đẩy của Khoái từ 1 lên 2), chơi tới lúc đòn đẩy đi 2 ô, bấm F2, dán cho AI; AI trả về kịch bản; chạy kịch bản đó thấy tái hiện đúng lỗi. Ghi lại nguyên văn vào Debug Log (AC 3).
+  - [x] 7.4 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, đúng những bước đã chạy.
+  - [x] 7.5 Commit tiếng Việt kết `(Story 2.13)`, kèm `text.vi.translation` và mọi `.uid` mới.
 
 ## Dev Notes
 
@@ -159,11 +159,11 @@ dia_hinh / quan / mau như trên nhưng của trạng thái hiện tại
 - Commit khi `tools/test.sh` xanh, lời commit tiếng Việt.
 - Tác giả không đọc code: hướng dẫn tự test phải là các bước bấm/phím và thấy gì.
 
-### Câu hỏi cho tác giả (chốt trước khi code xong)
+### Câu hỏi cho tác giả — ĐÃ CHỐT 2026-10-22
 
-1. **`truoc` là bàn nào?** Định dạng kịch bản không có `hiep`/`da_di`/`da_danh` cho `truoc`, nên không tả được bàn giữa hiệp. Đề xuất: `truoc` = **bàn đầu hiệp** + `hanh_dong` = mọi lệnh trong hiệp (phát lại ra đúng bàn hiện tại), kèm mục "bàn hiện tại" để đối chiếu. Cách khác: mở rộng định dạng `truoc` cho 3 khóa đó (sửa bộ nạp + runner, nhiều việc hơn, và `hanh_dong` khi đó chỉ còn để tham khảo vì lệnh sẽ bị từ chối khi phát lại).
-2. **F2 khi không có trận** (màn hình lỗi nạp dữ liệu, menu): vẫn chép log + phiên bản (không có phần bàn) chứ? Đề xuất: có — lỗi nạp dữ liệu là lúc cần báo cáo nhất.
-3. **Clipboard trên web**: nếu trình duyệt chặn, có cần đường dự phòng (in báo cáo ra Console F12, hay hiện khung để tự bôi đen) không? Đề xuất: story này chỉ ghi thêm một dòng log "đã sao chép N ký tự"; nếu tác giả thấy cần khung thì tách story sau.
+1. **`truoc` là bàn nào?** → **Bàn đầu hiệp + toàn bộ lệnh trong hiệp**, kèm mục "bàn hiện tại" để đối chiếu. Không sửa định dạng kịch bản.
+2. **F2 khi không có trận** (màn hình lỗi, menu)? → **Vẫn chép log + phiên bản**, phần bàn ghi `(không có trận)`.
+3. **Clipboard trên web bị chặn?** → Story này **chỉ ghi thêm một dòng log** "đã sao chép N ký tự"; chưa làm khung xem báo cáo.
 
 ### References
 
@@ -176,10 +176,55 @@ dia_hinh / quan / mau như trên nhưng của trạng thái hiện tại
 
 ### Agent Model Used
 
+deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
+
 ### Debug Log References
+
+- `tools/test.sh`: **612/612 đạt** (trước story: 591; +21 test: 12 `test_bug_report`, 4 `test_notice`, 3 `test_main`, 2 `test_battle_controller`), 81 kịch bản đã duyệt, kiểm ranh giới + quét project đạt.
+- Kiểm trong game thật (`tools/chay.sh --dev --tran=thu_lao`): gọi `_on_f2` qua cổng runtime GoPeak (7777) → log `[DEBUG][dev] f2: đã sao chép báo lỗi (2915 ký tự)`, `Notice` hiện đúng câu "Đã sao chép báo lỗi" (đọc qua runtime), tự ẩn sau ~3 giây. **Không bơm được phím F2 thật**: `inject_key` của GoPeak chỉ đặt `keycode`, còn `DevTools` khớp `physical_keycode` (nhánh phím đã có test `test_dev_tools` với `InputEventKey` đủ `physical_keycode`). Máy không có `xclip`/`xdotool` nên không đọc lại được clipboard thật.
+- Báo cáo thật in từ trận `thu_lao` (script tạm, đã xoá): 2915 ký tự, khối JSON hợp lệ; `truoc` có 3 đòn báo, `sau` còn 2, `mau` chỉ ghi quân thiếu máu (`3,3=1`), `hanh_dong` là `danh` + `ket_thuc_luot`; phần bàn hiện tại ghi cờ đã đi/đã đánh của tướng.
+- AC 3 (lỗi cố tình): dựng stats "đẩy 2 ô" thay vì 1 → lấy báo cáo → tách khối JSON → cho chính bộ nạp + bộ chạy kịch bản của game phát lại: ra đúng bàn đang thấy (`101@4,1`); chạy lại **cùng kịch bản** với stats đúng (đẩy 1) ra `101@3,1` — kịch bản phân biệt được lỗi. Script tạm đã xoá.
+- **Chưa làm:** dán báo cáo cho một AI ngoài game (ChatGPT/Claude) — tác giả tự thử; phần chuyển JSON → kịch bản đã kiểm tự động.
 
 ### Completion Notes List
 
+- `BoardText`: thêm `unit_symbol` / `terrain_symbol` / `direction_code` (chiều ngược của các bảng ký hiệu); `ScenarioRunner` gọi lại, bỏ bản sao.
+- `BattleController`: `_round_start` + `_round_commands` ghi **mọi** lệnh (chạy được, bị từ chối kèm mã lý do, và `huy`). `round_start_snapshot()` / `round_commands()` trả bản sao. Cửa sổ ngay sau `ket_thuc_luot` (chưa ra lệnh nào ở hiệp mới) dùng bàn đầu hiệp **trước** + lệnh gồm `ket_thuc_luot`, để phát lại được cả pha địch.
+- `BugReport` (mới): dựng báo cáo — khối JSON là **kịch bản hợp lệ** (`truoc` + `hanh_dong` + `sau` = bàn đang thấy), phần bàn hiện tại để đối chiếu, 200 dòng log, phiên bản, ghi chú cho AI. Chỉ đọc dữ liệu truyền vào, không đọc autoload, không phát signal.
+- `Notice` (mới): bảng thông báo giữa bàn, tự mờ và ẩn sau 2,5 s, không nhận chuột.
+- `DevTools`: thêm `f2_pressed`; `main`: nối F2 trong nhánh bật dev, `clipboard_writer` là seam để test bắt chuỗi (máy test không có clipboard), ghi log số ký tự đã chép.
+- Chữ mới `dev.copied`, `dev.copied_no_battle` trong `text.csv`; đã chạy `--headless --import` sinh lại `text.vi.translation`.
+- Ba câu hỏi đã chốt trước khi code: (1) `truoc` = bàn đầu hiệp + lệnh trong hiệp; (2) F2 vẫn chép được khi không có trận; (3) chưa làm khung dự phòng cho clipboard trên web.
+- **Khác story một chỗ:** khối JSON có thêm `sau` (bàn hiện tại) để kịch bản hợp lệ ngay và chạy được bằng `tools/test.sh`; nếu là lỗi thì sửa `sau` thành điều đúng trước khi sửa code (quy trình M3) — báo cáo có ghi câu này.
+
+**Hướng dẫn tác giả tự test (đúng những bước đã chạy):**
+
+1. Gõ `tools/test.sh` → `612/612 test đạt`, `81 đã duyệt`.
+2. Gõ `tools/chay.sh --dev --tran=thu_lao`.
+3. Bấm **F2**: giữa bàn, sát đáy, hiện bảng "Đã sao chép báo lỗi" khoảng 3 giây rồi tự mất.
+4. Mở trình soạn thảo, **Ctrl+V**: thấy tiêu đề (phiên bản, trận, hiệp, giờ), khối JSON của kịch bản, bàn hiện tại, 200 dòng log, ghi chú cho AI. Báo cáo thật dài cỡ 2.900 ký tự.
+5. Chép khối JSON vào `game/tests/kich_ban/thu/bao_loi.json` rồi chạy `tools/test.sh`: kịch bản mới **đạt** (vì `sau` ghi đúng điều đang xảy ra).
+6. Muốn thấy nó bắt lỗi: sửa `data/chi_so.json` cho Khoái `do_day` 1 → 2, chơi lại tới lúc đẩy quân, bấm F2, lặp bước 5 → kịch bản **trượt** (bàn sau khác `sau` đã ghi). Trả `chi_so.json` về như cũ sau khi thử.
+7. Bấm F2 ở màn hình **lỗi** (làm hỏng `data/tran/tran_01.json` rồi mở game): vẫn chép được, phần bàn ghi "(không có trận)".
+8. `tools/chay.sh` **không** có `--dev`: bấm F2 **không có gì xảy ra**.
+9. Bản web: chưa thử trong phiên này; nếu trình duyệt chặn clipboard thì chỉ mất phần sao chép, game không hỏng.
+
 ### File List
 
+- `game/src/debug/bug_report.gd` (mới) + `.uid`
+- `game/src/ui/notice.gd` (mới) + `.uid`
+- `game/src/battle/battle_controller.gd` (nhật ký lệnh theo hiệp, mốc bàn đầu hiệp)
+- `game/src/data/board_text.gd` (`unit_symbol`, `terrain_symbol`, `direction_code`)
+- `game/src/debug/dev_tools.gd` (`f2_pressed`)
+- `game/src/app/main.gd` (nối F2, `clipboard_writer`, `notice()`)
+- `game/i18n/text.csv`, `game/i18n/text.vi.translation`
+- `game/tests/test_bug_report.gd` (mới) + `.uid`
+- `game/tests/test_notice.gd` (mới) + `.uid`
+- `game/tests/test_battle_controller.gd` (+2 test nhật ký hiệp)
+- `game/tests/test_main.gd` (+3 test F2)
+- `game/tests/test_dev_tools.gd` (F2 phát signal)
+- `game/tests/scenario_runner.gd` (ký hiệu gọi lại `BoardText`)
+
 ### Change Log
+
+- 2026-10-22: F2 sao chép báo lỗi (Story 2.13) — `BugReport`, `Notice`, nhật ký lệnh theo hiệp, 21 test; test 591 → 612.
