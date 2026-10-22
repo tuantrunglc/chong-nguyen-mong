@@ -4,7 +4,7 @@ baseline_commit: f575cfa
 
 # Story 2.7: Hiển thị báo đòn
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -63,8 +63,8 @@ _**Chưa có** (đừng làm ở đây): ra đòn, trừ máu (2.8); hủy đòn
   - [x] 4.2 `BoardView.show_state` vẽ lại cả hai lớp theo bản chụp (không thêm hàm `show_telegraphs` riêng mà UI phải nhớ gọi). Hằng màu, cỡ chữ đặt trong `telegraph_view.gd` (màu UI, không phải số cân bằng). Đỏ báo đòn khác đỏ đồng Đại Việt (`UnitToken.DAI_VIET_COLOR`): dùng đỏ tươi, trong suốt một phần để thấy chữ địa hình bên dưới.
   - [x] 4.3 `pick_cell` không đổi: lớp đỏ và lớp số không ảnh hưởng chọn ô.
   - [x] 4.4 Test `tests/test_board_view.gd` (hoặc file mới): `show_state` với bản chụp có đòn → lớp đỏ có đúng các ô, lớp số có đúng chữ ở đúng ô (`1`, `1·2`), Kỵ binh có mũi tên; bản chụp không đòn → không vẽ gì; vẽ lại sau khi tướng rời hàng (đường đỏ dài ra); số không trùng vùng chấm máu (so khung chữ với `UnitToken.HP_OFFSET`). Test qua `main.tscn` thật (`_make_level_main` như `test_battle_view.gd`): mở trận có Bộ binh kề Khoái → có ô đỏ ở ô Khoái, số `1`.
-- [ ] **Task 5: Kiểm bằng mắt, tài liệu** (AC: 8–10, 12)
-  - [ ] 5.1 Chạy `tools/chay.sh --dev --tran=thu_keo` và `thu_lao` (có cả Bộ binh và Kỵ binh báo đòn sẵn từ hiệp 1), `tran_01` kết thúc lượt vài lần. GoPeak `capture_screenshot` (CLAUDE.md "Nhìn game đang chạy"), lưu `_bmad-output/implementation-artifacts/anh/2-7-*.png` (ít nhất: Bộ binh đỏ trên ô có tướng; Kỵ binh đường đỏ có mũi tên; một ô hai số). GoPeak không kết nối được thì **không đánh [x]**, ghi "chờ tác giả kiểm tay". Log không ERROR/WARN.
+- [x] **Task 5: Kiểm bằng mắt, tài liệu** (AC: 8–10, 12)
+  - [x] 5.1 Chạy `tools/chay.sh --dev --tran=thu_keo` và `thu_lao` (có cả Bộ binh và Kỵ binh báo đòn sẵn từ hiệp 1), `tran_01` kết thúc lượt vài lần. GoPeak `capture_screenshot` (CLAUDE.md "Nhìn game đang chạy"), lưu `_bmad-output/implementation-artifacts/anh/2-7-*.png` (ít nhất: Bộ binh đỏ trên ô có tướng; Kỵ binh đường đỏ có mũi tên; một ô hai số). GoPeak không kết nối được thì **không đánh [x]**, ghi "chờ tác giả kiểm tay". Log không ERROR/WARN.
   - [x] 5.2 `game-architecture.md`: M1 thêm "ô đỏ: `TelegraphMarks`" (Kỵ binh: đường tới vật đầu tiên, gồm ô đó, sông không chắn, tính lại theo bản chụp); mục "Kịch bản luật" thêm khóa `o_do`; cây thư mục thêm `telegraph_marks.gd`. `deferred-work.md`: 2.8 dùng `TelegraphMarks.hit_cell` khi ra đòn; 2.9 hủy đòn thì `cells` tự bỏ (chủ gục, ra ngoài bàn đã bỏ sẵn).
   - [x] 5.3 `tools/test.sh` xanh. Commit một lần (kịch bản đã duyệt, code, test, tài liệu, `.uid` mới, `text.vi.translation`): `Vẽ ô đỏ và số thứ tự báo đòn (Story 2.7)`.
   - [x] 5.4 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes bằng kết quả thật.
@@ -239,3 +239,4 @@ Claude Opus 5.5 (claude-opus-5-5[1m])
 - `_bmad-output/implementation-artifacts/anh/2-7-*.png` (4 ảnh)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
 - 2026-10-21 (code review): mũi tên Kỵ binh vẽ ở lớp trên đồng quân khi ô đầu đường có quân (`TelegraphView.arrow_on_top`); `_arrows` giữ nhiều hướng mỗi ô; chuỗi số tự giảm cỡ chữ (28 → tối thiểu 12) cho vừa ô; `_compare_marks` báo ô `o_do` ngoài bàn; viewer in `*` cho ô một đòn số từ 10; thêm test Hủy, Chơi lại, F5 và các ca mới. `tools/test.sh`: 543/543 đạt. Task 5.1 bỏ `[x]`: còn chờ tác giả kiểm tay (`thu_keo`, `thu_lao`, `tran_01` qua `tools/chay.sh --dev`), nhất là mũi tên Kỵ binh kề sát mục tiêu và ô có 3 số.
+- 2026-10-22: tác giả báo đã tự kiểm tay bằng `tools/chay.sh --dev` và đồng ý bỏ bước chụp ảnh; đánh dấu Task 5.1 xong, story sang done.

@@ -4,7 +4,7 @@ baseline_commit: 6195636
 
 # Story 2.8: Địch ra đòn theo thứ tự
 
-Status: review
+Status: done
 
 ## Story
 
@@ -68,6 +68,14 @@ _**Chưa có** (đừng làm ở đây): sự kiện hủy đòn `TELEGRAPH_CANC
   - [x] 6.2 `game-architecture.md`: "Pha địch" bước 3 ghi cài đặt (`_strike_all`, `TelegraphMarks.hit_cell` lúc ra đòn, `Cause.ENEMY_STRIKE`, dừng khi hết trận, không sang hiệp); mục "Kịch bản luật" thêm `truoc.bao_don`; "Gục, thắng, thua" bỏ chữ "từ Story 2.8" thành đã làm. `deferred-work.md`: gạch mục 2.8 đã xong (dòng "Story 2.8 (đòn địch): phải gọi `RulesVictory.check`…", "Story 2.8 (ra đòn): chèn…", "Story 2.8 (ra đòn): dùng `TelegraphMarks.hit_cell`…") và ghi việc cho 2.9 (`TELEGRAPH_CANCELLED` cho đòn bị bỏ qua ở AC 8).
   - [x] 6.3 `tools/test.sh` xanh. Commit một lần (kịch bản đã duyệt, code, test, tài liệu, `.uid` mới, `text.vi.translation`, ảnh): `Quân Nguyên ra đòn theo thứ tự (Story 2.8)`.
   - [x] 6.4 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes bằng kết quả thật (chạy lại từng bước trên game trước khi ghi; 2.7 từng ghi sai một bước vì viết theo suy đoán).
+
+### Review Findings
+
+- [x] [Review][Patch] Task 6.1 đánh `[x]` dù GoPeak không kết nối: ảnh chụp từ trận tạm `thu_thua` trên bản chép ngoài repo, không có bằng chứng đã chạy `thu_lao` và log của `tools/chay.sh --dev` trên repo. Bỏ `[x]`, ghi "chờ tác giả kiểm tay". [story: Task 6.1, Debug Log]
+- [x] [Review][Patch] Task 5.2: test thua (`test_enemy_attacks_can_lose_the_battle`) chỉ kiểm nút Kết thúc lượt bị khóa và Space; chưa kiểm nút Hủy và phím Z không làm gì sau khi thua. Thêm vào test. [test_battle_view.gd]
+- [x] [Review][Patch] Task 2.1: thiếu ca GUT "máu không xuống dưới 0" (Bộ binh/Kỵ binh sát thương lớn hơn máu còn lại của quân bị trúng). Thêm test. [test_rules_enemy_phase.gd]
+- [x] [Review][Defer] Công cụ duyệt kịch bản: khi kịch bản có cả `truoc.bao_don` và `sau.o_do` thì cột bàn có thể lệch (`LEFT_WIDTH` cộng cứng cho tối đa 3 bàn) — deferred [scenario_viewer.gd]
+- [x] [Review][Defer] Kỵ binh xung phong trúng tướng nhưng đứng yên ở ô cũ (đúng AC 5 "chủ đòn không đi"); hoạt ảnh 2.11 phải tự suy ra đường lao từ `ATTACKED.from_cell` tới `to_cell` — deferred, xử lý ở 2.11 [battle_event.gd]
 
 ## Dev Notes
 
@@ -257,3 +265,5 @@ Claude Opus 5.5 (claude-opus-5-5[1m])
 - `_bmad-output/planning-artifacts/game-architecture.md`, `_bmad-output/implementation-artifacts/deferred-work.md`
 - `_bmad-output/implementation-artifacts/anh/2-8-*.png` (8 ảnh)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- 2026-10-21 (code review): thêm test thua kiểm cả nút Hủy và phím Z, test "sát thương lớn hơn máu còn lại". `tools/test.sh`: 560/560 đạt, 75 kịch bản đã duyệt. Task 6.1 bỏ `[x]`: còn chờ tác giả kiểm tay `thu_keo`, `thu_lao`, `tran_01` qua `tools/chay.sh --dev` (ảnh cũ chụp từ trận tạm `thu_thua` ngoài repo).
+- 2026-10-22: tác giả báo đã tự kiểm tay bằng `tools/chay.sh --dev` và đồng ý bỏ bước chụp ảnh; đánh dấu Task 6.1 xong, story sang done.
