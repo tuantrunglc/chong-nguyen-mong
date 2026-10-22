@@ -3,7 +3,7 @@ extends RefCounted
 ## Đòn quân Nguyên đã báo (kiến trúc M1). Lưu tương đối so với chủ đòn, không lưu ô tuyệt đối: chủ đòn bị đẩy
 ## hoặc kéo thì đòn tự dịch theo. Trường chỉ gán trong _init; sao chép bằng clone().
 
-## CELL: đánh một ô (Bộ binh; Cung kỵ ở Story 2.15). DIRECTION: xung phong theo một hướng (Kỵ binh).
+## CELL: đánh một ô (Bộ binh: ô kề; Cung kỵ: ô thẳng hàng 2–3 ô). DIRECTION: xung phong theo một hướng (Kỵ binh).
 enum Kind { CELL, DIRECTION }
 
 ## Ô trả về khi chủ đòn không còn trên bàn (đòn sẽ bị hủy ở Story 2.9).

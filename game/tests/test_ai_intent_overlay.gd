@@ -35,8 +35,8 @@ func test_no_enemy_and_archer() -> void:
 	var empty: BattleState = _prepared({Vector2i(3, 6): "1"})
 	assert_eq(AiIntentOverlay.texts_for(empty), ["Ý định quân Nguyên (hiệp 1)", "không có quân Nguyên"] as Array[String])
 	var archer: BattleState = _prepared({Vector2i(3, 0): "C", Vector2i(3, 6): "1"})
-	assert_eq(AiIntentOverlay.texts_for(archer)[1], "Cung kỵ 101: đứng yên ở 3,0 · nhắm Nguyễn Khoái (cách 6 bước) · "
-		+ "chưa có luật đòn cho loại quân này · không báo đòn")
+	assert_eq(AiIntentOverlay.texts_for(archer)[1], "Cung kỵ 101: 3,0 → 3,3 · nhắm Nguyễn Khoái (cách 6 bước) · "
+		+ "đứng đây vì đánh trúng được · đòn số 1")
 
 
 func test_toggle_and_show_state() -> void:

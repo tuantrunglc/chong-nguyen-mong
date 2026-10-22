@@ -11,7 +11,8 @@ enum Reason {
 	CLOSEST,
 	## Không có đường tới tướng nào: đứng yên, không báo đòn.
 	NO_PATH,
-	## Loại quân chưa có luật đòn (Cung kỵ, Story 2.15): đứng yên, không báo đòn.
+	## Loại quân chưa có luật đòn: đứng yên, không báo đòn. Từ Story 2.15 cả ba loại quân Nguyên đều có luật;
+	## giữ mã này cho loại quân thêm sau.
 	NO_ATTACK_RULE,
 }
 

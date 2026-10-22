@@ -97,13 +97,43 @@ func test_infantry_cannot_stand_on_river_next_to_target() -> void:
 	_assert_intent(_plan(state, 101), 1, 4, Vector2i(4, 3), EnemyIntent.Reason.CLOSEST)
 
 
-func test_archer_has_no_attack_rule_yet() -> void:
-	var state: BattleState = BoardFixture.state({Vector2i(3, 0): "C", Vector2i(3, 6): "1"})
-	_assert_intent(_plan(state, 101), 1, 6, Vector2i(3, 0), EnemyIntent.Reason.NO_ATTACK_RULE)
+## Story 2.15: Cung kỵ bắn ô thẳng hàng cách 2–3 ô, tên bay qua quân.
+func test_archer_shoots_from_three_cells_away() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "C", Vector2i(3, 6): "1"})
+	_assert_intent(_plan(state, 101), 1, 3, Vector2i(3, 3), EnemyIntent.Reason.CAN_HIT)
 	var events: Array[BattleEvent] = []
 	RulesEnemyPhase.prepare(state, events)
-	assert_eq(BoardFixture.describe(events), [] as Array[String], "Cung kỵ đứng yên (Story 2.15)")
+	assert_eq(state.telegraphs.size(), 1, "báo đúng một đòn")
+	assert_eq(state.telegraphs[0].kind, Telegraph.Kind.CELL)
+	assert_eq(state.telegraphs[0].offset, Vector2i(0, 3), "ô 3,6 so với chỗ đứng 3,3")
 	assert_eq(state.validate(), [] as Array[String])
+
+
+func test_archer_walks_into_shooting_range() -> void:
+	# Cách 6 bước: ô duy nhất trong tầm đi bắn được là 3,3 (3,4 ở bước thứ 4).
+	var state: BattleState = BoardFixture.state({Vector2i(3, 0): "C", Vector2i(3, 6): "1"})
+	_assert_intent(_plan(state, 101), 1, 6, Vector2i(3, 3), EnemyIntent.Reason.CAN_HIT)
+
+
+func test_archer_next_to_target_cannot_shoot() -> void:
+	# Sông vây bốn phía (3,5): không đi được, cách 1 ô nên không bắn.
+	var state: BattleState = BoardFixture.state({Vector2i(3, 5): "C", Vector2i(3, 6): "1"},
+		{Vector2i(3, 4): "~", Vector2i(2, 5): "~", Vector2i(4, 5): "~"})
+	_assert_intent(_plan(state, 101), 1, 1, Vector2i(3, 5), EnemyIntent.Reason.CLOSEST)
+	var events: Array[BattleEvent] = []
+	RulesEnemyPhase.prepare(state, events)
+	assert_eq(BoardFixture.describe(events), [] as Array[String], "không báo đòn")
+	assert_eq(state.validate(), [] as Array[String])
+
+
+func test_archer_arrow_flies_over_units() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "C", Vector2i(3, 4): "B", Vector2i(3, 6): "1"})
+	var archer: Unit = state.unit_by_id(101)
+	assert_true(EnemyAI.can_hit_from(state, archer, Vector2i(3, 3), Vector2i(3, 6)),
+		"Bộ binh đứng giữa không chặn tên")
+	assert_false(EnemyAI.can_hit_from(state, archer, Vector2i(3, 5), Vector2i(3, 6)), "ô kề không bắn được")
+	assert_false(EnemyAI.can_hit_from(state, archer, Vector2i(3, 2), Vector2i(3, 6)), "4 ô không bắn được")
+	assert_false(EnemyAI.can_hit_from(state, archer, Vector2i(2, 4), Vector2i(3, 6)), "chéo không bắn được")
 
 
 func test_large_board_uses_its_own_size() -> void:

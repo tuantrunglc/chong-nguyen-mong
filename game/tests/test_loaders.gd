@@ -786,9 +786,10 @@ func test_real_lance_trial_level_loads() -> void:
 	assert_eq(level.terrain_at(Vector2i(5, 3)), Terrain.RIVER)
 
 
-## Ba trận thử còn lại (Story 2.1, 1.9): bố cục đổi ở Story 2.6 để pha địch lúc mở trận không dời quân nào.
+## Hai trận thử còn lại (Story 2.1, 1.9): bố cục đổi ở Story 2.6 để pha địch lúc mở trận không dời quân nào.
+## `thu_ba_tuong` tách ra ở Story 2.15 vì bàn đó có Cung kỵ, mà Cung kỵ bắn được thì đi tới chỗ bắn.
 func test_other_real_trial_levels_keep_enemies_still_on_begin() -> void:
-	for file: String in ["thu_ba_tuong", "thu_co_nho", "thu_day"]:
+	for file: String in ["thu_co_nho", "thu_day"]:
 		var r: LoadResult = LevelLoader.load_level("res://data/tran/%s.json" % file)
 		assert_eq(r.errors, [] as Array[String], file)
 		assert_eq(r.warnings, [] as Array[String], file)
@@ -796,6 +797,36 @@ func test_other_real_trial_levels_keep_enemies_still_on_begin() -> void:
 		assert_not_null(level, file)
 		if level != null:
 			_assert_enemies_stay_on_begin(level)
+
+
+## Story 2.15: `thu_ba_tuong` mở trận, Cung kỵ (5,2) tự đi tới chỗ bắn được và báo đòn; quân Nguyên khác đứng yên.
+func test_archer_trial_level_begins_with_a_shot() -> void:
+	var r: LoadResult = LevelLoader.load_level("res://data/tran/thu_ba_tuong.json")
+	assert_eq(r.errors, [] as Array[String])
+	var level: LevelData = r.data as LevelData
+	assert_not_null(level)
+	if level == null:
+		return
+	var stats: Stats = StatsLoader.load_stats("res://data/chi_so.json").data as Stats
+	var controller: BattleController = BattleController.new()
+	controller.start(level, stats)
+	controller.begin()
+	var state: BattleState = controller.snapshot()
+	var where: Dictionary = {}
+	for unit: Unit in state.units:
+		where[unit.id] = BoardText.cell_text(unit.cell)
+	assert_eq(where[101], "0,5", "Bộ binh đứng yên")
+	assert_eq(where[102], "2,5", "Kỵ binh đứng yên")
+	assert_eq(where[104], "5,6", "Bộ binh đứng yên")
+	assert_eq(where[103], "4,3", "Cung kỵ đi 2 bước tới chỗ bắn được Khánh Dư ở 4,6")
+	var archer_shot: Telegraph = null
+	for telegraph: Telegraph in state.telegraphs:
+		if telegraph.owner_id == 103:
+			archer_shot = telegraph
+	assert_not_null(archer_shot, "Cung kỵ có báo đòn")
+	if archer_shot != null:
+		assert_eq(archer_shot.offset, Vector2i(0, 3), "bắn 4,6 từ 4,3")
+	assert_eq(state.validate(), [] as Array[String])
 
 
 func test_real_pull_trial_level_loads() -> void:

@@ -6,7 +6,8 @@ extends RefCounted
 ## - Ô đứng: trong tầm đi (kể cả đứng yên), ô mà từ đó đòn trúng mục tiêu, cần ít bước nhất; hòa thì Bắc, rồi Đông.
 ## - Không có ô như vậy: ô gần mục tiêu nhất (số bước), hòa thì ít bước đi hơn, rồi Bắc, rồi Đông; không báo đòn.
 ## "Phía Bắc hơn" là hàng nhỏ hơn, "phía Đông hơn" là cột lớn hơn: thứ tự B→Đ→N→T áp cho chỗ hòa giữa các ô.
-## Nhắm làng (3.7), ô ải (3.11), luật Cung kỵ (2.15) thêm nhánh ở đây.
+## Đòn: Bộ binh ô kề; Kỵ binh xung phong thẳng hàng; Cung kỵ (Story 2.15) bắn ô thẳng hàng cách 2–3 ô, tên bay
+## qua quân (chặn tên là Story 3.1). Nhắm làng (3.7), ô ải (3.11) thêm nhánh ở đây.
 
 ## Địa hình chắn đường xung phong của Kỵ binh (FR19). Sông không chắn.
 const CHARGE_BLOCKERS: Array[int] = [Terrain.FOREST, Terrain.GRANARY, Terrain.VILLAGE]
@@ -67,7 +68,8 @@ static func plan(state: BattleState, unit: Unit) -> EnemyIntent:
 
 
 ## Đứng ở cell thì đòn của unit có trúng ô target không. Bộ binh: ô kề. Kỵ binh: cùng hàng hoặc cùng cột, giữa hai
-## ô không có quân nào (trừ chính unit, nó sẽ rời ô cũ) và không có rừng, kho lương, làng.
+## ô không có quân nào (trừ chính unit, nó sẽ rời ô cũ) và không có rừng, kho lương, làng. Cung kỵ (Story 2.15):
+## cùng hàng hoặc cùng cột, cách `tam_ban_gan`–`tam_ban_xa` ô, KHÔNG xét vật ở giữa (tên bay qua quân).
 static func can_hit_from(state: BattleState, unit: Unit, cell: Vector2i, target: Vector2i) -> bool:
 	match unit.type:
 		UnitType.BO_BINH:
@@ -83,6 +85,12 @@ static func can_hit_from(state: BattleState, unit: Unit, cell: Vector2i, target:
 					return false
 				step += dir
 			return true
+		UnitType.CUNG_KY:
+			if Grid.straight_dir(cell, target) == Vector2i.ZERO:
+				return false
+			var distance: int = Grid.distance(cell, target)
+			return distance >= state.stats.shoot_min_range(unit.type) \
+				and distance <= state.stats.shoot_max_range(unit.type)
 	return false
 
 
@@ -93,8 +101,10 @@ static func telegraph_for(unit: Unit, stand: Vector2i, target: Vector2i, order: 
 	return Telegraph.new(unit.id, Telegraph.Kind.CELL, target - stand, order)
 
 
+## Loại quân có luật đòn. Từ Story 2.15 cả ba loại quân Nguyên đều có; giữ hàm để loại quân thêm sau không có luật
+## thì không báo đòn.
 static func _has_attack_rule(type: int) -> bool:
-	return type == UnitType.BO_BINH or type == UnitType.KY_BINH
+	return type == UnitType.BO_BINH or type == UnitType.KY_BINH or type == UnitType.CUNG_KY
 
 
 ## So hai khóa cùng độ dài theo thứ tự từ điển: a nhỏ hơn b.
