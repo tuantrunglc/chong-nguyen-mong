@@ -395,6 +395,24 @@ func test_round_start_and_commands_follow_the_round_boundary() -> void:
 	assert_eq(BoardFixture.picture(c.round_start_snapshot()), new_round_start, "mốc dời sang bàn đầu hiệp mới")
 
 
+## Hủy khi không còn gì để hủy (bị từ chối) KHÔNG được đóng cửa sổ "giữ pha địch": lệnh bị từ chối không đổi bàn
+## cờ nên vẫn phải phát lại được cùng hiệp trước (Story 2.13 review).
+func test_rejected_undo_after_end_turn_keeps_the_previous_round() -> void:
+	var c: BattleController = _controller()
+	c.begin()
+	var round_one_start: Array[String] = BoardFixture.picture(c.snapshot())
+	c.submit(Command.move(1, Vector2i(0, 5)))
+	c.submit(Command.end_turn())
+	c.undo()  # END_TURN đã xoá bản chụp hủy -> bị từ chối NOTHING_TO_UNDO
+	var commands: Array[Dictionary] = c.round_commands()
+	assert_eq(commands.size(), 3, "hai lệnh hiệp trước + lần hủy bị từ chối ở hiệp mới")
+	assert_eq(str(commands[1]["lenh"]), "ket_thuc_luot")
+	assert_eq(str(commands[2]["lenh"]), "huy")
+	assert_eq(int(commands[2]["tu_choi"]), BattleEvent.Reject.NOTHING_TO_UNDO, "hủy bị từ chối")
+	assert_eq(BoardFixture.picture(c.round_start_snapshot()), round_one_start,
+		"vẫn dùng bàn đầu hiệp trước, không nhảy sang bàn sau pha địch")
+
+
 ## Xem trước chạy trên bản sao: không đổi trạng thái sống, không phát signal, không tạo bản chụp hủy (Story 2.12).
 func test_preview_does_not_touch_live_state() -> void:
 	var c: BattleController = _attack_controller()

@@ -188,7 +188,7 @@ func _report_meta() -> Dictionary:
 		"build": "v%s · %s" % [_read_version(), BuildInfo.read_commit(BUILD_INFO_PATH)],
 		"tran": _level_id,
 		"ten_tran": _level.name if _level != null else "",
-		"luc": Time.get_datetime_string_from_system(),
+		"luc": Time.get_datetime_string_from_system(false, true),
 		"lan_mo": _opens,
 	}
 

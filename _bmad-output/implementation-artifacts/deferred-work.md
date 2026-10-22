@@ -187,3 +187,9 @@
 
 - `BoardView.show_state` (`game/src/battle/board_view.gd:277`) xoá bóng xem trước nhưng không reset `BattleView._preview_cell`. Bất biến "memo == ô đang có bóng" hiện chỉ đúng nhờ `_finish_playback` reset memo ngay sau `playback_finished.emit()`; mọi chỗ gọi `show_state` giữa lượt thêm sau này sẽ làm bóng mất mà memo vẫn giữ ô → rê trong ô đó không hiện lại. Xử lý khi có lệnh gọi `show_state` ngoài luồng phát (hoặc khi BattleView nghe signal bàn-đổi).
 - (đã xử lý ở review vòng 2) Vị trí số máu của bóng nay có test: `test_preview_hp_label_stays_inside_its_cell` đọc tâm `Label` và đòi nằm trong `cell_rect` — revert cách đặt `hp_center` là test trượt.
+
+## Deferred from: code review of 2-13-f2-sao-chep-bao-loi (2026-10-22)
+
+- AC 3 của story 2.13 (dán báo cáo F2 cho một AI ngoài game để nó chuyển thành kịch bản tái hiện lỗi) chưa có bằng chứng: phần dữ liệu đã kiểm tự động (JSON → bộ nạp → bộ chạy, kể cả ca cố tình đẩy 2 ô), nhưng chưa lần nào dán cho ChatGPT/Claude. Tác giả thử một lần và ghi lại.
+- AC 1 chưa đọc lại clipboard thật: `_on_f2` đã chạy trong game thật (log "đã sao chép 2915 ký tự") nhưng máy không có `xclip`/`xdotool`, và công cụ bơm phím của GoPeak chỉ đặt `keycode` trong khi `DevTools` khớp `physical_keycode`. Kiểm trên máy có clipboard (hoặc dán tay) khi rảnh.
+- Lệnh làm hỏng bất biến (đường `rolled_back` của `BattleController`) không vào `hanh_dong` của báo cáo F2: `submit` quay về trước khi `_record`, và định dạng kịch bản không có mã cho "rollback". Muốn tái hiện bằng kịch bản thì phải thêm khái niệm đó vào định dạng + bộ chạy; hiện chỉ log giữ dấu vết.

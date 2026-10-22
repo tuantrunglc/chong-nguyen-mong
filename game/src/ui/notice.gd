@@ -62,7 +62,7 @@ func show_text(text: String) -> void:
 
 
 func text() -> String:
-	return _label.text if _label != null and visible else ""
+	return _label.text if _label != null else ""
 
 
 func is_shown() -> bool:
@@ -78,3 +78,5 @@ func _place_panel() -> void:
 func _hide() -> void:
 	visible = false
 	_shown = false
+	if _label != null:
+		_label.text = ""

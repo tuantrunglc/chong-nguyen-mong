@@ -152,9 +152,10 @@ func round_start_snapshot() -> BattleState:
 func round_commands() -> Array[Dictionary]:
 	var source: Array[Dictionary] = []
 	if _use_previous_round():
-		source = _prev_round_commands
-	else:
-		source = _round_commands
+		# Hiệp mới chưa có lệnh chạy được: giữ lệnh hiệp trước, rồi nối các lệnh bị từ chối vừa bấm ở hiệp mới
+		# (chúng không đổi bàn cờ nên phát lại vẫn khớp, mà người báo lỗi vẫn thấy mình đã bấm gì).
+		source.append_array(_prev_round_commands)
+	source.append_array(_round_commands)
 	var out: Array[Dictionary] = []
 	for entry: Dictionary in source:
 		out.append(entry.duplicate(true))
@@ -200,9 +201,18 @@ func _start_round(keep_previous: bool) -> void:
 	_round_commands = []
 
 
-## Báo cáo dùng hiệp trước khi hiệp này chưa có lệnh nào — đúng cửa sổ ngay sau khi kết thúc lượt.
+## Báo cáo dùng hiệp trước khi hiệp này chưa có lệnh nào CHẠY ĐƯỢC — đúng cửa sổ ngay sau khi kết thúc lượt.
+## Lệnh bị từ chối (kể cả Hủy khi không còn gì để hủy) không tính: chúng không đổi bàn cờ, nên không được đóng
+## cửa sổ giữ pha địch (Story 2.13 review).
 func _use_previous_round() -> bool:
-	return _round_commands.is_empty() and _prev_round_start != null
+	return _prev_round_start != null and not _has_accepted_command()
+
+
+func _has_accepted_command() -> bool:
+	for entry: Dictionary in _round_commands:
+		if int(entry.get("tu_choi", BattleEvent.Reject.NONE)) == BattleEvent.Reject.NONE:
+			return true
+	return false
 
 
 ## Các ô quân unit_id dừng được, theo thứ tự đọc bàn. Không có quân đó, hoặc trận đã hết, thì [].

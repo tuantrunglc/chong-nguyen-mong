@@ -4,7 +4,7 @@ baseline_commit: 6030532
 
 # Story 2.13: F2 sao chép báo lỗi
 
-Status: review
+Status: done
 
 ## Story
 
@@ -174,6 +174,24 @@ dia_hinh / quan / mau như trên nhưng của trạng thái hiện tại
 
 ## Dev Agent Record
 
+### Review Findings
+
+#### Vòng 1 — code review 2026-10-22 (diff `6030532..HEAD`)
+
+Blind Hunter + Edge Case Hunter + Acceptance Auditor. 30 phát hiện thô → 12 sau khi gộp và phân loại: **8 sửa, 3 hoãn, 5 loại bỏ** (trong đó vài phát hiện sai: `_level_id` gán trước khi nạp không gây lệch vì nhánh lỗi đã đặt `_controller = null` và `_level = null`; `test_main` không rò `AppState.launch.dev` vì `after_each` đã trả lại; fallback `truoc = state` khi `round_start == null` không có đường chạm từ `main`). Bằng chứng thô: `.review/2-13-findings-*.md`.
+
+- [x] [Review][Patch] **HIGH — `sau.bao_don` bỏ đòn của chủ đã gục, nhưng bàn phát lại vẫn giữ đòn đó: kịch bản trong báo cáo LUÔN trượt** — giết một quân đang báo đòn khi còn quân khác cũng báo đòn, rồi F2: `sau` chỉ có đòn của quân sống, còn bàn phát lại vẫn giữ đòn của quân đã gục (`Effects` không xoá telegraph), nên `ScenarioRunner` báo `sau: thừa đòn N` và `run.passed = false`. Đã dựng lại được: `["sau: thừa đòn 1: quân ở -1,-1 đánh ô -1,-1"]`. Nếu đòn của chủ đã gục là đòn DUY NHẤT thì `bao_don` bị bỏ hẳn → kịch bản "đạt" mà không kiểm gì. Cùng chỗ: đòn CELL có ô đích ra ngoài bàn (chủ bị đẩy sát mép — `TelegraphCancel.OUT_OF_BOARD` có thật) làm bộ nạp từ chối **cả báo cáo**. Sửa: chỉ ghi `bao_don` khi **mọi** đòn serialize được; còn lại bỏ khóa và ghi một dòng "bỏ N đòn" (gộp cả chủ đã gục, ô ngoài bàn, hướng lạ). [game/src/debug/bug_report.gd:170-190]
+- [x] [Review][Patch] **MEDIUM — lệnh bị từ chối ở hiệp mới đóng oan cửa sổ "giữ pha địch"** — sau `ket_thuc_luot`, bấm Hủy khi không có gì để hủy (hoặc đánh một ô ngoài tầm) ghi một lệnh `tu_choi` vào hiệp mới → `_use_previous_round()` thấy danh sách không rỗng → `truoc` thành bàn SAU pha địch, pha địch biến mất khỏi báo cáo (vẫn phát lại đúng nên không ai thấy). Sửa: chỉ coi là "hiệp đã có lệnh" khi có lệnh **chạy được**; các lệnh bị từ chối của hiệp mới vẫn được nối vào `hanh_dong` sau các lệnh hiệp trước. [game/src/battle/battle_controller.gd:204-220]
+- [x] [Review][Patch] **MEDIUM — `sau` thiếu `da_di`/`da_danh`/`ket_qua`** — định dạng `sau` nhận ba khóa này, báo cáo lại in cờ đã đi/đã đánh ở phần "bàn hiện tại", nhưng kịch bản sinh ra không kiểm chúng: báo lỗi "tướng đi hai lần" không thể thành kịch bản trượt, và bàn thắng với bàn "đầu hiệp không còn quân Nguyên" không phân biệt được. Sửa: thêm ba khóa vào `after_layers` (không thêm `hiep` — phát lại luôn bắt đầu từ hiệp 1). [game/src/debug/bug_report.gd:112-120]
+- [x] [Review][Patch] **MEDIUM — báo cáo "không có trận" bỏ id trận, đúng lúc màn hình lỗi cần nhất** — màn hình lỗi nạp dữ liệu thì `state == null`, dòng "trận:" in đè mất `meta["tran"]`, nên báo cáo không cho biết trận nào hỏng. Sửa: in `trận: %s (không có bàn)`; test khoá lại. [game/src/debug/bug_report.gd:44-48]
+- [x] [Review][Patch] **MEDIUM — test F2 ở `main` không phát lại báo cáo đã chép** — chỉ so chuỗi con, nên nối nhầm `snapshot()` với `round_start_snapshot()` (hoặc bỏ `round_commands()`) vẫn xanh; các test phát lại đều gọi `BugReport` trực tiếp. Sửa: tách khối JSON từ `copied[0]`, nạp + chạy, so với bàn sống; thêm assert "phiên bản:", "lúc:", "lần mở" và `assert_ne(text, "dev.copied")`. [game/tests/test_main.gd:568-600]
+- [x] [Review][Patch] **MEDIUM — test phát lại chỉ so quân, không so đòn đã báo; thiếu ca có lệnh bị từ chối** — `BoardFixture.picture` không có `telegraphs`, nên `direction_code`/`enemy_order`/`order` sai vẫn xanh (chỉ lộ nhờ `run.passed`); và không lần phát lại nào chứa bước `tu_choi` (comment trong `test_report_replays_to_the_live_board` nói có nhưng lệnh `huy` đó nằm ở hiệp trước). Sửa: so thêm danh sách đòn (ô chủ, kiểu, hướng/ô đích, số thứ tự); thêm ca đánh ô ngoài tầm rồi F2 ngay, và ca giết chủ đòn (khoá bản sửa HIGH). [game/tests/test_bug_report.gd:186-220]
+- [x] [Review][Patch] **LOW — dòng "lúc:" dùng dấu `T`** — `Time.get_datetime_string_from_system()` mặc định `use_space = false` → `2026-10-22T15:04:11`, lệch định dạng đã ghi trong story. Sửa: `get_datetime_string_from_system(false, true)`. [game/src/app/main.gd:191]
+- [x] [Review][Patch] **LOW — thiếu test cho ký hiệu lạ, cho bảng mã từ chối, và một assert không thể sai** — `BoardText.unit_symbol`/`terrain_symbol`/`direction_code` chưa có ca lạ; `test_reject_codes_match_scenario_runner` chỉ so hai bảng nên không bắt được khi enum `BattleEvent.Reject` thêm giá trị mà cả hai bảng cùng thiếu; `test_notice` khẳng định `get_child_count() == 1` trong khi `show_text` không bao giờ thêm con. Sửa: thêm ca lạ + vòng qua toàn bộ enum + đổi assert Notice sang kiểm nhãn thật. [game/tests/test_bug_report.gd, game/tests/test_notice.gd, game/tests/test_scenario_loader.gd]
+- [x] [Review][Defer] **AC 3 chưa có bằng chứng "dán cho AI ngoài game"** — dữ liệu phát lại đã kiểm tự động (kể cả ca lỗi cố tình đẩy 2 ô), nhưng chưa lần nào dán cho một AI khác; tác giả thử một lần và ghi lại. — deferred (kiểm tay của tác giả).
+- [x] [Review][Defer] **AC 1 chưa đọc lại clipboard thật** — `_on_f2` đã chạy trong game thật (log 2915 ký tự) nhưng máy không có `xclip`/`xdotool`, cũng không bơm được phím F2 (chỉ đặt `keycode`). — deferred (kiểm tay của tác giả trên máy có clipboard).
+- [x] [Review][Defer] **Lệnh làm hỏng bất biến (rollback) không vào `hanh_dong`** — `submit` quay về trước `_record`; định dạng kịch bản không có mã cho "rollback" nên chỉ log giữ được dấu vết. — deferred (cần định dạng mới nếu muốn tái hiện bằng kịch bản).
+
 ### Agent Model Used
 
 deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
@@ -185,6 +203,7 @@ deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
 - Báo cáo thật in từ trận `thu_lao` (script tạm, đã xoá): 2915 ký tự, khối JSON hợp lệ; `truoc` có 3 đòn báo, `sau` còn 2, `mau` chỉ ghi quân thiếu máu (`3,3=1`), `hanh_dong` là `danh` + `ket_thuc_luot`; phần bàn hiện tại ghi cờ đã đi/đã đánh của tướng.
 - AC 3 (lỗi cố tình): dựng stats "đẩy 2 ô" thay vì 1 → lấy báo cáo → tách khối JSON → cho chính bộ nạp + bộ chạy kịch bản của game phát lại: ra đúng bàn đang thấy (`101@4,1`); chạy lại **cùng kịch bản** với stats đúng (đẩy 1) ra `101@3,1` — kịch bản phân biệt được lỗi. Script tạm đã xoá.
 - **Chưa làm:** dán báo cáo cho một AI ngoài game (ChatGPT/Claude) — tác giả tự thử; phần chuyển JSON → kịch bản đã kiểm tự động.
+- Review vòng 1: **618/618 đạt** sau 8 bản sửa (thêm 6 test). Kiểm ngược: bỏ điều kiện "ghi `bao_don` khi mọi đòn ghi được" → `test_sau_omits_bao_don_when_a_strike_cannot_be_written` trượt đúng câu `sau: thừa đòn 1`; trả `_use_previous_round()` về `is_empty` → `test_rejected_undo_after_end_turn_keeps_the_previous_round` trượt.
 - **Bẫy đã gặp khi tác giả thử bước 5:** lưu **cả báo cáo** vào `bao_loi.json` → `tests/test_scenarios.gd` báo `JSON sai cú pháp (Expected 'true', 'false', or 'null', got 'H')` và cả bộ trượt. Đã làm rõ ngay trong báo cáo (tiêu đề mục + ghi chú: cả báo cáo là .txt, chỉ khối json là .json) và trong hướng dẫn bước 5. Báo cáo gốc giữ ở `game/tests/kich_ban/thu/bao_loi.txt` (không commit); `bao_loi.json` đã tách đúng khối JSON.
 
 ### Completion Notes List
@@ -196,7 +215,7 @@ deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
 - `DevTools`: thêm `f2_pressed`; `main`: nối F2 trong nhánh bật dev, `clipboard_writer` là seam để test bắt chuỗi (máy test không có clipboard), ghi log số ký tự đã chép.
 - Chữ mới `dev.copied`, `dev.copied_no_battle` trong `text.csv`; đã chạy `--headless --import` sinh lại `text.vi.translation`.
 - Ba câu hỏi đã chốt trước khi code: (1) `truoc` = bàn đầu hiệp + lệnh trong hiệp; (2) F2 vẫn chép được khi không có trận; (3) chưa làm khung dự phòng cho clipboard trên web.
-- **Khác story một chỗ:** khối JSON có thêm `sau` (bàn hiện tại) để kịch bản hợp lệ ngay và chạy được bằng `tools/test.sh`; nếu là lỗi thì sửa `sau` thành điều đúng trước khi sửa code (quy trình M3) — báo cáo có ghi câu này.
+- **Khác story một chỗ:** khối JSON có thêm `sau` (bàn hiện tại) để kịch bản hợp lệ ngay và chạy được bằng `tools/test.sh`; nếu là lỗi thì sửa `sau` thành điều đúng trước khi sửa code (quy trình M3) — báo cáo có ghi câu này. Sau review vòng 1, `sau` có thêm `da_di`/`da_danh`/`ket_qua`, và **bỏ cả khóa `bao_don`** khi có đòn không ghi được (chủ đã gục, ô đích ngoài bàn, hướng lạ) — ghi đủ từng phần thì bàn phát lại "thừa đòn" và kịch bản trong báo cáo luôn trượt.
 
 **Hướng dẫn tác giả tự test (đúng những bước đã chạy):**
 
@@ -229,3 +248,4 @@ deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
 ### Change Log
 
 - 2026-10-22: F2 sao chép báo lỗi (Story 2.13) — `BugReport`, `Notice`, nhật ký lệnh theo hiệp, 21 test; test 591 → 612.
+- 2026-10-22 (review vòng 1): sửa 8 phát hiện — `bao_don` chỉ ghi khi mọi đòn ghi được, giữ cửa sổ pha địch khi lệnh bị từ chối, `sau` thêm `da_di`/`da_danh`/`ket_qua`, giữ id trận ở màn hình lỗi, test F2 phát lại, test so đòn + ca lệnh bị từ chối, giờ dùng dấu cách, bổ sung test còn thiếu; test 612 → 618.

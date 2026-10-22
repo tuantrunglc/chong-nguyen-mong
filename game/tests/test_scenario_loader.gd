@@ -728,6 +728,16 @@ func test_every_board_symbol_has_a_name() -> void:
 		assert_eq(ScenarioRunner.terrain_symbol(kind), symbol)
 
 
+## Bảng ngược dùng cho báo cáo F2: ký hiệu lạ trả "?", hướng lạ trả "" (Story 2.13 review).
+func test_symbol_helpers_handle_unknown_values() -> void:
+	assert_eq(BoardText.unit_symbol(9999), "?", "loại quân lạ")
+	assert_eq(BoardText.terrain_symbol(9999), "?", "địa hình lạ")
+	assert_eq(BoardText.unit_symbol(BoardText.NO_UNIT), ".", "ô trống vẫn là dấu chấm")
+	for code: String in BoardText.DIRECTION_CODES:
+		assert_eq(BoardText.direction_code(BoardText.DIRECTION_CODES[code] as Vector2i), code)
+	assert_eq(BoardText.direction_code(Vector2i(2, 0)), "", "vector không phải hướng đơn vị")
+
+
 ## Mọi lệnh đã có luật từ Story 2.1 (PENDING_RULES rỗng): bước trượt thì dừng ở bước đó, không so bàn sau.
 func test_runner_stops_at_failed_step() -> void:
 	assert_eq(ScenarioRunner.PENDING_RULES, {}, "lệnh nào cũng có luật")

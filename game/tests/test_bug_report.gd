@@ -34,6 +34,34 @@ func _controller() -> BattleController:
 	return controller
 
 
+## 5×5: Khoái (1,1), Kỵ binh 2 máu (2,1) báo đòn 1 vào (1,1), Bộ binh (3,3) báo đòn 2 vào (3,4).
+func _telegraphed_controller() -> BattleController:
+	var level: LevelData = LevelData.new()
+	level.size = Vector2i(5, 5)
+	for i: int in range(level.size.x * level.size.y):
+		level.terrain.append(Terrain.PLAIN)
+	level.units.append(LevelData.UnitPlacement.new(UnitType.NGUYEN_KHOAI, Vector2i(1, 1)))
+	level.units.append(LevelData.UnitPlacement.new(UnitType.KY_BINH, Vector2i(2, 1)))
+	level.units.append(LevelData.UnitPlacement.new(UnitType.BO_BINH, Vector2i(3, 3)))
+	var stats: Stats = BoardFixture.stats()
+	var state: BattleState = BattleState.from_level(level, stats)
+	var horse: Unit = state.unit_at(Vector2i(2, 1))
+	var foot: Unit = state.unit_at(Vector2i(3, 3))
+	var controller: BattleController = BattleController.new()
+	controller.start(level, stats, [Telegraph.new(horse.id, Telegraph.Kind.CELL, Vector2i(-1, 0), 1),
+		Telegraph.new(foot.id, Telegraph.Kind.CELL, Vector2i(0, 1), 2)])
+	return controller
+
+
+## "chủ:kiểu:ô tương đối:số thứ tự" của mọi đòn — để so bàn phát lại với bàn thật.
+func _strikes(state: BattleState) -> Array[String]:
+	var out: Array[String] = []
+	for telegraph: Telegraph in state.telegraphs:
+		out.append("%d:%d:%s:%d" % [telegraph.owner_id, telegraph.kind,
+			BoardText.cell_text(telegraph.offset), telegraph.order])
+	return out
+
+
 func _report(controller: BattleController, log_lines: PackedStringArray = PackedStringArray()) -> String:
 	return BugReport.build(controller.snapshot(), controller.round_start_snapshot(),
 		controller.round_commands(), log_lines, META)
@@ -84,7 +112,7 @@ func test_report_has_every_required_section() -> void:
 func test_no_battle_report_has_no_scenario() -> void:
 	var text: String = BugReport.build(null, null, [] as Array[Dictionary],
 		PackedStringArray(["[INFO][battle] nạp trận"]), META)
-	assert_string_contains(text, "trận: (không có trận)")
+	assert_string_contains(text, "trận: thu (không có bàn)", "vẫn giữ id trận để biết trận nào hỏng")
 	assert_string_contains(text, "[INFO][battle] nạp trận")
 	assert_false(text.contains("```json"), "không có trận thì không có kịch bản")
 	assert_string_contains(text, "Không có trận đang chạy")
@@ -129,8 +157,18 @@ func test_strike_of_dead_owner_is_dropped_and_mentioned() -> void:
 	var state: BattleState = BoardFixture.state({Vector2i(1, 1): "1", Vector2i(3, 3): "B"})
 	state.telegraphs.append(Telegraph.new(999, Telegraph.Kind.CELL, Vector2i(-1, 0), 1))
 	assert_eq(BugReport.strikes_layer(state).size(), 0, "chủ đã gục: không ghi được vào kịch bản")
+	assert_eq(BugReport.dropped_strikes(state), 1, "đếm được đòn bị bỏ")
+	assert_false(BugReport.after_layers(state).has("bao_don"), "không ghi được hết thì bỏ cả khóa")
 	var lines: PackedStringArray = BugReport.current_section(state)
-	assert_has(lines, "bỏ 1 đòn của quân đã gục (không ghi được vào kịch bản)")
+	assert_has(lines, "bỏ 1 đòn không ghi được vào kịch bản (chủ đã gục / ô đích ngoài bàn / hướng lạ)")
+
+
+func test_off_board_strike_target_is_dropped() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(1, 1): "1", Vector2i(3, 0): "B"})
+	var foot: Unit = state.unit_at(Vector2i(3, 0))
+	state.telegraphs.append(Telegraph.new(foot.id, Telegraph.Kind.CELL, Vector2i(0, -1), 1))
+	assert_eq(BugReport.strikes_layer(state).size(), 0, "ô đích 3,-1 ngoài bàn: bộ nạp sẽ từ chối")
+	assert_eq(BugReport.dropped_strikes(state), 1)
 
 
 func test_commands_become_scenario_steps() -> void:
@@ -154,6 +192,10 @@ func test_reject_codes_match_scenario_runner() -> void:
 		assert_true(ScenarioRunner.REJECT_EVENTS.has(code), "mã %s phải có trong bộ chạy kịch bản" % code)
 		assert_eq(int(ScenarioRunner.REJECT_EVENTS[code]), reject, "mã %s phải trỏ về đúng lý do" % code)
 	assert_eq(BugReport.REJECT_CODES.size(), ScenarioRunner.REJECT_EVENTS.size(), "không thiếu mã nào")
+	for value: int in BattleEvent.Reject.values():
+		if value == BattleEvent.Reject.NONE:
+			continue
+		assert_true(BugReport.REJECT_CODES.has(value), "lý do từ chối %d phải có mã trong báo cáo" % value)
 
 
 func test_log_keeps_the_last_200_lines() -> void:
@@ -184,7 +226,7 @@ func test_report_replays_to_the_live_board() -> void:
 	controller.submit(Command.move(2, Vector2i(1, 3)))
 	var enemy: Unit = _enemy(controller.snapshot())
 	controller.submit(Command.attack(1, enemy.cell))
-	controller.undo()  # đánh đã xóa bản chụp hủy -> bị từ chối, vẫn phải ghi trong hanh_dong
+	controller.undo()  # đánh đã xóa bản chụp hủy -> bị từ chối (lệnh này thuộc hiệp cũ, không vào hanh_dong của hiệp mới)
 	controller.submit(Command.end_turn())
 	controller.submit(Command.move(1, Vector2i(0, 1)))
 	var data: Dictionary = _scenario_json(_report(controller))
@@ -194,6 +236,7 @@ func test_report_replays_to_the_live_board() -> void:
 	assert_true(run.passed, "kịch bản phát lại không lỗi: %s" % str(run.problems))
 	assert_eq(BoardFixture.picture(run.final_state), BoardFixture.picture(controller.snapshot()),
 		"bàn sau khi phát lại khớp bàn đang chơi (ô, máu, đã đi, đã đánh)")
+	assert_eq(_strikes(run.final_state), _strikes(controller.snapshot()), "đòn đã báo cũng khớp")
 
 
 ## AC 3: F2 rơi đúng lúc pha địch vừa chạy xong (chưa ra lệnh nào ở hiệp mới) thì báo cáo phải dùng hiệp TRƯỚC
@@ -214,3 +257,50 @@ func test_report_right_after_end_turn_keeps_the_enemy_phase() -> void:
 	assert_true(run.passed, "kịch bản phát lại không lỗi: %s" % str(run.problems))
 	assert_eq(BoardFixture.picture(run.final_state), BoardFixture.picture(controller.snapshot()),
 		"phát lại có cả pha địch: bàn khớp")
+	assert_eq(_strikes(run.final_state), _strikes(controller.snapshot()), "đòn đã báo sau pha địch cũng khớp")
+
+
+## Lệnh bị từ chối trong hiệp vào `hanh_dong` kèm mã lý do và phát lại khớp — nhánh `tu_choi` trước đây chỉ được
+## kiểm ở mức layer bằng dict tự dựng.
+func test_rejected_command_is_replayed() -> void:
+	var controller: BattleController = _controller()
+	controller.begin()
+	controller.submit(Command.attack(1, Vector2i(4, 4)))  # ngoài tầm
+	var data: Dictionary = _scenario_json(_report(controller))
+	var steps: Array = data["hanh_dong"] as Array
+	assert_eq(steps.size(), 1, "lệnh bị từ chối vẫn có trong hanh_dong")
+	assert_true((steps[0] as Dictionary).has("tu_choi"), "kèm mã lý do")
+	var run: ScenarioRunner.ScenarioResult = ScenarioRunner.run(_scenario(data), BoardFixture.stats())
+	assert_true(run.passed, "kịch bản có bước bị từ chối vẫn phát lại được: %s" % str(run.problems))
+	assert_eq(BoardFixture.picture(run.final_state), BoardFixture.picture(controller.snapshot()))
+
+
+## `sau` ghi cờ đã đi/đã đánh và kết cục (định dạng kiểm được cả ba) — trước đây chỉ in ở phần "bàn hiện tại".
+func test_sau_records_flags_and_outcome() -> void:
+	var controller: BattleController = _controller()
+	controller.begin()
+	controller.submit(Command.move(1, Vector2i(0, 1)))
+	var data: Dictionary = _scenario_json(_report(controller))
+	var sau: Dictionary = data["sau"] as Dictionary
+	assert_eq(sau["da_di"], ["1"] as Array[String], "Khoái đã đi")
+	assert_eq(sau["da_danh"], [] as Array[String])
+	assert_eq(str(sau["ket_qua"]), "dang_choi")
+	var run: ScenarioRunner.ScenarioResult = ScenarioRunner.run(_scenario(data), BoardFixture.stats())
+	assert_true(run.passed, "kịch bản có da_di/ket_qua vẫn phát lại được: %s" % str(run.problems))
+
+
+## HIGH của review: giết một chủ đòn khi còn đòn khác — `sau` không ghi được hết thì bỏ cả khóa `bao_don`, và báo
+## cáo vẫn phát lại được (trước khi sửa: `sau: thừa đòn 1` → kịch bản trong báo cáo luôn trượt).
+func test_sau_omits_bao_don_when_a_strike_cannot_be_written() -> void:
+	var controller: BattleController = _telegraphed_controller()
+	controller.submit(Command.attack(1, Vector2i(2, 1)))
+	assert_eq(controller.snapshot().telegraphs.size(), 2, "cả hai đòn còn trên bàn (đòn của chủ đã gục chưa bị xoá)")
+	var data: Dictionary = _scenario_json(_report(controller))
+	assert_false((data["sau"] as Dictionary).has("bao_don"), "không ghi được hết thì bỏ cả khóa")
+	assert_true((data["truoc"] as Dictionary).has("bao_don"), "bàn đầu hiệp vẫn ghi đủ hai đòn")
+	var run: ScenarioRunner.ScenarioResult = ScenarioRunner.run(_scenario(data), BoardFixture.stats())
+	assert_true(run.passed, "báo cáo phải phát lại được, không 'thừa đòn': %s" % str(run.problems))
+	assert_eq(BoardFixture.picture(run.final_state), BoardFixture.picture(controller.snapshot()))
+	assert_eq(_strikes(run.final_state), _strikes(controller.snapshot()), "đòn còn treo trên bàn phát lại khớp")
+	var lines: PackedStringArray = BugReport.current_section(controller.snapshot())
+	assert_has(lines, "bỏ 1 đòn không ghi được vào kịch bản (chủ đã gục / ô đích ngoài bàn / hướng lạ)")

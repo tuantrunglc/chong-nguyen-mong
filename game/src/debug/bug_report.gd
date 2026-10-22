@@ -44,7 +44,7 @@ static func build(state: BattleState, round_start: BattleState, commands: Array[
 	lines.append("Hào Khí Đông A — báo lỗi")
 	lines.append("phiên bản: %s" % str(meta.get("build", "dev")))
 	if state == null:
-		lines.append("trận: (không có trận)")
+		lines.append("trận: %s (không có bàn)" % str(meta.get("tran", "?")))
 	else:
 		lines.append("trận: %s — %s · hiệp %d" % [str(meta.get("tran", "?")), str(meta.get("ten_tran", "?")),
 			state.round_number])
@@ -71,7 +71,8 @@ static func build(state: BattleState, round_start: BattleState, commands: Array[
 		lines.append("Không có trận đang chạy. Chỉ có nhật ký và phiên bản ở trên.")
 	else:
 		lines.append("Cả báo cáo này là một tệp .txt. Chỉ khối json ở trên là một kịch bản luật hợp lệ:")
-		lines.append("`truoc` là bàn đầu hiệp, `hanh_dong` là các lệnh người chơi đã bấm trong hiệp, `sau` là bàn ĐANG thấy.")
+		lines.append("`truoc` là bàn đầu hiệp, `hanh_dong` là các lệnh người chơi đã bấm trong hiệp, `sau` là bàn SAU")
+		lines.append("lệnh vừa rồi (đang phát hoạt ảnh thì đây là bàn cuối, không phải khung đang chạy).")
 		lines.append("Muốn chạy thử: chép ĐÚNG khối đó (không kèm dòng nào khác) vào")
 		lines.append("game/tests/kich_ban/<nhóm>/<tên>.json rồi chạy tools/test.sh.")
 		lines.append("Nếu đây là lỗi: sửa `sau` thành điều ĐÚNG (kịch bản phải trượt), rồi mới sửa code — quy trình M3.")
@@ -95,29 +96,62 @@ static func scenario_data(state: BattleState, round_start: BattleState, commands
 	}
 
 
-## Các lớp của "truoc": dia_hinh, quan, mau (chỉ quân thiếu máu), thu_tu_dich, bao_don (nếu có).
+## Các lớp của "truoc": dia_hinh, quan, mau (chỉ quân thiếu máu), thu_tu_dich, bao_don (nếu ghi được hết).
 static func before_layers(state: BattleState) -> Dictionary:
 	var layers: Dictionary = {"dia_hinh": terrain_rows(state), "quan": unit_rows(state)}
 	var hp: Dictionary = hp_layer(state)
 	if not hp.is_empty():
 		layers["mau"] = hp
 	layers["thu_tu_dich"] = enemy_order(state)
-	var strikes: Array = strikes_layer(state)
-	if not strikes.is_empty():
-		layers["bao_don"] = strikes
+	_add_strikes(layers, state)
 	return layers
 
 
-## Các lớp của "sau": như "truoc" nhưng KHÔNG có `thu_tu_dich` (định dạng "sau" không nhận khóa đó).
+## Các lớp của "sau": như "truoc" nhưng KHÔNG có `thu_tu_dich` (định dạng "sau" không nhận khóa đó);
+## thêm cờ đã đi/đã đánh của tướng và kết cục — định dạng "sau" kiểm được cả ba.
 static func after_layers(state: BattleState) -> Dictionary:
 	var layers: Dictionary = {"dia_hinh": terrain_rows(state), "quan": unit_rows(state)}
 	var hp: Dictionary = hp_layer(state)
 	if not hp.is_empty():
 		layers["mau"] = hp
-	var strikes: Array = strikes_layer(state)
-	if not strikes.is_empty():
-		layers["bao_don"] = strikes
+	_add_strikes(layers, state)
+	layers["da_di"] = general_symbols(state, true)
+	layers["da_danh"] = general_symbols(state, false)
+	layers["ket_qua"] = outcome(state)
 	return layers
+
+
+## Ghi `bao_don` chỉ khi MỌI đòn serialize được. Bỏ một đòn (chủ đã gục, ô đích ngoài bàn, hướng lạ) mà vẫn ghi
+## thì bàn phát lại còn đòn đó còn "sau" thì không — `ScenarioRunner` báo "thừa đòn" và kịch bản trong báo cáo
+## luôn trượt (Story 2.13 review). Bỏ cả khóa thì bộ chạy chỉ không so đòn, kịch bản vẫn dùng được.
+static func _add_strikes(layers: Dictionary, state: BattleState) -> void:
+	var strikes: Array = strikes_layer(state)
+	if strikes.is_empty() or strikes.size() != state.telegraphs.size():
+		return
+	layers["bao_don"] = strikes
+
+
+## Ký hiệu "1"/"2"/"3" của các tướng đã đi (moved = true) hoặc đã đánh (moved = false).
+static func general_symbols(state: BattleState, moved: bool) -> Array[String]:
+	var out: Array[String] = []
+	for unit: Unit in state.units:
+		if unit.faction != Unit.Faction.DAI_VIET:
+			continue
+		if moved and unit.has_moved:
+			out.append(str(unit.id))
+		elif not moved and unit.has_attacked:
+			out.append(str(unit.id))
+	return out
+
+
+## "dang_choi" / "thang" / "thua" (khớp giá trị `sau.ket_qua` của kịch bản).
+static func outcome(state: BattleState) -> String:
+	match state.phase:
+		BattleState.Phase.WON:
+			return "thang"
+		BattleState.Phase.LOST:
+			return "thua"
+	return "dang_choi"
 
 
 ## Lớp `dia_hinh`: mỗi hàng một chuỗi, ô cách nhau một dấu cách.
@@ -167,7 +201,8 @@ static func enemy_order(state: BattleState) -> Array[String]:
 	return out
 
 
-## Lớp `bao_don`: đòn đã báo, xếp theo số thứ tự. Đòn của chủ đã gục bị bỏ (bộ nạp đòi `quan` phải có quân Nguyên).
+## Lớp `bao_don`: các đòn ghi được, xếp theo số thứ tự. Bỏ đòn không ghi được: chủ đã gục (bộ nạp đòi `quan` phải
+## có quân Nguyên), ô đích ra ngoài bàn (bộ nạp từ chối), hướng lạ. `dropped_strikes()` đếm phần bỏ.
 static func strikes_layer(state: BattleState) -> Array:
 	var sorted: Array[Telegraph] = state.telegraphs.duplicate()
 	sorted.sort_custom(func(a: Telegraph, b: Telegraph) -> bool: return a.order < b.order)
@@ -183,9 +218,17 @@ static func strikes_layer(state: BattleState) -> Array:
 				continue
 			item["huong"] = code
 		else:
-			item["o"] = BoardText.cell_text(owner.cell + telegraph.offset)
+			var target: Vector2i = owner.cell + telegraph.offset
+			if not state.in_bounds(target):
+				continue
+			item["o"] = BoardText.cell_text(target)
 		out.append(item)
 	return out
+
+
+## Số đòn không ghi được vào kịch bản (chủ đã gục, ô đích ngoài bàn, hướng lạ).
+static func dropped_strikes(state: BattleState) -> int:
+	return state.telegraphs.size() - strikes_layer(state).size()
 
 
 ## `hanh_dong`: [{lenh, tuong, o, tu_choi}] đúng định dạng kịch bản; lệnh bị từ chối giữ mã `tu_choi`.
@@ -239,12 +282,9 @@ static func current_section(state: BattleState) -> PackedStringArray:
 			var where: String = str(item["o"]) if item.has("o") else ("hướng %s" % str(item["huong"]))
 			parts.append("%d. %s" % [int(item["thu_tu"]), where])
 		lines.append("đòn đã báo: %s" % " · ".join(parts))
-	var dead_owner: int = 0
-	for telegraph: Telegraph in state.telegraphs:
-		if state.unit_by_id(telegraph.owner_id) == null:
-			dead_owner += 1
-	if dead_owner > 0:
-		lines.append("bỏ %d đòn của quân đã gục (không ghi được vào kịch bản)" % dead_owner)
+	var dropped: int = dropped_strikes(state)
+	if dropped > 0:
+		lines.append("bỏ %d đòn không ghi được vào kịch bản (chủ đã gục / ô đích ngoài bàn / hướng lạ)" % dropped)
 	return lines
 
 

@@ -566,7 +566,29 @@ func test_f5_needs_dev() -> void:
 	Log.debug_enabled = false
 
 
-## F2 (Story 2.13): chỉ khi bật dev, ghi clipboard qua seam test, hiện thông báo, và báo cáo có đủ phần.
+## Khối ```json trong báo cáo -> Dictionary.
+func _report_json(report: String) -> Dictionary:
+	var start: int = report.find("```json")
+	assert_gt(start, -1, "báo cáo phải có khối json")
+	var body: int = report.find("\n", start) + 1
+	var end: int = report.find("```", body)
+	var parser: JSON = JSON.new()
+	assert_eq(parser.parse(report.substr(body, end - body)), OK, "khối json đọc được")
+	return parser.data as Dictionary
+
+
+## Phát lại báo cáo bằng chính bộ nạp + bộ chạy của game, trả bàn cuối.
+func _replay_report(report: String) -> BattleState:
+	var loaded: LoadResult = ScenarioLoader.parse_scenario(JSON.stringify(_report_json(report), "  "),
+		"user://f2_report.json", "res://", AppState.stats)
+	assert_eq(loaded.errors, [] as Array[String], "kịch bản trong báo cáo phải nạp được")
+	var run: ScenarioRunner.ScenarioResult = ScenarioRunner.run(loaded.data as ScenarioData, AppState.stats)
+	assert_true(run.passed, "kịch bản trong báo cáo phải chạy được: %s" % str(run.problems))
+	return run.final_state
+
+
+## F2 (Story 2.13): chỉ khi bật dev, ghi clipboard qua seam test, hiện thông báo, báo cáo đủ phần và PHÁT LẠI ĐÚNG
+## bàn đang chơi (nối nhầm `snapshot()` / `round_start_snapshot()` / `round_commands()` sẽ trượt ở đây).
 func test_f2_copies_report_only_with_dev() -> void:
 	AppState.launch.dev = true
 	Log.debug_enabled = true
@@ -577,15 +599,26 @@ func test_f2_copies_report_only_with_dev() -> void:
 	assert_eq(copied.size(), 1, "ghi clipboard đúng một lần")
 	assert_string_contains(copied[0], "\"phien_ban_dinh_dang\": 1")
 	assert_string_contains(copied[0], "trận: tran_01")
+	assert_string_contains(copied[0], "phiên bản: v")
 	assert_string_contains(copied[0], "## Bàn hiện tại")
 	assert_string_contains(copied[0], "## Nhật ký")
+	var luc: String = ""
+	for line: String in copied[0].split("\n"):
+		if line.begins_with("lúc: "):
+			luc = line
+	assert_true(luc.contains("lần mở thứ"), "có dòng lúc + lần mở: %s" % luc)
+	assert_false(luc.contains("T"), "giờ dùng dấu cách, không dùng dấu T: %s" % luc)
 	assert_true(main.notice().is_shown(), "hiện thông báo")
 	assert_eq(main.notice().text(), tr("dev.copied"))
+	assert_ne(main.notice().text(), "dev.copied", "khóa dịch phải có thật trong text.csv")
 	assert_has(Log.get_lines(), "[DEBUG][dev] f2: đã sao chép báo lỗi (%d ký tự)" % copied[0].length())
+	assert_eq(BoardFixture.picture(_replay_report(copied[0])), BoardFixture.picture(main._controller.snapshot()),
+		"báo cáo đã chép phát lại ra đúng bàn đang chơi")
 	Log.debug_enabled = false
 
 
 func test_f2_is_not_wired_without_dev() -> void:
+	AppState.launch.dev = false
 	var main: Node2D = _make_main()
 	var copied: Array[String] = []
 	main.clipboard_writer = func(text: String) -> void: copied.append(text)
@@ -601,7 +634,7 @@ func test_f2_still_copies_on_error_screen() -> void:
 	main.clipboard_writer = func(text: String) -> void: copied.append(text)
 	_dev_tools(main).f2_pressed.emit()
 	assert_eq(copied.size(), 1, "màn hình lỗi vẫn chép được")
-	assert_string_contains(copied[0], "trận: (không có trận)")
+	assert_string_contains(copied[0], "trận: tran_01 (không có bàn)", "vẫn biết trận nào hỏng")
 	assert_string_contains(copied[0], "## Nhật ký")
 	assert_false(copied[0].contains("```json"), "không có trận thì không có kịch bản")
 	assert_eq(main.notice().text(), tr("dev.copied_no_battle"))

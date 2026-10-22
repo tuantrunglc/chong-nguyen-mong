@@ -29,7 +29,7 @@ func test_second_text_replaces_the_first() -> void:
 	notice.show_text("một")
 	notice.show_text("hai")
 	assert_eq(notice.text(), "hai", "câu sau thay câu trước")
-	assert_eq(notice.get_child_count(), 1, "chỉ một bảng, không chồng")
+	assert_eq(notice._panel.get_child_count(), 1, "một nhãn duy nhất, không chồng")
 
 
 func test_notice_does_not_take_mouse() -> void:
