@@ -93,6 +93,7 @@ var _world: Node2D
 var _target_layer: Node2D
 ## Ô đỏ báo đòn (dưới đồng quân) và lớp số thứ tự của nó (trên cùng, trừ F1) (Story 2.7).
 var _telegraph: TelegraphView
+var _preview: PreviewView
 ## id quân -> UnitToken
 var _tokens: Dictionary = {}
 ## Tướng đang chọn: ô của nó (NO_CELL là không chọn), các ô sáng, đường đi đang vẽ (không gồm ô tướng).
@@ -256,6 +257,10 @@ func _ready() -> void:
 	_world = Node2D.new()
 	_world.y_sort_enabled = true
 	add_child(_world)
+	# Bóng mờ xem trước đòn (Story 2.12): trên đồng quân, dưới viền mục tiêu và lớp số thứ tự đòn.
+	_preview = PreviewView.new()
+	add_child(_preview)
+	add_child(Node2D.new())
 	_target_layer = Node2D.new()
 	_target_layer.draw.connect(_draw_targets)
 	add_child(_target_layer)
@@ -269,6 +274,8 @@ func show_state(state: BattleState) -> void:
 		setup(state.size.x, state.size.y)
 	else:
 		clear_selection()
+	# Bàn đổi thì bóng xem trước của lệnh cũ không còn nghĩa.
+	_preview.clear()
 	_rebuild_terrain()
 	_sync_tokens()
 	_telegraph.show_state(state)
@@ -278,6 +285,11 @@ func show_state(state: BattleState) -> void:
 ## Ô đỏ báo đòn đang vẽ.
 func telegraph_view() -> TelegraphView:
 	return _telegraph
+
+
+## Bóng mờ xem trước đòn (Story 2.12).
+func preview_view() -> PreviewView:
+	return _preview
 
 
 ## Đồng quân đang hiện, theo id.

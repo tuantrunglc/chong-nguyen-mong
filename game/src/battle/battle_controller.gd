@@ -37,6 +37,18 @@ func snapshot() -> BattleState:
 	return _state.clone()
 
 
+## Chạy thử lệnh trên bản sao để xem trước kết quả (Story 2.12, ADR-005). Không đụng trạng thái sống, không phát
+## signal, không đổi bản chụp hủy. Lệnh bị từ chối (hoặc chưa có trận) thì null.
+func preview(command: Command) -> BattleState:
+	if _state == null:
+		return null
+	var copy: BattleState = _state.clone()
+	var events: Array[BattleEvent] = _resolve(copy, command)
+	if _rejection(events) != null:
+		return null
+	return copy
+
+
 ## Chạy lệnh. Bị từ chối: state không đổi, bản chụp hủy giữ nguyên, không phát signal.
 ## Làm hỏng bất biến: ghi log ERROR, quay về trước lệnh, phát rolled_back, trả [].
 func submit(command: Command) -> Array[BattleEvent]:

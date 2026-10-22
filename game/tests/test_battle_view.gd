@@ -1137,6 +1137,50 @@ func _banner(main: Node2D) -> ResultBanner:
 	return main._result_banner as ResultBanner
 
 
+## Rê lên mục tiêu đánh được thì hiện bóng mờ ở vị trí cuối + máu sau đòn; rời ra thì mất (Story 2.12).
+func test_preview_ghosts_show_on_attack_target() -> void:
+	var main: Node2D = _make_attack_main()
+	_press_physical(main, KEY_1)
+	_hover_by_mouse(main, Vector2i(3, 3))
+	var ghosts: Array[Dictionary] = _board(main).preview_view().ghosts()
+	assert_false(ghosts.is_empty(), "rê lên mục tiêu thì có bóng")
+	assert_eq(ghosts[0]["cell"], Vector2i(3, 2), "bóng ở ô quân bị đẩy tới")
+	assert_eq(ghosts[0]["hp"], 1, "bóng ghi máu sau đòn")
+	_hover_by_mouse(main, Vector2i(0, 0))
+	assert_true(_board(main).preview_view().ghosts().is_empty(), "rời mục tiêu thì bóng mất")
+
+
+## Xem trước chỉ tính lại khi đổi ô trỏ chuột (Story 2.12, AC 4).
+func test_preview_recomputes_only_when_target_changes() -> void:
+	var main: Node2D = _make_attack_main()
+	_press_physical(main, KEY_1)
+	_view(main)._on_cell_hovered(Vector2i(3, 3))
+	var first: int = _view(main).preview_computations()
+	_view(main)._on_cell_hovered(Vector2i(3, 3))
+	assert_eq(_view(main).preview_computations(), first, "rê trong cùng ô không tính lại")
+	_view(main)._on_cell_hovered(Vector2i(4, 4))
+	assert_eq(_view(main).preview_computations(), first + 1, "đổi sang mục tiêu khác thì tính lại một lần")
+	_view(main)._on_cell_hovered(Vector2i(0, 0))
+	assert_eq(_view(main).preview_computations(), first + 1, "ô không đánh được thì không tính")
+	assert_true(_board(main).preview_view().ghosts().is_empty(), "không phải mục tiêu thì không có bóng")
+
+
+## Bấm đánh thật thì kết quả khớp bóng đã hiện (Story 2.12, AC 2).
+func test_preview_matches_real_attack() -> void:
+	var main: Node2D = _make_attack_main()
+	_press_physical(main, KEY_1)
+	_hover_by_mouse(main, Vector2i(3, 3))
+	var ghosts: Array[Dictionary] = _board(main).preview_view().ghosts()
+	assert_false(ghosts.is_empty(), "điều kiện trước: đang có bóng xem trước")
+	var ghost_hp: int = ghosts[0]["hp"] as int
+	_click_by_mouse(main, Vector2i(3, 3))
+	var pushed: Unit = _unit_at(main, Vector2i(3, 2))
+	assert_not_null(pushed, "quân bị đẩy tới đúng ô bóng đã chỉ")
+	if pushed != null:
+		assert_eq(pushed.hp, ghost_hp, "máu sau đòn khớp bóng")
+	assert_true(_board(main).preview_view().ghosts().is_empty(), "đánh xong thì bóng biến mất")
+
+
 ## Đang phát hoạt ảnh thì lệnh mới bị bỏ qua (Story 2.11, AC 3).
 func test_commands_ignored_while_animation_plays() -> void:
 	var main: Node2D = _make_attack_main()

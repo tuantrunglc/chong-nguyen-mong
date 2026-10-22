@@ -35,6 +35,10 @@ var _enemy_turn: bool = false
 var _pending_enemy_turn: bool = false
 ## Tăng mỗi lần start()/stop(): lượt phát của trận cũ không được vẽ lên trận mới (F5 giữa lúc phát).
 var _playback_generation: int = 0
+## Ô đang được xem trước kết quả đòn; NO_CELL là chưa tính (Story 2.12, AC 4).
+var _preview_cell: Vector2i = BoardView.NO_CELL
+## Số lần đã tính xem trước (để test AC 4: rê trong cùng ô không tính lại).
+var _preview_count: int = 0
 
 
 func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = null) -> void:
@@ -64,6 +68,7 @@ func start(controller: BattleController) -> void:
 	_playing = false
 	_enemy_turn = false
 	_pending_enemy_turn = false
+	_preview_cell = BoardView.NO_CELL
 	_hud.set_locked(false)
 	_deselect()
 	_update_hud()
@@ -111,6 +116,11 @@ func begin_battle() -> void:
 ## Đang phát hoạt ảnh (để test).
 func is_playing() -> bool:
 	return _playing
+
+
+## Số lần đã tính bản xem trước (để test AC 4).
+func preview_computations() -> int:
+	return _preview_count
 
 
 ## Phát lại sự kiện của lệnh này (để test).
@@ -240,7 +250,10 @@ func _finish_playback(snapshot: BattleState, generation: int) -> void:
 	# vừa dời có thể đã che ô đang trỏ (Story 2.10 review).
 	if _input != null:
 		_input.refresh_hover()
-	_update_info(_input.hovered_cell() if _input != null else BoardView.NO_CELL)
+	_preview_cell = BoardView.NO_CELL
+	var hovered: Vector2i = _input.hovered_cell() if _input != null else BoardView.NO_CELL
+	_update_info(hovered)
+	_update_preview(hovered)
 
 func _on_cell_hovered(cell: Vector2i) -> void:
 	# Đang phát thì khung thông tin đứng yên: bản chụp đã là trạng thái sau lệnh, đọc nó lúc này sẽ tả ô mà
@@ -248,10 +261,65 @@ func _on_cell_hovered(cell: Vector2i) -> void:
 	if _playing:
 		return
 	_update_info(cell)
+	_update_preview(cell)
 	if _controller == null or _selected == NONE or not _cells.has(cell):
 		_board.show_path([])
 		return
 	_board.show_path(_controller.path_to(_selected, cell))
+
+
+## Bóng mờ kết quả đòn khi rê lên mục tiêu đánh được (Story 2.12). Chỉ tính lại khi ĐỔI ô (AC 4); đang phát
+## hoạt ảnh thì không tính, vì bản chụp đã là trạng thái sau lệnh.
+func _update_preview(cell: Vector2i) -> void:
+	if _board == null:
+		return
+	if _playing or _controller == null or _selected == NONE or not _targets.has(cell):
+		_clear_preview()
+		return
+	if cell == _preview_cell:
+		return
+	_preview_cell = cell
+	_preview_count += 1
+	var before: BattleState = _controller.snapshot()
+	var after: BattleState = _controller.preview(Command.attack(_selected, cell))
+	if after == null:
+		_board.preview_view().clear()
+		return
+	_board.preview_view().show_ghosts(_ghosts_of(before, after))
+
+
+func _clear_preview() -> void:
+	_preview_cell = BoardView.NO_CELL
+	if _board != null:
+		_board.preview_view().clear()
+
+
+## Chênh lệch hai bản chụp thành danh sách bóng: quân đổi ô hoặc mất máu hiện ở vị trí cuối với máu sau đòn;
+## quân biến mất hiện ở ô cũ với máu 0 (Story 2.12).
+func _ghosts_of(before: BattleState, after: BattleState) -> Array[Dictionary]:
+	var ghosts: Array[Dictionary] = []
+	for unit: Unit in after.units:
+		var old: Unit = before.unit_by_id(unit.id)
+		if old == null:
+			continue
+		if old.cell == unit.cell and old.hp == unit.hp:
+			continue
+		ghosts.append(_ghost(unit.cell, unit, after))
+	for unit: Unit in before.units:
+		if after.unit_by_id(unit.id) == null:
+			ghosts.append(_ghost(unit.cell, unit, before, 0))
+	return ghosts
+
+
+func _ghost(cell: Vector2i, unit: Unit, state: BattleState, hp: int = -1) -> Dictionary:
+	var lift: float = BoardView.surface_height(state.terrain_at(cell))
+	return {
+		"cell": cell,
+		"pos": BoardView.cell_center(cell) - Vector2(0.0, lift),
+		"type": unit.type,
+		"hp": unit.hp if hp < 0 else hp,
+		"faction": unit.faction,
+	}
 
 
 ## Khung thông tin và ô đỏ nổi bật theo ô đang trỏ (Story 2.10). Chỉ đọc bản chụp.
@@ -315,6 +383,7 @@ func _telegraph_cells_of(unit: Unit, state: BattleState) -> Array[Vector2i]:
 
 ## Ẩn khung thông tin và bỏ nổi bật ô đỏ (hết trận, dừng trận).
 func _hide_info() -> void:
+	_clear_preview()
 	if _tooltip != null:
 		_tooltip.hide_tooltip()
 	if _board != null:
@@ -348,6 +417,7 @@ func _battle_over() -> bool:
 
 
 func _deselect() -> void:
+	_clear_preview()
 	_selected = NONE
 	_cells = []
 	_targets = []

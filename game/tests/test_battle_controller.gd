@@ -349,3 +349,31 @@ func test_begin_runs_enemy_prepare_once_and_emits() -> void:
 	assert_false(controller.can_undo(), "mở trận không để lại gì để hủy")
 	assert_eq(BattleController._describe(Command.begin_battle()), "mở trận", "câu log của lệnh")
 
+
+
+## Xem trước chạy trên bản sao: không đổi trạng thái sống, không phát signal, không tạo bản chụp hủy (Story 2.12).
+func test_preview_does_not_touch_live_state() -> void:
+	var c: BattleController = _attack_controller()
+	var before: Array[String] = BoardFixture.picture(c.snapshot())
+	var preview: BattleState = c.preview(Command.attack(1, Vector2i(3, 3)))
+	assert_not_null(preview, "đòn hợp lệ thì có bản xem trước")
+	assert_eq(BoardFixture.picture(c.snapshot()), before, "trạng thái sống không đổi")
+	assert_false(c.can_undo(), "xem trước không tạo bản chụp hủy")
+	assert_eq(_events_seen.size(), 0, "xem trước không phát signal")
+
+
+## Bản xem trước khớp đúng kết quả khi thật sự ra đòn (Story 2.12, AC 2).
+func test_preview_matches_real_attack() -> void:
+	var c: BattleController = _attack_controller()
+	var preview: BattleState = c.preview(Command.attack(1, Vector2i(3, 3)))
+	assert_not_null(preview)
+	var expected: Array[String] = BoardFixture.picture(preview)
+	c.submit(Command.attack(1, Vector2i(3, 3)))
+	assert_eq(BoardFixture.picture(c.snapshot()), expected, "kết quả thật khớp bản xem trước")
+
+
+## Đòn không hợp lệ thì không có bản xem trước (Story 2.12).
+func test_preview_returns_null_for_rejected_command() -> void:
+	var c: BattleController = _attack_controller()
+	assert_null(c.preview(Command.attack(1, Vector2i(6, 4))), "ngoài tầm thì không xem trước")
+	assert_null(c.preview(Command.attack(2, Vector2i(3, 3))), "tướng ở xa cũng vậy")
