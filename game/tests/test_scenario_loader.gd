@@ -38,7 +38,7 @@ func _stats() -> Stats:
 	for type: int in [UnitType.NGUYEN_KHOAI, UnitType.PHAM_NGU_LAO, UnitType.TRAN_KHANH_DU, UnitType.BO_BINH]:
 		values[type] = {"mau": 3, "tam_di": 3}
 	values[UnitType.KY_BINH] = {"mau": 2, "tam_di": 3}
-	values[UnitType.CUNG_KY] = {"mau": 1, "tam_di": 3}
+	values[UnitType.CUNG_KY] = {"mau": 1, "tam_di": 3, "tam_ban_gan": 2, "tam_ban_xa": 3}
 	return Stats.new(values)
 
 
@@ -1110,6 +1110,28 @@ func test_before_telegraph_errors() -> void:
 		as Array[String])
 	d["truoc"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "3,4"}]
 	assert_eq(_errors(d), [F + ': "truoc.bao_don" mục 1: "o" ô 3,4 không kề "quan" ô 5,4'] as Array[String])
+
+
+## Story 2.15: "o" của Cung kỵ phải thẳng hàng và cách từ 2 ô. Bộ nạp KHÔNG chặn trên: tầm 3 nằm trong
+## chi_so.json, trần do BattleState.validate() kiểm lúc chạy.
+func test_archer_telegraph_target_is_straight_and_far() -> void:
+	var d: Dictionary = _valid()
+	d["truoc"]["quan"][4] = ". . . . . C ."
+	d["sau"]["quan"][4] = ". . . . . C ."
+	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,2"}]
+	assert_eq(_errors(d), [] as Array[String], "thẳng hàng, cách 2 ô")
+	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,1"}]
+	assert_eq(_errors(d), [] as Array[String], "thẳng hàng, cách 3 ô")
+	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,0"}]
+	assert_eq(_errors(d), [] as Array[String], "4 ô: bộ nạp chấp nhận, trần do validate")
+	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,5"}]
+	assert_eq(_errors(d), [
+		F + ': "sau.bao_don" mục 1: "o" ô 5,5 không cách "quan" ô 5,4 từ 2 ô trở lên (Cung kỵ không bắn ô kề)'
+	] as Array[String], "không bắn ô kề")
+	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "3,2"}]
+	assert_eq(_errors(d), [
+		F + ': "sau.bao_don" mục 1: "o" ô 3,2 không thẳng hàng với "quan" ô 5,4 (Cung kỵ chỉ bắn thẳng hàng)'
+	] as Array[String], "chéo không bắn được")
 
 
 func test_runner_compares_telegraphs_only_when_written() -> void:

@@ -51,3 +51,12 @@ func pull_range(type: int) -> int:
 ## Số ô quân Nguyên bị kéo về phía Dư (dừng sớm nếu bị chặn).
 func pull_distance(type: int) -> int:
 	return value(type, "tam_keo")
+
+
+## Tầm bắn của Cung kỵ: ô gần nhất và xa nhất bắn trúng được, tính từ chỗ đứng (tác giả chốt 2026-10-22).
+func shoot_min_range(type: int) -> int:
+	return value(type, "tam_ban_gan")
+
+
+func shoot_max_range(type: int) -> int:
+	return value(type, "tam_ban_xa")

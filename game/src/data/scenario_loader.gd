@@ -371,9 +371,8 @@ static func _read_telegraphs(value: Variant, shown: String, units_shown: String,
 			result.add_error('%s: phải có đúng một trong "o" (đòn vào ô) và "huong" (xung phong)' % where)
 		elif d.has("o"):
 			target = _read_telegraph_cell(d, "o", where, side.size, result)
-			if owner != null and target != null and not Grid.is_adjacent(owner as Vector2i, target as Vector2i):
-				result.add_error('%s: "o" ô %s không kề "quan" ô %s'
-					% [where, BoardText.cell_text(target as Vector2i), BoardText.cell_text(owner as Vector2i)])
+			if owner != null and target != null:
+				_check_telegraph_target(owner as Vector2i, target as Vector2i, side, where, file, result)
 		else:
 			kind = Telegraph.Kind.DIRECTION
 			var code: Variant = d["huong"]
@@ -388,6 +387,25 @@ static func _read_telegraphs(value: Variant, shown: String, units_shown: String,
 	telegraphs.sort_custom(func(a: ScenarioData.ExpectedTelegraph, b: ScenarioData.ExpectedTelegraph) -> bool:
 		return a.order < b.order)
 	return telegraphs
+
+
+## Đòn vào ô phải khớp loại quân (Story 2.15). Cung kỵ: thẳng hàng, cách >= 2 ô; bộ nạp KHÔNG chặn trên vì tầm
+## `tam_ban_xa` nằm trong chi_so.json (bộ nạp không có Stats) — trần do BattleState.validate() kiểm lúc chạy.
+## Loại khác: một ô kề, như trước.
+static func _check_telegraph_target(owner: Vector2i, target: Vector2i, side: Section, where: String,
+		file: String, result: LoadResult) -> void:
+	var friendly: bool = side.units_clean and BoardLayers.symbol(side.unit_rows, owner) == "C"
+	if not friendly:
+		if not Grid.is_adjacent(owner, target):
+			result.add_error('%s: "o" ô %s không kề "quan" ô %s'
+				% [where, BoardText.cell_text(target), BoardText.cell_text(owner)])
+		return
+	if Grid.straight_dir(owner, target) == Vector2i.ZERO:
+		result.add_error('%s: "o" ô %s không thẳng hàng với "quan" ô %s (Cung kỵ chỉ bắn thẳng hàng)'
+			% [where, BoardText.cell_text(target), BoardText.cell_text(owner)])
+	elif Grid.distance(owner, target) < 2:
+		result.add_error('%s: "o" ô %s không cách "quan" ô %s từ 2 ô trở lên (Cung kỵ không bắn ô kề)'
+			% [where, BoardText.cell_text(target), BoardText.cell_text(owner)])
 
 
 ## Ô "cot,hang" trong bàn của một mục "bao_don", hoặc null nếu thiếu hay sai (đã thêm lỗi).

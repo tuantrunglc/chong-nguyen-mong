@@ -108,7 +108,8 @@ func validate() -> Array[String]:
 
 
 ## Hình dạng đòn đã báo; rỗng là hợp lệ. Chủ đòn đã gục vẫn hợp lệ (hủy đòn ở Story 2.9), nhưng phải từng là quân
-## Nguyên: không có quân nào mang id đó thì chỉ kiểm hình dạng.
+## Nguyên: không có quân nào mang id đó thì chỉ kiểm hình dạng. `CELL` = một ô kề (Bộ binh) hoặc ô thẳng hàng 2–3
+## (Cung kỵ, Story 2.15).
 func _telegraph_shape_problem(t: Telegraph) -> String:
 	var owner: Unit = unit_by_id(t.owner_id)
 	if owner != null and owner.faction != Unit.Faction.NGUYEN:
@@ -118,9 +119,27 @@ func _telegraph_shape_problem(t: Telegraph) -> String:
 			if not Grid.DIRECTIONS.has(t.offset):
 				return "xung phong theo hướng %d,%d không hợp lệ" % [t.offset.x, t.offset.y]
 		Telegraph.Kind.CELL:
-			if absi(t.offset.x) + absi(t.offset.y) != 1:
-				return "đánh ô cách %d,%d, cần đúng một ô kề" % [t.offset.x, t.offset.y]
+			return _cell_telegraph_problem(t, owner)
 	return ""
+
+
+## Đòn vào ô (Story 2.15): Bộ binh đánh ô kề; Cung kỵ bắn ô thẳng hàng trong tầm `tam_ban_gan`–`tam_ban_xa`.
+## Chủ đòn đã gục thì không biết loại quân: chấp nhận offset thẳng hàng dài 1–3 để bản chụp vẫn hợp lệ (đòn sẽ
+## bị hủy ở Story 2.9, không phải lỗi dữ liệu).
+func _cell_telegraph_problem(t: Telegraph, owner: Unit) -> String:
+	var straight: bool = t.offset.x == 0 or t.offset.y == 0
+	var distance: int = Grid.distance(Vector2i.ZERO, t.offset)
+	if owner != null and owner.type == UnitType.CUNG_KY:
+		var near: int = stats.shoot_min_range(owner.type)
+		var far: int = stats.shoot_max_range(owner.type)
+		if not straight or distance < near or distance > far:
+			return "đánh ô cách %d,%d, Cung kỵ chỉ bắn thẳng hàng %d–%d ô" % [t.offset.x, t.offset.y, near, far]
+		return ""
+	if distance == 1:
+		return ""
+	if owner == null and straight and distance >= 2 and distance <= 3:
+		return ""
+	return "đánh ô cách %d,%d, cần đúng một ô kề" % [t.offset.x, t.offset.y]
 
 
 func in_bounds(cell: Vector2i) -> bool:

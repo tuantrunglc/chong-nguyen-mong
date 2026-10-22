@@ -9,7 +9,7 @@ func _stats() -> Stats:
 		values[type] = {"mau": 4}
 	values[UnitType.BO_BINH] = {"mau": 5}
 	values[UnitType.KY_BINH] = {"mau": 2}
-	values[UnitType.CUNG_KY] = {"mau": 1}
+	values[UnitType.CUNG_KY] = {"mau": 1, "tam_ban_gan": 2, "tam_ban_xa": 3}
 	return Stats.new(values)
 
 
@@ -227,6 +227,28 @@ func test_validate_reports_bad_telegraph_shape() -> void:
 	var general_id: int = state.units[0].id
 	state.telegraphs.append(Telegraph.new(general_id, Telegraph.Kind.CELL, Vector2i(0, 1), 1))
 	assert_eq(state.validate(), ["đòn của quân %d thuộc quân không phải quân Nguyên" % general_id] as Array[String])
+
+
+## Story 2.15: đòn vào ô của Cung kỵ phải thẳng hàng, cách 2–3 ô. Chủ đòn đã gục thì không biết loại quân.
+func test_validate_accepts_archer_long_shot_only() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "C", Vector2i(3, 6): "1"})
+	state.telegraphs.append(Telegraph.new(101, Telegraph.Kind.CELL, Vector2i(0, 3), 1))
+	assert_eq(state.validate(), [] as Array[String], "Cung kỵ bắn thẳng hàng 3 ô")
+	state.telegraphs[0].offset = Vector2i(0, 2)
+	assert_eq(state.validate(), [] as Array[String], "và 2 ô")
+	state.telegraphs[0].offset = Vector2i(0, 1)
+	assert_eq(state.validate(), ["đòn của quân 101 đánh ô cách 0,1, Cung kỵ chỉ bắn thẳng hàng 2–3 ô"]
+		as Array[String], "không bắn ô kề")
+	state.telegraphs[0].offset = Vector2i(0, 4)
+	assert_eq(state.validate(), ["đòn của quân 101 đánh ô cách 0,4, Cung kỵ chỉ bắn thẳng hàng 2–3 ô"]
+		as Array[String], "không bắn quá 3 ô")
+	state.telegraphs[0].offset = Vector2i(2, 2)
+	assert_eq(state.validate(), ["đòn của quân 101 đánh ô cách 2,2, Cung kỵ chỉ bắn thẳng hàng 2–3 ô"]
+		as Array[String], "chéo không bắn được")
+	state.telegraphs.clear()
+	state.telegraphs.append(Telegraph.new(7, Telegraph.Kind.CELL, Vector2i(0, 2), 1))
+	assert_eq(state.validate(), [] as Array[String],
+		"chủ đòn đã gục: không biết loại quân, chấp nhận thẳng hàng dài 1–3")
 
 
 func test_from_level_copies_mission() -> void:
