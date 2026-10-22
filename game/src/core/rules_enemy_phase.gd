@@ -21,13 +21,17 @@ static func end_player_turn(state: BattleState, events: Array[BattleEvent]) -> v
 
 ## Ra các đòn đã báo theo số thứ tự (state.telegraphs đã xếp). Ô trúng tính lúc đòn ra, theo bàn sau các đòn trước
 ## (TelegraphMarks.hit_cell, cùng chỗ tính ô đỏ). NO_CELL (chủ đã gục, ô đích ngoài bàn, Kỵ binh sát mép hướng ra
-## ngoài) thì đòn không ra (sự kiện hủy đòn: Story 2.9). Quân ở ô trúng, bất kỳ phe, mất máu theo sát thương của chủ
-## đòn; không đẩy, chủ đòn không đi. Kiểm thắng/thua sau từng đòn; trận hết thì dừng ngay.
+## ngoài) thì đòn không ra và phát TELEGRAPH_CANCELLED kèm lý do (Story 2.9). Quân ở ô trúng, bất kỳ phe, mất máu
+## theo sát thương của chủ đòn; không đẩy, chủ đòn không đi. Kiểm thắng/thua sau từng đòn; trận hết thì dừng ngay.
 static func _strike_all(state: BattleState, events: Array[BattleEvent]) -> void:
 	state.phase = BattleState.Phase.ENEMY_ACT
 	for telegraph: Telegraph in state.telegraphs:
 		var hit: Vector2i = TelegraphMarks.hit_cell(state, telegraph)
 		if hit == Telegraph.NO_CELL:
+			var owner_now: Unit = state.unit_by_id(telegraph.owner_id)
+			var owner_cell: Vector2i = Vector2i.ZERO if owner_now == null else owner_now.cell
+			events.append(BattleEvent.telegraph_cancelled(telegraph.owner_id, owner_cell, telegraph.order,
+				TelegraphMarks.cancel_reason(state, telegraph)))
 			continue
 		var owner: Unit = state.unit_by_id(telegraph.owner_id)
 		var strike: Array[BattleEvent] = [BattleEvent.enemy_attacked(owner.id, owner.cell, hit)]

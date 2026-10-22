@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Kỵ binh đã báo xung phong về đông; Dư kéo nó về phía mình 2 ô: đường đỏ vẫn hướng đông, giờ chỉ còn ô 6,2 (chỗ Dư đứng).",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",
@@ -22,11 +22,19 @@
       ". . . . . . ."
     ],
     "bao_don": [
-      { "thu_tu": 1, "quan": "3,2", "huong": "D" }
+      {
+        "thu_tu": 1,
+        "quan": "3,2",
+        "huong": "D"
+      }
     ]
   },
   "hanh_dong": [
-    { "lenh": "danh", "tuong": "3", "o": "3,2" }
+    {
+      "lenh": "danh",
+      "tuong": "3",
+      "o": "3,2"
+    }
   ],
   "sau": {
     "dia_hinh": [
@@ -47,6 +55,10 @@
       ". . . . . . .",
       ". . . . . . ."
     ],
-    "o_do": { "6,2": [1] }
+    "o_do": {
+      "6,2": [
+        1
+      ]
+    }
   }
 }

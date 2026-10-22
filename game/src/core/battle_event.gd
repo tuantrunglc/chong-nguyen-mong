@@ -29,6 +29,9 @@ enum Type {
 	## Quân Nguyên unit_id báo đòn (Story 2.6): from_cell là ô nó đứng; to_cell là ô bị nhắm (đòn vào ô) hoặc ô ngay
 	## trước mặt theo hướng xung phong (Kỵ binh); amount là số thứ tự ra đòn.
 	TELEGRAPHED,
+	## Đòn đã báo bị hủy, phát đúng chỗ nó đáng lẽ ra đòn (Story 2.9): unit_id là chủ đòn, from_cell là ô chủ đòn
+	## lúc hủy (ZERO nếu chủ đã gục), amount là số thứ tự, cancel là lý do. Không kèm ATTACKED.
+	TELEGRAPH_CANCELLED,
 }
 
 ## Vì sao quân đổi ô hoặc mất máu. STRIKE: đòn có sát thương của tướng (Khoái, Lão).
@@ -44,6 +47,12 @@ enum Reject {
 	BATTLE_OVER,
 }
 
+## Vì sao đòn đã báo bị hủy (TELEGRAPH_CANCELLED, Story 2.9). Đúng ba đường TelegraphMarks trả ô trúng rỗng:
+## OUT_OF_BOARD: đòn vào ô, chủ đòn bị đẩy/kéo làm ô đích rơi ra ngoài bàn.
+## OWNER_DIED: chủ đòn đã gục trước lượt ra đòn của mình.
+## NO_TARGET: Kỵ binh xung phong mà ô ngay trước mặt đã ngoài bàn (bị đẩy lùi về sát mép).
+enum TelegraphCancel { NONE, OUT_OF_BOARD, OWNER_DIED, NO_TARGET }
+
 var type: Type
 var unit_id: int = 0
 var from_cell: Vector2i = Vector2i.ZERO
@@ -54,11 +63,12 @@ var reason: String = ""
 var round_number: int = 0
 var amount: int = 0
 var other_id: int = 0
+var cancel: TelegraphCancel = TelegraphCancel.NONE
 
 
 func _init(p_type: Type, p_unit_id: int = 0, p_from: Vector2i = Vector2i.ZERO, p_to: Vector2i = Vector2i.ZERO,
 		p_cause: Cause = Cause.WALK, p_reject: Reject = Reject.NONE, p_reason: String = "", p_round: int = 0,
-		p_amount: int = 0, p_other_id: int = 0) -> void:
+		p_amount: int = 0, p_other_id: int = 0, p_cancel: TelegraphCancel = TelegraphCancel.NONE) -> void:
 	type = p_type
 	unit_id = p_unit_id
 	from_cell = p_from
@@ -69,6 +79,7 @@ func _init(p_type: Type, p_unit_id: int = 0, p_from: Vector2i = Vector2i.ZERO, p
 	round_number = p_round
 	amount = p_amount
 	other_id = p_other_id
+	cancel = p_cancel
 
 
 static func moved(p_unit_id: int, p_from: Vector2i, p_to: Vector2i, p_cause: Cause) -> BattleEvent:
@@ -120,3 +131,10 @@ static func defeat() -> BattleEvent:
 
 static func telegraphed(p_unit_id: int, p_stand: Vector2i, p_to: Vector2i, p_order: int) -> BattleEvent:
 	return BattleEvent.new(Type.TELEGRAPHED, p_unit_id, p_stand, p_to, Cause.WALK, Reject.NONE, "", 0, p_order)
+
+
+## Đòn đã báo của quân unit_id bị hủy (Story 2.9): p_from là ô chủ đòn lúc hủy (ZERO nếu đã gục), p_order là số thứ
+## tự đã báo, p_cancel là lý do.
+static func telegraph_cancelled(p_unit_id: int, p_from: Vector2i, p_order: int, p_cancel: TelegraphCancel) -> BattleEvent:
+	return BattleEvent.new(Type.TELEGRAPH_CANCELLED, p_unit_id, p_from, Vector2i.ZERO, Cause.WALK, Reject.NONE, "",
+		0, p_order, 0, p_cancel)

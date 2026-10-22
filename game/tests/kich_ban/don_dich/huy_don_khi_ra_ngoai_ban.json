@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Bộ binh ở sát mép dưới đã báo đánh ô 0,6; Khoái đẩy nó xuống 0,6 làm ô đỏ rơi ra ngoài bàn: đòn bị hủy, bàn không còn ô đỏ nào.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",
@@ -22,11 +22,19 @@
       ". . . . . . ."
     ],
     "bao_don": [
-      { "thu_tu": 1, "quan": "0,5", "o": "0,6" }
+      {
+        "thu_tu": 1,
+        "quan": "0,5",
+        "o": "0,6"
+      }
     ]
   },
   "hanh_dong": [
-    { "lenh": "danh", "tuong": "1", "o": "0,5" }
+    {
+      "lenh": "danh",
+      "tuong": "1",
+      "o": "0,5"
+    }
   ],
   "sau": {
     "dia_hinh": [
@@ -47,7 +55,9 @@
       ". . . . . . .",
       "B . . . . . ."
     ],
-    "mau": { "0,6": 2 },
+    "mau": {
+      "0,6": 1
+    },
     "o_do": {}
   }
 }

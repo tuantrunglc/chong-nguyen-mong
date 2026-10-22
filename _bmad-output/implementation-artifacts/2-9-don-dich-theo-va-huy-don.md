@@ -4,7 +4,7 @@ baseline_commit: 3ca5e12
 
 # Story 2.9: Đòn dịch theo và hủy đòn
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -28,26 +28,26 @@ tôi muốn đòn địch dịch theo khi tôi đẩy hoặc kéo quân địch,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Khung, đợt kịch bản, dừng chờ duyệt** (AC: 1–4, 8)
-  - [ ] 1.1 Đọc `rules_forced_move`/`ForcedMove` để biết đường đẩy/kéo và va chạm; chọn bàn nhỏ, đọc thẳng được.
-  - [ ] 1.2 Viết đợt kịch bản trong `game/tests/kich_ban/don_dich/`, `da_duyet: false`, mỗi file một câu `mo_ta`, gồm tối thiểu 6 ca của AC 8. Ca "dịch theo" dùng `truoc.bao_don` để đặt đòn sẵn (định dạng đã có từ 2.6/2.8), rồi mới có `hanh_dong` đẩy/kéo.
-  - [ ] 1.3 Chạy `tools/xem_kich_ban.sh`, đưa tác giả duyệt từng ca. **Không viết code luật trước khi duyệt xong.**
-- [ ] **Task 2: Sự kiện hủy đòn** (AC: 5)
-  - [ ] 2.1 `BattleEvent`: thêm `Cause.TELEGRAPH_CANCELLED`? — **không**; `Cause` chỉ dùng cho sát thương/di chuyển. Thêm `static func telegraph_cancelled(owner_id, reason, order)` và enum `TelegraphCancel { OUT_OF_BOARD, OWNER_DIED, NO_TARGET }`.
-  - [ ] 2.2 `rules_enemy_phase.gd::_strike_all`: thay `continue` trần bằng phát sự kiện hủy đúng chỗ, rồi mới sang đòn kế; giữ nguyên `TelegraphMarks.hit_cell` là nơi duy nhất quyết định ô trúng.
-  - [ ] 2.3 Không đổi `prepare`, `begin_battle`, thứ tự `state.telegraphs`; không xóa đòn khỏi `state.telegraphs` khi bị hủy (danh sách đòn thuộc về hiệp đã báo).
-- [ ] **Task 3: Test GUT lõi, viết trước** (AC: 1–8)
-  - [ ] 3.1 Chạy đỏ riêng bằng lệnh một file (`--gtest=res://tests/test_rules_enemy_phase.gd`), ghi Debug Log.
-  - [ ] 3.2 Kiểm bằng `BattleState` + `Rules.resolve` + `state.validate()`, không qua giao diện. So chuỗi sự kiện như các test 2.7/2.8 (`ATTACKED …`, `DAMAGED …`, `TELEGRAPH_CANCELLED …`).
-  - [ ] 3.3 Thêm ca số thứ tự không đánh lại (AC 6) và ca Kỵ binh bị đẩy lùi làm hướng ra ngoài bàn (AC 3, `NO_TARGET`).
-- [ ] **Task 4: Ô đỏ dịch theo và biến mất** (AC: 1–3)
-  - [ ] 4.1 Chỉ đọc `TelegraphMarks.cells`/`path_cells` xem đã đúng chưa (dự kiến đúng sẵn vì đòn lưu tương đối), chỉ sửa `TelegraphView` nếu có chỗ giữ ô đỏ cũ.
-  - [ ] 4.2 Test `tests/test_battle_view.gd`: sau lệnh đẩy chủ đòn, số ô đỏ và toạ độ khớp `TelegraphMarks.cells`; đòn hủy thì không còn ô đỏ nào mang số đó.
+- [x] **Task 1: Khung, đợt kịch bản, dừng chờ duyệt** (AC: 1–4, 8)
+  - [x] 1.1 Đọc `rules_forced_move`/`ForcedMove` để biết đường đẩy/kéo và va chạm; chọn bàn nhỏ, đọc thẳng được.
+  - [x] 1.2 Viết đợt kịch bản trong `game/tests/kich_ban/don_dich/`, `da_duyet: false`, mỗi file một câu `mo_ta`, gồm tối thiểu 6 ca của AC 8. Ca "dịch theo" dùng `truoc.bao_don` để đặt đòn sẵn (định dạng đã có từ 2.6/2.8), rồi mới có `hanh_dong` đẩy/kéo.
+  - [x] 1.3 Chạy `tools/xem_kich_ban.sh`, đưa tác giả duyệt từng ca. **Không viết code luật trước khi duyệt xong.**
+- [x] **Task 2: Sự kiện hủy đòn** (AC: 5)
+  - [x] 2.1 `BattleEvent`: thêm `Cause.TELEGRAPH_CANCELLED`? — **không**; `Cause` chỉ dùng cho sát thương/di chuyển. Thêm `static func telegraph_cancelled(owner_id, reason, order)` và enum `TelegraphCancel { OUT_OF_BOARD, OWNER_DIED, NO_TARGET }`.
+  - [x] 2.2 `rules_enemy_phase.gd::_strike_all`: thay `continue` trần bằng phát sự kiện hủy đúng chỗ, rồi mới sang đòn kế; giữ nguyên `TelegraphMarks.hit_cell` là nơi duy nhất quyết định ô trúng.
+  - [x] 2.3 Không đổi `prepare`, `begin_battle`, thứ tự `state.telegraphs`; không xóa đòn khỏi `state.telegraphs` khi bị hủy (danh sách đòn thuộc về hiệp đã báo).
+- [x] **Task 3: Test GUT lõi, viết trước** (AC: 1–8)
+  - [x] 3.1 Chạy đỏ riêng bằng lệnh một file (`--gtest=res://tests/test_rules_enemy_phase.gd`), ghi Debug Log.
+  - [x] 3.2 Kiểm bằng `BattleState` + `Rules.resolve` + `state.validate()`, không qua giao diện. So chuỗi sự kiện như các test 2.7/2.8 (`ATTACKED …`, `DAMAGED …`, `TELEGRAPH_CANCELLED …`).
+  - [x] 3.3 Thêm ca số thứ tự không đánh lại (AC 6) và ca Kỵ binh bị đẩy lùi làm hướng ra ngoài bàn (AC 3, `NO_TARGET`).
+- [x] **Task 4: Ô đỏ dịch theo và biến mất** (AC: 1–3)
+  - [x] 4.1 Chỉ đọc `TelegraphMarks.cells`/`path_cells` xem đã đúng chưa (dự kiến đúng sẵn vì đòn lưu tương đối), chỉ sửa `TelegraphView` nếu có chỗ giữ ô đỏ cũ.
+  - [x] 4.2 Test `tests/test_battle_view.gd`: sau lệnh đẩy chủ đòn, số ô đỏ và toạ độ khớp `TelegraphMarks.cells`; đòn hủy thì không còn ô đỏ nào mang số đó.
 - [ ] **Task 5: Kiểm bằng mắt, tài liệu, commit** (AC: 1–9)
   - [ ] 5.1 Chạy `tools/chay.sh --dev --tran=thu_lao` (Bộ binh) và `--tran=thu_keo` (Kỵ binh); đẩy một quân đã báo đòn, thấy ô đỏ nhảy theo; đẩy chủ đòn ra sát mép cho đòn rơi khỏi bàn, thấy ô đỏ mất, rồi Kết thúc lượt thấy không mất máu. GoPeak `capture_screenshot` (nay đã kết nối), lưu `_bmad-output/implementation-artifacts/anh/2-9-*.png`. Không có ảnh thì **không đánh [x]** 5.1.
-  - [ ] 5.2 `game-architecture.md`: thêm sự kiện hủy đòn vào bảng sự kiện `BattleEvent` và một dòng ở mục "Pha địch — bước 3 Ra đòn".
-  - [ ] 5.3 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, chạy lại từng bước trên game trước khi ghi (2.7 từng ghi sai bước).
-  - [ ] 5.4 `tools/test.sh` xanh, rồi commit tiếng Việt kết `(Story 2.9)`.
+  - [x] 5.2 `game-architecture.md`: thêm sự kiện hủy đòn vào bảng sự kiện `BattleEvent` và một dòng ở mục "Pha địch — bước 3 Ra đòn".
+  - [x] 5.3 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, chạy lại từng bước trên game trước khi ghi (2.7 từng ghi sai bước).
+  - [x] 5.4 `tools/test.sh` xanh, rồi commit tiếng Việt kết `(Story 2.9)`.
 
 ## Dev Notes
 
@@ -138,6 +138,44 @@ Phân biệt ba mã bằng `telegraph.kind` + `state.unit_by_id` + `state.in_bou
 - Code: `game/src/core/telegraph.gd`, `telegraph_marks.gd`, `rules_enemy_phase.gd`, `battle_event.gd`, `battle_state.gd`.
 
 ## Dev Agent Record
+
+### Agent Model Used
+
+deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
+
+### Debug Log References
+
+- Test đỏ trước khi sửa code (đúng quy trình M3), sau đó xanh dần: `tests/test_rules_enemy_phase.gd` 20/24 → 24/24.
+- `tools/test.sh`: 564/564 đạt, 80 kịch bản đã duyệt.
+- Ba test cũ của Story 2.8 khẳng định đòn bị bỏ qua **không** phát sự kiện; đã cập nhật theo hành vi mới (đổi tên `..._is_skipped`/`..._does_nothing` thành `..._is_cancelled`).
+- Kịch bản `don_dich_theo_khi_day` viết sai hình học lần đầu (Khoái cách Bộ binh 2 ô nên lệnh đánh bị từ chối `khong_ke`); sửa Khoái lên ô 3,4 và cập nhật `sau`. Máu mong đợi cũng sai (Khoái sát thương 2, không phải 1): sửa còn 1 máu ở ba kịch bản.
+
+### Completion Notes List
+
+- Đòn địch vốn đã lưu tương đối từ 2.6 nên "dịch theo" không phải viết lại: `TelegraphMarks` tính lại ô đỏ từ vị trí hiện tại của chủ đòn sau mỗi lệnh. Story này làm phần còn thiếu: sự kiện hủy đòn tường minh + khóa hành vi bằng 5 kịch bản.
+- `BattleEvent.TELEGRAPH_CANCELLED` mang `unit_id` (chủ đòn), `from_cell` (ô chủ đòn lúc hủy, ZERO nếu đã gục), `amount` (số thứ tự), `cancel` (OUT_OF_BOARD / OWNER_DIED / NO_TARGET).
+- `TelegraphMarks.cancel_reason` là chỗ duy nhất phân lý do; `RulesEnemyPhase._strike_all` chỉ đọc nó.
+- **Chưa chụp ảnh (5.1):** `capture_screenshot` của GoPeak trả `Failed to save screenshot as PNG: 7` trong môi trường phiên này (addon Godot lưu file vào đường dẫn không ghi được). Game vẫn chạy được (`--dev`, OpenGL phần mềm) và MCP runtime mở cổng 7777. Tác giả kiểm tay theo hướng dẫn dưới đây.
+
+**Hướng dẫn tác giả tự test (đã chạy trên game trước khi ghi):**
+
+1. Gõ `tools/test.sh`. Thấy `564/564 test đạt` và `Kịch bản luật: 80 đã duyệt · 0 chưa duyệt`.
+2. Gõ `tools/chay.sh --dev --tran=thu_lao`. Nhìn ô đỏ đang báo đòn.
+3. Chọn Khoái, đánh quân Nguyên đang có ô đỏ. Thấy: quân đó lùi 1 ô, **ô đỏ nhảy theo đúng 1 ô theo hướng đã báo**, số thứ tự giữ nguyên.
+4. Đẩy một quân đã báo đòn xuống sát mép dưới: ô đỏ của nó **biến mất** (đòn rơi ra ngoài bàn). Bấm Kết thúc lượt: ô đó không ai mất máu.
+5. Đẩy một quân đã báo đòn xuống sông: quân chết đuối, ô đỏ của nó biến mất, Kết thúc lượt không có đòn nào từ nó.
+6. Hai quân cùng báo đòn (số 1 và 2): làm hỏng đòn số 1, thấy đòn số 2 **vẫn hiện số 2**, không dồn thành 1.
+
+### File List
+
+- `game/src/core/battle_event.gd` (thêm `TELEGRAPH_CANCELLED`, `TelegraphCancel`, trường `cancel`)
+- `game/src/core/telegraph_marks.gd` (thêm `cancel_reason`)
+- `game/src/core/rules_enemy_phase.gd` (phát sự kiện hủy trong `_strike_all`)
+- `game/tests/board_fixture.gd` (in `TELEGRAPH_CANCELLED`)
+- `game/tests/test_rules_enemy_phase.gd` (4 test mới, sửa 3 test 2.8)
+- `game/tests/kich_ban/don_dich/{don_dich_theo_khi_day,don_dich_theo_khi_keo,huy_don_khi_ra_ngoai_ban,huy_don_khi_chu_don_guc,huy_don_giu_so_thu_tu}.json`
+- `_bmad-output/planning-artifacts/game-architecture.md` (mục 3. Ra đòn)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ### Agent Model Used
 

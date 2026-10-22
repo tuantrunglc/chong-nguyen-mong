@@ -17,6 +17,20 @@ static func cells(state: BattleState) -> Dictionary:
 	return out
 
 
+## Lý do đòn này sẽ bị hủy, hoặc NONE nếu còn hiệu lực (Story 2.9). Phân biệt đúng ba đường path_cells trả rỗng;
+## không suy từ hit_cell một mình vì nó gộp cả ba thành NO_CELL.
+static func cancel_reason(state: BattleState, telegraph: Telegraph) -> BattleEvent.TelegraphCancel:
+	if state.unit_by_id(telegraph.owner_id) == null:
+		return BattleEvent.TelegraphCancel.OWNER_DIED
+	var owner: Unit = state.unit_by_id(telegraph.owner_id)
+	var step: Vector2i = owner.cell + telegraph.offset
+	if state.in_bounds(step):
+		return BattleEvent.TelegraphCancel.NONE
+	if telegraph.kind == Telegraph.Kind.DIRECTION:
+		return BattleEvent.TelegraphCancel.NO_TARGET
+	return BattleEvent.TelegraphCancel.OUT_OF_BOARD
+
+
 ## Ô đòn sẽ trúng; NO_CELL nếu không có. Kỵ binh: ô cuối đường xung phong (vật đầu tiên, hoặc ô sát mép).
 static func hit_cell(state: BattleState, telegraph: Telegraph) -> Vector2i:
 	var path: Array[Vector2i] = path_cells(state, telegraph)
