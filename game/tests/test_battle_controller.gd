@@ -362,6 +362,19 @@ func test_preview_does_not_touch_live_state() -> void:
 	assert_eq(_events_seen.size(), 0, "xem trước không phát signal")
 
 
+## Xem trước không đụng bản chụp hủy đang có: hủy sau khi xem vẫn trả về đúng trạng thái trước nước đi
+## (Story 2.12 review, LOW-1 — test cũ chỉ kiểm `can_undo()` khi nó vốn đã false nên không chứng minh được gì).
+func test_preview_keeps_existing_undo_snapshot() -> void:
+	var c: BattleController = _attack_controller()
+	var before: Array[String] = BoardFixture.picture(c.snapshot())
+	c.submit(Command.move(2, Vector2i(0, 5)))
+	assert_true(c.can_undo(), "đi xong thì hủy được")
+	assert_not_null(c.preview(Command.attack(1, Vector2i(3, 3))), "vẫn xem trước được đòn của Khoái")
+	assert_true(c.can_undo(), "xem trước không xóa bản chụp hủy")
+	c.undo()
+	assert_eq(BoardFixture.picture(c.snapshot()), before, "hủy vẫn trả về trạng thái trước khi đi")
+
+
 ## Bản xem trước khớp đúng kết quả khi thật sự ra đòn (Story 2.12, AC 2).
 func test_preview_matches_real_attack() -> void:
 	var c: BattleController = _attack_controller()

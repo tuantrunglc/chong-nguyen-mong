@@ -28,6 +28,9 @@ const WIN_LEVEL: String = WIN_DIR + "/tran_01.json"
 ## Trận thử cho thua vì đòn địch (Story 2.8).
 const LOSE_DIR: String = PROBE_DIR + "/tran_thua"
 const LOSE_LEVEL: String = LOSE_DIR + "/tran_01.json"
+## Trận thử cho đòn đẩy va vào quân khác (Story 2.12, AC 1: nhiều quân cùng bị ảnh hưởng).
+const VA_DIR: String = PROBE_DIR + "/tran_va_cham"
+const VA_LEVEL: String = VA_DIR + "/tran_01.json"
 
 ## Ô sáng mong đợi trên trận 1 (AC 4, AC 5), theo thứ tự đọc bàn.
 const KHOAI_CELLS: Array[Vector2i] = [
@@ -58,7 +61,7 @@ func after_each() -> void:
 			InputMap.erase_action("dev_f%d" % (i + 1))
 	SaveProbe.path = SaveProbe.DEFAULT_PATH
 	for path: String in [BROKEN_LEVEL, ATTACK_LEVEL, ALLY_LEVEL, LAO_LEVEL, KEO_LEVEL, WIN_LEVEL, LOSE_LEVEL,
-			HUY_LEVEL, PROBE_FILE]:
+			HUY_LEVEL, VA_LEVEL, PROBE_FILE]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(BROKEN_DIR)
@@ -69,6 +72,7 @@ func after_each() -> void:
 	DirAccess.remove_absolute(HUY_DIR)
 	DirAccess.remove_absolute(WIN_DIR)
 	DirAccess.remove_absolute(LOSE_DIR)
+	DirAccess.remove_absolute(VA_DIR)
 	DirAccess.remove_absolute(PROBE_DIR)
 	Log.clear()
 
@@ -581,6 +585,23 @@ func _make_attack_main() -> Node2D:
 		"quan": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . B . . .",
 			". . . 1 K . .", ". . . . . B .", ". . . . . 2 ."],
 		"thu_tu_dich": ["3,3", "4,4", "5,5"],
+		"tiep_vien": [],
+		"muu_ke_mo": [],
+	})
+
+
+## Khoái 3,4 đẩy Bộ binh 4,4 sang 5,4 — ô đó có Bộ binh khác đứng chắn: đòn va chạm làm cả hai mất máu
+## (Story 2.12, AC 1: bóng phải có đủ mọi quân bị ảnh hưởng, không chỉ quân bị đánh).
+func _make_push_collision_main() -> Node2D:
+	return _make_level_main(VA_DIR, VA_LEVEL, {
+		"phien_ban_dinh_dang": 1,
+		"ten": "Thử va chạm",
+		"kieu": "tieu_diet",
+		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . . . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"quan": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . . . .",
+			". . . 1 B B .", ". . . . . . .", ". . . . . . ."],
+		"thu_tu_dich": ["4,4", "5,4"],
 		"tiep_vien": [],
 		"muu_ke_mo": [],
 	})
@@ -1151,6 +1172,8 @@ func test_preview_ghosts_show_on_attack_target() -> void:
 
 
 ## Xem trước chỉ tính lại khi đổi ô trỏ chuột (Story 2.12, AC 4).
+## Gọi thẳng `_on_cell_hovered` là cố ý: test này canh chốt chặn *trong view* (sự kiện trùng ô vẫn không tính
+## lại). Đường chuột thật đã đi qua `BattleInput` ở `test_preview_ghosts_show_on_attack_target`.
 func test_preview_recomputes_only_when_target_changes() -> void:
 	var main: Node2D = _make_attack_main()
 	_press_physical(main, KEY_1)
@@ -1172,13 +1195,92 @@ func test_preview_matches_real_attack() -> void:
 	_hover_by_mouse(main, Vector2i(3, 3))
 	var ghosts: Array[Dictionary] = _board(main).preview_view().ghosts()
 	assert_false(ghosts.is_empty(), "điều kiện trước: đang có bóng xem trước")
+	assert_eq(ghosts.size(), 1, "một quân bị ảnh hưởng: không có bóng thừa")
+	if ghosts.size() != 1:
+		return
+	var ghost_cell: Vector2i = ghosts[0]["cell"] as Vector2i
 	var ghost_hp: int = ghosts[0]["hp"] as int
 	_click_by_mouse(main, Vector2i(3, 3))
-	var pushed: Unit = _unit_at(main, Vector2i(3, 2))
+	var pushed: Unit = _unit_at(main, ghost_cell)
 	assert_not_null(pushed, "quân bị đẩy tới đúng ô bóng đã chỉ")
 	if pushed != null:
 		assert_eq(pushed.hp, ghost_hp, "máu sau đòn khớp bóng")
 	assert_true(_board(main).preview_view().ghosts().is_empty(), "đánh xong thì bóng biến mất")
+
+
+## Đổi tướng khi chuột vẫn đứng yên trên cùng một ô thì bóng phải đổi theo tướng mới (Story 2.12 review,
+## HIGH-1). Ở thu_lao, Khoái 3,5 và Lão 3,3 cùng nhắm ô 3,6 nhưng ra hai kết quả khác nhau: Khoái đẩy Bộ binh
+## khỏi mép bàn (máu 0), lao của Lão trúng Khoái đứng chắn (máu 2).
+func test_preview_follows_general_switch_without_moving_pointer() -> void:
+	var main: Node2D = _make_lao_main()
+	_press_physical(main, KEY_1)
+	_hover_by_mouse(main, Vector2i(3, 6))
+	var ghosts: Array[Dictionary] = _board(main).preview_view().ghosts()
+	assert_eq(ghosts.size(), 1, "trước: một bóng cho Bộ binh bị đẩy")
+	if ghosts.size() == 1:
+		assert_eq(ghosts[0]["hp"], 0, "trước: Bộ binh chết vì bị đẩy ra ngoài bàn")
+	_press_physical(main, KEY_2)
+	ghosts = _board(main).preview_view().ghosts()
+	assert_eq(ghosts.size(), 1, "sau khi đổi tướng vẫn đúng một quân bị ảnh hưởng")
+	if ghosts.size() == 1:
+		assert_eq(ghosts[0]["cell"], Vector2i(3, 5), "lao của Lão trúng Khoái 3,5, không phải Bộ binh 3,6")
+		assert_eq(ghosts[0]["hp"], 2, "Khoái mất 1 máu vì đứng chắn")
+
+
+## Bóng tắt ngay khi hoạt ảnh bắt đầu, không đợi phát xong (Story 2.12, Task 3.3; review MEDIUM-1).
+func test_preview_clears_when_attack_animation_starts() -> void:
+	var main: Node2D = _make_attack_main()
+	_press_physical(main, KEY_1)
+	_view(main).event_player().instant = false
+	_hover_by_mouse(main, Vector2i(3, 3))
+	assert_false(_board(main).preview_view().ghosts().is_empty(), "điều kiện trước: đang có bóng")
+	_click_by_mouse(main, Vector2i(3, 3))
+	assert_true(_view(main).is_playing(), "hoạt ảnh đang chạy")
+	assert_true(_board(main).preview_view().ghosts().is_empty(), "vừa bắt đầu phát thì bóng phải tắt")
+	await wait_seconds(1.5)
+	assert_false(_view(main).is_playing(), "phát xong thì mở khóa")
+
+
+## Bóng vẫn hiện khi đang chờ bấm lần hai để xác nhận đòn (Story 2.12, câu hỏi Q3 chốt: có).
+func test_preview_stays_while_waiting_for_confirmation() -> void:
+	var main: Node2D = _make_lao_main()
+	_press_physical(main, KEY_2)
+	_click_by_mouse(main, Vector2i(2, 3))
+	assert_eq(_unit_cell(main, 2), Vector2i(2, 3), "trước: Lão đã đi tới 2,3")
+	_hover_by_mouse(main, Vector2i(6, 3))
+	assert_eq(_view(main).pending_cell(), BoardView.NO_CELL, "trước: chưa bấm lần hai")
+	assert_false(_board(main).preview_view().ghosts().is_empty(), "trước: rê lên Kỵ binh đã có bóng")
+	_click_by_mouse(main, Vector2i(6, 3))
+	assert_eq(_view(main).pending_cell(), Vector2i(6, 3), "đang chờ xác nhận")
+	assert_false(_board(main).preview_view().ghosts().is_empty(), "chờ xác nhận vẫn thấy bóng của đòn sắp ra")
+	assert_eq(_unit_at(main, Vector2i(6, 3)).hp, 2, "chưa ra đòn")
+
+
+## Đòn đẩy va vào quân khác làm cả hai mất máu: bóng phải có đủ hai quân (Story 2.12, AC 1).
+func test_preview_shows_every_affected_unit() -> void:
+	var main: Node2D = _make_push_collision_main()
+	_press_physical(main, KEY_1)
+	_hover_by_mouse(main, Vector2i(4, 4))
+	var ghosts: Array[Dictionary] = _board(main).preview_view().ghosts()
+	assert_eq(ghosts.size(), 2, "hai quân cùng bị ảnh hưởng thì hai bóng")
+	var hp_by_cell: Dictionary = {}
+	for ghost: Dictionary in ghosts:
+		hp_by_cell[ghost["cell"] as Vector2i] = ghost["hp"] as int
+	assert_eq(hp_by_cell.get(Vector2i(4, 4), -1), 0, "quân bị đẩy gục vì va chạm: máu 0, ở nguyên ô cũ")
+	assert_eq(hp_by_cell.get(Vector2i(5, 4), -1), 2, "quân đứng chắn mất 1 máu va chạm: còn 2")
+	_click_by_mouse(main, Vector2i(4, 4))
+	assert_null(_unit_at(main, Vector2i(4, 4)), "đánh thật: quân bị đẩy gục, ô trống")
+	assert_eq(_unit_at(main, Vector2i(5, 4)).hp, 2, "đánh thật: quân chắn còn 2 máu, khớp bóng")
+
+
+## Bóng mờ vẽ trên đồng quân nhưng dưới viền mục tiêu và số thứ tự đòn (Story 2.12, AC 6 / NFR9).
+func test_preview_layer_sits_above_tokens_below_numbers() -> void:
+	var main: Node2D = _make_attack_main()
+	var board: BoardView = _board(main)
+	var preview_index: int = board.preview_view().get_index()
+	assert_gt(preview_index, board._world.get_index(), "bóng vẽ sau lớp đồng quân")
+	assert_lt(preview_index, board._target_layer.get_index(), "bóng vẽ trước viền mục tiêu")
+	assert_lt(preview_index, board._telegraph.numbers.get_index(), "bóng vẽ trước lớp số thứ tự đòn")
 
 
 ## Đang phát hoạt ảnh thì lệnh mới bị bỏ qua (Story 2.11, AC 3).

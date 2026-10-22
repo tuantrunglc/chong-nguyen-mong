@@ -177,3 +177,8 @@
 - Không test nào đọc kích thước/vị trí khung thông tin (chỉ test chuỗi), vì AC 8 cấm viết test cho phần chỉ nhìn thấy bằng mắt. Hệ quả: lỗi khung bị bóp còn 17 px (xem Review Findings) chỉ lộ ra khi đo hoặc nhìn; nếu sau này có test giao diện chạy được ở chế độ có cửa sổ thì thêm một assert `size.x` tối thiểu.
 - Bốn dòng hiệu ứng địa hình trong khung thông tin đang dạy luật chưa có: hầm chông "Đi qua mất máu" (Story 3.4), kho lương "Quân Nguyên đứng kề thì hồi máu" (3.9), làng "Đánh vào làng thì mất Lòng dân" (3.7), ải "Quân Nguyên vào ải thì thua" (3.11 — `rules_victory.gd:35` mới chỉ xét `ELIMINATE`). Tác giả chốt 2026-10-22: giữ lời thiết kế, rà lại từng dòng khi luật tương ứng vào.
 - Nhánh "Kỵ binh" (`Telegraph.Kind.DIRECTION`) của khung thông tin chưa có test: cần một trận có Kỵ binh bị đẩy cho ô xung phong ra ngoài bàn rồi rê chuột để khẳng định khung ghi "Không có đòn nào" (code đã sửa theo review 2026-10-22, nhưng chỉ kiểm bằng đọc code). Viết khi có kịch bản Kỵ binh bị đẩy.
+
+## Deferred from: code review of story 2-12-xem-truoc-ket-qua-don (2026-10-22)
+
+- Bóng mờ của quân bị đánh **tại chỗ** vẽ đè lên tên quân thật (cùng cỡ chữ, alpha 0.5) nên tên đậm hơn một chút; số máu đã được đẩy lên trên đồng nên không chồng số thật. Chưa sửa vì chưa biết tác giả thấy có khó đọc không — chờ tác giả nhìn `anh/2-12-2.png`, `anh/2-12-3.png`; nếu khó đọc thì bỏ tên trên bóng, chỉ giữ số máu.
+- Chưa có test đọc vị trí nhãn của bóng (tên, số máu), vì đó là phần chỉ nhìn thấy bằng mắt: nếu sau này có test chạy được ở chế độ có cửa sổ thì thêm assert vị trí số máu khi `moved == false` (phải nằm trên đồng, không đè số thật). Đo pixel đã có trong Debug Log của story.

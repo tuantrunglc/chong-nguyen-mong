@@ -260,7 +260,6 @@ func _ready() -> void:
 	# Bóng mờ xem trước đòn (Story 2.12): trên đồng quân, dưới viền mục tiêu và lớp số thứ tự đòn.
 	_preview = PreviewView.new()
 	add_child(_preview)
-	add_child(Node2D.new())
 	_target_layer = Node2D.new()
 	_target_layer.draw.connect(_draw_targets)
 	add_child(_target_layer)

@@ -46,9 +46,9 @@ tôi muốn thấy trước kết quả của đòn trước khi bấm,
   - [x] 4.3 Đánh thật đúng mục tiêu đó → bàn khớp với ghost đã hiện (so `ghosts()` trước khi bấm với trạng thái sau khi phát xong).
   - [x] 4.4 `game/tests/test_battle_controller.gd`: `preview` không đổi state; khớp kết quả thật; lệnh bị từ chối → null.
 
-- [ ] **Task 5: Kiểm bằng mắt, tài liệu, commit** (AC: 1–7)
+- [x] **Task 5: Kiểm bằng mắt, tài liệu, commit** (AC: 1–7)
   - [x] 5.1 `tools/test.sh` xanh; ghi số test vào Debug Log.
-  - [ ] 5.2 `tools/chay.sh --dev --tran=thu_lao`: chọn Khoái, rê lên Bộ binh → thấy bóng mờ + máu sau đòn; rê ra → mất; bấm đánh → kết quả đúng như bóng. Chụp ảnh nếu lưu được (`anh/2-12-*.png`); không có ảnh thì **không đánh [x]**.
+  - [x] 5.2 `tools/chay.sh --dev --tran=thu_lao`: chọn Khoái, rê lên Bộ binh → thấy bóng mờ + máu sau đòn; rê ra → mất; bấm đánh → kết quả đúng như bóng. Chụp ảnh nếu lưu được (`anh/2-12-*.png`); không có ảnh thì **không đánh [x]**.
   - [x] 5.3 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, đúng những bước đã chạy.
   - [x] 5.4 Commit tiếng Việt kết `(Story 2.12)`.
 
@@ -114,13 +114,19 @@ tôi muốn thấy trước kết quả của đòn trước khi bấm,
 
 ## Dev Agent Record
 
-### Agent Model Used
+### Review Findings
 
-### Debug Log References
+Code review 2026-10-22 (Blind Hunter + Edge Case Hunter + Acceptance Auditor, diff `66c2108`). 8 phát hiện (1 HIGH, 2 MEDIUM, 5 LOW); mọi mục sửa được đã sửa trong cùng ngày, test `589/589` đạt. Bằng chứng thô ở `_bmad-output/implementation-artifacts/.review/2-12-*.md`.
 
-### Completion Notes List
-
-### File List
+- [x] [Review][Patch] HIGH-1: đổi tướng khi chuột đứng yên vẫn giữ bóng của tướng cũ — `_select` không xóa ô đã xem trước nên `_update_preview` thấy `cell == _preview_cell` và bỏ qua. Sửa: `_select` đặt `_preview_cell = NO_CELL` rồi mới chọn + gọi `_on_cell_hovered` để tính lại. Bằng chứng: bỏ dòng đó → `test_preview_follows_general_switch_without_moving_pointer` trượt (78/79). [game/src/battle/battle_view.gd:407-415]
+- [x] [Review][Patch] MEDIUM-1: bóng chỉ tắt khi phát xong, còn nguyên trong lúc hoạt ảnh chạy trên bàn cũ — `_on_events_resolved` gọi `_clear_preview()` ngay khi bắt đầu phát. Bằng chứng: bỏ dòng đó → `test_preview_clears_when_attack_animation_starts` trượt. [game/src/battle/battle_view.gd:206-212]
+- [x] [Review][Patch] MEDIUM-2: AC 1/AC 6 chưa có bằng chứng hình ảnh — chạy game thật ở 3 trận, lưu 13 ảnh `anh/2-12-*.png`, đo pixel (đĩa bóng trên ô trống tương phản 5,56:1 so với nền ô; hai ảnh rê cùng ô giống hệt từng pixel), thêm test thứ tự lớp cho AC 6. Tác giả vẫn cần nhìn để chốt độ mờ (xem Completion Notes).
+- [x] [Review][Patch] LOW-1: test yếu — `BoardFixture.picture()` chỉ so `id@ô:máu`, `can_undo()` được khẳng định khi nó vốn đã false, test bóng chỉ có một quân. Thêm `test_preview_keeps_existing_undo_snapshot` (đi trước → xem trước → hủy → so cả bàn), siết `test_preview_matches_real_attack` (đúng 1 bóng, so ô + máu), thêm `test_preview_shows_every_affected_unit` (đòn đẩy va quân chắn: 2 bóng, 2 mức máu). [game/tests/test_battle_controller.gd:365-376]
+- [x] [Review][Patch] LOW-2: thiếu test cho Q1 (quân chết: máu 0), Q3 (bóng còn khi chờ xác nhận) và ca "lao trúng tướng mình đứng chắn" — đã có trong 3 test mới: `test_preview_follows_general_switch_without_moving_pointer`, `test_preview_stays_while_waiting_for_confirmation`, `test_preview_shows_every_affected_unit`.
+- [x] [Review][Patch] LOW-3: `add_child(Node2D.new())` rác trong `board_view.gd` — đã bỏ. [game/src/battle/board_view.gd:250-262]
+- [x] [Review][Patch] LOW-4: Task 5.3 khai khống "đúng những bước đã chạy" khi 5.2 chưa chạy được — 5.2 giờ chạy thật, hướng dẫn dưới đây viết lại theo đúng 9 bước đã thực hiện (ghi cả trận và ô).
+- [x] [Review][Patch] LOW-5: `game/.bak_preview_view.gd` còn sót — không còn trong cây làm việc.
+- [x] [Review][Defer] Bóng của quân **bị đánh tại chỗ** vẽ đè lên tên quân thật (cùng cỡ chữ, alpha 0.5) nên tên đậm hơn một chút; số máu đã được đẩy lên trên đồng để không chồng số thật. Không tự sửa vì chưa biết tác giả thấy có khó đọc không — xem `anh/2-12-2` và `2-12-3` rồi quyết. Ghi vào `deferred-work.md`.
 
 ### Agent Model Used
 
@@ -128,32 +134,47 @@ deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
 
 ### Debug Log References
 
-- `tools/test.sh`: 583/583 đạt (trước story: 577; thêm 3 test `test_battle_controller.gd` + 3 test trong `test_battle_view.gd`), 81 kịch bản đã duyệt, kiểm ranh giới đạt.
-- Báo động oan: sau khi thêm `preview_view.gd`, chạy `--headless --quit-after` thấy `1 resources still in use at exit` + rò `FontAdvanced`. Truy ra KHÔNG phải rò thật: cache lớp toàn cục chưa có `PreviewView` nên script được nạp nửa vời. Chạy `--headless --path game --import` một lần là sạch; các lần sau cũng sạch. Ghi lại để phiên sau không mất thời gian: **thêm script có `class_name` thì phải `--import` trước khi chạy thử**.
-- Kiểm ngược: bỏ `if cell == _preview_cell` → `test_preview_recomputes_only_when_target_changes` trượt (2 lần tính thay vì 1); đổi `_state.clone()` thành `_state` trong `preview` → `test_preview_does_not_touch_live_state` trượt (máu quân bị trừ vào trạng thái sống).
+- `tools/test.sh`: **589/589 đạt** (trước story: 577; đợt đầu 583; đợt sửa review thêm 6 test), 81 kịch bản đã duyệt, kiểm ranh giới + quét project đạt.
+- Báo động oan (ghi lại để phiên sau khỏi mất thời gian): thêm script có `class_name` thì lần chạy đầu báo `resources still in use` + rò `FontAdvanced`; chạy `--headless --path game --import` một lần là sạch, không phải rò thật.
+- Không dùng được công cụ `capture_screenshot` của GoPeak trong phiên này (nhóm `testing` không hiện). Đã bơm chuột qua cổng runtime 7777 của game (`inject_mouse_motion`, `inject_mouse_click`) và chụp bằng `capture_screenshot` của chính runtime (ra file PNG 1280×720). Bài học: `inject_key` của runtime chỉ đặt `keycode`, mà `BattleInput` so `physical_keycode` → phím chọn tướng phải bơm qua XTest (X11); nút HUD cần **cả press lẫn release**, thiếu release thì nút không kêu.
+- Kiểm ngược hai bản sửa review (đã khôi phục nguyên trạng, chạy lại 589/589): bỏ `_clear_preview()` trong `_on_events_resolved` → 1 test trượt; bỏ `_preview_cell = NO_CELL` trong `_select` → 1 test trượt.
+- Đo bằng ảnh (không chỉ bằng dữ liệu): rê trong cùng một ô 3 lần → `preview_computations` 1 → 1, ảnh giống hệt từng pixel; bóng trên ô trống: đĩa (89,85,78) trên nền ô (237,222,186); kết quả thật khớp bóng: Khoái còn 2 máu (thu_lao), Bộ binh ở (0,4) còn 1 máu (thu_ba_tuong), Bộ binh biến mất sau khi bị đẩy xuống sông (thu_day).
 
 ### Completion Notes List
 
-- `BattleController.preview(command)`: clone trạng thái, chạy `Rules.resolve` trên bản sao, trả bản sao; lệnh bị từ chối thì `null`. Không phát signal, không đổi bản chụp hủy.
-- `game/src/battle/preview_view.gd` (mới): vẽ đĩa mờ màu phe + chữ tắt + số máu cho danh sách ghost `{cell, pos, type, hp, faction}`; không đọc trạng thái, không tạo `Unit` (tránh luật "chỉ Effects sửa `.hp`/`.cell`). BoardView tạo nó **sau lớp đồng quân, trước viền mục tiêu và lớp số** để ô đỏ + số vẫn nổi nhất (NFR9); `show_state` xóa bóng cũ.
-- `BattleView`: `_update_preview(cell)` tính lại **chỉ khi đổi ô** (AC 4), bỏ qua khi đang phát hoạt ảnh; bóng tắt khi bỏ chọn, rê ra ngoài mục tiêu, `_hide_info()`, `stop()`, hết trận. Bóng dựng từ chênh lệch hai bản chụp: quân đổi ô/mất máu → ô cuối + máu sau đòn; quân biến mất → ô cũ + máu 0.
-- **Chưa kiểm bằng mắt (5.2)**: phiên AI không mở cửa sổ; bóng mờ đã đo bằng dữ liệu (đúng ô, đúng máu) nhưng chưa ai nhìn độ mờ/độ nổi.
+- `BattleController`: `preview_result(command) -> {state, events}` (clone → `_resolve` → trả cả nhật ký, để view dựng bóng cho quân chết đuối đúng ô cuối); `preview(command) -> BattleState` là vỏ mỏng cho test/controller. Lệnh bị từ chối → `{}` / `null`; không phát signal, không đổi `_undo_snapshot`.
+- `PreviewView` (mới): đĩa mờ màu phe + vòng sáng + tên quân + số máu, alpha 0.5; `moved == false` (quân bị đánh tại chỗ) thì số máu đặt **trên** đồng để không chồng số thật. `_clear_labels` gỡ khỏi cây trước khi `queue_free` (nhãn cũ không kịp chồng lên nhãn mới khi rê nhanh).
+- `BoardView`: tạo `PreviewView` ngay sau `_world`, trước viền mục tiêu và lớp số (AC 6) — có test so `get_index()`.
+- `BattleView`: `_update_preview` chỉ tính lại khi **đổi ô** (AC 4), bỏ qua khi đang phát; `_ghosts_of` dựng bóng từ chênh lệch hai bản chụp, nhớ ô cuối từ `MOVED`/`DROWNED` cho quân biến mất; bóng tắt khi bỏ chọn, rê ra ngoài mục tiêu, bắt đầu phát, `_hide_info()`, `stop()`, hết trận.
+- Câu hỏi Q1–Q3 (Dev Notes) đang chạy đúng như đề xuất: quân chết → bóng ở ô cuối, máu 0; có xem trước đòn đẩy; bóng vẫn hiện khi chờ xác nhận. Cả ba đã có test; **chờ tác giả xác nhận** khi chơi tay.
+- **Đã kiểm bằng ảnh chụp, chưa có mắt người nhìn**: 13 ảnh trong `anh/2-12-*.png` chứng minh bóng hiện/đổi/mất, kết quả thật khớp bóng, không có bóng trong pha địch, rê cùng ô không nhấp nháy. Độ mờ/độ nổi và cảm giác "dễ đọc" thì tác giả chốt khi xem ảnh hoặc chơi.
 
-**Hướng dẫn tác giả tự test:**
+**Hướng dẫn tác giả tự test (đúng 9 bước đã chạy):**
 
-1. Gõ `tools/test.sh` → `583/583 test đạt`.
+1. Gõ `tools/test.sh` → `589/589 test đạt`, `81 đã duyệt`.
 2. Gõ `tools/chay.sh --dev --tran=thu_lao`.
-3. Bấm `1` chọn Khoái, rê chuột lên một Bộ binh kề bên: thấy **bóng mờ** ở ô quân đó sẽ bị đẩy tới, kèm **số máu sau đòn**.
-4. Rê sang quân khác: bóng đổi theo. Rê ra ô trống: bóng biến mất.
-5. Bấm đánh: kết quả đúng như bóng đã chỉ (ô và máu).
-6. Rê trong cùng một ô nhiều lần: bóng đứng yên, không nhấp nháy.
-7. Trong lúc quân Nguyên đang ra đòn: không có bóng xem trước nào hiện.
+3. Bấm `1` chọn Khoái, rê lên **Bộ binh ở mép dưới (cột 4, hàng 7)**: hiện **bóng mờ** ngay trên đồng quân đó kèm số **0** — nghĩa là nó sẽ chết vì bị đẩy khỏi bàn (`2-12-2`).
+4. **Giữ nguyên chuột**, bấm `2` đổi sang Lão: bóng phải **đổi ngay** sang Khoái (ô trên, số **2**) — lao của Lão trúng tướng mình đứng chắn, không phải Bộ binh (`2-12-3`). Đây là lỗi HIGH-1 đã sửa.
+5. Rê ra ô trống: bóng biến mất (`2-12-4`). Rê lại vào Bộ binh rồi rê quanh trong **cùng ô**: bóng đứng yên, không nhấp nháy (`2-12-13`, `2-12-14`).
+6. Bấm đánh: Khoái còn **2 máu**, đúng như bóng đã chỉ (`2-12-5`).
+7. `tools/chay.sh --dev --tran=thu_ba_tuong`: bấm `1`, rê lên Bộ binh bên trái (cột 1, hàng 6) → bóng nằm ở **ô trống** phía trên, số **1** (`2-12-10`); bấm đánh → Bộ binh đứng đúng ô đó với **1 máu** (`2-12-12`).
+8. `tools/chay.sh --dev --tran=thu_day`: Khoái đẩy Bộ binh xuống sông → bóng ở ô sông với số **0** (`2-12-7`); bấm đánh → quân biến mất khỏi bàn (`2-12-8`).
+9. Bấm **Kết thúc lượt (Space)**: trong lúc quân Nguyên đi/đánh **không còn bóng xem trước nào** (`2-12-11`).
+
+**Cần tác giả chốt:** nhìn `2-12-2` và `2-12-3` (bóng vẽ đè lên quân bị đánh tại chỗ) — tên quân có bị đậm/nhòe khó đọc không? Nếu khó đọc thì em bỏ tên trên bóng, chỉ giữ số máu.
 
 ### File List
 
 - `game/src/battle/preview_view.gd` (mới) + `.uid`
-- `game/src/battle/battle_controller.gd` (`preview`)
-- `game/src/battle/board_view.gd` (tạo `PreviewView`, `preview_view()`, xóa bóng khi đổi bàn)
-- `game/src/battle/battle_view.gd` (xem trước theo ô trỏ, đếm số lần tính)
-- `game/tests/test_battle_controller.gd`, `game/tests/test_battle_view.gd`
+- `game/src/battle/battle_controller.gd` (`preview_result`, `preview`)
+- `game/src/battle/board_view.gd` (tạo `PreviewView`, `preview_view()`, xóa bóng khi đổi bàn, bỏ `Node2D` rác)
+- `game/src/battle/battle_view.gd` (xem trước theo ô trỏ, đếm số lần tính, xóa bóng khi đổi tướng / bắt đầu phát)
+- `game/tests/test_battle_controller.gd` (+2 test: không đụng state/undo, khớp kết quả thật, null khi bị từ chối)
+- `game/tests/test_battle_view.gd` (+7 test: hiện/ẩn, đếm lần tính, khớp kết quả thật, đổi tướng khi chuột đứng yên, tắt khi bắt đầu phát, còn khi chờ xác nhận, đủ mọi quân bị ảnh hưởng, thứ tự lớp)
+- `_bmad-output/implementation-artifacts/anh/2-12-*.png` (13 ảnh kiểm bằng mắt)
+- `_bmad-output/implementation-artifacts/deferred-work.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+
+### Change Log
+
+- 2026-10-22: sửa 8 phát hiện code review (HIGH-1, MEDIUM-1/2, LOW-1..5), thêm 6 test, kiểm bằng mắt bằng 13 ảnh chụp thật; test 583 → 589.

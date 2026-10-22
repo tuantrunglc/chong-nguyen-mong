@@ -35,7 +35,10 @@ func ghosts() -> Array[Dictionary]:
 
 
 func _clear_labels() -> void:
+	# Gỡ khỏi cây ngay rồi mới hẹn xóa: nếu chỉ `queue_free` thì nhãn cũ còn nằm trong cây tới cuối khung hình
+	# và chồng lên nhãn mới khi chuột đổi ô nhanh.
 	for child: Node in get_children():
+		remove_child(child)
 		child.queue_free()
 
 
@@ -44,11 +47,15 @@ func _add_labels(ghost: Dictionary) -> void:
 	var center: Vector2 = pos + Vector2(0.0, -UnitToken.TOKEN_LIFT)
 	var type: int = ghost.get("type", 0) as int
 	var hp: int = ghost.get("hp", 0) as int
+	var moved: bool = ghost.get("moved", true) as bool
 	var text_color: Color = Color(1.0, 0.95, 0.80, GHOST_ALPHA)
 	if not UnitToken.NAME_KEYS.has(type):
 		return
 	_add_label(tr(UnitToken.NAME_KEYS[type] as String), center, NAME_FONT_SIZE, text_color)
-	_add_label(str(hp), center + UnitToken.HP_OFFSET, HP_FONT_SIZE, Color(1.0, 1.0, 1.0, GHOST_ALPHA))
+	# Quân không đổi ô (bị đánh tại chỗ): số máu sau đòn phải nằm TRÊN đồng quân, nếu để đúng góc dưới phải thì
+	# hai số máu (thật và xem trước) chồng lên nhau thành một cục không đọc được.
+	var hp_center: Vector2 = center + UnitToken.HP_OFFSET if moved else center - Vector2(0.0, UnitToken.RADIUS + 10.0)
+	_add_label(str(hp), hp_center, HP_FONT_SIZE, Color(1.0, 1.0, 1.0, GHOST_ALPHA))
 
 
 func _add_label(text: String, center: Vector2, font_size: int, color: Color) -> void:
@@ -58,6 +65,7 @@ func _add_label(text: String, center: Vector2, font_size: int, color: Color) -> 
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.theme_type_variation = &"TitleLabel"
 	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_color_override("font_color", color)
 	label.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.05, GHOST_ALPHA))

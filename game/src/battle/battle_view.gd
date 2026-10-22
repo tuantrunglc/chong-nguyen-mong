@@ -207,6 +207,8 @@ func _on_events_resolved(events: Array[BattleEvent], snapshot: BattleState) -> v
 	if _controller == null:
 		return
 	_playing = true
+	# Bóng xem trước là kết quả của lệnh vừa bấm: phải biến mất trước khi hoạt ảnh chạy trên bàn cũ (Story 2.12).
+	_clear_preview()
 	_enemy_turn = _pending_enemy_turn
 	_pending_enemy_turn = false
 	# Không gọi `_update_hud()` ở đây: bản chụp đã là trạng thái SAU lệnh, vẽ số hiệp mới giữa lúc phát sẽ
@@ -279,13 +281,16 @@ func _update_preview(cell: Vector2i) -> void:
 	if cell == _preview_cell:
 		return
 	_preview_cell = cell
-	_preview_count += 1
 	var before: BattleState = _controller.snapshot()
-	var after: BattleState = _controller.preview(Command.attack(_selected, cell))
-	if after == null:
+	var result: Dictionary = _controller.preview_result(Command.attack(_selected, cell))
+	if result.is_empty():
+		# Lệnh không chạy được: không nhớ ô này, để lần trỏ sau còn tính lại (trạng thái có thể vừa đổi).
+		_preview_cell = BoardView.NO_CELL
 		_board.preview_view().clear()
 		return
-	_board.preview_view().show_ghosts(_ghosts_of(before, after))
+	_preview_count += 1
+	_board.preview_view().show_ghosts(
+		_ghosts_of(before, result["state"] as BattleState, result["events"] as Array[BattleEvent]))
 
 
 func _clear_preview() -> void:
@@ -296,22 +301,30 @@ func _clear_preview() -> void:
 
 ## Chênh lệch hai bản chụp thành danh sách bóng: quân đổi ô hoặc mất máu hiện ở vị trí cuối với máu sau đòn;
 ## quân biến mất hiện ở ô cũ với máu 0 (Story 2.12).
-func _ghosts_of(before: BattleState, after: BattleState) -> Array[Dictionary]:
+func _ghosts_of(before: BattleState, after: BattleState, events: Array[BattleEvent]) -> Array[Dictionary]:
 	var ghosts: Array[Dictionary] = []
+	var last_cell: Dictionary = {}
+	for event: BattleEvent in events:
+		if event.type == BattleEvent.Type.MOVED:
+			last_cell[event.unit_id] = event.to_cell
+		elif event.type == BattleEvent.Type.DROWNED:
+			last_cell[event.unit_id] = event.to_cell
 	for unit: Unit in after.units:
 		var old: Unit = before.unit_by_id(unit.id)
 		if old == null:
 			continue
 		if old.cell == unit.cell and old.hp == unit.hp:
 			continue
-		ghosts.append(_ghost(unit.cell, unit, after))
+		ghosts.append(_ghost(unit.cell, unit, after, -1, old.cell != unit.cell))
 	for unit: Unit in before.units:
 		if after.unit_by_id(unit.id) == null:
-			ghosts.append(_ghost(unit.cell, unit, before, 0))
+			# Quân biến mất: đặt bóng ở ô cuối cùng nó tới trong lệnh (chết đuối sau khi bị đẩy), không phải ô đầu.
+			var cell: Vector2i = last_cell.get(unit.id, unit.cell) as Vector2i
+			ghosts.append(_ghost(cell, unit, before, 0, cell != unit.cell))
 	return ghosts
 
 
-func _ghost(cell: Vector2i, unit: Unit, state: BattleState, hp: int = -1) -> Dictionary:
+func _ghost(cell: Vector2i, unit: Unit, state: BattleState, hp: int = -1, moved: bool = true) -> Dictionary:
 	var lift: float = BoardView.surface_height(state.terrain_at(cell))
 	return {
 		"cell": cell,
@@ -319,6 +332,7 @@ func _ghost(cell: Vector2i, unit: Unit, state: BattleState, hp: int = -1) -> Dic
 		"type": unit.type,
 		"hp": unit.hp if hp < 0 else hp,
 		"faction": unit.faction,
+		"moved": moved,
 	}
 
 
@@ -391,6 +405,8 @@ func _hide_info() -> void:
 
 
 func _select(id: int) -> void:
+	# Đổi tướng thì kết quả đòn khác: bóng của tướng trước không được giữ lại (Story 2.12 review).
+	_preview_cell = BoardView.NO_CELL
 	_selected = id
 	_cells = _controller.reachable(id)
 	_targets = _controller.attack_targets(id)
