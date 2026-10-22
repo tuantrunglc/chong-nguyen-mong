@@ -51,10 +51,11 @@ static func build(state: BattleState, round_start: BattleState, commands: Array[
 	lines.append("lúc: %s · lần mở thứ %d" % [str(meta.get("luc", "?")), int(meta.get("lan_mo", 0))])
 	lines.append("")
 	if state != null:
-		lines.append("## Kịch bản tái hiện (dán vào game/tests/kich_ban/<nhóm>/<tên>.json)")
+		lines.append("## Kịch bản tái hiện (chỉ khối json ngay dưới đây là tệp .json)")
 		lines.append("```json")
 		lines.append(JSON.stringify(scenario_data(state, round_start, commands, meta), "  "))
 		lines.append("```")
+		lines.append("(hết khối JSON — phần còn lại của báo cáo KHÔNG thuộc tệp kịch bản)")
 		lines.append("")
 		lines.append("## Bàn hiện tại (để đối chiếu, không phải kịch bản)")
 		lines.append_array(current_section(state))
@@ -69,9 +70,10 @@ static func build(state: BattleState, round_start: BattleState, commands: Array[
 	if state == null:
 		lines.append("Không có trận đang chạy. Chỉ có nhật ký và phiên bản ở trên.")
 	else:
-		lines.append("Khối JSON ở trên là một kịch bản luật hợp lệ: `truoc` là bàn đầu hiệp, `hanh_dong` là các lệnh người")
-		lines.append("chơi đã bấm trong hiệp, `sau` là bàn ĐANG thấy (bàn hiện tại). Chép vào")
-		lines.append("game/tests/kich_ban/<nhóm>/<tên>.json rồi chạy tools/test.sh để dựng lại và đối chiếu.")
+		lines.append("Cả báo cáo này là một tệp .txt. Chỉ khối json ở trên là một kịch bản luật hợp lệ:")
+		lines.append("`truoc` là bàn đầu hiệp, `hanh_dong` là các lệnh người chơi đã bấm trong hiệp, `sau` là bàn ĐANG thấy.")
+		lines.append("Muốn chạy thử: chép ĐÚNG khối đó (không kèm dòng nào khác) vào")
+		lines.append("game/tests/kich_ban/<nhóm>/<tên>.json rồi chạy tools/test.sh.")
 		lines.append("Nếu đây là lỗi: sửa `sau` thành điều ĐÚNG (kịch bản phải trượt), rồi mới sửa code — quy trình M3.")
 	return "\n".join(lines)
 

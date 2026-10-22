@@ -185,6 +185,7 @@ deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
 - Báo cáo thật in từ trận `thu_lao` (script tạm, đã xoá): 2915 ký tự, khối JSON hợp lệ; `truoc` có 3 đòn báo, `sau` còn 2, `mau` chỉ ghi quân thiếu máu (`3,3=1`), `hanh_dong` là `danh` + `ket_thuc_luot`; phần bàn hiện tại ghi cờ đã đi/đã đánh của tướng.
 - AC 3 (lỗi cố tình): dựng stats "đẩy 2 ô" thay vì 1 → lấy báo cáo → tách khối JSON → cho chính bộ nạp + bộ chạy kịch bản của game phát lại: ra đúng bàn đang thấy (`101@4,1`); chạy lại **cùng kịch bản** với stats đúng (đẩy 1) ra `101@3,1` — kịch bản phân biệt được lỗi. Script tạm đã xoá.
 - **Chưa làm:** dán báo cáo cho một AI ngoài game (ChatGPT/Claude) — tác giả tự thử; phần chuyển JSON → kịch bản đã kiểm tự động.
+- **Bẫy đã gặp khi tác giả thử bước 5:** lưu **cả báo cáo** vào `bao_loi.json` → `tests/test_scenarios.gd` báo `JSON sai cú pháp (Expected 'true', 'false', or 'null', got 'H')` và cả bộ trượt. Đã làm rõ ngay trong báo cáo (tiêu đề mục + ghi chú: cả báo cáo là .txt, chỉ khối json là .json) và trong hướng dẫn bước 5. Báo cáo gốc giữ ở `game/tests/kich_ban/thu/bao_loi.txt` (không commit); `bao_loi.json` đã tách đúng khối JSON.
 
 ### Completion Notes List
 
@@ -203,8 +204,8 @@ deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
 2. Gõ `tools/chay.sh --dev --tran=thu_lao`.
 3. Bấm **F2**: giữa bàn, sát đáy, hiện bảng "Đã sao chép báo lỗi" khoảng 3 giây rồi tự mất.
 4. Mở trình soạn thảo, **Ctrl+V**: thấy tiêu đề (phiên bản, trận, hiệp, giờ), khối JSON của kịch bản, bàn hiện tại, 200 dòng log, ghi chú cho AI. Báo cáo thật dài cỡ 2.900 ký tự.
-5. Chép khối JSON vào `game/tests/kich_ban/thu/bao_loi.json` rồi chạy `tools/test.sh`: kịch bản mới **đạt** (vì `sau` ghi đúng điều đang xảy ra).
-6. Muốn thấy nó bắt lỗi: sửa `data/chi_so.json` cho Khoái `do_day` 1 → 2, chơi lại tới lúc đẩy quân, bấm F2, lặp bước 5 → kịch bản **trượt** (bàn sau khác `sau` đã ghi). Trả `chi_so.json` về như cũ sau khi thử.
+5. Lưu cả báo cáo thành một tệp **.txt** (không phải .json). Chép **chỉ phần giữa hai dòng ` ```json ` và ` ``` `** (bắt đầu bằng `{`, kết thúc bằng `}` ở cột đầu) vào `game/tests/kich_ban/thu/bao_loi.json` rồi chạy `tools/test.sh`: kịch bản mới hiện **1 chưa duyệt (0 chưa đạt)** và cả bộ vẫn xanh. Lưu cả báo cáo vào .json là **sai**: bộ nạp đọc dòng đầu "Hào Khí Đông A…" và báo "JSON sai cú pháp".
+6. Muốn thấy nó bắt lỗi: sửa `data/chi_so.json` cho Khoái `do_day` 1 → 2, chơi lại tới lúc đẩy quân, bấm F2, lặp bước 5 → `tools/test.sh` **trượt** vì kịch bản mới "chưa đạt" (bàn phát lại khác `sau` đã ghi). Trả `chi_so.json` về như cũ sau khi thử.
 7. Bấm F2 ở màn hình **lỗi** (làm hỏng `data/tran/tran_01.json` rồi mở game): vẫn chép được, phần bàn ghi "(không có trận)".
 8. `tools/chay.sh` **không** có `--dev`: bấm F2 **không có gì xảy ra**.
 9. Bản web: chưa thử trong phiên này; nếu trình duyệt chặn clipboard thì chỉ mất phần sao chép, game không hỏng.
