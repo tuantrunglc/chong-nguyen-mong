@@ -34,10 +34,10 @@ const VA_LEVEL: String = VA_DIR + "/tran_01.json"
 
 ## Ô sáng mong đợi trên trận 1 (AC 4, AC 5), theo thứ tự đọc bàn.
 const KHOAI_CELLS: Array[Vector2i] = [
-	Vector2i(0, 3), Vector2i(0, 4), Vector2i(1, 4), Vector2i(0, 5), Vector2i(1, 5), Vector2i(2, 5), Vector2i(1, 6),
+	Vector2i(0, 3), Vector2i(0, 4), Vector2i(1, 4), Vector2i(0, 5), Vector2i(1, 5), Vector2i(1, 6),
 ]
 const LAO_CELLS: Array[Vector2i] = [
-	Vector2i(2, 3), Vector2i(1, 4), Vector2i(2, 4), Vector2i(0, 5), Vector2i(1, 5), Vector2i(2, 5), Vector2i(1, 6),
+	Vector2i(1, 4), Vector2i(0, 5), Vector2i(1, 5), Vector2i(1, 6),
 ]
 const KHOAI_CELL: Vector2i = Vector2i(0, 6)
 const LAO_CELL: Vector2i = Vector2i(2, 6)
@@ -141,7 +141,7 @@ func _assert_nothing_selected(main: Node2D) -> void:
 	assert_eq(_board(main).path(), [] as Array[Vector2i])
 
 
-func test_key_1_selects_khoai_and_lights_7_cells() -> void:
+func test_key_1_selects_khoai_and_lights_6_cells() -> void:
 	var main: Node2D = _make_main()
 	_press_key(main, 1)
 	_assert_selected(main, 1, KHOAI_CELLS, KHOAI_CELL)
@@ -225,7 +225,7 @@ func test_click_on_unlit_cell_deselects() -> void:
 # ---------- Đi, hủy, kết thúc lượt (Story 1.5) ----------
 
 const KHOAI_TARGET: Vector2i = Vector2i(0, 4)
-const LAO_TARGET: Vector2i = Vector2i(2, 4)
+const LAO_TARGET: Vector2i = Vector2i(1, 4)
 
 
 func _controller(main: Node2D) -> BattleController:
@@ -414,7 +414,7 @@ func test_click_undo_button_then_space_ends_turn() -> void:
 func test_mouse_onto_button_clears_path() -> void:
 	var main: Node2D = await _make_main_in_viewport()
 	_press_key(main, 1)
-	_hover_by_mouse(main, Vector2i(2, 5))
+	_hover_by_mouse(main, Vector2i(1, 5))
 	assert_false(_board(main).path().is_empty())
 	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
 	motion.position = _hud(main).end_turn_button().get_global_rect().get_center()
@@ -481,8 +481,8 @@ func test_resting_mouse_follows_token_moving_under_it() -> void:
 func test_hover_lit_cell_draws_path() -> void:
 	var main: Node2D = _make_main()
 	_press_key(main, 1)
-	_hover(main, Vector2i(2, 5))
-	assert_eq(_board(main).path(), [Vector2i(0, 5), Vector2i(1, 5), Vector2i(2, 5)] as Array[Vector2i])
+	_hover(main, Vector2i(1, 5))
+	assert_eq(_board(main).path(), [Vector2i(0, 5), Vector2i(1, 5)] as Array[Vector2i])
 	_hover(main, Vector2i(3, 5))
 	assert_eq(_board(main).path(), [] as Array[Vector2i], "rê ra ô sông: hết đường đi")
 
@@ -494,17 +494,17 @@ func test_selecting_under_resting_mouse_draws_path_at_once() -> void:
 	_press_key(main, 1)
 	assert_eq(_board(main).path(), [Vector2i(0, 5), Vector2i(1, 5)] as Array[Vector2i])
 	_press_key(main, 2)
-	assert_eq(_board(main).path(), [Vector2i(2, 5), Vector2i(1, 5)] as Array[Vector2i], "đổi tướng: đường của Lão")
+	assert_eq(_board(main).path(), [Vector2i(1, 6), Vector2i(1, 5)] as Array[Vector2i], "đổi tướng: đường của Lão")
 
 
 func test_mouse_leaving_window_clears_path() -> void:
 	var main: Node2D = _make_main()
 	_press_key(main, 1)
-	_hover_by_mouse(main, Vector2i(2, 5))
+	_hover_by_mouse(main, Vector2i(1, 5))
 	assert_false(_board(main).path().is_empty())
 	main.get_window().mouse_exited.emit()
 	assert_eq(_board(main).path(), [] as Array[Vector2i])
-	_hover_by_mouse(main, Vector2i(2, 5))
+	_hover_by_mouse(main, Vector2i(1, 5))
 	assert_false(_board(main).path().is_empty(), "quay lại đúng ô cũ: vẽ lại")
 
 
@@ -566,9 +566,9 @@ func test_mouse_events_map_screen_pixels_to_cells() -> void:
 	_battle_input(main)._unhandled_input(click)
 	_assert_selected(main, 1, KHOAI_CELLS, KHOAI_CELL)
 	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
-	motion.position = board.get_global_transform_with_canvas() * BoardView.cell_center(Vector2i(2, 5))
+	motion.position = board.get_global_transform_with_canvas() * BoardView.cell_center(Vector2i(1, 5))
 	_battle_input(main)._unhandled_input(motion)
-	assert_eq(board.path(), [Vector2i(0, 5), Vector2i(1, 5), Vector2i(2, 5)] as Array[Vector2i])
+	assert_eq(board.path(), [Vector2i(0, 5), Vector2i(1, 5)] as Array[Vector2i])
 
 
 # ---------- Đánh (Story 2.1) ----------

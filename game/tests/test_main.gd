@@ -306,8 +306,8 @@ func test_level_1_shows_terrain_and_units() -> void:
 	assert_eq(tokens.keys(), [1, 2, 101, 102, 103], "2 tướng và 3 quân Nguyên")
 	if tokens.size() != 5:
 		return
-	# Hiệp 1 mở bằng pha địch chuẩn bị (Story 2.6): Bộ binh 1,0 đã đi 2 bước về phía Lão (2,6), tới 2,1.
-	assert_eq((tokens[101] as UnitToken).position, BoardView.cell_center(Vector2i(2, 1)))
+	# Hiệp 1 mở bằng pha địch chuẩn bị (Story 2.6): Bộ binh dạy ở 2,4 đi xuống 2,5, báo đòn vào Lão (2,6).
+	assert_eq((tokens[101] as UnitToken).position, BoardView.cell_center(Vector2i(2, 5)))
 	assert_eq((tokens[1] as UnitToken).position, BoardView.cell_center(Vector2i(0, 6)))
 	assert_eq((tokens[1] as UnitToken).name_text(), tr("unit.nguyen_khoai"))
 	assert_eq((tokens[2] as UnitToken).name_text(), tr("unit.pham_ngu_lao"))
@@ -479,7 +479,7 @@ func test_f5_reads_edited_stats() -> void:
 	AppState.launch.dev = true
 	var main: Node2D = _make_main("", _write_stats(3))
 	var old: BattleController = main._controller
-	assert_eq(old.reachable(1).size(), 7, "tầm đi 3: 7 ô")
+	assert_eq(old.reachable(1).size(), 6, "tầm đi 3: 6 ô (Bộ binh đứng 2,5 chắn)")
 	old.submit(Command.move(1, Vector2i(0, 4)))
 	assert_eq(old.snapshot().unit_by_id(1).cell, Vector2i(0, 4), "trước F5 Khoái đã đi")
 	assert_true(old.can_undo(), "trước F5 có nước để hủy")

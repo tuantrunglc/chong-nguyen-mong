@@ -4,7 +4,7 @@ baseline_commit: 898098c
 
 # Story 2.14: Hoàn thiện trận 1 và mốc tự chơi hết E2
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -22,41 +22,41 @@ tôi muốn trận 1 đã có lời giải được kiểm chứng,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Khảo sát và đề xuất bố cục cuối** (AC: 1)
-  - [ ] 1.1 Chạy thử trận hiện tại (`tools/chay.sh --tran=1`, hoặc mô phỏng bằng script): ghi lại nó đang dạy gì, chỗ nào quá dễ/khó, hiệp nào buộc phải né ô đỏ, hiệp nào buộc phải đẩy xuống sông.
-  - [ ] 1.2 Viết đề xuất bố cục trong Completion Notes: bàn chữ (`dia_hinh` + `quan`), `thu_tu_dich`, và với mỗi hiệp của lời giải nói rõ **nó dạy luật gì**. Điều kiện: 2 tướng; có ít nhất một chỗ buộc né đòn đã báo, một chỗ buộc đẩy quân Nguyên xuống sông; **không mất tướng nào**. **Dừng, chờ tác giả duyệt (Câu hỏi 1)** trước khi sửa file trận.
-  - [ ] 1.3 Nếu tác giả duyệt: sửa `game/data/tran/tran_01.json`; chạy `tools/test.sh` (nhiều test nạp thật file này: `test_real_levels_are_valid`, `test_real_level_1_loads`, `test_main`).
+- [x] **Task 1: Khảo sát và đề xuất bố cục cuối** (AC: 1)
+  - [x] 1.1 Chạy thử trận hiện tại (`tools/chay.sh --tran=1`, hoặc mô phỏng bằng script): ghi lại nó đang dạy gì, chỗ nào quá dễ/khó, hiệp nào buộc phải né ô đỏ, hiệp nào buộc phải đẩy xuống sông.
+  - [x] 1.2 Viết đề xuất bố cục trong Completion Notes: bàn chữ (`dia_hinh` + `quan`), `thu_tu_dich`, và với mỗi hiệp của lời giải nói rõ **nó dạy luật gì**. Điều kiện: 2 tướng; có ít nhất một chỗ buộc né đòn đã báo, một chỗ buộc đẩy quân Nguyên xuống sông; **không mất tướng nào**. **Dừng, chờ tác giả duyệt (Câu hỏi 1)** trước khi sửa file trận.
+  - [x] 1.3 Nếu tác giả duyệt: sửa `game/data/tran/tran_01.json`; chạy `tools/test.sh` (nhiều test nạp thật file này: `test_real_levels_are_valid`, `test_real_level_1_loads`, `test_main`).
 
-- [ ] **Task 2: Lời giải không mất tướng + kiểm chứng bằng máy** (AC: 1, 2)
-  - [ ] 2.1 Viết script tạm (xoá sau khi xong) chạy lời giải qua `BattleController` trên đúng `tran_01.json` + `chi_so.json`: `start` → `begin()` (pha chuẩn bị hiệp 1) → các lệnh của lời giải (gồm `ket_thuc_luot` giữa các hiệp) → in từng hiệp: lệnh, sự kiện đáng chú ý, máu còn lại, trạng thái đòn đã báo.
-  - [ ] 2.2 Điều kiện đạt: kết cục `WON` và **cả 2 tướng còn sống** (không tướng nào gục ở bất kỳ hiệp nào). Không đạt thì sửa lời giải, cùng lắm sửa bố cục — không hạ yêu cầu.
-  - [ ] 2.3 Giữ script này ở dạng test thật nếu gọn (ví dụ `test_tran_01_solvable.gd` chạy lời giải và khẳng định thắng + đủ tướng); nếu không, kịch bản ở Task 4 là đủ.
+- [x] **Task 2: Lời giải không mất tướng + kiểm chứng bằng máy** (AC: 1, 2)
+  - [x] 2.1 Viết script tạm (xoá sau khi xong) chạy lời giải qua `BattleController` trên đúng `tran_01.json` + `chi_so.json`: `start` → `begin()` (pha chuẩn bị hiệp 1) → các lệnh của lời giải (gồm `ket_thuc_luot` giữa các hiệp) → in từng hiệp: lệnh, sự kiện đáng chú ý, máu còn lại, trạng thái đòn đã báo.
+  - [x] 2.2 Điều kiện đạt: kết cục `WON` và **cả 2 tướng còn sống** (không tướng nào gục ở bất kỳ hiệp nào). Không đạt thì sửa lời giải, cùng lắm sửa bố cục — không hạ yêu cầu.
+  - [x] 2.3 Giữ script này ở dạng test thật nếu gọn (ví dụ `test_tran_01_solvable.gd` chạy lời giải và khẳng định thắng + đủ tướng); nếu không, kịch bản ở Task 4 là đủ.
 
-- [ ] **Task 3: Ghi lời giải cho tác giả** (AC: 1, 2)
-  - [ ] 3.1 `game/data/tran/tran_01_loi_giai.md`: mở đầu bằng mục tiêu ("thắng, không mất tướng"), bàn đầu trận (hai lớp `dia_hinh`/`quan` dạng chữ như file trận), rồi **từng hiệp**: bàn đầu hiệp, lệnh của người chơi (bấm gì, ở ô nào), đòn quân Nguyên ra trong hiệp, máu còn lại, và một câu "hiệp này dạy: …".
-  - [ ] 3.2 Viết theo cách tác giả làm theo được bằng tay: ô ghi `cột,hàng` (0-based như F1), phím/bấm nêu rõ.
-  - [ ] 3.3 Đối chiếu lời giải trong tài liệu với lời giải đã chạy ở Task 2 — cùng một chuỗi lệnh, không lệch.
+- [x] **Task 3: Ghi lời giải cho tác giả** (AC: 1, 2)
+  - [x] 3.1 `game/data/tran/tran_01_loi_giai.md`: mở đầu bằng mục tiêu ("thắng, không mất tướng"), bàn đầu trận (hai lớp `dia_hinh`/`quan` dạng chữ như file trận), rồi **từng hiệp**: bàn đầu hiệp, lệnh của người chơi (bấm gì, ở ô nào), đòn quân Nguyên ra trong hiệp, máu còn lại, và một câu "hiệp này dạy: …".
+  - [x] 3.2 Viết theo cách tác giả làm theo được bằng tay: ô ghi `cột,hàng` (0-based như F1), phím/bấm nêu rõ.
+  - [x] 3.3 Đối chiếu lời giải trong tài liệu với lời giải đã chạy ở Task 2 — cùng một chuỗi lệnh, không lệch.
 
-- [ ] **Task 4: Kịch bản tự động** (AC: 3)
-  - [ ] 4.1 Sinh `game/tests/kich_ban/tran/tran_01_loi_giai.json`:
+- [x] **Task 4: Kịch bản tự động** (AC: 3)
+  - [x] 4.1 Sinh `game/tests/kich_ban/tran/tran_01_loi_giai.json`:
     - `truoc` = bàn **người chơi thấy ở đầu hiệp 1**, tức sau pha chuẩn bị (gọi `begin()` rồi lấy bản chụp). Lấy lớp chữ bằng `BugReport.before_layers(state)` (Story 2.13) thay vì chép tay, rồi bỏ `thu_tu_dich` nếu bộ nạp không cần — kiểm bằng `tools/test.sh`.
     - `hanh_dong` = toàn bộ lệnh của lời giải, đúng thứ tự, gồm `ket_thuc_luot`.
     - `sau` = bàn cuối: `quan` còn đủ 2 tướng (`1`, `2`), không còn quân Nguyên; thêm `ket_qua: "thang"` (định dạng `sau` hỗ trợ từ Story 2.13).
     - `da_duyet: true` **chỉ sau khi tác giả duyệt lời giải**; trước đó để `false` và ghi rõ trong story.
-  - [ ] 4.2 `tools/test.sh` xanh; kịch bản mới được `ScenarioLoader.list_files("res://tests/kich_ban")` nhặt tự động (không cần đăng ký).
-  - [ ] 4.3 Kiểm ngược: sửa một lệnh trong `hanh_dong` (hoặc bỏ một `ket_thuc_luot`) → kịch bản phải **trượt**; khôi phục → xanh. Ghi bằng chứng vào Debug Log.
+  - [x] 4.2 `tools/test.sh` xanh; kịch bản mới được `ScenarioLoader.list_files("res://tests/kich_ban")` nhặt tự động (không cần đăng ký).
+  - [x] 4.3 Kiểm ngược: sửa một lệnh trong `hanh_dong` (hoặc bỏ một `ket_thuc_luot`) → kịch bản phải **trượt**; khôi phục → xanh. Ghi bằng chứng vào Debug Log.
 
 - [ ] **Task 5: Tác giả đánh lại bằng tay** (AC: 2)
-  - [ ] 5.1 Hướng dẫn trong Completion Notes: `tools/chay.sh --tran=1`, làm đúng `tran_01_loi_giai.md`, thấy bảng **Thắng** và không mất tướng nào.
+  - [ ] 5.1 Hướng dẫn trong Completion Notes: `tools/chay.sh --tran=1`, làm đúng `tran_01_loi_giai.md`, thấy bảng **Thắng** và không mất tướng nào. **Chờ tác giả chạy.**
   - [ ] 5.2 Ghi nhận kết quả tác giả báo lại (nếu chưa kịp thì ghi "chờ tác giả", không đánh [x] khi chưa có).
 
 - [ ] **Task 6: Deploy itch (riêng tư)** (AC: 4)
-  - [ ] 6.1 Kiểm `tools/itch.cfg`: hiện vẫn là `<đã điền hay chưa?>` → **chặn**. Cần tác giả điền `ITCH_TARGET=<tài khoản>/<trang>` (Câu hỏi 2).
+  - [ ] 6.1 **CHẶN:** `tools/itch.cfg` vẫn là `<đã điền hay chưa?>` — chưa deploy được. Cần tác giả điền `ITCH_TARGET=<tài khoản>/<trang>`.
   - [ ] 6.2 Khi đã có: `tools/build_web.sh` rồi `tools/deploy_itch.sh`; giữ trang ở chế độ riêng tư (script không tự đổi hiển thị). Ghi link trong Completion Notes.
   - [ ] 6.3 Nếu chưa có trang: ghi rõ "chặn: chưa cấu hình itch", không tự tạo trang.
 
 - [ ] **Task 7: Mốc tự chơi hết E2** (AC: 5)
-  - [ ] 7.1 Tác giả tự chơi từ trận 1 tới hết nội dung E2 (hiện có trận 1) và trả lời: có chán không, luật nào cần sửa trước E3.
+  - [ ] 7.1 **Chờ tác giả:** tự chơi từ trận 1 tới hết nội dung E2 (hiện có trận 1) và trả lời: có chán không, luật nào cần sửa trước E3.
   - [ ] 7.2 Ghi câu trả lời vào Change Log; nếu có luật phải sửa thì mở story sửa luật, chưa sang E3.
 
 ## Dev Notes
@@ -134,10 +134,57 @@ tôi muốn trận 1 đã có lời giải được kiểm chứng,
 
 ### Agent Model Used
 
+deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
+
 ### Debug Log References
+
+- `tools/test.sh`: **618/618 đạt**, 81 kịch bản đã duyệt; kịch bản mới `tran/tran_01_loi_giai.json` hiện **1 chưa duyệt (0 chưa đạt)** — phát lại đúng, chờ tác giả duyệt.
+- Đổi bố cục trận 1 làm **14 test trượt** (các test ghi nhớ bàn mở màn trận 1: ô sáng của Khoái/Lão, đường đi tới `2,5`, vị trí đồng quân 101). Đã cập nhật đúng theo bàn mới; chạy lại 618/618.
+- Tìm lời giải bằng beam search (script tạm, đã xoá): thắng ở **hiệp 3**, cả hai tướng còn 3 máu. Chạy lại bằng `BattleController` thật để in sự kiện từng lệnh.
+- Kiểm ngược kịch bản: sửa một bước `danh 2 2,2` thành `3,2` và tạm đặt `da_duyet: true` → `test_scenarios` trượt đúng câu "bước 7: luật từ chối ... mà kịch bản không ghi tu_choi"; khôi phục → xanh.
+- **Chưa làm được:** deploy itch (`tools/itch.cfg` còn chỗ trống) và hai bước tác giả (đánh lại bằng tay, mốc E2).
 
 ### Completion Notes List
 
+**Đề xuất bố cục cuối (Task 1.2) — tác giả đã chốt hướng "giữ khung, tinh chỉnh":**
+
+- Giữ bàn 7×7, sông cột 3 (hàng 3 đi được), hai tướng Khoái `0,6` — Lão `2,6`.
+- Dời **một** Bộ binh từ `1,0` xuống `2,4` (thứ tự quân Nguyên: `2,4`, `5,0`, `5,4`). Hiệp 1 nó đi xuống `2,5` và **báo đòn vào `2,6`** — đúng ô Lão, nên người chơi gặp ô đỏ ngay hiệp đầu; đồng thời nó đứng sát sông, mở ra bài "đẩy xuống sông" bằng một cú đẩy của Khoái.
+- Hai Bộ binh còn lại giữ nguyên `5,0`, `5,4`, tiến vào theo hướng đông.
+- Không đổi `chi_so.json` và không đụng `src/core/`.
+
+**Lời giải (3 hiệp, không mất tướng) — đã kiểm bằng máy:**
+
+| Hiệp | Lệnh | Kết quả |
+|---|---|---|
+| 1 | Khoái đi `1,5`, đánh `2,5`; Lão đi `2,5`; hết lượt | Bộ binh `2,5` bị đẩy xuống sông `3,5`, chết đuối; ô đỏ `2,6` bị hủy |
+| 2 | Khoái đi `2,4`, đánh `2,3`; Lão đánh `2,2`; hết lượt | Bộ binh `2,3` mất 2 máu, bị đẩy lên `2,2`, rồi trúng lao và gục |
+| 3 | Khoái đi `2,3`, đánh `3,3`; Lão đi `1,3`, đánh `4,3` | Quân cuối mất 2 máu, bị đẩy sang `4,3`, trúng lao và gục → **thắng** |
+
+Cả hai tướng còn 3 máu ở mọi hiệp. Bản đầy đủ cho người chơi: `game/data/tran/tran_01_loi_giai.md`.
+
+**Kịch bản tự động:** `game/tests/kich_ban/tran/tran_01_loi_giai.json` — `truoc` là bàn người chơi thấy ở hiệp 1 (sau pha chuẩn bị, có ô đỏ `2,5 → 2,6`), `hanh_dong` là 12 lệnh trên, `sau` là bàn thắng còn đủ hai tướng (`ket_qua: "thang"`). Đang để `da_duyet: false`: **tác giả đánh lại bằng tay xong thì đổi thành `true`** để kịch bản thành chốt chặn thật (khi đã duyệt, sửa một bước là `tools/test.sh` trượt — đã kiểm ngược).
+
+**Hướng dẫn tác giả tự test (AC 2):**
+
+1. `tools/chay.sh --tran=1`.
+2. Làm đúng `game/data/tran/tran_01_loi_giai.md` (3 hiệp, 12 lệnh).
+3. Thấy bảng **Thắng** và **không tướng nào gục** (cả hai cùng 3 máu).
+4. Nếu khớp: đổi `"da_duyet": false` → `true` trong `game/tests/kich_ban/tran/tran_01_loi_giai.json`, chạy `tools/test.sh` (vẫn 618/618, dòng kịch bản thành `82 đã duyệt`).
+5. Chơi chậm hơn (không hạ chủ đòn ở hiệp 1) để thấy ô đỏ giáng xuống và bài "né ô đỏ".
+
+**Deploy (AC 4): CHẶN.** `tools/itch.cfg` vẫn là `<đã điền hay chưa?>`. Tác giả điền `ITCH_TARGET=<tài khoản>/<trang>` rồi chạy `tools/build_web.sh` + `tools/deploy_itch.sh`; trang để riêng tư (script không tự đổi hiển thị). Chưa có trang thì ghi nhận chặn, không tự tạo.
+
 ### File List
 
+- `game/data/tran/tran_01.json` (bố cục cuối: Bộ binh `2,4`, `5,0`, `5,4`; `thu_tu_dich` tương ứng)
+- `game/data/tran/tran_01_loi_giai.md` (mới — lời giải 3 hiệp cho tác giả)
+- `game/tests/kich_ban/tran/tran_01_loi_giai.json` (mới — kịch bản tự động, `da_duyet: false`)
+- `game/tests/test_battle_view.gd` (ô sáng/đường đi theo bàn mới; `LAO_TARGET` sang `1,4`)
+- `game/tests/test_main.gd` (vị trí đồng quân 101 ở `2,5`; số ô đi được 7 → 6)
+- `_bmad-output/implementation-artifacts/2-14-hoan-thien-tran-1-va-moc-tu-choi-het-e2.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+
 ### Change Log
+
+- 2026-10-22: bố cục cuối trận 1 (dời một Bộ binh xuống `2,4` để hiệp 1 có ô đỏ + sát sông), lời giải 3 hiệp không mất tướng, kịch bản tự động `tran/tran_01_loi_giai.json`; 618/618 test. Chờ tác giả: đánh lại bằng tay (AC 2), duyệt kịch bản, deploy itch (AC 4 — chặn vì `itch.cfg`), mốc E2 (AC 5).
