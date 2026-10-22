@@ -73,6 +73,10 @@ func setup(unit: Unit, lift: float = 0.0) -> void:
 
 
 func update(unit: Unit, lift: float = 0.0) -> void:
+	# Bản chụp mới là nguồn đúng: trả lại trạng thái hiện cho đồng quân dùng lại sau một lượt phát bị ngắt
+	# (hoạt ảnh gục/chết đuối có thể đã ẩn hoặc làm mờ nó — Story 2.11 review).
+	visible = true
+	modulate = Color.WHITE
 	cell = unit.cell
 	position = BoardView.cell_center(unit.cell) - Vector2(0, lift)
 	_hp_label.text = str(unit.hp)

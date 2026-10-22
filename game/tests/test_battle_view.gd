@@ -1153,6 +1153,22 @@ func test_commands_ignored_while_animation_plays() -> void:
 	assert_eq(_view(main).selected_id(), 2, "phát xong thì nhận lệnh mới")
 
 
+## Đang phát thì cú bấm chuột cũng không ra lệnh: bấm sang tướng khác không đổi tướng đang chọn (AC 3).
+func test_mouse_click_ignored_while_animation_plays() -> void:
+	var main: Node2D = _make_attack_main()
+	_press_physical(main, KEY_1)
+	var move_cell: Vector2i = _view(main).lit_cells()[0]
+	_view(main).event_player().instant = false
+	_click_by_mouse(main, move_cell)
+	assert_true(_view(main).is_playing(), "đang phát hoạt ảnh nước đi")
+	_click_by_mouse(main, Vector2i(5, 6))
+	assert_eq(_view(main).selected_id(), 1, "bấm chuột giữa lúc phát không đổi tướng đang chọn")
+	await wait_seconds(1.5)
+	assert_false(_view(main).is_playing(), "phát xong")
+	_click_by_mouse(main, Vector2i(5, 6))
+	assert_eq(_view(main).selected_id(), 2, "phát xong thì bấm chuột nhận lệnh")
+
+
 ## Dòng pha trên HUD: "Lượt của bạn" khi chờ, "Quân Nguyên đang ra đòn" trong lúc phát pha địch (Story 2.11, AC 4).
 func test_phase_line_follows_playback() -> void:
 	var main: Node2D = _make_attack_main()

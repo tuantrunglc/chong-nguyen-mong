@@ -21,6 +21,10 @@ var _undo_button: Button
 var _end_turn_button: Button
 ## Dòng nhắc dưới các nút ("Bấm lần nữa để đánh"); rỗng thì ẩn.
 var _hint_label: Label
+## Trạng thái để tính lại nút khi khóa/mở (Story 2.11: đang phát hoạt ảnh thì không bấm được).
+var _can_undo: bool = false
+var _over: bool = false
+var _locked: bool = false
 
 
 func _ready() -> void:
@@ -60,12 +64,24 @@ func _ready() -> void:
 ## Hiện bảng với số hiệp; nút Hủy mờ khi không có gì để hủy. Hết trận (over) thì cả hai nút đều mờ.
 func show_turn(round_number: int, can_undo: bool, over: bool = false) -> void:
 	_round_label.text = tr("hud.round") % round_number
-	_undo_button.disabled = over or not can_undo
-	_end_turn_button.disabled = over
+	_can_undo = can_undo
+	_over = over
+	_apply_disabled()
 	visible = true
 	# Hết trận thì bảng Thắng/Thua là thứ duy nhất cần đọc.
 	if over:
 		hide_phase()
+
+
+## Khóa nút khi đang phát hoạt ảnh: nút trông mờ đúng như lúc không bấm được (Story 2.11, AC 3).
+func set_locked(locked: bool) -> void:
+	_locked = locked
+	_apply_disabled()
+
+
+func _apply_disabled() -> void:
+	_undo_button.disabled = _over or not _can_undo or _locked
+	_end_turn_button.disabled = _over or _locked
 
 
 ## Dòng báo pha (Story 2.11, AC 4). `enemy_turn` true khi đang phát hoạt ảnh của quân Nguyên.

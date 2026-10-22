@@ -31,7 +31,7 @@ func test_events_apply_in_log_order() -> void:
 		BattleEvent.moved(KHOAI, Vector2i(1, 0), Vector2i(2, 0), BattleEvent.Cause.WALK),
 		BattleEvent.died(BO_BINH, Vector2i(3, 0)),
 	]
-	player.play_now(events)
+	player.play_now(events, BoardFixture.state({Vector2i(0, 0): "1", Vector2i(3, 0): "B"}))
 	assert_eq(player.played().size(), 3, "phát đủ số sự kiện nhận được")
 	assert_eq(player.played()[0].type, BattleEvent.Type.MOVED, "phát theo đúng thứ tự nhật ký")
 	assert_eq(player.played()[2].type, BattleEvent.Type.DIED)
@@ -66,3 +66,22 @@ func test_animation_does_not_change_battle_state() -> void:
 	player.play_now([BattleEvent.moved(KHOAI, Vector2i(0, 0), Vector2i(1, 0), BattleEvent.Cause.WALK)])
 	assert_eq(state.unit_by_id(KHOAI).cell, Vector2i(0, 0), "hoạt ảnh chỉ đọc, không sửa state (AC 6)")
 	assert_eq(state.unit_by_id(BO_BINH).cell, Vector2i(3, 0), "quân khác cũng không đổi")
+
+
+## NFR3 đo bằng đồng hồ thật: 60 sự kiện, sàn 0,06 s mỗi sự kiện = 3,6 s nếu không canh đồng hồ, nên test này
+## trượt khi mất phần canh `remaining` (đã thử phá).
+func test_play_stays_under_three_seconds_on_the_clock() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(0, 0): "1", Vector2i(3, 0): "B"})
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	board.show_state(state)
+	var player: EventPlayer = _player(board)
+	player.instant = false
+	var events: Array[BattleEvent] = []
+	for i: int in range(60):
+		events.append(BattleEvent.moved(BO_BINH, Vector2i(3, 0), Vector2i(3, 0), BattleEvent.Cause.WALK))
+	var started: int = Time.get_ticks_msec()
+	await player.play(events, state)
+	var elapsed: float = float(Time.get_ticks_msec() - started) / 1000.0
+	assert_lte(elapsed, EventPlayer.MAX_PHASE_SECONDS + 0.15, "phát thật ≤ 3 s (đo được %.2f s)" % elapsed)
+	assert_eq(player.played().size(), 60, "vẫn phát đủ sự kiện, phần cuối áp ngay khi hết ngân sách")

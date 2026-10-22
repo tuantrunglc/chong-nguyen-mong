@@ -480,7 +480,7 @@ Log.error("save", "file lưu phiên bản %d không hỗ trợ" % version)
 | Lõi luật → `BattleController` | Danh sách sự kiện (dữ liệu, giá trị trả về). Lõi luật **không phát signal** |
 | `BattleController` → trình bày | Signal `events_resolved(events: Array[BattleEvent], snapshot: BattleState)` |
 | UI → `BattleController` | Gọi hàm trực tiếp: `controller.submit(command)`, `controller.preview(command)` |
-| Trình bày → `BattleController` | Signal `playback_finished` khi phát hết hoạt ảnh, để mở khóa input |
+| Trình bày → `main.gd` | Signal `playback_finished(snapshot)` của `BattleView` khi phát hết hoạt ảnh: `main` vẽ bản chụp cuối, `BattleView` mở khóa input (Story 2.11) |
 
 **Đặt tên:**
 - Signal: `snake_case`, thì quá khứ (`events_resolved`, `battle_won`, `level_loaded`).
@@ -491,19 +491,16 @@ Log.error("save", "file lưu phiên bản %d không hỗ trợ" % version)
 ```gdscript
 # battle_controller.gd
 signal events_resolved(events: Array[BattleEvent], snapshot: BattleState)
-signal playback_finished
 
 # battle_view.gd
-func _ready() -> void:
-    controller.events_resolved.connect(_on_events_resolved)
+signal playback_finished(snapshot: BattleState)   # main.gd vẽ bàn khi nhận signal này
 
 func _on_events_resolved(events: Array[BattleEvent], snapshot: BattleState) -> void:
-    _input_locked = true
-    for e in events:
-        await _play(e)          # Tween; tua nhanh = tăng tốc độ phát của view
-    _redraw(snapshot)
-    _input_locked = false
-    controller.playback_finished.emit()
+    _playing = true
+    await _player.play(events, snapshot)   # EventPlayer: Tween; tua nhanh = tăng tốc độ phát
+    _playing = false
+    playback_finished.emit(snapshot)       # main vẽ bản chụp cuối
+    _unlock_input()                        # và tính lại ô sáng, khung thông tin
 ```
 
 ### Công cụ debug

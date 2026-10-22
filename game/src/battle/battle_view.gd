@@ -30,6 +30,9 @@ var _player: EventPlayer = null
 var _playing: bool = false
 ## Lệnh đang phát là pha của quân Nguyên (end_turn hoặc mở trận): dòng pha trên HUD.
 var _enemy_turn: bool = false
+## Lệnh vừa gửi là lệnh mở pha địch; `_on_events_resolved` tiêu thụ nó. Lệnh bị từ chối (không phát signal)
+## thì cờ này không được rò sang lượt phát sau.
+var _pending_enemy_turn: bool = false
 ## Tăng mỗi lần start()/stop(): lượt phát của trận cũ không được vẽ lên trận mới (F5 giữa lúc phát).
 var _playback_generation: int = 0
 
@@ -60,6 +63,8 @@ func start(controller: BattleController) -> void:
 		_player.stop()
 	_playing = false
 	_enemy_turn = false
+	_pending_enemy_turn = false
+	_hud.set_locked(false)
 	_deselect()
 	_update_hud()
 
@@ -98,8 +103,9 @@ func pending_cell() -> Vector2i:
 func begin_battle() -> void:
 	if _controller == null:
 		return
-	_enemy_turn = true
+	_pending_enemy_turn = true
 	_controller.begin()
+	_pending_enemy_turn = false
 
 
 ## Đang phát hoạt ảnh (để test).
@@ -179,8 +185,10 @@ func _on_undo() -> void:
 func _on_end_turn() -> void:
 	if _controller == null or _playing or _battle_over():
 		return
-	_enemy_turn = true
+	_pending_enemy_turn = true
 	_controller.submit(Command.end_turn())
+	# Lệnh bị từ chối thì không có lượt phát nào tiêu thụ cờ: bỏ đi để lượt sau không báo sai pha.
+	_pending_enemy_turn = false
 	_deselect()
 
 
@@ -189,24 +197,31 @@ func _on_events_resolved(events: Array[BattleEvent], snapshot: BattleState) -> v
 	if _controller == null:
 		return
 	_playing = true
-	_update_hud()
+	_enemy_turn = _pending_enemy_turn
+	_pending_enemy_turn = false
+	# Không gọi `_update_hud()` ở đây: bản chụp đã là trạng thái SAU lệnh, vẽ số hiệp mới giữa lúc phát sẽ
+	# nói dối ("Hiệp 2" khi quân Nguyên còn đang đi). HUD cập nhật một lần khi phát xong.
+	_hud.set_locked(true)
+	_hud.show_phase(_enemy_turn)
 	var generation: int = _playback_generation
 	# Chế độ không màn hình (test) hoặc không có gì để phát: làm ngay trong cùng khung hình, không await.
 	if _player.instant or events.is_empty():
-		_player.play_now(events)
+		_player.play_now(events, snapshot)
 		_finish_playback(snapshot, generation)
 		return
-	await _player.play(events)
+	await _player.play(events, snapshot)
 	_finish_playback(snapshot, generation)
 
 
 ## Phát xong: mở khóa, để `main.gd` vẽ bản chụp cuối, rồi tính lại chọn/ô sáng/khung thông tin trên bàn mới.
 func _finish_playback(snapshot: BattleState, generation: int) -> void:
-	_playing = false
-	_enemy_turn = false
-	# Trận đã bị dừng hoặc thay bằng trận khác giữa lúc phát (màn hình lỗi, menu, F5): bỏ bản chụp cũ.
+	# Trận đã bị dừng hoặc thay bằng trận khác giữa lúc phát (màn hình lỗi, menu, F5): không được đụng vào
+	# cờ khóa của trận đang chạy, cũng không vẽ bản chụp cũ.
 	if _controller == null or generation != _playback_generation:
 		return
+	_playing = false
+	_enemy_turn = false
+	_hud.set_locked(false)
 	playback_finished.emit(snapshot)
 	if Rules.is_battle_over(snapshot):
 		_deselect()
@@ -228,6 +243,10 @@ func _finish_playback(snapshot: BattleState, generation: int) -> void:
 	_update_info(_input.hovered_cell() if _input != null else BoardView.NO_CELL)
 
 func _on_cell_hovered(cell: Vector2i) -> void:
+	# Đang phát thì khung thông tin đứng yên: bản chụp đã là trạng thái sau lệnh, đọc nó lúc này sẽ tả ô mà
+	# người chơi chưa thấy quân tới. Phát xong `_finish_playback` cập nhật lại theo ô đang trỏ.
+	if _playing:
+		return
 	_update_info(cell)
 	if _controller == null or _selected == NONE or not _cells.has(cell):
 		_board.show_path([])

@@ -1,14 +1,16 @@
 class_name EventPlayer
 extends Node
 ## Phát lại nhật ký sự kiện của một lệnh bằng Tween (Story 2.11, NFR3, ADR-002).
-## Chỉ đọc `BattleEvent` và node của view: KHÔNG gọi `show_state` chen giữa chừng, KHÔNG sửa `BattleState`.
+## Chỉ đọc `BattleEvent` và bản chụp: KHÔNG gọi `show_state` chen giữa chừng, KHÔNG sửa `BattleState`.
 ## Lúc `play()` bắt đầu, bàn đang ở trạng thái TRƯỚC lệnh; `BoardView.show_state(snapshot)` gọi sau đó sẽ đưa mọi
 ## thứ về trạng thái cuối. Vì vậy hoạt ảnh chỉ cần đi từ vị trí đang có tới vị trí mà sự kiện nói.
 
 ## Một sự kiện có động tác dài chừng này; cả pha bị co lại nếu vượt `MAX_PHASE_SECONDS`.
 const SECONDS_PER_EVENT: float = 0.18
-## Trần NFR3 cho trọn một pha địch.
+## Trần NFR3 cho trọn một pha địch, canh bằng đồng hồ thật (không phải số học).
 const MAX_PHASE_SECONDS: float = 3.0
+## Sự kiện có động tác không ngắn hơn mức này, trừ khi ngân sách pha đã cạn.
+const MIN_EVENT_SECONDS: float = 0.06
 const DAMAGE_SECONDS: float = 0.14
 const DEATH_SECONDS: float = 0.22
 ## Đồng quân lao về phía mục tiêu bao xa (px) rồi về chỗ cũ.
@@ -20,10 +22,13 @@ const SHAKE_DISTANCE: float = 5.0
 var instant: bool = DisplayServer.get_name() == "headless"
 
 var _board: BoardView = null
-## Sự kiện đã phát, đúng thứ tự nhận được (để test).
+## Sự kiện đã phát, ghi lúc ÁP DỤNG (không phải lúc nhận), đúng thứ tự thực tế (để test).
 var _played: Array[BattleEvent] = []
-## `stop()` đặt cờ này để vòng phát dừng giữa chừng.
-var _stopped: bool = false
+## Mỗi lượt phát một số. Lượt cũ đang chờ timer mà thấy số đã đổi thì bỏ cuộc: F5/đổi trận giữa lúc phát
+## không thể phát tiếp nhật ký của trận cũ lên bàn mới.
+var _play_id: int = 0
+## Tween đang chạy, để `stop()` giết ngay (không để đồng quân trôi tiếp trên bàn vừa vẽ lại).
+var _active_tween: Tween = null
 
 
 func setup(board: BoardView) -> void:
@@ -34,7 +39,8 @@ func played() -> Array[BattleEvent]:
 	return _played
 
 
-## Tổng thời lượng phát của danh sách này; không bao giờ vượt `MAX_PHASE_SECONDS` (AC 2).
+## Ước lượng thời lượng phát của danh sách này, chặn ở `MAX_PHASE_SECONDS`.
+## Chỉ để test và để đọc; `play()` tự canh đồng hồ thật nên không phụ thuộc hàm này.
 func total_seconds(events: Array[BattleEvent]) -> float:
 	var sum: float = 0.0
 	for event: BattleEvent in events:
@@ -43,30 +49,43 @@ func total_seconds(events: Array[BattleEvent]) -> float:
 
 
 ## Áp dụng ngay toàn bộ, không Tween (test và chế độ instant).
-func play_now(events: Array[BattleEvent]) -> void:
-	_played = events.duplicate()
-	_stopped = false
+func play_now(events: Array[BattleEvent], snapshot: BattleState = null) -> void:
+	_begin(events)
 	for event: BattleEvent in events:
-		_apply_instant(event)
+		_apply_instant(event, snapshot)
 
 
-## Phát lần lượt bằng Tween, đúng thứ tự trong nhật ký (AC 1).
-func play(events: Array[BattleEvent]) -> void:
-	_played = events.duplicate()
-	_stopped = false
+## Phát lần lượt bằng Tween, đúng thứ tự trong nhật ký (AC 1); canh đồng hồ thật để cả pha ≤ `MAX_PHASE_SECONDS`
+## kể cả khi mỗi lần chờ bị làm tròn lên một khung hình (NFR3).
+func play(events: Array[BattleEvent], snapshot: BattleState = null) -> void:
+	var id: int = _begin(events)
 	var scale: float = _time_scale(events)
+	var deadline: int = Time.get_ticks_msec() + int(MAX_PHASE_SECONDS * 1000.0)
 	for event: BattleEvent in events:
-		if _stopped:
+		if id != _play_id:
 			return
 		var seconds: float = _base_seconds(event) * scale
-		if seconds <= 0.0:
+		var remaining: float = float(deadline - Time.get_ticks_msec()) / 1000.0
+		if seconds <= 0.0 or remaining <= 0.0:
+			# Hết ngân sách (hoặc sự kiện không có động tác): áp nốt ngay, không chờ thêm khung hình nào.
+			_apply_instant(event, snapshot)
 			continue
-		await _play_one(event, seconds)
+		await _play_one(event, minf(maxf(seconds, MIN_EVENT_SECONDS), remaining), snapshot)
 
 
-## Dừng giữa chừng (đổi trận, màn hình lỗi): vòng phát thoát ở sự kiện kế tiếp.
+## Dừng giữa chừng (đổi trận, màn hình lỗi): vô hiệu lượt phát đang chờ và giết Tween đang chạy.
 func stop() -> void:
-	_stopped = true
+	_play_id += 1
+	if _active_tween != null:
+		_active_tween.kill()
+		_active_tween = null
+
+
+## Bắt đầu một lượt phát mới; trả số lượt để vòng lặp tự kiểm.
+func _begin(events: Array[BattleEvent]) -> int:
+	_play_id += 1
+	_played = []
+	return _play_id
 
 
 ## Tỉ lệ co thời gian để cả danh sách vừa `MAX_PHASE_SECONDS`.
@@ -82,50 +101,46 @@ func _time_scale(events: Array[BattleEvent]) -> float:
 ## Sự kiện không có động tác thì 0 giây (không tốn thời gian của pha).
 func _base_seconds(event: BattleEvent) -> float:
 	match event.type:
-		BattleEvent.Type.MOVED:
+		BattleEvent.Type.MOVED, BattleEvent.Type.ATTACKED:
 			return SECONDS_PER_EVENT
-		BattleEvent.Type.ATTACKED:
-			return SECONDS_PER_EVENT
-		BattleEvent.Type.COLLIDED, BattleEvent.Type.DAMAGED:
+		BattleEvent.Type.COLLIDED, BattleEvent.Type.DAMAGED, BattleEvent.Type.TELEGRAPHED:
 			return DAMAGE_SECONDS
 		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
 			return DEATH_SECONDS
-		BattleEvent.Type.TELEGRAPHED:
-			return DAMAGE_SECONDS
 	return 0.0
 
 
-func _play_one(event: BattleEvent, seconds: float) -> void:
+func _play_one(event: BattleEvent, seconds: float, snapshot: BattleState) -> void:
+	_played.append(event)
 	var token: UnitToken = _token(event.unit_id)
-	if token == null:
-		# TELEGRAPH_CANCELLED không còn đồng quân; các sự kiện khác cũng có thể gặp quân đã bị gỡ.
-		await _wait(seconds * 0.5)
-		return
 	match event.type:
 		BattleEvent.Type.MOVED:
-			await _tween_to(token, "position", token.position + _delta(event), seconds)
+			if token != null:
+				await _tween_to(token, "position", _move_target(token, event, snapshot), seconds)
 		BattleEvent.Type.ATTACKED:
-			await _lunge(token, event, seconds)
+			if token != null:
+				await _lunge(token, event, seconds)
 		BattleEvent.Type.COLLIDED:
-			await _shake(token, seconds)
-		BattleEvent.Type.DAMAGED:
-			await _flash(token, seconds)
+			await _collide(token, event, seconds)
+		BattleEvent.Type.DAMAGED, BattleEvent.Type.TELEGRAPHED:
+			if token != null:
+				await _flash(token, seconds)
 		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
-			await _sink_or_fade(token, event, seconds)
-		BattleEvent.Type.TELEGRAPHED:
-			await _flash(token, seconds)
+			if token != null:
+				await _sink_or_fade(token, event, seconds)
 		_:
 			await _wait(seconds * 0.5)
 
 
-## Trạng thái cuối của một sự kiện, dùng khi không chạy Tween (test, chế độ instant).
-func _apply_instant(event: BattleEvent) -> void:
+## Trạng thái cuối của một sự kiện, dùng khi không chạy Tween (test, chế độ instant, hết ngân sách pha).
+func _apply_instant(event: BattleEvent, snapshot: BattleState) -> void:
+	_played.append(event)
 	var token: UnitToken = _token(event.unit_id)
 	if token == null:
 		return
 	match event.type:
 		BattleEvent.Type.MOVED:
-			token.position += _delta(event)
+			token.position = _move_target(token, event, snapshot)
 		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
 			token.visible = false
 
@@ -136,28 +151,43 @@ func _token(unit_id: int) -> UnitToken:
 	return _board.tokens().get(unit_id) as UnitToken
 
 
-## Sự kiện đi nói ô đầu và ô cuối; đồng quân đang đứng ở ô đầu (lift của ô ải giữ nguyên).
-func _delta(event: BattleEvent) -> Vector2:
-	return BoardView.cell_center(event.to_cell) - BoardView.cell_center(event.from_cell)
+## Đích của một bước đi: tâm ô đích, trừ độ cao mặt ô (ô ải) — cùng công thức với `UnitToken.update`.
+func _move_target(token: UnitToken, event: BattleEvent, snapshot: BattleState) -> Vector2:
+	var lift: float = 0.0
+	if snapshot != null and snapshot.in_bounds(event.to_cell):
+		lift = BoardView.surface_height(snapshot.terrain_at(event.to_cell))
+	else:
+		# Không có bản chụp: giữ nguyên độ cao đang có.
+		lift = BoardView.cell_center(event.from_cell).y - token.position.y
+	return BoardView.cell_center(event.to_cell) - Vector2(0.0, lift)
 
 
 func _lunge(token: UnitToken, event: BattleEvent, seconds: float) -> void:
 	# Hướng lao tính từ chỗ đồng quân đang vẽ tới ô trúng: đúng cả khi nó vừa được đẩy trong cùng nhật ký
-	# (không đọc `token.cell`, vì view không được sửa `cell` — luật ranh giới, chỉ Effects).
+	# (view không được ghi `token.cell` — luật ranh giới, chỉ Effects được sửa `.cell`).
 	var direction: Vector2 = BoardView.cell_center(event.to_cell) - token.position
 	if direction.length() < 1.0:
 		direction = Vector2.DOWN
 	var start: Vector2 = token.position
 	var forward: Vector2 = start + direction.normalized() * LUNGE_DISTANCE
-	var tween: Tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	var tween: Tween = _new_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	tween.tween_property(token, "position", forward, seconds * 0.4)
 	tween.tween_property(token, "position", start, seconds * 0.6)
 	await _wait(seconds)
 
 
+func _collide(token: UnitToken, event: BattleEvent, seconds: float) -> void:
+	# Cả hai quân cùng rung: bên bị đẩy và bên bị va.
+	if token != null:
+		await _shake(token, seconds)
+	var other: UnitToken = _token(event.other_id)
+	if other != null:
+		await _shake(other, seconds * 0.6)
+
+
 func _shake(token: UnitToken, seconds: float) -> void:
 	var start: Vector2 = token.position
-	var tween: Tween = create_tween()
+	var tween: Tween = _new_tween()
 	tween.tween_property(token, "position", start + Vector2(SHAKE_DISTANCE, -SHAKE_DISTANCE * 0.4), seconds * 0.25)
 	tween.tween_property(token, "position", start - Vector2(SHAKE_DISTANCE, -SHAKE_DISTANCE * 0.4),
 		seconds * 0.5)
@@ -167,7 +197,7 @@ func _shake(token: UnitToken, seconds: float) -> void:
 
 func _flash(token: UnitToken, seconds: float) -> void:
 	var normal: Color = token.modulate
-	var tween: Tween = create_tween()
+	var tween: Tween = _new_tween()
 	tween.tween_property(token, "modulate", Color(1.0, 0.35, 0.35, normal.a), seconds * 0.35)
 	tween.tween_property(token, "modulate", normal, seconds * 0.65)
 	await _wait(seconds)
@@ -175,7 +205,7 @@ func _flash(token: UnitToken, seconds: float) -> void:
 
 ## Gục: mờ hẳn. Chết đuối: chìm xuống rồi mờ. Cả hai ẩn đồng quân; `show_state` sau đó gỡ hẳn.
 func _sink_or_fade(token: UnitToken, event: BattleEvent, seconds: float) -> void:
-	var tween: Tween = create_tween()
+	var tween: Tween = _new_tween()
 	if event.type == BattleEvent.Type.DROWNED:
 		tween.set_parallel(true)
 		tween.tween_property(token, "position", token.position + Vector2(0.0, 10.0), seconds)
@@ -185,9 +215,17 @@ func _sink_or_fade(token: UnitToken, event: BattleEvent, seconds: float) -> void
 
 
 func _tween_to(node: Node2D, property: String, target: Variant, seconds: float) -> void:
-	var tween: Tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	var tween: Tween = _new_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(node, property, target, seconds)
 	await _wait(seconds)
+
+
+## Tween mới cho node này; giết Tween cũ để `stop()`/lượt sau không chồng chuyển động lên nhau.
+func _new_tween() -> Tween:
+	if _active_tween != null:
+		_active_tween.kill()
+	_active_tween = create_tween()
+	return _active_tween
 
 
 ## Chờ bằng timer (không chờ `Tween.finished`): `stop()`/đổi trận giết Tween thì vòng phát vẫn tỉnh dậy được.

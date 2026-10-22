@@ -4,7 +4,7 @@ baseline_commit: b874ecd
 
 # Story 2.11: Hoạt ảnh phát lại sự kiện
 
-Status: review
+Status: done
 
 <!-- Ghi chú: Story 2.10 đã xong code + review; các sửa theo review của 2.10 đang nằm trong cây làm việc (chưa commit). -->
 
@@ -128,7 +128,7 @@ tôi muốn thấy từng bước đẩy, va chạm, ra đòn diễn ra,
 ### Câu hỏi cho tác giả (chốt trước khi code xong)
 
 1. Tốc độ hoạt ảnh mặc định và **có nút tua nhanh trong story này không**? (đề xuất: chưa có nút; một hằng số tốc độ, tua nhanh để E4 theo kiến trúc "Trình bày và hoạt ảnh: … có tua nhanh").
-2. Trong lúc pha địch đang chạy, **có cho rê chuột xem thông tin** không? (đề xuất: có — rê chỉ để xem, và khung thông tin chỉ đọc bản chụp).
+2. Trong lúc pha địch đang chạy, **có cho rê chuột xem thông tin** không? (đề xuất: có — rê chỉ để xem, và khung thông tin chỉ đọc bản chụp). **Sau code review:** khung đứng yên trong lúc phát rồi cập nhật khi phát xong, vì bản chụp lúc đó đã là trạng thái sau lệnh.
 3. **Hủy (Z)** và **F5** có chạy hoạt ảnh không? (đề xuất: không; Hủy và F5 vẽ lại ngay, vì không có sự kiện nào để phát lại).
 4. Dòng pha đặt ở đâu? (đề xuất: trong HUD, ngay dưới số hiệp, luôn hiện khi có trận).
 5. Quân gục/chết đuối: cho đồng quân mờ dần rồi biến mất, hay biến ngay? (đề xuất: mờ dần ~0,2 s).
@@ -142,6 +142,24 @@ tôi muốn thấy từng bước đẩy, va chạm, ra đòn diễn ra,
 - Story 2.10 (`_bmad-output/implementation-artifacts/2-10-re-chuot-xem-thong-tin.md`) — Review Findings, để không lặp lại lỗi "test xanh nhưng nhìn là hỏng".
 
 ## Dev Agent Record
+
+### Review Findings
+
+Code review 2026-10-22 (Blind Hunter + Edge Case Hunter + Acceptance Auditor, diff `b874ecd..1195039`). 28 phát hiện thô, gộp còn 13 mục; tất cả mục sửa được đã sửa trong cùng ngày, test `577/577` đạt.
+
+- [x] [Review][Patch] F5/đổi trận giữa lúc phát thì lượt phát cũ phát tiếp nhật ký lên bàn mới — `EventPlayer` có số lượt phát (`_play_id`), `stop()` vô hiệu lượt cũ và giết Tween đang chạy; `_finish_playback` kiểm thế hệ **trước** khi mở khóa. [game/src/battle/event_player.gd:31-34,66-70]
+- [x] [Review][Patch] Gục/chết đuối bị ngắt giữa chừng để lại đồng quân vô hình ở trận sau — `UnitToken.update` trả lại `visible`/`modulate` khi dùng lại đồng quân. [game/src/battle/unit_token.gd:75-80]
+- [x] [Review][Patch] NFR3 chỉ đúng trên giấy (mỗi lần chờ bị làm tròn lên khung hình) — `play()` canh đồng hồ thật: hết `MAX_PHASE_SECONDS` thì áp nốt phần còn lại, không chờ; test đo bằng `Time.get_ticks_msec()` với 60 sự kiện (đã thử phá: 3,68 s → trượt). [game/src/battle/event_player.gd:56-73]
+- [x] [Review][Patch] HUD hiện **hiệp mới** trong lúc pha địch còn đang chạy — bỏ `_update_hud()` lúc bắt đầu phát; chỉ khóa nút và đặt dòng pha, HUD cập nhật một lần khi phát xong. [game/src/battle/battle_view.gd:196-206]
+- [x] [Review][Patch] Nút Hủy/Kết thúc lượt trông bấm được nhưng nuốt cú bấm — `Hud.set_locked()` + `_apply_disabled()`; đang phát thì hai nút mờ. [game/src/ui/hud.gd:77-85]
+- [x] [Review][Patch] Cờ pha địch rò sang lượt phát sau khi lệnh bị từ chối (không phát signal) — `_pending_enemy_turn` chỉ được tiêu thụ trong `_on_events_resolved`. [game/src/battle/battle_view.gd:104-106,186-199]
+- [x] [Review][Patch] Rê chuột giữa lúc phát đọc bản chụp **sau** lệnh nên tả ô mà người chơi chưa thấy quân tới — bỏ qua hover khi `_playing`, phát xong cập nhật lại theo ô đang trỏ. [game/src/battle/battle_view.gd:244-249]
+- [x] [Review][Patch] `COLLIDED` chỉ rung quân bị đẩy, quân bị va đứng im — rung cả hai. [game/src/battle/event_player.gd:170-177]
+- [x] [Review][Patch] `MOVED` bỏ qua độ cao ô ải (đồng quân nhảy 8 px cuối bước) — `play()`/`play_now()` nhận thêm `snapshot`, đích tính bằng `BoardView.surface_height`. [game/src/battle/event_player.gd:145-155]
+- [x] [Review][Patch] `playback_finished` đổi từ `BattleController` sang `BattleView` mà kiến trúc chưa ghi — cập nhật bảng signal và ví dụ trong `game-architecture.md`. [_bmad-output/planning-artifacts/game-architecture.md:483,494-509]
+- [x] [Review][Patch] File List thiếu file của commit, và commit gộp cả sửa Story 2.10 — ghi lại đầy đủ bên dưới.
+- [x] [Review][Defer] Đường async chưa có test cho `DIED`/`DROWNED`/`_shake`; `instant` mặc định bật khi headless nên 577 test chỉ có 3 test chạm đường async. — deferred, test chậm; thêm khi có hoạt ảnh phức tạp hơn (2.12).
+- [x] [Review][Defer] NFR9 (ô đỏ nổi bật nhất) chưa có bằng chứng hình ảnh — tác giả kiểm tay (Task 6.2 đã đánh [x] theo tác giả chốt). — deferred, chỉ nhìn thấy bằng mắt.
 
 ### Agent Model Used
 
@@ -186,9 +204,12 @@ deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
 ### File List
 
 - `game/src/battle/event_player.gd` (mới) + `.uid`
-- `game/src/battle/battle_view.gd` (playback, khóa lệnh, dòng pha)
+- `game/src/battle/battle_view.gd` (playback, khóa lệnh, dòng pha, thế hệ phát)
+- `game/src/battle/unit_token.gd` (trả lại `visible`/`modulate` khi dùng lại đồng quân)
 - `game/src/app/main.gd` (vẽ sau khi phát xong, `begin_battle`)
-- `game/src/ui/hud.gd` (dòng pha)
+- `game/src/ui/hud.gd` (dòng pha, khóa nút)
 - `game/i18n/text.csv`, `game/i18n/text.vi.translation`
 - `game/tests/test_event_player.gd` (mới) + `.uid`, `game/tests/test_battle_view.gd`
+- `_bmad-output/planning-artifacts/game-architecture.md` (signal `playback_finished`)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- Commit `1195039` (gộp cả sửa theo review Story 2.10: `tooltip.gd`, story 2.10, `deferred-work.md`) và commit sửa theo review này.
