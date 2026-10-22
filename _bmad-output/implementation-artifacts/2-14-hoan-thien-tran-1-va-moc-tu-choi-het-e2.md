@@ -4,7 +4,7 @@ baseline_commit: 898098c
 
 # Story 2.14: Hoàn thiện trận 1 và mốc tự chơi hết E2
 
-Status: review
+Status: in-progress
 
 ## Story
 
@@ -51,7 +51,7 @@ tôi muốn trận 1 đã có lời giải được kiểm chứng,
   - [ ] 5.2 Ghi nhận kết quả tác giả báo lại (nếu chưa kịp thì ghi "chờ tác giả", không đánh [x] khi chưa có).
 
 - [ ] **Task 6: Deploy itch (riêng tư)** (AC: 4)
-  - [ ] 6.1 **CHẶN:** `tools/itch.cfg` vẫn là `<đã điền hay chưa?>` — chưa deploy được. Cần tác giả điền `ITCH_TARGET=<tài khoản>/<trang>`.
+  - [x] 6.1 `tools/itch.cfg` **đã điền** `ITCH_TARGET=tuantrunglc/hao-khi-dong-a` từ Story 0.5 — không phải chỗ trống. Bản web đã build lại (`v0.1.0 · 25cf3a0-sua`, 2026-10-22). Thử `tools/deploy_itch.sh`: **butler chưa đăng nhập trên máy này** → chặn thật là bước đăng nhập, không phải `itch.cfg`.
   - [ ] 6.2 Khi đã có: `tools/build_web.sh` rồi `tools/deploy_itch.sh`; giữ trang ở chế độ riêng tư (script không tự đổi hiển thị). Ghi link trong Completion Notes.
   - [ ] 6.3 Nếu chưa có trang: ghi rõ "chặn: chưa cấu hình itch", không tự tạo trang.
 
@@ -61,7 +61,7 @@ tôi muốn trận 1 đã có lời giải được kiểm chứng,
 
 ## Dev Notes
 
-### Hiện trạng liên quan (đọc trước khi sửa)
+### Hiện trạng trước story này (đọc trước khi sửa)
 
 - `game/data/tran/tran_01.json`: 7×7, `kieu: tieu_diet`, sông ở **cột 3** (hàng 0–2 và 4–6), 3 Bộ binh ở `(1,0)`, `(5,0)`, `(5,4)`; hai tướng Khoái `(0,6)`, Lão `(2,6)`; `thu_tu_dich: ["1,0", "5,0", "5,4"]`. Đây là bàn mà Story 1.2 dựng; chưa có lời giải nào.
 - `game/data/chi_so.json`: Khoái 3 máu, đi 3, sát thương 2, **đẩy 1**; Lão 3 máu, đi 3, sát thương 1, lao gần 2 / xa 4; Bộ binh 3 máu, đi 2, sát thương 1. Không có Kỵ binh/Cung kỵ trong trận 1.
@@ -71,7 +71,7 @@ tôi muốn trận 1 đã có lời giải được kiểm chứng,
 - `game/src/debug/bug_report.gd` (Story 2.13): `before_layers(state)` / `after_layers(state)` in ra đúng các lớp chữ của kịch bản — dùng để sinh `truoc`/`sau` thay vì chép tay 7 dòng × 7 cột.
 - `game/src/core/rules_enemy_phase.gd`: `begin_battle` là pha chuẩn bị hiệp 1 (quân Nguyên đi + báo đòn); **kịch bản không có lệnh này**, nên `truoc` phải là bàn **sau** pha đó (bàn người chơi thấy khi mở trận).
 - `game/src/core/battle_state.gd`: `kieu: tieu_diet` → thắng khi hết quân Nguyên (`phase = WON`); tướng gục không làm thua ngay, chỉ thua khi **mọi** tướng gục — nên "không mất tướng" là điều kiện của lời giải, không phải của luật.
-- `tools/deploy_itch.sh`: cần `tools/itch.cfg` có `ITCH_TARGET=<tài khoản>/<trang>`, đã đăng nhập butler, và `build/web/` có bản build. Hiện `ITCH_TARGET` vẫn là chỗ trống.
+- `tools/deploy_itch.sh`: cần `tools/itch.cfg` có `ITCH_TARGET=<tài khoản>/<trang>`, đã đăng nhập butler, và `build/web/` có bản build. `ITCH_TARGET` **đã điền** `tuantrunglc/hao-khi-dong-a` (từ Story 0.5); chặn thật khi đẩy là butler chưa đăng nhập trên máy này.
 
 ### Luật kiến trúc phải theo
 
@@ -120,7 +120,7 @@ tôi muốn trận 1 đã có lời giải được kiểm chứng,
 ### Câu hỏi cho tác giả (chốt trước khi sửa file trận)
 
 1. **Bố cục:** giữ khung 7×7 + sông cột 3 + 3 Bộ binh như hiện tại và chỉ tinh chỉnh vị trí/`thu_tu_dich`, hay thiết kế lại từ đầu? (Đề xuất: giữ khung, vì nó đã có sông giữa bàn và hai tướng; chỉ đổi vị trí để lời giải buộc dùng cả "né ô đỏ" lẫn "đẩy xuống sông".)
-2. **itch:** `tools/itch.cfg` chưa điền — bạn đã có trang itch riêng chưa? Nếu chưa, story dừng ở bước build và ghi "chặn: chưa cấu hình itch", không tự tạo trang.
+2. **itch (đã trả lời):** trang đã có — `tuantrunglc/hao-khi-dong-a` trong `tools/itch.cfg` và đã đẩy bản web ở Story 0.5. Câu hỏi cũ ("cfg chưa điền") sai; chặn thật khi đẩy là butler chưa đăng nhập.
 3. **Độ dài lời giải:** bao nhiêu hiệp là chấp nhận được? (Đề xuất 3–5 hiệp; dài hơn thì người chơi mới mệt và khó làm theo bằng tay.)
 
 ### References
@@ -132,6 +132,26 @@ tôi muốn trận 1 đã có lời giải được kiểm chứng,
 
 ## Dev Agent Record
 
+### Review Findings
+
+#### Vòng 1 — code review 2026-10-22 (diff `898098c..25cf3a0`)
+
+Blind Hunter + Edge Case Hunter + Acceptance Auditor. 20 phát hiện thô → 11 việc sau khi gộp và khử trùng; 3 việc cần tác giả quyết đã chốt 2026-10-22, còn **9 sửa, 2 hoãn**, 9 phát hiện bị loại hoặc gộp. Bằng chứng thô: `.review/2-14-findings-*.md`. Đã xác nhận độc lập: `tools/test.sh` 618/618, 81 đã duyệt + 2 chưa duyệt (0 chưa đạt), 12 lệnh/3 hiệp cho đường chính, `truoc` khớp bàn sau `begin()`, File List đủ 7 tệp, không đụng `src/core/`, `chi_so.json` hay kịch bản đã duyệt.
+
+- [x] [Review][Patch] **HIGH — AC4: sửa 5 chỗ nói sai về itch, build lại rồi thử đẩy** — `ITCH_TARGET=tuantrunglc/hao-khi-dong-a` có từ commit `c9cc5a6`, có mặt ở cả `898098c` và `25cf3a0`; Story 0.5 đã đẩy bản web lên trang đó (commit `ebd46e2`). Story lặp lại điều sai ở 5 chỗ (dòng 54, 74, 123, 145, 176) và Câu hỏi 2. Bản build duy nhất trong `build/web/` là `d3ddfd1-sua` ngày 20/10 — cũ hơn story, nên phải build lại. **Tác giả đã chốt (2026-10-22): thử đẩy ngay**; nếu butler chưa đăng nhập thì ghi đúng lý do thật (không phải `itch.cfg`) và hẹn tác giả đăng nhập rồi chạy lại. [tools/itch.cfg:3, story:54,74,123,145,176]
+- [x] [Review][Defer] **MEDIUM — AC3: bật `da_duyet: true` sau khi tác giả đánh tay** — `test_scenarios.gd:49-52` chỉ `assert` khi kịch bản đã duyệt; hiện `da_duyet: false` nên lời giải hỏng chỉ được liệt kê, `tools/test.sh` vẫn xanh. **Tác giả đã chốt (2026-10-22): dev bật cờ sau khi tác giả đánh lại bằng tay và xác nhận** (không bắt tác giả sửa JSON). Phần sửa câu chữ tài liệu và hướng dẫn vẫn làm ngay (xem patch bên dưới). [game/tests/kich_ban/tran/tran_01_loi_giai.json:2] — deferred, chờ tác giả đánh tay.
+- [x] [Review][Patch] **MEDIUM — AC1/Task 1.2: thêm kịch bản cho nhánh né ô đỏ + ghi lại khảo sát và duyệt bố cục** — trận chỉ có một ô đỏ (`2,5 → 2,6`); lời giải chính hạ chủ đòn ngay hiệp 1. **Tác giả đã chốt (2026-10-22): "hạ chủ đòn" được tính là dạy né; vẫn phải có kịch bản chạy nhánh né** (Lão sang `1,6` ở hiệp 1 rồi thắng, không mất tướng), bổ sung phần khảo sát Task 1.1 vào Completion Notes và ghi rõ việc tác giả duyệt bố cục. [game/tests/kich_ban/tran/, story:26,149]
+
+- [x] [Review][Patch] **MEDIUM — sơ đồ cuối hiệp 1 trong tài liệu đặt Khoái ở `1,6`, đúng là `1,5`** — `tran_01_loi_giai.md:45-46` phải là `hàng 5:  . 1 2 . . . .` và `hàng 6:  . . . . . . .`; máy và chính các bước (`:34`, `:51`) đều là `1,5`. Nhân đây cho sông (`~`) hiện trong các sơ đồ cho khớp lớp chữ của game. [game/data/tran/tran_01_loi_giai.md:42-47]
+- [x] [Review][Patch] **MEDIUM — lời khuyên "Lão đi sang `1,6`" / "chơi chậm hơn" phá chuỗi lệnh phía sau mà không nói** — hiệp 2 giả định Lão đứng `2,5` bắn `2,2`; hiệp 3 giả định Lão `2,5`. Làm theo lời khuyên thì chuỗi 12 lệnh không còn đúng. Sửa: bỏ lời khuyên, hoặc ghi rõ "đây là đường khác, phải tự tìm tiếp; chuỗi bên dưới chỉ đúng khi hạ chủ đòn ở hiệp 1". [game/data/tran/tran_01_loi_giai.md:76]
+- [x] [Review][Patch] **MEDIUM — không test nào buộc `truoc`/ô đỏ mở màn khớp bàn thật sau `begin()`** — `test_main.gd:309-310` chỉ chốt đồng quân 101; dời Bộ binh `4,1`/`4,3` hoặc đổi AI sẽ làm lời giải tay hỏng mà 618 test vẫn xanh. Thêm assert 102 ở `4,1`, 103 ở `4,3`, ô đỏ `2,6` (hoặc so `BugReport.before_layers(begin())` với `truoc`). [game/tests/test_main.gd:309]
+- [x] [Review][Patch] **LOW — tài liệu nói kịch bản "khẳng định" trong khi cờ duyệt đang tắt; hướng dẫn bắt tác giả sửa JSON** — sửa `tran_01_loi_giai.md:80` thành "chạy và báo kết quả; chỉ thành chốt chặn sau khi duyệt", và đổi bước 4 trong Completion Notes thành "tác giả xác nhận; dev bật cờ". [game/data/tran/tran_01_loi_giai.md:80, story:173]
+- [x] [Review][Patch] **LOW — comment `test_battle_view.gd:11` giờ sai** — "trận 1 thật không có quân Nguyên nào kề tướng lúc đầu": nay Bộ binh `2,5` kề Lão `2,6` ngay khi mở trận. Sửa comment cho đúng (trận thử vẫn cần vì lý do khác). [game/tests/test_battle_view.gd:11]
+- [x] [Review][Patch] **LOW — "14 test trượt" trong Debug Log không tái lập được** — dựng lại: test cũ + dữ liệu mới → 22 trượt; test mới + dữ liệu cũ → 18 trượt. Sửa thành số đo được hoặc bỏ con số. [story:142]
+- [x] [Review][Patch] **LOW — mục "Hiện trạng liên quan" vẫn tả bố cục trước story như đang là hiện tại** — dòng 66-74 ghi `1,0`/`5,0`/`5,4`, trong khi story này đổi thành `2,4`. Ghi rõ "trước story 2.14" hoặc cập nhật. [story:66]
+
+- [x] [Review][Defer] **LOW — mẫu JSON "Trận 1" trong `game-architecture.md` còn bố cục cũ và 3 tướng** — lệch có sẵn từ trước diff; ghi rõ là ví dụ minh hoạ hoặc cập nhật sau. [game-architecture.md:304-313] — deferred, pre-existing
+
 ### Agent Model Used
 
 deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
@@ -139,10 +159,10 @@ deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
 ### Debug Log References
 
 - `tools/test.sh`: **618/618 đạt**, 81 kịch bản đã duyệt; kịch bản mới `tran/tran_01_loi_giai.json` hiện **1 chưa duyệt (0 chưa đạt)** — phát lại đúng, chờ tác giả duyệt.
-- Đổi bố cục trận 1 làm **14 test trượt** (các test ghi nhớ bàn mở màn trận 1: ô sáng của Khoái/Lão, đường đi tới `2,5`, vị trí đồng quân 101). Đã cập nhật đúng theo bàn mới; chạy lại 618/618.
+- Đổi bố cục trận 1 làm **22 test trượt** (con số cũ ghi 14 không tái lập được; đo lại với bộ test cũ + dữ liệu mới) — các test ghi nhớ bàn mở màn trận 1: ô sáng của Khoái/Lão, đường đi tới `2,5`, vị trí đồng quân 101. Đã cập nhật đúng theo bàn mới; chạy lại 618/618.
 - Tìm lời giải bằng beam search (script tạm, đã xoá): thắng ở **hiệp 3**, cả hai tướng còn 3 máu. Chạy lại bằng `BattleController` thật để in sự kiện từng lệnh.
 - Kiểm ngược kịch bản: sửa một bước `danh 2 2,2` thành `3,2` và tạm đặt `da_duyet: true` → `test_scenarios` trượt đúng câu "bước 7: luật từ chối ... mà kịch bản không ghi tu_choi"; khôi phục → xanh.
-- **Chưa làm được:** deploy itch (`tools/itch.cfg` còn chỗ trống) và hai bước tác giả (đánh lại bằng tay, mốc E2).
+- **Deploy itch:** đã build lại bản web (`v0.1.0 · 25cf3a0-sua`, 2026-10-22) và thử `tools/deploy_itch.sh` → **butler chưa đăng nhập** trên máy này (lỗi thật, không phải `itch.cfg`). Tác giả chạy `tools/dang_nhap_itch.sh` một lần rồi `tools/deploy_itch.sh`. Còn hai bước tác giả: đánh lại bằng tay (AC 2), mốc E2 (AC 5).
 
 ### Completion Notes List
 
@@ -150,8 +170,12 @@ deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
 
 - Giữ bàn 7×7, sông cột 3 (hàng 3 đi được), hai tướng Khoái `0,6` — Lão `2,6`.
 - Dời **một** Bộ binh từ `1,0` xuống `2,4` (thứ tự quân Nguyên: `2,4`, `5,0`, `5,4`). Hiệp 1 nó đi xuống `2,5` và **báo đòn vào `2,6`** — đúng ô Lão, nên người chơi gặp ô đỏ ngay hiệp đầu; đồng thời nó đứng sát sông, mở ra bài "đẩy xuống sông" bằng một cú đẩy của Khoái.
-- Hai Bộ binh còn lại giữ nguyên `5,0`, `5,4`, tiến vào theo hướng đông.
+- Hai Bộ binh còn lại giữ nguyên `5,0`, `5,4`, tiến vào giữa bàn.
 - Không đổi `chi_so.json` và không đụng `src/core/`.
+
+**Khảo sát bàn cũ (Task 1.1):** bàn trước story (Bộ binh `1,0`, `5,0`, `5,4`) mở trận không có ô đỏ nào trên ô tướng — Bộ binh `1,0` chỉ báo vào ô trống `2,1` — nên hiệp 1 không dạy gì; muốn "đẩy xuống sông" phải chờ quân Nguyên tự đi sát sông. Bàn mới đưa ô đỏ lên đúng ô Lão ngay hiệp 1 và đặt Bộ binh sát sông, nên cả hai bài đều xuất hiện ngay.
+
+**Duyệt bố cục:** tác giả chốt "giữ khung, tinh chỉnh" (2026-10-22); chi tiết dời Bộ binh xuống `2,4` ghi ở trên. Lời giải chính (hạ chủ đòn) được tác giả chấp nhận là đủ dạy "né ô đỏ"; nhánh né có kịch bản riêng bên dưới.
 
 **Lời giải (3 hiệp, không mất tướng) — đã kiểm bằng máy:**
 
@@ -163,28 +187,36 @@ deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
 
 Cả hai tướng còn 3 máu ở mọi hiệp. Bản đầy đủ cho người chơi: `game/data/tran/tran_01_loi_giai.md`.
 
-**Kịch bản tự động:** `game/tests/kich_ban/tran/tran_01_loi_giai.json` — `truoc` là bàn người chơi thấy ở hiệp 1 (sau pha chuẩn bị, có ô đỏ `2,5 → 2,6`), `hanh_dong` là 12 lệnh trên, `sau` là bàn thắng còn đủ hai tướng (`ket_qua: "thang"`). Đang để `da_duyet: false`: **tác giả đánh lại bằng tay xong thì đổi thành `true`** để kịch bản thành chốt chặn thật (khi đã duyệt, sửa một bước là `tools/test.sh` trượt — đã kiểm ngược).
+**Kịch bản tự động:** hai kịch bản trong `game/tests/kich_ban/tran/`:
+
+- `tran_01_loi_giai.json` — đường chính: `hanh_dong` 12 lệnh, 3 hiệp; `sau` là bàn thắng còn đủ hai tướng (`ket_qua: "thang"`).
+- `tran_01_ne_o_do.json` — nhánh né ô đỏ: Lão đi `1,6` (đòn giáng xuống ô trống), Khoái `1,5`; hiệp 2 Khoái đẩy Bộ binh `2,5` xuống sông; hiệp 3 Khoái đẩy Bộ binh `2,4` xuống sông; hiệp 4 Khoái đánh `1,3`, Lão lao `1,2` → thắng, hai tướng 3 máu.
+
+Cả hai đang để `da_duyet: false`. **Tác giả đánh tay xong và xác nhận thì dev bật `true`** cho cả hai (tác giả không phải sửa JSON); khi đã duyệt, sửa một bước là `tools/test.sh` trượt (đã kiểm ngược).
 
 **Hướng dẫn tác giả tự test (AC 2):**
 
 1. `tools/chay.sh --tran=1`.
 2. Làm đúng `game/data/tran/tran_01_loi_giai.md` (3 hiệp, 12 lệnh).
 3. Thấy bảng **Thắng** và **không tướng nào gục** (cả hai cùng 3 máu).
-4. Nếu khớp: đổi `"da_duyet": false` → `true` trong `game/tests/kich_ban/tran/tran_01_loi_giai.json`, chạy `tools/test.sh` (vẫn 618/618, dòng kịch bản thành `82 đã duyệt`).
-5. Chơi chậm hơn (không hạ chủ đòn ở hiệp 1) để thấy ô đỏ giáng xuống và bài "né ô đỏ".
+4. Nếu khớp: báo lại; **dev** bật `"da_duyet": true` cho cả hai kịch bản rồi chạy `tools/test.sh` (vẫn 618/618, dòng tóm tắt thành `83 đã duyệt`).
+5. Thử nhánh né: làm mục "Nhánh né ô đỏ" trong tài liệu (4 hiệp) để thấy đòn đã báo giáng xuống ô trống `2,6`.
 
-**Deploy (AC 4): CHẶN.** `tools/itch.cfg` vẫn là `<đã điền hay chưa?>`. Tác giả điền `ITCH_TARGET=<tài khoản>/<trang>` rồi chạy `tools/build_web.sh` + `tools/deploy_itch.sh`; trang để riêng tư (script không tự đổi hiển thị). Chưa có trang thì ghi nhận chặn, không tự tạo.
+**Deploy (AC 4): build xong, chặn ở bước đăng nhập.** `tools/itch.cfg` đã điền `tuantrunglc/hao-khi-dong-a` từ Story 0.5. Đã build lại bản web (`v0.1.0 · 25cf3a0-sua`, 2026-10-22) và chạy thử `tools/deploy_itch.sh` → **butler chưa đăng nhập trên máy này**. Tác giả chạy `tools/dang_nhap_itch.sh` (một lần, mở trình duyệt) rồi `tools/deploy_itch.sh`; trang vẫn riêng tư (script không tự đổi hiển thị).
 
 ### File List
 
 - `game/data/tran/tran_01.json` (bố cục cuối: Bộ binh `2,4`, `5,0`, `5,4`; `thu_tu_dich` tương ứng)
-- `game/data/tran/tran_01_loi_giai.md` (mới — lời giải 3 hiệp cho tác giả)
+- `game/data/tran/tran_01_loi_giai.md` (mới — lời giải 3 hiệp cho tác giả; sửa sơ đồ hiệp 1 và thêm nhánh né ô đỏ)
 - `game/tests/kich_ban/tran/tran_01_loi_giai.json` (mới — kịch bản tự động, `da_duyet: false`)
-- `game/tests/test_battle_view.gd` (ô sáng/đường đi theo bàn mới; `LAO_TARGET` sang `1,4`)
-- `game/tests/test_main.gd` (vị trí đồng quân 101 ở `2,5`; số ô đi được 7 → 6)
+- `game/tests/kich_ban/tran/tran_01_ne_o_do.json` (mới — kịch bản nhánh né ô đỏ, 4 hiệp, `da_duyet: false`)
+- `game/tests/test_battle_view.gd` (ô sáng/đường đi theo bàn mới; `LAO_TARGET` sang `1,4`; comment trận thử)
+- `game/tests/test_main.gd` (vị trí đồng quân 101 ở `2,5`; số ô đi được 7 → 6; khóa thêm 102/103 và ô đỏ `2,6`)
+- `_bmad-output/implementation-artifacts/deferred-work.md`
 - `_bmad-output/implementation-artifacts/2-14-hoan-thien-tran-1-va-moc-tu-choi-het-e2.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ### Change Log
 
 - 2026-10-22: bố cục cuối trận 1 (dời một Bộ binh xuống `2,4` để hiệp 1 có ô đỏ + sát sông), lời giải 3 hiệp không mất tướng, kịch bản tự động `tran/tran_01_loi_giai.json`; 618/618 test. Chờ tác giả: đánh lại bằng tay (AC 2), duyệt kịch bản, deploy itch (AC 4 — chặn vì `itch.cfg`), mốc E2 (AC 5).
+- 2026-10-22 (sau code review): sửa sơ đồ hiệp 1 trong tài liệu (Khoái `1,5`, hiện sông), thêm kịch bản nhánh né `tran_01_ne_o_do.json` (4 hiệp), khóa thêm 102/103 + ô đỏ `2,6` trong `test_main`, sửa comment và số liệu story, build lại web; deploy chặn ở butler chưa đăng nhập (không phải `itch.cfg`). 618/618 test.

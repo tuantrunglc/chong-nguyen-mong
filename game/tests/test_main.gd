@@ -308,6 +308,10 @@ func test_level_1_shows_terrain_and_units() -> void:
 		return
 	# Hiệp 1 mở bằng pha địch chuẩn bị (Story 2.6): Bộ binh dạy ở 2,4 đi xuống 2,5, báo đòn vào Lão (2,6).
 	assert_eq((tokens[101] as UnitToken).position, BoardView.cell_center(Vector2i(2, 5)))
+	assert_eq((tokens[102] as UnitToken).position, BoardView.cell_center(Vector2i(4, 1)), "Bộ binh 5,0 tiến vào 4,1")
+	assert_eq((tokens[103] as UnitToken).position, BoardView.cell_center(Vector2i(4, 3)), "Bộ binh 5,4 tiến vào 4,3")
+	var red: Dictionary = {Vector2i(2, 6): [1] as Array[int]}
+	assert_eq(main._board_view.telegraph_view().red_cells(), red, "ô đỏ hiệp 1 nhắm đúng ô Lão")
 	assert_eq((tokens[1] as UnitToken).position, BoardView.cell_center(Vector2i(0, 6)))
 	assert_eq((tokens[1] as UnitToken).name_text(), tr("unit.nguyen_khoai"))
 	assert_eq((tokens[2] as UnitToken).name_text(), tr("unit.pham_ngu_lao"))

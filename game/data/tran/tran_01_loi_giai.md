@@ -15,13 +15,13 @@
 ## Bàn đầu trận (sau khi quân Nguyên đi ở hiệp 1)
 
 ```
-hàng 0:  . . . . . . .
-hàng 1:  . . . . B . .
-hàng 2:  . . . . . . .
+hàng 0:  . . . ~ . . .
+hàng 1:  . . . ~ B . .
+hàng 2:  . . . ~ . . .
 hàng 3:  . . . . B . .
-hàng 4:  . . . . . . .
-hàng 5:  . . B . . . .
-hàng 6:  1 . 2 . . . .
+hàng 4:  . . . ~ . . .
+hàng 5:  . . B ~ . . .
+hàng 6:  1 . 2 ~ . . .
 ```
 
 - Khoái `1` ở `0,6`; Lão `2` ở `2,6`.
@@ -40,10 +40,10 @@ hàng 6:  1 . 2 . . . .
 Quân Nguyên còn lại: `4,1` đi tới `4,2`; `4,3` đi tới `2,3`. Không có đòn nào giáng xuống.
 
 ```
-hàng 2:  . . . . B . .
+hàng 2:  . . . ~ B . .
 hàng 3:  . . B . . . .
-hàng 5:  . . 2 . . . .
-hàng 6:  . 1 . . . . .
+hàng 5:  . 1 2 ~ . . .
+hàng 6:  . . . ~ . . .
 ```
 
 ## Hiệp 2 — bài học "lao phải đứng xa"
@@ -57,8 +57,8 @@ Quân Nguyên cuối: `4,2` đi tới `3,3`.
 
 ```
 hàng 3:  . . . B . . .
-hàng 4:  . . 1 . . . .
-hàng 5:  . . 2 . . . .
+hàng 4:  . . 1 ~ . . .
+hàng 5:  . . 2 ~ . . .
 ```
 
 ## Hiệp 3 — hạ quân cuối
@@ -73,8 +73,19 @@ hàng 5:  . . 2 . . . .
 ## Vì sao trận này dạy đúng hai bài
 
 - **Đẩy xuống sông:** hiệp 1, Bộ binh đứng sát sông; Khoái đẩy 1 ô là nó rơi xuống nước và chết ngay, không cần đánh đủ 3 máu.
-- **Né ô đỏ:** hiệp 1 có ô đỏ nhắm thẳng vào Lão. Lời giải chọn **hạ chủ đòn** (Khoái đẩy nó xuống sông) nên ô đỏ tự mất. Nếu bạn không hạ được chủ đòn trong hiệp đó, hãy cho Lão đi sang `1,6` — đòn sẽ giáng xuống ô trống. Chơi chậm hơn (không hạ sớm), quân Nguyên sẽ báo đòn vào đúng ô tướng đang đứng ở hiệp 3 trở đi; lúc đó phải né.
+- **Né ô đỏ:** hiệp 1 có ô đỏ nhắm thẳng vào Lão. Lời giải chính chọn **hạ chủ đòn** (Khoái đẩy nó xuống sông) nên ô đỏ tự mất. Muốn thấy cảnh **né**, đi theo nhánh dưới đây.
+
+## Nhánh né ô đỏ — đường khác, 4 hiệp (đã có kịch bản)
+
+Đường này để thấy đòn đã báo giáng xuống ô trống. **Không trộn** với 3 hiệp ở trên.
+
+1. Hiệp 1: Lão đi `1,6` (rời ô đỏ `2,6`); Khoái đi `1,5`; Space. Đòn giáng xuống `2,6` — ô trống, không ai mất máu.
+2. Hiệp 2: Khoái đánh `2,5` (đẩy xuống sông `3,5`); Lão đi `2,5`; Space.
+3. Hiệp 3: Khoái đi `1,4`, đánh `2,4` (đẩy xuống sông `3,4`); Lão đi `1,5`; Space.
+4. Hiệp 4: Khoái đánh `1,3` (đẩy lên `1,2`); Lão đánh `1,2` → thắng, hai tướng vẫn 3 máu.
+
+Kịch bản: `game/tests/kich_ban/tran/tran_01_ne_o_do.json` (đang `da_duyet: false`, chờ tác giả duyệt).
 
 ## Kiểm chứng
 
-Lời giải này được chạy tự động mỗi lần gõ `tools/test.sh`: kịch bản `game/tests/kich_ban/tran/tran_01_loi_giai.json` phát lại đúng chuỗi lệnh trên và khẳng định bàn cuối **thắng, còn đủ hai tướng**. Kịch bản đang để `da_duyet: false` cho tới khi tác giả đánh lại bằng tay và xác nhận.
+Mỗi lần gõ `tools/test.sh`, hai kịch bản `tran_01_loi_giai.json` và `tran_01_ne_o_do.json` đều được phát lại và ghi kết quả. Chúng chỉ trở thành **chốt chặn** (làm test đỏ khi lời giải hỏng) sau khi tác giả đánh tay xác nhận và `da_duyet` được đổi sang `true`.

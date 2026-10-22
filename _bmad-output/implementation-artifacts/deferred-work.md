@@ -193,3 +193,8 @@
 - AC 3 của story 2.13 (dán báo cáo F2 cho một AI ngoài game để nó chuyển thành kịch bản tái hiện lỗi) chưa có bằng chứng: phần dữ liệu đã kiểm tự động (JSON → bộ nạp → bộ chạy, kể cả ca cố tình đẩy 2 ô), nhưng chưa lần nào dán cho ChatGPT/Claude. Tác giả thử một lần và ghi lại.
 - AC 1 chưa đọc lại clipboard thật: `_on_f2` đã chạy trong game thật (log "đã sao chép 2915 ký tự") nhưng máy không có `xclip`/`xdotool`, và công cụ bơm phím của GoPeak chỉ đặt `keycode` trong khi `DevTools` khớp `physical_keycode`. Kiểm trên máy có clipboard (hoặc dán tay) khi rảnh.
 - Lệnh làm hỏng bất biến (đường `rolled_back` của `BattleController`) không vào `hanh_dong` của báo cáo F2: `submit` quay về trước khi `_record`, và định dạng kịch bản không có mã cho "rollback". Muốn tái hiện bằng kịch bản thì phải thêm khái niệm đó vào định dạng + bộ chạy; hiện chỉ log giữ dấu vết.
+
+## Deferred from: code review of 2-14-hoan-thien-tran-1-va-moc-tu-choi-het-e2 (2026-10-22)
+
+- Mẫu JSON "Trận 1" trong `game-architecture.md:304-313` còn bố cục cũ (Bộ binh `1,0`/`5,0`/`5,4`, `thu_tu_dich` cũ) và có tướng `3` — lệch có sẵn từ trước story 2.14 (trận thật chỉ 2 tướng), diff chỉ làm lệch thêm trường `thu_tu_dich`. Không ảnh hưởng test. Ghi rõ đây là ví dụ minh hoạ hoặc cập nhật khi có dịp sửa tài liệu kiến trúc.
+- Bật `"da_duyet": true` cho `game/tests/kich_ban/tran/tran_01_loi_giai.json` sau khi tác giả đánh lại lời giải bằng tay và xác nhận. Tác giả chốt 2026-10-22: **dev bật cờ**, không bắt tác giả sửa JSON. Chừng nào cờ còn `false`, lời giải hỏng chỉ được liệt kê ("1 chưa duyệt, 1 chưa đạt") và `tools/test.sh` vẫn thoát 0 — chưa phải chốt chặn hồi quy.

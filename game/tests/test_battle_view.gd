@@ -8,7 +8,8 @@ const PROBE_DIR: String = "user://test_battle_view"
 const PROBE_FILE: String = PROBE_DIR + "/thu_luu.json"
 const BROKEN_DIR: String = PROBE_DIR + "/tran"
 const BROKEN_LEVEL: String = BROKEN_DIR + "/tran_01.json"
-## Trận thử cho đòn đánh (Story 2.1): trận 1 thật không có quân Nguyên nào kề tướng lúc đầu.
+## Trận thử cho đòn đánh (Story 2.1): trận 1 thật chỉ có một Bộ binh kề Lão (2,5 kề 2,6),
+## không có quân Nguyên nào kề Khoái lúc mở trận.
 const ATTACK_DIR: String = PROBE_DIR + "/tran_danh"
 const ATTACK_LEVEL: String = ATTACK_DIR + "/tran_01.json"
 ## Trận thử cho tướng mình đứng kề (Story 2.2, FR16).
