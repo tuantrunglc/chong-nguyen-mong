@@ -249,6 +249,23 @@ func _click_by_mouse(main: Node2D, cell: Vector2i) -> void:
 	_battle_input(main)._unhandled_input(click)
 
 
+## Bấm chuột đi qua Viewport: GUI chia sự kiện trước (Control nhận chuột sẽ nuốt), phần còn lại mới tới
+## `_unhandled_input`. Dùng khi cần chứng minh một Control không nuốt chuột (Story 2.10, AC 5).
+## `push_input` nhận toạ độ cửa sổ, nên phải qua `get_screen_transform()` (chạy headless cửa sổ chỉ 64×36).
+func _click_through_viewport(main: Node2D, cell: Vector2i) -> void:
+	var click: InputEventMouseButton = InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	var viewport: Viewport = main.get_viewport()
+	click.position = viewport.get_screen_transform() * _screen_point(main, cell)
+	viewport.push_input(click)
+
+
+## Tâm ô đổi sang toạ độ màn hình (cùng hệ với vị trí sự kiện chuột).
+func _screen_point(main: Node2D, cell: Vector2i) -> Vector2:
+	return _board(main).get_global_transform_with_canvas() * BoardView.cell_center(cell)
+
+
 ## Phím thật trên bàn phím (phím vật lý).
 func _press_physical(main: Node2D, key: Key, echo: bool = false) -> void:
 	var ev: InputEventKey = InputEventKey.new()
@@ -661,13 +678,24 @@ func test_hover_enemy_highlights_only_its_own_red_cells() -> void:
 
 
 ## Khung thông tin không nuốt cú bấm: bấm vẫn ra lệnh đánh (Story 2.10, AC 5).
+## Cú bấm phải đi qua Viewport và phải rơi đúng lên khung, nếu không test sẽ "đạt" cả khi khung nuốt chuột.
 func test_tooltip_does_not_block_click() -> void:
 	var main: Node2D = _make_attack_main()
 	_hover_by_mouse(main, Vector2i(3, 3))
-	assert_true(_tooltip(main).visible_now(), "điều kiện trước: khung đang hiện")
+	var tip: Tooltip = _tooltip(main)
+	assert_true(tip.visible_now(), "điều kiện trước: khung đang hiện")
+	assert_eq(tip.mouse_filter, Control.MOUSE_FILTER_IGNORE, "khung khai báo không nhận chuột")
 	_press_physical(main, KEY_1)
-	_click_by_mouse(main, Vector2i(3, 3))
-	assert_eq(_unit_at(main, Vector2i(3, 2)).hp, 1, "cú bấm vẫn tới quân (bị đẩy lên 3,2), không bị khung nuốt")
+	# Chọn tướng làm khung vẽ lại (bám con trỏ thật), nên phải đặt khung đè lên ô **sau** bước này.
+	var at: Vector2 = _screen_point(main, Vector2i(3, 3))
+	# `place_at` tự cộng CURSOR_OFFSET, nên trừ hai lần để mép khung nằm trước điểm bấm.
+	tip.place_at(at - Tooltip.CURSOR_OFFSET * 2.0)
+	assert_true(tip.get_global_rect().grow(-2.0).has_point(at), "điều kiện trước: khung nằm đè lên ô sắp bấm")
+	_click_through_viewport(main, Vector2i(3, 3))
+	var pushed: Unit = _unit_at(main, Vector2i(3, 2))
+	assert_not_null(pushed, "cú bấm vẫn tới quân (bị đẩy lên 3,2), không bị khung nuốt")
+	if pushed != null:
+		assert_eq(pushed.hp, 1, "quân bị đẩy mất 1 máu")
 
 
 ## Ô đỏ vẽ lại đúng sau Hủy nước đi, Chơi lại trận và F5 (Story 2.7, AC 10).
@@ -1107,6 +1135,48 @@ func _make_win_main() -> Node2D:
 
 func _banner(main: Node2D) -> ResultBanner:
 	return main._result_banner as ResultBanner
+
+
+## Đang phát hoạt ảnh thì lệnh mới bị bỏ qua (Story 2.11, AC 3).
+func test_commands_ignored_while_animation_plays() -> void:
+	var main: Node2D = _make_attack_main()
+	_press_physical(main, KEY_1)
+	assert_eq(_view(main).selected_id(), 1, "điều kiện trước: đã chọn Khoái")
+	_view(main).event_player().instant = false
+	_click_by_mouse(main, Vector2i(3, 3))
+	assert_true(_view(main).is_playing(), "đang phát hoạt ảnh của đòn đánh")
+	_press_physical(main, KEY_2)
+	assert_eq(_view(main).selected_id(), 1, "phím chọn tướng bị bỏ qua khi đang phát")
+	await wait_seconds(1.5)
+	assert_false(_view(main).is_playing(), "phát xong thì mở khóa")
+	_press_physical(main, KEY_2)
+	assert_eq(_view(main).selected_id(), 2, "phát xong thì nhận lệnh mới")
+
+
+## Dòng pha trên HUD: "Lượt của bạn" khi chờ, "Quân Nguyên đang ra đòn" trong lúc phát pha địch (Story 2.11, AC 4).
+func test_phase_line_follows_playback() -> void:
+	var main: Node2D = _make_attack_main()
+	assert_eq(_hud(main).phase_text(), tr("hud.phase.player"), "đang chờ người chơi")
+	_view(main).event_player().instant = false
+	_press_physical(main, KEY_SPACE)
+	assert_true(_view(main).is_playing(), "điều kiện trước: pha địch có sự kiện để phát")
+	assert_eq(_hud(main).phase_text(), tr("hud.phase.enemy"), "đang phát pha địch")
+	await wait_seconds(3.5)
+	assert_false(_view(main).is_playing(), "trọn pha địch phát xong")
+	assert_eq(_hud(main).phase_text(), tr("hud.phase.player"), "xong pha địch thì về lượt người chơi")
+
+
+## Hết trận thì khung thông tin ẩn và bỏ nổi bật; rê chuột sau đó cũng không hiện lại (Story 2.10, Task 3.3).
+func test_tooltip_hidden_when_battle_ends() -> void:
+	var main: Node2D = _make_win_main()
+	var view: TelegraphView = _board(main).telegraph_view()
+	_hover_by_mouse(main, Vector2i(5, 2))
+	assert_true(_tooltip(main).visible_now(), "điều kiện trước: đang xem được thông tin quân")
+	_win(main)
+	assert_false(_tooltip(main).visible_now(), "hết trận: khung ẩn")
+	assert_eq(view.highlighted(), [] as Array[Vector2i], "hết trận: bỏ nổi bật ô đỏ")
+	_hover_by_mouse(main, Vector2i(1, 2))
+	assert_false(_tooltip(main).visible_now(), "rê chuột sau khi hết trận: vẫn ẩn, không hiện lại")
 
 
 ## Thắng trong hai đòn: đòn đầu chưa có bảng, đòn sau hiện "Thắng!" và khóa bàn.

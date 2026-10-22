@@ -171,3 +171,9 @@
 - Công cụ duyệt kịch bản (`scenario_viewer.gd`): kịch bản có cả `truoc.bao_don` và `sau.o_do` thì tối đa 3 bàn cạnh nhau, cột có thể lệch vì `LEFT_WIDTH` cộng cứng; xem lại khi có kịch bản thật như vậy.
 - Story 2.11 (hoạt ảnh): Kỵ binh xung phong không đổi ô lúc ra đòn (AC 5); hoạt ảnh tự suy đường lao từ `from_cell` tới `to_cell` của `ATTACKED`.
 - Story 3.5 (giới hạn hiệp): điểm chèn kiểm hiệp cuối nằm sau `_strike_all` và trước `round_number += 1`, để đòn cuối hiệp vẫn ra.
+
+## Deferred from: code review of story 2-10-re-chuot-xem-thong-tin (2026-10-22)
+
+- Không test nào đọc kích thước/vị trí khung thông tin (chỉ test chuỗi), vì AC 8 cấm viết test cho phần chỉ nhìn thấy bằng mắt. Hệ quả: lỗi khung bị bóp còn 17 px (xem Review Findings) chỉ lộ ra khi đo hoặc nhìn; nếu sau này có test giao diện chạy được ở chế độ có cửa sổ thì thêm một assert `size.x` tối thiểu.
+- Bốn dòng hiệu ứng địa hình trong khung thông tin đang dạy luật chưa có: hầm chông "Đi qua mất máu" (Story 3.4), kho lương "Quân Nguyên đứng kề thì hồi máu" (3.9), làng "Đánh vào làng thì mất Lòng dân" (3.7), ải "Quân Nguyên vào ải thì thua" (3.11 — `rules_victory.gd:35` mới chỉ xét `ELIMINATE`). Tác giả chốt 2026-10-22: giữ lời thiết kế, rà lại từng dòng khi luật tương ứng vào.
+- Nhánh "Kỵ binh" (`Telegraph.Kind.DIRECTION`) của khung thông tin chưa có test: cần một trận có Kỵ binh bị đẩy cho ô xung phong ra ngoài bàn rồi rê chuột để khẳng định khung ghi "Không có đòn nào" (code đã sửa theo review 2026-10-22, nhưng chỉ kiểm bằng đọc code). Viết khi có kịch bản Kỵ binh bị đẩy.

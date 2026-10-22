@@ -7,6 +7,8 @@ hud.round,Hiệp %d
 hud.undo,Hủy (Z)
 hud.end_turn,Kết thúc lượt (Space)
 hud.confirm_attack,Bấm lần nữa để đánh
+hud.phase.player,"Lượt của bạn"
+hud.phase.enemy,"Quân Nguyên đang ra đòn"
 result.won,Thắng!
 result.lost,Thua!
 result.retry,Chơi lại trận

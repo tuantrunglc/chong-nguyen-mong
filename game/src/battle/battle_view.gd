@@ -6,6 +6,10 @@ extends Node
 
 const NONE: int = 0
 
+## Phát xong hoạt ảnh của một lệnh (hoặc không có gì để phát): bàn đã sẵn sàng vẽ bản chụp cuối.
+## `main.gd` vẽ bàn ở đây để hoạt ảnh chạy trên bàn cũ (Story 2.11).
+signal playback_finished(snapshot: BattleState)
+
 var _board: BoardView = null
 var _input: BattleInput = null
 var _hud: Hud = null
@@ -20,6 +24,14 @@ var _cells: Array[Vector2i] = []
 var _targets: Array[Vector2i] = []
 ## Mục tiêu đang chờ bấm lần nữa (tướng đã đi thì phải xác nhận, FR15); NO_CELL là không chờ.
 var _pending: Vector2i = BoardView.NO_CELL
+## Phát lại sự kiện bằng Tween (Story 2.11); con của view này, không giữ trạng thái trận.
+var _player: EventPlayer = null
+## Đang phát hoạt ảnh: mọi lệnh mới đều bị bỏ qua (AC 3).
+var _playing: bool = false
+## Lệnh đang phát là pha của quân Nguyên (end_turn hoặc mở trận): dòng pha trên HUD.
+var _enemy_turn: bool = false
+## Tăng mỗi lần start()/stop(): lượt phát của trận cũ không được vẽ lên trận mới (F5 giữa lúc phát).
+var _playback_generation: int = 0
 
 
 func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = null) -> void:
@@ -27,6 +39,9 @@ func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = nu
 	_input = input
 	_hud = hud
 	_tooltip = tooltip
+	_player = EventPlayer.new()
+	_player.setup(board)
+	add_child(_player)
 	input.general_key_pressed.connect(_on_general_key)
 	input.cell_clicked.connect(_on_cell_clicked)
 	input.cell_hovered.connect(_on_cell_hovered)
@@ -40,6 +55,11 @@ func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = nu
 func start(controller: BattleController) -> void:
 	_controller = controller
 	controller.events_resolved.connect(_on_events_resolved)
+	_playback_generation += 1
+	if _player != null:
+		_player.stop()
+	_playing = false
+	_enemy_turn = false
 	_deselect()
 	_update_hud()
 
@@ -47,11 +67,13 @@ func start(controller: BattleController) -> void:
 ## Màn hình lỗi, menu: không còn trận, mọi thao tác không làm gì, bảng nút ẩn.
 func stop() -> void:
 	_controller = null
+	_playback_generation += 1
+	_playing = false
+	_enemy_turn = false
+	if _player != null:
+		_player.stop()
 	_deselect()
-	if _tooltip != null:
-		_tooltip.hide_tooltip()
-	if _board != null:
-		_board.telegraph_view().highlight([] as Array[Vector2i])
+	_hide_info()
 	_hud.visible = false
 
 
@@ -71,10 +93,29 @@ func pending_cell() -> Vector2i:
 	return _pending
 
 
+## Mở trận: pha địch chuẩn bị của hiệp 1 cũng là một lần phát hoạt ảnh (Story 2.6, 2.11).
+## `main.gd` gọi hàm này thay cho `controller.begin()` để view biết đó là pha địch.
+func begin_battle() -> void:
+	if _controller == null:
+		return
+	_enemy_turn = true
+	_controller.begin()
+
+
+## Đang phát hoạt ảnh (để test).
+func is_playing() -> bool:
+	return _playing
+
+
+## Phát lại sự kiện của lệnh này (để test).
+func event_player() -> EventPlayer:
+	return _player
+
+
 ## Phím 1-2-3: tướng không có trên bàn hoặc đã đánh thì không gì; phím của tướng đang chọn thì bỏ chọn.
 ## Hết trận (thắng hoặc thua) thì mọi thao tác không làm gì (Story 2.5).
 func _on_general_key(id: int) -> void:
-	if _controller == null or _battle_over():
+	if _controller == null or _playing or _battle_over():
 		return
 	if id == _selected:
 		_deselect()
@@ -88,7 +129,7 @@ func _on_general_key(id: int) -> void:
 
 
 func _on_cell_clicked(cell: Vector2i) -> void:
-	if _controller == null or _battle_over():
+	if _controller == null or _playing or _battle_over():
 		return
 	var unit: Unit = _controller.snapshot().unit_at(cell) if cell != BoardView.NO_CELL else null
 	if unit != null and unit.faction == Unit.Faction.DAI_VIET:
@@ -129,23 +170,44 @@ func _set_pending(cell: Vector2i) -> void:
 
 ## Hủy nước đi gần nhất; vẫn giữ tướng đang chọn (tác giả chốt). Không có gì để hủy thì không gì.
 func _on_undo() -> void:
-	if _controller == null or _battle_over():
+	if _controller == null or _playing or _battle_over():
 		return
 	_controller.undo()
 
 
 ## Kết thúc lượt rồi bỏ chọn (tác giả chốt).
 func _on_end_turn() -> void:
-	if _controller == null or _battle_over():
+	if _controller == null or _playing or _battle_over():
 		return
+	_enemy_turn = true
 	_controller.submit(Command.end_turn())
 	_deselect()
 
 
-## Sau mỗi lệnh chạy được và mỗi lần hủy: ô sáng, vòng chọn, đường đi của tướng đang chọn tính lại.
-func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) -> void:
+## Mỗi lệnh chạy được: khóa lệnh, phát hoạt ảnh theo nhật ký, rồi mới vẽ bàn và tính lại ô sáng (Story 2.11).
+func _on_events_resolved(events: Array[BattleEvent], snapshot: BattleState) -> void:
 	if _controller == null:
 		return
+	_playing = true
+	_update_hud()
+	var generation: int = _playback_generation
+	# Chế độ không màn hình (test) hoặc không có gì để phát: làm ngay trong cùng khung hình, không await.
+	if _player.instant or events.is_empty():
+		_player.play_now(events)
+		_finish_playback(snapshot, generation)
+		return
+	await _player.play(events)
+	_finish_playback(snapshot, generation)
+
+
+## Phát xong: mở khóa, để `main.gd` vẽ bản chụp cuối, rồi tính lại chọn/ô sáng/khung thông tin trên bàn mới.
+func _finish_playback(snapshot: BattleState, generation: int) -> void:
+	_playing = false
+	_enemy_turn = false
+	# Trận đã bị dừng hoặc thay bằng trận khác giữa lúc phát (màn hình lỗi, menu, F5): bỏ bản chụp cũ.
+	if _controller == null or generation != _playback_generation:
+		return
+	playback_finished.emit(snapshot)
 	if Rules.is_battle_over(snapshot):
 		_deselect()
 		_update_hud()
@@ -159,9 +221,11 @@ func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) -> 
 		else:
 			_deselect()
 	_update_hud()
-	# Bàn đã đổi (đòn dịch theo, đòn bị hủy): khung thông tin và nổi bật tính lại theo ô đang trỏ.
+	# Bàn đã đổi (đòn dịch theo, đòn bị hủy): chọn lại ô dưới chuột rồi tính lại khung và nổi bật, vì đồng quân
+	# vừa dời có thể đã che ô đang trỏ (Story 2.10 review).
+	if _input != null:
+		_input.refresh_hover()
 	_update_info(_input.hovered_cell() if _input != null else BoardView.NO_CELL)
-
 
 func _on_cell_hovered(cell: Vector2i) -> void:
 	_update_info(cell)
@@ -178,10 +242,12 @@ func _update_info(cell: Vector2i) -> void:
 	var state: BattleState = _controller.snapshot()
 	if state == null:
 		return
+	# Hết trận thì không còn gì để xem: bảng Thắng/Thua là thứ duy nhất còn trên bàn (Story 2.10, Task 3.3).
+	if Rules.is_battle_over(state):
+		_hide_info()
+		return
 	if not state.in_bounds(cell):
-		if _tooltip != null:
-			_tooltip.hide_tooltip()
-		_board.telegraph_view().highlight([] as Array[Vector2i])
+		_hide_info()
 		return
 	var unit: Unit = state.unit_at(cell)
 	if _tooltip != null:
@@ -197,15 +263,18 @@ func _unit_text(unit: Unit, state: BattleState) -> String:
 	return "\n".join(lines)
 
 
+## Chữ "đòn sắp đánh" của quân này. Đòn đã bị hủy (chủ đòn gục, ô đích ngoài bàn, Kỵ binh sát mép hướng ra
+## ngoài) thì `TelegraphMarks.hit_cell` trả `NO_CELL` và đường đỏ cũng rỗng, nên phải kiểm trước khi hứa đòn:
+## nếu không, khung nói "Xung phong hướng Bắc" trong khi bàn không còn ô đỏ nào (Story 2.10 review).
 func _attack_text(unit: Unit, state: BattleState) -> String:
 	for t: Telegraph in state.telegraphs:
 		if t.owner_id != unit.id:
 			continue
-		if t.kind == Telegraph.Kind.DIRECTION:
-			return tr("tooltip.attack_charge") % [tr(Tooltip.DIRECTION_NAMES[t.offset] as String), t.order]
 		var hit: Vector2i = TelegraphMarks.hit_cell(state, t)
 		if hit == Telegraph.NO_CELL:
 			return tr("tooltip.no_attack")
+		if t.kind == Telegraph.Kind.DIRECTION:
+			return tr("tooltip.attack_charge") % [tr(Tooltip.DIRECTION_NAMES[t.offset] as String), t.order]
 		return tr("tooltip.attack_cell") % [BoardText.cell_text(hit), t.order]
 	return tr("tooltip.no_attack")
 
@@ -225,6 +294,14 @@ func _telegraph_cells_of(unit: Unit, state: BattleState) -> Array[Vector2i]:
 	return cells
 
 
+## Ẩn khung thông tin và bỏ nổi bật ô đỏ (hết trận, dừng trận).
+func _hide_info() -> void:
+	if _tooltip != null:
+		_tooltip.hide_tooltip()
+	if _board != null:
+		_board.telegraph_view().highlight([] as Array[Vector2i])
+
+
 func _select(id: int) -> void:
 	_selected = id
 	_cells = _controller.reachable(id)
@@ -239,7 +316,11 @@ func _select(id: int) -> void:
 
 func _update_hud() -> void:
 	var snapshot: BattleState = _controller.snapshot()
-	_hud.show_turn(snapshot.round_number, _controller.can_undo(), Rules.is_battle_over(snapshot))
+	var over: bool = Rules.is_battle_over(snapshot)
+	_hud.show_turn(snapshot.round_number, _controller.can_undo(), over)
+	# Dòng pha luôn có khi đang chơi; lúc phát hoạt ảnh pha địch thì báo đúng pha đang chạy (Story 2.11, AC 4).
+	if not over:
+		_hud.show_phase(_playing and _enemy_turn)
 
 
 ## Trận đã kết thúc (thắng hoặc thua).

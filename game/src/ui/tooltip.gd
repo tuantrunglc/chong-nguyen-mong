@@ -43,7 +43,12 @@ const DIRECTION_NAMES: Dictionary = {
 const CURSOR_OFFSET: Vector2 = Vector2(18, 14)
 ## Chừa mép màn hình.
 const SCREEN_MARGIN: float = 8.0
+## Bề rộng tối đa của cả khung; chữ dài hơn thì Label tự xuống dòng.
 const MAX_WIDTH: float = 340.0
+## Lề trong của khung (StyleBox), trừ ra khi tính bề rộng cho Label.
+const CONTENT_MARGIN: float = 8.0
+## Chừa một chút cho dấu tiếng Việt và cho số đo của font khỏi cụt chữ.
+const WIDTH_SLACK: float = 4.0
 
 var _label: Label
 
@@ -56,7 +61,7 @@ func _init() -> void:
 	style.border_color = Color(0.85, 0.70, 0.35, 1.0)
 	style.set_border_width_all(2)
 	style.set_corner_radius_all(4)
-	style.set_content_margin_all(8)
+	style.set_content_margin_all(CONTENT_MARGIN)
 	add_theme_stylebox_override("panel", style)
 	_label = Label.new()
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -71,8 +76,25 @@ func show_text(text: String) -> void:
 		return
 	_label.text = text
 	visible = true
+	_fit_width(text)
 	reset_size()
-	place_at(get_viewport().get_mouse_position())
+	var viewport: Viewport = get_viewport()
+	place_at(viewport.get_mouse_position() if viewport != null else Vector2.ZERO)
+
+
+## Cho Label bề rộng bằng dòng dài nhất, không quá `MAX_WIDTH`.
+## Bắt buộc phải có: Label bật autowrap có bề rộng tối thiểu 1 px, nên `reset_size()` một mình sẽ bóp khung
+## thành một cột hẹp và chữ rơi xuống mỗi dòng một ký tự (đo thật: khung 17×637 px).
+func _fit_width(text: String) -> void:
+	var font: Font = _label.get_theme_font("font")
+	if font == null:
+		return
+	var font_size: int = _label.get_theme_font_size("font_size")
+	var widest: float = 0.0
+	for line: String in text.split("\n"):
+		widest = maxf(widest, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
+	var room: float = MAX_WIDTH - CONTENT_MARGIN * 2.0
+	_label.custom_minimum_size = Vector2(minf(widest + WIDTH_SLACK, room), 0.0)
 
 
 func hide_tooltip() -> void:
@@ -82,6 +104,9 @@ func hide_tooltip() -> void:
 
 ## Đặt khung cạnh điểm neo, lật sang trái/trên khi sát mép màn hình.
 func place_at(anchor: Vector2) -> void:
+	if get_viewport() == null:
+		position = anchor + CURSOR_OFFSET
+		return
 	var screen: Vector2 = get_viewport_rect().size
 	var pos: Vector2 = anchor + CURSOR_OFFSET
 	if pos.x + size.x > screen.x - SCREEN_MARGIN:

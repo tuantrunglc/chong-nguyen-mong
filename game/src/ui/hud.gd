@@ -11,8 +11,12 @@ const PANEL_POSITION: Vector2 = Vector2(972, 52)
 const PANEL_WIDTH: float = 260.0
 const SEPARATION: int = 12
 const BUTTON_HEIGHT: float = 44.0
+## Dòng báo pha ("Lượt của bạn" / "Quân Nguyên đang ra đòn"), nhỏ hơn số hiệp.
+const PHASE_FONT_SIZE: int = 17
 
 var _round_label: Label
+## Dòng pha, luôn hiện khi đang chơi (Story 2.11, AC 4).
+var _phase_label: Label
 var _undo_button: Button
 var _end_turn_button: Button
 ## Dòng nhắc dưới các nút ("Bấm lần nữa để đánh"); rỗng thì ẩn.
@@ -35,6 +39,13 @@ func _ready() -> void:
 	_round_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(_round_label)
 
+	_phase_label = Label.new()
+	_phase_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_phase_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_phase_label.add_theme_font_size_override("font_size", PHASE_FONT_SIZE)
+	_phase_label.visible = false
+	box.add_child(_phase_label)
+
 	_undo_button = _button(tr("hud.undo"), box)
 	_undo_button.pressed.connect(func() -> void: undo_pressed.emit())
 	_end_turn_button = _button(tr("hud.end_turn"), box)
@@ -52,6 +63,25 @@ func show_turn(round_number: int, can_undo: bool, over: bool = false) -> void:
 	_undo_button.disabled = over or not can_undo
 	_end_turn_button.disabled = over
 	visible = true
+	# Hết trận thì bảng Thắng/Thua là thứ duy nhất cần đọc.
+	if over:
+		hide_phase()
+
+
+## Dòng báo pha (Story 2.11, AC 4). `enemy_turn` true khi đang phát hoạt ảnh của quân Nguyên.
+func show_phase(enemy_turn: bool) -> void:
+	_phase_label.text = tr("hud.phase.enemy") if enemy_turn else tr("hud.phase.player")
+	_phase_label.visible = true
+
+
+func hide_phase() -> void:
+	_phase_label.visible = false
+	_phase_label.text = ""
+
+
+## Dòng pha đang hiện (để test); rỗng là đang ẩn.
+func phase_text() -> String:
+	return _phase_label.text if _phase_label.visible else ""
 
 
 ## Dòng nhắc; chuỗi rỗng là ẩn.

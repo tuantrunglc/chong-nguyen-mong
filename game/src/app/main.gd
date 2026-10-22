@@ -60,6 +60,8 @@ func _ready() -> void:
 	add_child(_result_banner)
 	_battle_view = BattleView.new()
 	_battle_view.setup(_board_view, _battle_input, _hud, _tooltip)
+	# Hoạt ảnh phát xong mới vẽ bản chụp cuối (Story 2.11).
+	_battle_view.playback_finished.connect(_on_playback_finished)
 	add_child(_battle_view)
 
 	_version_label = Label.new()
@@ -123,12 +125,11 @@ func _start_battle() -> void:
 	_result_banner.hide_result()
 	_controller = BattleController.new()
 	_controller.start(_level, AppState.stats)
-	# Nối trước BattleView: đồng quân và lớp F1 vẽ lại trước khi BattleView vẽ lại ô sáng.
-	_controller.events_resolved.connect(_on_events_resolved)
+	# Bàn "trước lệnh" phải có trước: hoạt ảnh chạy trên nó, xong mới vẽ bản chụp cuối (Story 2.11).
 	_show_board(_controller.snapshot())
 	_battle_view.start(_controller)
 	# Hiệp 1 cũng bắt đầu bằng pha địch chuẩn bị (Story 2.6): bàn người chơi thấy là bàn sau khi quân Nguyên đã đi.
-	_controller.begin()
+	_battle_view.begin_battle()
 	_hide_error()
 	_screen = Screen.BATTLE
 
@@ -140,7 +141,8 @@ func _reload_data() -> void:
 	_start_battle()
 
 
-func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) -> void:
+## Hoạt ảnh của lệnh vừa phát xong: vẽ bản chụp cuối và bảng kết quả (Story 2.11).
+func _on_playback_finished(snapshot: BattleState) -> void:
 	_show_board(snapshot)
 	_result_banner.show_result(snapshot.phase)
 
