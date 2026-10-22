@@ -47,7 +47,12 @@ func preview_result(command: Command) -> Dictionary:
 	var events: Array[BattleEvent] = _resolve(copy, command)
 	if _rejection(events) != null:
 		return {}
-	if not copy.validate().is_empty():
+	# Lưới an toàn như `submit`, nhưng không phát signal: một `clone()` thiếu field mới sẽ làm mọi lần rê mất bóng.
+	# Ghi log để lỗi đó còn dấu vết, thay vì im lặng.
+	var problems: Array[String] = copy.validate()
+	if not problems.is_empty():
+		for problem: String in problems:
+			Log.error("battle", "xem trước vi phạm bất biến: %s" % problem)
 		return {}
 	return {"state": copy, "events": events}
 

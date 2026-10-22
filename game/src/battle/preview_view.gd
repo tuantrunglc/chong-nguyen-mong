@@ -2,10 +2,10 @@ class_name PreviewView
 extends Node2D
 ## Bóng mờ kết quả đòn (Story 2.12, FR41): vị trí cuối + số máu sau đòn của mọi quân bị ảnh hưởng.
 ## Chỉ nhận dữ liệu hiển thị đã tính sẵn (`pos`, `type`, `hp`, `faction`, `cell`): không đọc trạng thái sống,
-## không sửa gì. BoardView đặt nó sau lớp đồng quân và trước lớp số thứ tự đòn, để ô đỏ + số vẫn nổi nhất (NFR9).
+## không sửa gì. BoardView đặt nó sau lớp đồng quân, trước viền mục tiêu và lớp số thứ tự đòn: bóng nằm trên ô
+## đỏ (ô đỏ vốn ở dưới đồng quân) nhưng không bao giờ che số thứ tự đòn (NFR9).
 
 const GHOST_ALPHA: float = 0.5
-const NAME_FONT_SIZE: int = 15
 const HP_FONT_SIZE: int = 12
 const OUTLINE_SIZE: int = 6
 
@@ -45,16 +45,16 @@ func _clear_labels() -> void:
 func _add_labels(ghost: Dictionary) -> void:
 	var pos: Vector2 = ghost.get("pos", Vector2.ZERO) as Vector2
 	var center: Vector2 = pos + Vector2(0.0, -UnitToken.TOKEN_LIFT)
-	var type: int = ghost.get("type", 0) as int
 	var hp: int = ghost.get("hp", 0) as int
 	var moved: bool = ghost.get("moved", true) as bool
-	var text_color: Color = Color(1.0, 0.95, 0.80, GHOST_ALPHA)
-	if not UnitToken.NAME_KEYS.has(type):
-		return
-	_add_label(tr(UnitToken.NAME_KEYS[type] as String), center, NAME_FONT_SIZE, text_color)
-	# Quân không đổi ô (bị đánh tại chỗ): số máu sau đòn phải nằm TRÊN đồng quân, nếu để đúng góc dưới phải thì
-	# hai số máu (thật và xem trước) chồng lên nhau thành một cục không đọc được.
-	var hp_center: Vector2 = center + UnitToken.HP_OFFSET if moved else center - Vector2(0.0, UnitToken.RADIUS + 10.0)
+	# Số máu luôn nằm TRONG ô của bóng. Quân không đổi ô (bị đánh tại chỗ) đặt số ở góc dưới–trái, đối xứng với
+	# chấm máu thật ở góc dưới–phải: không đè số thật, và không lọt sang ô bên trên như bản đặt phía trên đồng
+	# (Story 2.12 review vòng 2). Bóng không vẽ tên quân để không làm đậm/nhòe tên thật.
+	var hp_center: Vector2
+	if moved:
+		hp_center = center + UnitToken.HP_OFFSET
+	else:
+		hp_center = center + Vector2(-UnitToken.HP_OFFSET.x, UnitToken.HP_OFFSET.y)
 	_add_label(str(hp), hp_center, HP_FONT_SIZE, Color(1.0, 1.0, 1.0, GHOST_ALPHA))
 
 

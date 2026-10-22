@@ -249,10 +249,10 @@ func _finish_playback(snapshot: BattleState, generation: int) -> void:
 			_deselect()
 	_update_hud()
 	# Bàn đã đổi (đòn dịch theo, đòn bị hủy): chọn lại ô dưới chuột rồi tính lại khung và nổi bật, vì đồng quân
-	# vừa dời có thể đã che ô đang trỏ (Story 2.10 review).
+	# vừa dời có thể đã che ô đang trỏ (Story 2.10 review). Không xoá `_preview_cell` ở đây: `_select`/`_deselect`
+	# ngay trên đã reset nó và tính lại bóng rồi; xoá thêm sẽ bắt tính lại đúng ô đó lần thứ hai (Story 2.12 review).
 	if _input != null:
 		_input.refresh_hover()
-	_preview_cell = BoardView.NO_CELL
 	var hovered: Vector2i = _input.hovered_cell() if _input != null else BoardView.NO_CELL
 	_update_info(hovered)
 	_update_preview(hovered)
@@ -303,11 +303,11 @@ func _clear_preview() -> void:
 ## quân biến mất hiện ở ô cũ với máu 0 (Story 2.12).
 func _ghosts_of(before: BattleState, after: BattleState, events: Array[BattleEvent]) -> Array[Dictionary]:
 	var ghosts: Array[Dictionary] = []
+	# Ô cuối của từng quân trong lệnh này. `Effects.move` phát MOVED trước rồi mới tới DROWNED, nên MOVED đã phủ
+	# cả ca chết đuối; không cần nhánh riêng cho DROWNED.
 	var last_cell: Dictionary = {}
 	for event: BattleEvent in events:
 		if event.type == BattleEvent.Type.MOVED:
-			last_cell[event.unit_id] = event.to_cell
-		elif event.type == BattleEvent.Type.DROWNED:
 			last_cell[event.unit_id] = event.to_cell
 	for unit: Unit in after.units:
 		var old: Unit = before.unit_by_id(unit.id)

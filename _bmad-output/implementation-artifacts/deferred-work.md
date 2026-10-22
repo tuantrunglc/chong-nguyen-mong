@@ -180,5 +180,10 @@
 
 ## Deferred from: code review of story 2-12-xem-truoc-ket-qua-don (2026-10-22)
 
-- Bóng mờ của quân bị đánh **tại chỗ** vẽ đè lên tên quân thật (cùng cỡ chữ, alpha 0.5) nên tên đậm hơn một chút; số máu đã được đẩy lên trên đồng nên không chồng số thật. Chưa sửa vì chưa biết tác giả thấy có khó đọc không — chờ tác giả nhìn `anh/2-12-2.png`, `anh/2-12-3.png`; nếu khó đọc thì bỏ tên trên bóng, chỉ giữ số máu.
+- Bóng mờ của quân bị đánh **tại chỗ** vẽ đè lên tên quân thật (cùng cỡ chữ, alpha 0.5) nên tên đậm hơn một chút; số máu đã được đẩy lên trên đồng nên không chồng số thật. Chưa sửa vì chưa biết tác giả thấy có khó đọc không — chờ tác giả nhìn `anh/2-12-2.png`, `anh/2-12-3.png`; nếu khó đọc thì bỏ tên trên bóng, chỉ giữ số máu. → **xong ở review vòng 2**: tác giả chốt bỏ tên trên bóng; số máu dời xuống góc dưới–trái trong ô (vị trí "trên đồng" cũ rơi hẳn sang ô bên trên).
 - Chưa có test đọc vị trí nhãn của bóng (tên, số máu), vì đó là phần chỉ nhìn thấy bằng mắt: nếu sau này có test chạy được ở chế độ có cửa sổ thì thêm assert vị trí số máu khi `moved == false` (phải nằm trên đồng, không đè số thật). Đo pixel đã có trong Debug Log của story.
+
+### Vòng 2 (sau `f10d5d3`)
+
+- `BoardView.show_state` (`game/src/battle/board_view.gd:277`) xoá bóng xem trước nhưng không reset `BattleView._preview_cell`. Bất biến "memo == ô đang có bóng" hiện chỉ đúng nhờ `_finish_playback` reset memo ngay sau `playback_finished.emit()`; mọi chỗ gọi `show_state` giữa lượt thêm sau này sẽ làm bóng mất mà memo vẫn giữ ô → rê trong ô đó không hiện lại. Xử lý khi có lệnh gọi `show_state` ngoài luồng phát (hoặc khi BattleView nghe signal bàn-đổi).
+- (đã xử lý ở review vòng 2) Vị trí số máu của bóng nay có test: `test_preview_hp_label_stays_inside_its_cell` đọc tâm `Label` và đòi nằm trong `cell_rect` — revert cách đặt `hp_center` là test trượt.

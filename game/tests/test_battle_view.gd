@@ -1273,6 +1273,51 @@ func test_preview_shows_every_affected_unit() -> void:
 	assert_eq(_unit_at(main, Vector2i(5, 4)).hp, 2, "đánh thật: quân chắn còn 2 máu, khớp bóng")
 
 
+## Bóng của quân chết đuối nằm ở ô sông (ô cuối nó tới), không phải ô xuất phát — nhánh `last_cell` của
+## `_ghosts_of` (Story 2.12 review vòng 2; trước đó chỉ có bằng chứng ảnh, không có test).
+func test_preview_ghost_of_drowned_unit_sits_on_river_cell() -> void:
+	var main: Node2D = _make_level_main(HUY_DIR, HUY_LEVEL, {
+		"phien_ban_dinh_dang": 1,
+		"ten": "Thử xem trước chết đuối",
+		"kieu": "tieu_diet",
+		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . ~ . . . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"quan": [". . . . . . .", ". . 1 . . . .", ". . B . . . .", ". . . . . . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"thu_tu_dich": ["2,2"],
+		"tiep_vien": [],
+		"muu_ke_mo": [],
+	})
+	_press_physical(main, KEY_1)
+	_hover_by_mouse(main, Vector2i(2, 2))
+	var ghosts: Array[Dictionary] = _board(main).preview_view().ghosts()
+	assert_eq(ghosts.size(), 1, "một quân bị ảnh hưởng")
+	if ghosts.size() != 1:
+		return
+	assert_eq(ghosts[0]["cell"] as Vector2i, Vector2i(2, 3), "bóng ở ô sông, ô cuối nó tới")
+	assert_eq(ghosts[0]["hp"] as int, 0, "chết đuối thì máu 0")
+
+
+## Số máu của bóng luôn nằm trong ô của bóng, và mỗi bóng chỉ có một nhãn (không còn tên quân) — Story 2.12
+## review vòng 2: bản trước đặt số ở phía trên đồng, rơi hẳn sang ô bên trên mà không test nào bắt được.
+## Dùng trận va chạm vì cả hai bóng ở đây đều "đứng yên" (`moved == false`), đúng ca từng sai.
+func test_preview_hp_label_stays_inside_its_cell() -> void:
+	var main: Node2D = _make_push_collision_main()
+	_press_physical(main, KEY_1)
+	_hover_by_mouse(main, Vector2i(4, 4))
+	var preview: PreviewView = _board(main).preview_view()
+	var ghosts: Array[Dictionary] = preview.ghosts()
+	assert_eq(ghosts.size(), 2, "điều kiện trước: hai bóng")
+	var labels: Array[Node] = preview.get_children()
+	assert_eq(labels.size(), ghosts.size(), "mỗi bóng đúng một nhãn số máu")
+	for i: int in range(mini(labels.size(), ghosts.size())):
+		var cell: Vector2i = ghosts[i]["cell"] as Vector2i
+		var label: Label = labels[i] as Label
+		var center: Vector2 = label.position + label.size / 2.0
+		assert_true(BoardView.cell_rect(cell).has_point(center),
+			"số máu của bóng ở %s phải nằm trong ô của nó" % str(cell))
+
+
 ## Bóng mờ vẽ trên đồng quân nhưng dưới viền mục tiêu và số thứ tự đòn (Story 2.12, AC 6 / NFR9).
 func test_preview_layer_sits_above_tokens_below_numbers() -> void:
 	var main: Node2D = _make_attack_main()
