@@ -1,0 +1,380 @@
+diff --git a/game/src/battle/battle_controller.gd b/game/src/battle/battle_controller.gd
+index f2700d5..87be0c5 100644
+--- a/game/src/battle/battle_controller.gd
++++ b/game/src/battle/battle_controller.gd
+@@ -37,6 +37,18 @@ func snapshot() -> BattleState:
+ 	return _state.clone()
+ 
+ 
++## Chạy thử lệnh trên bản sao để xem trước kết quả (Story 2.12, ADR-005). Không đụng trạng thái sống, không phát
++## signal, không đổi bản chụp hủy. Lệnh bị từ chối (hoặc chưa có trận) thì null.
++func preview(command: Command) -> BattleState:
++	if _state == null:
++		return null
++	var copy: BattleState = _state.clone()
++	var events: Array[BattleEvent] = _resolve(copy, command)
++	if _rejection(events) != null:
++		return null
++	return copy
++
++
+ ## Chạy lệnh. Bị từ chối: state không đổi, bản chụp hủy giữ nguyên, không phát signal.
+ ## Làm hỏng bất biến: ghi log ERROR, quay về trước lệnh, phát rolled_back, trả [].
+ func submit(command: Command) -> Array[BattleEvent]:
+diff --git a/game/src/battle/battle_view.gd b/game/src/battle/battle_view.gd
+index 021c088..bd8b067 100644
+--- a/game/src/battle/battle_view.gd
++++ b/game/src/battle/battle_view.gd
+@@ -35,6 +35,10 @@ var _enemy_turn: bool = false
+ var _pending_enemy_turn: bool = false
+ ## Tăng mỗi lần start()/stop(): lượt phát của trận cũ không được vẽ lên trận mới (F5 giữa lúc phát).
+ var _playback_generation: int = 0
++## Ô đang được xem trước kết quả đòn; NO_CELL là chưa tính (Story 2.12, AC 4).
++var _preview_cell: Vector2i = BoardView.NO_CELL
++## Số lần đã tính xem trước (để test AC 4: rê trong cùng ô không tính lại).
++var _preview_count: int = 0
+ 
+ 
+ func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = null) -> void:
+@@ -64,6 +68,7 @@ func start(controller: BattleController) -> void:
+ 	_playing = false
+ 	_enemy_turn = false
+ 	_pending_enemy_turn = false
++	_preview_cell = BoardView.NO_CELL
+ 	_hud.set_locked(false)
+ 	_deselect()
+ 	_update_hud()
+@@ -113,6 +118,11 @@ func is_playing() -> bool:
+ 	return _playing
+ 
+ 
++## Số lần đã tính bản xem trước (để test AC 4).
++func preview_computations() -> int:
++	return _preview_count
++
++
+ ## Phát lại sự kiện của lệnh này (để test).
+ func event_player() -> EventPlayer:
+ 	return _player
+@@ -240,7 +250,10 @@ func _finish_playback(snapshot: BattleState, generation: int) -> void:
+ 	# vừa dời có thể đã che ô đang trỏ (Story 2.10 review).
+ 	if _input != null:
+ 		_input.refresh_hover()
+-	_update_info(_input.hovered_cell() if _input != null else BoardView.NO_CELL)
++	_preview_cell = BoardView.NO_CELL
++	var hovered: Vector2i = _input.hovered_cell() if _input != null else BoardView.NO_CELL
++	_update_info(hovered)
++	_update_preview(hovered)
+ 
+ func _on_cell_hovered(cell: Vector2i) -> void:
+ 	# Đang phát thì khung thông tin đứng yên: bản chụp đã là trạng thái sau lệnh, đọc nó lúc này sẽ tả ô mà
+@@ -248,12 +261,67 @@ func _on_cell_hovered(cell: Vector2i) -> void:
+ 	if _playing:
+ 		return
+ 	_update_info(cell)
++	_update_preview(cell)
+ 	if _controller == null or _selected == NONE or not _cells.has(cell):
+ 		_board.show_path([])
+ 		return
+ 	_board.show_path(_controller.path_to(_selected, cell))
+ 
+ 
++## Bóng mờ kết quả đòn khi rê lên mục tiêu đánh được (Story 2.12). Chỉ tính lại khi ĐỔI ô (AC 4); đang phát
++## hoạt ảnh thì không tính, vì bản chụp đã là trạng thái sau lệnh.
++func _update_preview(cell: Vector2i) -> void:
++	if _board == null:
++		return
++	if _playing or _controller == null or _selected == NONE or not _targets.has(cell):
++		_clear_preview()
++		return
++	if cell == _preview_cell:
++		return
++	_preview_cell = cell
++	_preview_count += 1
++	var before: BattleState = _controller.snapshot()
++	var after: BattleState = _controller.preview(Command.attack(_selected, cell))
++	if after == null:
++		_board.preview_view().clear()
++		return
++	_board.preview_view().show_ghosts(_ghosts_of(before, after))
++
++
++func _clear_preview() -> void:
++	_preview_cell = BoardView.NO_CELL
++	if _board != null:
++		_board.preview_view().clear()
++
++
++## Chênh lệch hai bản chụp thành danh sách bóng: quân đổi ô hoặc mất máu hiện ở vị trí cuối với máu sau đòn;
++## quân biến mất hiện ở ô cũ với máu 0 (Story 2.12).
++func _ghosts_of(before: BattleState, after: BattleState) -> Array[Dictionary]:
++	var ghosts: Array[Dictionary] = []
++	for unit: Unit in after.units:
++		var old: Unit = before.unit_by_id(unit.id)
++		if old == null:
++			continue
++		if old.cell == unit.cell and old.hp == unit.hp:
++			continue
++		ghosts.append(_ghost(unit.cell, unit, after))
++	for unit: Unit in before.units:
++		if after.unit_by_id(unit.id) == null:
++			ghosts.append(_ghost(unit.cell, unit, before, 0))
++	return ghosts
++
++
++func _ghost(cell: Vector2i, unit: Unit, state: BattleState, hp: int = -1) -> Dictionary:
++	var lift: float = BoardView.surface_height(state.terrain_at(cell))
++	return {
++		"cell": cell,
++		"pos": BoardView.cell_center(cell) - Vector2(0.0, lift),
++		"type": unit.type,
++		"hp": unit.hp if hp < 0 else hp,
++		"faction": unit.faction,
++	}
++
++
+ ## Khung thông tin và ô đỏ nổi bật theo ô đang trỏ (Story 2.10). Chỉ đọc bản chụp.
+ func _update_info(cell: Vector2i) -> void:
+ 	if _controller == null or _board == null:
+@@ -315,6 +383,7 @@ func _telegraph_cells_of(unit: Unit, state: BattleState) -> Array[Vector2i]:
+ 
+ ## Ẩn khung thông tin và bỏ nổi bật ô đỏ (hết trận, dừng trận).
+ func _hide_info() -> void:
++	_clear_preview()
+ 	if _tooltip != null:
+ 		_tooltip.hide_tooltip()
+ 	if _board != null:
+@@ -348,6 +417,7 @@ func _battle_over() -> bool:
+ 
+ 
+ func _deselect() -> void:
++	_clear_preview()
+ 	_selected = NONE
+ 	_cells = []
+ 	_targets = []
+diff --git a/game/src/battle/board_view.gd b/game/src/battle/board_view.gd
+index 452805a..c597304 100644
+--- a/game/src/battle/board_view.gd
++++ b/game/src/battle/board_view.gd
+@@ -93,6 +93,7 @@ var _world: Node2D
+ var _target_layer: Node2D
+ ## Ô đỏ báo đòn (dưới đồng quân) và lớp số thứ tự của nó (trên cùng, trừ F1) (Story 2.7).
+ var _telegraph: TelegraphView
++var _preview: PreviewView
+ ## id quân -> UnitToken
+ var _tokens: Dictionary = {}
+ ## Tướng đang chọn: ô của nó (NO_CELL là không chọn), các ô sáng, đường đi đang vẽ (không gồm ô tướng).
+@@ -256,6 +257,10 @@ func _ready() -> void:
+ 	_world = Node2D.new()
+ 	_world.y_sort_enabled = true
+ 	add_child(_world)
++	# Bóng mờ xem trước đòn (Story 2.12): trên đồng quân, dưới viền mục tiêu và lớp số thứ tự đòn.
++	_preview = PreviewView.new()
++	add_child(_preview)
++	add_child(Node2D.new())
+ 	_target_layer = Node2D.new()
+ 	_target_layer.draw.connect(_draw_targets)
+ 	add_child(_target_layer)
+@@ -269,6 +274,8 @@ func show_state(state: BattleState) -> void:
+ 		setup(state.size.x, state.size.y)
+ 	else:
+ 		clear_selection()
++	# Bàn đổi thì bóng xem trước của lệnh cũ không còn nghĩa.
++	_preview.clear()
+ 	_rebuild_terrain()
+ 	_sync_tokens()
+ 	_telegraph.show_state(state)
+@@ -280,6 +287,11 @@ func telegraph_view() -> TelegraphView:
+ 	return _telegraph
+ 
+ 
++## Bóng mờ xem trước đòn (Story 2.12).
++func preview_view() -> PreviewView:
++	return _preview
++
++
+ ## Đồng quân đang hiện, theo id.
+ func tokens() -> Dictionary:
+ 	return _tokens
+diff --git a/game/src/battle/preview_view.gd b/game/src/battle/preview_view.gd
+new file mode 100644
+index 0000000..a044f2e
+--- /dev/null
++++ b/game/src/battle/preview_view.gd
+@@ -0,0 +1,78 @@
++class_name PreviewView
++extends Node2D
++## Bóng mờ kết quả đòn (Story 2.12, FR41): vị trí cuối + số máu sau đòn của mọi quân bị ảnh hưởng.
++## Chỉ nhận dữ liệu hiển thị đã tính sẵn (`pos`, `type`, `hp`, `faction`, `cell`): không đọc trạng thái sống,
++## không sửa gì. BoardView đặt nó sau lớp đồng quân và trước lớp số thứ tự đòn, để ô đỏ + số vẫn nổi nhất (NFR9).
++
++const GHOST_ALPHA: float = 0.5
++const NAME_FONT_SIZE: int = 15
++const HP_FONT_SIZE: int = 12
++const OUTLINE_SIZE: int = 6
++
++var _ghosts: Array[Dictionary] = []
++
++
++## Vẽ bóng cho danh sách quân; danh sách rỗng là xóa hết.
++func show_ghosts(ghosts: Array[Dictionary]) -> void:
++	_clear_labels()
++	_ghosts = ghosts.duplicate(true)
++	for ghost: Dictionary in _ghosts:
++		_add_labels(ghost)
++	queue_redraw()
++
++
++func clear() -> void:
++	if _ghosts.is_empty():
++		return
++	_ghosts = []
++	_clear_labels()
++	queue_redraw()
++
++
++## Bóng đang hiện (để test).
++func ghosts() -> Array[Dictionary]:
++	return _ghosts.duplicate(true)
++
++
++func _clear_labels() -> void:
++	for child: Node in get_children():
++		child.queue_free()
++
++
++func _add_labels(ghost: Dictionary) -> void:
++	var pos: Vector2 = ghost.get("pos", Vector2.ZERO) as Vector2
++	var center: Vector2 = pos + Vector2(0.0, -UnitToken.TOKEN_LIFT)
++	var type: int = ghost.get("type", 0) as int
++	var hp: int = ghost.get("hp", 0) as int
++	var text_color: Color = Color(1.0, 0.95, 0.80, GHOST_ALPHA)
++	if not UnitToken.NAME_KEYS.has(type):
++		return
++	_add_label(tr(UnitToken.NAME_KEYS[type] as String), center, NAME_FONT_SIZE, text_color)
++	_add_label(str(hp), center + UnitToken.HP_OFFSET, HP_FONT_SIZE, Color(1.0, 1.0, 1.0, GHOST_ALPHA))
++
++
++func _add_label(text: String, center: Vector2, font_size: int, color: Color) -> void:
++	var label: Label = Label.new()
++	label.text = text
++	label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
++	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
++	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
++	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
++	label.add_theme_font_size_override("font_size", font_size)
++	label.add_theme_color_override("font_color", color)
++	label.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.05, GHOST_ALPHA))
++	label.add_theme_constant_override("outline_size", OUTLINE_SIZE)
++	label.size = Vector2(UnitToken.RADIUS * 2.0, font_size * 1.6)
++	label.position = center - label.size / 2.0
++	add_child(label)
++
++
++func _draw() -> void:
++	for ghost: Dictionary in _ghosts:
++		var pos: Vector2 = ghost.get("pos", Vector2.ZERO) as Vector2
++		var faction: int = ghost.get("faction", Unit.Faction.NGUYEN) as int
++		var color: Color = UnitToken.DAI_VIET_COLOR if faction == Unit.Faction.DAI_VIET else UnitToken.NGUYEN_COLOR
++		color.a = GHOST_ALPHA
++		draw_circle(pos + Vector2(0.0, -UnitToken.TOKEN_LIFT), UnitToken.RADIUS, color)
++		draw_arc(pos + Vector2(0.0, -UnitToken.TOKEN_LIFT), UnitToken.RADIUS, 0.0, TAU, 32,
++			Color(1.0, 1.0, 1.0, GHOST_ALPHA), 2.0)
+diff --git a/game/src/battle/preview_view.gd.uid b/game/src/battle/preview_view.gd.uid
+new file mode 100644
+index 0000000..d79605b
+--- /dev/null
++++ b/game/src/battle/preview_view.gd.uid
+@@ -0,0 +1 @@
++uid://bh7tnowr5ew1n
+diff --git a/game/tests/test_battle_controller.gd b/game/tests/test_battle_controller.gd
+index 2369b7a..8360c7b 100644
+--- a/game/tests/test_battle_controller.gd
++++ b/game/tests/test_battle_controller.gd
+@@ -349,3 +349,31 @@ func test_begin_runs_enemy_prepare_once_and_emits() -> void:
+ 	assert_false(controller.can_undo(), "mở trận không để lại gì để hủy")
+ 	assert_eq(BattleController._describe(Command.begin_battle()), "mở trận", "câu log của lệnh")
+ 
++
++
++## Xem trước chạy trên bản sao: không đổi trạng thái sống, không phát signal, không tạo bản chụp hủy (Story 2.12).
++func test_preview_does_not_touch_live_state() -> void:
++	var c: BattleController = _attack_controller()
++	var before: Array[String] = BoardFixture.picture(c.snapshot())
++	var preview: BattleState = c.preview(Command.attack(1, Vector2i(3, 3)))
++	assert_not_null(preview, "đòn hợp lệ thì có bản xem trước")
++	assert_eq(BoardFixture.picture(c.snapshot()), before, "trạng thái sống không đổi")
++	assert_false(c.can_undo(), "xem trước không tạo bản chụp hủy")
++	assert_eq(_events_seen.size(), 0, "xem trước không phát signal")
++
++
++## Bản xem trước khớp đúng kết quả khi thật sự ra đòn (Story 2.12, AC 2).
++func test_preview_matches_real_attack() -> void:
++	var c: BattleController = _attack_controller()
++	var preview: BattleState = c.preview(Command.attack(1, Vector2i(3, 3)))
++	assert_not_null(preview)
++	var expected: Array[String] = BoardFixture.picture(preview)
++	c.submit(Command.attack(1, Vector2i(3, 3)))
++	assert_eq(BoardFixture.picture(c.snapshot()), expected, "kết quả thật khớp bản xem trước")
++
++
++## Đòn không hợp lệ thì không có bản xem trước (Story 2.12).
++func test_preview_returns_null_for_rejected_command() -> void:
++	var c: BattleController = _attack_controller()
++	assert_null(c.preview(Command.attack(1, Vector2i(6, 4))), "ngoài tầm thì không xem trước")
++	assert_null(c.preview(Command.attack(2, Vector2i(3, 3))), "tướng ở xa cũng vậy")
+diff --git a/game/tests/test_battle_view.gd b/game/tests/test_battle_view.gd
+index 9076d15..fce557f 100644
+--- a/game/tests/test_battle_view.gd
++++ b/game/tests/test_battle_view.gd
+@@ -1137,6 +1137,50 @@ func _banner(main: Node2D) -> ResultBanner:
+ 	return main._result_banner as ResultBanner
+ 
+ 
++## Rê lên mục tiêu đánh được thì hiện bóng mờ ở vị trí cuối + máu sau đòn; rời ra thì mất (Story 2.12).
++func test_preview_ghosts_show_on_attack_target() -> void:
++	var main: Node2D = _make_attack_main()
++	_press_physical(main, KEY_1)
++	_hover_by_mouse(main, Vector2i(3, 3))
++	var ghosts: Array[Dictionary] = _board(main).preview_view().ghosts()
++	assert_false(ghosts.is_empty(), "rê lên mục tiêu thì có bóng")
++	assert_eq(ghosts[0]["cell"], Vector2i(3, 2), "bóng ở ô quân bị đẩy tới")
++	assert_eq(ghosts[0]["hp"], 1, "bóng ghi máu sau đòn")
++	_hover_by_mouse(main, Vector2i(0, 0))
++	assert_true(_board(main).preview_view().ghosts().is_empty(), "rời mục tiêu thì bóng mất")
++
++
++## Xem trước chỉ tính lại khi đổi ô trỏ chuột (Story 2.12, AC 4).
++func test_preview_recomputes_only_when_target_changes() -> void:
++	var main: Node2D = _make_attack_main()
++	_press_physical(main, KEY_1)
++	_view(main)._on_cell_hovered(Vector2i(3, 3))
++	var first: int = _view(main).preview_computations()
++	_view(main)._on_cell_hovered(Vector2i(3, 3))
++	assert_eq(_view(main).preview_computations(), first, "rê trong cùng ô không tính lại")
++	_view(main)._on_cell_hovered(Vector2i(4, 4))
++	assert_eq(_view(main).preview_computations(), first + 1, "đổi sang mục tiêu khác thì tính lại một lần")
++	_view(main)._on_cell_hovered(Vector2i(0, 0))
++	assert_eq(_view(main).preview_computations(), first + 1, "ô không đánh được thì không tính")
++	assert_true(_board(main).preview_view().ghosts().is_empty(), "không phải mục tiêu thì không có bóng")
++
++
++## Bấm đánh thật thì kết quả khớp bóng đã hiện (Story 2.12, AC 2).
++func test_preview_matches_real_attack() -> void:
++	var main: Node2D = _make_attack_main()
++	_press_physical(main, KEY_1)
++	_hover_by_mouse(main, Vector2i(3, 3))
++	var ghosts: Array[Dictionary] = _board(main).preview_view().ghosts()
++	assert_false(ghosts.is_empty(), "điều kiện trước: đang có bóng xem trước")
++	var ghost_hp: int = ghosts[0]["hp"] as int
++	_click_by_mouse(main, Vector2i(3, 3))
++	var pushed: Unit = _unit_at(main, Vector2i(3, 2))
++	assert_not_null(pushed, "quân bị đẩy tới đúng ô bóng đã chỉ")
++	if pushed != null:
++		assert_eq(pushed.hp, ghost_hp, "máu sau đòn khớp bóng")
++	assert_true(_board(main).preview_view().ghosts().is_empty(), "đánh xong thì bóng biến mất")
++
++
+ ## Đang phát hoạt ảnh thì lệnh mới bị bỏ qua (Story 2.11, AC 3).
+ func test_commands_ignored_while_animation_plays() -> void:
+ 	var main: Node2D = _make_attack_main()

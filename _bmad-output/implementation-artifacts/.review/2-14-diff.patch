@@ -1,0 +1,560 @@
+diff --git a/_bmad-output/implementation-artifacts/2-14-hoan-thien-tran-1-va-moc-tu-choi-het-e2.md b/_bmad-output/implementation-artifacts/2-14-hoan-thien-tran-1-va-moc-tu-choi-het-e2.md
+new file mode 100644
+index 0000000..ebbd1f8
+--- /dev/null
++++ b/_bmad-output/implementation-artifacts/2-14-hoan-thien-tran-1-va-moc-tu-choi-het-e2.md
+@@ -0,0 +1,190 @@
++---
++baseline_commit: 898098c
++---
++
++# Story 2.14: Hoàn thiện trận 1 và mốc tự chơi hết E2
++
++Status: review
++
++## Story
++
++Là tác giả,
++tôi muốn trận 1 đã có lời giải được kiểm chứng,
++để biết trận này giải được và dạy đúng luật.
++
++## Acceptance Criteria
++
++1. **Cho** AI đề xuất bố cục cuối của trận 1 (2 tướng; dạy né ô đỏ và đẩy xuống sông) **thì** kèm theo một lời giải không mất tướng, ghi theo từng hiệp vào `data/tran/tran_01_loi_giai.md` (FR43).
++2. **Khi** tác giả đánh lại đúng lời giải đó **thì** thắng và không mất tướng nào.
++3. **Và** lời giải được chuyển ngay thành kịch bản tự động trong `tests/kich_ban/tran/`; từ đó mỗi lần chạy `tools/test.sh` đều kiểm tra trận này còn giải được không mất tướng.
++4. **Và** bản mới được deploy lên itch (riêng tư).
++5. **Và** mốc tự chơi hết E2 (khoảng tuần 7): nếu tác giả thấy chán thì sửa luật trước khi sang E3.
++
++## Tasks / Subtasks
++
++- [x] **Task 1: Khảo sát và đề xuất bố cục cuối** (AC: 1)
++  - [x] 1.1 Chạy thử trận hiện tại (`tools/chay.sh --tran=1`, hoặc mô phỏng bằng script): ghi lại nó đang dạy gì, chỗ nào quá dễ/khó, hiệp nào buộc phải né ô đỏ, hiệp nào buộc phải đẩy xuống sông.
++  - [x] 1.2 Viết đề xuất bố cục trong Completion Notes: bàn chữ (`dia_hinh` + `quan`), `thu_tu_dich`, và với mỗi hiệp của lời giải nói rõ **nó dạy luật gì**. Điều kiện: 2 tướng; có ít nhất một chỗ buộc né đòn đã báo, một chỗ buộc đẩy quân Nguyên xuống sông; **không mất tướng nào**. **Dừng, chờ tác giả duyệt (Câu hỏi 1)** trước khi sửa file trận.
++  - [x] 1.3 Nếu tác giả duyệt: sửa `game/data/tran/tran_01.json`; chạy `tools/test.sh` (nhiều test nạp thật file này: `test_real_levels_are_valid`, `test_real_level_1_loads`, `test_main`).
++
++- [x] **Task 2: Lời giải không mất tướng + kiểm chứng bằng máy** (AC: 1, 2)
++  - [x] 2.1 Viết script tạm (xoá sau khi xong) chạy lời giải qua `BattleController` trên đúng `tran_01.json` + `chi_so.json`: `start` → `begin()` (pha chuẩn bị hiệp 1) → các lệnh của lời giải (gồm `ket_thuc_luot` giữa các hiệp) → in từng hiệp: lệnh, sự kiện đáng chú ý, máu còn lại, trạng thái đòn đã báo.
++  - [x] 2.2 Điều kiện đạt: kết cục `WON` và **cả 2 tướng còn sống** (không tướng nào gục ở bất kỳ hiệp nào). Không đạt thì sửa lời giải, cùng lắm sửa bố cục — không hạ yêu cầu.
++  - [x] 2.3 Giữ script này ở dạng test thật nếu gọn (ví dụ `test_tran_01_solvable.gd` chạy lời giải và khẳng định thắng + đủ tướng); nếu không, kịch bản ở Task 4 là đủ.
++
++- [x] **Task 3: Ghi lời giải cho tác giả** (AC: 1, 2)
++  - [x] 3.1 `game/data/tran/tran_01_loi_giai.md`: mở đầu bằng mục tiêu ("thắng, không mất tướng"), bàn đầu trận (hai lớp `dia_hinh`/`quan` dạng chữ như file trận), rồi **từng hiệp**: bàn đầu hiệp, lệnh của người chơi (bấm gì, ở ô nào), đòn quân Nguyên ra trong hiệp, máu còn lại, và một câu "hiệp này dạy: …".
++  - [x] 3.2 Viết theo cách tác giả làm theo được bằng tay: ô ghi `cột,hàng` (0-based như F1), phím/bấm nêu rõ.
++  - [x] 3.3 Đối chiếu lời giải trong tài liệu với lời giải đã chạy ở Task 2 — cùng một chuỗi lệnh, không lệch.
++
++- [x] **Task 4: Kịch bản tự động** (AC: 3)
++  - [x] 4.1 Sinh `game/tests/kich_ban/tran/tran_01_loi_giai.json`:
++    - `truoc` = bàn **người chơi thấy ở đầu hiệp 1**, tức sau pha chuẩn bị (gọi `begin()` rồi lấy bản chụp). Lấy lớp chữ bằng `BugReport.before_layers(state)` (Story 2.13) thay vì chép tay, rồi bỏ `thu_tu_dich` nếu bộ nạp không cần — kiểm bằng `tools/test.sh`.
++    - `hanh_dong` = toàn bộ lệnh của lời giải, đúng thứ tự, gồm `ket_thuc_luot`.
++    - `sau` = bàn cuối: `quan` còn đủ 2 tướng (`1`, `2`), không còn quân Nguyên; thêm `ket_qua: "thang"` (định dạng `sau` hỗ trợ từ Story 2.13).
++    - `da_duyet: true` **chỉ sau khi tác giả duyệt lời giải**; trước đó để `false` và ghi rõ trong story.
++  - [x] 4.2 `tools/test.sh` xanh; kịch bản mới được `ScenarioLoader.list_files("res://tests/kich_ban")` nhặt tự động (không cần đăng ký).
++  - [x] 4.3 Kiểm ngược: sửa một lệnh trong `hanh_dong` (hoặc bỏ một `ket_thuc_luot`) → kịch bản phải **trượt**; khôi phục → xanh. Ghi bằng chứng vào Debug Log.
++
++- [ ] **Task 5: Tác giả đánh lại bằng tay** (AC: 2)
++  - [ ] 5.1 Hướng dẫn trong Completion Notes: `tools/chay.sh --tran=1`, làm đúng `tran_01_loi_giai.md`, thấy bảng **Thắng** và không mất tướng nào. **Chờ tác giả chạy.**
++  - [ ] 5.2 Ghi nhận kết quả tác giả báo lại (nếu chưa kịp thì ghi "chờ tác giả", không đánh [x] khi chưa có).
++
++- [ ] **Task 6: Deploy itch (riêng tư)** (AC: 4)
++  - [ ] 6.1 **CHẶN:** `tools/itch.cfg` vẫn là `<đã điền hay chưa?>` — chưa deploy được. Cần tác giả điền `ITCH_TARGET=<tài khoản>/<trang>`.
++  - [ ] 6.2 Khi đã có: `tools/build_web.sh` rồi `tools/deploy_itch.sh`; giữ trang ở chế độ riêng tư (script không tự đổi hiển thị). Ghi link trong Completion Notes.
++  - [ ] 6.3 Nếu chưa có trang: ghi rõ "chặn: chưa cấu hình itch", không tự tạo trang.
++
++- [ ] **Task 7: Mốc tự chơi hết E2** (AC: 5)
++  - [ ] 7.1 **Chờ tác giả:** tự chơi từ trận 1 tới hết nội dung E2 (hiện có trận 1) và trả lời: có chán không, luật nào cần sửa trước E3.
++  - [ ] 7.2 Ghi câu trả lời vào Change Log; nếu có luật phải sửa thì mở story sửa luật, chưa sang E3.
++
++## Dev Notes
++
++### Hiện trạng liên quan (đọc trước khi sửa)
++
++- `game/data/tran/tran_01.json`: 7×7, `kieu: tieu_diet`, sông ở **cột 3** (hàng 0–2 và 4–6), 3 Bộ binh ở `(1,0)`, `(5,0)`, `(5,4)`; hai tướng Khoái `(0,6)`, Lão `(2,6)`; `thu_tu_dich: ["1,0", "5,0", "5,4"]`. Đây là bàn mà Story 1.2 dựng; chưa có lời giải nào.
++- `game/data/chi_so.json`: Khoái 3 máu, đi 3, sát thương 2, **đẩy 1**; Lão 3 máu, đi 3, sát thương 1, lao gần 2 / xa 4; Bộ binh 3 máu, đi 2, sát thương 1. Không có Kỵ binh/Cung kỵ trong trận 1.
++- `game/data/tran/`: các trận thử (`thu_*`) dùng cho test; **đừng sửa** chúng cho story này.
++- `game/tests/kich_ban/`: 12 nhóm hiện có, **chưa có `tran/`**. `ScenarioLoader.list_files("res://tests/kich_ban")` quét đệ quy nên thư mục mới tự được chạy.
++- `game/src/data/scenario_loader.gd`: `truoc` nhận `dia_hinh`, `quan`, `mau`, `thu_tu_dich`, `bao_don` — **không** có `hiep`/`da_di`/`da_danh`; `sau` nhận thêm `hiep`, `da_di`, `da_danh`, `ket_qua`, `bao_don`, `o_do`.
++- `game/src/debug/bug_report.gd` (Story 2.13): `before_layers(state)` / `after_layers(state)` in ra đúng các lớp chữ của kịch bản — dùng để sinh `truoc`/`sau` thay vì chép tay 7 dòng × 7 cột.
++- `game/src/core/rules_enemy_phase.gd`: `begin_battle` là pha chuẩn bị hiệp 1 (quân Nguyên đi + báo đòn); **kịch bản không có lệnh này**, nên `truoc` phải là bàn **sau** pha đó (bàn người chơi thấy khi mở trận).
++- `game/src/core/battle_state.gd`: `kieu: tieu_diet` → thắng khi hết quân Nguyên (`phase = WON`); tướng gục không làm thua ngay, chỉ thua khi **mọi** tướng gục — nên "không mất tướng" là điều kiện của lời giải, không phải của luật.
++- `tools/deploy_itch.sh`: cần `tools/itch.cfg` có `ITCH_TARGET=<tài khoản>/<trang>`, đã đăng nhập butler, và `build/web/` có bản build. Hiện `ITCH_TARGET` vẫn là chỗ trống.
++
++### Luật kiến trúc phải theo
++
++- Không sửa `src/core/` cho story này. Nếu thấy luật phải đổi mới giải được thì **dừng, hỏi tác giả** — đó là story sửa luật riêng.
++- Trận 1 là **dữ liệu**, không phải code: chỉ sửa `game/data/tran/tran_01.json` (+ tài liệu lời giải + kịch bản test).
++- Kịch bản luật là **spec**: `da_duyet: true` chỉ khi tác giả đã duyệt lời giải; đã duyệt rồi thì không được sửa để test xanh.
++- Mọi test chạy qua `main.tscn`/headless; `tools/test.sh` là lệnh duy nhất.
++- Đi xuống gọi hàm, đi lên phát signal — story này không thêm code UI.
++
++### Cách dựng `truoc`/`sau` cho kịch bản (để dev không phải đoán)
++
++1. `BattleController.start(level, stats)` rồi `begin()` → `snapshot()` là bàn người chơi thấy ở hiệp 1.
++2. `BugReport.before_layers(snapshot)` → `dia_hinh`, `quan`, `mau`, `thu_tu_dich`, `bao_don` (nếu có). Bỏ `thu_tu_dich` nếu bộ nạp cảnh báo (nó là khóa hợp lệ của `truoc`, giữ được thì tốt vì giữ id quân Nguyên).
++3. Chạy lời giải trên controller; `snapshot()` cuối → `BugReport.after_layers(snapshot)` cho `sau`, thêm `"ket_qua": BugReport.outcome(snapshot)`.
++4. `hanh_dong`: `{"lenh": "di"|"danh", "tuong": "1"|"2", "o": "cột,hàng"}`, `{"lenh": "ket_thuc_luot"}`. Không có `huy` nếu lời giải không hủy nước nào (khuyến khích: lời giải sạch, không cần hủy).
++5. Kiểm: `tools/test.sh` chạy kịch bản; `ScenarioRunner` so bàn cuối với `sau` (ô, máu, tướng còn sống, `ket_qua`).
++
++### Testing
++
++- `tools/test.sh` là lệnh duy nhất; trong phiên AI có sandbox: `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh`.
++- Chạy một file: `.tools/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64 --headless --path game -s res://addons/gut/gut_cmdln.gd -gtest=res://tests/test_scenarios.gd -gexit`
++- **Bẫy của story này:** (a) kịch bản `truoc` lấy bàn TRƯỚC `begin()` → lời giải lệch ngay từ hiệp 1; (b) lời giải "thắng" nhưng có tướng gục — phải kiểm máu/còn tướng ở **mọi** hiệp, không chỉ kết cục; (c) `da_duyet: true` trước khi tác giả duyệt; (d) quên `ket_thuc_luot` giữa các hiệp.
++- Kiểm ngược (bài học 2.12/2.13): sửa một lệnh hoặc bỏ một `ket_thuc_luot` → kịch bản phải trượt.
++
++### Previous Story Intelligence (2.13, 2.12, 2.11)
++
++- 2.13: `BugReport.before_layers`/`after_layers`/`outcome` dựng đúng lớp chữ của kịch bản — dùng lại, đừng viết lại. Báo cáo F2 cũng là cách nhanh nhất để lấy một bàn chữ từ game thật; nhớ nó in cả khối JSON.
++- 2.13: `sau` chỉ ghi `bao_don` khi **mọi** đòn ghi được; đừng chép tay `bao_don`.
++- 2.12: kịch bản phát lại phải so cả **đòn đã báo** và `ket_qua`, không chỉ quân.
++- 2.11: `begin()` phát hoạt ảnh; script headless dùng `_player.instant` hoặc gọi thẳng controller (không cần view).
++- 1.2/1.9: `tran_01.json` là bàn mẫu của test nạp dữ liệu; đổi bố cục vẫn phải hợp lệ (có tướng, có quân Nguyên, ô đi được).
++
++### Git Intelligence
++
++- `898098c Sửa theo code review Story 2.13: kịch bản trong báo cáo F2 luôn phát lại được (Story 2.13)`
++- `bb104e2 F2 sao chép báo lỗi: kịch bản tái hiện, thông báo, 21 test (Story 2.13)`
++- `6030532 Sửa theo code review vòng 2 ... (Story 2.12)`
++
++### Project Context Rules
++
++- Godot 4.7.2, GDScript tĩnh kiểu, GUT 9.7.1.
++- Kịch bản luật là spec; `da_duyet` chỉ do tác giả chốt; cấm sửa kịch bản đã duyệt để test xanh.
++- Chữ hiển thị qua `tr()`; story này không thêm chữ UI (tài liệu lời giải là tiếng Việt thường).
++- Commit khi `tools/test.sh` xanh, lời commit tiếng Việt.
++
++### Câu hỏi cho tác giả (chốt trước khi sửa file trận)
++
++1. **Bố cục:** giữ khung 7×7 + sông cột 3 + 3 Bộ binh như hiện tại và chỉ tinh chỉnh vị trí/`thu_tu_dich`, hay thiết kế lại từ đầu? (Đề xuất: giữ khung, vì nó đã có sông giữa bàn và hai tướng; chỉ đổi vị trí để lời giải buộc dùng cả "né ô đỏ" lẫn "đẩy xuống sông".)
++2. **itch:** `tools/itch.cfg` chưa điền — bạn đã có trang itch riêng chưa? Nếu chưa, story dừng ở bước build và ghi "chặn: chưa cấu hình itch", không tự tạo trang.
++3. **Độ dài lời giải:** bao nhiêu hiệp là chấp nhận được? (Đề xuất 3–5 hiệp; dài hơn thì người chơi mới mệt và khó làm theo bằng tay.)
++
++### References
++
++- `_bmad-output/planning-artifacts/epics.md` Story 2.14 (dòng ~884–905), FR43 (dòng 93, 167), phạm vi E2 (dòng 199).
++- `_bmad-output/planning-artifacts/game-architecture.md`: cây `data/tran/` và `tests/kich_ban/`, mục kịch bản luật; quy trình M3 (dòng ~797).
++- `_bmad-output/project-context.md`: quy trình M3, `da_duyet`, test một lệnh.
++- `game/data/tran/tran_01.json`, `game/data/chi_so.json`, `game/src/data/scenario_loader.gd`, `game/src/debug/bug_report.gd`, `game/src/core/rules_enemy_phase.gd`, `game/tests/scenario_runner.gd`, `tools/deploy_itch.sh`, `tools/itch.cfg`.
++
++## Dev Agent Record
++
++### Agent Model Used
++
++deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
++
++### Debug Log References
++
++- `tools/test.sh`: **618/618 đạt**, 81 kịch bản đã duyệt; kịch bản mới `tran/tran_01_loi_giai.json` hiện **1 chưa duyệt (0 chưa đạt)** — phát lại đúng, chờ tác giả duyệt.
++- Đổi bố cục trận 1 làm **14 test trượt** (các test ghi nhớ bàn mở màn trận 1: ô sáng của Khoái/Lão, đường đi tới `2,5`, vị trí đồng quân 101). Đã cập nhật đúng theo bàn mới; chạy lại 618/618.
++- Tìm lời giải bằng beam search (script tạm, đã xoá): thắng ở **hiệp 3**, cả hai tướng còn 3 máu. Chạy lại bằng `BattleController` thật để in sự kiện từng lệnh.
++- Kiểm ngược kịch bản: sửa một bước `danh 2 2,2` thành `3,2` và tạm đặt `da_duyet: true` → `test_scenarios` trượt đúng câu "bước 7: luật từ chối ... mà kịch bản không ghi tu_choi"; khôi phục → xanh.
++- **Chưa làm được:** deploy itch (`tools/itch.cfg` còn chỗ trống) và hai bước tác giả (đánh lại bằng tay, mốc E2).
++
++### Completion Notes List
++
++**Đề xuất bố cục cuối (Task 1.2) — tác giả đã chốt hướng "giữ khung, tinh chỉnh":**
++
++- Giữ bàn 7×7, sông cột 3 (hàng 3 đi được), hai tướng Khoái `0,6` — Lão `2,6`.
++- Dời **một** Bộ binh từ `1,0` xuống `2,4` (thứ tự quân Nguyên: `2,4`, `5,0`, `5,4`). Hiệp 1 nó đi xuống `2,5` và **báo đòn vào `2,6`** — đúng ô Lão, nên người chơi gặp ô đỏ ngay hiệp đầu; đồng thời nó đứng sát sông, mở ra bài "đẩy xuống sông" bằng một cú đẩy của Khoái.
++- Hai Bộ binh còn lại giữ nguyên `5,0`, `5,4`, tiến vào theo hướng đông.
++- Không đổi `chi_so.json` và không đụng `src/core/`.
++
++**Lời giải (3 hiệp, không mất tướng) — đã kiểm bằng máy:**
++
++| Hiệp | Lệnh | Kết quả |
++|---|---|---|
++| 1 | Khoái đi `1,5`, đánh `2,5`; Lão đi `2,5`; hết lượt | Bộ binh `2,5` bị đẩy xuống sông `3,5`, chết đuối; ô đỏ `2,6` bị hủy |
++| 2 | Khoái đi `2,4`, đánh `2,3`; Lão đánh `2,2`; hết lượt | Bộ binh `2,3` mất 2 máu, bị đẩy lên `2,2`, rồi trúng lao và gục |
++| 3 | Khoái đi `2,3`, đánh `3,3`; Lão đi `1,3`, đánh `4,3` | Quân cuối mất 2 máu, bị đẩy sang `4,3`, trúng lao và gục → **thắng** |
++
++Cả hai tướng còn 3 máu ở mọi hiệp. Bản đầy đủ cho người chơi: `game/data/tran/tran_01_loi_giai.md`.
++
++**Kịch bản tự động:** `game/tests/kich_ban/tran/tran_01_loi_giai.json` — `truoc` là bàn người chơi thấy ở hiệp 1 (sau pha chuẩn bị, có ô đỏ `2,5 → 2,6`), `hanh_dong` là 12 lệnh trên, `sau` là bàn thắng còn đủ hai tướng (`ket_qua: "thang"`). Đang để `da_duyet: false`: **tác giả đánh lại bằng tay xong thì đổi thành `true`** để kịch bản thành chốt chặn thật (khi đã duyệt, sửa một bước là `tools/test.sh` trượt — đã kiểm ngược).
++
++**Hướng dẫn tác giả tự test (AC 2):**
++
++1. `tools/chay.sh --tran=1`.
++2. Làm đúng `game/data/tran/tran_01_loi_giai.md` (3 hiệp, 12 lệnh).
++3. Thấy bảng **Thắng** và **không tướng nào gục** (cả hai cùng 3 máu).
++4. Nếu khớp: đổi `"da_duyet": false` → `true` trong `game/tests/kich_ban/tran/tran_01_loi_giai.json`, chạy `tools/test.sh` (vẫn 618/618, dòng kịch bản thành `82 đã duyệt`).
++5. Chơi chậm hơn (không hạ chủ đòn ở hiệp 1) để thấy ô đỏ giáng xuống và bài "né ô đỏ".
++
++**Deploy (AC 4): CHẶN.** `tools/itch.cfg` vẫn là `<đã điền hay chưa?>`. Tác giả điền `ITCH_TARGET=<tài khoản>/<trang>` rồi chạy `tools/build_web.sh` + `tools/deploy_itch.sh`; trang để riêng tư (script không tự đổi hiển thị). Chưa có trang thì ghi nhận chặn, không tự tạo.
++
++### File List
++
++- `game/data/tran/tran_01.json` (bố cục cuối: Bộ binh `2,4`, `5,0`, `5,4`; `thu_tu_dich` tương ứng)
++- `game/data/tran/tran_01_loi_giai.md` (mới — lời giải 3 hiệp cho tác giả)
++- `game/tests/kich_ban/tran/tran_01_loi_giai.json` (mới — kịch bản tự động, `da_duyet: false`)
++- `game/tests/test_battle_view.gd` (ô sáng/đường đi theo bàn mới; `LAO_TARGET` sang `1,4`)
++- `game/tests/test_main.gd` (vị trí đồng quân 101 ở `2,5`; số ô đi được 7 → 6)
++- `_bmad-output/implementation-artifacts/2-14-hoan-thien-tran-1-va-moc-tu-choi-het-e2.md`
++- `_bmad-output/implementation-artifacts/sprint-status.yaml`
++
++### Change Log
++
++- 2026-10-22: bố cục cuối trận 1 (dời một Bộ binh xuống `2,4` để hiệp 1 có ô đỏ + sát sông), lời giải 3 hiệp không mất tướng, kịch bản tự động `tran/tran_01_loi_giai.json`; 618/618 test. Chờ tác giả: đánh lại bằng tay (AC 2), duyệt kịch bản, deploy itch (AC 4 — chặn vì `itch.cfg`), mốc E2 (AC 5).
+diff --git a/_bmad-output/implementation-artifacts/sprint-status.yaml b/_bmad-output/implementation-artifacts/sprint-status.yaml
+index dac970e..14c19d3 100644
+--- a/_bmad-output/implementation-artifacts/sprint-status.yaml
++++ b/_bmad-output/implementation-artifacts/sprint-status.yaml
+@@ -75,7 +75,7 @@ development_status:
+   2-11-hoat-anh-phat-lai-su-kien: done
+   2-12-xem-truoc-ket-qua-don: done
+   2-13-f2-sao-chep-bao-loi: done
+-  2-14-hoan-thien-tran-1-va-moc-tu-choi-het-e2: backlog
++  2-14-hoan-thien-tran-1-va-moc-tu-choi-het-e2: review
+   2-15-cung-ky-cat-duoc-neu-tre: backlog
+   epic-2-retrospective: optional
+   epic-3: backlog
+diff --git a/game/data/tran/tran_01.json b/game/data/tran/tran_01.json
+index cce7ab0..cf512ec 100644
+--- a/game/data/tran/tran_01.json
++++ b/game/data/tran/tran_01.json
+@@ -12,15 +12,15 @@
+     ". . . ~ . . ."
+   ],
+   "quan": [
+-    ". B . . . B .",
++    ". . . . . B .",
+     ". . . . . . .",
+     ". . . . . . .",
+     ". . . . . . .",
+-    ". . . . . B .",
++    ". . B . . B .",
+     ". . . . . . .",
+     "1 . 2 . . . ."
+   ],
+-  "thu_tu_dich": ["1,0", "5,0", "5,4"],
++  "thu_tu_dich": ["2,4", "5,0", "5,4"],
+   "tiep_vien": [],
+   "muu_ke_mo": []
+ }
+diff --git a/game/data/tran/tran_01_loi_giai.md b/game/data/tran/tran_01_loi_giai.md
+new file mode 100644
+index 0000000..10b3fee
+--- /dev/null
++++ b/game/data/tran/tran_01_loi_giai.md
+@@ -0,0 +1,80 @@
++# Trận 1 — lời giải không mất tướng
++
++**Mục tiêu:** thắng (hạ hết 3 Bộ binh) mà **không tướng nào gục**. Cả hai tướng còn đủ 3 máu khi bảng Thắng hiện ra.
++
++**Cách đọc ô:** `cột,hàng`, gốc ở góc trên trái, tính từ 0 — giống F1 trong game. Bàn 7×7, sông ở **cột 3** (trừ hàng 3 đi được).
++
++**Lưu ý luật (dùng trong lời giải):**
++- **Khoái** đánh ô kề, 2 sát thương, **đẩy 1 ô** theo hướng đánh. Đẩy quân Nguyên xuống sông là nó chết đuối ngay.
++- **Lão** lao thẳng hàng, chỉ trúng quân ở cách **2–4 ô** (quân đứng sát hơn 2 ô không bị tính), 1 sát thương, không đẩy.
++- Tướng **đi xuyên qua tướng mình** được, nhưng không dừng trên ô có quân.
++- Ô đỏ là đòn quân Nguyên **đã báo**: hiệp sau, lúc bạn bấm Kết thúc lượt, đòn đó giáng xuống đúng ô đỏ. Hạ chủ đòn trước thì đòn bị hủy; không hạ được thì phải **đi khỏi ô đỏ**.
++
++---
++
++## Bàn đầu trận (sau khi quân Nguyên đi ở hiệp 1)
++
++```
++hàng 0:  . . . . . . .
++hàng 1:  . . . . B . .
++hàng 2:  . . . . . . .
++hàng 3:  . . . . B . .
++hàng 4:  . . . . . . .
++hàng 5:  . . B . . . .
++hàng 6:  1 . 2 . . . .
++```
++
++- Khoái `1` ở `0,6`; Lão `2` ở `2,6`.
++- Ba Bộ binh ở `2,5`, `4,1`, `4,3`.
++- **Ô đỏ:** Bộ binh `2,5` đang nhắm `2,6` — đúng ô Lão đang đứng.
++
++## Hiệp 1 — bài học "đẩy xuống sông"
++
++1. Bấm `1` chọn **Khoái**.
++2. Bấm ô `1,5` để đi (tốn 2 bước).
++3. Bấm ô `2,5` để **đánh** Bộ binh đang đứng đó.
++   → Khoái đẩy nó sang `3,5` — ô sông. **Nó chết đuối.** Ô đỏ trên `2,6` biến mất vì chủ đòn đã chết.
++4. Bấm `2` chọn **Lão**, bấm ô `2,5` (ô Bộ binh vừa bỏ trống) để đi.
++5. Bấm **Space** (Kết thúc lượt).
++
++Quân Nguyên còn lại: `4,1` đi tới `4,2`; `4,3` đi tới `2,3`. Không có đòn nào giáng xuống.
++
++```
++hàng 2:  . . . . B . .
++hàng 3:  . . B . . . .
++hàng 5:  . . 2 . . . .
++hàng 6:  . 1 . . . . .
++```
++
++## Hiệp 2 — bài học "lao phải đứng xa"
++
++1. Khoái đi `1,5` → `2,4`.
++2. Khoái đánh `2,3`: Bộ binh mất 2 máu, bị đẩy lên `2,2`.
++3. Lão đứng nguyên `2,5`, đánh ô `2,2`: lao bay 3 ô, trúng Bộ binh, mất 1 máu cuối → **nó gục**.
++4. Bấm **Space**.
++
++Quân Nguyên cuối: `4,2` đi tới `3,3`.
++
++```
++hàng 3:  . . . B . . .
++hàng 4:  . . 1 . . . .
++hàng 5:  . . 2 . . . .
++```
++
++## Hiệp 3 — hạ quân cuối
++
++1. Khoái đi `2,4` → `2,3`.
++2. Khoái đánh `3,3`: mất 2 máu, bị đẩy sang `4,3`.
++3. Lão đi `2,5` → `1,3` (đi xuyên qua ô Khoái đang đứng — hợp lệ).
++4. Lão đánh `4,3`: lao 3 ô, 1 máu cuối → **nó gục**. **Thắng**, cả hai tướng còn 3 máu.
++
++---
++
++## Vì sao trận này dạy đúng hai bài
++
++- **Đẩy xuống sông:** hiệp 1, Bộ binh đứng sát sông; Khoái đẩy 1 ô là nó rơi xuống nước và chết ngay, không cần đánh đủ 3 máu.
++- **Né ô đỏ:** hiệp 1 có ô đỏ nhắm thẳng vào Lão. Lời giải chọn **hạ chủ đòn** (Khoái đẩy nó xuống sông) nên ô đỏ tự mất. Nếu bạn không hạ được chủ đòn trong hiệp đó, hãy cho Lão đi sang `1,6` — đòn sẽ giáng xuống ô trống. Chơi chậm hơn (không hạ sớm), quân Nguyên sẽ báo đòn vào đúng ô tướng đang đứng ở hiệp 3 trở đi; lúc đó phải né.
++
++## Kiểm chứng
++
++Lời giải này được chạy tự động mỗi lần gõ `tools/test.sh`: kịch bản `game/tests/kich_ban/tran/tran_01_loi_giai.json` phát lại đúng chuỗi lệnh trên và khẳng định bàn cuối **thắng, còn đủ hai tướng**. Kịch bản đang để `da_duyet: false` cho tới khi tác giả đánh lại bằng tay và xác nhận.
+diff --git a/game/tests/kich_ban/tran/tran_01_loi_giai.json b/game/tests/kich_ban/tran/tran_01_loi_giai.json
+new file mode 100644
+index 0000000..5311be6
+--- /dev/null
++++ b/game/tests/kich_ban/tran/tran_01_loi_giai.json
+@@ -0,0 +1,124 @@
++{
++  "da_duyet": false,
++  "hanh_dong": [
++    {
++      "lenh": "di",
++      "o": "1,5",
++      "tuong": "1"
++    },
++    {
++      "lenh": "danh",
++      "o": "2,5",
++      "tuong": "1"
++    },
++    {
++      "lenh": "di",
++      "o": "2,5",
++      "tuong": "2"
++    },
++    {
++      "lenh": "ket_thuc_luot"
++    },
++    {
++      "lenh": "di",
++      "o": "2,4",
++      "tuong": "1"
++    },
++    {
++      "lenh": "danh",
++      "o": "2,3",
++      "tuong": "1"
++    },
++    {
++      "lenh": "danh",
++      "o": "2,2",
++      "tuong": "2"
++    },
++    {
++      "lenh": "ket_thuc_luot"
++    },
++    {
++      "lenh": "di",
++      "o": "2,3",
++      "tuong": "1"
++    },
++    {
++      "lenh": "danh",
++      "o": "3,3",
++      "tuong": "1"
++    },
++    {
++      "lenh": "di",
++      "o": "1,3",
++      "tuong": "2"
++    },
++    {
++      "lenh": "danh",
++      "o": "4,3",
++      "tuong": "2"
++    }
++  ],
++  "mo_ta": "Lời giải trận 1 không mất tướng: Khoái đẩy Bộ binh xuống sông ở hiệp 1, hai hiệp sau hạ hai Bộ binh còn lại.",
++  "phien_ban_dinh_dang": 1,
++  "sau": {
++    "da_danh": [
++      "1",
++      "2"
++    ],
++    "da_di": [
++      "1",
++      "2"
++    ],
++    "dia_hinh": [
++      ". . . ~ . . .",
++      ". . . ~ . . .",
++      ". . . ~ . . .",
++      ". . . . . . .",
++      ". . . ~ . . .",
++      ". . . ~ . . .",
++      ". . . ~ . . ."
++    ],
++    "ket_qua": "thang",
++    "quan": [
++      ". . . . . . .",
++      ". . . . . . .",
++      ". . . . . . .",
++      ". 2 1 . . . .",
++      ". . . . . . .",
++      ". . . . . . .",
++      ". . . . . . ."
++    ]
++  },
++  "truoc": {
++    "bao_don": [
++      {
++        "o": "2,6",
++        "quan": "2,5",
++        "thu_tu": 1
++      }
++    ],
++    "dia_hinh": [
++      ". . . ~ . . .",
++      ". . . ~ . . .",
++      ". . . ~ . . .",
++      ". . . . . . .",
++      ". . . ~ . . .",
++      ". . . ~ . . .",
++      ". . . ~ . . ."
++    ],
++    "quan": [
++      ". . . . . . .",
++      ". . . . B . .",
++      ". . . . . . .",
++      ". . . . B . .",
++      ". . . . . . .",
++      ". . B . . . .",
++      "1 . 2 . . . ."
++    ],
++    "thu_tu_dich": [
++      "2,5",
++      "4,1",
++      "4,3"
++    ]
++  }
++}
+diff --git a/game/tests/test_battle_view.gd b/game/tests/test_battle_view.gd
+index 050129e..22203d0 100644
+--- a/game/tests/test_battle_view.gd
++++ b/game/tests/test_battle_view.gd
+@@ -34,10 +34,10 @@ const VA_LEVEL: String = VA_DIR + "/tran_01.json"
+ 
+ ## Ô sáng mong đợi trên trận 1 (AC 4, AC 5), theo thứ tự đọc bàn.
+ const KHOAI_CELLS: Array[Vector2i] = [
+-	Vector2i(0, 3), Vector2i(0, 4), Vector2i(1, 4), Vector2i(0, 5), Vector2i(1, 5), Vector2i(2, 5), Vector2i(1, 6),
++	Vector2i(0, 3), Vector2i(0, 4), Vector2i(1, 4), Vector2i(0, 5), Vector2i(1, 5), Vector2i(1, 6),
+ ]
+ const LAO_CELLS: Array[Vector2i] = [
+-	Vector2i(2, 3), Vector2i(1, 4), Vector2i(2, 4), Vector2i(0, 5), Vector2i(1, 5), Vector2i(2, 5), Vector2i(1, 6),
++	Vector2i(1, 4), Vector2i(0, 5), Vector2i(1, 5), Vector2i(1, 6),
+ ]
+ const KHOAI_CELL: Vector2i = Vector2i(0, 6)
+ const LAO_CELL: Vector2i = Vector2i(2, 6)
+@@ -141,7 +141,7 @@ func _assert_nothing_selected(main: Node2D) -> void:
+ 	assert_eq(_board(main).path(), [] as Array[Vector2i])
+ 
+ 
+-func test_key_1_selects_khoai_and_lights_7_cells() -> void:
++func test_key_1_selects_khoai_and_lights_6_cells() -> void:
+ 	var main: Node2D = _make_main()
+ 	_press_key(main, 1)
+ 	_assert_selected(main, 1, KHOAI_CELLS, KHOAI_CELL)
+@@ -225,7 +225,7 @@ func test_click_on_unlit_cell_deselects() -> void:
+ # ---------- Đi, hủy, kết thúc lượt (Story 1.5) ----------
+ 
+ const KHOAI_TARGET: Vector2i = Vector2i(0, 4)
+-const LAO_TARGET: Vector2i = Vector2i(2, 4)
++const LAO_TARGET: Vector2i = Vector2i(1, 4)
+ 
+ 
+ func _controller(main: Node2D) -> BattleController:
+@@ -414,7 +414,7 @@ func test_click_undo_button_then_space_ends_turn() -> void:
+ func test_mouse_onto_button_clears_path() -> void:
+ 	var main: Node2D = await _make_main_in_viewport()
+ 	_press_key(main, 1)
+-	_hover_by_mouse(main, Vector2i(2, 5))
++	_hover_by_mouse(main, Vector2i(1, 5))
+ 	assert_false(_board(main).path().is_empty())
+ 	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+ 	motion.position = _hud(main).end_turn_button().get_global_rect().get_center()
+@@ -481,8 +481,8 @@ func test_resting_mouse_follows_token_moving_under_it() -> void:
+ func test_hover_lit_cell_draws_path() -> void:
+ 	var main: Node2D = _make_main()
+ 	_press_key(main, 1)
+-	_hover(main, Vector2i(2, 5))
+-	assert_eq(_board(main).path(), [Vector2i(0, 5), Vector2i(1, 5), Vector2i(2, 5)] as Array[Vector2i])
++	_hover(main, Vector2i(1, 5))
++	assert_eq(_board(main).path(), [Vector2i(0, 5), Vector2i(1, 5)] as Array[Vector2i])
+ 	_hover(main, Vector2i(3, 5))
+ 	assert_eq(_board(main).path(), [] as Array[Vector2i], "rê ra ô sông: hết đường đi")
+ 
+@@ -494,17 +494,17 @@ func test_selecting_under_resting_mouse_draws_path_at_once() -> void:
+ 	_press_key(main, 1)
+ 	assert_eq(_board(main).path(), [Vector2i(0, 5), Vector2i(1, 5)] as Array[Vector2i])
+ 	_press_key(main, 2)
+-	assert_eq(_board(main).path(), [Vector2i(2, 5), Vector2i(1, 5)] as Array[Vector2i], "đổi tướng: đường của Lão")
++	assert_eq(_board(main).path(), [Vector2i(1, 6), Vector2i(1, 5)] as Array[Vector2i], "đổi tướng: đường của Lão")
+ 
+ 
+ func test_mouse_leaving_window_clears_path() -> void:
+ 	var main: Node2D = _make_main()
+ 	_press_key(main, 1)
+-	_hover_by_mouse(main, Vector2i(2, 5))
++	_hover_by_mouse(main, Vector2i(1, 5))
+ 	assert_false(_board(main).path().is_empty())
+ 	main.get_window().mouse_exited.emit()
+ 	assert_eq(_board(main).path(), [] as Array[Vector2i])
+-	_hover_by_mouse(main, Vector2i(2, 5))
++	_hover_by_mouse(main, Vector2i(1, 5))
+ 	assert_false(_board(main).path().is_empty(), "quay lại đúng ô cũ: vẽ lại")
+ 
+ 
+@@ -566,9 +566,9 @@ func test_mouse_events_map_screen_pixels_to_cells() -> void:
+ 	_battle_input(main)._unhandled_input(click)
+ 	_assert_selected(main, 1, KHOAI_CELLS, KHOAI_CELL)
+ 	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+-	motion.position = board.get_global_transform_with_canvas() * BoardView.cell_center(Vector2i(2, 5))
++	motion.position = board.get_global_transform_with_canvas() * BoardView.cell_center(Vector2i(1, 5))
+ 	_battle_input(main)._unhandled_input(motion)
+-	assert_eq(board.path(), [Vector2i(0, 5), Vector2i(1, 5), Vector2i(2, 5)] as Array[Vector2i])
++	assert_eq(board.path(), [Vector2i(0, 5), Vector2i(1, 5)] as Array[Vector2i])
+ 
+ 
+ # ---------- Đánh (Story 2.1) ----------
+diff --git a/game/tests/test_main.gd b/game/tests/test_main.gd
+index a6dd003..a562973 100644
+--- a/game/tests/test_main.gd
++++ b/game/tests/test_main.gd
+@@ -306,8 +306,8 @@ func test_level_1_shows_terrain_and_units() -> void:
+ 	assert_eq(tokens.keys(), [1, 2, 101, 102, 103], "2 tướng và 3 quân Nguyên")
+ 	if tokens.size() != 5:
+ 		return
+-	# Hiệp 1 mở bằng pha địch chuẩn bị (Story 2.6): Bộ binh 1,0 đã đi 2 bước về phía Lão (2,6), tới 2,1.
+-	assert_eq((tokens[101] as UnitToken).position, BoardView.cell_center(Vector2i(2, 1)))
++	# Hiệp 1 mở bằng pha địch chuẩn bị (Story 2.6): Bộ binh dạy ở 2,4 đi xuống 2,5, báo đòn vào Lão (2,6).
++	assert_eq((tokens[101] as UnitToken).position, BoardView.cell_center(Vector2i(2, 5)))
+ 	assert_eq((tokens[1] as UnitToken).position, BoardView.cell_center(Vector2i(0, 6)))
+ 	assert_eq((tokens[1] as UnitToken).name_text(), tr("unit.nguyen_khoai"))
+ 	assert_eq((tokens[2] as UnitToken).name_text(), tr("unit.pham_ngu_lao"))
+@@ -479,7 +479,7 @@ func test_f5_reads_edited_stats() -> void:
+ 	AppState.launch.dev = true
+ 	var main: Node2D = _make_main("", _write_stats(3))
+ 	var old: BattleController = main._controller
+-	assert_eq(old.reachable(1).size(), 7, "tầm đi 3: 7 ô")
++	assert_eq(old.reachable(1).size(), 6, "tầm đi 3: 6 ô (Bộ binh đứng 2,5 chắn)")
+ 	old.submit(Command.move(1, Vector2i(0, 4)))
+ 	assert_eq(old.snapshot().unit_by_id(1).cell, Vector2i(0, 4), "trước F5 Khoái đã đi")
+ 	assert_true(old.can_undo(), "trước F5 có nước để hủy")

@@ -1,0 +1,421 @@
+diff --git a/game/i18n/text.csv b/game/i18n/text.csv
+index 0052348..d067702 100644
+--- a/game/i18n/text.csv
++++ b/game/i18n/text.csv
+@@ -97,3 +97,21 @@ dev.ai.no_rule,chưa có luật đòn cho loại quân này
+ dev.ai.order,đòn số %d
+ dev.ai.no_attack,không báo đòn
+ dev.ai.fallen,(đã gục)
++terrain.plain,Đồng bằng
++terrain.effect.plain,Không có hiệu ứng
++terrain.effect.river,Quân Nguyên vào thì chết đuối
++terrain.effect.forest,"Chắn đường, không đi vào được"
++terrain.effect.spikes,Đi qua mất máu
++terrain.effect.granary,Quân Nguyên đứng kề thì hồi máu
++terrain.effect.village,Đánh vào làng thì mất Lòng dân
++terrain.effect.pass,Quân Nguyên vào ải thì thua
++unit.full.nguyen_khoai,Nguyễn Khoái
++unit.full.pham_ngu_lao,Phạm Ngũ Lão
++unit.full.tran_khanh_du,Trần Khánh Dư
++unit.full.bo_binh,Bộ binh
++unit.full.ky_binh,Kỵ binh
++unit.full.cung_ky,Cung kỵ
++tooltip.hp,Máu %d/%d
++tooltip.attack_cell,"Đánh ô %s, đòn số %d"
++tooltip.attack_charge,"Xung phong hướng %s, đòn số %d"
++tooltip.no_attack,Không có đòn nào
+diff --git a/game/i18n/text.vi.translation b/game/i18n/text.vi.translation
+index 25d20ec..25e60a0 100644
+Binary files a/game/i18n/text.vi.translation and b/game/i18n/text.vi.translation differ
+diff --git a/game/src/app/main.gd b/game/src/app/main.gd
+index d15d974..ff97069 100644
+--- a/game/src/app/main.gd
++++ b/game/src/app/main.gd
+@@ -30,6 +30,7 @@ var _board_view: BoardView
+ var _battle_input: BattleInput
+ var _battle_view: BattleView
+ var _hud: Hud
++var _tooltip: Tooltip
+ var _result_banner: ResultBanner
+ var _version_label: Label
+ 
+@@ -52,11 +53,13 @@ func _ready() -> void:
+ 	add_child(_battle_input)
+ 	_hud = Hud.new()
+ 	add_child(_hud)
++	_tooltip = Tooltip.new()
++	add_child(_tooltip)
+ 	_result_banner = ResultBanner.new()
+ 	_result_banner.retry_pressed.connect(_start_battle)
+ 	add_child(_result_banner)
+ 	_battle_view = BattleView.new()
+-	_battle_view.setup(_board_view, _battle_input, _hud)
++	_battle_view.setup(_board_view, _battle_input, _hud, _tooltip)
+ 	add_child(_battle_view)
+ 
+ 	_version_label = Label.new()
+diff --git a/game/src/battle/battle_view.gd b/game/src/battle/battle_view.gd
+index a1d1eb7..ecdefa7 100644
+--- a/game/src/battle/battle_view.gd
++++ b/game/src/battle/battle_view.gd
+@@ -9,6 +9,8 @@ const NONE: int = 0
+ var _board: BoardView = null
+ var _input: BattleInput = null
+ var _hud: Hud = null
++## Khung thông tin khi rê chuột (Story 2.10); null thì không hiện gì.
++var _tooltip: Tooltip = null
+ var _controller: BattleController = null
+ ## Id tướng đang chọn; NONE là không chọn.
+ var _selected: int = NONE
+@@ -20,10 +22,11 @@ var _targets: Array[Vector2i] = []
+ var _pending: Vector2i = BoardView.NO_CELL
+ 
+ 
+-func setup(board: BoardView, input: BattleInput, hud: Hud) -> void:
++func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = null) -> void:
+ 	_board = board
+ 	_input = input
+ 	_hud = hud
++	_tooltip = tooltip
+ 	input.general_key_pressed.connect(_on_general_key)
+ 	input.cell_clicked.connect(_on_cell_clicked)
+ 	input.cell_hovered.connect(_on_cell_hovered)
+@@ -45,6 +48,10 @@ func start(controller: BattleController) -> void:
+ func stop() -> void:
+ 	_controller = null
+ 	_deselect()
++	if _tooltip != null:
++		_tooltip.hide_tooltip()
++	if _board != null:
++		_board.telegraph_view().highlight([] as Array[Vector2i])
+ 	_hud.visible = false
+ 
+ 
+@@ -142,6 +149,7 @@ func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) ->
+ 	if Rules.is_battle_over(snapshot):
+ 		_deselect()
+ 		_update_hud()
++		_update_info(_input.hovered_cell() if _input != null else BoardView.NO_CELL)
+ 		return
+ 	if _selected != NONE:
+ 		var unit: Unit = snapshot.unit_by_id(_selected)
+@@ -151,15 +159,72 @@ func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) ->
+ 		else:
+ 			_deselect()
+ 	_update_hud()
++	# Bàn đã đổi (đòn dịch theo, đòn bị hủy): khung thông tin và nổi bật tính lại theo ô đang trỏ.
++	_update_info(_input.hovered_cell() if _input != null else BoardView.NO_CELL)
+ 
+ 
+ func _on_cell_hovered(cell: Vector2i) -> void:
++	_update_info(cell)
+ 	if _controller == null or _selected == NONE or not _cells.has(cell):
+ 		_board.show_path([])
+ 		return
+ 	_board.show_path(_controller.path_to(_selected, cell))
+ 
+ 
++## Khung thông tin và ô đỏ nổi bật theo ô đang trỏ (Story 2.10). Chỉ đọc bản chụp.
++func _update_info(cell: Vector2i) -> void:
++	if _controller == null or _board == null:
++		return
++	var state: BattleState = _controller.snapshot()
++	if state == null:
++		return
++	if not state.in_bounds(cell):
++		if _tooltip != null:
++			_tooltip.hide_tooltip()
++		_board.telegraph_view().highlight([] as Array[Vector2i])
++		return
++	var unit: Unit = state.unit_at(cell)
++	if _tooltip != null:
++		_tooltip.show_text(_unit_text(unit, state) if unit != null else _terrain_text(state.terrain_at(cell)))
++	_board.telegraph_view().highlight(_telegraph_cells_of(unit, state))
++
++
++func _unit_text(unit: Unit, state: BattleState) -> String:
++	var lines: PackedStringArray = PackedStringArray()
++	lines.append(tr(Tooltip.UNIT_NAMES[unit.type] as String))
++	lines.append(tr("tooltip.hp") % [unit.hp, state.stats.max_hp(unit.type)])
++	lines.append(_attack_text(unit, state))
++	return "\n".join(lines)
++
++
++func _attack_text(unit: Unit, state: BattleState) -> String:
++	for t: Telegraph in state.telegraphs:
++		if t.owner_id != unit.id:
++			continue
++		if t.kind == Telegraph.Kind.DIRECTION:
++			return tr("tooltip.attack_charge") % [tr(Tooltip.DIRECTION_NAMES[t.offset] as String), t.order]
++		var hit: Vector2i = TelegraphMarks.hit_cell(state, t)
++		if hit == Telegraph.NO_CELL:
++			return tr("tooltip.no_attack")
++		return tr("tooltip.attack_cell") % [BoardText.cell_text(hit), t.order]
++	return tr("tooltip.no_attack")
++
++
++func _terrain_text(terrain: int) -> String:
++	return "%s\n%s" % [tr(Tooltip.TERRAIN_NAMES[terrain] as String),
++		tr(Tooltip.TERRAIN_EFFECTS[terrain] as String)]
++
++
++func _telegraph_cells_of(unit: Unit, state: BattleState) -> Array[Vector2i]:
++	var cells: Array[Vector2i] = []
++	if unit == null:
++		return cells
++	for t: Telegraph in state.telegraphs:
++		if t.owner_id == unit.id:
++			cells.append_array(TelegraphMarks.path_cells(state, t))
++	return cells
++
++
+ func _select(id: int) -> void:
+ 	_selected = id
+ 	_cells = _controller.reachable(id)
+diff --git a/game/src/battle/telegraph_view.gd b/game/src/battle/telegraph_view.gd
+index b243ff2..19c17c4 100644
+--- a/game/src/battle/telegraph_view.gd
++++ b/game/src/battle/telegraph_view.gd
+@@ -29,6 +29,10 @@ const NUMBER_OUTLINE_SIZE: int = 8
+ const NUMBER_MARGIN: Vector2 = Vector2(3, 2)
+ ## Nối các số của nhiều đòn trúng cùng một ô.
+ const NUMBER_SEPARATOR: String = "·"
++## Ô đỏ nổi bật khi rê chuột lên chủ đòn (Story 2.10): sáng hơn và viền trắng, vẫn đỏ để không lẫn với ô sáng xanh.
++const HIGHLIGHT_FILL_COLOR: Color = Color(1.0, 0.45, 0.45, 0.85)
++const HIGHLIGHT_BORDER_COLOR: Color = Color(1.0, 1.0, 1.0, 1.0)
++const HIGHLIGHT_BORDER_WIDTH: float = 5.0
+ 
+ ## Lớp số, BoardView đặt trên đồng quân.
+ var numbers: Node2D
+@@ -38,6 +42,8 @@ var _state: BattleState = null
+ var _cells: Dictionary = {}
+ ## Ô đầu đường xung phong -> các hướng (Array[Vector2i]) của những Kỵ binh bắt đầu từ ô đó.
+ var _arrows: Dictionary = {}
++## Ô đỏ của chủ đòn đang được trỏ chuột (Story 2.10), rỗng là không nổi bật ô nào.
++var _highlight: Array[Vector2i] = []
+ 
+ 
+ func _init() -> void:
+@@ -85,6 +91,20 @@ func arrows() -> Dictionary:
+ 	return _arrows
+ 
+ 
++## Làm nổi bật ô đỏ của một chủ đòn (Story 2.10); mảng rỗng là bỏ nổi bật.
++func highlight(cells: Array[Vector2i]) -> void:
++	if cells == _highlight:
++		return
++	_highlight = cells.duplicate()
++	queue_redraw()
++	numbers.queue_redraw()
++
++
++## Ô đang nổi bật (để test).
++func highlighted() -> Array[Vector2i]:
++	return _highlight
++
++
+ ## Ô -> nhãn số thứ tự đang hiện (để test).
+ func number_labels() -> Dictionary:
+ 	var out: Dictionary = {}
+@@ -159,6 +179,11 @@ func _is_block(cell: Vector2i) -> bool:
+ 
+ func _draw_red(canvas: CanvasItem, cell: Vector2i) -> void:
+ 	var face: Rect2 = top_rect(cell)
++	if _highlight.has(cell):
++		canvas.draw_rect(face, HIGHLIGHT_FILL_COLOR)
++		canvas.draw_rect(face.grow(-HIGHLIGHT_BORDER_WIDTH / 2.0), HIGHLIGHT_BORDER_COLOR, false,
++			HIGHLIGHT_BORDER_WIDTH)
++		return
+ 	canvas.draw_rect(face, FILL_COLOR)
+ 	canvas.draw_rect(face.grow(-BORDER_WIDTH / 2.0), BORDER_COLOR, false, BORDER_WIDTH)
+ 
+diff --git a/game/src/ui/tooltip.gd b/game/src/ui/tooltip.gd
+new file mode 100644
+index 0000000..d6cf86f
+--- /dev/null
++++ b/game/src/ui/tooltip.gd
+@@ -0,0 +1,103 @@
++class_name Tooltip
++extends PanelContainer
++## Khung thông tin khi rê chuột (Story 2.10, FR40): tên quân, máu, đòn sắp đánh và số thứ tự; hoặc tên địa hình
++## và hiệu ứng. Chỉ hiển thị: không nhận chuột (bấm xuyên qua), không đọc trạng thái sống, không biết luật.
++## Dựng bằng code, không cần mở editor.
++
++## Tên đầy đủ của từng loại quân (token chỉ có chữ cái tắt).
++const UNIT_NAMES: Dictionary = {
++	UnitType.NGUYEN_KHOAI: "unit.full.nguyen_khoai",
++	UnitType.PHAM_NGU_LAO: "unit.full.pham_ngu_lao",
++	UnitType.TRAN_KHANH_DU: "unit.full.tran_khanh_du",
++	UnitType.BO_BINH: "unit.full.bo_binh",
++	UnitType.KY_BINH: "unit.full.ky_binh",
++	UnitType.CUNG_KY: "unit.full.cung_ky",
++}
++const TERRAIN_NAMES: Dictionary = {
++	Terrain.PLAIN: "terrain.plain",
++	Terrain.RIVER: "terrain.river",
++	Terrain.FOREST: "terrain.forest",
++	Terrain.SPIKES: "terrain.spikes",
++	Terrain.GRANARY: "terrain.granary",
++	Terrain.VILLAGE: "terrain.village",
++	Terrain.PASS: "terrain.pass",
++}
++const TERRAIN_EFFECTS: Dictionary = {
++	Terrain.PLAIN: "terrain.effect.plain",
++	Terrain.RIVER: "terrain.effect.river",
++	Terrain.FOREST: "terrain.effect.forest",
++	Terrain.SPIKES: "terrain.effect.spikes",
++	Terrain.GRANARY: "terrain.effect.granary",
++	Terrain.VILLAGE: "terrain.effect.village",
++	Terrain.PASS: "terrain.effect.pass",
++}
++## Hướng xung phong -> tên hướng; dùng chung chữ với công cụ duyệt kịch bản.
++const DIRECTION_NAMES: Dictionary = {
++	Vector2i(0, -1): "scenario.viewer.direction_B",
++	Vector2i(1, 0): "scenario.viewer.direction_D",
++	Vector2i(0, 1): "scenario.viewer.direction_N",
++	Vector2i(-1, 0): "scenario.viewer.direction_T",
++}
++
++## Cách con trỏ một khoảng để không che ô đang trỏ.
++const CURSOR_OFFSET: Vector2 = Vector2(18, 14)
++## Chừa mép màn hình.
++const SCREEN_MARGIN: float = 8.0
++const MAX_WIDTH: float = 340.0
++
++var _label: Label
++
++
++func _init() -> void:
++	mouse_filter = Control.MOUSE_FILTER_IGNORE
++	visible = false
++	var style: StyleBoxFlat = StyleBoxFlat.new()
++	style.bg_color = Color(0.06, 0.05, 0.04, 0.92)
++	style.border_color = Color(0.85, 0.70, 0.35, 1.0)
++	style.set_border_width_all(2)
++	style.set_corner_radius_all(4)
++	style.set_content_margin_all(8)
++	add_theme_stylebox_override("panel", style)
++	_label = Label.new()
++	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
++	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
++	add_child(_label)
++
++
++## Hiện khung với nội dung mới; khung tự đo lại kích thước và bám con trỏ.
++func show_text(text: String) -> void:
++	if text.is_empty():
++		hide_tooltip()
++		return
++	_label.text = text
++	visible = true
++	reset_size()
++	place_at(get_viewport().get_mouse_position())
++
++
++func hide_tooltip() -> void:
++	visible = false
++	_label.text = ""
++
++
++## Đặt khung cạnh điểm neo, lật sang trái/trên khi sát mép màn hình.
++func place_at(anchor: Vector2) -> void:
++	var screen: Vector2 = get_viewport_rect().size
++	var pos: Vector2 = anchor + CURSOR_OFFSET
++	if pos.x + size.x > screen.x - SCREEN_MARGIN:
++		pos.x = anchor.x - size.x - CURSOR_OFFSET.x
++	if pos.y + size.y > screen.y - SCREEN_MARGIN:
++		pos.y = anchor.y - size.y - CURSOR_OFFSET.y
++	pos.x = clampf(pos.x, SCREEN_MARGIN, maxf(SCREEN_MARGIN, screen.x - size.x - SCREEN_MARGIN))
++	pos.y = clampf(pos.y, SCREEN_MARGIN, maxf(SCREEN_MARGIN, screen.y - size.y - SCREEN_MARGIN))
++	position = pos
++
++
++## Nội dung đang hiện (để test).
++func text() -> String:
++	return _label.text if _label != null else ""
++
++
++## Đang hiện và có chữ (để test).
++func visible_now() -> bool:
++	return visible and not text().is_empty()
+diff --git a/game/src/ui/tooltip.gd.uid b/game/src/ui/tooltip.gd.uid
+new file mode 100644
+index 0000000..c068180
+--- /dev/null
++++ b/game/src/ui/tooltip.gd.uid
+@@ -0,0 +1 @@
++uid://bgyf4imqlur4g
+diff --git a/game/tests/test_battle_view.gd b/game/tests/test_battle_view.gd
+index 34b8172..64eba84 100644
+--- a/game/tests/test_battle_view.gd
++++ b/game/tests/test_battle_view.gd
+@@ -85,6 +85,13 @@ func _view(main: Node2D) -> BattleView:
+ 	return main._battle_view as BattleView
+ 
+ 
++func _tooltip(main: Node2D) -> Tooltip:
++	for child: Node in main.get_children():
++		if child is Tooltip:
++			return child as Tooltip
++	return null
++
++
+ func _board(main: Node2D) -> BoardView:
+ 	return main._board_view as BoardView
+ 
+@@ -614,6 +621,55 @@ func test_red_cells_vanish_when_owner_drowns() -> void:
+ 	assert_true(view.number_labels().is_empty(), "không còn số thứ tự của đòn bị hủy")
+ 
+ 
++## Khung thông tin khi rê chuột (Story 2.10): quân, địa hình, và ẩn khi ra ngoài bàn.
++func test_tooltip_shows_unit_and_terrain() -> void:
++	var main: Node2D = _make_level_main(HUY_DIR, HUY_LEVEL, {
++		"phien_ban_dinh_dang": 1,
++		"ten": "Thử thông tin",
++		"kieu": "tieu_diet",
++		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . ~ . . . .",
++			". . . . . . .", ". . . . . . .", ". . . . . . ."],
++		"quan": [". . . . . . .", ". . 1 . . . .", ". . B . . . .", ". . . . . . .",
++			". . . . . . .", ". . . . . . .", ". . . . . . ."],
++		"thu_tu_dich": ["2,2"],
++		"tiep_vien": [],
++		"muu_ke_mo": [],
++	})
++	_hover_by_mouse(main, Vector2i(2, 1))
++	assert_true(_tooltip(main).text().contains("Nguyễn Khoái"), "rê tướng: hiện tên đầy đủ")
++	assert_true(_tooltip(main).text().contains("Máu 3/3"), "rê tướng: hiện máu")
++	_hover_by_mouse(main, Vector2i(2, 2))
++	assert_true(_tooltip(main).text().contains("Bộ binh"), "rê quân Nguyên: hiện tên loại")
++	assert_true(_tooltip(main).text().contains("Đánh ô 2,1, đòn số 1"), "thực tế: [%s]" % _tooltip(main).text().replace("\n", " | "))
++	_hover_by_mouse(main, Vector2i(2, 3))
++	assert_true(_tooltip(main).text().contains("Sông"), "rê ô: hiện tên địa hình")
++	assert_true(_tooltip(main).text().contains("chết đuối"), "rê ô: hiện hiệu ứng")
++	_hover_by_mouse(main, Vector2i(-1, -1))
++	assert_false(_tooltip(main).visible_now(), "ra ngoài bàn thì khung ẩn")
++
++
++## Rê lên quân Nguyên thì chỉ ô đỏ của chính nó nổi bật (Story 2.10, AC 2).
++func test_hover_enemy_highlights_only_its_own_red_cells() -> void:
++	var main: Node2D = _make_attack_main()
++	var view: TelegraphView = _board(main).telegraph_view()
++	_hover_by_mouse(main, Vector2i(3, 3))
++	assert_eq(view.highlighted(), [Vector2i(3, 4)] as Array[Vector2i], "chỉ ô đỏ của Bộ binh 3,3")
++	_hover_by_mouse(main, Vector2i(5, 5))
++	assert_eq(view.highlighted(), [Vector2i(5, 6)] as Array[Vector2i], "đổi sang quân khác thì đổi ô nổi bật")
++	_hover_by_mouse(main, Vector2i(3, 4))
++	assert_eq(view.highlighted(), [] as Array[Vector2i], "rê tướng chưa báo đòn: bỏ nổi bật")
++
++
++## Khung thông tin không nuốt cú bấm: bấm vẫn ra lệnh đánh (Story 2.10, AC 5).
++func test_tooltip_does_not_block_click() -> void:
++	var main: Node2D = _make_attack_main()
++	_hover_by_mouse(main, Vector2i(3, 3))
++	assert_true(_tooltip(main).visible_now(), "điều kiện trước: khung đang hiện")
++	_press_physical(main, KEY_1)
++	_click_by_mouse(main, Vector2i(3, 3))
++	assert_eq(_unit_at(main, Vector2i(3, 2)).hp, 1, "cú bấm vẫn tới quân (bị đẩy lên 3,2), không bị khung nuốt")
++
++
+ ## Ô đỏ vẽ lại đúng sau Hủy nước đi, Chơi lại trận và F5 (Story 2.7, AC 10).
+ func test_red_cells_redrawn_after_undo_restart_and_reload() -> void:
+ 	AppState.launch.dev = true

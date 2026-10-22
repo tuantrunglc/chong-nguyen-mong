@@ -1,6 +1,6 @@
 diff -ruN a/game/data/tran/thu_ba_tuong.json b/game/data/tran/thu_ba_tuong.json
 --- a/game/data/tran/thu_ba_tuong.json	2026-10-20 15:53:41.751454194 +0700
-+++ b/game/data/tran/thu_ba_tuong.json	2026-10-20 16:15:03.294611743 +0700
++++ b/game/data/tran/thu_ba_tuong.json	2026-10-21 10:17:28.921164085 +0700
 @@ -3,12 +3,12 @@
    "ten": "Thử ba tướng",
    "kieu": "tieu_diet",
@@ -20,7 +20,7 @@ diff -ruN a/game/data/tran/thu_ba_tuong.json b/game/data/tran/thu_ba_tuong.json
    "quan": [
 diff -ruN a/game/data/tran/van_don.json b/game/data/tran/van_don.json
 --- a/game/data/tran/van_don.json	1970-01-01 08:00:00.000000000 +0800
-+++ b/game/data/tran/van_don.json	2026-10-20 16:15:03.294611743 +0700
++++ b/game/data/tran/van_don.json	2026-10-21 10:17:28.921164085 +0700
 @@ -0,0 +1,23 @@
 +{
 +  "phien_ban_dinh_dang": 1,
@@ -47,7 +47,7 @@ diff -ruN a/game/data/tran/van_don.json b/game/data/tran/van_don.json
 +}
 diff -ruN a/game/data/tran/van_don_lon.json b/game/data/tran/van_don_lon.json
 --- a/game/data/tran/van_don_lon.json	1970-01-01 08:00:00.000000000 +0800
-+++ b/game/data/tran/van_don_lon.json	2026-10-20 16:15:03.294611743 +0700
++++ b/game/data/tran/van_don_lon.json	2026-10-21 10:17:28.921164085 +0700
 @@ -0,0 +1,29 @@
 +{
 +  "phien_ban_dinh_dang": 1,
@@ -80,7 +80,7 @@ diff -ruN a/game/data/tran/van_don_lon.json b/game/data/tran/van_don_lon.json
 +}
 diff -ruN a/game/project.godot b/game/project.godot
 --- a/game/project.godot	2026-10-20 15:53:41.752454201 +0700
-+++ b/game/project.godot	2026-10-20 16:15:03.294611743 +0700
++++ b/game/project.godot	2026-10-21 10:17:28.921164085 +0700
 @@ -39,3 +39,6 @@
  
  renderer/rendering_method="gl_compatibility"
@@ -90,7 +90,7 @@ diff -ruN a/game/project.godot b/game/project.godot
 +environment/defaults/default_clear_color=Color(0.12, 0.14, 0.14, 1)
 diff -ruN a/game/src/battle/board_view.gd b/game/src/battle/board_view.gd
 --- a/game/src/battle/board_view.gd	2026-10-20 15:53:41.753454209 +0700
-+++ b/game/src/battle/board_view.gd	2026-10-20 16:15:03.295611716 +0700
++++ b/game/src/battle/board_view.gd	2026-10-21 10:17:28.922164131 +0700
 @@ -8,6 +8,15 @@
  
  ## Cạnh ô (px), khớp tranh E8 64×64 hiện 1:1.
@@ -137,7 +137,7 @@ diff -ruN a/game/src/battle/board_view.gd b/game/src/battle/board_view.gd
  			# Ô phẳng: chữ ở phần dưới ô, không bị đồng quân đứng giữa ô che hết.
  			var label: Label = Label.new()
  			label.text = text
-@@ -369,20 +379,31 @@
+@@ -369,27 +379,38 @@
  func _draw() -> void:
  	var surface: Rect2 = Rect2(0, 0, cols * TILE_SIZE, rows * TILE_SIZE)
  	# Mép bàn: cả bàn là một tấm dày EDGE_DEPTH, mặt trên là mặt đất.
@@ -173,6 +173,14 @@ diff -ruN a/game/src/battle/board_view.gd b/game/src/battle/board_view.gd
  	draw_rect(surface, LINE_COLOR, false, BORDER_WIDTH)
  	# Bệ ô ải, ô sáng và vòng chọn vẽ trên mặt đất, từng hàng từ trên xuống (quân đứng lên bệ được,
  	# xem BLOCK_KINDS): bệ ô ải ở hàng dưới che ô sáng ở hàng trên, ô sáng trên bệ nằm trên mặt bệ.
+ 	for r: int in range(rows):
+ 		for c: int in range(cols):
+ 			var cell: Vector2i = Vector2i(c, r)
+-			if _state != null and _state.terrain_at(cell) == Terrain.PASS:
++			if _state != null and _state.terrain_at(cell) == Terrain.PASS and not has_bg():
+ 				draw_raised(self, cell_rect(cell), PASS_HEIGHT, TERRAIN_COLORS[Terrain.PASS] as Color, EDGE_SHADE)
+ 			if _lit_cells.has(cell):
+ 				draw_rect(_top_rect(cell), REACH_COLOR)
 @@ -432,17 +453,15 @@
  	var ground: Rect2 = cell_rect(cell)
  	var above: Vector2i = cell + Vector2i(0, -1)
@@ -197,19 +205,24 @@ diff -ruN a/game/src/battle/board_view.gd b/game/src/battle/board_view.gd
  		draw_colored_polygon(PackedVector2Array([
 diff -ruN a/game/src/battle/terrain_block.gd b/game/src/battle/terrain_block.gd
 --- a/game/src/battle/terrain_block.gd	2026-10-20 15:53:41.752454201 +0700
-+++ b/game/src/battle/terrain_block.gd	2026-10-20 16:15:03.295611716 +0700
-@@ -37,4 +37,7 @@
++++ b/game/src/battle/terrain_block.gd	2026-10-21 10:17:28.922164131 +0700
+@@ -37,4 +37,12 @@
  	# Ô vuông trên mặt đất, tính từ position.
  	var ground: Rect2 = BoardView.cell_rect(cell)
  	ground.position -= position
 -	BoardView.draw_raised(self, ground, _height, color, FRONT_SHADE)
-+	if kind == Terrain.FOREST and BoardView.has_bg():
++	if kind == Terrain.FOREST and FileAccess.file_exists("res://mock/an_rung"):
 +		return
-+	var t: Texture2D = BoardView.tex({Terrain.FOREST: "rung", Terrain.VILLAGE: "lang", Terrain.GRANARY: "kho"}[kind])
++	var tex_name: String = {Terrain.FOREST: "rung", Terrain.VILLAGE: "lang", Terrain.GRANARY: "kho"}[kind]
++	# Hình riêng cho từng ô (biến thể, trạng thái): mock/o_rieng.json = {"cot,hang": "ten_hinh"}
++	if FileAccess.file_exists("res://mock/o_rieng.json"):
++		var rieng: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://mock/o_rieng.json"))
++		tex_name = rieng.get("%d,%d" % [cell.x, cell.y], tex_name)
++	var t: Texture2D = BoardView.tex(tex_name)
 +	draw_texture(t, Vector2(ground.position.x, ground.end.y - t.get_height() + 2))
 diff -ruN a/game/src/battle/unit_token.gd b/game/src/battle/unit_token.gd
 --- a/game/src/battle/unit_token.gd	2026-10-20 15:53:41.752454201 +0700
-+++ b/game/src/battle/unit_token.gd	2026-10-20 16:15:03.295611716 +0700
++++ b/game/src/battle/unit_token.gd	2026-10-21 10:17:28.922164131 +0700
 @@ -24,7 +24,7 @@
  const NAME_FONT_SIZE: int = 15
  const HP_RADIUS: float = 9.0

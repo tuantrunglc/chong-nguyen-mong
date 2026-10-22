@@ -1,0 +1,809 @@
+diff --git a/game/i18n/text.csv b/game/i18n/text.csv
+index d067702..ebf3a8a 100644
+--- a/game/i18n/text.csv
++++ b/game/i18n/text.csv
+@@ -7,6 +7,8 @@ hud.round,Hiệp %d
+ hud.undo,Hủy (Z)
+ hud.end_turn,Kết thúc lượt (Space)
+ hud.confirm_attack,Bấm lần nữa để đánh
++hud.phase.player,"Lượt của bạn"
++hud.phase.enemy,"Quân Nguyên đang ra đòn"
+ result.won,Thắng!
+ result.lost,Thua!
+ result.retry,Chơi lại trận
+diff --git a/game/i18n/text.vi.translation b/game/i18n/text.vi.translation
+index 25e60a0..cd97296 100644
+Binary files a/game/i18n/text.vi.translation and b/game/i18n/text.vi.translation differ
+diff --git a/game/src/app/main.gd b/game/src/app/main.gd
+index ff97069..4d70444 100644
+--- a/game/src/app/main.gd
++++ b/game/src/app/main.gd
+@@ -60,6 +60,8 @@ func _ready() -> void:
+ 	add_child(_result_banner)
+ 	_battle_view = BattleView.new()
+ 	_battle_view.setup(_board_view, _battle_input, _hud, _tooltip)
++	# Hoạt ảnh phát xong mới vẽ bản chụp cuối (Story 2.11).
++	_battle_view.playback_finished.connect(_on_playback_finished)
+ 	add_child(_battle_view)
+ 
+ 	_version_label = Label.new()
+@@ -123,12 +125,11 @@ func _start_battle() -> void:
+ 	_result_banner.hide_result()
+ 	_controller = BattleController.new()
+ 	_controller.start(_level, AppState.stats)
+-	# Nối trước BattleView: đồng quân và lớp F1 vẽ lại trước khi BattleView vẽ lại ô sáng.
+-	_controller.events_resolved.connect(_on_events_resolved)
++	# Bàn "trước lệnh" phải có trước: hoạt ảnh chạy trên nó, xong mới vẽ bản chụp cuối (Story 2.11).
+ 	_show_board(_controller.snapshot())
+ 	_battle_view.start(_controller)
+ 	# Hiệp 1 cũng bắt đầu bằng pha địch chuẩn bị (Story 2.6): bàn người chơi thấy là bàn sau khi quân Nguyên đã đi.
+-	_controller.begin()
++	_battle_view.begin_battle()
+ 	_hide_error()
+ 	_screen = Screen.BATTLE
+ 
+@@ -140,7 +141,8 @@ func _reload_data() -> void:
+ 	_start_battle()
+ 
+ 
+-func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) -> void:
++## Hoạt ảnh của lệnh vừa phát xong: vẽ bản chụp cuối và bảng kết quả (Story 2.11).
++func _on_playback_finished(snapshot: BattleState) -> void:
+ 	_show_board(snapshot)
+ 	_result_banner.show_result(snapshot.phase)
+ 
+diff --git a/game/src/battle/battle_view.gd b/game/src/battle/battle_view.gd
+index ecdefa7..937f636 100644
+--- a/game/src/battle/battle_view.gd
++++ b/game/src/battle/battle_view.gd
+@@ -6,6 +6,10 @@ extends Node
+ 
+ const NONE: int = 0
+ 
++## Phát xong hoạt ảnh của một lệnh (hoặc không có gì để phát): bàn đã sẵn sàng vẽ bản chụp cuối.
++## `main.gd` vẽ bàn ở đây để hoạt ảnh chạy trên bàn cũ (Story 2.11).
++signal playback_finished(snapshot: BattleState)
++
+ var _board: BoardView = null
+ var _input: BattleInput = null
+ var _hud: Hud = null
+@@ -20,6 +24,14 @@ var _cells: Array[Vector2i] = []
+ var _targets: Array[Vector2i] = []
+ ## Mục tiêu đang chờ bấm lần nữa (tướng đã đi thì phải xác nhận, FR15); NO_CELL là không chờ.
+ var _pending: Vector2i = BoardView.NO_CELL
++## Phát lại sự kiện bằng Tween (Story 2.11); con của view này, không giữ trạng thái trận.
++var _player: EventPlayer = null
++## Đang phát hoạt ảnh: mọi lệnh mới đều bị bỏ qua (AC 3).
++var _playing: bool = false
++## Lệnh đang phát là pha của quân Nguyên (end_turn hoặc mở trận): dòng pha trên HUD.
++var _enemy_turn: bool = false
++## Tăng mỗi lần start()/stop(): lượt phát của trận cũ không được vẽ lên trận mới (F5 giữa lúc phát).
++var _playback_generation: int = 0
+ 
+ 
+ func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = null) -> void:
+@@ -27,6 +39,9 @@ func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = nu
+ 	_input = input
+ 	_hud = hud
+ 	_tooltip = tooltip
++	_player = EventPlayer.new()
++	_player.setup(board)
++	add_child(_player)
+ 	input.general_key_pressed.connect(_on_general_key)
+ 	input.cell_clicked.connect(_on_cell_clicked)
+ 	input.cell_hovered.connect(_on_cell_hovered)
+@@ -40,6 +55,11 @@ func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = nu
+ func start(controller: BattleController) -> void:
+ 	_controller = controller
+ 	controller.events_resolved.connect(_on_events_resolved)
++	_playback_generation += 1
++	if _player != null:
++		_player.stop()
++	_playing = false
++	_enemy_turn = false
+ 	_deselect()
+ 	_update_hud()
+ 
+@@ -47,11 +67,13 @@ func start(controller: BattleController) -> void:
+ ## Màn hình lỗi, menu: không còn trận, mọi thao tác không làm gì, bảng nút ẩn.
+ func stop() -> void:
+ 	_controller = null
++	_playback_generation += 1
++	_playing = false
++	_enemy_turn = false
++	if _player != null:
++		_player.stop()
+ 	_deselect()
+-	if _tooltip != null:
+-		_tooltip.hide_tooltip()
+-	if _board != null:
+-		_board.telegraph_view().highlight([] as Array[Vector2i])
++	_hide_info()
+ 	_hud.visible = false
+ 
+ 
+@@ -71,10 +93,29 @@ func pending_cell() -> Vector2i:
+ 	return _pending
+ 
+ 
++## Mở trận: pha địch chuẩn bị của hiệp 1 cũng là một lần phát hoạt ảnh (Story 2.6, 2.11).
++## `main.gd` gọi hàm này thay cho `controller.begin()` để view biết đó là pha địch.
++func begin_battle() -> void:
++	if _controller == null:
++		return
++	_enemy_turn = true
++	_controller.begin()
++
++
++## Đang phát hoạt ảnh (để test).
++func is_playing() -> bool:
++	return _playing
++
++
++## Phát lại sự kiện của lệnh này (để test).
++func event_player() -> EventPlayer:
++	return _player
++
++
+ ## Phím 1-2-3: tướng không có trên bàn hoặc đã đánh thì không gì; phím của tướng đang chọn thì bỏ chọn.
+ ## Hết trận (thắng hoặc thua) thì mọi thao tác không làm gì (Story 2.5).
+ func _on_general_key(id: int) -> void:
+-	if _controller == null or _battle_over():
++	if _controller == null or _playing or _battle_over():
+ 		return
+ 	if id == _selected:
+ 		_deselect()
+@@ -88,7 +129,7 @@ func _on_general_key(id: int) -> void:
+ 
+ 
+ func _on_cell_clicked(cell: Vector2i) -> void:
+-	if _controller == null or _battle_over():
++	if _controller == null or _playing or _battle_over():
+ 		return
+ 	var unit: Unit = _controller.snapshot().unit_at(cell) if cell != BoardView.NO_CELL else null
+ 	if unit != null and unit.faction == Unit.Faction.DAI_VIET:
+@@ -129,23 +170,44 @@ func _set_pending(cell: Vector2i) -> void:
+ 
+ ## Hủy nước đi gần nhất; vẫn giữ tướng đang chọn (tác giả chốt). Không có gì để hủy thì không gì.
+ func _on_undo() -> void:
+-	if _controller == null or _battle_over():
++	if _controller == null or _playing or _battle_over():
+ 		return
+ 	_controller.undo()
+ 
+ 
+ ## Kết thúc lượt rồi bỏ chọn (tác giả chốt).
+ func _on_end_turn() -> void:
+-	if _controller == null or _battle_over():
++	if _controller == null or _playing or _battle_over():
+ 		return
++	_enemy_turn = true
+ 	_controller.submit(Command.end_turn())
+ 	_deselect()
+ 
+ 
+-## Sau mỗi lệnh chạy được và mỗi lần hủy: ô sáng, vòng chọn, đường đi của tướng đang chọn tính lại.
+-func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) -> void:
++## Mỗi lệnh chạy được: khóa lệnh, phát hoạt ảnh theo nhật ký, rồi mới vẽ bàn và tính lại ô sáng (Story 2.11).
++func _on_events_resolved(events: Array[BattleEvent], snapshot: BattleState) -> void:
+ 	if _controller == null:
+ 		return
++	_playing = true
++	_update_hud()
++	var generation: int = _playback_generation
++	# Chế độ không màn hình (test) hoặc không có gì để phát: làm ngay trong cùng khung hình, không await.
++	if _player.instant or events.is_empty():
++		_player.play_now(events)
++		_finish_playback(snapshot, generation)
++		return
++	await _player.play(events)
++	_finish_playback(snapshot, generation)
++
++
++## Phát xong: mở khóa, để `main.gd` vẽ bản chụp cuối, rồi tính lại chọn/ô sáng/khung thông tin trên bàn mới.
++func _finish_playback(snapshot: BattleState, generation: int) -> void:
++	_playing = false
++	_enemy_turn = false
++	# Trận đã bị dừng hoặc thay bằng trận khác giữa lúc phát (màn hình lỗi, menu, F5): bỏ bản chụp cũ.
++	if _controller == null or generation != _playback_generation:
++		return
++	playback_finished.emit(snapshot)
+ 	if Rules.is_battle_over(snapshot):
+ 		_deselect()
+ 		_update_hud()
+@@ -159,10 +221,12 @@ func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) ->
+ 		else:
+ 			_deselect()
+ 	_update_hud()
+-	# Bàn đã đổi (đòn dịch theo, đòn bị hủy): khung thông tin và nổi bật tính lại theo ô đang trỏ.
++	# Bàn đã đổi (đòn dịch theo, đòn bị hủy): chọn lại ô dưới chuột rồi tính lại khung và nổi bật, vì đồng quân
++	# vừa dời có thể đã che ô đang trỏ (Story 2.10 review).
++	if _input != null:
++		_input.refresh_hover()
+ 	_update_info(_input.hovered_cell() if _input != null else BoardView.NO_CELL)
+ 
+-
+ func _on_cell_hovered(cell: Vector2i) -> void:
+ 	_update_info(cell)
+ 	if _controller == null or _selected == NONE or not _cells.has(cell):
+@@ -178,10 +242,12 @@ func _update_info(cell: Vector2i) -> void:
+ 	var state: BattleState = _controller.snapshot()
+ 	if state == null:
+ 		return
++	# Hết trận thì không còn gì để xem: bảng Thắng/Thua là thứ duy nhất còn trên bàn (Story 2.10, Task 3.3).
++	if Rules.is_battle_over(state):
++		_hide_info()
++		return
+ 	if not state.in_bounds(cell):
+-		if _tooltip != null:
+-			_tooltip.hide_tooltip()
+-		_board.telegraph_view().highlight([] as Array[Vector2i])
++		_hide_info()
+ 		return
+ 	var unit: Unit = state.unit_at(cell)
+ 	if _tooltip != null:
+@@ -197,15 +263,18 @@ func _unit_text(unit: Unit, state: BattleState) -> String:
+ 	return "\n".join(lines)
+ 
+ 
++## Chữ "đòn sắp đánh" của quân này. Đòn đã bị hủy (chủ đòn gục, ô đích ngoài bàn, Kỵ binh sát mép hướng ra
++## ngoài) thì `TelegraphMarks.hit_cell` trả `NO_CELL` và đường đỏ cũng rỗng, nên phải kiểm trước khi hứa đòn:
++## nếu không, khung nói "Xung phong hướng Bắc" trong khi bàn không còn ô đỏ nào (Story 2.10 review).
+ func _attack_text(unit: Unit, state: BattleState) -> String:
+ 	for t: Telegraph in state.telegraphs:
+ 		if t.owner_id != unit.id:
+ 			continue
+-		if t.kind == Telegraph.Kind.DIRECTION:
+-			return tr("tooltip.attack_charge") % [tr(Tooltip.DIRECTION_NAMES[t.offset] as String), t.order]
+ 		var hit: Vector2i = TelegraphMarks.hit_cell(state, t)
+ 		if hit == Telegraph.NO_CELL:
+ 			return tr("tooltip.no_attack")
++		if t.kind == Telegraph.Kind.DIRECTION:
++			return tr("tooltip.attack_charge") % [tr(Tooltip.DIRECTION_NAMES[t.offset] as String), t.order]
+ 		return tr("tooltip.attack_cell") % [BoardText.cell_text(hit), t.order]
+ 	return tr("tooltip.no_attack")
+ 
+@@ -225,6 +294,14 @@ func _telegraph_cells_of(unit: Unit, state: BattleState) -> Array[Vector2i]:
+ 	return cells
+ 
+ 
++## Ẩn khung thông tin và bỏ nổi bật ô đỏ (hết trận, dừng trận).
++func _hide_info() -> void:
++	if _tooltip != null:
++		_tooltip.hide_tooltip()
++	if _board != null:
++		_board.telegraph_view().highlight([] as Array[Vector2i])
++
++
+ func _select(id: int) -> void:
+ 	_selected = id
+ 	_cells = _controller.reachable(id)
+@@ -239,7 +316,11 @@ func _select(id: int) -> void:
+ 
+ func _update_hud() -> void:
+ 	var snapshot: BattleState = _controller.snapshot()
+-	_hud.show_turn(snapshot.round_number, _controller.can_undo(), Rules.is_battle_over(snapshot))
++	var over: bool = Rules.is_battle_over(snapshot)
++	_hud.show_turn(snapshot.round_number, _controller.can_undo(), over)
++	# Dòng pha luôn có khi đang chơi; lúc phát hoạt ảnh pha địch thì báo đúng pha đang chạy (Story 2.11, AC 4).
++	if not over:
++		_hud.show_phase(_playing and _enemy_turn)
+ 
+ 
+ ## Trận đã kết thúc (thắng hoặc thua).
+diff --git a/game/src/battle/event_player.gd b/game/src/battle/event_player.gd
+new file mode 100644
+index 0000000..8e3b1bb
+--- /dev/null
++++ b/game/src/battle/event_player.gd
+@@ -0,0 +1,197 @@
++class_name EventPlayer
++extends Node
++## Phát lại nhật ký sự kiện của một lệnh bằng Tween (Story 2.11, NFR3, ADR-002).
++## Chỉ đọc `BattleEvent` và node của view: KHÔNG gọi `show_state` chen giữa chừng, KHÔNG sửa `BattleState`.
++## Lúc `play()` bắt đầu, bàn đang ở trạng thái TRƯỚC lệnh; `BoardView.show_state(snapshot)` gọi sau đó sẽ đưa mọi
++## thứ về trạng thái cuối. Vì vậy hoạt ảnh chỉ cần đi từ vị trí đang có tới vị trí mà sự kiện nói.
++
++## Một sự kiện có động tác dài chừng này; cả pha bị co lại nếu vượt `MAX_PHASE_SECONDS`.
++const SECONDS_PER_EVENT: float = 0.18
++## Trần NFR3 cho trọn một pha địch.
++const MAX_PHASE_SECONDS: float = 3.0
++const DAMAGE_SECONDS: float = 0.14
++const DEATH_SECONDS: float = 0.22
++## Đồng quân lao về phía mục tiêu bao xa (px) rồi về chỗ cũ.
++const LUNGE_DISTANCE: float = 12.0
++## Rung khi va chạm (px).
++const SHAKE_DISTANCE: float = 5.0
++
++## Bật khi chạy không có màn hình (GUT): áp dụng ngay, không chờ khung hình nào, để test không phải await.
++var instant: bool = DisplayServer.get_name() == "headless"
++
++var _board: BoardView = null
++## Sự kiện đã phát, đúng thứ tự nhận được (để test).
++var _played: Array[BattleEvent] = []
++## `stop()` đặt cờ này để vòng phát dừng giữa chừng.
++var _stopped: bool = false
++
++
++func setup(board: BoardView) -> void:
++	_board = board
++
++
++func played() -> Array[BattleEvent]:
++	return _played
++
++
++## Tổng thời lượng phát của danh sách này; không bao giờ vượt `MAX_PHASE_SECONDS` (AC 2).
++func total_seconds(events: Array[BattleEvent]) -> float:
++	var sum: float = 0.0
++	for event: BattleEvent in events:
++		sum += _base_seconds(event)
++	return minf(sum, MAX_PHASE_SECONDS)
++
++
++## Áp dụng ngay toàn bộ, không Tween (test và chế độ instant).
++func play_now(events: Array[BattleEvent]) -> void:
++	_played = events.duplicate()
++	_stopped = false
++	for event: BattleEvent in events:
++		_apply_instant(event)
++
++
++## Phát lần lượt bằng Tween, đúng thứ tự trong nhật ký (AC 1).
++func play(events: Array[BattleEvent]) -> void:
++	_played = events.duplicate()
++	_stopped = false
++	var scale: float = _time_scale(events)
++	for event: BattleEvent in events:
++		if _stopped:
++			return
++		var seconds: float = _base_seconds(event) * scale
++		if seconds <= 0.0:
++			continue
++		await _play_one(event, seconds)
++
++
++## Dừng giữa chừng (đổi trận, màn hình lỗi): vòng phát thoát ở sự kiện kế tiếp.
++func stop() -> void:
++	_stopped = true
++
++
++## Tỉ lệ co thời gian để cả danh sách vừa `MAX_PHASE_SECONDS`.
++func _time_scale(events: Array[BattleEvent]) -> float:
++	var sum: float = 0.0
++	for event: BattleEvent in events:
++		sum += _base_seconds(event)
++	if sum <= MAX_PHASE_SECONDS or sum <= 0.0:
++		return 1.0
++	return MAX_PHASE_SECONDS / sum
++
++
++## Sự kiện không có động tác thì 0 giây (không tốn thời gian của pha).
++func _base_seconds(event: BattleEvent) -> float:
++	match event.type:
++		BattleEvent.Type.MOVED:
++			return SECONDS_PER_EVENT
++		BattleEvent.Type.ATTACKED:
++			return SECONDS_PER_EVENT
++		BattleEvent.Type.COLLIDED, BattleEvent.Type.DAMAGED:
++			return DAMAGE_SECONDS
++		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
++			return DEATH_SECONDS
++		BattleEvent.Type.TELEGRAPHED:
++			return DAMAGE_SECONDS
++	return 0.0
++
++
++func _play_one(event: BattleEvent, seconds: float) -> void:
++	var token: UnitToken = _token(event.unit_id)
++	if token == null:
++		# TELEGRAPH_CANCELLED không còn đồng quân; các sự kiện khác cũng có thể gặp quân đã bị gỡ.
++		await _wait(seconds * 0.5)
++		return
++	match event.type:
++		BattleEvent.Type.MOVED:
++			await _tween_to(token, "position", token.position + _delta(event), seconds)
++		BattleEvent.Type.ATTACKED:
++			await _lunge(token, event, seconds)
++		BattleEvent.Type.COLLIDED:
++			await _shake(token, seconds)
++		BattleEvent.Type.DAMAGED:
++			await _flash(token, seconds)
++		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
++			await _sink_or_fade(token, event, seconds)
++		BattleEvent.Type.TELEGRAPHED:
++			await _flash(token, seconds)
++		_:
++			await _wait(seconds * 0.5)
++
++
++## Trạng thái cuối của một sự kiện, dùng khi không chạy Tween (test, chế độ instant).
++func _apply_instant(event: BattleEvent) -> void:
++	var token: UnitToken = _token(event.unit_id)
++	if token == null:
++		return
++	match event.type:
++		BattleEvent.Type.MOVED:
++			token.position += _delta(event)
++		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
++			token.visible = false
++
++
++func _token(unit_id: int) -> UnitToken:
++	if _board == null:
++		return null
++	return _board.tokens().get(unit_id) as UnitToken
++
++
++## Sự kiện đi nói ô đầu và ô cuối; đồng quân đang đứng ở ô đầu (lift của ô ải giữ nguyên).
++func _delta(event: BattleEvent) -> Vector2:
++	return BoardView.cell_center(event.to_cell) - BoardView.cell_center(event.from_cell)
++
++
++func _lunge(token: UnitToken, event: BattleEvent, seconds: float) -> void:
++	# Hướng lao tính từ chỗ đồng quân đang vẽ tới ô trúng: đúng cả khi nó vừa được đẩy trong cùng nhật ký
++	# (không đọc `token.cell`, vì view không được sửa `cell` — luật ranh giới, chỉ Effects).
++	var direction: Vector2 = BoardView.cell_center(event.to_cell) - token.position
++	if direction.length() < 1.0:
++		direction = Vector2.DOWN
++	var start: Vector2 = token.position
++	var forward: Vector2 = start + direction.normalized() * LUNGE_DISTANCE
++	var tween: Tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
++	tween.tween_property(token, "position", forward, seconds * 0.4)
++	tween.tween_property(token, "position", start, seconds * 0.6)
++	await _wait(seconds)
++
++
++func _shake(token: UnitToken, seconds: float) -> void:
++	var start: Vector2 = token.position
++	var tween: Tween = create_tween()
++	tween.tween_property(token, "position", start + Vector2(SHAKE_DISTANCE, -SHAKE_DISTANCE * 0.4), seconds * 0.25)
++	tween.tween_property(token, "position", start - Vector2(SHAKE_DISTANCE, -SHAKE_DISTANCE * 0.4),
++		seconds * 0.5)
++	tween.tween_property(token, "position", start, seconds * 0.25)
++	await _wait(seconds)
++
++
++func _flash(token: UnitToken, seconds: float) -> void:
++	var normal: Color = token.modulate
++	var tween: Tween = create_tween()
++	tween.tween_property(token, "modulate", Color(1.0, 0.35, 0.35, normal.a), seconds * 0.35)
++	tween.tween_property(token, "modulate", normal, seconds * 0.65)
++	await _wait(seconds)
++
++
++## Gục: mờ hẳn. Chết đuối: chìm xuống rồi mờ. Cả hai ẩn đồng quân; `show_state` sau đó gỡ hẳn.
++func _sink_or_fade(token: UnitToken, event: BattleEvent, seconds: float) -> void:
++	var tween: Tween = create_tween()
++	if event.type == BattleEvent.Type.DROWNED:
++		tween.set_parallel(true)
++		tween.tween_property(token, "position", token.position + Vector2(0.0, 10.0), seconds)
++	tween.tween_property(token, "modulate:a", 0.0, seconds)
++	await _wait(seconds)
++	token.visible = false
++
++
++func _tween_to(node: Node2D, property: String, target: Variant, seconds: float) -> void:
++	var tween: Tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
++	tween.tween_property(node, property, target, seconds)
++	await _wait(seconds)
++
++
++## Chờ bằng timer (không chờ `Tween.finished`): `stop()`/đổi trận giết Tween thì vòng phát vẫn tỉnh dậy được.
++func _wait(seconds: float) -> void:
++	if seconds <= 0.0 or not is_inside_tree():
++		return
++	await get_tree().create_timer(seconds).timeout
+diff --git a/game/src/battle/event_player.gd.uid b/game/src/battle/event_player.gd.uid
+new file mode 100644
+index 0000000..a3f735b
+--- /dev/null
++++ b/game/src/battle/event_player.gd.uid
+@@ -0,0 +1 @@
++uid://bscdovbgx3byk
+diff --git a/game/src/ui/hud.gd b/game/src/ui/hud.gd
+index f116be2..74bf3dd 100644
+--- a/game/src/ui/hud.gd
++++ b/game/src/ui/hud.gd
+@@ -11,8 +11,12 @@ const PANEL_POSITION: Vector2 = Vector2(972, 52)
+ const PANEL_WIDTH: float = 260.0
+ const SEPARATION: int = 12
+ const BUTTON_HEIGHT: float = 44.0
++## Dòng báo pha ("Lượt của bạn" / "Quân Nguyên đang ra đòn"), nhỏ hơn số hiệp.
++const PHASE_FONT_SIZE: int = 17
+ 
+ var _round_label: Label
++## Dòng pha, luôn hiện khi đang chơi (Story 2.11, AC 4).
++var _phase_label: Label
+ var _undo_button: Button
+ var _end_turn_button: Button
+ ## Dòng nhắc dưới các nút ("Bấm lần nữa để đánh"); rỗng thì ẩn.
+@@ -35,6 +39,13 @@ func _ready() -> void:
+ 	_round_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+ 	box.add_child(_round_label)
+ 
++	_phase_label = Label.new()
++	_phase_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
++	_phase_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
++	_phase_label.add_theme_font_size_override("font_size", PHASE_FONT_SIZE)
++	_phase_label.visible = false
++	box.add_child(_phase_label)
++
+ 	_undo_button = _button(tr("hud.undo"), box)
+ 	_undo_button.pressed.connect(func() -> void: undo_pressed.emit())
+ 	_end_turn_button = _button(tr("hud.end_turn"), box)
+@@ -52,6 +63,25 @@ func show_turn(round_number: int, can_undo: bool, over: bool = false) -> void:
+ 	_undo_button.disabled = over or not can_undo
+ 	_end_turn_button.disabled = over
+ 	visible = true
++	# Hết trận thì bảng Thắng/Thua là thứ duy nhất cần đọc.
++	if over:
++		hide_phase()
++
++
++## Dòng báo pha (Story 2.11, AC 4). `enemy_turn` true khi đang phát hoạt ảnh của quân Nguyên.
++func show_phase(enemy_turn: bool) -> void:
++	_phase_label.text = tr("hud.phase.enemy") if enemy_turn else tr("hud.phase.player")
++	_phase_label.visible = true
++
++
++func hide_phase() -> void:
++	_phase_label.visible = false
++	_phase_label.text = ""
++
++
++## Dòng pha đang hiện (để test); rỗng là đang ẩn.
++func phase_text() -> String:
++	return _phase_label.text if _phase_label.visible else ""
+ 
+ 
+ ## Dòng nhắc; chuỗi rỗng là ẩn.
+diff --git a/game/src/ui/tooltip.gd b/game/src/ui/tooltip.gd
+index d6cf86f..041a71b 100644
+--- a/game/src/ui/tooltip.gd
++++ b/game/src/ui/tooltip.gd
+@@ -43,7 +43,12 @@ const DIRECTION_NAMES: Dictionary = {
+ const CURSOR_OFFSET: Vector2 = Vector2(18, 14)
+ ## Chừa mép màn hình.
+ const SCREEN_MARGIN: float = 8.0
++## Bề rộng tối đa của cả khung; chữ dài hơn thì Label tự xuống dòng.
+ const MAX_WIDTH: float = 340.0
++## Lề trong của khung (StyleBox), trừ ra khi tính bề rộng cho Label.
++const CONTENT_MARGIN: float = 8.0
++## Chừa một chút cho dấu tiếng Việt và cho số đo của font khỏi cụt chữ.
++const WIDTH_SLACK: float = 4.0
+ 
+ var _label: Label
+ 
+@@ -56,7 +61,7 @@ func _init() -> void:
+ 	style.border_color = Color(0.85, 0.70, 0.35, 1.0)
+ 	style.set_border_width_all(2)
+ 	style.set_corner_radius_all(4)
+-	style.set_content_margin_all(8)
++	style.set_content_margin_all(CONTENT_MARGIN)
+ 	add_theme_stylebox_override("panel", style)
+ 	_label = Label.new()
+ 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+@@ -71,8 +76,25 @@ func show_text(text: String) -> void:
+ 		return
+ 	_label.text = text
+ 	visible = true
++	_fit_width(text)
+ 	reset_size()
+-	place_at(get_viewport().get_mouse_position())
++	var viewport: Viewport = get_viewport()
++	place_at(viewport.get_mouse_position() if viewport != null else Vector2.ZERO)
++
++
++## Cho Label bề rộng bằng dòng dài nhất, không quá `MAX_WIDTH`.
++## Bắt buộc phải có: Label bật autowrap có bề rộng tối thiểu 1 px, nên `reset_size()` một mình sẽ bóp khung
++## thành một cột hẹp và chữ rơi xuống mỗi dòng một ký tự (đo thật: khung 17×637 px).
++func _fit_width(text: String) -> void:
++	var font: Font = _label.get_theme_font("font")
++	if font == null:
++		return
++	var font_size: int = _label.get_theme_font_size("font_size")
++	var widest: float = 0.0
++	for line: String in text.split("\n"):
++		widest = maxf(widest, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
++	var room: float = MAX_WIDTH - CONTENT_MARGIN * 2.0
++	_label.custom_minimum_size = Vector2(minf(widest + WIDTH_SLACK, room), 0.0)
+ 
+ 
+ func hide_tooltip() -> void:
+@@ -82,6 +104,9 @@ func hide_tooltip() -> void:
+ 
+ ## Đặt khung cạnh điểm neo, lật sang trái/trên khi sát mép màn hình.
+ func place_at(anchor: Vector2) -> void:
++	if get_viewport() == null:
++		position = anchor + CURSOR_OFFSET
++		return
+ 	var screen: Vector2 = get_viewport_rect().size
+ 	var pos: Vector2 = anchor + CURSOR_OFFSET
+ 	if pos.x + size.x > screen.x - SCREEN_MARGIN:
+diff --git a/game/tests/test_battle_view.gd b/game/tests/test_battle_view.gd
+index 64eba84..d5a844d 100644
+--- a/game/tests/test_battle_view.gd
++++ b/game/tests/test_battle_view.gd
+@@ -249,6 +249,23 @@ func _click_by_mouse(main: Node2D, cell: Vector2i) -> void:
+ 	_battle_input(main)._unhandled_input(click)
+ 
+ 
++## Bấm chuột đi qua Viewport: GUI chia sự kiện trước (Control nhận chuột sẽ nuốt), phần còn lại mới tới
++## `_unhandled_input`. Dùng khi cần chứng minh một Control không nuốt chuột (Story 2.10, AC 5).
++## `push_input` nhận toạ độ cửa sổ, nên phải qua `get_screen_transform()` (chạy headless cửa sổ chỉ 64×36).
++func _click_through_viewport(main: Node2D, cell: Vector2i) -> void:
++	var click: InputEventMouseButton = InputEventMouseButton.new()
++	click.button_index = MOUSE_BUTTON_LEFT
++	click.pressed = true
++	var viewport: Viewport = main.get_viewport()
++	click.position = viewport.get_screen_transform() * _screen_point(main, cell)
++	viewport.push_input(click)
++
++
++## Tâm ô đổi sang toạ độ màn hình (cùng hệ với vị trí sự kiện chuột).
++func _screen_point(main: Node2D, cell: Vector2i) -> Vector2:
++	return _board(main).get_global_transform_with_canvas() * BoardView.cell_center(cell)
++
++
+ ## Phím thật trên bàn phím (phím vật lý).
+ func _press_physical(main: Node2D, key: Key, echo: bool = false) -> void:
+ 	var ev: InputEventKey = InputEventKey.new()
+@@ -661,13 +678,24 @@ func test_hover_enemy_highlights_only_its_own_red_cells() -> void:
+ 
+ 
+ ## Khung thông tin không nuốt cú bấm: bấm vẫn ra lệnh đánh (Story 2.10, AC 5).
++## Cú bấm phải đi qua Viewport và phải rơi đúng lên khung, nếu không test sẽ "đạt" cả khi khung nuốt chuột.
+ func test_tooltip_does_not_block_click() -> void:
+ 	var main: Node2D = _make_attack_main()
+ 	_hover_by_mouse(main, Vector2i(3, 3))
+-	assert_true(_tooltip(main).visible_now(), "điều kiện trước: khung đang hiện")
++	var tip: Tooltip = _tooltip(main)
++	assert_true(tip.visible_now(), "điều kiện trước: khung đang hiện")
++	assert_eq(tip.mouse_filter, Control.MOUSE_FILTER_IGNORE, "khung khai báo không nhận chuột")
+ 	_press_physical(main, KEY_1)
+-	_click_by_mouse(main, Vector2i(3, 3))
+-	assert_eq(_unit_at(main, Vector2i(3, 2)).hp, 1, "cú bấm vẫn tới quân (bị đẩy lên 3,2), không bị khung nuốt")
++	# Chọn tướng làm khung vẽ lại (bám con trỏ thật), nên phải đặt khung đè lên ô **sau** bước này.
++	var at: Vector2 = _screen_point(main, Vector2i(3, 3))
++	# `place_at` tự cộng CURSOR_OFFSET, nên trừ hai lần để mép khung nằm trước điểm bấm.
++	tip.place_at(at - Tooltip.CURSOR_OFFSET * 2.0)
++	assert_true(tip.get_global_rect().grow(-2.0).has_point(at), "điều kiện trước: khung nằm đè lên ô sắp bấm")
++	_click_through_viewport(main, Vector2i(3, 3))
++	var pushed: Unit = _unit_at(main, Vector2i(3, 2))
++	assert_not_null(pushed, "cú bấm vẫn tới quân (bị đẩy lên 3,2), không bị khung nuốt")
++	if pushed != null:
++		assert_eq(pushed.hp, 1, "quân bị đẩy mất 1 máu")
+ 
+ 
+ ## Ô đỏ vẽ lại đúng sau Hủy nước đi, Chơi lại trận và F5 (Story 2.7, AC 10).
+@@ -1109,6 +1137,48 @@ func _banner(main: Node2D) -> ResultBanner:
+ 	return main._result_banner as ResultBanner
+ 
+ 
++## Đang phát hoạt ảnh thì lệnh mới bị bỏ qua (Story 2.11, AC 3).
++func test_commands_ignored_while_animation_plays() -> void:
++	var main: Node2D = _make_attack_main()
++	_press_physical(main, KEY_1)
++	assert_eq(_view(main).selected_id(), 1, "điều kiện trước: đã chọn Khoái")
++	_view(main).event_player().instant = false
++	_click_by_mouse(main, Vector2i(3, 3))
++	assert_true(_view(main).is_playing(), "đang phát hoạt ảnh của đòn đánh")
++	_press_physical(main, KEY_2)
++	assert_eq(_view(main).selected_id(), 1, "phím chọn tướng bị bỏ qua khi đang phát")
++	await wait_seconds(1.5)
++	assert_false(_view(main).is_playing(), "phát xong thì mở khóa")
++	_press_physical(main, KEY_2)
++	assert_eq(_view(main).selected_id(), 2, "phát xong thì nhận lệnh mới")
++
++
++## Dòng pha trên HUD: "Lượt của bạn" khi chờ, "Quân Nguyên đang ra đòn" trong lúc phát pha địch (Story 2.11, AC 4).
++func test_phase_line_follows_playback() -> void:
++	var main: Node2D = _make_attack_main()
++	assert_eq(_hud(main).phase_text(), tr("hud.phase.player"), "đang chờ người chơi")
++	_view(main).event_player().instant = false
++	_press_physical(main, KEY_SPACE)
++	assert_true(_view(main).is_playing(), "điều kiện trước: pha địch có sự kiện để phát")
++	assert_eq(_hud(main).phase_text(), tr("hud.phase.enemy"), "đang phát pha địch")
++	await wait_seconds(3.5)
++	assert_false(_view(main).is_playing(), "trọn pha địch phát xong")
++	assert_eq(_hud(main).phase_text(), tr("hud.phase.player"), "xong pha địch thì về lượt người chơi")
++
++
++## Hết trận thì khung thông tin ẩn và bỏ nổi bật; rê chuột sau đó cũng không hiện lại (Story 2.10, Task 3.3).
++func test_tooltip_hidden_when_battle_ends() -> void:
++	var main: Node2D = _make_win_main()
++	var view: TelegraphView = _board(main).telegraph_view()
++	_hover_by_mouse(main, Vector2i(5, 2))
++	assert_true(_tooltip(main).visible_now(), "điều kiện trước: đang xem được thông tin quân")
++	_win(main)
++	assert_false(_tooltip(main).visible_now(), "hết trận: khung ẩn")
++	assert_eq(view.highlighted(), [] as Array[Vector2i], "hết trận: bỏ nổi bật ô đỏ")
++	_hover_by_mouse(main, Vector2i(1, 2))
++	assert_false(_tooltip(main).visible_now(), "rê chuột sau khi hết trận: vẫn ẩn, không hiện lại")
++
++
+ ## Thắng trong hai đòn: đòn đầu chưa có bảng, đòn sau hiện "Thắng!" và khóa bàn.
+ func _win(main: Node2D) -> void:
+ 	_press_physical(main, KEY_1)
+diff --git a/game/tests/test_event_player.gd b/game/tests/test_event_player.gd
+new file mode 100644
+index 0000000..783ce95
+--- /dev/null
++++ b/game/tests/test_event_player.gd
+@@ -0,0 +1,68 @@
++extends GutTest
++## Hoạt ảnh phát lại sự kiện (Story 2.11, AC 1, 2, 6): thứ tự phát, trần 3 giây của một pha, và không đụng state.
++
++const KHOAI: int = 1
++## Quân Nguyên đầu tiên theo thứ tự đọc bàn (xem BoardFixture).
++const BO_BINH: int = 101
++
++
++func _board(units: Dictionary) -> BoardView:
++	var board: BoardView = BoardView.new()
++	add_child_autofree(board)
++	board.show_state(BoardFixture.state(units))
++	return board
++
++
++func _player(board: BoardView) -> EventPlayer:
++	var player: EventPlayer = EventPlayer.new()
++	player.setup(board)
++	add_child_autofree(player)
++	return player
++
++
++func test_events_apply_in_log_order() -> void:
++	var board: BoardView = _board({Vector2i(0, 0): "1", Vector2i(3, 0): "B"})
++	var player: EventPlayer = _player(board)
++	var khoai: UnitToken = board.tokens()[KHOAI] as UnitToken
++	var start: Vector2 = khoai.position
++	var bo_binh: UnitToken = board.tokens()[BO_BINH] as UnitToken
++	var events: Array[BattleEvent] = [
++		BattleEvent.moved(KHOAI, Vector2i(0, 0), Vector2i(1, 0), BattleEvent.Cause.WALK),
++		BattleEvent.moved(KHOAI, Vector2i(1, 0), Vector2i(2, 0), BattleEvent.Cause.WALK),
++		BattleEvent.died(BO_BINH, Vector2i(3, 0)),
++	]
++	player.play_now(events)
++	assert_eq(player.played().size(), 3, "phát đủ số sự kiện nhận được")
++	assert_eq(player.played()[0].type, BattleEvent.Type.MOVED, "phát theo đúng thứ tự nhật ký")
++	assert_eq(player.played()[2].type, BattleEvent.Type.DIED)
++	var step: Vector2 = BoardView.cell_center(Vector2i(1, 0)) - BoardView.cell_center(Vector2i(0, 0))
++	assert_eq(khoai.position, start + step * 2.0, "đồng quân đi đúng hai bước")
++	assert_false(bo_binh.visible, "quân gục bị ẩn khỏi bàn")
++
++
++func test_enemy_phase_total_is_capped_at_three_seconds() -> void:
++	var board: BoardView = _board({Vector2i(0, 0): "1", Vector2i(3, 0): "B"})
++	var player: EventPlayer = _player(board)
++	var long_log: Array[BattleEvent] = []
++	for i: int in range(40):
++		long_log.append(
++			BattleEvent.moved(BO_BINH, Vector2i(3, 0), Vector2i(3, 0), BattleEvent.Cause.WALK))
++	assert_almost_eq(player.total_seconds(long_log), EventPlayer.MAX_PHASE_SECONDS, 0.001,
++		"nhật ký dài vẫn bị co về đúng 3 giây (NFR3)")
++	var short_log: Array[BattleEvent] = [
++		BattleEvent.moved(BO_BINH, Vector2i(3, 0), Vector2i(3, 0), BattleEvent.Cause.WALK),
++	]
++	assert_almost_eq(player.total_seconds(short_log), EventPlayer.SECONDS_PER_EVENT, 0.001,
++		"pha ngắn giữ nguyên nhịp từng sự kiện")
++	assert_eq(player.total_seconds([] as Array[BattleEvent]), 0.0, "không có sự kiện thì không tốn thời gian")
++
++
++func test_animation_does_not_change_battle_state() -> void:
++	var state: BattleState = BoardFixture.state({Vector2i(0, 0): "1", Vector2i(3, 0): "B"})
++	var board: BoardView = BoardView.new()
++	add_child_autofree(board)
++	board.show_state(state)
++	var player: EventPlayer = _player(board)
++	player.play_now([BattleEvent.moved(KHOAI, Vector2i(0, 0), Vector2i(1, 0), BattleEvent.Cause.WALK)])
++	assert_eq(state.unit_by_id(KHOAI).cell, Vector2i(0, 0), "hoạt ảnh chỉ đọc, không sửa state (AC 6)")
++	assert_eq(state.unit_by_id(BO_BINH).cell, Vector2i(3, 0), "quân khác cũng không đổi")
+diff --git a/game/tests/test_event_player.gd.uid b/game/tests/test_event_player.gd.uid
+new file mode 100644
+index 0000000..901d21c
+--- /dev/null
++++ b/game/tests/test_event_player.gd.uid
+@@ -0,0 +1 @@
++uid://vhj236wh451c

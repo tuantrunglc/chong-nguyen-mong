@@ -1,0 +1,1100 @@
+diff --git a/game/i18n/text.csv b/game/i18n/text.csv
+index ebf3a8a..99273ac 100644
+--- a/game/i18n/text.csv
++++ b/game/i18n/text.csv
+@@ -117,3 +117,5 @@ tooltip.hp,Máu %d/%d
+ tooltip.attack_cell,"Đánh ô %s, đòn số %d"
+ tooltip.attack_charge,"Xung phong hướng %s, đòn số %d"
+ tooltip.no_attack,Không có đòn nào
++dev.copied,Đã sao chép báo lỗi
++dev.copied_no_battle,Đã sao chép báo lỗi (không có trận)
+diff --git a/game/src/app/main.gd b/game/src/app/main.gd
+index 4d70444..c4117e1 100644
+--- a/game/src/app/main.gd
++++ b/game/src/app/main.gd
+@@ -32,7 +32,14 @@ var _battle_view: BattleView
+ var _hud: Hud
+ var _tooltip: Tooltip
+ var _result_banner: ResultBanner
++var _notice: Notice
+ var _version_label: Label
++## Số lần mở game (SaveProbe) — báo cáo F2 ghi kèm.
++var _opens: int = 0
++## Id trận đang mở ("tran_01"), cho báo cáo F2.
++var _level_id: String = ""
++## Test thay được để bắt chuỗi thay vì ghi clipboard thật (headless không có clipboard). Callable() = dùng DisplayServer.
++var clipboard_writer: Callable = Callable()
+ 
+ 
+ func _ready() -> void:
+@@ -58,6 +65,9 @@ func _ready() -> void:
+ 	_result_banner = ResultBanner.new()
+ 	_result_banner.retry_pressed.connect(_start_battle)
+ 	add_child(_result_banner)
++	_notice = Notice.new()
++	_notice.name = "Notice"
++	add_child(_notice)
+ 	_battle_view = BattleView.new()
+ 	_battle_view.setup(_board_view, _battle_input, _hud, _tooltip)
+ 	# Hoạt ảnh phát xong mới vẽ bản chụp cuối (Story 2.11).
+@@ -75,11 +85,11 @@ func _ready() -> void:
+ 
+ 	# Thử lưu user:// (Story 0.5): luôn đếm và ghi log, vì trên itch.io không bật được dev trong iframe
+ 	# (tác giả chốt 2026-10-17). Xem bằng F12 → Console. Chữ trên màn hình chỉ hiện khi bật dev.
+-	var opens: int = SaveProbe.bump(SaveProbe.path)
+-	Log.info("luu_thu", "lần mở thứ %d, user:// bền: %s" % [opens, OS.is_userfs_persistent()])
++	_opens = SaveProbe.bump(SaveProbe.path)
++	Log.info("luu_thu", "lần mở thứ %d, user:// bền: %s" % [_opens, OS.is_userfs_persistent()])
+ 
+ 	var dev_tools: DevTools = DevTools.new()
+-	dev_tools.setup(AppState.launch.dev, opens)
++	dev_tools.setup(AppState.launch.dev, _opens)
+ 	add_child(dev_tools)
+ 	if AppState.launch.dev:
+ 		# Con cuối của bàn cờ: nằm trên đồng quân, ẩn theo bàn cờ khi có màn hình lỗi.
+@@ -90,6 +100,7 @@ func _ready() -> void:
+ 		add_child(_ai_overlay)
+ 		dev_tools.f3_pressed.connect(_toggle_ai_intents)
+ 		dev_tools.f5_pressed.connect(_reload_data)
++		dev_tools.f2_pressed.connect(_on_f2)
+ 
+ 	# Công cụ AI (Story 0.6): chỉ khi bật dev trên desktop có cửa sổ.
+ 	McpRuntime.start_if_enabled(self, AppState.launch.dev)
+@@ -102,6 +113,7 @@ func _start_battle() -> void:
+ 	var level_id: String = AppState.launch.level_id()
+ 	if level_id.is_empty():
+ 		level_id = "tran_%02d" % DEFAULT_TRAN
++	_level_id = level_id
+ 	var stats_result: LoadResult = StatsLoader.load_stats(stats_path)
+ 	var level_result: LoadResult = LevelLoader.load_level("%s/%s.json" % [level_dir, level_id])
+ 
+@@ -141,6 +153,46 @@ func _reload_data() -> void:
+ 	_start_battle()
+ 
+ 
++## F2 (chỉ khi bật dev): sao chép báo lỗi vào clipboard rồi báo trên màn hình (Story 2.13).
++## Không có trận (màn hình lỗi/menu) vẫn chép nhật ký + phiên bản — lỗi nạp dữ liệu là lúc cần báo cáo nhất.
++func _on_f2() -> void:
++	var meta: Dictionary = _report_meta()
++	if _controller == null:
++		var no_commands: Array[Dictionary] = []
++		_copy_to_clipboard(BugReport.build(null, null, no_commands, Log.get_lines(), meta))
++		Log.debug("dev", "f2: đã sao chép báo lỗi (không có trận)")
++		_notice.show_text(tr("dev.copied_no_battle"))
++		return
++	var text: String = BugReport.build(_controller.snapshot(), _controller.round_start_snapshot(),
++		_controller.round_commands(), Log.get_lines(), meta)
++	_copy_to_clipboard(text)
++	Log.debug("dev", "f2: đã sao chép báo lỗi (%d ký tự)" % text.length())
++	_notice.show_text(tr("dev.copied"))
++
++
++## Ghi clipboard; test thay `clipboard_writer` để bắt chuỗi (máy chạy test không có clipboard).
++func _copy_to_clipboard(text: String) -> void:
++	if clipboard_writer.is_valid():
++		clipboard_writer.call(text)
++	else:
++		DisplayServer.clipboard_set(text)
++
++
++## Thông báo ngắn (để test).
++func notice() -> Notice:
++	return _notice
++
++
++func _report_meta() -> Dictionary:
++	return {
++		"build": "v%s · %s" % [_read_version(), BuildInfo.read_commit(BUILD_INFO_PATH)],
++		"tran": _level_id,
++		"ten_tran": _level.name if _level != null else "",
++		"luc": Time.get_datetime_string_from_system(),
++		"lan_mo": _opens,
++	}
++
++
+ ## Hoạt ảnh của lệnh vừa phát xong: vẽ bản chụp cuối và bảng kết quả (Story 2.11).
+ func _on_playback_finished(snapshot: BattleState) -> void:
+ 	_show_board(snapshot)
+diff --git a/game/src/battle/battle_controller.gd b/game/src/battle/battle_controller.gd
+index a14ba5a..b1653da 100644
+--- a/game/src/battle/battle_controller.gd
++++ b/game/src/battle/battle_controller.gd
+@@ -14,6 +14,14 @@ const NOTHING_TO_UNDO_REASON: String = "không còn nước đi nào để hủy
+ var _state: BattleState = null
+ ## Bản chụp ngay trước nước đi gần nhất; null là không có gì để hủy. Chỉ giữ một (tác giả chốt 2026-10-18).
+ var _undo_snapshot: BattleState = null
++## Bàn đầu hiệp và các lệnh từ đó tới giờ, cho báo cáo F2 (Story 2.13). Phát lại hai thứ này ra đúng bàn đang sống.
++## Mục lệnh: {"lenh": "di"|"danh"|"ket_thuc_luot"|"huy", "tuong": int, "o": Vector2i, "tu_choi": Reject}.
++var _round_start: BattleState = null
++var _round_commands: Array[Dictionary] = []
++## Hiệp trước, giữ lại khi vừa kết thúc lượt: F2 rơi đúng lúc pha địch vừa chạy xong (chưa ra lệnh nào ở hiệp mới)
++## thì báo cáo vẫn phải phát lại được pha địch, nên dùng bàn đầu hiệp cũ + lệnh, gồm cả `ket_thuc_luot`.
++var _prev_round_start: BattleState = null
++var _prev_round_commands: Array[Dictionary] = []
+ 
+ 
+ ## telegraphs: đòn đã báo sẵn (chỉ bộ chạy kịch bản dùng, "truoc.bao_don", Story 2.8); chép sâu, theo số thứ tự.
+@@ -22,6 +30,11 @@ func start(level: LevelData, stats: Stats, telegraphs: Array[Telegraph] = []) ->
+ 	for t: Telegraph in telegraphs:
+ 		_state.telegraphs.append(t.clone())
+ 	_undo_snapshot = null
++	# Đầu hiệp 1 là bàn "truoc" của trận; begin() sẽ dời mốc sang bàn sau pha chuẩn bị (Story 2.13).
++	_round_start = _state.clone()
++	_round_commands = []
++	_prev_round_start = null
++	_prev_round_commands = []
+ 	# Bộ nạp đã chặn các lỗi này; đây chỉ là lưới an toàn.
+ 	for problem: String in _state.validate():
+ 		Log.error("battle", problem)
+@@ -74,6 +87,7 @@ func submit(command: Command) -> Array[BattleEvent]:
+ 	var rejected: BattleEvent = _rejection(events)
+ 	if rejected != null:
+ 		Log.debug("battle", "lệnh bị từ chối: %s" % rejected.reason)
++		_record(command, rejected.reject)
+ 		return events
+ 	var problems: Array[String] = _state.validate()
+ 	if not problems.is_empty():
+@@ -92,6 +106,11 @@ func submit(command: Command) -> Array[BattleEvent]:
+ 			_undo_snapshot = null
+ 		Command.Kind.BEGIN_BATTLE:
+ 			_undo_snapshot = null
++	_record(command, BattleEvent.Reject.NONE)
++	# Sang hiệp (hoặc mở trận): mốc "đầu hiệp" dời sang bàn mới. Mở trận không giữ hiệp trước (bàn trước khi quân
++	# Nguyên đi không phải thứ người chơi báo lỗi).
++	if command.kind == Command.Kind.BEGIN_BATTLE or command.kind == Command.Kind.END_TURN:
++		_start_round(command.kind == Command.Kind.END_TURN)
+ 	events_resolved.emit(events, _state.clone())
+ 	return events
+ 
+@@ -101,13 +120,16 @@ func submit(command: Command) -> Array[BattleEvent]:
+ func undo() -> Array[BattleEvent]:
+ 	if Rules.is_battle_over(_state):
+ 		Log.debug("battle", "hủy: trận đã kết thúc")
++		_record_undo(BattleEvent.Reject.BATTLE_OVER)
+ 		return [BattleEvent.rejected(BattleEvent.Reject.BATTLE_OVER, "trận đã kết thúc")]
+ 	if _undo_snapshot == null:
+ 		Log.debug("battle", "hủy: %s" % NOTHING_TO_UNDO_REASON)
++		_record_undo(BattleEvent.Reject.NOTHING_TO_UNDO)
+ 		return [BattleEvent.rejected(BattleEvent.Reject.NOTHING_TO_UNDO, NOTHING_TO_UNDO_REASON)]
+ 	# Bản chụp là bản riêng, không ai khác giữ, nên gán thẳng được.
+ 	_state = _undo_snapshot
+ 	_undo_snapshot = null
++	_record_undo(BattleEvent.Reject.NONE)
+ 	Log.debug("battle", "hủy nước đi gần nhất")
+ 	var events: Array[BattleEvent] = []
+ 	events_resolved.emit(events, _state.clone())
+@@ -118,6 +140,71 @@ func can_undo() -> bool:
+ 	return _undo_snapshot != null
+ 
+ 
++## Đầu hiệp để báo cáo F2 phát lại được (Story 2.13): bàn đầu hiệp hiện tại, hoặc bàn đầu hiệp trước khi vừa kết
++## thúc lượt mà chưa ra lệnh nào (giữ được pha địch vừa chạy). Null khi chưa mở trận.
++func round_start_snapshot() -> BattleState:
++	if _use_previous_round():
++		return _prev_round_start.clone()
++	return _round_start.clone() if _round_start != null else null
++
++
++## Các lệnh của hiệp tương ứng với `round_start_snapshot()`, theo thứ tự đã bấm (đã chép sâu).
++func round_commands() -> Array[Dictionary]:
++	var source: Array[Dictionary] = []
++	if _use_previous_round():
++		source = _prev_round_commands
++	else:
++		source = _round_commands
++	var out: Array[Dictionary] = []
++	for entry: Dictionary in source:
++		out.append(entry.duplicate(true))
++	return out
++
++
++## Ghi lại một lệnh cho báo cáo F2. Bị từ chối vẫn ghi (kèm mã `tu_choi`) vì đó thường chính là lỗi đang báo.
++func _record(command: Command, reject: BattleEvent.Reject) -> void:
++	# BEGIN_BATTLE không phải lệnh người chơi và `hanh_dong` không có nó. END_TURN bị từ chối cũng không có chỗ ghi
++	# `tu_choi` trong định dạng kịch bản (`"ket_thuc_luot": []`).
++	if command.kind == Command.Kind.BEGIN_BATTLE:
++		return
++	if command.kind == Command.Kind.END_TURN and reject != BattleEvent.Reject.NONE:
++		return
++	_round_commands.append({"lenh": _command_code(command), "tuong": command.unit_id,
++		"o": command.cell, "tu_choi": reject})
++
++
++func _record_undo(reject: BattleEvent.Reject) -> void:
++	_round_commands.append({"lenh": "huy", "tuong": 0, "o": Vector2i.ZERO, "tu_choi": reject})
++
++
++static func _command_code(command: Command) -> String:
++	match command.kind:
++		Command.Kind.MOVE:
++			return "di"
++		Command.Kind.ATTACK:
++			return "danh"
++		Command.Kind.END_TURN:
++			return "ket_thuc_luot"
++	return ""
++
++
++## Dời mốc đầu hiệp sang bàn hiện tại (sau BEGIN_BATTLE/END_TURN). keep_previous giữ hiệp vừa xong cho báo cáo F2.
++func _start_round(keep_previous: bool) -> void:
++	if keep_previous:
++		_prev_round_start = _round_start
++		_prev_round_commands = _round_commands
++	else:
++		_prev_round_start = null
++		_prev_round_commands = []
++	_round_start = _state.clone()
++	_round_commands = []
++
++
++## Báo cáo dùng hiệp trước khi hiệp này chưa có lệnh nào — đúng cửa sổ ngay sau khi kết thúc lượt.
++func _use_previous_round() -> bool:
++	return _round_commands.is_empty() and _prev_round_start != null
++
++
+ ## Các ô quân unit_id dừng được, theo thứ tự đọc bàn. Không có quân đó, hoặc trận đã hết, thì [].
+ func reachable(unit_id: int) -> Array[Vector2i]:
+ 	var unit: Unit = _state.unit_by_id(unit_id)
+diff --git a/game/src/data/board_text.gd b/game/src/data/board_text.gd
+index d10bdbe..4df599c 100644
+--- a/game/src/data/board_text.gd
++++ b/game/src/data/board_text.gd
+@@ -62,3 +62,21 @@ static func parse_cell(text: String) -> Variant:
+ 
+ static func cell_text(cell: Vector2i) -> String:
+ 	return "%d,%d" % [cell.x, cell.y]
++
++
++## Ký hiệu của một loại quân (chiều ngược của UNIT_SYMBOLS). Loại lạ trả "?".
++static func unit_symbol(type: int) -> String:
++	var symbol: Variant = UNIT_SYMBOLS.find_key(type)
++	return symbol as String if symbol != null else "?"
++
++
++## Ký hiệu của một loại địa hình (chiều ngược của TERRAIN_SYMBOLS). Loại lạ trả "?".
++static func terrain_symbol(kind: int) -> String:
++	var symbol: Variant = TERRAIN_SYMBOLS.find_key(kind)
++	return symbol as String if symbol != null else "?"
++
++
++## Mã hướng của một vector đơn vị (chiều ngược của DIRECTION_CODES): "B", "D", "N", "T". Vector lạ trả "".
++static func direction_code(dir: Vector2i) -> String:
++	var code: Variant = DIRECTION_CODES.find_key(dir)
++	return code as String if code != null else ""
+diff --git a/game/src/debug/bug_report.gd b/game/src/debug/bug_report.gd
+new file mode 100644
+index 0000000..57e8c7f
+--- /dev/null
++++ b/game/src/debug/bug_report.gd
+@@ -0,0 +1,252 @@
++class_name BugReport
++extends RefCounted
++## Dựng nội dung báo lỗi F2 (Story 2.13): kịch bản tái hiện (khối JSON dán thẳng vào `tests/kich_ban/`), bàn hiện
++## tại để đối chiếu, 200 dòng log gần nhất và phiên bản build.
++## Chỉ đọc dữ liệu được truyền vào: không giữ trạng thái sống, không đọc autoload, không ghi file, không phát signal.
++## `truoc` là BÀN ĐẦU HIỆP + `hanh_dong` là mọi lệnh trong hiệp, nên phát lại ra đúng bàn đang chơi (tác giả chốt
++## 2026-10-22: định dạng `truoc` không có `hiep`/`da_di`/`da_danh` nên không tả được bàn giữa hiệp).
++
++const FORMAT_VERSION: int = 1
++## Số dòng log tối đa đưa vào báo cáo (Log đã giữ 200; đây là chốt chặn thứ hai).
++const LOG_LINES: int = 200
++
++## BattleEvent.Reject -> mã "tu_choi" của kịch bản (ngược của ScenarioLoader.REJECT_CODES / ScenarioRunner.REJECT_EVENTS).
++const REJECT_CODES: Dictionary = {
++	BattleEvent.Reject.NO_UNIT: "khong_co_quan",
++	BattleEvent.Reject.NOT_GENERAL: "khong_phai_tuong",
++	BattleEvent.Reject.ALREADY_THERE: "da_dung_o_do",
++	BattleEvent.Reject.UNREACHABLE: "khong_toi_duoc",
++	BattleEvent.Reject.ALREADY_MOVED: "da_di_roi",
++	BattleEvent.Reject.NOTHING_TO_UNDO: "khong_con_nuoc_di",
++	BattleEvent.Reject.ALREADY_ATTACKED: "da_danh_roi",
++	BattleEvent.Reject.NOT_ADJACENT: "khong_ke",
++	BattleEvent.Reject.NO_TARGET: "khong_co_dich",
++	BattleEvent.Reject.NOT_IN_RANGE: "ngoai_tam",
++	BattleEvent.Reject.BATTLE_OVER: "tran_da_het",
++}
++
++## Tên đầy đủ cho phần "bàn hiện tại" (chữ chẩn đoán, không qua `tr()` như log — báo cáo dán cho AI, không phải UI).
++const TEN_QUAN: Dictionary = {
++	UnitType.NGUYEN_KHOAI: "Nguyễn Khoái",
++	UnitType.PHAM_NGU_LAO: "Phạm Ngũ Lão",
++	UnitType.TRAN_KHANH_DU: "Trần Khánh Dư",
++	UnitType.BO_BINH: "Bộ binh",
++	UnitType.KY_BINH: "Kỵ binh",
++	UnitType.CUNG_KY: "Cung kỵ",
++}
++
++
++## Toàn bộ văn bản dán vào clipboard. `state` null: không có trận (màn hình lỗi/menu) — chỉ log + phiên bản.
++## `round_start`/`commands`: xem `BattleController.round_start_snapshot()/round_commands()`.
++static func build(state: BattleState, round_start: BattleState, commands: Array[Dictionary],
++		log_lines: PackedStringArray, meta: Dictionary) -> String:
++	var lines: PackedStringArray = PackedStringArray()
++	lines.append("Hào Khí Đông A — báo lỗi")
++	lines.append("phiên bản: %s" % str(meta.get("build", "dev")))
++	if state == null:
++		lines.append("trận: (không có trận)")
++	else:
++		lines.append("trận: %s — %s · hiệp %d" % [str(meta.get("tran", "?")), str(meta.get("ten_tran", "?")),
++			state.round_number])
++	lines.append("lúc: %s · lần mở thứ %d" % [str(meta.get("luc", "?")), int(meta.get("lan_mo", 0))])
++	lines.append("")
++	if state != null:
++		lines.append("## Kịch bản tái hiện (chỉ khối json ngay dưới đây là tệp .json)")
++		lines.append("```json")
++		lines.append(JSON.stringify(scenario_data(state, round_start, commands, meta), "  "))
++		lines.append("```")
++		lines.append("(hết khối JSON — phần còn lại của báo cáo KHÔNG thuộc tệp kịch bản)")
++		lines.append("")
++		lines.append("## Bàn hiện tại (để đối chiếu, không phải kịch bản)")
++		lines.append_array(current_section(state))
++		lines.append("")
++	var logs: PackedStringArray = log_lines
++	if logs.size() > LOG_LINES:
++		logs = logs.slice(logs.size() - LOG_LINES)
++	lines.append("## Nhật ký (%d dòng gần nhất, cũ → mới)" % logs.size())
++	lines.append_array(logs)
++	lines.append("")
++	lines.append("## Ghi chú cho AI")
++	if state == null:
++		lines.append("Không có trận đang chạy. Chỉ có nhật ký và phiên bản ở trên.")
++	else:
++		lines.append("Cả báo cáo này là một tệp .txt. Chỉ khối json ở trên là một kịch bản luật hợp lệ:")
++		lines.append("`truoc` là bàn đầu hiệp, `hanh_dong` là các lệnh người chơi đã bấm trong hiệp, `sau` là bàn ĐANG thấy.")
++		lines.append("Muốn chạy thử: chép ĐÚNG khối đó (không kèm dòng nào khác) vào")
++		lines.append("game/tests/kich_ban/<nhóm>/<tên>.json rồi chạy tools/test.sh.")
++		lines.append("Nếu đây là lỗi: sửa `sau` thành điều ĐÚNG (kịch bản phải trượt), rồi mới sửa code — quy trình M3.")
++	return "\n".join(lines)
++
++
++## Khối kịch bản (Dictionary thuần, JSON.stringify được): `truoc` = bàn đầu hiệp, `hanh_dong` = lệnh trong hiệp.
++static func scenario_data(state: BattleState, round_start: BattleState, commands: Array[Dictionary],
++		meta: Dictionary) -> Dictionary:
++	var start: BattleState = round_start if round_start != null else state
++	return {
++		"phien_ban_dinh_dang": FORMAT_VERSION,
++		"mo_ta": "Báo lỗi F2: trận %s, hiệp %d, %d lệnh trong hiệp." % [str(meta.get("tran", "?")),
++			start.round_number, commands.size()],
++		"da_duyet": false,
++		"truoc": before_layers(start),
++		"hanh_dong": command_entries(commands),
++		# `sau` = bàn hiện tại: kịch bản hợp lệ ngay, ghi lại điều ĐANG xảy ra. Nếu là lỗi thì sửa `sau` thành
++		# điều đúng (kịch bản phải trượt trước khi sửa code — quy trình M3).
++		"sau": after_layers(state),
++	}
++
++
++## Các lớp của "truoc": dia_hinh, quan, mau (chỉ quân thiếu máu), thu_tu_dich, bao_don (nếu có).
++static func before_layers(state: BattleState) -> Dictionary:
++	var layers: Dictionary = {"dia_hinh": terrain_rows(state), "quan": unit_rows(state)}
++	var hp: Dictionary = hp_layer(state)
++	if not hp.is_empty():
++		layers["mau"] = hp
++	layers["thu_tu_dich"] = enemy_order(state)
++	var strikes: Array = strikes_layer(state)
++	if not strikes.is_empty():
++		layers["bao_don"] = strikes
++	return layers
++
++
++## Các lớp của "sau": như "truoc" nhưng KHÔNG có `thu_tu_dich` (định dạng "sau" không nhận khóa đó).
++static func after_layers(state: BattleState) -> Dictionary:
++	var layers: Dictionary = {"dia_hinh": terrain_rows(state), "quan": unit_rows(state)}
++	var hp: Dictionary = hp_layer(state)
++	if not hp.is_empty():
++		layers["mau"] = hp
++	var strikes: Array = strikes_layer(state)
++	if not strikes.is_empty():
++		layers["bao_don"] = strikes
++	return layers
++
++
++## Lớp `dia_hinh`: mỗi hàng một chuỗi, ô cách nhau một dấu cách.
++static func terrain_rows(state: BattleState) -> Array[String]:
++	var rows: Array[String] = []
++	for y: int in range(state.size.y):
++		var cells: PackedStringArray = PackedStringArray()
++		for x: int in range(state.size.x):
++			cells.append(BoardText.terrain_symbol(state.terrain[y * state.size.x + x]))
++		rows.append(" ".join(cells))
++	return rows
++
++
++## Lớp `quan`: ký hiệu quân theo ô, ô trống là ".".
++static func unit_rows(state: BattleState) -> Array[String]:
++	var by_cell: Dictionary = {}
++	for unit: Unit in state.units:
++		by_cell[unit.cell] = BoardText.unit_symbol(unit.type)
++	var rows: Array[String] = []
++	for y: int in range(state.size.y):
++		var cells: PackedStringArray = PackedStringArray()
++		for x: int in range(state.size.x):
++			cells.append(str(by_cell.get(Vector2i(x, y), ".")))
++		rows.append(" ".join(cells))
++	return rows
++
++
++## Lớp `mau`: ô -> máu, chỉ cho quân đang thiếu máu (quân đầy máu không ghi).
++static func hp_layer(state: BattleState) -> Dictionary:
++	var out: Dictionary = {}
++	for unit: Unit in state.units:
++		if unit.hp < state.stats.max_hp(unit.type):
++			out[BoardText.cell_text(unit.cell)] = unit.hp
++	return out
++
++
++## Lớp `thu_tu_dich`: ô quân Nguyên theo id tăng dần (id quyết định thứ tự ra đòn; bộ nạp gán id theo danh sách này).
++static func enemy_order(state: BattleState) -> Array[String]:
++	var enemies: Array[Unit] = []
++	for unit: Unit in state.units:
++		if unit.faction == Unit.Faction.NGUYEN:
++			enemies.append(unit)
++	enemies.sort_custom(func(a: Unit, b: Unit) -> bool: return a.id < b.id)
++	var out: Array[String] = []
++	for unit: Unit in enemies:
++		out.append(BoardText.cell_text(unit.cell))
++	return out
++
++
++## Lớp `bao_don`: đòn đã báo, xếp theo số thứ tự. Đòn của chủ đã gục bị bỏ (bộ nạp đòi `quan` phải có quân Nguyên).
++static func strikes_layer(state: BattleState) -> Array:
++	var sorted: Array[Telegraph] = state.telegraphs.duplicate()
++	sorted.sort_custom(func(a: Telegraph, b: Telegraph) -> bool: return a.order < b.order)
++	var out: Array = []
++	for telegraph: Telegraph in sorted:
++		var owner: Unit = state.unit_by_id(telegraph.owner_id)
++		if owner == null:
++			continue
++		var item: Dictionary = {"thu_tu": telegraph.order, "quan": BoardText.cell_text(owner.cell)}
++		if telegraph.kind == Telegraph.Kind.DIRECTION:
++			var code: String = BoardText.direction_code(telegraph.offset)
++			if code.is_empty():
++				continue
++			item["huong"] = code
++		else:
++			item["o"] = BoardText.cell_text(owner.cell + telegraph.offset)
++		out.append(item)
++	return out
++
++
++## `hanh_dong`: [{lenh, tuong, o, tu_choi}] đúng định dạng kịch bản; lệnh bị từ chối giữ mã `tu_choi`.
++static func command_entries(commands: Array[Dictionary]) -> Array:
++	var out: Array = []
++	for record: Dictionary in commands:
++		var code: String = str(record.get("lenh", ""))
++		if code.is_empty():
++			continue
++		var entry: Dictionary = {"lenh": code}
++		if code == "di" or code == "danh":
++			entry["tuong"] = str(int(record.get("tuong", 0)))
++			entry["o"] = BoardText.cell_text(record.get("o", Vector2i.ZERO) as Vector2i)
++		var reject: int = int(record.get("tu_choi", BattleEvent.Reject.NONE))
++		if reject != BattleEvent.Reject.NONE and REJECT_CODES.has(reject):
++			entry["tu_choi"] = str(REJECT_CODES[reject])
++		out.append(entry)
++	return out
++
++
++## Phần "bàn hiện tại": hiệp, cờ đã đi/đã đánh của tướng, bàn chữ, máu lẻ, đòn đã báo. Chỉ để đối chiếu.
++static func current_section(state: BattleState) -> PackedStringArray:
++	var lines: PackedStringArray = PackedStringArray()
++	lines.append("hiệp: %d" % state.round_number)
++	var generals: PackedStringArray = PackedStringArray()
++	for unit: Unit in state.units:
++		if unit.faction != Unit.Faction.DAI_VIET:
++			continue
++		generals.append("%s (%d): %s, %s, %d máu" % [_ten_quan(unit.type), unit.id,
++			"đã đi" if unit.has_moved else "chưa đi", "đã đánh" if unit.has_attacked else "chưa đánh",
++			unit.hp])
++	lines.append("tướng: %s" % ("; ".join(generals) if not generals.is_empty() else "không còn tướng nào"))
++	lines.append("địa hình:")
++	for row: String in terrain_rows(state):
++		lines.append("  " + row)
++	lines.append("quân:")
++	for row: String in unit_rows(state):
++		lines.append("  " + row)
++	var hp: Dictionary = hp_layer(state)
++	if hp.is_empty():
++		lines.append("máu lẻ: không có")
++	else:
++		var parts: PackedStringArray = PackedStringArray()
++		for cell: String in hp:
++			parts.append("%s=%d" % [cell, int(hp[cell])])
++		lines.append("máu lẻ: %s" % " · ".join(parts))
++	var strikes: Array = strikes_layer(state)
++	if not strikes.is_empty():
++		var parts: PackedStringArray = PackedStringArray()
++		for item: Dictionary in strikes:
++			var where: String = str(item["o"]) if item.has("o") else ("hướng %s" % str(item["huong"]))
++			parts.append("%d. %s" % [int(item["thu_tu"]), where])
++		lines.append("đòn đã báo: %s" % " · ".join(parts))
++	var dead_owner: int = 0
++	for telegraph: Telegraph in state.telegraphs:
++		if state.unit_by_id(telegraph.owner_id) == null:
++			dead_owner += 1
++	if dead_owner > 0:
++		lines.append("bỏ %d đòn của quân đã gục (không ghi được vào kịch bản)" % dead_owner)
++	return lines
++
++
++static func _ten_quan(type: int) -> String:
++	return str(TEN_QUAN.get(type, "quân lạ"))
+diff --git a/game/src/debug/dev_tools.gd b/game/src/debug/dev_tools.gd
+index 930ce2f..b90a0ab 100644
+--- a/game/src/debug/dev_tools.gd
++++ b/game/src/debug/dev_tools.gd
+@@ -3,10 +3,11 @@ extends Node2D
+ ## Công cụ dev: chữ "DEV" ở góc trên trái và phím F1–F5. Không bật dev thì không làm gì.
+ ## Phím đăng ký vào InputMap bằng code, chỉ khi bật dev.
+ ## Bật dev thì chữ DEV kèm số lần mở do main.gd đếm (SaveProbe): tải lại trang mà số tăng là user:// lưu được.
+-## F1 phát f1_pressed (main.gd bật/tắt tọa độ), F3 phát f3_pressed (main.gd bật/tắt ý định AI, Story 2.6), F5 phát
+-## f5_pressed (main.gd nạp lại dữ liệu); F2, F4 mới chỉ ghi log.
++## F1 phát f1_pressed (main.gd bật/tắt tọa độ), F2 phát f2_pressed (main.gd sao chép báo lỗi, Story 2.13),
++## F3 phát f3_pressed (main.gd bật/tắt ý định AI, Story 2.6), F5 phát f5_pressed (main.gd nạp lại dữ liệu); F4 mới chỉ ghi log.
+ 
+ signal f1_pressed
++signal f2_pressed
+ signal f3_pressed
+ signal f5_pressed
+ 
+@@ -15,10 +16,10 @@ const BADGE_FONT_SIZE: int = 20
+ const BADGE_COLOR: Color = Color(0.85, 0.1, 0.1)
+ const KEYS: Array[Key] = [KEY_F1, KEY_F2, KEY_F3, KEY_F4, KEY_F5]
+ ## Câu log khi bấm phím, theo thứ tự F1–F5. Công cụ thật làm ở các story ghi trong ngoặc.
+-## F1, F3, F5 đã có công cụ (f1_pressed, f3_pressed, f5_pressed) nên không có câu.
++## F1, F2, F3, F5 đã có công cụ (f1_pressed, f2_pressed, f3_pressed, f5_pressed) nên không có câu.
+ const MESSAGES: Array[String] = [
+ 	"",
+-	"f2: chưa có sao chép báo lỗi (story 2.13)",
++	"",
+ 	"",
+ 	"f4: không dùng",
+ 	"",
+@@ -61,6 +62,8 @@ func _unhandled_input(event: InputEvent) -> void:
+ 		if event.is_action_pressed(_action(i), false, true):
+ 			if i == 0:
+ 				f1_pressed.emit()
++			elif i == 1:
++				f2_pressed.emit()
+ 			elif i == 2:
+ 				f3_pressed.emit()
+ 			elif i == 4:
+diff --git a/game/src/ui/notice.gd b/game/src/ui/notice.gd
+new file mode 100644
+index 0000000..7fb230e
+--- /dev/null
++++ b/game/src/ui/notice.gd
+@@ -0,0 +1,80 @@
++class_name Notice
++extends Control
++## Thông báo ngắn giữa bàn (Story 2.13; kiến trúc: src/ui/notice.gd): hiện một câu rồi tự mờ dần và ẩn.
++## Không nhận chuột, không chặn input, không giữ trạng thái trận. Bảng nằm trên đồng quân nhưng dưới HUD.
++
++const SHOW_SECONDS: float = 2.5
++const FADE_SECONDS: float = 0.35
++const FONT_SIZE: int = 20
++const BOTTOM_MARGIN: float = 24.0
++const PADDING: int = 14
++const BACKGROUND_COLOR: Color = Color(0.16, 0.11, 0.08, 0.9)
++const BORDER_COLOR: Color = Color(0.36, 0.24, 0.14)
++const TEXT_COLOR: Color = Color(1.0, 0.95, 0.82)
++
++var _panel: PanelContainer
++var _label: Label
++var _tween: Tween
++var _shown: bool = false
++
++
++func _ready() -> void:
++	mouse_filter = Control.MOUSE_FILTER_IGNORE
++	size = BoardView.viewport_size
++	visible = false
++
++	_panel = PanelContainer.new()
++	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
++	var style: StyleBoxFlat = StyleBoxFlat.new()
++	style.bg_color = BACKGROUND_COLOR
++	style.border_color = BORDER_COLOR
++	style.set_border_width_all(2)
++	style.set_content_margin_all(PADDING)
++	_panel.add_theme_stylebox_override("panel", style)
++	add_child(_panel)
++
++	_label = Label.new()
++	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
++	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
++	_label.add_theme_font_size_override("font_size", FONT_SIZE)
++	_label.add_theme_color_override("font_color", TEXT_COLOR)
++	_label.theme_type_variation = &"TitleLabel"
++	_panel.add_child(_label)
++
++
++## Hiện câu thông báo; chuỗi rỗng là ẩn ngay. Gọi liên tiếp thì câu sau thay câu trước, không chồng bảng.
++func show_text(text: String) -> void:
++	if _label == null:
++		return
++	_label.text = text
++	_shown = not text.is_empty()
++	visible = _shown
++	if _tween != null and _tween.is_valid():
++		_tween.kill()
++	if not _shown:
++		return
++	modulate.a = 1.0
++	_place_panel()
++	_tween = create_tween()
++	_tween.tween_interval(SHOW_SECONDS)
++	_tween.tween_property(self, "modulate:a", 0.0, FADE_SECONDS)
++	_tween.tween_callback(_hide)
++
++
++func text() -> String:
++	return _label.text if _label != null and visible else ""
++
++
++func is_shown() -> bool:
++	return _shown
++
++
++## Canh bảng giữa bàn, sát đáy (không che HUD bên phải và không che thanh tiêu đề).
++func _place_panel() -> void:
++	_panel.reset_size()
++	_panel.position = Vector2((size.x - _panel.size.x) / 2.0, size.y - BOTTOM_MARGIN - _panel.size.y)
++
++
++func _hide() -> void:
++	visible = false
++	_shown = false
+diff --git a/game/tests/scenario_runner.gd b/game/tests/scenario_runner.gd
+index 7db3a4a..4ae1301 100644
+--- a/game/tests/scenario_runner.gd
++++ b/game/tests/scenario_runner.gd
+@@ -100,16 +100,14 @@ static func before_telegraphs(scenario: ScenarioData, stats: Stats) -> Array[Tel
+ 	return out
+ 
+ 
+-## Ký hiệu của UnitType trên bàn cờ chữ (bảng ngược của BoardText.UNIT_SYMBOLS).
++## Ký hiệu của UnitType trên bàn cờ chữ (như BoardText.unit_symbol; giữ hàm này cho test cũ).
+ static func unit_symbol(type: int) -> String:
+-	var symbol: Variant = BoardText.UNIT_SYMBOLS.find_key(type)
+-	return symbol as String if symbol != null else "?"
++	return BoardText.unit_symbol(type)
+ 
+ 
+-## Ký hiệu của Terrain trên bàn cờ chữ (bảng ngược của BoardText.TERRAIN_SYMBOLS).
++## Ký hiệu của Terrain trên bàn cờ chữ (như BoardText.terrain_symbol; giữ hàm này cho test cũ).
+ static func terrain_symbol(terrain: int) -> String:
+-	var symbol: Variant = BoardText.TERRAIN_SYMBOLS.find_key(terrain)
+-	return symbol as String if symbol != null else "?"
++	return BoardText.terrain_symbol(terrain)
+ 
+ 
+ ## Chạy một lệnh trên state. Trả "" nếu chạy được, hoặc câu báo vì sao không chạy được.
+diff --git a/game/tests/test_battle_controller.gd b/game/tests/test_battle_controller.gd
+index 44a67e7..63a21b3 100644
+--- a/game/tests/test_battle_controller.gd
++++ b/game/tests/test_battle_controller.gd
+@@ -351,6 +351,50 @@ func test_begin_runs_enemy_prepare_once_and_emits() -> void:
+ 
+ 
+ 
++## Nhật ký lệnh cho báo cáo F2 (Story 2.13): ghi lệnh chạy được, lệnh bị từ chối (kèm lý do) và hủy.
++func test_round_commands_record_accepted_rejected_and_undo() -> void:
++	var c: BattleController = _controller()
++	c.begin()
++	assert_eq(c.round_commands().size(), 0, "mở trận không để lệnh nào")
++	c.submit(Command.move(1, Vector2i(0, 5)))
++	var commands: Array[Dictionary] = c.round_commands()
++	assert_eq(commands.size(), 1)
++	assert_eq(str(commands[0]["lenh"]), "di")
++	assert_eq(int(commands[0]["tuong"]), 1)
++	assert_eq(int(commands[0]["tu_choi"]), BattleEvent.Reject.NONE)
++	c.submit(Command.attack(1, Vector2i(6, 0)))
++	commands = c.round_commands()
++	assert_eq(commands.size(), 2, "lệnh bị từ chối vẫn ghi")
++	assert_ne(int(commands[1]["tu_choi"]), BattleEvent.Reject.NONE, "có mã lý do")
++	c.undo()
++	commands = c.round_commands()
++	assert_eq(commands.size(), 3)
++	assert_eq(str(commands[2]["lenh"]), "huy")
++	assert_eq(int(commands[2]["tu_choi"]), BattleEvent.Reject.NONE, "hủy chạy được")
++
++
++## Sau khi kết thúc lượt mà chưa ra lệnh nào ở hiệp mới, báo cáo dùng hiệp TRƯỚC + `ket_thuc_luot` (pha địch phát
++## lại được). Ra lệnh đầu tiên ở hiệp mới thì mốc dời sang hiệp mới, danh sách lệnh rỗng lại.
++func test_round_start_and_commands_follow_the_round_boundary() -> void:
++	var c: BattleController = _controller()
++	c.begin()
++	var round_one_start: Array[String] = BoardFixture.picture(c.snapshot())
++	c.submit(Command.move(1, Vector2i(0, 5)))
++	assert_eq(BoardFixture.picture(c.round_start_snapshot()), round_one_start, "giữa hiệp: mốc là bàn đầu hiệp")
++	c.submit(Command.end_turn())
++	# Cửa sổ "vừa phát xong": báo cáo dùng hiệp trước, lệnh cuối là kết thúc lượt.
++	var commands: Array[Dictionary] = c.round_commands()
++	assert_eq(commands.size(), 2, "hai lệnh của hiệp trước")
++	assert_eq(str(commands[1]["lenh"]), "ket_thuc_luot")
++	assert_eq(BoardFixture.picture(c.round_start_snapshot()), round_one_start, "mốc vẫn là bàn đầu hiệp cũ")
++	# Ra lệnh đầu tiên ở hiệp mới: mốc dời sang hiệp mới, danh sách lệnh rỗng lại.
++	var new_round_start: Array[String] = BoardFixture.picture(c.snapshot())
++	c.submit(Command.move(2, Vector2i(1, 5)))
++	assert_eq(c.round_commands().size(), 1, "chỉ lệnh của hiệp mới")
++	assert_eq(str((c.round_commands()[0] as Dictionary)["lenh"]), "di")
++	assert_eq(BoardFixture.picture(c.round_start_snapshot()), new_round_start, "mốc dời sang bàn đầu hiệp mới")
++
++
+ ## Xem trước chạy trên bản sao: không đổi trạng thái sống, không phát signal, không tạo bản chụp hủy (Story 2.12).
+ func test_preview_does_not_touch_live_state() -> void:
+ 	var c: BattleController = _attack_controller()
+diff --git a/game/tests/test_bug_report.gd b/game/tests/test_bug_report.gd
+new file mode 100644
+index 0000000..ab1ca97
+--- /dev/null
++++ b/game/tests/test_bug_report.gd
+@@ -0,0 +1,216 @@
++extends GutTest
++## Báo cáo F2 (Story 2.13): dựng kịch bản tái hiện từ bàn đầu hiệp + lệnh trong hiệp, kèm bàn hiện tại, 200 dòng
++## log và phiên bản. Test quan trọng nhất: tách khối JSON ra, cho bộ nạp + bộ chạy kịch bản phát lại, phải ra đúng
++## bàn đang chơi (AC 1 và AC 3 ở mức dữ liệu).
++
++const META: Dictionary = {
++	"build": "v0.1.0 · abc1234",
++	"tran": "thu",
++	"ten_tran": "Trận thử",
++	"luc": "2026-10-22 15:00:00",
++	"lan_mo": 3,
++}
++
++
++func after_each() -> void:
++	Log.clear()
++
++
++## 5×5 toàn đất: Khoái 1,1; Lão 1,2; Bộ binh 2,1 (kề Khoái, nên pha chuẩn bị đứng yên và báo đòn vào 1,1).
++func _level() -> LevelData:
++	var level: LevelData = LevelData.new()
++	level.size = Vector2i(5, 5)
++	for i: int in range(level.size.x * level.size.y):
++		level.terrain.append(Terrain.PLAIN)
++	level.units.append(LevelData.UnitPlacement.new(UnitType.NGUYEN_KHOAI, Vector2i(1, 1)))
++	level.units.append(LevelData.UnitPlacement.new(UnitType.PHAM_NGU_LAO, Vector2i(1, 2)))
++	level.units.append(LevelData.UnitPlacement.new(UnitType.BO_BINH, Vector2i(2, 1)))
++	return level
++
++
++func _controller() -> BattleController:
++	var controller: BattleController = BattleController.new()
++	controller.start(_level(), BoardFixture.stats())
++	return controller
++
++
++func _report(controller: BattleController, log_lines: PackedStringArray = PackedStringArray()) -> String:
++	return BugReport.build(controller.snapshot(), controller.round_start_snapshot(),
++		controller.round_commands(), log_lines, META)
++
++
++func _enemy(state: BattleState) -> Unit:
++	for unit: Unit in state.units:
++		if unit.faction == Unit.Faction.NGUYEN:
++			return unit
++	return null
++
++
++## Khối ```json trong báo cáo -> Dictionary.
++func _scenario_json(report: String) -> Dictionary:
++	var start: int = report.find("```json")
++	assert_gt(start, -1, "báo cáo phải có khối json")
++	var body_start: int = report.find("\n", start) + 1
++	var end: int = report.find("```", body_start)
++	assert_gt(end, body_start, "khối json phải đóng")
++	var parser: JSON = JSON.new()
++	assert_eq(parser.parse(report.substr(body_start, end - body_start)), OK, "khối json đọc được")
++	return parser.data as Dictionary
++
++
++## Dictionary kịch bản -> ScenarioData qua đúng bộ nạp của game (không tự dựng tắt).
++func _scenario(data: Dictionary) -> ScenarioData:
++	var result: LoadResult = ScenarioLoader.parse_scenario(JSON.stringify(data, "  "),
++		"user://bao_loi_f2.json", "res://", BoardFixture.stats())
++	assert_eq(result.errors, [] as Array[String], "kịch bản trong báo cáo phải nạp được")
++	return result.data as ScenarioData
++
++
++func test_report_has_every_required_section() -> void:
++	var state: BattleState = BoardFixture.state({Vector2i(1, 1): "1", Vector2i(2, 1): "B"})
++	var text: String = BugReport.build(state, state.clone(), [] as Array[Dictionary],
++		PackedStringArray(["dòng một", "dòng hai"]), META)
++	assert_string_contains(text, "Hào Khí Đông A — báo lỗi")
++	assert_string_contains(text, "phiên bản: v0.1.0 · abc1234")
++	assert_string_contains(text, "trận: thu — Trận thử · hiệp 1")
++	assert_string_contains(text, "## Kịch bản tái hiện")
++	assert_string_contains(text, "```json")
++	assert_string_contains(text, "## Bàn hiện tại")
++	assert_string_contains(text, "## Nhật ký (2 dòng gần nhất")
++	assert_string_contains(text, "dòng một\ndòng hai")
++	assert_string_contains(text, "## Ghi chú cho AI")
++
++
++func test_no_battle_report_has_no_scenario() -> void:
++	var text: String = BugReport.build(null, null, [] as Array[Dictionary],
++		PackedStringArray(["[INFO][battle] nạp trận"]), META)
++	assert_string_contains(text, "trận: (không có trận)")
++	assert_string_contains(text, "[INFO][battle] nạp trận")
++	assert_false(text.contains("```json"), "không có trận thì không có kịch bản")
++	assert_string_contains(text, "Không có trận đang chạy")
++
++
++func test_truoc_layers_match_the_board() -> void:
++	var state: BattleState = BoardFixture.state({Vector2i(1, 1): "1", Vector2i(2, 1): "B"},
++		{Vector2i(0, 0): "~"}, {Vector2i(2, 1): 1})
++	var layers: Dictionary = BugReport.before_layers(state)
++	var terrain: Array[String] = layers["dia_hinh"] as Array[String]
++	assert_eq(terrain.size(), 7, "bảy hàng")
++	assert_eq(terrain[0], "~ . . . . . .", "hàng 0 có sông ở cột 0")
++	var units: Array[String] = layers["quan"] as Array[String]
++	assert_eq(units[1], ". 1 B . . . .", "hàng 1 có Khoái và Bộ binh")
++	var hp: Dictionary = layers["mau"] as Dictionary
++	assert_eq(hp.size(), 1, "chỉ quân thiếu máu mới ghi")
++	assert_eq(int(hp["2,1"]), 1, "Bộ binh còn 1 máu")
++	assert_eq(layers["thu_tu_dich"], ["2,1"] as Array[String], "thứ tự quân Nguyên theo ô")
++
++
++func test_truoc_omits_mau_when_nobody_is_hurt() -> void:
++	var state: BattleState = BoardFixture.state({Vector2i(1, 1): "1", Vector2i(2, 1): "B"})
++	assert_false(BugReport.before_layers(state).has("mau"), "không ai thiếu máu thì không có khóa mau")
++
++
++func test_bao_don_lists_cell_and_direction_strikes() -> void:
++	var state: BattleState = BoardFixture.state({Vector2i(1, 1): "1", Vector2i(2, 1): "B",
++		Vector2i(4, 4): "K"})
++	var infantry: Unit = state.unit_at(Vector2i(2, 1))
++	var cavalry: Unit = state.unit_at(Vector2i(4, 4))
++	state.telegraphs.append(Telegraph.new(cavalry.id, Telegraph.Kind.DIRECTION, Vector2i(-1, 0), 1))
++	state.telegraphs.append(Telegraph.new(infantry.id, Telegraph.Kind.CELL, Vector2i(-1, 0), 2))
++	var strikes: Array = BugReport.strikes_layer(state)
++	assert_eq(strikes.size(), 2, "hai đòn")
++	assert_eq(strikes[0] as Dictionary, {"thu_tu": 1, "quan": "4,4", "huong": "T"} as Dictionary,
++		"Kỵ binh xung phong hướng Tây")
++	assert_eq(strikes[1] as Dictionary, {"thu_tu": 2, "quan": "2,1", "o": "1,1"} as Dictionary,
++		"Bộ binh chém ô 1,1")
++
++
++func test_strike_of_dead_owner_is_dropped_and_mentioned() -> void:
++	var state: BattleState = BoardFixture.state({Vector2i(1, 1): "1", Vector2i(3, 3): "B"})
++	state.telegraphs.append(Telegraph.new(999, Telegraph.Kind.CELL, Vector2i(-1, 0), 1))
++	assert_eq(BugReport.strikes_layer(state).size(), 0, "chủ đã gục: không ghi được vào kịch bản")
++	var lines: PackedStringArray = BugReport.current_section(state)
++	assert_has(lines, "bỏ 1 đòn của quân đã gục (không ghi được vào kịch bản)")
++
++
++func test_commands_become_scenario_steps() -> void:
++	var commands: Array[Dictionary] = [
++		{"lenh": "di", "tuong": 1, "o": Vector2i(3, 4), "tu_choi": BattleEvent.Reject.NONE},
++		{"lenh": "danh", "tuong": 2, "o": Vector2i(3, 3), "tu_choi": BattleEvent.Reject.NOT_IN_RANGE},
++		{"lenh": "huy", "tuong": 0, "o": Vector2i.ZERO, "tu_choi": BattleEvent.Reject.NONE},
++	]
++	var steps: Array = BugReport.command_entries(commands)
++	assert_eq(steps.size(), 3)
++	assert_eq(steps[0] as Dictionary, {"lenh": "di", "tuong": "1", "o": "3,4"} as Dictionary)
++	assert_eq(steps[1] as Dictionary,
++		{"lenh": "danh", "tuong": "2", "o": "3,3", "tu_choi": "ngoai_tam"} as Dictionary,
++		"lệnh bị từ chối giữ mã lý do")
++	assert_eq(steps[2] as Dictionary, {"lenh": "huy"} as Dictionary, "hủy không có tướng/ô")
++
++
++func test_reject_codes_match_scenario_runner() -> void:
++	for reject: int in BugReport.REJECT_CODES:
++		var code: String = str(BugReport.REJECT_CODES[reject])
++		assert_true(ScenarioRunner.REJECT_EVENTS.has(code), "mã %s phải có trong bộ chạy kịch bản" % code)
++		assert_eq(int(ScenarioRunner.REJECT_EVENTS[code]), reject, "mã %s phải trỏ về đúng lý do" % code)
++	assert_eq(BugReport.REJECT_CODES.size(), ScenarioRunner.REJECT_EVENTS.size(), "không thiếu mã nào")
++
++
++func test_log_keeps_the_last_200_lines() -> void:
++	var lines: PackedStringArray = PackedStringArray()
++	for i: int in range(250):
++		lines.append("dòng %d" % i)
++	var state: BattleState = BoardFixture.state({Vector2i(1, 1): "1"})
++	var text: String = BugReport.build(state, state.clone(), [] as Array[Dictionary], lines, META)
++	assert_string_contains(text, "## Nhật ký (200 dòng gần nhất")
++	assert_false(text.contains("dòng 49\n"), "bỏ dòng cũ nhất")
++	assert_string_contains(text, "dòng 50")
++	assert_string_contains(text, "dòng 249")
++
++
++func test_report_does_not_touch_the_live_state() -> void:
++	var controller: BattleController = _controller()
++	controller.begin()
++	var before: Array[String] = BoardFixture.picture(controller.snapshot())
++	_report(controller)
++	assert_eq(BoardFixture.picture(controller.snapshot()), before, "dựng báo cáo không đổi trận")
++	assert_false(controller.can_undo(), "không tạo bản chụp hủy")
++
++
++## AC 1 + AC 3: báo cáo lấy giữa hiệp, phát lại bằng chính bộ nạp + bộ chạy kịch bản, phải ra đúng bàn đang chơi.
++func test_report_replays_to_the_live_board() -> void:
++	var controller: BattleController = _controller()
++	controller.begin()
++	controller.submit(Command.move(2, Vector2i(1, 3)))
++	var enemy: Unit = _enemy(controller.snapshot())
++	controller.submit(Command.attack(1, enemy.cell))
++	controller.undo()  # đánh đã xóa bản chụp hủy -> bị từ chối, vẫn phải ghi trong hanh_dong
++	controller.submit(Command.end_turn())
++	controller.submit(Command.move(1, Vector2i(0, 1)))
++	var data: Dictionary = _scenario_json(_report(controller))
++	var steps: Array = data["hanh_dong"] as Array
++	assert_eq(steps.size(), 1, "chỉ lệnh của hiệp đang chơi")
++	var run: ScenarioRunner.ScenarioResult = ScenarioRunner.run(_scenario(data), BoardFixture.stats())
++	assert_true(run.passed, "kịch bản phát lại không lỗi: %s" % str(run.problems))
++	assert_eq(BoardFixture.picture(run.final_state), BoardFixture.picture(controller.snapshot()),
++		"bàn sau khi phát lại khớp bàn đang chơi (ô, máu, đã đi, đã đánh)")
++
++
++## AC 3: F2 rơi đúng lúc pha địch vừa chạy xong (chưa ra lệnh nào ở hiệp mới) thì báo cáo phải dùng hiệp TRƯỚC
++## + `ket_thuc_luot`, để phát lại ra cả pha địch chứ không chỉ chụp bàn sau nó.
++func test_report_right_after_end_turn_keeps_the_enemy_phase() -> void:
++	var controller: BattleController = _controller()
++	controller.begin()
++	controller.submit(Command.move(2, Vector2i(1, 3)))
++	var enemy: Unit = _enemy(controller.snapshot())
++	controller.submit(Command.attack(1, enemy.cell))
++	controller.submit(Command.end_turn())
++	assert_eq(controller.round_commands().size(), 3, "báo cáo vẫn thấy ba lệnh của hiệp trước")
++	var data: Dictionary = _scenario_json(_report(controller))
++	var steps: Array = data["hanh_dong"] as Array
++	assert_eq(steps.size(), 3, "ba lệnh của hiệp trước")
++	assert_eq(str((steps[2] as Dictionary)["lenh"]), "ket_thuc_luot", "lệnh cuối là kết thúc lượt")
++	var run: ScenarioRunner.ScenarioResult = ScenarioRunner.run(_scenario(data), BoardFixture.stats())
++	assert_true(run.passed, "kịch bản phát lại không lỗi: %s" % str(run.problems))
++	assert_eq(BoardFixture.picture(run.final_state), BoardFixture.picture(controller.snapshot()),
++		"phát lại có cả pha địch: bàn khớp")
+diff --git a/game/tests/test_dev_tools.gd b/game/tests/test_dev_tools.gd
+index 75581e7..5ce70a4 100644
+--- a/game/tests/test_dev_tools.gd
++++ b/game/tests/test_dev_tools.gd
+@@ -1,7 +1,7 @@
+ extends GutTest
+ ## Phím F1–F5 chỉ có tác dụng khi bật dev; không bật dev thì không có chữ "DEV", không có log, không phát signal.
+-## F1 phát f1_pressed (main.gd bật/tắt tọa độ), F3 phát f3_pressed (ý định AI), F5 phát f5_pressed (main.gd nạp lại dữ
+-## liệu); F2, F4 mới chỉ ghi log.
++## F1 phát f1_pressed (main.gd bật/tắt tọa độ), F2 phát f2_pressed (main.gd sao chép báo lỗi), F3 phát f3_pressed
++## (ý định AI), F5 phát f5_pressed (main.gd nạp lại dữ liệu); F4 mới chỉ ghi log.
+ ## Bật dev thì chữ DEV kèm số lần mở (nếu có).
+ 
+ const ACTIONS: Array[String] = ["dev_f1", "dev_f2", "dev_f3", "dev_f4", "dev_f5"]
+@@ -53,6 +53,7 @@ func test_dev_off_keys_do_nothing() -> void:
+ 	assert_false(InputMap.has_action("dev_f1"), "không đăng ký phím dev")
+ 	assert_false(tools.is_processing_unhandled_input(), "không nhận phím")
+ 	assert_signal_not_emitted(tools, "f1_pressed")
++	assert_signal_not_emitted(tools, "f2_pressed")
+ 	assert_signal_not_emitted(tools, "f3_pressed")
+ 	assert_signal_not_emitted(tools, "f5_pressed")
+ 
+@@ -61,12 +62,11 @@ func test_dev_on_shows_badge_and_logs_each_key() -> void:
+ 	Log.debug_enabled = true
+ 	var tools: DevTools = _make_and_press_all(true)
+ 	assert_signal_emit_count(tools, "f1_pressed", 1)
++	assert_signal_emit_count(tools, "f2_pressed", 1)
+ 	assert_signal_emit_count(tools, "f3_pressed", 1)
+ 	assert_signal_emit_count(tools, "f5_pressed", 1)
+-	assert_eq(Log.get_lines(), PackedStringArray([
+-		"[DEBUG][dev] f2: chưa có sao chép báo lỗi (story 2.13)",
+-		"[DEBUG][dev] f4: không dùng",
+-	]))
++	assert_eq(Log.get_lines(), PackedStringArray(["[DEBUG][dev] f4: không dùng"]),
++		"F1, F2, F3, F5 đều có công cụ; chỉ F4 còn câu log")
+ 	assert_true(tools.is_processing_unhandled_input(), "nhận phím")
+ 	var badge: Label = null
+ 	for child: Node in tools.get_children():
+diff --git a/game/tests/test_main.gd b/game/tests/test_main.gd
+index 9284fbc..61b3f1c 100644
+--- a/game/tests/test_main.gd
++++ b/game/tests/test_main.gd
+@@ -564,3 +564,44 @@ func test_f5_needs_dev() -> void:
+ 	for line: String in Log.get_lines():
+ 		assert_false(line.contains("][dev]"), line)
+ 	Log.debug_enabled = false
++
++
++## F2 (Story 2.13): chỉ khi bật dev, ghi clipboard qua seam test, hiện thông báo, và báo cáo có đủ phần.
++func test_f2_copies_report_only_with_dev() -> void:
++	AppState.launch.dev = true
++	Log.debug_enabled = true
++	var main: Node2D = _make_main()
++	var copied: Array[String] = []
++	main.clipboard_writer = func(text: String) -> void: copied.append(text)
++	_dev_tools(main).f2_pressed.emit()
++	assert_eq(copied.size(), 1, "ghi clipboard đúng một lần")
++	assert_string_contains(copied[0], "\"phien_ban_dinh_dang\": 1")
++	assert_string_contains(copied[0], "trận: tran_01")
++	assert_string_contains(copied[0], "## Bàn hiện tại")
++	assert_string_contains(copied[0], "## Nhật ký")
++	assert_true(main.notice().is_shown(), "hiện thông báo")
++	assert_eq(main.notice().text(), tr("dev.copied"))
++	assert_has(Log.get_lines(), "[DEBUG][dev] f2: đã sao chép báo lỗi (%d ký tự)" % copied[0].length())
++	Log.debug_enabled = false
++
++
++func test_f2_is_not_wired_without_dev() -> void:
++	var main: Node2D = _make_main()
++	var copied: Array[String] = []
++	main.clipboard_writer = func(text: String) -> void: copied.append(text)
++	_dev_tools(main).f2_pressed.emit()
++	assert_eq(copied.size(), 0, "không bật dev thì không nối F2")
++	assert_false(main.notice().is_shown())
++
++
++func test_f2_still_copies_on_error_screen() -> void:
++	AppState.launch.dev = true
++	var main: Node2D = _make_main(_broken_level_dir())
++	var copied: Array[String] = []
++	main.clipboard_writer = func(text: String) -> void: copied.append(text)
++	_dev_tools(main).f2_pressed.emit()
++	assert_eq(copied.size(), 1, "màn hình lỗi vẫn chép được")
++	assert_string_contains(copied[0], "trận: (không có trận)")
++	assert_string_contains(copied[0], "## Nhật ký")
++	assert_false(copied[0].contains("```json"), "không có trận thì không có kịch bản")
++	assert_eq(main.notice().text(), tr("dev.copied_no_battle"))
+diff --git a/game/tests/test_notice.gd b/game/tests/test_notice.gd
+new file mode 100644
+index 0000000..aab42f4
+--- /dev/null
++++ b/game/tests/test_notice.gd
+@@ -0,0 +1,38 @@
++extends GutTest
++## Thông báo ngắn (Story 2.13): hiện một câu rồi tự ẩn, không nhận chuột, câu sau thay câu trước.
++
++func _notice() -> Notice:
++	var notice: Notice = Notice.new()
++	add_child_autofree(notice)
++	return notice
++
++
++func test_shows_text_then_hides_itself() -> void:
++	var notice: Notice = _notice()
++	notice.show_text("Đã sao chép báo lỗi")
++	assert_true(notice.is_shown(), "hiện ngay")
++	assert_eq(notice.text(), "Đã sao chép báo lỗi")
++	await wait_seconds(Notice.SHOW_SECONDS + Notice.FADE_SECONDS + 0.5)
++	assert_false(notice.is_shown(), "tự ẩn sau khoảng 3 giây")
++	assert_eq(notice.text(), "", "ẩn rồi thì không còn chữ")
++
++
++func test_empty_text_hides_immediately() -> void:
++	var notice: Notice = _notice()
++	notice.show_text("một câu")
++	notice.show_text("")
++	assert_false(notice.is_shown(), "chuỗi rỗng là ẩn")
++
++
++func test_second_text_replaces_the_first() -> void:
++	var notice: Notice = _notice()
++	notice.show_text("một")
++	notice.show_text("hai")
++	assert_eq(notice.text(), "hai", "câu sau thay câu trước")
++	assert_eq(notice.get_child_count(), 1, "chỉ một bảng, không chồng")
++
++
++func test_notice_does_not_take_mouse() -> void:
++	var notice: Notice = _notice()
++	assert_eq(notice.mouse_filter, Control.MOUSE_FILTER_IGNORE)
++	assert_eq(notice.get_child(0).mouse_filter, Control.MOUSE_FILTER_IGNORE, "bảng cũng không nhận chuột")

@@ -7,3 +7,5 @@ build/
 game/.godot/
 game/build_info.json
 *.tmp
+*.xlsx
+.agents/
