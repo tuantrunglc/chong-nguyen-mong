@@ -97,3 +97,21 @@ dev.ai.no_rule,chưa có luật đòn cho loại quân này
 dev.ai.order,đòn số %d
 dev.ai.no_attack,không báo đòn
 dev.ai.fallen,(đã gục)
+terrain.plain,Đồng bằng
+terrain.effect.plain,Không có hiệu ứng
+terrain.effect.river,Quân Nguyên vào thì chết đuối
+terrain.effect.forest,"Chắn đường, không đi vào được"
+terrain.effect.spikes,Đi qua mất máu
+terrain.effect.granary,Quân Nguyên đứng kề thì hồi máu
+terrain.effect.village,Đánh vào làng thì mất Lòng dân
+terrain.effect.pass,Quân Nguyên vào ải thì thua
+unit.full.nguyen_khoai,Nguyễn Khoái
+unit.full.pham_ngu_lao,Phạm Ngũ Lão
+unit.full.tran_khanh_du,Trần Khánh Dư
+unit.full.bo_binh,Bộ binh
+unit.full.ky_binh,Kỵ binh
+unit.full.cung_ky,Cung kỵ
+tooltip.hp,Máu %d/%d
+tooltip.attack_cell,"Đánh ô %s, đòn số %d"
+tooltip.attack_charge,"Xung phong hướng %s, đòn số %d"
+tooltip.no_attack,Không có đòn nào

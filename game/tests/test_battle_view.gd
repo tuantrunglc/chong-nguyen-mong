@@ -85,6 +85,13 @@ func _view(main: Node2D) -> BattleView:
 	return main._battle_view as BattleView
 
 
+func _tooltip(main: Node2D) -> Tooltip:
+	for child: Node in main.get_children():
+		if child is Tooltip:
+			return child as Tooltip
+	return null
+
+
 func _board(main: Node2D) -> BoardView:
 	return main._board_view as BoardView
 
@@ -612,6 +619,55 @@ func test_red_cells_vanish_when_owner_drowns() -> void:
 	assert_null(_unit_at(main, Vector2i(2, 2)), "Bộ binh chết đuối")
 	assert_true(view.red_cells().is_empty(), "đòn bị hủy thì không còn ô đỏ")
 	assert_true(view.number_labels().is_empty(), "không còn số thứ tự của đòn bị hủy")
+
+
+## Khung thông tin khi rê chuột (Story 2.10): quân, địa hình, và ẩn khi ra ngoài bàn.
+func test_tooltip_shows_unit_and_terrain() -> void:
+	var main: Node2D = _make_level_main(HUY_DIR, HUY_LEVEL, {
+		"phien_ban_dinh_dang": 1,
+		"ten": "Thử thông tin",
+		"kieu": "tieu_diet",
+		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . ~ . . . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"quan": [". . . . . . .", ". . 1 . . . .", ". . B . . . .", ". . . . . . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"thu_tu_dich": ["2,2"],
+		"tiep_vien": [],
+		"muu_ke_mo": [],
+	})
+	_hover_by_mouse(main, Vector2i(2, 1))
+	assert_true(_tooltip(main).text().contains("Nguyễn Khoái"), "rê tướng: hiện tên đầy đủ")
+	assert_true(_tooltip(main).text().contains("Máu 3/3"), "rê tướng: hiện máu")
+	_hover_by_mouse(main, Vector2i(2, 2))
+	assert_true(_tooltip(main).text().contains("Bộ binh"), "rê quân Nguyên: hiện tên loại")
+	assert_true(_tooltip(main).text().contains("Đánh ô 2,1, đòn số 1"), "thực tế: [%s]" % _tooltip(main).text().replace("\n", " | "))
+	_hover_by_mouse(main, Vector2i(2, 3))
+	assert_true(_tooltip(main).text().contains("Sông"), "rê ô: hiện tên địa hình")
+	assert_true(_tooltip(main).text().contains("chết đuối"), "rê ô: hiện hiệu ứng")
+	_hover_by_mouse(main, Vector2i(-1, -1))
+	assert_false(_tooltip(main).visible_now(), "ra ngoài bàn thì khung ẩn")
+
+
+## Rê lên quân Nguyên thì chỉ ô đỏ của chính nó nổi bật (Story 2.10, AC 2).
+func test_hover_enemy_highlights_only_its_own_red_cells() -> void:
+	var main: Node2D = _make_attack_main()
+	var view: TelegraphView = _board(main).telegraph_view()
+	_hover_by_mouse(main, Vector2i(3, 3))
+	assert_eq(view.highlighted(), [Vector2i(3, 4)] as Array[Vector2i], "chỉ ô đỏ của Bộ binh 3,3")
+	_hover_by_mouse(main, Vector2i(5, 5))
+	assert_eq(view.highlighted(), [Vector2i(5, 6)] as Array[Vector2i], "đổi sang quân khác thì đổi ô nổi bật")
+	_hover_by_mouse(main, Vector2i(3, 4))
+	assert_eq(view.highlighted(), [] as Array[Vector2i], "rê tướng chưa báo đòn: bỏ nổi bật")
+
+
+## Khung thông tin không nuốt cú bấm: bấm vẫn ra lệnh đánh (Story 2.10, AC 5).
+func test_tooltip_does_not_block_click() -> void:
+	var main: Node2D = _make_attack_main()
+	_hover_by_mouse(main, Vector2i(3, 3))
+	assert_true(_tooltip(main).visible_now(), "điều kiện trước: khung đang hiện")
+	_press_physical(main, KEY_1)
+	_click_by_mouse(main, Vector2i(3, 3))
+	assert_eq(_unit_at(main, Vector2i(3, 2)).hp, 1, "cú bấm vẫn tới quân (bị đẩy lên 3,2), không bị khung nuốt")
 
 
 ## Ô đỏ vẽ lại đúng sau Hủy nước đi, Chơi lại trận và F5 (Story 2.7, AC 10).

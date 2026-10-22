@@ -29,6 +29,10 @@ const NUMBER_OUTLINE_SIZE: int = 8
 const NUMBER_MARGIN: Vector2 = Vector2(3, 2)
 ## Nối các số của nhiều đòn trúng cùng một ô.
 const NUMBER_SEPARATOR: String = "·"
+## Ô đỏ nổi bật khi rê chuột lên chủ đòn (Story 2.10): sáng hơn và viền trắng, vẫn đỏ để không lẫn với ô sáng xanh.
+const HIGHLIGHT_FILL_COLOR: Color = Color(1.0, 0.45, 0.45, 0.85)
+const HIGHLIGHT_BORDER_COLOR: Color = Color(1.0, 1.0, 1.0, 1.0)
+const HIGHLIGHT_BORDER_WIDTH: float = 5.0
 
 ## Lớp số, BoardView đặt trên đồng quân.
 var numbers: Node2D
@@ -38,6 +42,8 @@ var _state: BattleState = null
 var _cells: Dictionary = {}
 ## Ô đầu đường xung phong -> các hướng (Array[Vector2i]) của những Kỵ binh bắt đầu từ ô đó.
 var _arrows: Dictionary = {}
+## Ô đỏ của chủ đòn đang được trỏ chuột (Story 2.10), rỗng là không nổi bật ô nào.
+var _highlight: Array[Vector2i] = []
 
 
 func _init() -> void:
@@ -83,6 +89,20 @@ func red_cells() -> Dictionary:
 ## Ô đầu đường xung phong -> các hướng mũi tên (để test).
 func arrows() -> Dictionary:
 	return _arrows
+
+
+## Làm nổi bật ô đỏ của một chủ đòn (Story 2.10); mảng rỗng là bỏ nổi bật.
+func highlight(cells: Array[Vector2i]) -> void:
+	if cells == _highlight:
+		return
+	_highlight = cells.duplicate()
+	queue_redraw()
+	numbers.queue_redraw()
+
+
+## Ô đang nổi bật (để test).
+func highlighted() -> Array[Vector2i]:
+	return _highlight
 
 
 ## Ô -> nhãn số thứ tự đang hiện (để test).
@@ -159,6 +179,11 @@ func _is_block(cell: Vector2i) -> bool:
 
 func _draw_red(canvas: CanvasItem, cell: Vector2i) -> void:
 	var face: Rect2 = top_rect(cell)
+	if _highlight.has(cell):
+		canvas.draw_rect(face, HIGHLIGHT_FILL_COLOR)
+		canvas.draw_rect(face.grow(-HIGHLIGHT_BORDER_WIDTH / 2.0), HIGHLIGHT_BORDER_COLOR, false,
+			HIGHLIGHT_BORDER_WIDTH)
+		return
 	canvas.draw_rect(face, FILL_COLOR)
 	canvas.draw_rect(face.grow(-BORDER_WIDTH / 2.0), BORDER_COLOR, false, BORDER_WIDTH)
 

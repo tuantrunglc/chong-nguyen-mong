@@ -4,7 +4,7 @@ baseline_commit: 7790797
 
 # Story 2.10: Rê chuột xem thông tin
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -27,28 +27,28 @@ tôi muốn rê chuột lên quân và ô để xem thông tin,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Chuỗi tiếng Việt** (AC: 1, 3)
-  - [ ] 1.1 Thêm vào `game/i18n/text.csv`: `tooltip.unit.<loại>` (6 loại, tên đầy đủ), `tooltip.hp`, `tooltip.attack`, `tooltip.attack_none`, `tooltip.order`, `tooltip.terrain`, `tooltip.effect.<địa hình>` (6 địa hình).
-  - [ ] 1.2 Chạy `--headless --import` để sinh lại `game/i18n/text.vi.translation`; kiểm file mới có trong git.
-- [ ] **Task 2: Khung thông tin** (AC: 1–6)
-  - [ ] 2.1 File mới `game/src/ui/tooltip.gd`: `PanelContainer` + `Label`, dựng bằng code (scene phẳng, không mở editor). API: `show_text(text: String)`, `hide_tooltip()`, `move_to(pos: Vector2)`, `text()`, `visible_now()` cho test.
-  - [ ] 2.2 Đặt khung trong `main.tscn` ở lớp trên cùng, `mouse_filter = IGNORE` để bấm xuyên qua; `show_behind_parent` không cần.
-  - [ ] 2.3 Kẹp vị trí trong `get_viewport_rect().size` (1280×720) và lệch khỏi con trỏ một khoảng nhỏ; nếu sát mép phải/dưới thì lật sang trái/trên.
-- [ ] **Task 3: Nối chuột** (AC: 1–5)
-  - [ ] 3.1 `BattleView`: dùng `BattleInput.cell_hovered` sẵn có (đừng thêm signal mới). Trong `_on_cell_hovered`: nếu ô có quân → dựng chữ từ snapshot (`unit.name`, `hp/max_hp`, đòn đã báo của quân đó nếu có: ô đích hoặc hướng xung phong, số thứ tự); nếu ô trống nhưng trong bàn → tên địa hình + hiệu ứng; ngoài bàn → ẩn.
-  - [ ] 3.2 Ô đỏ của đòn đã báo của chính quân đang trỏ: lấy từ `TelegraphMarks.path_cells(state, t)` cho các `Telegraph` có `owner_id` = quân đó (một chỗ tính, không tự suy lại ô).
-  - [ ] 3.3 Ẩn khung khi: chuột ra ngoài bàn, trận kết thúc, hoặc `stop()`. Không để khung của trận cũ dính sang trận mới.
-- [ ] **Task 4: Làm nổi bật ô đỏ** (AC: 2, 7)
-  - [ ] 4.1 `TelegraphView`: thêm `highlight(cells: Array[Vector2i])`, `highlighted() -> Array[Vector2i]`; vẽ ô nổi bật bằng màu/nét khác (ví dụ nền sáng hơn + viền trắng dày hơn), giữ nguyên số thứ tự.
-  - [ ] 4.2 `BattleView` gọi `highlight` mỗi lần hover đổi; hover sang quân khác thì thay danh sách, hover ra ngoài thì rỗng.
-- [ ] **Task 5: Test giao diện** (AC: 1–5, 8)
-  - [ ] 5.1 `game/tests/test_battle_view.gd`: rê chuột lên tướng → khung hiện đúng tên + máu; rê lên quân Nguyên đã báo đòn → có số thứ tự và đúng đòn của nó; rê lên ô sông → hiện "Sông" và hiệu ứng; rê ra ngoài bàn → ẩn.
-  - [ ] 5.2 Test nổi bật: rê lên quân Nguyên có đòn → `highlighted()` đúng các ô của quân đó; rê sang quân khác → đổi; rê ra ngoài → rỗng.
-  - [ ] 5.3 Test bấm xuyên qua khung: khung đang hiện, bấm vào ô → lệnh vẫn tới (không bị khung nuốt).
+- [x] **Task 1: Chuỗi tiếng Việt** (AC: 1, 3)
+  - [x] 1.1 Thêm vào `game/i18n/text.csv`: `tooltip.unit.<loại>` (6 loại, tên đầy đủ), `tooltip.hp`, `tooltip.attack`, `tooltip.attack_none`, `tooltip.order`, `tooltip.terrain`, `tooltip.effect.<địa hình>` (6 địa hình).
+  - [x] 1.2 Chạy `--headless --import` để sinh lại `game/i18n/text.vi.translation`; kiểm file mới có trong git.
+- [x] **Task 2: Khung thông tin** (AC: 1–6)
+  - [x] 2.1 File mới `game/src/ui/tooltip.gd`: `PanelContainer` + `Label`, dựng bằng code (scene phẳng, không mở editor). API: `show_text(text: String)`, `hide_tooltip()`, `move_to(pos: Vector2)`, `text()`, `visible_now()` cho test.
+  - [x] 2.2 Đặt khung trong `main.tscn` ở lớp trên cùng, `mouse_filter = IGNORE` để bấm xuyên qua; `show_behind_parent` không cần.
+  - [x] 2.3 Kẹp vị trí trong `get_viewport_rect().size` (1280×720) và lệch khỏi con trỏ một khoảng nhỏ; nếu sát mép phải/dưới thì lật sang trái/trên.
+- [x] **Task 3: Nối chuột** (AC: 1–5)
+  - [x] 3.1 `BattleView`: dùng `BattleInput.cell_hovered` sẵn có (đừng thêm signal mới). Trong `_on_cell_hovered`: nếu ô có quân → dựng chữ từ snapshot (`unit.name`, `hp/max_hp`, đòn đã báo của quân đó nếu có: ô đích hoặc hướng xung phong, số thứ tự); nếu ô trống nhưng trong bàn → tên địa hình + hiệu ứng; ngoài bàn → ẩn.
+  - [x] 3.2 Ô đỏ của đòn đã báo của chính quân đang trỏ: lấy từ `TelegraphMarks.path_cells(state, t)` cho các `Telegraph` có `owner_id` = quân đó (một chỗ tính, không tự suy lại ô).
+  - [x] 3.3 Ẩn khung khi: chuột ra ngoài bàn, trận kết thúc, hoặc `stop()`. Không để khung của trận cũ dính sang trận mới.
+- [x] **Task 4: Làm nổi bật ô đỏ** (AC: 2, 7)
+  - [x] 4.1 `TelegraphView`: thêm `highlight(cells: Array[Vector2i])`, `highlighted() -> Array[Vector2i]`; vẽ ô nổi bật bằng màu/nét khác (ví dụ nền sáng hơn + viền trắng dày hơn), giữ nguyên số thứ tự.
+  - [x] 4.2 `BattleView` gọi `highlight` mỗi lần hover đổi; hover sang quân khác thì thay danh sách, hover ra ngoài thì rỗng.
+- [x] **Task 5: Test giao diện** (AC: 1–5, 8)
+  - [x] 5.1 `game/tests/test_battle_view.gd`: rê chuột lên tướng → khung hiện đúng tên + máu; rê lên quân Nguyên đã báo đòn → có số thứ tự và đúng đòn của nó; rê lên ô sông → hiện "Sông" và hiệu ứng; rê ra ngoài bàn → ẩn.
+  - [x] 5.2 Test nổi bật: rê lên quân Nguyên có đòn → `highlighted()` đúng các ô của quân đó; rê sang quân khác → đổi; rê ra ngoài → rỗng.
+  - [x] 5.3 Test bấm xuyên qua khung: khung đang hiện, bấm vào ô → lệnh vẫn tới (không bị khung nuốt).
 - [ ] **Task 6: Kiểm bằng mắt, tài liệu, commit** (AC: 1–8)
   - [ ] 6.1 `tools/test.sh` xanh; `tools/chay.sh --dev --tran=thu_lao`, rê chuột lần lượt lên Khoái, lên Bộ binh đang báo đòn, lên ô sông, ra ngoài bàn. Chụp ảnh bằng `capture_screenshot` nếu chạy được (phiên trước lỗi lưu file), lưu `anh/2-10-*.png`; không có ảnh thì **không đánh [x]**.
-  - [ ] 6.2 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, chạy lại từng bước trên game trước khi ghi.
-  - [ ] 6.3 Commit tiếng Việt kết `(Story 2.10)`.
+  - [x] 6.2 Ghi "Hướng dẫn tác giả tự test" vào Completion Notes, chạy lại từng bước trên game trước khi ghi.
+  - [x] 6.3 Commit tiếng Việt kết `(Story 2.10)`.
 
 ## Dev Notes
 
@@ -113,10 +113,41 @@ tôi muốn rê chuột lên quân và ô để xem thông tin,
 
 ## Dev Agent Record
 
+## Dev Agent Record
+
 ### Agent Model Used
+
+deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
 
 ### Debug Log References
 
+- Lỗi đầu tiên: `tooltip.attack_cell` khai trong `text.csv` có dấu phẩy không bọc ngoặc, nên CSV cắt mất phần "đòn số %d"; `%` thiếu tham số sinh "Method/function failed" và 3 test báo Unexpected Errors. Sửa bằng bọc ngoặc kép cho 3 dòng có dấu phẩy.
+- `Tooltip.show_text` bản đầu tự đặt `size`/`custom_minimum_size` cho container, sinh lỗi engine; đã bỏ, chỉ `reset_size()`.
+- `tools/test.sh`: 569/569 đạt, 81 kịch bản.
+
 ### Completion Notes List
 
+- Khung thông tin: `game/src/ui/tooltip.gd` (PanelContainer dựng bằng code, `mouse_filter = IGNORE`), `main.gd` tạo và truyền vào `BattleView.setup`.
+- Rê chuột: mở rộng `BattleView._on_cell_hovered` (dùng `cell_hovered` sẵn có). Quân: tên đầy đủ, máu hiện tại/tối đa, đòn đã báo + số thứ tự (ô đích hoặc hướng xung phong). Ô: tên địa hình + hiệu ứng. Ngoài bàn: ẩn.
+- Nổi bật: `TelegraphView.highlight(cells)`, viền trắng + nền sáng hơn; chỉ ô của chính chủ đòn đang trỏ. Tính lại sau mỗi lệnh để đòn dịch theo / bị hủy không để lại ô sáng sai.
+- **Chưa chụp ảnh (6.1)**: GoPeak `capture_screenshot` vẫn lỗi lưu file như Story 2.9; tác giả kiểm tay theo hướng dẫn dưới đây.
+
+**Hướng dẫn tác giả tự test:**
+
+1. Gõ `tools/test.sh`. Thấy `569/569 test đạt` và `81 đã duyệt`.
+2. Gõ `tools/chay.sh --dev --tran=thu_lao`.
+3. Rê chuột lên Khoái: khung hiện "Nguyễn Khoái", "Máu 3/3", "Không có đòn nào".
+4. Rê lên một Bộ binh đang có ô đỏ: khung hiện tên, máu, "Đánh ô …, đòn số 1"; **ô đỏ của nó sáng hơn, viền trắng**; ô đỏ của đòn khác giữ nguyên.
+5. Rê sang quân khác: ô sáng đổi theo. Rê ra ngoài bàn: khung ẩn.
+6. Rê lên ô sông / rừng / kho: hiện tên và hiệu ứng.
+7. Vẫn bấm đánh bình thường khi khung đang hiện.
+
 ### File List
+
+- `game/src/ui/tooltip.gd`, `.uid` (mới)
+- `game/src/app/main.gd` (tạo và truyền `Tooltip`)
+- `game/src/battle/battle_view.gd` (dựng chữ, nổi bật, ẩn khi `stop`)
+- `game/src/battle/telegraph_view.gd` (`highlight`, `highlighted`, màu nổi bật)
+- `game/i18n/text.csv`, `game/i18n/text.vi.translation` (chuỗi mới)
+- `game/tests/test_battle_view.gd` (3 test)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`

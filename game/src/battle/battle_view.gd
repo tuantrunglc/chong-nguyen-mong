@@ -9,6 +9,8 @@ const NONE: int = 0
 var _board: BoardView = null
 var _input: BattleInput = null
 var _hud: Hud = null
+## Khung thông tin khi rê chuột (Story 2.10); null thì không hiện gì.
+var _tooltip: Tooltip = null
 var _controller: BattleController = null
 ## Id tướng đang chọn; NONE là không chọn.
 var _selected: int = NONE
@@ -20,10 +22,11 @@ var _targets: Array[Vector2i] = []
 var _pending: Vector2i = BoardView.NO_CELL
 
 
-func setup(board: BoardView, input: BattleInput, hud: Hud) -> void:
+func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = null) -> void:
 	_board = board
 	_input = input
 	_hud = hud
+	_tooltip = tooltip
 	input.general_key_pressed.connect(_on_general_key)
 	input.cell_clicked.connect(_on_cell_clicked)
 	input.cell_hovered.connect(_on_cell_hovered)
@@ -45,6 +48,10 @@ func start(controller: BattleController) -> void:
 func stop() -> void:
 	_controller = null
 	_deselect()
+	if _tooltip != null:
+		_tooltip.hide_tooltip()
+	if _board != null:
+		_board.telegraph_view().highlight([] as Array[Vector2i])
 	_hud.visible = false
 
 
@@ -142,6 +149,7 @@ func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) -> 
 	if Rules.is_battle_over(snapshot):
 		_deselect()
 		_update_hud()
+		_update_info(_input.hovered_cell() if _input != null else BoardView.NO_CELL)
 		return
 	if _selected != NONE:
 		var unit: Unit = snapshot.unit_by_id(_selected)
@@ -151,13 +159,70 @@ func _on_events_resolved(_events: Array[BattleEvent], snapshot: BattleState) -> 
 		else:
 			_deselect()
 	_update_hud()
+	# Bàn đã đổi (đòn dịch theo, đòn bị hủy): khung thông tin và nổi bật tính lại theo ô đang trỏ.
+	_update_info(_input.hovered_cell() if _input != null else BoardView.NO_CELL)
 
 
 func _on_cell_hovered(cell: Vector2i) -> void:
+	_update_info(cell)
 	if _controller == null or _selected == NONE or not _cells.has(cell):
 		_board.show_path([])
 		return
 	_board.show_path(_controller.path_to(_selected, cell))
+
+
+## Khung thông tin và ô đỏ nổi bật theo ô đang trỏ (Story 2.10). Chỉ đọc bản chụp.
+func _update_info(cell: Vector2i) -> void:
+	if _controller == null or _board == null:
+		return
+	var state: BattleState = _controller.snapshot()
+	if state == null:
+		return
+	if not state.in_bounds(cell):
+		if _tooltip != null:
+			_tooltip.hide_tooltip()
+		_board.telegraph_view().highlight([] as Array[Vector2i])
+		return
+	var unit: Unit = state.unit_at(cell)
+	if _tooltip != null:
+		_tooltip.show_text(_unit_text(unit, state) if unit != null else _terrain_text(state.terrain_at(cell)))
+	_board.telegraph_view().highlight(_telegraph_cells_of(unit, state))
+
+
+func _unit_text(unit: Unit, state: BattleState) -> String:
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append(tr(Tooltip.UNIT_NAMES[unit.type] as String))
+	lines.append(tr("tooltip.hp") % [unit.hp, state.stats.max_hp(unit.type)])
+	lines.append(_attack_text(unit, state))
+	return "\n".join(lines)
+
+
+func _attack_text(unit: Unit, state: BattleState) -> String:
+	for t: Telegraph in state.telegraphs:
+		if t.owner_id != unit.id:
+			continue
+		if t.kind == Telegraph.Kind.DIRECTION:
+			return tr("tooltip.attack_charge") % [tr(Tooltip.DIRECTION_NAMES[t.offset] as String), t.order]
+		var hit: Vector2i = TelegraphMarks.hit_cell(state, t)
+		if hit == Telegraph.NO_CELL:
+			return tr("tooltip.no_attack")
+		return tr("tooltip.attack_cell") % [BoardText.cell_text(hit), t.order]
+	return tr("tooltip.no_attack")
+
+
+func _terrain_text(terrain: int) -> String:
+	return "%s\n%s" % [tr(Tooltip.TERRAIN_NAMES[terrain] as String),
+		tr(Tooltip.TERRAIN_EFFECTS[terrain] as String)]
+
+
+func _telegraph_cells_of(unit: Unit, state: BattleState) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	if unit == null:
+		return cells
+	for t: Telegraph in state.telegraphs:
+		if t.owner_id == unit.id:
+			cells.append_array(TelegraphMarks.path_cells(state, t))
+	return cells
 
 
 func _select(id: int) -> void:

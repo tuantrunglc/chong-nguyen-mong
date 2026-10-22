@@ -30,6 +30,7 @@ var _board_view: BoardView
 var _battle_input: BattleInput
 var _battle_view: BattleView
 var _hud: Hud
+var _tooltip: Tooltip
 var _result_banner: ResultBanner
 var _version_label: Label
 
@@ -52,11 +53,13 @@ func _ready() -> void:
 	add_child(_battle_input)
 	_hud = Hud.new()
 	add_child(_hud)
+	_tooltip = Tooltip.new()
+	add_child(_tooltip)
 	_result_banner = ResultBanner.new()
 	_result_banner.retry_pressed.connect(_start_battle)
 	add_child(_result_banner)
 	_battle_view = BattleView.new()
-	_battle_view.setup(_board_view, _battle_input, _hud)
+	_battle_view.setup(_board_view, _battle_input, _hud, _tooltip)
 	add_child(_battle_view)
 
 	_version_label = Label.new()
