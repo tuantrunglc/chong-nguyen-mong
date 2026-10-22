@@ -142,6 +142,22 @@ Mỗi quân cần (khung 64×64, hai phe tách màu rõ: Đại Việt đỏ, Ng
 | F4 | Biểu tượng game, favicon web | 32, 64, 128, 256 px | Khiên đồng hoa văn mặt trời và kiếm giáo bắt chéo | Đã xong đủ 4 cỡ |
 | F5 | Ảnh bìa itch.io | 630×500 | Bố cục 2 phe đối đầu trên nền sông Bạch Đằng, logo chữ và tagline | Đã xong (100% Resurrect 64) |
 
+## G. Thủy chiến & Thuyền (P2 & P3)
+
+**Tình trạng 2026-10-22:** Đã hoàn thiện toàn diện 100% hệ thống Thuyền chiến & Thủy chiến chuẩn 100% Resurrect 64 và 1-bit alpha tại `img/pixellab-thu/toi_uu/thuyen/`. Đại bảng tổng hợp: `_tong_hop_toan_bo_thuyen_chien.png`.
+
+| # | Loại thuyền / Trạng thái | Kích thước | Chi tiết thiết kế | Tình trạng |
+|---|---|---|---|---|
+| G1 | Thuyền Chiến Đại Việt (Mông Đồng) | 64×64 | Thân gỗ nâu đỏ viền đồng, buồm đen, hàng mái chèo lướt sóng (2 hướng xuôi/ngược dòng) | Đã xong |
+| G2 | Chiến Thuyền Nguyên Mông | 64×64 | Thân gỗ bầu dày, buồm xám xanh chàm, gắn khiên phòng thủ dọc mạn thuyền (2 hướng) | Đã xong |
+| G3 | Thuyền Tải Lương Trương Văn Hổ | 64×64 | Thuyền buôn to bản chất đầy các bao lương thực Vân Đồn (2 hướng) | Đã xong |
+| G4 | Thuyền Đắm Cọc Bạch Đằng | 64×64 | Mạn thuyền vỡ toác cắm vào bãi cọc nhọn Bạch Đằng, nước tràn tung bọt trắng | Đã xong |
+| G5 | Thuyền Lương Cháy Vân Đồn | 64×64 | Bao lương bốc cháy ngùn ngụt, ngọn lửa cam đỏ và khói đen cuộn bốc lên | Đã xong |
+| G6 | Chiến Thuyền Trúng Hỏa Công | 64×64 | Cột buồm rách tơi tả, lửa bùng cháy dữ dội từ thân thuyền | Đã xong |
+| G7 | Đại Soái Hạm Mông Đồng (Đại Việt) | 64×128 (2 ô) | Soái hạm 2 lầu chỉ huy, cờ đại kỳ thêu rồng thời Trần viền đồng, nhiều tầng mái chèo | Đã xong |
+| G8 | Đại Hạm Ô Mã Nhi (Nguyên Mông) | 64×128 (2 ô) | Đại hạm bọc giáp gỗ kiên cố, tháp canh gắn khiên phòng thủ, buồm lớn | Đã xong |
+| G9 | Hoạt ảnh Chèo Thuyền Lướt Sóng | 64×64 (4 frames) | Mái chèo chèo nước nhịp nhàng, sủi bọt trắng và rẽ vệt sóng đuôi thuyền | Đã xong (kèm GIF preview) |
+
 ## Kiểm tra trước khi đưa một hình vào game
 
 1. Đúng kích thước, đúng lưới 64 px, không có điểm ảnh nhòe.
