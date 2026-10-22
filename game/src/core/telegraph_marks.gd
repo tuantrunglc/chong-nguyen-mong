@@ -17,14 +17,13 @@ static func cells(state: BattleState) -> Dictionary:
 	return out
 
 
-## Lý do đòn này sẽ bị hủy, hoặc NONE nếu còn hiệu lực (Story 2.9). Phân biệt đúng ba đường path_cells trả rỗng;
-## không suy từ hit_cell một mình vì nó gộp cả ba thành NO_CELL.
+## Lý do đòn này sẽ bị hủy, hoặc NONE nếu còn hiệu lực (Story 2.9). Dùng đúng `target_cell` (một chỗ tính ô đích)
+## nên lý do không lệch được với `hit_cell`; không suy từ `hit_cell` một mình vì nó gộp cả ba đường thành NO_CELL.
 static func cancel_reason(state: BattleState, telegraph: Telegraph) -> BattleEvent.TelegraphCancel:
-	if state.unit_by_id(telegraph.owner_id) == null:
-		return BattleEvent.TelegraphCancel.OWNER_DIED
 	var owner: Unit = state.unit_by_id(telegraph.owner_id)
-	var step: Vector2i = owner.cell + telegraph.offset
-	if state.in_bounds(step):
+	if owner == null:
+		return BattleEvent.TelegraphCancel.OWNER_DIED
+	if state.in_bounds(telegraph.target_cell(state)):
 		return BattleEvent.TelegraphCancel.NONE
 	if telegraph.kind == Telegraph.Kind.DIRECTION:
 		return BattleEvent.TelegraphCancel.NO_TARGET

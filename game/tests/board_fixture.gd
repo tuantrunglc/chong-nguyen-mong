@@ -83,8 +83,8 @@ static func describe(events: Array[BattleEvent]) -> Array[String]:
 				out.append("TELEGRAPHED %d %s>%s #%d" % [e.unit_id, BoardText.cell_text(e.from_cell),
 					BoardText.cell_text(e.to_cell), e.amount])
 			BattleEvent.Type.TELEGRAPH_CANCELLED:
-				out.append("TELEGRAPH_CANCELLED %d #%d %s" % [e.unit_id, e.amount,
-					BattleEvent.TelegraphCancel.find_key(e.cancel)])
+				out.append("TELEGRAPH_CANCELLED %d %s #%d %s" % [e.unit_id, BoardText.cell_text(e.from_cell),
+					e.amount, BattleEvent.TelegraphCancel.find_key(e.cancel)])
 			BattleEvent.Type.REJECTED:
 				out.append("REJECTED %s" % BattleEvent.Reject.find_key(e.reject))
 			_:

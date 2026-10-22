@@ -50,7 +50,8 @@ enum Reject {
 ## Vì sao đòn đã báo bị hủy (TELEGRAPH_CANCELLED, Story 2.9). Đúng ba đường TelegraphMarks trả ô trúng rỗng:
 ## OUT_OF_BOARD: đòn vào ô, chủ đòn bị đẩy/kéo làm ô đích rơi ra ngoài bàn.
 ## OWNER_DIED: chủ đòn đã gục trước lượt ra đòn của mình.
-## NO_TARGET: Kỵ binh xung phong mà ô ngay trước mặt đã ngoài bàn (bị đẩy lùi về sát mép).
+## NO_TARGET: Kỵ binh xung phong mà ô ngay trước mặt đã ngoài bàn. Với chỉ số hiện tại, đường này chỉ tới được từ
+## dữ liệu trận (`bao_don` ghi hướng ra ngoài bàn), không từ một cú đẩy trong game.
 enum TelegraphCancel { NONE, OUT_OF_BOARD, OWNER_DIED, NO_TARGET }
 
 var type: Type
@@ -133,8 +134,8 @@ static func telegraphed(p_unit_id: int, p_stand: Vector2i, p_to: Vector2i, p_ord
 	return BattleEvent.new(Type.TELEGRAPHED, p_unit_id, p_stand, p_to, Cause.WALK, Reject.NONE, "", 0, p_order)
 
 
-## Đòn đã báo của quân unit_id bị hủy (Story 2.9): p_from là ô chủ đòn lúc hủy (ZERO nếu đã gục), p_order là số thứ
-## tự đã báo, p_cancel là lý do.
+## Đòn đã báo của quân unit_id bị hủy (Story 2.9): p_from là ô chủ đòn lúc hủy (Telegraph.NO_CELL nếu đã gục),
+## p_order là số thứ tự đã báo, p_cancel là lý do.
 static func telegraph_cancelled(p_unit_id: int, p_from: Vector2i, p_order: int, p_cancel: TelegraphCancel) -> BattleEvent:
 	return BattleEvent.new(Type.TELEGRAPH_CANCELLED, p_unit_id, p_from, Vector2i.ZERO, Cause.WALK, Reject.NONE, "",
 		0, p_order, 0, p_cancel)

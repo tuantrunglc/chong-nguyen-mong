@@ -16,6 +16,9 @@ const ALLY_DIR: String = PROBE_DIR + "/tran_dong_minh"
 const ALLY_LEVEL: String = ALLY_DIR + "/tran_01.json"
 const LAO_DIR: String = PROBE_DIR + "/tran_lao"
 const LAO_LEVEL: String = LAO_DIR + "/tran_01.json"
+## Trận thử cho đòn bị hủy (Story 2.9): Bộ binh báo đòn vào Khoái, bị đẩy xuống sông.
+const HUY_DIR: String = PROBE_DIR + "/tran_huy_don"
+const HUY_LEVEL: String = HUY_DIR + "/tran_01.json"
 const KEO_DIR: String = PROBE_DIR + "/tran_keo"
 const KEO_LEVEL: String = KEO_DIR + "/tran_01.json"
 ## Phím chọn Dư (tướng thứ ba).
@@ -55,7 +58,7 @@ func after_each() -> void:
 			InputMap.erase_action("dev_f%d" % (i + 1))
 	SaveProbe.path = SaveProbe.DEFAULT_PATH
 	for path: String in [BROKEN_LEVEL, ATTACK_LEVEL, ALLY_LEVEL, LAO_LEVEL, KEO_LEVEL, WIN_LEVEL, LOSE_LEVEL,
-			PROBE_FILE]:
+			HUY_LEVEL, PROBE_FILE]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(BROKEN_DIR)
@@ -63,6 +66,7 @@ func after_each() -> void:
 	DirAccess.remove_absolute(ALLY_DIR)
 	DirAccess.remove_absolute(LAO_DIR)
 	DirAccess.remove_absolute(KEO_DIR)
+	DirAccess.remove_absolute(HUY_DIR)
 	DirAccess.remove_absolute(WIN_DIR)
 	DirAccess.remove_absolute(LOSE_DIR)
 	DirAccess.remove_absolute(PROBE_DIR)
@@ -585,6 +589,29 @@ func test_telegraphs_drawn_on_open_and_follow_pushed_owner() -> void:
 	_click_by_mouse(main, Vector2i(3, 3))
 	assert_eq(view.red_cells(), {Vector2i(3, 3): [1] as Array[int], Vector2i(3, 4): [2] as Array[int],
 		Vector2i(5, 6): [3] as Array[int]}, "đòn 1 dịch theo Bộ binh bị đẩy")
+
+
+## Chủ đòn chết đuối: đòn bị hủy nên ô đỏ và số thứ tự biến mất khỏi bàn (Story 2.9, AC 3).
+func test_red_cells_vanish_when_owner_drowns() -> void:
+	var main: Node2D = _make_level_main(HUY_DIR, HUY_LEVEL, {
+		"phien_ban_dinh_dang": 1,
+		"ten": "Thử hủy đòn",
+		"kieu": "tieu_diet",
+		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . ~ . . . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"quan": [". . . . . . .", ". . 1 . . . .", ". . B . . . .", ". . . . . . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"thu_tu_dich": ["2,2"],
+		"tiep_vien": [],
+		"muu_ke_mo": [],
+	})
+	var view: TelegraphView = _board(main).telegraph_view()
+	assert_eq(view.red_cells(), {Vector2i(2, 1): [1] as Array[int]}, "điều kiện trước: ô đỏ nhắm Khoái")
+	_press_physical(main, KEY_1)
+	_click_by_mouse(main, Vector2i(2, 2))
+	assert_null(_unit_at(main, Vector2i(2, 2)), "Bộ binh chết đuối")
+	assert_true(view.red_cells().is_empty(), "đòn bị hủy thì không còn ô đỏ")
+	assert_true(view.number_labels().is_empty(), "không còn số thứ tự của đòn bị hủy")
 
 
 ## Ô đỏ vẽ lại đúng sau Hủy nước đi, Chơi lại trận và F5 (Story 2.7, AC 10).

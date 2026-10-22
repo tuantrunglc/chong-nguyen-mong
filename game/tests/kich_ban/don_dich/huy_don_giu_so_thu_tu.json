@@ -1,6 +1,6 @@
 {
   "phien_ban_dinh_dang": 1,
-  "mo_ta": "Hai Bộ binh báo đòn số 1 và số 2; Khoái đẩy quân số 1 ra ngoài bàn: đòn số 1 bị hủy, đòn số 2 vẫn giữ số 2 chứ không dồn lại thành 1.",
+  "mo_ta": "Hai Bộ binh báo đòn số 1 và số 2; Khoái đẩy quân số 1 xuống 0,6 làm ô đỏ của nó rơi ra ngoài bàn: đòn số 1 bị hủy, đòn số 2 vẫn giữ số 2 chứ không dồn lại thành 1.",
   "da_duyet": true,
   "truoc": {
     "dia_hinh": [

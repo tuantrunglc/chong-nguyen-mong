@@ -25,9 +25,9 @@ static func state_text(state: BattleState) -> String:
 
 ## Đủ mọi trường của sự kiện.
 static func event_text(e: BattleEvent) -> String:
-	return "%s %d %s>%s %s %s '%s' %d %d %d" % [BattleEvent.Type.find_key(e.type), e.unit_id, e.from_cell, e.to_cell,
-		BattleEvent.Cause.find_key(e.cause), BattleEvent.Reject.find_key(e.reject), e.reason, e.round_number, e.amount,
-		e.other_id]
+	return "%s %d %s>%s %s %s '%s' %d %d %d %s" % [BattleEvent.Type.find_key(e.type), e.unit_id, e.from_cell,
+		e.to_cell, BattleEvent.Cause.find_key(e.cause), BattleEvent.Reject.find_key(e.reject), e.reason,
+		e.round_number, e.amount, e.other_id, BattleEvent.TelegraphCancel.find_key(e.cancel)]
 
 
 static func run_text(result: ScenarioRunner.ScenarioResult) -> Array[String]:

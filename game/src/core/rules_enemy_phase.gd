@@ -28,10 +28,11 @@ static func _strike_all(state: BattleState, events: Array[BattleEvent]) -> void:
 	for telegraph: Telegraph in state.telegraphs:
 		var hit: Vector2i = TelegraphMarks.hit_cell(state, telegraph)
 		if hit == Telegraph.NO_CELL:
-			var owner_now: Unit = state.unit_by_id(telegraph.owner_id)
-			var owner_cell: Vector2i = Vector2i.ZERO if owner_now == null else owner_now.cell
-			events.append(BattleEvent.telegraph_cancelled(telegraph.owner_id, owner_cell, telegraph.order,
-				TelegraphMarks.cancel_reason(state, telegraph)))
+			var reason: BattleEvent.TelegraphCancel = TelegraphMarks.cancel_reason(state, telegraph)
+			if reason != BattleEvent.TelegraphCancel.NONE:
+				var owner_now: Unit = state.unit_by_id(telegraph.owner_id)
+				var owner_cell: Vector2i = Telegraph.NO_CELL if owner_now == null else owner_now.cell
+				events.append(BattleEvent.telegraph_cancelled(telegraph.owner_id, owner_cell, telegraph.order, reason))
 			continue
 		var owner: Unit = state.unit_by_id(telegraph.owner_id)
 		var strike: Array[BattleEvent] = [BattleEvent.enemy_attacked(owner.id, owner.cell, hit)]

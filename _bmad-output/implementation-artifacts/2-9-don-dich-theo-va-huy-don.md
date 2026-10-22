@@ -39,7 +39,7 @@ tôi muốn đòn địch dịch theo khi tôi đẩy hoặc kéo quân địch,
 - [x] **Task 3: Test GUT lõi, viết trước** (AC: 1–8)
   - [x] 3.1 Chạy đỏ riêng bằng lệnh một file (`--gtest=res://tests/test_rules_enemy_phase.gd`), ghi Debug Log.
   - [x] 3.2 Kiểm bằng `BattleState` + `Rules.resolve` + `state.validate()`, không qua giao diện. So chuỗi sự kiện như các test 2.7/2.8 (`ATTACKED …`, `DAMAGED …`, `TELEGRAPH_CANCELLED …`).
-  - [x] 3.3 Thêm ca số thứ tự không đánh lại (AC 6) và ca Kỵ binh bị đẩy lùi làm hướng ra ngoài bàn (AC 3, `NO_TARGET`).
+  - [x] 3.3 Thêm ca số thứ tự không đánh lại (AC 6) và ca Kỵ binh có ô trước mặt ngoài bàn (AC 3, `NO_TARGET`). Ca `NO_TARGET` dựng trạng thái trực tiếp, **không** qua cú đẩy: với chỉ số hiện tại Kỵ binh 2 máu chết trước khi bị đẩy.
 - [x] **Task 4: Ô đỏ dịch theo và biến mất** (AC: 1–3)
   - [x] 4.1 Chỉ đọc `TelegraphMarks.cells`/`path_cells` xem đã đúng chưa (dự kiến đúng sẵn vì đòn lưu tương đối), chỉ sửa `TelegraphView` nếu có chỗ giữ ô đỏ cũ.
   - [x] 4.2 Test `tests/test_battle_view.gd`: sau lệnh đẩy chủ đòn, số ô đỏ và toạ độ khớp `TelegraphMarks.cells`; đòn hủy thì không còn ô đỏ nào mang số đó.
@@ -139,6 +139,20 @@ Phân biệt ba mã bằng `telegraph.kind` + `state.unit_by_id` + `state.in_bou
 
 ## Dev Agent Record
 
+### Review Findings
+
+- [ ] [Review][Decision] Ba kịch bản đã bị sửa sau khi tác giả duyệt — bản duyệt `4db7b28` có `don_dich_theo_khi_day` với Khoái 3,5 và máu 3,2 = 2, nhưng lệnh đánh khi đó bị từ chối `khong_ke` nên kịch bản không chạy được. Bản đang dùng (commit `e8ad1e8`) đặt Khoái 3,4, máu 3,2 = 1; Luật M3 nói kịch bản phải được tác giả duyệt lại. [game/tests/kich_ban/don_dich/don_dich_theo_khi_day.json]
+- [ ] [Review][Decision] AC 8 đòi 6 ca nhưng mới có 5: thiếu ca "chủ đòn gục do đòn số trước" (đòn #1 giết chủ đòn #2, #2 bị hủy, mục tiêu không mất máu). GUT đã có (`test_attack_killing_next_owner_cancels_its_attack`) nhưng kịch bản thì chưa. [game/tests/kich_ban/don_dich/]
+- [ ] [Review][Decision] Không kịch bản nào chạy tới lúc ra đòn (`ket_thuc_luot`), nên AC 3/4/5 "không gây sát thương" chỉ được GUT chứng minh, không phải kịch bản. [game/tests/kich_ban/don_dich/huy_don_*.json]
+- [ ] [Review][Decision] Trận hết giữa pha địch: các đòn chưa ra không phát `TELEGRAPH_CANCELLED`, ô đỏ của chúng còn trên bàn sau khi thua (đã ghi ở `deferred-work.md` từ Story 2.8). Cần quyết: dọn `telegraphs` khi trận hết, hay giữ như hiện tại.
+- [x] [Review][Patch] `cancel_reason` tính lại ô đích thay vì `target_cell`, và `_strike_all` phát sự kiện cả khi lý do là `NONE` — đã dùng `target_cell`, chỉ phát khi lý do khác `NONE`.
+- [x] [Review][Patch] Ô chủ đòn khi đã gục dùng `Vector2i.ZERO`, trùng ô thật (0,0) — đã đổi sang `Telegraph.NO_CELL`, `describe` in thêm ô chủ đòn.
+- [x] [Review][Patch] `describe` và `test_determinism.event_text` bỏ sót trường mới nên test không bắt được lý do/ô sai — đã in `from_cell` và `cancel`.
+- [x] [Review][Patch] Task 4.2 đánh [x] nhưng chưa có test giao diện cho đòn hủy — đã thêm `test_red_cells_vanish_when_owner_drowns` (ô đỏ và số biến mất khi chủ đòn chết đuối).
+- [x] [Review][Patch] AC 4 thiếu ca chết do va chạm — đã thêm `test_owner_dying_from_push_into_edge_telegraph_is_cancelled` và assert `telegraphs.size()` không đổi.
+- [x] [Review][Patch] Chú thích `cause` và mô tả `NO_TARGET` sai (nói "bị đẩy lùi") — đã sửa: đường này chỉ tới được từ dữ liệu trận.
+- [x] [Review][Patch] `mo_ta` hai kịch bản sai: "xuống ô 3,3" (thực ra lên) và "đẩy quân ra ngoài bàn" (thực ra đẩy quân xuống 0,6, ô đỏ mới rơi ra ngoài) — đã sửa lời, không đổi bàn.
+
 ### Agent Model Used
 
 deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
@@ -171,16 +185,10 @@ deepseek-flash (DeepSeek Harness), phiên 2026-10-22.
 - `game/src/core/battle_event.gd` (thêm `TELEGRAPH_CANCELLED`, `TelegraphCancel`, trường `cancel`)
 - `game/src/core/telegraph_marks.gd` (thêm `cancel_reason`)
 - `game/src/core/rules_enemy_phase.gd` (phát sự kiện hủy trong `_strike_all`)
-- `game/tests/board_fixture.gd` (in `TELEGRAPH_CANCELLED`)
-- `game/tests/test_rules_enemy_phase.gd` (4 test mới, sửa 3 test 2.8)
+- `game/tests/board_fixture.gd` (in `TELEGRAPH_CANCELLED` kèm ô chủ đòn)
+- `game/tests/test_battle_view.gd` (test ô đỏ biến mất khi chủ đòn chết đuối)
+- `game/tests/test_determinism.gd` (so cả lý do hủy)
+- `game/tests/test_rules_enemy_phase.gd` (5 test mới, sửa 3 test 2.8)
 - `game/tests/kich_ban/don_dich/{don_dich_theo_khi_day,don_dich_theo_khi_keo,huy_don_khi_ra_ngoai_ban,huy_don_khi_chu_don_guc,huy_don_giu_so_thu_tu}.json`
 - `_bmad-output/planning-artifacts/game-architecture.md` (mục 3. Ra đòn)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
-
-### Agent Model Used
-
-### Debug Log References
-
-### Completion Notes List
-
-### File List
