@@ -2,17 +2,22 @@
 
 **Mục tiêu:** thắng (hạ 2 Kỵ binh + 1 Bộ binh) mà **không tướng nào mất máu**. Kết thúc, Khoái và Lão đều còn **3/3 máu**.
 
-**Cách đọc ô:** `cột,hàng`, gốc ở góc trên trái, tính từ 0 — giống F1 trong game. Bàn **6 cột × 7 hàng**.
+**Cách đọc ô:** `cột,hàng`, gốc ở góc trên trái, tính từ 0 — giống F1 trong game. Bàn **6 cột × 7 hàng**. Các bàn đầu hiệp dưới đây là bàn **đầu lượt người chơi**, sau khi quân Nguyên đã chạy pha chuẩn bị (đi nếu cần) và báo đòn.
+
+> Bấm sai một nước: dùng **Chơi lại hiệp** (phím `R`, mỗi trận 1 lần) để lùi về đầu hiệp, không phải đánh lại từ đầu.
 
 ## Luật dùng trong trận này
 
-- **Kỵ binh (`K`):** tới lượt địch, nó **báo hướng** trước bằng một dãy **ô đỏ** chạy thẳng từ nó ra. Cuối lượt của bạn, nó lao theo đúng hướng đó và **trúng vật đầu tiên** trên đường: quân đầu tiên (bất kỳ phe nào) hoặc **rừng**. Sát thương 1, **không đẩy**. Kỵ binh **không dời chỗ** khi lao.
+- **Kỵ binh (`K`):** trong **pha chuẩn bị**, nó đi (tối đa 3 ô) rồi **báo hướng** bằng một dãy **ô đỏ** chạy thẳng từ nó ra. Trong **pha ra đòn** (cuối lượt của bạn), nó lao theo đúng hướng đó và **trúng vật đầu tiên** trên đường: quân đầu tiên (bất kỳ phe nào) hoặc **rừng**; sát thương 1, **không đẩy**, và **không dời chỗ** khi lao. Vì vậy Kỵ binh có thể đứng ở ô mới sau mỗi hiệp (do pha chuẩn bị), nhưng không nhảy thêm khi ra đòn.
 - **Rừng (`#`):** **chặn đường lao**. Đường lao dừng ở ô rừng; nếu rừng là vật đầu tiên thì **không ai mất máu**. Đứng **sau rừng** (rừng nằm giữa bạn và Kỵ binh) là an toàn.
 - **Địch đánh trúng nhau:** đòn Kỵ binh trúng **mọi phe**. Nếu bạn né khỏi ô đỏ và phía sau có quân Nguyên khác, Kỵ binh lao tiếp và đánh **quân Nguyên đó**.
-- **Bộ binh (`B`):** báo đòn vào **một ô cố định** (ô đỏ). Cuối lượt, nó đánh đúng ô đó. **Đi khỏi ô** là tránh được.
+- **Bộ binh (`B`):** báo đòn vào **ô đỏ**. Cuối lượt, nó đánh đúng ô đó. **Đi khỏi ô** là tránh được.
 - **Khoái (`1`):** đánh ô kề, **2 sát thương**, đẩy mục tiêu 1 ô theo hướng đánh.
-- **Lão (`2`):** lao thẳng hàng, trúng quân ở cách **2–4 ô**, **1 sát thương**, không đẩy. Lao **bay qua quân ở ô kề** (cách 1 ô). Rừng chặn lao.
-- Hạ **chủ đòn** trước khi nó ra đòn thì ô đỏ của nó **biến mất**.
+- **Lão (`2`):** lao thẳng hàng, trúng quân ở cách **2–4 ô**, **1 sát thương**, không đẩy. Lao **bay qua quân ở ô kề** (cách 1 ô) — trận này không dùng tới. Rừng chặn lao.
+- Hạ **chủ đòn** trước khi nó ra đòn thì đòn đã báo bị **hủy hoàn toàn**: ô đỏ biến mất, **không ai mất máu**. Nếu chỉ làm chủ đòn **mất máu** mà nó không gục, đòn vẫn giáng đúng ô đỏ — ví dụ Bộ binh còn 1 máu ở hiệp 3 vẫn đánh ô `1,1` (ô trống).
+- **Đi:** mỗi tướng đi tối đa **3 ô** một lượt, theo 4 hướng (không chéo), **đi xuyên qua tướng mình** nhưng **không dừng trên quân**. Đi rồi đánh được 1 lần; đánh rồi thì không đi nữa.
+- **Sông (`~`):** **không đi vào được** — chỉ là tường chắn đường đi. Đòn lao và Kỵ binh xung phong **bay qua sông**, sông không chặn đòn. Trận này **không dạy chết đuối**: lời giải không đẩy ai xuống sông.
+- **Thua khi:** mọi tướng trên bàn gục (trận này 2 tướng; không có giới hạn hiệp). Một tướng gục vẫn chơi tiếp, nhưng lời giải này đặt mục tiêu **không tướng nào mất máu**.
 
 ---
 
@@ -35,7 +40,7 @@ hàng 6:  . . 2 . . .
   - Bộ binh `1,4` đánh ô `2,4`.
   - Kỵ binh `5,4` lao ngang sang trái: đỏ `4,4`, `3,4`, `2,4`.
 
-> **Bài học 1 — né ô đỏ:** Khoái đang nằm trong **ba** ô đỏ. Chỉ cần đi khỏi `2,4` và khỏi cột 2 / hàng 4 là thoát cả ba.
+> **Bài học 1 — né ô đỏ:** Khoái đang nằm trong **ba** ô đỏ. Đi khỏi `2,4`, khỏi cột 2 và khỏi hàng 4 là thoát cả ba. Về sau, đứng trong ô đỏ chỉ an toàn khi **hạ được chủ đòn ngay trong lượt đó** (hiệp 2, hiệp 6); nếu không, phải ra ngoài.
 
 ---
 
@@ -186,4 +191,4 @@ hàng 6:  . . . . . .
 ## Kiểm chứng
 
 - Trận đã được phát lại bằng đúng luật thật (`Rules` + `BattleController`, không dùng luật riêng của công cụ): **thắng ở hiệp 6, hai tướng 3/3**.
-- Kịch bản tự động `game/tests/kich_ban/tran/tran_02_loi_giai.json` **chưa được tạo** — chỉ tạo sau khi tác giả đánh lại đúng lời giải và xác nhận. Khi đó `tools/test.sh` sẽ phát lại trận này mỗi lần chạy.
+- Kịch bản tự động `game/tests/kich_ban/tran/tran_02_loi_giai.json` — **`da_duyet: true`**, `ket_qua: "thang"`, `mau` **3/3** cho cả hai tướng. `tools/test.sh` phát lại trận này mỗi lần chạy và đang đạt.

@@ -25,7 +25,7 @@ tôi muốn trận 2 dạy dùng rừng chặn Kỵ binh và cho địch đánh 
 
 - [x] **Task 1: Chốt câu hỏi với tác giả** (AC: 1, 2, 5)
   - [x] 1.1 Hỏi 5 câu trước khi khoá bàn (tên trận, cỡ bàn, vai trò sông, mức chi tiết lời giải, kịch bản trận 1 đang chờ duyệt).
-  - [x] 1.2 Chốt: tên **Trận 2 — Ải Lãnh Kinh**; bàn **6×7** (rộng 6, cao 7); sông **chỉ làm tường chắn**, không dùng chết đuối trong lời giải; lời giải **từng nước**; **không** đụng 2 kịch bản `da_duyet: false` của trận 1.
+  - [x] 1.2 Chốt: tên **Trận 2 — Ải Lãnh Kinh**; bàn **6×7** (rộng 6, cao 7); sông **chỉ làm tường chắn** (đi vào: không; lao/Kỵ binh bay qua: được, sông không chặn đòn), không dùng chết đuối trong lời giải; lời giải **từng nước**; **không** đụng 2 kịch bản `da_duyet: false` của trận 1.
 
 - [x] **Task 2: Thiết kế `tran_02.json` và tự chơi thử** (AC: 1, 3)
   - [x] 2.1 Dựng bàn 6×7: Khoái `1` ở `2,4`; Lão `2` ở `2,6`; rừng `#` ở `2,5`; sông `~` ở `4,5` và `5,5`.
@@ -51,6 +51,25 @@ tôi muốn trận 2 dạy dùng rừng chặn Kỵ binh và cho địch đánh 
 - [x] **Task 6: Chốt story, sprint, commit** (AC: 6)
   - [x] 6.1 Cập nhật story (Debug Log, Completion Notes, File List, Change Log), `sprint-status.yaml` 3-3 → `review`/`done`.
   - [x] 6.2 Commit từng phần, lời tiếng Việt, kết `(Story 3.3)`; không gộp `img/` hay việc của story khác.
+
+### Review Findings
+
+_Code review 3 lớp (Blind Hunter, Edge Case Hunter, Acceptance Auditor) trên diff `f770d73..76f1051`, 2026-10-23. 0 `decision_needed`, 13 `patch`, 1 `defer`, 6 dismissed (ghi ở phần tổng hợp chat). **Đã áp dụng toàn bộ 13 patch ngày 2026-10-23.**_
+
+- [x] [Review][Patch] Sửa "Kiểm chứng": kịch bản đã có, đã duyệt, được `test.sh` phát lại [game/data/tran/tran_02_loi_giai.md:186]
+- [x] [Review][Patch] Thêm luật đi của tướng: tối đa 3 ô, 4 hướng, xuyên tướng mình, không dừng trên quân; đánh rồi không đi [game/data/tran/tran_02_loi_giai.md:7-15]
+- [x] [Review][Patch] Thêm luật sông: không đi vào, chỉ là tường; lao/Kỵ binh bay qua sông, không chặn; trận này không dạy chết đuối [game/data/tran/tran_02_loi_giai.md:7-15]
+- [x] [Review][Patch] Sửa "Bài học 1 — né ô đỏ": nêu ngoại lệ hạ chủ đòn ngay trong lượt [game/data/tran/tran_02_loi_giai.md:38]
+- [x] [Review][Patch] Nói rõ hạ chủ đòn hủy đòn đã báo; chỉ làm mất máu thì đòn vẫn giáng [game/data/tran/tran_02_loi_giai.md:15]
+- [x] [Review][Patch] Tách pha chuẩn bị (địch đi rồi báo) và pha ra đòn (lao, không dời chỗ); ghi nhãn từng bàn [game/data/tran/tran_02_loi_giai.md:9]
+- [x] [Review][Patch] Thêm ghi chú "Chơi lại hiệp" (Story 3.2) để cứu khi bấm sai [game/data/tran/tran_02_loi_giai.md:42]
+- [x] [Review][Patch] Ghi chú Lão bay qua quân ô kề chưa dùng trong trận này [game/data/tran/tran_02_loi_giai.md:14]
+- [x] [Review][Patch] Sửa trap 1: pha chuẩn bị không dời quân nếu đã có đường đánh; bàn này đứng yên [_bmad-output/implementation-artifacts/3-3-tran-2.md:108]
+- [x] [Review][Patch] Thêm test nạp `tran_02.json` và so bàn sau `begin()` với `truoc`/`bao_don` của kịch bản [game/tests/test_tran_02.gd]
+- [x] [Review][Patch] Ghi mốc test cuối (HEAD `76f1051`) và dòng kịch bản `tran/tran_02_loi_giai.json: đạt` [_bmad-output/implementation-artifacts/3-3-tran-2.md:159]
+- [x] [Review][Patch] Chốt trạng thái `done` sau khi review và xử lý 13 patch; Change Log ghi ngày review [_bmad-output/implementation-artifacts/sprint-status.yaml:84]
+- [x] [Review][Patch] Thêm "Thua khi" vào luật trận: mọi tướng trên bàn gục; không có giới hạn hiệp [game/data/tran/tran_02_loi_giai.md:7-15]
+- [x] [Review][Defer] Kịch bản âm chứng minh rừng bắt buộc (bỏ `#` ở `2,5`, khẳng định không thắng) [_bmad-output/implementation-artifacts/3-3-tran-2.md:161] — deferred, follow-up (không thuộc AC)
 
 ## Dev Notes
 
@@ -105,7 +124,7 @@ Nếu thấy phải sửa `src/core/` thì **dừng, hỏi tác giả**: trận 
 
 ### Bẫy của story này
 
-1. **`truoc` của kịch bản là bàn SAU pha chuẩn bị hiệp 1**, không phải bàn trong `tran_02.json`: quân Nguyên đã đi, `bao_don` đã có. Lệch một ô là kịch bản đỏ.
+1. **`truoc` của kịch bản là bàn SAU pha chuẩn bị hiệp 1**, không phải bàn trong `tran_02.json`: quân Nguyên đã chạy pha chuẩn bị (đi nếu cần — ở bàn này cả ba đứng yên vì đã có đường đánh), `bao_don` đã có. Lệch một ô là kịch bản đỏ.
 2. **`thu_tu_dich` sai thứ tự** → quân đi khác, lời giải hỏng. Phải đúng thứ tự đọc bàn.
 3. **Kịch bản đã duyệt bị khoá theo commit** (`tools/test.sh` bước 2): sửa file `da_duyet: true` phải có tác giả duyệt lại.
 4. **Không chép tay bàn `truoc` từ trí nhớ** — dựng từ bàn thật sau `begin()`.
@@ -156,7 +175,8 @@ DeepSeek Harness (deepseek-flash), 2026-10-23.
 - **Kiểm ngược địch đánh nhau:** hiệp 1, sau khi Khoái né, đường lao `5,4` đi tiếp tới `1,4` và Bộ binh mất 1 máu (sự kiện `MẤT MÁU` của quân 102).
 - **Tác giả xác nhận (2026-10-23):** đã chạy `tools/chay.sh --dev --tran=2`, đánh đúng 15 nước, thắng, Khoái 3/3, Lão 3/3.
 - **Kịch bản tự động:** sinh từ bàn thật sau `begin()` (đọc bàn + `state.telegraphs`, không chép tay); tự kiểm bằng `ScenarioRunner` → ĐẠT; đặt `da_duyet: true`.
-- **Xanh cuối:** `tools/test.sh` → 644/644 test, **97 kịch bản đã duyệt**, 0 trượt; bước 2 khoá `da_duyet` đạt (97 file).
+- **Trước vá review:** `tools/test.sh` tại HEAD `76f1051` → 644/644 test, 97 kịch bản đã duyệt, 0 trượt.
+- **Xanh cuối (sau vá review):** `tools/test.sh` → **645/645 test** (thêm `test_tran_02.gd`), **97 kịch bản đã duyệt**, 0 trượt; kịch bản `tran/tran_02_loi_giai.json`: **đạt**; bước 2 khoá `da_duyet` đạt (97 file).
 
 ### Completion Notes List
 
@@ -167,17 +187,21 @@ DeepSeek Harness (deepseek-flash), 2026-10-23.
 - **Không sửa** `src/core/`, `chi_so.json`, `tran_01*`, 2 kịch bản `tran/tran_01_*` (`da_duyet: false`), kịch bản đã duyệt khác. Không thêm luật mới (không hầm chông/làng/kho lương/giới hạn hiệp/mưu kế/tiếp viện).
 - **Kiểm ngược rừng:** bỏ `#` ở `2,5` rồi phát lại đúng 15 lệnh → hiệp 1 Kỵ binh `2,0` lao trúng Lão `2,6` (Lão còn 2 máu), về sau Lão gục, không thắng. Rừng là **bắt buộc**.
 - **Kiểm ngược địch đánh nhau:** hiệp 1, sau khi Khoái né, đường lao `5,4` đi tiếp tới `1,4`; sự kiện `MẤT MÁU` của quân 102 (Bộ binh) chứng minh B mất 1 máu vì đòn của Kỵ binh cùng phe.
-- **Xanh cuối:** `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh` → **644/644 test**, **97 kịch bản đã duyệt**, 0 trượt; bước 2 khoá `da_duyet` đạt với 97 file.
+- **Trước vá review:** `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh` tại HEAD `76f1051` → **644/644 test**, **97 kịch bản đã duyệt**, 0 trượt.
+- **Xanh cuối (sau vá review):** `tools/test.sh` → **645/645 test** (thêm test khoá level–kịch bản), **97 kịch bản đã duyệt**, 0 trượt; kịch bản `tran/tran_02_loi_giai.json`: **đạt**; bước 2 khoá `da_duyet` đạt với 97 file.
 
 ### File List
 
 - `game/data/tran/tran_02.json` (mới)
 - `game/data/tran/tran_02_loi_giai.md` (mới)
 - `game/tests/kich_ban/tran/tran_02_loi_giai.json` (mới, `da_duyet: true`)
+- `game/tests/test_tran_02.gd` (mới, review 3.3: khoá level với kịch bản)
 - `_bmad-output/implementation-artifacts/3-3-tran-2.md` (mới)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` (3-3 → done)
+- `_bmad-output/implementation-artifacts/deferred-work.md` (mục defer review 3.3)
 
 ### Change Log
 
 - 2026-10-23: chốt 5 câu hỏi; dựng `tran_02.json` (6×7, Ải Lãnh Kinh); viết lời giải 15 lệnh thắng 3/3; kiểm ngược rừng bắt buộc. Chờ tác giả đánh lại.
 - 2026-10-23 (sau xác nhận): tác giả đánh lại đúng lời giải → thắng, hai tướng 3/3. Sinh kịch bản từ bàn thật, đặt `da_duyet: true`; `tools/test.sh` xanh 644/644, 97 kịch bản đã duyệt. Story → `done`.
+- 2026-10-23 (sau code review 3 lớp): 13 patch đã áp dụng — MD (luật đi/sông/thua, pha chuẩn bị–ra đòn, ngoại lệ né ô đỏ, hủy đòn, "Chơi lại hiệp", Lão bay qua quân, "Kiểm chứng"), story (trap 1, mốc test), test mới `test_tran_02.gd`, kịch bản giữ `da_duyet: true`. 1 defer: kịch bản âm rừng bắt buộc. Test xanh **645/645**, 97 kịch bản.

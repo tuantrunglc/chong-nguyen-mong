@@ -215,3 +215,7 @@
 
 - **Báo cáo F2 không ghi dấu "đã chơi lại".** Sau khi chơi lại, `truoc` của báo cáo là bàn **giữa hiệp** (sau pha chuẩn bị) nên phát lại vẫn đúng, nhưng người đọc/AI tưởng đó là bàn mở hiệp; dấu vết duy nhất là log `chơi lại hiệp N`. Nếu tác giả muốn, thêm một dòng chú thích trong `current_section`/`meta` (chỉ là chữ, không thêm lệnh kịch bản).
 - **AC 3 của 3.2 mới kiểm được phần "mọi trạng thái nằm trong `BattleState.clone()`".** Khi có **mưu kế** (Story 3.12–3.13) và **Lòng dân** (Story 3.7 — GDD yêu cầu chơi lại trả lại cả Lòng dân đã dùng), phải thêm test: dùng mưu kế/Lòng dân trong lượt → chơi lại → dùng lại được. Nhớ thêm cờ mưu kế vào `BattleState.clone()` và test `validate()` của `replay_round`.
+
+## Deferred from: code review of story-3-3-tran-2 (2026-10-23)
+
+- **Kịch bản âm chứng minh rừng `2,5` là bắt buộc.** Hiện chỉ có kiểm tay ghi ở story: bỏ `#` ở `2,5`, phát lại đúng 15 lệnh thì Lão mất 1 máu ở hiệp 1 và về sau gục. Chưa thành kịch bản đã duyệt vì cần tác giả duyệt một kịch bản "không thắng" (M3), và story 3.3 không yêu cầu. Thêm khi mở rộng bộ kịch bản trận, hoặc khi có thay đổi AI/địa hình có thể làm rừng thành trang trí.
