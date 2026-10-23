@@ -80,17 +80,17 @@ Mỗi quân cần (khung 64×64, hai phe tách màu rõ: Đại Việt đỏ, Ng
 | Trạng thái | Ưu tiên | Số khung | Tình trạng |
 |---|---|---|---|
 | Đứng yên | P1 | 1 (đủ 8 hướng) | Đã xong cả 6 quân (`toi_uu/{khoai,lao,du,nguyen_v3,ky_binh,cung_ky}`) |
-| Đi (Walk) | P2 | 4 frames × 4 hướng | Đã xong Spritesheet 4x4 & GIF cho Khoái, Lão, Dư, Bộ binh |
-| Đánh (Attack) | P2 | 4 frames × 2-3 hướng | Đã xong đầy đủ 4 quân (Khoái, Lão, Dư, Bộ binh) |
-| Trúng đòn (Hurt) | P2 | 4 frames | Đã xong đầy đủ 4 quân (Khoái, Lão, Dư, Bộ binh) |
-| Gục (Death) | P2 | 4 frames | Đã xong đầy đủ 4 quân (Khoái, Lão, Dư, Bộ binh) |
+| Đi (Walk) | P2 | 4 frames × 4 hướng | Đã xong Spritesheet 4x4 & GIF cho cả 6 quân (`khoai`, `lao`, `du`, `bo_binh`, `ky_binh`, `cung_ky`) |
+| Đánh (Attack) | P2 | 4 frames × 2-3 hướng | Đã xong đầy đủ 6 quân (`khoai`, `lao`, `du`, `bo_binh`, `ky_binh`, `cung_ky`) |
+| Trúng đòn (Hurt) | P2 | 4 frames | Đã xong đầy đủ 6 quân (`khoai`, `lao`, `du`, `bo_binh`, `ky_binh`, `cung_ky`) |
+| Gục (Death) | P2 | 4 frames | Đã xong đầy đủ 6 quân (`khoai`, `lao`, `du`, `bo_binh`, `ky_binh`, `cung_ky`) |
 | Chết đuối (Drown) | P2 | 4 frames | Đã xong cho Bộ Binh Nguyên (rơi sông chìm dần) |
 
 "Đã đi" và "đã đánh" làm bằng tô mờ trong code, không cần hình riêng.
 
 ## C. Hiệu ứng (P2)
 
-**Tình trạng 2026-10-22:** Đã tạo và tối ưu xong toàn bộ 8 hiệu ứng chiến đấu & kỹ năng chuẩn Resurrect 64 tại `img/pixellab-thu/toi_uu/hieu_ung/`, ảnh tổng hợp `_tong_hop_tat_ca_hieu_ung_c1_c8.png`.
+**Tình trạng 2026-10-23:** Đã hoàn thiện toàn diện 100% toàn bộ 10 hiệu ứng chiến đấu, kỹ năng & tương tác môi trường chuẩn Resurrect 64 tại `img/pixellab-thu/toi_uu/hieu_ung/`.
 
 | # | Hiệu ứng | Khi nào | Tình trạng |
 |---|---|---|---|
@@ -102,12 +102,12 @@ Mỗi quân cần (khung 64×64, hai phe tách màu rõ: Đại Việt đỏ, Ng
 | C6 | Lửa cháy kho | *Vườn không nhà trống* | Đã xong (48×48, tàn tro & ngọn lửa) |
 | C7 | Hào quang đỏ trên tướng | *Sát Thát* đang có hiệu lực | Đã xong (48×48, hào quang đỏ sẫm) |
 | C8 | Dấu báo quân tiếp viện | Ô sẽ có quân tiếp viện hiệp sau | Đã xong (32×32, cờ hiệu cắm đất) |
-| C9 | Hồi máu | Quân Nguyên đứng kề kho lương | |
-| C10 | Khói, nhà trúng đòn | Làng bị trúng (Lòng dân −1) | Đã có khói vẽ riêng |
+| C9 | Hồi máu | Quân Nguyên đứng kề kho lương | Đã xong (`c9_hoi_mau.png`, 48×48, ánh sáng ngọc & tia xanh thảo mộc) |
+| C10 | Khói, nhà trúng đòn | Làng bị trúng (Lòng dân −1) | Đã xong (`c10_lang_trung_don.png`, 48×48, khói nổ tung mái tranh & mảnh gỗ) |
 
 ## D. Giao diện (P1 cơ bản, P2 trau chuốt)
 
-**Tình trạng 2026-10-22:** Đã tạo và chuẩn hóa 100% Resurrect 64 tại `img/pixellab-thu/toi_uu/giao_dien/`, bảng tổng hợp `_tong_hop_giao_dien_d1_d4.png`.
+**Tình trạng 2026-10-23:** Đã hoàn thiện 100% bộ Giao diện UI và Con trỏ chuột chuẩn Resurrect 64 tại `img/pixellab-thu/toi_uu/giao_dien/`.
 
 | # | Thành phần | Kích thước | Ghi chú | Tình trạng |
 |---|---|---|---|---|
@@ -116,28 +116,28 @@ Mỗi quân cần (khung 64×64, hai phe tách màu rõ: Đại Việt đỏ, Ng
 | D3 | Biểu tượng 2 mưu kế | 32×32 | *Vườn không nhà trống* (đuốc/tro tàn), *Sát Thát* (đao lửa hào quang) | Đã xong |
 | D4 | Biểu tượng máu | 24×24 | Trái tim đá quý viền thép | Đã xong |
 | D5 | Biểu tượng Lòng dân | 24×24 | Mái nhà tranh ấm áp | Đã xong |
-| D6 | Biểu tượng hiệp, nhiệm vụ | Tiêu diệt, Giữ ải | | |
-| D7 | Con trỏ chuột | Thường, chọn được, đánh được | | |
+| D6 | Biểu tượng hiệp, nhiệm vụ | 32×32 & 24×24 | Tiêu diệt (đao cong bắt chéo), Giữ ải (cổng lũy đá & khiên đồng) | Đã xong (`d6_nhiem_vu_*`) |
+| D7 | Con trỏ chuột | 32×32 | Thường (mũi tên đồng sơn mài), Chọn được (vòng tròn ngắm), Đánh được (mũi kiếm chữ thập đỏ đồng) | Đã xong (`con_tro/d7_*`) |
 
 ## E. Chân dung (P3)
 
-**Tình trạng 2026-10-22:** Đã hoàn thiện toàn bộ chân dung 3 tướng Đại Việt tại `img/pixellab-thu/toi_uu/chan_dung/`. Đầy đủ 2 kích thước (96×96 Bảng chỉ số, 64×64 Hộp thoại) với cả bản có khung sơn mài chỉ đồng thời Trần và bản không khung, 100% chuẩn Resurrect 64 và 1-bit alpha. Bảng tổng hợp `_tong_hop_chan_dung_3_tuong.png` và Mockup giao diện Bảng thông tin 3 tướng `_mockup_bang_thong_tin_3_tuong.png`.
+**Tình trạng 2026-10-23:** Đã hoàn thiện toàn bộ chân dung 3 tướng Đại Việt và Người dẫn chuyện tại `img/pixellab-thu/toi_uu/chan_dung/`. Đầy đủ 2 kích thước (96×96 Bảng chỉ số, 64×64 Hộp thoại) với cả bản có khung sơn mài chỉ đồng thời Trần và bản không khung, 100% chuẩn Resurrect 64 và 1-bit alpha.
 
 | # | Nhân vật | Kích thước | Ghi chú | Tình trạng |
 |---|---|---|---|---|
 | E1 | Nguyễn Khoái | 96×96 & 64×64 | Chỉ huy quân Thánh Dực, mạch đao, búi tóc khăn đỏ | Đã xong (có khung & không khung) |
 | E2 | Phạm Ngũ Lão | 96×96 & 64×64 | Điện súy Thượng tướng quân, giáo đứng, bắp tay trần | Đã xong (có khung & không khung) |
 | E3 | Trần Khánh Dư | 96×96 & 64×64 | Nhân Huệ Vương, nón Ma Lôi, móc câu liêm, áo đỏ sẫm | Đã xong (có khung & không khung) |
-| E4 | Người dẫn chuyện | 96×96 & 64×64 | Chốt nhân vật khi làm E8b | Chờ E8b |
+| E4 | Người dẫn chuyện | 96×96 & 64×64 | Bô lão / học sĩ Nho gia thời Trần, râu tóc bạc phơ, khăn the áo lụa | Đã xong (`e4_nguoi_dan_chuyen_*`) |
 
 ## F. Màn hình và quảng bá (P3)
 
-**Tình trạng 2026-10-22:** Đã khắc phục toàn diện các lỗi kỹ thuật (khử triệt để 100% semi-transparent alpha, loại bỏ fractional scaling, áp dụng 9-slice và dithering retro), lượng tử hóa 100% Resurrect 64 tại `img/pixellab-thu/toi_uu/man_hinh_chinh/`. Ảnh phối cảnh chuẩn `_mockup_man_hinh_chinh_640x360.png` và ảnh bìa itch.io `f5_anh_bia_itch_io_630x500.png`.
+**Tình trạng 2026-10-23:** Đã hoàn thiện toàn bộ màn hình chính, ảnh bìa itch.io và bộ 3 bức tranh chuyển cảnh / dẫn nhập lịch sử tại `img/pixellab-thu/toi_uu/man_hinh_chinh/` và `img/pixellab-thu/toi_uu/chuyen_tran/`. 100% Resurrect 64, integer scale x2 chuẩn pixel art.
 
 | # | Hình | Kích thước | Nguồn & Chi tiết | Tình trạng |
 |---|---|---|---|---|
 | F1 | Nền màn hình chính | 640×360 (phóng ×2) | Cảnh sông Bạch Đằng hoàng hôn, bãi cọc và thuyền chiến mờ xa | Đã xong (100% Resurrect 64) |
-| F2 | Tranh chuyển trận | 1–3 bức | **Thuê vẽ** (GDD) | |
+| F2 | Tranh chuyển trận | 320×180 & 640×360 (3 bức) | Bức 1: Hội nghị Bình Than; Bức 2: Lũy ải Vạn Kiếp; Bức 3: Thủy chiến Bạch Đằng | Đã xong (`chuyen_tran/f2_*`) |
 | F3 | Chữ "Hào Khí Đông A" (logo) | 420×84 & 192×64 | Typography vàng hoàng kim, viền đỏ sẫm Đại Việt, bóng đổ đen; kèm huy hiệu đồng | Đã xong |
 | F4 | Biểu tượng game, favicon web | 32, 64, 128, 256 px | Khiên đồng hoa văn mặt trời và kiếm giáo bắt chéo | Đã xong đủ 4 cỡ |
 | F5 | Ảnh bìa itch.io | 630×500 | Bố cục 2 phe đối đầu trên nền sông Bạch Đằng, logo chữ và tagline | Đã xong (100% Resurrect 64) |
