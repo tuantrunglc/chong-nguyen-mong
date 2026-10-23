@@ -1,5 +1,6 @@
 ---
 baseline_commit: c1ef957
+tested_commit: d7c9609
 ---
 
 # Story 3.4: Hầm chông
