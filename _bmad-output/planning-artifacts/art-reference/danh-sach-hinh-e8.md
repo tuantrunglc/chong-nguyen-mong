@@ -158,6 +158,21 @@ Mỗi quân cần (khung 64×64, hai phe tách màu rõ: Đại Việt đỏ, Ng
 | G8 | Đại Hạm Chỉ Huy Ô Mã Nhi (Nguyên Mông) | 64×128 (2 ô) | Đại hạm bọc giáp gỗ kiên cố, tháp canh gắn khiên phòng thủ, buồm lớn (mục tiêu lớn mắc cạn) | Đã xong |
 | G9 | Hoạt ảnh Chèo Thuyền Lướt Sóng | 64×64 (4 frames) | Mái chèo chèo nước nhịp nhàng, sủi bọt trắng và rẽ vệt sóng đuôi thuyền | Đã xong (kèm GIF preview) |
 
+## H. Asset bổ sung chuyên sâu (P1 & P2)
+
+**Tình trạng 2026-10-23:** Đã hoàn thiện toàn diện 100% trọn bộ các asset bổ sung phục vụ gameplay và trải nghiệm sa bàn chuẩn 100% Resurrect 64 và 1-bit alpha. Bảng tổng hợp: `_tong_hop_asset_bo_sung.png`.
+
+| # | Hạng mục | Kích thước / Quy cách | Chi tiết & Mục đích | Tình trạng |
+|---|---|---|---|---|
+| H1 | Bóng đổ dither (Drop Shadows) | 32×16 (quân), 48×24 (vật cản) | Dither checkerboard 1-bit alpha, đặt dưới chân quân cờ và vật cản | Đã xong (`giao_dien/bong_do/`) |
+| H2 | Bộ số chiến đấu Pixel Art | 12×16 (to), 8×10 (nhỏ) + Spritesheet | Viền đen ruột vàng kim/trắng (0–9, ·, -, ×, /, +), cực kỳ tương phản trên ô đỏ NFR9 | Đã xong (`giao_dien/chu_so/`) |
+| H3 | Mũi tên xung phong Kỵ binh | 64×64 (4 hướng) | Mũi tên đỏ rực nhọn viền đen chỉ hướng xung phong Kỵ binh trên ô báo đòn | Đã xong (`giao_dien/o_co/`) |
+| H4 | Khung chọn & Khung ô chiến thuật | 64×64 (3 loại khung) | Khung góc thước thợ đồng sơn mài chọn tướng, khung ô đi được xanh ngọc, khung ô đánh được đỏ nhọn | Đã xong (`giao_dien/o_co/`) |
+| H5 | Vệt chém Mạch đao (Slash Arc) | 48×48 (4 frames) | Lưỡi chém quét vòng cung ánh bạc uy lực đẩy lùi của Nguyễn Khoái (kèm GIF preview) | Đã xong (`hieu_ung/vet_chem/`) |
+| H6 | Triện ấn Thắng / Bại | 160×64 & 80×32 | Con dấu son đồng "ĐẠI THẮNG" và con dấu tro tàn nứt vỡ "THẤT THỦ" | Đã xong (`giao_dien/trien_an/`) |
+| H7 | Hoạt ảnh Rơi sông Kỵ binh & Cung kỵ | 64×64 (4 frames × 2) | Ngựa và lính chìm sông, bọt nước sủi tăm (kèm GIF preview) | Đã xong (`hoat_anh/chet_duoi/`) |
+| H8 | Khung viền sa bàn bàn cờ | 9-slice module | Gỗ lim đen dát chỉ đồng cổ thời Trần bo viền bàn cờ | Đã xong (`dia_hinh/khung_ban_co/`) |
+
 ## Kiểm tra trước khi đưa một hình vào game
 
 1. Đúng kích thước, đúng lưới 64 px, không có điểm ảnh nhòe.
