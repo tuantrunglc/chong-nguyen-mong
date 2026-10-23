@@ -93,6 +93,8 @@ var _world: Node2D
 var _target_layer: Node2D
 ## Ô đỏ báo đòn (dưới đồng quân) và lớp số thứ tự của nó (trên cùng, trừ F1) (Story 2.7).
 var _telegraph: TelegraphView
+## Nhãn số máu mất do hầm chông trên ô sáng (Story 3.4).
+var _damage_labels: Node2D
 var _preview: PreviewView
 ## id quân -> UnitToken
 var _tokens: Dictionary = {}
@@ -179,12 +181,29 @@ func board_rect() -> Rect2:
 
 
 ## Vẽ vòng quanh tướng ở unit_cell và tô sáng cells. Xóa đường đi cũ.
-func show_selection(unit_cell: Vector2i, cells: Array[Vector2i], targets: Array[Vector2i] = []) -> void:
+## cell_penalties: ô -> số máu sẽ mất do hầm chông trên đường đi (Story 3.4).
+func show_selection(unit_cell: Vector2i, cells: Array[Vector2i], targets: Array[Vector2i] = [],
+		cell_penalties: Dictionary = {}) -> void:
 	_selected_cell = unit_cell
 	_lit_cells = cells.duplicate()
 	_target_cells = targets.duplicate()
 	_pending_cell = NO_CELL
 	_path = []
+	_clear_damage_labels()
+	for cell: Variant in cell_penalties.keys():
+		var dmg: int = cell_penalties[cell] as int
+		if dmg > 0 and cell is Vector2i:
+			var label: Label = Label.new()
+			label.text = "−%d" % dmg
+			label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+			label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			label.add_theme_font_size_override("font_size", 14)
+			label.add_theme_color_override("font_color", Color(0.95, 0.25, 0.25))
+			label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			label.size = Vector2(30, 20)
+			label.position = _top_center(cell as Vector2i) - label.size / 2.0
+			_damage_labels.add_child(label)
 	_redraw()
 
 
@@ -210,7 +229,15 @@ func clear_selection() -> void:
 	_target_cells = []
 	_pending_cell = NO_CELL
 	_path = []
+	_clear_damage_labels()
 	_redraw()
+
+
+func _clear_damage_labels() -> void:
+	if _damage_labels != null:
+		for child: Node in _damage_labels.get_children():
+			_damage_labels.remove_child(child)
+			child.queue_free()
 
 
 func lit_cells() -> Array[Vector2i]:
@@ -263,6 +290,8 @@ func _ready() -> void:
 	_target_layer = Node2D.new()
 	_target_layer.draw.connect(_draw_targets)
 	add_child(_target_layer)
+	_damage_labels = Node2D.new()
+	add_child(_damage_labels)
 	add_child(_telegraph.numbers)
 	setup(cols, rows)
 

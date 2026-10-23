@@ -34,6 +34,8 @@ static func run(state: BattleState, unit: Unit, dir: Vector2i, distance: int, ca
 			_hit_obstacle(state, unit, next, events)
 			return
 		Effects.move(state, unit, next, cause, events)
+		if not unit.is_alive() or not state.units.has(unit):
+			return
 
 
 ## Mép bàn, vật cản, tướng vào sông: đứng yên, mất máu.

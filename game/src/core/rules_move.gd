@@ -55,7 +55,10 @@ static func resolve(state: BattleState, command: Command, events: Array[BattleEv
 		return
 	for step: Vector2i in path:
 		Effects.move(state, unit, step, BattleEvent.Cause.WALK, events)
-	unit.has_moved = true
+		if not unit.is_alive():
+			break
+	if unit.is_alive():
+		unit.has_moved = true
 
 
 static func _paths(state: BattleState, unit: Unit) -> Dictionary:

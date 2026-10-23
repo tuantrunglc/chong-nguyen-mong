@@ -4,7 +4,7 @@ extends RefCounted
 
 
 ## Đặt quân vào ô kề to_cell và ghi sự kiện MOVED. Quân Nguyên vào sông thì chết đuối (tướng không bao giờ bị
-## đưa vào sông: ForcedMove chặn trước, luật đi không cho). Hầm chông thêm ở Story 3.4.
+## đưa vào sông: ForcedMove chặn trước, luật đi không cho). Hầm chông (Story 3.4): vào ô chông thì mất 1 máu.
 static func move(state: BattleState, unit: Unit, to_cell: Vector2i, cause: BattleEvent.Cause,
 		events: Array[BattleEvent]) -> void:
 	var from_cell: Vector2i = unit.cell
@@ -13,6 +13,8 @@ static func move(state: BattleState, unit: Unit, to_cell: Vector2i, cause: Battl
 	if unit.faction == Unit.Faction.NGUYEN and state.terrain_at(to_cell) == Terrain.RIVER:
 		_remove(state, unit)
 		events.append(BattleEvent.drowned(unit.id, to_cell))
+	elif state.terrain_at(to_cell) == Terrain.SPIKES:
+		damage(state, unit, 1, BattleEvent.Cause.SPIKES, events)
 
 
 ## Trừ amount máu, ghi DAMAGED với số máu đã trừ thật (máu không xuống dưới 0). Hết máu thì nhấc khỏi bàn, ghi DIED

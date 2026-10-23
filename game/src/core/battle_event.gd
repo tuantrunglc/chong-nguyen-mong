@@ -37,7 +37,8 @@ enum Type {
 ## Vì sao quân đổi ô hoặc mất máu. STRIKE: đòn có sát thương của tướng (Khoái, Lão).
 ## PULL: đòn kéo của Trần Khánh Dư (Story 2.4); mọi MOVED của đòn kéo mang nguyên nhân này.
 ## ENEMY_STRIKE: đòn quân Nguyên đã báo (Story 2.8); tách khỏi STRIKE để mưu kế cộng sát thương tướng không đụng tới.
-enum Cause { WALK, STRIKE, PUSH, COLLISION, PULL, ENEMY_STRIKE }
+## SPIKES: sát thương hầm chông (Story 3.4).
+enum Cause { WALK, STRIKE, PUSH, COLLISION, PULL, ENEMY_STRIKE, SPIKES }
 
 ## Vì sao lệnh bị từ chối (REJECTED). Kịch bản luật ghi bằng mã "tu_choi" (ScenarioRunner.REJECT_EVENTS).
 enum Reject {

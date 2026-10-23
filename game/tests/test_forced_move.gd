@@ -103,11 +103,12 @@ func test_general_pushed_into_river_collides() -> void:
 	assert_eq(state.unit_by_id(1).cell, Vector2i(3, 3))
 
 
-## Hầm chông mất máu ở Story 3.4; ô ải như đất trống.
+## Hầm chông mất máu (Story 3.4); ô ải như đất trống.
 func test_spikes_and_pass_are_entered() -> void:
 	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "B"}, {Vector2i(3, 2): "^", Vector2i(3, 1): "A"})
-	assert_eq(_push(state, 101, N, 2), ["MOVED 101 3,3>3,2 PUSH", "MOVED 101 3,2>3,1 PUSH"] as Array[String])
-	assert_eq(state.unit_by_id(101).hp, 3)
+	assert_eq(_push(state, 101, N, 2), ["MOVED 101 3,3>3,2 PUSH", "DAMAGED 101 -1 SPIKES",
+		"MOVED 101 3,2>3,1 PUSH"] as Array[String])
+	assert_eq(state.unit_by_id(101).hp, 2)
 
 
 func test_stops_after_first_collision() -> void:
