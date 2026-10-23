@@ -1,10 +1,11 @@
 ---
 baseline_commit: 2a813e5
+tested_commit: a95ede6
 ---
 
 # Story 3.5: Giới hạn hiệp (Tiêu diệt)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -66,9 +67,9 @@ tôi muốn trận Tiêu diệt có số hiệp tối đa,
   - [x] 7.1 Tạo `game/tests/test_round_limit.gd` phủ đầy đủ các ca luật và giao diện.
   - [x] 7.2 Chạy `tools/check_boundaries.sh` và `tools/test.sh` xanh 100% (669/669 test đạt, 107/107 kịch bản đạt).
 
-- [ ] **Task 8: Review code và chốt story** (AC: 7)
-  - [ ] 8.1 Chạy review 3 lớp, vá phát hiện (nếu có).
-  - [ ] 8.2 Cập nhật sprint status `done`.
+- [x] **Task 8: Review code và chốt story** (AC: 7)
+  - [x] 8.1 Chạy review 3 lớp (Blind Hunter, Edge Case Hunter, Acceptance Auditor): cả 7 AC đều thỏa mãn, không có lỗi tiềm ẩn.
+  - [x] 8.2 Cập nhật sprint status `done`.
 
 ## Dev Notes
 
