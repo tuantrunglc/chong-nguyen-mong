@@ -1,5 +1,6 @@
 ---
 baseline_commit: f770d73
+tested_commit: ce2db9f
 ---
 
 # Story 3.3: Trận 2
@@ -176,7 +177,7 @@ DeepSeek Harness (deepseek-flash), 2026-10-23.
 - **Tác giả xác nhận (2026-10-23):** đã chạy `tools/chay.sh --dev --tran=2`, đánh đúng 15 nước, thắng, Khoái 3/3, Lão 3/3.
 - **Kịch bản tự động:** sinh từ bàn thật sau `begin()` (đọc bàn + `state.telegraphs`, không chép tay); tự kiểm bằng `ScenarioRunner` → ĐẠT; đặt `da_duyet: true`.
 - **Trước vá review:** `tools/test.sh` tại HEAD `76f1051` → 644/644 test, 97 kịch bản đã duyệt, 0 trượt.
-- **Xanh cuối (sau vá review):** `tools/test.sh` → **645/645 test** (thêm `test_tran_02.gd`), **97 kịch bản đã duyệt**, 0 trượt; kịch bản `tran/tran_02_loi_giai.json`: **đạt**; bước 2 khoá `da_duyet` đạt (97 file).
+- **Xanh cuối (sau vá review, HEAD `ce2db9f`):** `tools/test.sh` → **645/645 test** (thêm `test_tran_02.gd`), **97 kịch bản đã duyệt**, 0 trượt; kịch bản `tran/tran_02_loi_giai.json`: **đạt**; bước 2 khoá `da_duyet` đạt (97 file).
 
 ### Completion Notes List
 
@@ -188,7 +189,7 @@ DeepSeek Harness (deepseek-flash), 2026-10-23.
 - **Kiểm ngược rừng:** bỏ `#` ở `2,5` rồi phát lại đúng 15 lệnh → hiệp 1 Kỵ binh `2,0` lao trúng Lão `2,6` (Lão còn 2 máu), về sau Lão gục, không thắng. Rừng là **bắt buộc**.
 - **Kiểm ngược địch đánh nhau:** hiệp 1, sau khi Khoái né, đường lao `5,4` đi tiếp tới `1,4`; sự kiện `MẤT MÁU` của quân 102 (Bộ binh) chứng minh B mất 1 máu vì đòn của Kỵ binh cùng phe.
 - **Trước vá review:** `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh` tại HEAD `76f1051` → **644/644 test**, **97 kịch bản đã duyệt**, 0 trượt.
-- **Xanh cuối (sau vá review):** `tools/test.sh` → **645/645 test** (thêm test khoá level–kịch bản), **97 kịch bản đã duyệt**, 0 trượt; kịch bản `tran/tran_02_loi_giai.json`: **đạt**; bước 2 khoá `da_duyet` đạt với 97 file.
+- **Xanh cuối (sau vá review, HEAD `ce2db9f`):** `tools/test.sh` → **645/645 test** (thêm test khoá level–kịch bản), **97 kịch bản đã duyệt**, 0 trượt; kịch bản `tran/tran_02_loi_giai.json`: **đạt**; bước 2 khoá `da_duyet` đạt với 97 file.
 
 ### File List
 
@@ -204,4 +205,4 @@ DeepSeek Harness (deepseek-flash), 2026-10-23.
 
 - 2026-10-23: chốt 5 câu hỏi; dựng `tran_02.json` (6×7, Ải Lãnh Kinh); viết lời giải 15 lệnh thắng 3/3; kiểm ngược rừng bắt buộc. Chờ tác giả đánh lại.
 - 2026-10-23 (sau xác nhận): tác giả đánh lại đúng lời giải → thắng, hai tướng 3/3. Sinh kịch bản từ bàn thật, đặt `da_duyet: true`; `tools/test.sh` xanh 644/644, 97 kịch bản đã duyệt. Story → `done`.
-- 2026-10-23 (sau code review 3 lớp): 13 patch đã áp dụng — MD (luật đi/sông/thua, pha chuẩn bị–ra đòn, ngoại lệ né ô đỏ, hủy đòn, "Chơi lại hiệp", Lão bay qua quân, "Kiểm chứng"), story (trap 1, mốc test), test mới `test_tran_02.gd`, kịch bản giữ `da_duyet: true`. 1 defer: kịch bản âm rừng bắt buộc. Test xanh **645/645**, 97 kịch bản.
+- 2026-10-23 (sau code review 3 lớp): 13 patch đã áp dụng — MD (luật đi/sông/thua, pha chuẩn bị–ra đòn, ngoại lệ né ô đỏ, hủy đòn, "Chơi lại hiệp", Lão bay qua quân, "Kiểm chứng"), story (trap 1, mốc test), test mới `test_tran_02.gd`, kịch bản giữ `da_duyet: true`. 1 defer: kịch bản âm rừng bắt buộc. Test xanh **645/645** tại HEAD `ce2db9f`, 97 kịch bản.
