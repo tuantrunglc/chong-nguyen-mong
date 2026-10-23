@@ -353,15 +353,16 @@ func test_step_reject_code_is_read() -> void:
 func test_step_reject_code_errors() -> void:
 	var d: Dictionary = _valid()
 	d["hanh_dong"] = [
-		{"lenh": "di", "tuong": "1", "o": "4,6", "tu_choi": "bi_chan"},
+		{"lenh": "di", "tuong": "1", "o": "4,6", "tu_choi": "sai_ma"},
 		{"lenh": "di", "tuong": "1", "o": "4,6", "tu_choi": true},
 		{"lenh": "ket_thuc_luot", "tu_choi": "khong_toi_duoc"},
 	]
 	var r: LoadResult = _parse(d)
 	var codes: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", ' \
-		+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam", "tran_da_het"'
+		+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich", "bi_chan", ' \
+		+ '"ngoai_tam", "tran_da_het"'
 	assert_eq(r.errors, [
-		F + ': "hanh_dong" mục 1 (di): "tu_choi" là "bi_chan", chỉ được ' + codes,
+		F + ': "hanh_dong" mục 1 (di): "tu_choi" là "sai_ma", chỉ được ' + codes,
 		F + ': "hanh_dong" mục 2 (di): "tu_choi" là true, chỉ được ' + codes,
 	] as Array[String])
 	assert_eq(r.warnings, [F + ': "hanh_dong" mục 3 (ket_thuc_luot): bỏ qua khóa lạ "tu_choi"'] as Array[String])
@@ -545,7 +546,8 @@ func test_attack_reject_codes_fit_command() -> void:
 	]
 	assert_eq(_parse(d).errors, [
 		F + ': "hanh_dong" mục 1 (danh): "tu_choi" là "khong_con_nuoc_di", lệnh "danh" chỉ bị từ chối vì '
-			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "khong_ke", "khong_co_dich", "ngoai_tam", "tran_da_het"',
+			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "khong_ke", "khong_co_dich", "bi_chan", '
+			+ '"ngoai_tam", "tran_da_het"',
 		F + ': "hanh_dong" mục 2 (di): "tu_choi" là "khong_ke", lệnh "di" chỉ bị từ chối vì '
 			+ '"khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc", "tran_da_het"',
 		F + ': "hanh_dong" mục 3 (di): "tu_choi" là "ngoai_tam", lệnh "di" chỉ bị từ chối vì '

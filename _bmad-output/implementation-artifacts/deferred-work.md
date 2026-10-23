@@ -204,3 +204,9 @@
 - `"huong"` (xung phong) trong `bao_don` không kiểm loại quân (`scenario_loader.gd`): Cung kỵ hoặc Bộ binh vẫn "xung phong" được nếu người viết kịch bản gõ vậy. Có sẵn từ Story 2.8, không do 2.15; nên thêm kiểm "chỉ `K` được `huong`" ở story dữ liệu/kịch bản sau. Mọi kịch bản hiện có dùng `huong` cho Kỵ binh nên sửa được an toàn.
 - Thiếu kịch bản biên riêng cho Cung kỵ: (a) bị kéo làm ô đích ra ngoài bàn, (b) quân khác phe bị kéo vào ô đỏ, (c) tướng rời ô đỏ rồi kết thúc lượt. Đều dùng chung đường `CELL` đã có test cho Bộ binh. Làm khi tác giả chốt 2 câu hỏi cuối story 2.15 (ô đích trống; tướng mình đứng giữa) hoặc ở Story 3.1.
 - `EnemyIntent.Reason.NO_ATTACK_RULE` vẫn giữ enum + chuỗi dịch `dev.ai.no_rule` nhưng từ Story 2.15 không loại quân nào dùng, nên không còn test. Giữ có chủ ý cho loại quân thêm sau; xoá khi chắc chắn không cần.
+
+## Deferred from: code review of story-3-1-rung-va-vat-can-chan-don (2026-10-23)
+
+- Kéo qua **làng**: `_du_targets` chỉ dừng ở `ATTACK_BLOCKERS` (rừng, kho lương), nên Dư vẫn kéo được quân đứng sau làng; quân bị kéo va vào làng và mất 1 máu (`ForcedMove.OBSTACLES` có `VILLAGE`). Trái GDD ("vật đầu tiên là làng thì không kéo được") nhưng đúng phạm vi 3.1 (làng để 3.7). Story 3.7 thêm làng vào chặn + Lòng dân sẽ xử lý; khi đó phải thêm test.
+- Không có test khóa ranh giới "làng **không** chặn lao/tên/kéo" (AC 6 của 3.1): nếu ai thêm `VILLAGE` vào `Terrain.ATTACK_BLOCKERS` sớm, chỉ `test_archer_trial_level_begins_with_a_shot` bắt được (gián tiếp). Cố ý không thêm test vì 3.7 sẽ đổi hành vi.
+- Nhánh va chạm khi kéo (`COLLIDED`/`DAMAGED COLLISION`) mất test trực tiếp sau 3.1: ca rừng đổi thành "không kéo được", chỉ còn làng chạm tới nhánh này. Làm lại cùng Story 3.7.

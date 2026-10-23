@@ -4,7 +4,7 @@ baseline_commit: 1fbbf6f
 
 # Story 3.1: Rừng và vật cản chặn đòn
 
-Status: review
+Status: done
 
 ## Story
 
@@ -16,7 +16,7 @@ tôi muốn rừng và kho lương che chắn được đòn đánh,
 
 1. **Cho** rừng hoặc kho lương nằm giữa Phạm Ngũ Lão và mục tiêu, **kể cả ở ô kề** **khi** phóng lao **thì** lao bị chặn, mục tiêu không mất máu (FR13).
 2. **Khi** Kỵ binh xung phong vào rừng hoặc kho lương **thì** đòn dừng ở vật cản, không ai mất máu (FR19).
-3. **Khi** có rừng hoặc kho lương nằm giữa Cung kỵ và ô đã báo **thì** tên bị chặn (FR20).
+3. **Khi** có rừng hoặc kho lương nằm giữa Cung kỵ và ô đã báo **thì** tên bị chặn (FR20). Chỉ tính **lúc báo**: nếu chủ đòn bị đẩy/kéo sau đó làm vật cản rơi vào giữa thì đòn đã báo vẫn trúng ô (tác giả chốt 2026-10-23).
 4. **Khi** vật đầu tiên trên hàng của Trần Khánh Dư là rừng hoặc kho lương **thì** không kéo được, không có viền "đánh được" về hướng đó (FR14).
 5. **Và** có kịch bản trong `dia_hinh/` (rừng), tác giả duyệt **trước khi viết luật** (quy trình M3); `tools/test.sh` xanh.
 6. **Và** làng (ô `D`) **không** thuộc story này: phần chặn lao/tên/kéo của làng và Lòng dân làm ở Story 3.7. Kỵ binh đã dừng ở làng từ Story 2.6 — giữ nguyên, không gỡ.
@@ -75,6 +75,29 @@ tôi muốn rừng và kho lương che chắn được đòn đánh,
   - [x] 7.3 Chạy tay `tools/chay.sh --dev --tran=thu_ba_tuong` (bàn có rừng ở (1,1) và (1,4)? kiểm lại) hoặc `--tran=thu_lao`: xem viền mục tiêu của Lão biến mất khi rừng chắn; chụp cửa sổ game nếu GoPeak không nối (`DISPLAY=:1 import -window <id>`).
   - [x] 7.4 Commit kịch bản (sau duyệt) và code **riêng**; lời tiếng Việt, kết `(Story 3.1)`. Không gộp `img/` hay việc của story khác.
 
+### Review Findings
+
+_Code review 3 lớp (Blind Hunter, Edge Case Hunter, Acceptance Auditor) trên diff 11 file, 2026-10-23. Kết quả: 4 `decision_needed`, 7 `patch`, 3 `defer`, 3 bỏ. **Không AC nào KHÔNG ĐẠT.**_
+
+**Đã chốt và sửa (2026-10-23, `ea5633a` + `726a8df` + kịch bản + tài liệu):**
+
+- [x] [Review][Decision] Tên chỉ bị chặn **lúc báo** — tác giả chốt giữ; AC 3 ghi rõ; khóa bằng `test_reported_archer_shot_is_not_blocked_afterwards` (đòn đã báo vẫn trúng dù rừng ở giữa).
+- [x] [Review][Decision] Lý do khi bị chặn — thêm `BattleEvent.Reject.BLOCKED`, mã kịch bản `bi_chan`, câu "đòn bị rừng hoặc kho lương chặn trước ô x,y"; cập nhật `ScenarioLoader` (REJECT_CODES, REJECT_LIST, COMMAND_REJECTS), `ScenarioRunner.REJECT_EVENTS`, `BugReport.REJECT_CODES`, bản dịch; 4 kịch bản đổi sang `bi_chan`.
+- [x] [Review][Decision] Sửa kịch bản đã duyệt — trả lại `truoc.bao_don` cho `rung_chan_xung_phong` (đòn xung phong có thật) + sửa `mo_ta` "(2,2)"; thêm kịch bản dương `vat_can_sau_muc_tieu` (rừng sau mục tiêu, lao vẫn trúng); tooltip rừng/kho thêm "Chặn lao, tên, kéo".
+- [x] [Review][Decision] Kiến trúc — `game-architecture.md` sửa làng chặn lao/tên/kéo sang Story 3.7.
+
+- [x] [Patch] `lao_throw` quét từ d=1 (bay qua quân trước `min_range`, chặn mọi vật cản) — cùng biên với `_lao_targets` [game/src/core/rules_attack.gd]
+- [x] [Patch] Comment `EnemyAI.can_hit_from` sửa: không xét quân, nhưng rừng/kho lương chặn [game/src/core/enemy_ai.gd]
+- [x] [Patch] Comment `_lao_targets` sửa: "quân trước `min_range` bị bay qua", không viết cứng "ô kề" [game/src/core/rules_attack.gd]
+- [x] [Patch] Thêm test "vật cản chỉ chặn hướng của nó" (lao + kéo, hướng Đông vẫn đánh được) [game/tests/test_rules_attack.gd]
+- [x] [Patch] Thêm ca Dư bị kho lương chặn và tên bị chặn ở khoảng cách 2 [game/tests/test_rules_attack.gd, game/tests/test_enemy_ai.gd]
+- [x] [Patch] Ca "vật cản sau mục tiêu" của lao đổi sang trong tầm (Lão `3,6` → B `3,4`, rừng `3,3`) [game/tests/test_rules_attack.gd]
+- [x] [Patch] Comment "Tầm bắn đọc từ chi_so.json" trả về đúng test stats [game/tests/test_enemy_ai.gd]
+
+- [x] [Review][Defer] Kéo qua **làng** vẫn gây 1 máu va chạm [game/src/core/rules_attack.gd] — deferred, Story 3.7 thêm làng + Lòng dân
+- [x] [Review][Defer] Không có test khóa "làng KHÔNG chặn lao/tên/kéo" (AC 6) [game/src/core/terrain.gd] — deferred, 3.7 sẽ đổi hành vi làng
+- [x] [Review][Defer] Nhánh va chạm khi kéo mất test trực tiếp [game/tests/test_rules_attack.gd] — deferred cùng 3.7
+
 ## Dev Notes
 
 ### Hiện trạng trước story này (đọc trước khi sửa)
@@ -103,6 +126,9 @@ TÊN (Cung kỵ):
   - Khi chọn ô đứng/báo đòn: vật chặn nằm giữa ô đứng và ô đích → ô đó không bắn được.
   - "Giữa" là các ô từ ô sau lưng chủ đòn tới trước ô đích; không tính ô chủ đòn, không tính ô đích.
 XUNG PHONG (Kỵ binh): đã đúng từ 2.6, chỉ kiểm lại.
+LÝ DO TỪ CHỐI: địch đúng ô đích nhưng bị vật cản chặn trước → `Reject.BLOCKED`, mã kịch bản `bi_chan`,
+câu "đòn bị rừng hoặc kho lương chặn trước ô x,y". Ô trống/không phải đích vẫn là `khong_co_dich`.
+
 ```
 
 ### Chỗ phải sửa, và chỗ KHÔNG được sửa
@@ -181,6 +207,10 @@ DeepSeek Harness (deepseek-flash), 2026-10-23.
 - **Kiểm ngược 4 đường (khôi phục bằng bản sao `/tmp`, không `git checkout`):** (a) bỏ chặn lao → `rung_chan_lao`, `rung_chan_lao_o_ke`, `kho_luong_chan_lao` trượt; (b) bỏ chặn kéo → `rung_chan_keo` trượt; (c) bỏ chặn tên → `rung_chan_ten` trượt ("thừa đòn 1", ô đỏ 3,6); (d) `ATTACK_BLOCKERS` chỉ còn `FOREST` → `kho_luong_chan_lao` trượt. Cả 4 khôi phục, xanh lại.
 - **Kiểm tay:** bàn tạm `thu_rung_31` (đã xoá, không commit): **có rừng** ở (3,4) → Cung kỵ đi tới (4,5), **không có ô đỏ**; **bỏ rừng** → Cung kỵ đứng (3,3), ô đỏ "1" trên Khoái. Ảnh: `build/test/shot_31_co_rung.png`, `build/test/shot_31_khong_rung.png` (`build/` bị gitignore).
 - **Xanh cuối:** `tools/test.sh` → **629/629**, 95 kịch bản đã duyệt, 0 chưa đạt.
+- **Code review 3 lớp (2026-10-23):** 4 `decision_needed` + 7 `patch`; không AC nào không đạt. Phát hiện nặng: (a) kịch bản `rung_chan_xung_phong` mất `truoc.bao_don` nên **không có đòn xung phong** — đã trả lại và sửa `mo_ta`; (b) AC 3 mơ hồ "chặn lúc nào" — tác giả chốt **chỉ lúc báo**, có test khóa; (c) lý do từ chối `khong_co_dich` sai khi bị địa hình chắn — thêm `bi_chan`.
+- **Sửa kèm khi thêm `bi_chan`:** `REJECT_LIST`, `COMMAND_REJECTS["danh"]`, `BugReport.REJECT_CODES`, `ScenarioRunner.REJECT_EVENTS`, CSV `scenario.viewer.reject_blocked`; 4 kịch bản đổi `tu_choi`; 2 test kỳ vọng danh sách mã.
+- **Biến cố môi trường:** một phiên khác `git checkout` xoá các thay đổi **chưa commit** (rules_attack, battle_event, test_rules_attack, …) lúc ~09:53; đã áp lại và commit ngay từng phần (`ea5633a`, `726a8df`, kịch bản). Bài học: trong phiên có nhiều người, commit ngay sau mỗi phần.
+- **Xanh cuối:** `tools/test.sh` → **632/632**, 96 kịch bản đã duyệt, 0 chưa đạt.
 
 ### Completion Notes List
 
@@ -189,6 +219,7 @@ DeepSeek Harness (deepseek-flash), 2026-10-23.
 - **Câu hỏi 1 giữ mặc định:** tên chỉ bị chặn **lúc báo**; đòn đã báo vẫn trúng ô dù Cung kỵ bị đẩy/kéo sau đó. Muốn chặn cả lúc ra đòn thì là việc riêng, cần tác giả yêu cầu.
 - **Câu hỏi 2:** làng chưa chặn lao/tên/kéo — để 3.7.
 - Đã xoá bàn thử tạm `game/data/tran/thu_rung_31.json` sau khi chụp ảnh; `git status` sạch ngoài các file của story.
+- **Sau code review:** tên chỉ chặn lúc báo (có test khóa); lý do bị chặn có mã riêng `bi_chan`; kịch bản xung phong đã có đòn thật; thêm ca dương `vat_can_sau_muc_tieu`; tooltip nói rõ chặn đòn; kiến trúc sửa làng → 3.7. 3 `defer` ghi trong `deferred-work.md`.
 
 ### File List
 
@@ -196,11 +227,20 @@ DeepSeek Harness (deepseek-flash), 2026-10-23.
 - `game/src/core/rules_attack.gd` — chặn lao (`_lao_targets`, `lao_throw`), chặn kéo (`_du_targets`).
 - `game/src/core/enemy_ai.gd` — `can_hit_from` nhánh CUNG_KY kiểm vật cản giữa.
 - `game/tests/test_rules_attack.gd` — đổi ca kéo-qua-rừng; thêm ca lao/kéo biên.
-- `game/tests/test_enemy_ai.gd` — `test_archer_arrow_blocked_by_terrain`.
+- `game/tests/test_enemy_ai.gd` — `test_archer_arrow_blocked_by_terrain` (thêm ca cách 2).
+- `game/src/core/battle_event.gd` — `Reject.BLOCKED`.
+- `game/src/debug/bug_report.gd` — ánh xạ `BLOCKED` → `bi_chan`.
+- `game/i18n/text.csv` — `scenario.viewer.reject_blocked`, tooltip rừng/kho nói chặn đòn.
+- `game/tests/test_rules_enemy_phase.gd` — khóa "tên chỉ chặn lúc báo".
+- `game/tests/test_scenario_loader.gd` — kỳ vọng danh sách mã có `bi_chan`.
+- `game/tests/kich_ban/dia_hinh/vat_can_sau_muc_tieu.json` (mới).
 - `game/tests/kich_ban/dia_hinh/rung_chan_lao.json`, `rung_chan_lao_o_ke.json`, `kho_luong_chan_lao.json`, `rung_chan_keo.json`, `rung_chan_ten.json`, `rung_chan_xung_phong.json` (mới, đã duyệt).
+- `_bmad-output/planning-artifacts/game-architecture.md` — làng chặn lao/tên/kéo sang Story 3.7.
+- `_bmad-output/implementation-artifacts/deferred-work.md` — 3 mục hoãn của review 3.1.
 - `_bmad-output/implementation-artifacts/3-1-rung-va-vat-can-chan-don.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ### Change Log
 
 - 2026-10-23: 6 kịch bản `dia_hinh/` (5 trượt đúng lý do, ca xung phong đạt ngay), tác giả duyệt; sửa bàn `rung_chan_ten` sau khi phát hiện nó vây kín Cung kỵ (được tác giả duyệt). Viết luật chặn lao/kéo/tên; kiểm ngược 4 đường; kiểm tay bằng ảnh có/không rừng. `tools/test.sh` xanh 629/629. Story → `review`.
+- 2026-10-23 (sau code review): tác giả chốt 4 điểm (tên chỉ chặn lúc báo; thêm mã `bi_chan`; sửa kịch bản + thêm ca dương + tooltip; sửa kiến trúc). Sửa 7 patch + 4 quyết định; `tools/test.sh` xanh 632/632, 96 kịch bản đã duyệt. Story → `done`.

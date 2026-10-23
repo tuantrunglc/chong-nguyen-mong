@@ -21,6 +21,7 @@ const REJECT_CODES: Dictionary = {
 	BattleEvent.Reject.ALREADY_ATTACKED: "da_danh_roi",
 	BattleEvent.Reject.NOT_ADJACENT: "khong_ke",
 	BattleEvent.Reject.NO_TARGET: "khong_co_dich",
+	BattleEvent.Reject.BLOCKED: "bi_chan",
 	BattleEvent.Reject.NOT_IN_RANGE: "ngoai_tam",
 	BattleEvent.Reject.BATTLE_OVER: "tran_da_het",
 }
