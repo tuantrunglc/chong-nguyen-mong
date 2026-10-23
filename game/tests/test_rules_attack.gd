@@ -324,7 +324,7 @@ func test_pull_leaves_unit_behind_target_alone() -> void:
 ## Story 3.1: rừng là vật đầu tiên trên hàng thì không kéo được (trước 3.1 vẫn kéo và quân bị va chạm).
 func test_pull_blocked_by_forest_is_not_a_target() -> void:
 	var state: BattleState = BoardFixture.state({Vector2i(3, 5): "3", Vector2i(3, 2): "B"}, {Vector2i(3, 3): "#"})
-	assert_eq(_attack(state, 3, Vector2i(3, 2)), ["REJECTED NO_TARGET"] as Array[String])
+	assert_eq(_attack(state, 3, Vector2i(3, 2)), ["REJECTED BLOCKED"] as Array[String])
 	assert_eq(state.unit_by_id(101).cell, Vector2i(3, 2), "mục tiêu đứng yên")
 	assert_eq(state.unit_by_id(101).hp, 3, "không ai mất máu")
 	assert_false(state.unit_by_id(3).has_attacked, "Dư không tính đã đánh")
@@ -334,25 +334,52 @@ func test_pull_blocked_by_forest_is_not_a_target() -> void:
 func test_pull_blocked_by_blocker_any_distance() -> void:
 	var next_door: BattleState = BoardFixture.state({Vector2i(3, 6): "3", Vector2i(3, 3): "B"},
 		{Vector2i(3, 5): "#"})
-	assert_eq(_attack(next_door, 3, Vector2i(3, 3)), ["REJECTED NO_TARGET"] as Array[String], "rừng ở ô kề Dư")
+	assert_eq(_attack(next_door, 3, Vector2i(3, 3)), ["REJECTED BLOCKED"] as Array[String], "rừng ở ô kề Dư")
 	var beyond: BattleState = BoardFixture.state({Vector2i(3, 6): "3", Vector2i(3, 4): "B"},
 		{Vector2i(3, 3): "#"})
 	assert_eq(_attack(beyond, 3, Vector2i(3, 4)), ["ATTACKED 3 3,4", "MOVED 101 3,4>3,5 PULL"]
 		as Array[String], "rừng sau mục tiêu không chặn")
 
 
+## Story 3.1: vật cản chỉ chặn HƯỚNG của nó; hướng khác vẫn có mục tiêu.
+func test_blocker_blocks_only_its_direction() -> void:
+	var north: BattleState = BoardFixture.state({Vector2i(3, 6): "2", Vector2i(3, 2): "B",
+		Vector2i(5, 6): "B"}, {Vector2i(3, 5): "#"})
+	assert_eq(_attack(north, 2, Vector2i(3, 2)), ["REJECTED BLOCKED"] as Array[String], "hướng Bắc bị chặn")
+	var east: BattleState = BoardFixture.state({Vector2i(3, 6): "2", Vector2i(3, 2): "B",
+		Vector2i(5, 6): "B"}, {Vector2i(3, 5): "#"})
+	assert_eq(_attack(east, 2, Vector2i(5, 6)), ["ATTACKED 2 5,6", "DAMAGED 102 -1 STRIKE"]
+		as Array[String], "hướng Đông vẫn đánh được")
+	var pull_north: BattleState = BoardFixture.state({Vector2i(3, 6): "3", Vector2i(3, 3): "B",
+		Vector2i(6, 6): "B"}, {Vector2i(3, 5): "#"})
+	assert_eq(_attack(pull_north, 3, Vector2i(3, 3)), ["REJECTED BLOCKED"] as Array[String],
+		"kéo hướng Bắc bị chặn")
+	var pull_east: BattleState = BoardFixture.state({Vector2i(3, 6): "3", Vector2i(3, 3): "B",
+		Vector2i(6, 6): "B"}, {Vector2i(3, 5): "#"})
+	assert_eq(_attack(pull_east, 3, Vector2i(6, 6)), ["ATTACKED 3 6,6", "MOVED 102 6,6>5,6 PULL",
+		"MOVED 102 5,6>4,6 PULL"] as Array[String], "kéo hướng Đông vẫn được")
+
+
+## Story 3.1: kho lương cũng chặn kéo, không chỉ rừng.
+func test_pull_blocked_by_granary() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 6): "3", Vector2i(3, 3): "B"},
+		{Vector2i(3, 4): "L"})
+	assert_eq(_attack(state, 3, Vector2i(3, 3)), ["REJECTED BLOCKED"] as Array[String])
+	assert_eq(state.unit_by_id(101).hp, 3)
+
+
 ## Story 3.1: lao bị rừng/kho lương chặn ở bất kỳ ô nào từ ô kề; sông không chặn.
 func test_lao_blocked_by_terrain() -> void:
 	var adjacent: BattleState = BoardFixture.state({Vector2i(3, 6): "2", Vector2i(3, 2): "B"},
 		{Vector2i(3, 5): "#"})
-	assert_eq(_attack(adjacent, 2, Vector2i(3, 2)), ["REJECTED NO_TARGET"] as Array[String], "rừng ở ô kề Lão")
+	assert_eq(_attack(adjacent, 2, Vector2i(3, 2)), ["REJECTED BLOCKED"] as Array[String], "rừng ở ô kề Lão")
 	var between: BattleState = BoardFixture.state({Vector2i(3, 6): "2", Vector2i(3, 2): "B"},
 		{Vector2i(3, 4): "L"})
-	assert_eq(_attack(between, 2, Vector2i(3, 2)), ["REJECTED NO_TARGET"] as Array[String], "kho lương chắn")
-	var behind: BattleState = BoardFixture.state({Vector2i(3, 6): "2", Vector2i(3, 2): "B"},
-		{Vector2i(3, 1): "#"})
-	assert_eq(_attack(behind, 2, Vector2i(3, 2)), ["ATTACKED 2 3,2", "DAMAGED 101 -1 STRIKE"]
-		as Array[String], "vật cản sau mục tiêu không chặn")
+	assert_eq(_attack(between, 2, Vector2i(3, 2)), ["REJECTED BLOCKED"] as Array[String], "kho lương chắn")
+	var behind: BattleState = BoardFixture.state({Vector2i(3, 6): "2", Vector2i(3, 4): "B"},
+		{Vector2i(3, 3): "#"})
+	assert_eq(_attack(behind, 2, Vector2i(3, 4)), ["ATTACKED 2 3,4", "DAMAGED 101 -1 STRIKE"]
+		as Array[String], "vật cản sau mục tiêu (trong tầm) không chặn")
 	var river: BattleState = BoardFixture.state({Vector2i(3, 6): "2", Vector2i(3, 2): "B"},
 		{Vector2i(3, 4): "~"})
 	assert_eq(_attack(river, 2, Vector2i(3, 2)), ["ATTACKED 2 3,2", "DAMAGED 101 -1 STRIKE"]

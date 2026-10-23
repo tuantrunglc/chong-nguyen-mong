@@ -36,6 +36,17 @@ func test_end_turn_starts_next_round() -> void:
 	assert_eq(state.validate(), [] as Array[String])
 
 
+## Story 3.1 (tác giả chốt 2026-10-23): tên chỉ bị chặn LÚC BÁO. Đòn đã báo vẫn trúng ô dù sau đó chủ đòn bị dời
+## và vật cản rơi vào giữa (kéo/đẩy) — hành vi có chủ ý, không phải lỗi.
+func test_reported_archer_shot_is_not_blocked_afterwards() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(3, 3): "C", Vector2i(3, 6): "1"},
+		{Vector2i(3, 4): "#"})
+	state.telegraphs.append(Telegraph.new(101, Telegraph.Kind.CELL, Vector2i(0, 3), 1))
+	var events: Array[BattleEvent] = []
+	RulesEnemyPhase._strike_all(state, events)
+	assert_eq(state.unit_by_id(1).hp, 2, "đòn đã báo vẫn trúng")
+
+
 ## Story 2.15: Bộ binh (id nhỏ hơn) và Cung kỵ cùng chuẩn bị — đi rồi báo đòn, số thứ tự theo id.
 func test_prepare_orders_infantry_and_archer_by_id() -> void:
 	var level: LevelData = LevelData.new()
