@@ -36,6 +36,28 @@ func test_end_turn_starts_next_round() -> void:
 	assert_eq(state.validate(), [] as Array[String])
 
 
+## Story 2.15: Bộ binh (id nhỏ hơn) và Cung kỵ cùng chuẩn bị — đi rồi báo đòn, số thứ tự theo id.
+func test_prepare_orders_infantry_and_archer_by_id() -> void:
+	var level: LevelData = LevelData.new()
+	level.size = Vector2i(7, 7)
+	for i: int in range(level.size.x * level.size.y):
+		level.terrain.append(Terrain.PLAIN)
+	level.units.append(LevelData.UnitPlacement.new(UnitType.NGUYEN_KHOAI, Vector2i(3, 6)))
+	level.units.append(LevelData.UnitPlacement.new(UnitType.BO_BINH, Vector2i(3, 4)))
+	level.units.append(LevelData.UnitPlacement.new(UnitType.CUNG_KY, Vector2i(0, 5)))
+	var state: BattleState = BattleState.from_level(level, BoardFixture.stats())
+	var events: Array[BattleEvent] = []
+	RulesEnemyPhase.prepare(state, events)
+	assert_eq(state.unit_by_id(101).cell, Vector2i(3, 5), "Bộ binh lên kề Khoái")
+	assert_eq(state.unit_by_id(102).cell, Vector2i(0, 6), "Cung kỵ lùi một bước vào tầm bắn")
+	assert_eq(state.telegraphs.size(), 2)
+	assert_eq(state.telegraphs[0].owner_id, 101, "đòn số 1 của quân id nhỏ hơn")
+	assert_eq(state.telegraphs[0].offset, Vector2i(0, 1))
+	assert_eq(state.telegraphs[1].owner_id, 102)
+	assert_eq(state.telegraphs[1].offset, Vector2i(3, 0))
+	assert_eq(state.validate(), [] as Array[String])
+
+
 func test_end_turn_lets_every_general_move_again() -> void:
 	var state: BattleState = _state()
 	Rules.resolve(state, Command.move(1, Vector2i(0, 4)))

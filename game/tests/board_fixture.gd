@@ -7,7 +7,7 @@ extends RefCounted
 const DEFAULT_SIZE: Vector2i = Vector2i(7, 7)
 
 
-static func stats() -> Stats:
+static func values() -> Dictionary:
 	var values: Dictionary = {}
 	values[UnitType.NGUYEN_KHOAI] = {"mau": 3, "tam_di": 3, "sat_thuong": 2, "do_day": 1}
 	values[UnitType.PHAM_NGU_LAO] = {"mau": 3, "tam_di": 3, "sat_thuong": 1, "tam_danh_gan": 2, "tam_danh_xa": 4}
@@ -15,7 +15,18 @@ static func stats() -> Stats:
 	values[UnitType.BO_BINH] = {"mau": 3, "tam_di": 2, "sat_thuong": 1}
 	values[UnitType.KY_BINH] = {"mau": 2, "tam_di": 3, "sat_thuong": 1}
 	values[UnitType.CUNG_KY] = {"mau": 1, "tam_di": 3, "sat_thuong": 1, "tam_ban_gan": 2, "tam_ban_xa": 3}
-	return Stats.new(values)
+	return values
+
+
+static func stats() -> Stats:
+	return Stats.new(values())
+
+
+## Chỉ số của fixture với một khóa bị đổi — để test chứng minh luật đọc số từ chi_so, không hard-code.
+static func stats_with(type: int, key: String, value: int) -> Stats:
+	var changed: Dictionary = values()
+	(changed[type] as Dictionary)[key] = value
+	return Stats.new(changed)
 
 
 ## Bàn trống cỡ size, ô (c, r) thay bằng ký hiệu.
@@ -34,7 +45,7 @@ static func rows(cells: Dictionary, size: Vector2i = DEFAULT_SIZE) -> Array[Stri
 
 ## Tướng theo ký hiệu (id 1, 2, 3), quân Nguyên theo thứ tự đọc bàn (id 101, 102…). hp: ô -> máu.
 static func state(units: Dictionary, terrain: Dictionary = {}, hp: Dictionary = {},
-		size: Vector2i = DEFAULT_SIZE) -> BattleState:
+		size: Vector2i = DEFAULT_SIZE, p_stats: Stats = null) -> BattleState:
 	var unit_rows: Array[String] = rows(units, size)
 	var terrain_rows: Array[String] = rows(terrain, size)
 	var level: LevelData = LevelData.new()
@@ -58,7 +69,7 @@ static func state(units: Dictionary, terrain: Dictionary = {}, hp: Dictionary = 
 	generals.sort_custom(func(a: LevelData.UnitPlacement, b: LevelData.UnitPlacement) -> bool: return a.type < b.type)
 	level.units.append_array(generals)
 	level.units.append_array(enemies)
-	return BattleState.from_level(level, stats())
+	return BattleState.from_level(level, p_stats if p_stats != null else stats())
 
 
 ## "loại:id:..." của từng sự kiện, để so cả dãy trong một assert.

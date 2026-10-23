@@ -1112,9 +1112,11 @@ func test_before_telegraph_errors() -> void:
 	assert_eq(_errors(d), [F + ': "truoc.bao_don" mục 1: "o" ô 3,4 không kề "quan" ô 5,4'] as Array[String])
 
 
-## Story 2.15: "o" của Cung kỵ phải thẳng hàng và cách từ 2 ô. Bộ nạp KHÔNG chặn trên: tầm 3 nằm trong
-## chi_so.json, trần do BattleState.validate() kiểm lúc chạy.
-func test_archer_telegraph_target_is_straight_and_far() -> void:
+## Story 2.15: "o" của Cung kỵ phải thẳng hàng và cách đúng tầm `tam_ban_gan`–`tam_ban_xa` trong chi_so.json
+## (một nguồn với luật, không hard-code). `truoc` và `sau` dùng chung phép kiểm.
+func test_archer_telegraph_target_uses_stats_range() -> void:
+	var after: String = F + ': "sau.bao_don" mục 1: '
+	var before: String = F + ': "truoc.bao_don" mục 1: '
 	var d: Dictionary = _valid()
 	d["truoc"]["quan"][4] = ". . . . . C ."
 	d["sau"]["quan"][4] = ". . . . . C ."
@@ -1122,16 +1124,31 @@ func test_archer_telegraph_target_is_straight_and_far() -> void:
 	assert_eq(_errors(d), [] as Array[String], "thẳng hàng, cách 2 ô")
 	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,1"}]
 	assert_eq(_errors(d), [] as Array[String], "thẳng hàng, cách 3 ô")
-	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,0"}]
-	assert_eq(_errors(d), [] as Array[String], "4 ô: bộ nạp chấp nhận, trần do validate")
 	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,5"}]
-	assert_eq(_errors(d), [
-		F + ': "sau.bao_don" mục 1: "o" ô 5,5 không cách "quan" ô 5,4 từ 2 ô trở lên (Cung kỵ không bắn ô kề)'
-	] as Array[String], "không bắn ô kề")
+	assert_eq(_errors(d), [after + '"o" ô 5,5 không cách "quan" ô 5,4 từ 2 ô trở lên (Cung kỵ bắn xa)']
+		as Array[String], "ô kề")
 	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "3,2"}]
-	assert_eq(_errors(d), [
-		F + ': "sau.bao_don" mục 1: "o" ô 3,2 không thẳng hàng với "quan" ô 5,4 (Cung kỵ chỉ bắn thẳng hàng)'
-	] as Array[String], "chéo không bắn được")
+	assert_eq(_errors(d), [after + '"o" ô 3,2 không thẳng hàng với "quan" ô 5,4 (Cung kỵ chỉ bắn thẳng hàng)']
+		as Array[String], "chéo")
+	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,0"}]
+	assert_eq(_errors(d), [after + '"o" ô 5,0 vượt tầm bắn 3 ô của Cung kỵ, tính từ "quan" ô 5,4']
+		as Array[String], "4 ô: quá tầm, bộ nạp báo ngay")
+	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,4"}]
+	assert_eq(_errors(d), [after + '"o" ô 5,4 trùng "quan" ô 5,4'] as Array[String], "trùng ô chủ đòn")
+	d["sau"]["bao_don"] = []
+	d["truoc"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,2"}]
+	assert_eq(_errors(d), [] as Array[String], "truoc dùng chung phép kiểm")
+	d["truoc"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,5"}]
+	assert_eq(_errors(d), [before + '"o" ô 5,5 không cách "quan" ô 5,4 từ 2 ô trở lên (Cung kỵ bắn xa)']
+		as Array[String], "truoc: ô kề cũng lỗi")
+	d["truoc"]["bao_don"] = []
+	d["sau"]["quan"][4] = ". . . . . B ."
+	d["sau"]["bao_don"] = [{"thu_tu": 1, "quan": "5,4", "o": "5,2"}]
+	assert_eq(_errors(d), [after + '"o" ô 5,2 không kề "quan" ô 5,4'] as Array[String],
+		"Bộ binh vẫn chỉ đánh một ô kề")
+	d["sau"]["quan"][4] = ". . . . . K ."
+	assert_eq(_errors(d), [after + '"o" ô 5,2 không kề "quan" ô 5,4'] as Array[String],
+		"Kỵ binh không bắn xa")
 
 
 func test_runner_compares_telegraphs_only_when_written() -> void:

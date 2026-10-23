@@ -8,6 +8,8 @@ extends RefCounted
 ## "Phía Bắc hơn" là hàng nhỏ hơn, "phía Đông hơn" là cột lớn hơn: thứ tự B→Đ→N→T áp cho chỗ hòa giữa các ô.
 ## Đòn: Bộ binh ô kề; Kỵ binh xung phong thẳng hàng; Cung kỵ (Story 2.15) bắn ô thẳng hàng cách 2–3 ô, tên bay
 ## qua quân (chặn tên là Story 3.1). Nhắm làng (3.7), ô ải (3.11) thêm nhánh ở đây.
+## Mọi loại quân chỉ nhắm tướng có ĐƯỜNG ĐI tới (Pathfinding.distance_field); tướng bị vây hoàn toàn thì bỏ qua,
+## kể cả Cung kỵ bắn qua được — giữ nguyên luật AI chung ở bảng thứ tự phân giải (tác giả chốt 2026-10-23).
 
 ## Địa hình chắn đường xung phong của Kỵ binh (FR19). Sông không chắn.
 const CHARGE_BLOCKERS: Array[int] = [Terrain.FOREST, Terrain.GRANARY, Terrain.VILLAGE]

@@ -113,6 +113,26 @@ func test_archer_walks_into_shooting_range() -> void:
 	# Cách 6 bước: ô duy nhất trong tầm đi bắn được là 3,3 (3,4 ở bước thứ 4).
 	var state: BattleState = BoardFixture.state({Vector2i(3, 0): "C", Vector2i(3, 6): "1"})
 	_assert_intent(_plan(state, 101), 1, 6, Vector2i(3, 3), EnemyIntent.Reason.CAN_HIT)
+	var events: Array[BattleEvent] = []
+	RulesEnemyPhase.prepare(state, events)
+	assert_eq(state.unit_by_id(101).cell, Vector2i(3, 3), "prepare cho quân đi thật")
+	assert_eq(state.telegraphs.size(), 1, "và báo đòn sau khi đi")
+	assert_eq(state.telegraphs[0].offset, Vector2i(0, 3))
+	assert_eq(state.validate(), [] as Array[String])
+
+
+## Tầm bắn đọc từ chi_so.json, không hard-code 2–3: đổi tam_ban_gan thành 3 thì 2 ô không bắn được nữa.
+func test_archer_range_comes_from_stats() -> void:
+	var stats: Stats = BoardFixture.stats_with(UnitType.CUNG_KY, "tam_ban_gan", 3)
+	var state: BattleState = BoardFixture.state({Vector2i(3, 0): "C", Vector2i(3, 3): "1"}, {}, {},
+		BoardFixture.DEFAULT_SIZE, stats)
+	var archer: Unit = state.unit_by_id(101)
+	assert_false(EnemyAI.can_hit_from(state, archer, Vector2i(3, 0), Vector2i(3, 2)),
+		"cách 2 ô, dưới tầm gần 3")
+	assert_true(EnemyAI.can_hit_from(state, archer, Vector2i(3, 0), Vector2i(3, 3)), "cách 3 ô, đúng tầm")
+	state.telegraphs.append(Telegraph.new(101, Telegraph.Kind.CELL, Vector2i(0, 2), 1))
+	assert_eq(state.validate(), ["đòn của quân 101 đánh ô cách 0,2, Cung kỵ chỉ bắn thẳng hàng 3–3 ô"]
+		as Array[String], "validate cũng đọc tầm từ stats")
 
 
 func test_archer_next_to_target_cannot_shoot() -> void:

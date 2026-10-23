@@ -269,7 +269,8 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 		else:
 			side.outcome = outcome as String
 	if known.has("bao_don") and section.has("bao_don"):
-		side.telegraphs = _read_telegraphs(section["bao_don"], name + ".bao_don", name + ".quan", side, file, result)
+		side.telegraphs = _read_telegraphs(section["bao_don"], name + ".bao_don", name + ".quan", side, stats,
+			file, result)
 		if name == "truoc" and side.telegraphs != null:
 			_check_orders_from_one(side.telegraphs as Array[ScenarioData.ExpectedTelegraph], name + ".bao_don",
 				file, result)
@@ -322,7 +323,7 @@ static func _read_generals(value: Variant, shown: String, units_shown: String, s
 
 ## "bao_don": [{"thu_tu": 1, "quan": "3,3", "o": "3,4"}, {"thu_tu": 2, "quan": "0,3", "huong": "D"}]: các đòn quân
 ## Nguyên đã báo. [] là không quân nào báo đòn. Trả Array[ExpectedTelegraph] theo số thứ tự, hoặc null nếu sai.
-static func _read_telegraphs(value: Variant, shown: String, units_shown: String, side: Section,
+static func _read_telegraphs(value: Variant, shown: String, units_shown: String, side: Section, stats: Stats,
 		file: String, result: LoadResult) -> Variant:
 	if not value is Array:
 		result.add_error(JsonFile.type_error(file, shown, "một danh sách", value))
@@ -372,7 +373,7 @@ static func _read_telegraphs(value: Variant, shown: String, units_shown: String,
 		elif d.has("o"):
 			target = _read_telegraph_cell(d, "o", where, side.size, result)
 			if owner != null and target != null:
-				_check_telegraph_target(owner as Vector2i, target as Vector2i, side, where, file, result)
+				_check_telegraph_target(owner as Vector2i, target as Vector2i, side, stats, where, file, result)
 		else:
 			kind = Telegraph.Kind.DIRECTION
 			var code: Variant = d["huong"]
@@ -389,13 +390,17 @@ static func _read_telegraphs(value: Variant, shown: String, units_shown: String,
 	return telegraphs
 
 
-## Đòn vào ô phải khớp loại quân (Story 2.15). Cung kỵ: thẳng hàng, cách >= 2 ô; bộ nạp KHÔNG chặn trên vì tầm
-## `tam_ban_xa` nằm trong chi_so.json (bộ nạp không có Stats) — trần do BattleState.validate() kiểm lúc chạy.
-## Loại khác: một ô kề, như trước.
-static func _check_telegraph_target(owner: Vector2i, target: Vector2i, side: Section, where: String,
-		file: String, result: LoadResult) -> void:
-	var friendly: bool = side.units_clean and BoardLayers.symbol(side.unit_rows, owner) == "C"
-	if not friendly:
+## Đòn vào ô phải khớp loại quân (Story 2.15). Cung kỵ: thẳng hàng, cách đúng tầm `tam_ban_gan`–`tam_ban_xa`
+## (đọc từ chi_so.json, cùng nguồn với luật — không hard-code). Loại khác: một ô kề, như trước.
+## "o" trùng "quan" báo riêng, vì `Grid.straight_dir` trả ZERO cho cùng ô và câu "không thẳng hàng" sẽ khó hiểu.
+static func _check_telegraph_target(owner: Vector2i, target: Vector2i, side: Section, stats: Stats,
+		where: String, file: String, result: LoadResult) -> void:
+	if owner == target:
+		result.add_error('%s: "o" ô %s trùng "quan" ô %s'
+			% [where, BoardText.cell_text(target), BoardText.cell_text(owner)])
+		return
+	var is_archer: bool = side.units_clean and BoardLayers.symbol(side.unit_rows, owner) == "C"
+	if not is_archer:
 		if not Grid.is_adjacent(owner, target):
 			result.add_error('%s: "o" ô %s không kề "quan" ô %s'
 				% [where, BoardText.cell_text(target), BoardText.cell_text(owner)])
@@ -403,9 +408,16 @@ static func _check_telegraph_target(owner: Vector2i, target: Vector2i, side: Sec
 	if Grid.straight_dir(owner, target) == Vector2i.ZERO:
 		result.add_error('%s: "o" ô %s không thẳng hàng với "quan" ô %s (Cung kỵ chỉ bắn thẳng hàng)'
 			% [where, BoardText.cell_text(target), BoardText.cell_text(owner)])
-	elif Grid.distance(owner, target) < 2:
-		result.add_error('%s: "o" ô %s không cách "quan" ô %s từ 2 ô trở lên (Cung kỵ không bắn ô kề)'
-			% [where, BoardText.cell_text(target), BoardText.cell_text(owner)])
+		return
+	var near: int = stats.shoot_min_range(UnitType.CUNG_KY)
+	var far: int = stats.shoot_max_range(UnitType.CUNG_KY)
+	var distance: int = Grid.distance(owner, target)
+	if distance < near:
+		result.add_error('%s: "o" ô %s không cách "quan" ô %s từ %d ô trở lên (Cung kỵ bắn xa)'
+			% [where, BoardText.cell_text(target), BoardText.cell_text(owner), near])
+	elif distance > far:
+		result.add_error('%s: "o" ô %s vượt tầm bắn %d ô của Cung kỵ, tính từ "quan" ô %s'
+			% [where, BoardText.cell_text(target), far, BoardText.cell_text(owner)])
 
 
 ## Ô "cot,hang" trong bàn của một mục "bao_don", hoặc null nếu thiếu hay sai (đã thêm lỗi).

@@ -124,8 +124,8 @@ func _telegraph_shape_problem(t: Telegraph) -> String:
 
 
 ## Đòn vào ô (Story 2.15): Bộ binh đánh ô kề; Cung kỵ bắn ô thẳng hàng trong tầm `tam_ban_gan`–`tam_ban_xa`.
-## Chủ đòn đã gục thì không biết loại quân: chấp nhận offset thẳng hàng dài 1–3 để bản chụp vẫn hợp lệ (đòn sẽ
-## bị hủy ở Story 2.9, không phải lỗi dữ liệu).
+## Chủ đòn đã gục thì không biết loại quân: chỉ đòi offset thẳng hàng, dài từ 1 trở lên — không chặn trần, vì trần
+## là số cân bằng (`tam_ban_xa`) và đòn của chủ đã gục sẽ bị hủy ở Story 2.9, không phải dữ liệu hỏng.
 func _cell_telegraph_problem(t: Telegraph, owner: Unit) -> String:
 	var straight: bool = t.offset.x == 0 or t.offset.y == 0
 	var distance: int = Grid.distance(Vector2i.ZERO, t.offset)
@@ -135,9 +135,11 @@ func _cell_telegraph_problem(t: Telegraph, owner: Unit) -> String:
 		if not straight or distance < near or distance > far:
 			return "đánh ô cách %d,%d, Cung kỵ chỉ bắn thẳng hàng %d–%d ô" % [t.offset.x, t.offset.y, near, far]
 		return ""
+	if owner == null:
+		if straight and distance >= 1:
+			return ""
+		return "đánh ô cách %d,%d không hợp lệ (chủ đòn đã gục, phải thẳng hàng)" % [t.offset.x, t.offset.y]
 	if distance == 1:
-		return ""
-	if owner == null and straight and distance >= 2 and distance <= 3:
 		return ""
 	return "đánh ô cách %d,%d, cần đúng một ô kề" % [t.offset.x, t.offset.y]
 

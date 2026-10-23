@@ -248,7 +248,14 @@ func test_validate_accepts_archer_long_shot_only() -> void:
 	state.telegraphs.clear()
 	state.telegraphs.append(Telegraph.new(7, Telegraph.Kind.CELL, Vector2i(0, 2), 1))
 	assert_eq(state.validate(), [] as Array[String],
-		"chủ đòn đã gục: không biết loại quân, chấp nhận thẳng hàng dài 1–3")
+		"chủ đòn đã gục: không biết loại quân, chấp nhận thẳng hàng")
+	state.telegraphs[0].offset = Vector2i(0, 4)
+	assert_eq(state.validate(), [] as Array[String],
+		"không chặn trần: trần là tam_ban_xa trong chi_so.json, không phải số 3 chép cứng")
+	state.telegraphs[0].offset = Vector2i(1, 1)
+	assert_eq(state.validate(),
+		["đòn của quân 7 đánh ô cách 1,1 không hợp lệ (chủ đòn đã gục, phải thẳng hàng)"]
+		as Array[String], "chéo vẫn là dữ liệu hỏng")
 
 
 func test_from_level_copies_mission() -> void:
