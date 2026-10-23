@@ -198,3 +198,9 @@
 
 - Mẫu JSON "Trận 1" trong `game-architecture.md:304-313` còn bố cục cũ (Bộ binh `1,0`/`5,0`/`5,4`, `thu_tu_dich` cũ) và có tướng `3` — lệch có sẵn từ trước story 2.14 (trận thật chỉ 2 tướng), diff chỉ làm lệch thêm trường `thu_tu_dich`. Không ảnh hưởng test. Ghi rõ đây là ví dụ minh hoạ hoặc cập nhật khi có dịp sửa tài liệu kiến trúc.
 - Bật `"da_duyet": true` cho `game/tests/kich_ban/tran/tran_01_loi_giai.json` sau khi tác giả đánh lại lời giải bằng tay và xác nhận. Tác giả chốt 2026-10-22: **dev bật cờ**, không bắt tác giả sửa JSON. Chừng nào cờ còn `false`, lời giải hỏng chỉ được liệt kê ("1 chưa duyệt, 1 chưa đạt") và `tools/test.sh` vẫn thoát 0 — chưa phải chốt chặn hồi quy.
+
+## Deferred from: code review of story-2.15-cung-ky-cat-duoc-neu-tre (2026-10-23)
+
+- `"huong"` (xung phong) trong `bao_don` không kiểm loại quân (`scenario_loader.gd`): Cung kỵ hoặc Bộ binh vẫn "xung phong" được nếu người viết kịch bản gõ vậy. Có sẵn từ Story 2.8, không do 2.15; nên thêm kiểm "chỉ `K` được `huong`" ở story dữ liệu/kịch bản sau. Mọi kịch bản hiện có dùng `huong` cho Kỵ binh nên sửa được an toàn.
+- Thiếu kịch bản biên riêng cho Cung kỵ: (a) bị kéo làm ô đích ra ngoài bàn, (b) quân khác phe bị kéo vào ô đỏ, (c) tướng rời ô đỏ rồi kết thúc lượt. Đều dùng chung đường `CELL` đã có test cho Bộ binh. Làm khi tác giả chốt 2 câu hỏi cuối story 2.15 (ô đích trống; tướng mình đứng giữa) hoặc ở Story 3.1.
+- `EnemyIntent.Reason.NO_ATTACK_RULE` vẫn giữ enum + chuỗi dịch `dev.ai.no_rule` nhưng từ Story 2.15 không loại quân nào dùng, nên không còn test. Giữ có chủ ý cho loại quân thêm sau; xoá khi chắc chắn không cần.

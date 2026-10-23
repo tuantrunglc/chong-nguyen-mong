@@ -4,7 +4,7 @@ baseline_commit: 47651f3
 
 # Story 2.15: Cung kỵ (cắt được nếu trễ)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -56,12 +56,14 @@ tôi muốn có Cung kỵ yếu máu nhưng bắn xa,
     - Chủ đòn đã gục (không còn trên bàn): chấp nhận offset **thẳng hàng**, dài 1–3 (không biết loại quân, không được nổ assert). Ghi comment lý do.
     - Cập nhật comment đầu hàm: `CELL` = một ô kề (Bộ binh) hoặc ô thẳng hàng 2–3 (Cung kỵ).
   - [x] 2.3 `game/src/data/scenario_loader.gd::_read_telegraphs`, chỗ kiểm `"o"` kề `"quan"`: lấy ký hiệu quân ở ô `quan` (`BoardLayers.symbol(side.unit_rows, owner)`).
-    - Là `"C"`: kiểm **hai** lỗi theo thứ tự, câu nguyên văn:
-      - không thẳng hàng (`Grid.straight_dir(owner, target) == Vector2i.ZERO`): `'%s: "o" ô %s không thẳng hàng với "quan" ô %s (Cung kỵ chỉ bắn thẳng hàng)'`
-      - thẳng hàng nhưng `Grid.distance(owner, target) < 2`: `'%s: "o" ô %s không cách "quan" ô %s từ 2 ô trở lên (Cung kỵ không bắn ô kề)'`
+    - Là `"C"`: kiểm theo thứ tự, câu nguyên văn (số tầm đọc từ `stats.shoot_min_range`/`shoot_max_range`):
+      - `"o"` trùng `"quan"`: `'%s: "o" ô %s trùng "quan" ô %s'`
+      - không thẳng hàng: `'%s: "o" ô %s không thẳng hàng với "quan" ô %s (Cung kỵ chỉ bắn thẳng hàng)'`
+      - gần hơn `tam_ban_gan`: `'%s: "o" ô %s không cách "quan" ô %s từ %d ô trở lên (Cung kỵ bắn xa)'`
+      - xa hơn `tam_ban_xa`: `'%s: "o" ô %s vượt tầm bắn %d ô của Cung kỵ, tính từ "quan" ô %s'`
     - Là ký hiệu khác: giữ nguyên `Grid.is_adjacent` + câu cũ `'"o" ô %s không kề "quan" ô %s'`.
     - Không tra được ký hiệu (lớp quân đã có lỗi riêng): giữ nhánh kề như hiện tại, đừng thêm lỗi thứ hai.
-    - **Không chặn trên ở bộ nạp**: số 3 nằm trong `chi_so.json`, bộ nạp không có `Stats`. Trần 3 do `BattleState.validate()` kiểm lúc chạy.
+    - **Tầm bắn một nguồn:** `_read_side` đã nhận `Stats`, truyền xuống `_read_telegraphs` để kiểm đúng `tam_ban_gan`–`tam_ban_xa` ở **cả `truoc` và `sau`** (tác giả chốt 2026-10-23, thay cho "không chặn trên ở bộ nạp").
   - [x] 2.4 Test GUT cho hai chỗ trên (xem mục Testing): `test_scenario_loader.gd` (thêm ca Cung kỵ), `test_battle_state.gd` (hình dạng đòn). **Thêm `tam_ban_gan`/`tam_ban_xa` cho CUNG_KY trong `_stats()` của cả `test_battle_state.gd` lẫn `test_scenario_loader.gd`** — `validate()` gọi `Stats.value` nên thiếu khóa là assert nổ ngay.
   - [x] 2.5 Chạy `tools/test.sh`: phải **xanh** (kịch bản Task 1 lúc này còn `da_duyet: false` và chưa đạt — bình thường; điều cần là không còn lỗi "sai định dạng"). Commit riêng phần định dạng: `Mở định dạng đòn bắn xa (Story 2.15)`.
 
@@ -101,6 +103,26 @@ tôi muốn có Cung kỵ yếu máu nhưng bắn xa,
 - [x] **Task 8: Commit** (AC: 3)
   - [x] 8.1 Commit kịch bản đã duyệt (Task 3) và phần luật (Task 5–7) **riêng**; phần định dạng đã commit ở Task 2.5. Lời tiếng Việt, kết `(Story 2.15)`. Không gộp `img/` và thay đổi của story khác.
 
+### Review Findings
+
+_Code review 3 lớp (Blind Hunter, Edge Case Hunter, Acceptance Auditor) trên diff 19 file, 2026-10-23. Kết quả: 3 `decision_needed`, 5 `patch`, 3 `defer`, 5 bỏ (nhiễu/đã có lý do). Không có lỗi hành vi mức Cao._
+
+**Đã chốt và sửa (2026-10-23, `47a02b2` + `690d5a9`):**
+
+- [x] [Review][Decision] Cung kỵ bỏ đòn khi tướng không có đường đi — **chốt: giữ nguyên** luật AI chung (tướng bị vây thì bỏ qua, kể cả Cung kỵ bắn qua được); đã ghi rõ ngoại lệ trong `enemy_ai.gd` và mục "Luật phải cài".
+- [x] [Review][Decision] Sửa 8 kịch bản đã duyệt — **chốt: được sửa** (chỉ làm test chặt hơn): thêm `"hiep": 2` cho 6 ca, thêm `"sau.bao_don": []` cho 2 ca, sửa `mo_ta` sai của ca hủy đòn.
+- [x] [Review][Decision] Một nguồn sự thật cho tầm bắn — **chốt: truyền `Stats` xuống bộ nạp**; `_read_telegraphs`/`_check_telegraph_target` kiểm đúng `tam_ban_gan`–`tam_ban_xa` cho cả `truoc`/`sau`, thêm lỗi riêng cho `o` trùng `quan`.
+
+- [x] [Review][Patch] Nhánh "chủ đòn đã gục" hard-code `distance <= 3` — bỏ trần, chỉ đòi thẳng hàng dài ≥ 1 (trần là số cân bằng, không chép cứng) [game/src/core/battle_state.gd]
+- [x] [Review][Patch] Chưa có test chứng minh cận dưới đọc từ `tam_ban_gan` — thêm `test_archer_range_comes_from_stats` (min 3 → 2 ô không bắn được; `validate` cũng báo `2–3` đổi thành `3–3`) [game/tests/test_enemy_ai.gd]
+- [x] [Review][Patch] Test bộ nạp chỉ phủ `sau.bao_don` — thêm `truoc`, `o` trùng `quan`, `B`/`K` với `o` 2 ô [game/tests/test_scenario_loader.gd]
+- [x] [Review][Patch] `test_archer_walks_into_shooting_range` chỉ gọi `plan` — thêm `prepare`, kiểm ô đứng + đòn + `validate` [game/tests/test_enemy_ai.gd]
+- [x] [Review][Patch] Thiếu ca GUT Bộ binh + Cung kỵ chung pha chuẩn bị — thêm `test_prepare_orders_infantry_and_archer_by_id` (số thứ tự theo id) [game/tests/test_rules_enemy_phase.gd]
+
+- [x] [Review][Defer] `"huong"` (xung phong) không kiểm loại quân [game/src/data/scenario_loader.gd] — deferred, pre-existing
+- [x] [Review][Defer] Thiếu kịch bản biên riêng cho Cung kỵ (ô đích ra ngoài bàn sau khi kéo, quân khác phe vào ô đỏ, tướng rời ô rồi hết lượt) — deferred, dùng chung đường `CELL` đã có test cho Bộ binh
+- [x] [Review][Defer] `Reason.NO_ATTACK_RULE` giữ enum/chuỗi dịch nhưng không còn test — deferred, cố ý giữ cho loại quân thêm sau
+
 ## Dev Notes
 
 ### Hiện trạng trước story này (đọc trước khi sửa)
@@ -131,6 +153,8 @@ Cung kỵ báo đòn khi, và chỉ khi, ô đích:
 
 Hệ quả cần nhớ: Cung kỵ **không** bắn được ô kề (cách 1) và **không** bắn quá 3 ô; đứng kề tướng thì nó chỉ đi/đứng và không báo đòn. Nếu mọi ô trong tầm đi đều không bắn được, nó đi tới ô gần tướng nhất (nhánh `CLOSEST` có sẵn).
 
+**Mục tiêu vẫn cần đường đi:** mọi loại quân chỉ nhắm tướng có đường đi tới (`Pathfinding.distance_field`); tướng bị vây hoàn toàn thì **bỏ qua**, kể cả khi Cung kỵ bắn thẳng qua được. Đây là luật AI chung ở bảng thứ tự phân giải, tác giả chốt giữ nguyên ngày 2026-10-23 (code review).
+
 ### Kịch bản: định dạng và cách kiểm
 
 - `bao_don` (có từ 2.8) nhận `{"thu_tu": n, "quan": "cột,hàng", "o": "cột,hàng"}` cho đòn vào ô, hoặc `"huong": "B|D|N|T"` cho xung phong. Story này dùng `"o"` cho Cung kỵ.
@@ -159,7 +183,7 @@ Nếu thấy phải sửa `RulesEnemyPhase` hay `TelegraphMarks` để Cung kỵ
 - Lệnh duy nhất: `tools/test.sh` (trong phiên AI: `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh`). Chạy một file:
   `.tools/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64 --headless --path game -s res://addons/gut/gut_cmdln.gd -gtest=res://tests/test_enemy_ai.gd -gexit`
 - GUT cần thêm trong Task 2/6:
-  - `test_scenario_loader.gd`: `truoc.bao_don`/`sau.bao_don` với `C` + `o` thẳng hàng **2** và **3** ô → không lỗi; `C` + `o` **1** ô → lỗi; `C` + `o` chéo → lỗi; **`C` + `o` 4 ô → bộ nạp CHẤP NHẬN** (trần do `validate`, viết test đúng như vậy, đừng "sửa" cho ra lỗi).
+  - `test_scenario_loader.gd`: `truoc.bao_don`/`sau.bao_don` với `C` + `o` thẳng hàng **2** và **3** ô → không lỗi; `C` + `o` **1** ô → lỗi; chéo → lỗi; **4 ô → lỗi vượt tầm**; `o` trùng `quan` → lỗi riêng; `B`/`K` + `o` 2 ô → lỗi "không kề". `truoc` và `sau` dùng chung phép kiểm.
   - `test_battle_state.gd`: `CUNG_KY` + `CELL (0,2)` và `(0,3)` hợp lệ; `(0,4)` sai với câu nêu tầm 2–3; `(0,1)` sai; `(1,1)` sai; chủ đòn đã gục + `(0,3)` hợp lệ; `BO_BINH` + `(0,2)` vẫn ra câu cũ `"… cần đúng một ô kề"`. Nhớ thêm `tam_ban_gan`/`tam_ban_xa` vào `_stats()` (và của `test_scenario_loader.gd`).
   - `test_enemy_ai.gd`: 4 ca ở Task 6.1.
   - `test_rules_enemy_phase.gd`: một ca `prepare` có cả Bộ binh và Cung kỵ → số thứ tự liền và đúng thứ tự id.
@@ -248,6 +272,9 @@ DeepSeek Harness (deepseek-flash), 2026-10-22.
   - Lần check (c) đầu tiên dùng `git checkout -- enemy_ai.gd` nên **xoá mất phần luật chưa commit**; đã áp lại nguyên văn và commit ngay (`336f148`). Bài học: kiểm ngược trên file chưa commit thì phải sao lưu, đừng `git checkout`.
 - **Kiểm tay (Task 7.3):** `tools/chay.sh --dev --tran=thu_ba_tuong`; GoPeak `capture_screenshot` lỗi (runtime addon chưa nối), nên chụp cửa sổ game bằng X11: `DISPLAY=:1 import -window 0x2000007`. Thấy: Cung kỵ đứng ở (4,3); ô đỏ `3` trên Khánh Dư (4,6), cạnh đòn `1` (Bộ binh 0,5 → Khoái), `2` (Kỵ binh 2,5 xung phong xuống Lão, có mũi tên), `4` (Bộ binh 5,6 → Dư); không tô ô trung gian. Ảnh: `build/test/shot_215_game.png`, `build/test/shot_215_board.png` (`build/` bị gitignore, không commit).
 - **Xanh cuối:** `tools/test.sh` → **624/624**, 89 kịch bản đã duyệt (81 cũ + 8 mới), 2 chưa duyệt của 2.14 (0 chưa đạt).
+- **Code review 3 lớp (2026-10-23):** 3 lớp chạy song song trên diff 896 dòng; không có lỗi hành vi mức Cao; AC 1–5 đều đạt (AC 4 kiểm được phần "không cờ"). Đã sửa 8 việc: bộ nạp dùng `Stats` (một nguồn tầm bắn, lỗi `o` 4 ô/trùng ô báo ngay), bỏ hard-code `≤ 3` ở nhánh chủ đòn đã gục (bẫy khi `tam_ban_xa` = 4), thêm 3 test GUT (cận dưới đọc từ stats; bộ nạp `truoc`/trùng ô/B-K; B+C chung pha chuẩn bị), `test_archer_walks_into_shooting_range` chạy `prepare` thật, và siết 8 kịch bản (`hiep: 2`, `bao_don: []`, sửa `mo_ta` sai) sau khi tác giả duyệt.
+- **Xanh sau review:** `tools/test.sh` → **626/626**, 89 kịch bản đã duyệt, 0 chưa đạt.
+- **Kiểm ngược cận dưới (bổ sung):** `stats_with(CUNG_KY, "tam_ban_gan", 3)` → 2 ô không bắn được, 3 ô bắn được; `validate` báo "2–3" đổi thành "3–3". Chứng minh không hard-code 2.
 
 ### Completion Notes List
 
@@ -256,6 +283,7 @@ DeepSeek Harness (deepseek-flash), 2026-10-22.
 - **AC 4** (nếu cắt story thì trận 3/6 dùng Bộ binh): trận 3 và 6 **chưa có**, nên không có gì phải sửa; không thêm cờ bật/tắt.
 - **Không sửa** `game/data/tran/*`, `chi_so.json`, `telegraph_marks.gd`, `rules_enemy_phase.gd`, `rules_*.gd`, UI.
 - **Kiểm tay:** xem ảnh `build/test/shot_215_board.png` — Cung kỵ (4,3) có ô đỏ `3` trên Khánh Dư (4,6).
+- **Sau code review:** tầm bắn chỉ còn một nguồn (`chi_so.json`) ở cả bộ nạp lẫn luật; 3 `defer` đã ghi vào `deferred-work.md`; không còn `decision_needed` hay `patch` mở.
 - **Còn chờ tác giả:** nên chơi thử `--tran=thu_ba_tuong` một hiệp để cảm nhận (Cung kỵ 1 máu, bắn 1 sát thương).
 - 2 kịch bản `tran/` của 2.14 vẫn **chưa duyệt** — không phải việc của story này.
 
@@ -265,7 +293,7 @@ DeepSeek Harness (deepseek-flash), 2026-10-22.
 - `game/src/core/stats.gd` — `shoot_min_range`, `shoot_max_range`.
 - `game/src/core/battle_state.gd` — `_cell_telegraph_problem` cho `CELL` (Bộ binh kề / Cung kỵ 2–3 / chủ đòn đã gục).
 - `game/src/data/scenario_loader.gd` — `_check_telegraph_target` kiểm `"o"` theo ký hiệu quân.
-- `game/src/core/enemy_ai.gd` — nhánh `CUNG_KY` trong `can_hit_from`, `_has_attack_rule`, comment.
+- `game/src/core/enemy_ai.gd` — nhánh `CUNG_KY` trong `can_hit_from`, `_has_attack_rule`, comment + ngoại lệ "tướng không có đường đi".
 - `game/src/core/enemy_intent.gd` — comment `NO_ATTACK_RULE`.
 - `game/src/core/telegraph.gd` — comment `CELL`.
 - `game/tests/test_battle_state.gd` — khóa `tam_ban_*` + `test_validate_accepts_archer_long_shot_only`.
@@ -273,6 +301,9 @@ DeepSeek Harness (deepseek-flash), 2026-10-22.
 - `game/tests/test_enemy_ai.gd` — 4 test Cung kỵ thay test "chưa có luật đòn".
 - `game/tests/test_ai_intent_overlay.gd` — dòng F3 của Cung kỵ.
 - `game/tests/test_loaders.gd` — tách `thu_ba_tuong` khỏi test "đứng yên khi mở trận", thêm test Cung kỵ bắn ở hiệp 1.
+- `game/tests/board_fixture.gd` — `values()`, `stats_with()`, `state()` nhận `Stats` tuỳ chọn (test cận dưới).
+- `game/tests/test_rules_enemy_phase.gd` — `test_prepare_orders_infantry_and_archer_by_id`.
+- `_bmad-output/implementation-artifacts/deferred-work.md` — 3 mục hoãn của review 2.15.
 
 Thêm mới (kịch bản, `da_duyet: false`):
 - `game/tests/kich_ban/ai/cung_ky_dung_yen_ban.json`
@@ -288,3 +319,4 @@ Thêm mới (kịch bản, `da_duyet: false`):
 
 - 2026-10-22: Viết 8 kịch bản Cung kỵ bằng mô hình tạm độc lập; mở định dạng đòn bắn xa (Stats, `BattleState.validate`, `ScenarioLoader`) + 2 test GUT. Dừng chờ tác giả duyệt kịch bản.
 - 2026-10-22: Tác giả duyệt 8 kịch bản (`46dfb2e`); viết luật AI Cung kỵ (`336f148`); sửa 3 test cũ + 1 test bàn thử; kiểm ngược 3 cách; kiểm tay bằng ảnh chụp cửa sổ game. `tools/test.sh` xanh 624/624.
+- 2026-10-23: Code review 3 lớp; tác giả chốt 3 điểm (giữ luật "không có đường đi thì bỏ qua"; được siết kịch bản; gộp tầm bắn về `chi_so.json`). Sửa 8 việc (`47a02b2`, `690d5a9`); `tools/test.sh` xanh 626/626. Story → `done`.
