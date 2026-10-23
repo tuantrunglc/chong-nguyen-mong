@@ -46,7 +46,16 @@ func _stats() -> Stats:
 	var values: Dictionary = {}
 	for type: int in UnitType.GENERALS:
 		values[type] = {"mau": 3, "tam_di": 3}
+	values[UnitType.NGUYEN_KHOAI] = {"mau": 3, "tam_di": 3, "sat_thuong": 2, "do_day": 1}
+	values[UnitType.BO_BINH] = {"mau": 3, "tam_di": 2, "sat_thuong": 1}
 	return Stats.new(values)
+
+
+## Trận có một Bộ binh để pha chuẩn bị kịp báo đòn (điều kiện của Story 3.2).
+func _level_with_enemy() -> LevelData:
+	var level: LevelData = _level()
+	level.units.append(LevelData.UnitPlacement.new(UnitType.BO_BINH, Vector2i(1, 4)))
+	return level
 
 
 func _controller(controller: BattleController = BattleController.new()) -> BattleController:
@@ -55,6 +64,68 @@ func _controller(controller: BattleController = BattleController.new()) -> Battl
 		_events_seen.append([events, snapshot]))
 	controller.rolled_back.connect(func(problems: Array[String]) -> void: _rolled_back_seen.append(problems))
 	return controller
+
+
+## Story 3.2: chơi lại về đúng bàn đầu lượt người chơi (sau pha chuẩn bị), chỉ một lần mỗi trận.
+func test_replay_returns_to_player_turn_start() -> void:
+	var c: BattleController = BattleController.new()
+	c.start(_level_with_enemy(), _stats())
+	c.begin()
+	var start: BattleState = c.snapshot()
+	assert_gt(start.telegraphs.size(), 0, "đầu lượt đã có đòn báo")
+	assert_true(c.can_replay())
+	assert_eq(c.replay_left(), 1)
+	c.submit(Command.move(1, Vector2i(0, 4)))
+	assert_eq(c.snapshot().unit_by_id(1).cell, Vector2i(0, 4))
+	assert_true(c.replay_round())
+	var after: BattleState = c.snapshot()
+	assert_eq(after.unit_by_id(1).cell, Vector2i(0, 6), "về ô đầu lượt")
+	assert_eq(after.unit_by_id(1).has_moved, false, "đi lại được")
+	assert_eq(after.round_number, start.round_number)
+	assert_eq(after.telegraphs.size(), start.telegraphs.size(), "đòn đã báo còn nguyên")
+	assert_eq(after.enemy_intents.size(), start.enemy_intents.size())
+	assert_eq(after.validate(), [] as Array[String])
+	assert_false(c.can_undo(), "Hủy không quay về trước lúc chơi lại")
+	assert_eq(c.replay_left(), 0)
+	assert_false(c.can_replay(), "chỉ một lần mỗi trận")
+	assert_false(c.replay_round())
+
+
+func test_replay_before_battle_opening_is_refused() -> void:
+	var c: BattleController = BattleController.new()
+	c.start(_level(), _stats())
+	assert_false(c.can_replay(), "chưa mở trận thì chưa có đầu lượt người chơi")
+	assert_false(c.replay_round())
+	assert_eq(c.replay_left(), 1, "chưa dùng thì còn lượt")
+
+
+func test_replay_refused_after_battle_over() -> void:
+	var level: LevelData = LevelData.new()
+	level.size = Vector2i(7, 7)
+	for i: int in range(level.size.x * level.size.y):
+		level.terrain.append(Terrain.PLAIN)
+	level.units.append(LevelData.UnitPlacement.new(UnitType.NGUYEN_KHOAI, Vector2i(3, 6)))
+	level.units.append(LevelData.UnitPlacement.new(UnitType.BO_BINH, Vector2i(3, 5), 1))
+	var c: BattleController = BattleController.new()
+	c.start(level, _stats())
+	c.begin()
+	c.submit(Command.attack(1, Vector2i(3, 5)))
+	assert_eq(c.snapshot().phase, BattleState.Phase.WON, "hạ quân cuối là thắng")
+	assert_false(c.can_replay(), "hết trận thì không chơi lại")
+	assert_false(c.replay_round())
+
+
+## Báo cáo F2 sau khi chơi lại phát lại từ bàn vừa khôi phục, không phải từ bàn trước đó.
+func test_round_report_after_replay_uses_replay_board() -> void:
+	var c: BattleController = BattleController.new()
+	c.start(_level_with_enemy(), _stats())
+	c.begin()
+	c.submit(Command.move(1, Vector2i(0, 4)))
+	c.replay_round()
+	c.submit(Command.move(2, Vector2i(0, 5)))
+	var base: BattleState = c.round_start_snapshot()
+	assert_eq(base.unit_by_id(1).cell, Vector2i(0, 6), "mốc là bàn vừa khôi phục")
+	assert_eq(c.round_commands().size(), 1, "chỉ còn lệnh sau khi chơi lại")
 
 
 func _cell(c: BattleController, id: int) -> Vector2i:

@@ -4,7 +4,7 @@ baseline_commit: 28f60ee
 
 # Story 3.2: Chơi lại hiệp
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -22,30 +22,30 @@ tôi muốn chơi lại hiệp một lần khi tính sai,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Bản chụp đầu lượt người chơi + `replay_round`** (AC: 1, 3, 4)
-  - [ ] 1.1 `game/src/battle/battle_controller.gd`: thêm `_turn_start: BattleState` và `_replay_used: bool`; khởi tạo trong `start()` (`null`, `false`).
-  - [ ] 1.2 Chụp `_turn_start = _state.clone()` **sau khi lệnh `BEGIN_BATTLE` hoặc `END_TURN` chạy xong** (tức sau `_start_round(...)`), chỉ khi `_state.phase == BattleState.Phase.PLAYER`; ngược lại `null`. Đây là bàn người chơi thấy khi hiệp bắt đầu (quân Nguyên đã đi, đòn đã báo).
-  - [ ] 1.3 `can_replay() -> bool`: có state, **không** hết trận, `phase == PLAYER`, `_turn_start != null`, `not _replay_used`. `replay_left() -> int`: `0` nếu đã dùng, ngược lại `1`.
-  - [ ] 1.4 `replay_round() -> bool`: nếu `can_replay()` sai thì trả `false`, không đổi gì (im lặng, như nút mờ). Nếu đúng: `_state = _turn_start.clone()`, `_replay_used = true`, `_undo_snapshot = null`, gọi `_start_round(false)` (mốc F2 dời về bàn vừa khôi phục, xóa lệnh cũ), `events_resolved.emit([], _state.clone())`, trả `true`. Ghi `Log.debug("battle", "chơi lại hiệp")`.
-  - [ ] 1.5 Không ghi "chơi lại" vào `_round_commands` (định dạng kịch bản không có lệnh này); báo cáo F2 sau khi chơi lại phát lại từ bàn vừa khôi phục.
+- [x] **Task 1: Bản chụp đầu lượt người chơi + `replay_round`** (AC: 1, 3, 4)
+  - [x] 1.1 `game/src/battle/battle_controller.gd`: thêm `_turn_start: BattleState` và `_replay_used: bool`; khởi tạo trong `start()` (`null`, `false`).
+  - [x] 1.2 Chụp `_turn_start = _state.clone()` **sau khi lệnh `BEGIN_BATTLE` hoặc `END_TURN` chạy xong** (tức sau `_start_round(...)`), chỉ khi `_state.phase == BattleState.Phase.PLAYER`; ngược lại `null`. Đây là bàn người chơi thấy khi hiệp bắt đầu (quân Nguyên đã đi, đòn đã báo).
+  - [x] 1.3 `can_replay() -> bool`: có state, **không** hết trận, `phase == PLAYER`, `_turn_start != null`, `not _replay_used`. `replay_left() -> int`: `0` nếu đã dùng, ngược lại `1`.
+  - [x] 1.4 `replay_round() -> bool`: nếu `can_replay()` sai thì trả `false`, không đổi gì (im lặng, như nút mờ). Nếu đúng: `_state = _turn_start.clone()`, `_replay_used = true`, `_undo_snapshot = null`, gọi `_start_round(false)` (mốc F2 dời về bàn vừa khôi phục, xóa lệnh cũ), `events_resolved.emit([], _state.clone())`, trả `true`. Ghi `Log.debug("battle", "chơi lại hiệp")`.
+  - [x] 1.5 Không ghi "chơi lại" vào `_round_commands` (định dạng kịch bản không có lệnh này); báo cáo F2 sau khi chơi lại phát lại từ bàn vừa khôi phục.
 
-- [ ] **Task 2: Giao diện và phím** (AC: 1, 2)
-  - [ ] 2.1 `game/src/battle/battle_input.gd`: thêm `REPLAY_ACTION = "replay_round"`, `KEY_R` trong `ACTION_KEYS`, signal `replay_pressed`, xử lý trong `_unhandled_input` (không nhận lặp phím, như `Z`/`Space`).
-  - [ ] 2.2 `game/src/ui/hud.gd`: thêm nút `_replay_button` (`hud.replay`) + nhãn `_replay_label` hiện số lần còn lại; signal `replay_pressed`; `show_turn(...)` nhận thêm `can_replay: bool, replay_left: int`; `_apply_disabled` mờ nút khi không chơi lại được/đã dùng/đang khóa/hết trận. Nhãn: `hud.replay.left` với `%d` khi còn, `hud.replay.used` khi đã dùng.
-  - [ ] 2.3 `game/src/battle/battle_view.gd`: nối `input.replay_pressed` và `hud.replay_pressed` vào `_on_replay()`; guard `_playing`/`_battle_over`; gọi `_controller.replay_round()`; nếu trả `true` thì `_deselect()`; `_update_hud()` truyền `can_replay`/`replay_left`.
-  - [ ] 2.4 `game/i18n/text.csv`: `hud.replay,Chơi lại (R)`, `hud.replay.left,Còn %d lần`, `hud.replay.used,Đã dùng`. Chạy import để cập nhật `text.vi.translation`.
+- [x] **Task 2: Giao diện và phím** (AC: 1, 2)
+  - [x] 2.1 `game/src/battle/battle_input.gd`: thêm `REPLAY_ACTION = "replay_round"`, `KEY_R` trong `ACTION_KEYS`, signal `replay_pressed`, xử lý trong `_unhandled_input` (không nhận lặp phím, như `Z`/`Space`).
+  - [x] 2.2 `game/src/ui/hud.gd`: thêm nút `_replay_button` (`hud.replay`) + nhãn `_replay_label` hiện số lần còn lại; signal `replay_pressed`; `show_turn(...)` nhận thêm `can_replay: bool, replay_left: int`; `_apply_disabled` mờ nút khi không chơi lại được/đã dùng/đang khóa/hết trận. Nhãn: `hud.replay.left` với `%d` khi còn, `hud.replay.used` khi đã dùng.
+  - [x] 2.3 `game/src/battle/battle_view.gd`: nối `input.replay_pressed` và `hud.replay_pressed` vào `_on_replay()`; guard `_playing`/`_battle_over`; gọi `_controller.replay_round()`; nếu trả `true` thì `_deselect()`; `_update_hud()` truyền `can_replay`/`replay_left`.
+  - [x] 2.4 `game/i18n/text.csv`: `hud.replay,Chơi lại (R)`, `hud.replay.left,Còn %d lần`, `hud.replay.used,Đã dùng`. Chạy import để cập nhật `text.vi.translation`.
 
-- [ ] **Task 3: Test GUT** (AC: 1–4)
-  - [ ] 3.1 `game/tests/test_battle_controller.gd`: chơi lại sau khi đi + đánh → bàn, máu, `telegraphs`, `enemy_intents`, `round_number`, `has_moved`/`has_attacked` y như đầu lượt; `can_undo()` false sau chơi lại; chơi lại lần hai trả `false`; trước `begin()` và khi trận đã hết trả `false`; `replay_left()` 1 → 0.
-  - [ ] 3.2 `game/tests/test_battle_view.gd`: nút Chơi lại sáng ở đầu lượt, bấm → bàn về đầu lượt và nút mờ + nhãn "Đã dùng"; phím `R` làm việc đó; sau khi chơi lại, `Z` không hủy được gì; nút mờ khi đang phát hoạt ảnh; hết trận thì mờ.
-  - [ ] 3.3 `game/tests/test_bug_report.gd` (hoặc test kịch bản F2): sau khi chơi lại rồi đi một nước, báo cáo F2 vẫn phát lại ra đúng bàn hiện tại.
-  - [ ] 3.4 Không thêm lệnh kịch bản; nếu review đòi, ghi thành việc sau.
+- [x] **Task 3: Test GUT** (AC: 1–4)
+  - [x] 3.1 `game/tests/test_battle_controller.gd`: chơi lại sau khi đi + đánh → bàn, máu, `telegraphs`, `enemy_intents`, `round_number`, `has_moved`/`has_attacked` y như đầu lượt; `can_undo()` false sau chơi lại; chơi lại lần hai trả `false`; trước `begin()` và khi trận đã hết trả `false`; `replay_left()` 1 → 0.
+  - [x] 3.2 `game/tests/test_battle_view.gd`: nút Chơi lại sáng ở đầu lượt, bấm → bàn về đầu lượt và nút mờ + nhãn "Đã dùng"; phím `R` làm việc đó; sau khi chơi lại, `Z` không hủy được gì; nút mờ khi đang phát hoạt ảnh; hết trận thì mờ.
+  - [x] 3.3 `game/tests/test_bug_report.gd` (hoặc test kịch bản F2): sau khi chơi lại rồi đi một nước, báo cáo F2 vẫn phát lại ra đúng bàn hiện tại.
+  - [x] 3.4 Không thêm lệnh kịch bản; nếu review đòi, ghi thành việc sau.
 
-- [ ] **Task 4: Xanh, kiểm ngược, chạy tay, commit** (AC: 1–5)
-  - [ ] 4.1 `tools/test.sh` xanh (phiên AI: `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh`).
-  - [ ] 4.2 Kiểm ngược: (a) bỏ gọi `_start_round(false)` trong `replay_round` → test F2 trượt; (b) không xóa `_undo_snapshot` → test Hủy-sau-chơi-lại trượt; (c) bỏ `_replay_used = true` → test dùng-hai-lần trượt; (d) bỏ capture `_turn_start` → test chơi lại trượt. Khôi phục từng cái, **sao lưu ra `/tmp` trước, không `git checkout`** (bài học 3.1).
-  - [ ] 4.3 Chạy tay `tools/chay.sh --dev --tran=1`: đi 1–2 nước rồi bấm Chơi lại/R — bàn về đầu lượt, ô đỏ còn, nút mờ, nhãn "Đã dùng"; bấm R lần nữa không gì xảy ra. Chụp cửa sổ game (`DISPLAY=:1 import -window <id>`) nếu GoPeak không nối.
-  - [ ] 4.4 Commit riêng phần code + test; lời tiếng Việt, kết `(Story 3.2)`. Không gộp `img/`.
+- [x] **Task 4: Xanh, kiểm ngược, chạy tay, commit** (AC: 1–5)
+  - [x] 4.1 `tools/test.sh` xanh (phiên AI: `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh`).
+  - [x] 4.2 Kiểm ngược: (a) bỏ gọi `_start_round(false)` trong `replay_round` → test F2 trượt; (b) không xóa `_undo_snapshot` → test Hủy-sau-chơi-lại trượt; (c) bỏ `_replay_used = true` → test dùng-hai-lần trượt; (d) bỏ capture `_turn_start` → test chơi lại trượt. Khôi phục từng cái, **sao lưu ra `/tmp` trước, không `git checkout`** (bài học 3.1).
+  - [x] 4.3 Chạy tay `tools/chay.sh --dev --tran=1`: đi 1–2 nước rồi bấm Chơi lại/R — bàn về đầu lượt, ô đỏ còn, nút mờ, nhãn "Đã dùng"; bấm R lần nữa không gì xảy ra. Chụp cửa sổ game (`DISPLAY=:1 import -window <id>`) nếu GoPeak không nối.
+  - [x] 4.4 Commit riêng phần code + test; lời tiếng Việt, kết `(Story 3.2)`. Không gộp `img/`.
 
 ## Dev Notes
 
@@ -134,10 +134,39 @@ Nếu thấy phải sửa `src/core/` thì **dừng, hỏi tác giả**: chơi l
 
 ### Agent Model Used
 
+DeepSeek Harness (deepseek-flash), 2026-10-23.
+
 ### Debug Log References
+
+- **Nền trước story:** 632/632 test, 96 kịch bản đã duyệt, 0 trượt.
+- **Bản chụp đầu lượt:** `_turn_start` chụp **sau** `BEGIN_BATTLE`/`END_TURN` (sau `_start_round`), chỉ khi `phase == PLAYER`. Hiệp 1 chụp sau `begin()`, nên bàn chơi lại có đủ quân Nguyên đã đi + đòn đã báo.
+- **`replay_round`:** `_state = _turn_start.clone()`, `_replay_used = true`, `_undo_snapshot = null`, `_start_round(false)`, phát `events_resolved` với danh sách rỗng (view vẽ lại, không hoạt ảnh). Không ghi lệnh vào `_round_commands` (định dạng kịch bản không có lệnh này).
+- **Giao diện:** nút "Chơi lại (R)" + nhãn "Còn 1 lần"/"Đã dùng"; phím `R` khai báo trong `ACTION_KEYS`; nút mờ khi đang phát hoạt ảnh/đã dùng/hết trận; `Hud.show_turn` nhận thêm `can_replay, replay_left`.
+- **Test:** controller (chơi lại khôi phục ô, `has_moved`, `telegraphs`, `enemy_intents`, hiệp; hủy sau chơi lại không tác dụng; chơi lại lần hai/hết trận/chưa mở trận bị từ chối; báo cáo F2 dựng lại từ bàn vừa khôi phục); view (nút + phím R, nhãn, mờ sau dùng).
+- **Kiểm ngược 4 đường (sao lưu `/tmp`, không `git checkout`):** (a) bỏ `_start_round(false)` → test F2 trượt ("2 lệnh, cần 1"); (b) không xóa `_undo_snapshot` → "Hủy không quay về trước lúc chơi lại" trượt; (c) không đặt `_replay_used` → "chỉ một lần mỗi trận"/"dùng rồi thì mờ" trượt; (d) không chụp `_turn_start` → "về ô đầu lượt"/"đi lại được" trượt. Khôi phục, xanh lại.
+- **Kiểm tay:** chạy `main.tscn` bằng script chụp tạm (`game/tests/chup_tmp.gd`, đã xoá): ảnh `build/test/rl_01..04.png`. `rl_02`: Khoái đã đi (0,6)→(0,4), ô đỏ của Lão còn, nút Chơi lại sáng, nhãn "Còn 1 lần". `rl_03`: bấm `R` → Khoái về (0,6), ô đỏ còn, nút Chơi lại mờ + nhãn "Đã dùng", nút Hủy mờ. `rl_04`: bấm `R` lần hai không đổi gì.
+- **Xanh cuối:** `tools/test.sh` → **638/638**, 96 kịch bản đã duyệt, 0 trượt.
 
 ### Completion Notes List
 
+- **AC 1, 2, 4 xong** (bàn về đầu lượt người chơi, một lần mỗi trận + số lần còn lại trên HUD, Hủy sau chơi lại không tác dụng).
+- **AC 3 chưa kiểm được:** chưa có mưu kế (Story 3.12–3.13). `BattleState.clone()` sao chép sâu mọi trường hiện có; khi mưu kế được thêm vào state (và `clone()`), chơi lại sẽ tự trả lại. Ghi thành việc kiểm ở 3.12/3.13.
+- **Không sửa** `src/core/`, `chi_so.json`, `game/data/tran/*`, kịch bản đã duyệt. Không thêm lệnh kịch bản `choi_lai` (Câu hỏi 2 giữ "không").
+- **Câu hỏi 1:** bấm Chơi lại ngay khi chưa đi nước nào **vẫn tính** đã dùng (theo câu "đã dùng một lần trong trận"); nút vẫn sáng tới lần bấm đầu.
+- Ảnh kiểm tay nằm trong `build/` (gitignore), không commit.
+
 ### File List
 
+- `game/src/battle/battle_controller.gd` — `_turn_start`, `_replay_used`, `can_replay`, `replay_left`, `replay_round`.
+- `game/src/battle/battle_input.gd` — action `replay_round` + KEY_R + signal.
+- `game/src/ui/hud.gd` — nút Chơi lại, nhãn số lần, `show_turn` mới.
+- `game/src/battle/battle_view.gd` — nối signal, `_on_replay`, `_update_hud`.
+- `game/i18n/text.csv` + `game/i18n/text.vi.translation` — 3 khóa `hud.replay*`.
+- `game/tests/test_battle_controller.gd` — 4 test chơi lại + `_level_with_enemy`, `_stats` mở rộng.
+- `game/tests/test_battle_view.gd` — 2 test nút/phím R.
+- `_bmad-output/implementation-artifacts/3-2-choi-lai-hiep.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+
 ### Change Log
+
+- 2026-10-23: thêm chơi lại hiệp (controller + HUD + phím R + nhãn số lần), 6 test GUT; kiểm ngược 4 đường; kiểm tay bằng ảnh trước/sau khi bấm R. `tools/test.sh` xanh 638/638. Story → `review`. AC 3 (trả lại mưu kế) chờ Story 3.12–3.13.

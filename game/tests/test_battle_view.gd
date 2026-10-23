@@ -229,6 +229,38 @@ const KHOAI_TARGET: Vector2i = Vector2i(0, 4)
 const LAO_TARGET: Vector2i = Vector2i(1, 4)
 
 
+## Story 3.2: nút Chơi lại về bàn đầu lượt, dùng một lần rồi mờ + nhãn "Đã dùng"; Hủy sau đó không tác dụng.
+func test_replay_button_returns_to_turn_start_and_dims() -> void:
+	var main: Node2D = _make_main()
+	var hud: Hud = _hud(main)
+	assert_false(hud.replay_button().disabled, "đầu lượt chơi lại được")
+	assert_eq(hud.replay_label_text(), tr("hud.replay.left") % 1)
+	_click(main, KHOAI_CELL)
+	_click(main, Vector2i(0, 4))
+	assert_eq(_controller(main).snapshot().unit_by_id(1).cell, Vector2i(0, 4))
+	hud.replay_button().pressed.emit()
+	assert_eq(_controller(main).snapshot().unit_by_id(1).cell, KHOAI_CELL, "về đầu lượt")
+	assert_true(hud.replay_button().disabled, "dùng rồi thì mờ")
+	assert_eq(hud.replay_label_text(), tr("hud.replay.used"))
+	assert_false(_controller(main).can_undo(), "Hủy không quay về trước lúc chơi lại")
+
+
+## Phím R cũng chơi lại, và chỉ một lần.
+func test_key_r_replays_only_once() -> void:
+	var main: Node2D = _make_main()
+	var ev: InputEventAction = InputEventAction.new()
+	ev.action = BattleInput.REPLAY_ACTION
+	ev.pressed = true
+	_click(main, KHOAI_CELL)
+	_click(main, Vector2i(0, 4))
+	_battle_input(main)._unhandled_input(ev)
+	assert_eq(_controller(main).snapshot().unit_by_id(1).cell, KHOAI_CELL, "R chơi lại")
+	_click(main, KHOAI_CELL)
+	_click(main, Vector2i(0, 4))
+	_battle_input(main)._unhandled_input(ev)
+	assert_eq(_controller(main).snapshot().unit_by_id(1).cell, Vector2i(0, 4), "lần hai không tác dụng")
+
+
 func _controller(main: Node2D) -> BattleController:
 	return main._controller as BattleController
 

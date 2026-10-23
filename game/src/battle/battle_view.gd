@@ -53,8 +53,10 @@ func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = nu
 	input.cell_clicked.connect(_on_cell_clicked)
 	input.cell_hovered.connect(_on_cell_hovered)
 	input.undo_pressed.connect(_on_undo)
+	input.replay_pressed.connect(_on_replay)
 	input.end_turn_pressed.connect(_on_end_turn)
 	hud.undo_pressed.connect(_on_undo)
+	hud.replay_pressed.connect(_on_replay)
 	hud.end_turn_pressed.connect(_on_end_turn)
 
 
@@ -189,6 +191,14 @@ func _on_undo() -> void:
 	if _controller == null or _playing or _battle_over():
 		return
 	_controller.undo()
+
+
+## Chơi lại hiệp (Story 3.2): về bàn đầu lượt người chơi; controller phát bản chụp mới, view vẽ lại rồi bỏ chọn.
+func _on_replay() -> void:
+	if _controller == null or _playing or _battle_over():
+		return
+	_controller.replay_round()
+	_deselect()
 
 
 ## Kết thúc lượt rồi bỏ chọn (tác giả chốt).
@@ -421,7 +431,8 @@ func _select(id: int) -> void:
 func _update_hud() -> void:
 	var snapshot: BattleState = _controller.snapshot()
 	var over: bool = Rules.is_battle_over(snapshot)
-	_hud.show_turn(snapshot.round_number, _controller.can_undo(), over)
+	_hud.show_turn(snapshot.round_number, _controller.can_undo(), _controller.can_replay(),
+		_controller.replay_left(), over)
 	# Dòng pha luôn có khi đang chơi; lúc phát hoạt ảnh pha địch thì báo đúng pha đang chạy (Story 2.11, AC 4).
 	if not over:
 		_hud.show_phase(_playing and _enemy_turn)

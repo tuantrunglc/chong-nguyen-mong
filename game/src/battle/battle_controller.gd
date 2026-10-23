@@ -22,6 +22,10 @@ var _round_commands: Array[Dictionary] = []
 ## thì báo cáo vẫn phải phát lại được pha địch, nên dùng bàn đầu hiệp cũ + lệnh, gồm cả `ket_thuc_luot`.
 var _prev_round_start: BattleState = null
 var _prev_round_commands: Array[Dictionary] = []
+## Bàn đầu LƯỢT NGƯỜI CHƠI của hiệp hiện tại (sau pha chuẩn bị của địch); null khi chưa mở trận hoặc trận đã hết.
+var _turn_start: BattleState = null
+## Chơi lại hiệp chỉ được một lần mỗi trận (FR39).
+var _replay_used: bool = false
 
 
 ## telegraphs: đòn đã báo sẵn (chỉ bộ chạy kịch bản dùng, "truoc.bao_don", Story 2.8); chép sâu, theo số thứ tự.
@@ -35,6 +39,8 @@ func start(level: LevelData, stats: Stats, telegraphs: Array[Telegraph] = []) ->
 	_round_commands = []
 	_prev_round_start = null
 	_prev_round_commands = []
+	_turn_start = null
+	_replay_used = false
 	# Bộ nạp đã chặn các lỗi này; đây chỉ là lưới an toàn.
 	for problem: String in _state.validate():
 		Log.error("battle", problem)
@@ -111,6 +117,8 @@ func submit(command: Command) -> Array[BattleEvent]:
 	# Nguyên đi không phải thứ người chơi báo lỗi).
 	if command.kind == Command.Kind.BEGIN_BATTLE or command.kind == Command.Kind.END_TURN:
 		_start_round(command.kind == Command.Kind.END_TURN)
+		# Bàn người chơi thấy khi hiệp bắt đầu: sau pha chuẩn bị (quân Nguyên đã đi, đòn đã báo).
+		_turn_start = _state.clone() if _state.phase == BattleState.Phase.PLAYER else null
 	events_resolved.emit(events, _state.clone())
 	return events
 
@@ -138,6 +146,33 @@ func undo() -> Array[BattleEvent]:
 
 func can_undo() -> bool:
 	return _undo_snapshot != null
+
+
+## Chơi lại hiệp được không (FR39): chưa dùng lần nào trong trận, đang ở lượt người chơi, trận chưa hết.
+func can_replay() -> bool:
+	return _state != null and _turn_start != null and not _replay_used \
+		and _state.phase == BattleState.Phase.PLAYER and not Rules.is_battle_over(_state)
+
+
+## Số lần chơi lại còn lại trong trận: 1 hoặc 0. Giao diện hiện số này (Story 3.2).
+func replay_left() -> int:
+	return 0 if _replay_used else 1
+
+
+## Chơi lại hiệp (FR39): về đúng bàn đầu lượt người chơi của hiệp này, mỗi trận một lần.
+## Không chơi lại được thì trả false và không đổi gì (nút đã mờ; phím R im lặng).
+func replay_round() -> bool:
+	if not can_replay():
+		return false
+	_state = _turn_start.clone()
+	_replay_used = true
+	_undo_snapshot = null  # AC 4: Hủy sau khi chơi lại không quay về trước đó
+	# F2: mốc mới là bàn vừa khôi phục; lệnh cũ không phát lại được vì bàn đã đổi.
+	_start_round(false)
+	Log.debug("battle", "chơi lại hiệp %d" % _state.round_number)
+	var no_events: Array[BattleEvent] = []
+	events_resolved.emit(no_events, _state.clone())
+	return true
 
 
 ## Đầu hiệp để báo cáo F2 phát lại được (Story 2.13): bàn đầu hiệp hiện tại, hoặc bàn đầu hiệp trước khi vừa kết

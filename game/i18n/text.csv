@@ -5,6 +5,9 @@ error.data_short,Không mở được trận vì file dữ liệu bị lỗi.
 error.back_to_menu,Về menu
 hud.round,Hiệp %d
 hud.undo,Hủy (Z)
+hud.replay,Chơi lại (R)
+hud.replay.left,Còn %d lần
+hud.replay.used,Đã dùng
 hud.end_turn,Kết thúc lượt (Space)
 hud.confirm_attack,Bấm lần nữa để đánh
 hud.phase.player,"Lượt của bạn"

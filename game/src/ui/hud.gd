@@ -1,9 +1,11 @@
 class_name Hud
 extends Control
-## Bảng bên phải bàn cờ, dựng bằng code: số hiệp, nút Hủy, nút Kết thúc lượt, dòng nhắc. Ẩn khi không có trận.
+## Bảng bên phải bàn cờ, dựng bằng code: số hiệp, nút Hủy, nút Chơi lại (kèm số lần còn lại), nút Kết thúc lượt,
+## dòng nhắc. Ẩn khi không có trận.
 ## Nút không nhận focus: nếu không, bấm nút bằng chuột rồi gõ Space thì ui_accept bấm lại nút đó.
 
 signal undo_pressed
+signal replay_pressed
 signal end_turn_pressed
 
 ## Góc trên trái và bề rộng: bên phải bàn cờ (bàn nằm trong BoardView.AREA, x 16–956).
@@ -18,11 +20,16 @@ var _round_label: Label
 ## Dòng pha, luôn hiện khi đang chơi (Story 2.11, AC 4).
 var _phase_label: Label
 var _undo_button: Button
+var _replay_button: Button
+## Số lần chơi lại còn lại (Story 3.2), hiện dưới nút Chơi lại.
+var _replay_label: Label
 var _end_turn_button: Button
 ## Dòng nhắc dưới các nút ("Bấm lần nữa để đánh"); rỗng thì ẩn.
 var _hint_label: Label
 ## Trạng thái để tính lại nút khi khóa/mở (Story 2.11: đang phát hoạt ảnh thì không bấm được).
 var _can_undo: bool = false
+var _can_replay: bool = false
+var _replay_left: int = 0
 var _over: bool = false
 var _locked: bool = false
 
@@ -52,6 +59,12 @@ func _ready() -> void:
 
 	_undo_button = _button(tr("hud.undo"), box)
 	_undo_button.pressed.connect(func() -> void: undo_pressed.emit())
+	_replay_button = _button(tr("hud.replay"), box)
+	_replay_button.pressed.connect(func() -> void: replay_pressed.emit())
+	_replay_label = Label.new()
+	_replay_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_replay_label.add_theme_font_size_override("font_size", PHASE_FONT_SIZE)
+	box.add_child(_replay_label)
 	_end_turn_button = _button(tr("hud.end_turn"), box)
 	_end_turn_button.pressed.connect(func() -> void: end_turn_pressed.emit())
 	_hint_label = Label.new()
@@ -61,11 +74,16 @@ func _ready() -> void:
 	box.add_child(_hint_label)
 
 
-## Hiện bảng với số hiệp; nút Hủy mờ khi không có gì để hủy. Hết trận (over) thì cả hai nút đều mờ.
-func show_turn(round_number: int, can_undo: bool, over: bool = false) -> void:
+## Hiện bảng với số hiệp; nút Hủy mờ khi không có gì để hủy, nút Chơi lại mờ khi đã dùng/không chơi lại được.
+## Hết trận (over) thì mọi nút đều mờ và ẩn số lần chơi lại.
+func show_turn(round_number: int, can_undo: bool, can_replay: bool, replay_left: int, over: bool = false) -> void:
 	_round_label.text = tr("hud.round") % round_number
 	_can_undo = can_undo
+	_can_replay = can_replay
+	_replay_left = replay_left
 	_over = over
+	_replay_label.visible = not over
+	_replay_label.text = tr("hud.replay.used") if replay_left <= 0 else tr("hud.replay.left") % replay_left
 	_apply_disabled()
 	visible = true
 	# Hết trận thì bảng Thắng/Thua là thứ duy nhất cần đọc.
@@ -81,6 +99,7 @@ func set_locked(locked: bool) -> void:
 
 func _apply_disabled() -> void:
 	_undo_button.disabled = _over or not _can_undo or _locked
+	_replay_button.disabled = _over or not _can_replay or _locked
 	_end_turn_button.disabled = _over or _locked
 
 
@@ -116,6 +135,14 @@ func round_text() -> String:
 
 func undo_button() -> Button:
 	return _undo_button
+
+
+func replay_button() -> Button:
+	return _replay_button
+
+
+func replay_label_text() -> String:
+	return _replay_label.text if _replay_label.visible else ""
 
 
 func end_turn_button() -> Button:

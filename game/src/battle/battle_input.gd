@@ -6,6 +6,7 @@ extends Node
 
 signal general_key_pressed(index: int)
 signal undo_pressed
+signal replay_pressed
 signal end_turn_pressed
 signal cell_clicked(cell: Vector2i)
 ## Chỉ phát khi ô dưới chuột đổi; ra ngoài bàn thì cell là BoardView.NO_CELL.
@@ -18,6 +19,8 @@ const GENERAL_ACTIONS: Dictionary = {
 	"select_general_3": 3,
 }
 const UNDO_ACTION: String = "undo_move"
+## Chơi lại hiệp (Story 3.2).
+const REPLAY_ACTION: String = "replay_round"
 const END_TURN_ACTION: String = "end_turn"
 ## Action -> phím vật lý, cho mọi phím tắt của bàn cờ.
 const ACTION_KEYS: Dictionary = {
@@ -25,6 +28,7 @@ const ACTION_KEYS: Dictionary = {
 	"select_general_2": KEY_2,
 	"select_general_3": KEY_3,
 	UNDO_ACTION: KEY_Z,
+	REPLAY_ACTION: KEY_R,
 	END_TURN_ACTION: KEY_SPACE,
 }
 
@@ -68,6 +72,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Không nhận lặp phím: giữ Space không kết thúc nhiều lượt liền.
 	if event.is_action_pressed(UNDO_ACTION, false, true):
 		undo_pressed.emit()
+		return
+	if event.is_action_pressed(REPLAY_ACTION, false, true):
+		replay_pressed.emit()
 		return
 	if event.is_action_pressed(END_TURN_ACTION, false, true):
 		end_turn_pressed.emit()
