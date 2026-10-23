@@ -71,7 +71,8 @@ static func plan(state: BattleState, unit: Unit) -> EnemyIntent:
 
 ## Đứng ở cell thì đòn của unit có trúng ô target không. Bộ binh: ô kề. Kỵ binh: cùng hàng hoặc cùng cột, giữa hai
 ## ô không có quân nào (trừ chính unit, nó sẽ rời ô cũ) và không có rừng, kho lương, làng. Cung kỵ (Story 2.15):
-## cùng hàng hoặc cùng cột, cách `tam_ban_gan`–`tam_ban_xa` ô, KHÔNG xét vật ở giữa (tên bay qua quân).
+## cùng hàng hoặc cùng cột, cách `tam_ban_gan`–`tam_ban_xa` ô, không xét QUÂN ở giữa, nhưng rừng hoặc kho lương
+## giữa thì chặn (Story 3.1); làng chặn ở Story 3.7.
 static func can_hit_from(state: BattleState, unit: Unit, cell: Vector2i, target: Vector2i) -> bool:
 	match unit.type:
 		UnitType.BO_BINH:

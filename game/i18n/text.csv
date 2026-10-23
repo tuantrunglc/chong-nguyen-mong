@@ -55,6 +55,7 @@ scenario.viewer.reject_nothing_to_undo,không còn nước đi nào để hủy
 scenario.viewer.reject_already_attacked,tướng đã đánh rồi trong lượt này
 scenario.viewer.reject_not_adjacent,ô đó không kề tướng
 scenario.viewer.reject_no_target,ô đó không có quân Nguyên đánh được
+scenario.viewer.reject_blocked,đòn bị rừng hoặc kho lương chặn
 scenario.viewer.reject_not_in_range,ô đó không thẳng hàng hoặc ngoài tầm đánh
 scenario.viewer.reject_battle_over,trận đã kết thúc (thắng hoặc thua)
 scenario.viewer.after_state,Sau lệnh: %s
@@ -102,9 +103,9 @@ dev.ai.fallen,(đã gục)
 terrain.plain,Đồng bằng
 terrain.effect.plain,Không có hiệu ứng
 terrain.effect.river,Quân Nguyên vào thì chết đuối
-terrain.effect.forest,"Chắn đường, không đi vào được"
+terrain.effect.forest,"Chắn đường, không đi vào được. Chặn lao, tên, kéo"
 terrain.effect.spikes,Đi qua mất máu
-terrain.effect.granary,Quân Nguyên đứng kề thì hồi máu
+terrain.effect.granary,"Quân Nguyên đứng kề thì hồi máu. Chặn lao, tên, kéo"
 terrain.effect.village,Đánh vào làng thì mất Lòng dân
 terrain.effect.pass,Quân Nguyên vào ải thì thua
 unit.full.nguyen_khoai,Nguyễn Khoái

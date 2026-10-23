@@ -43,6 +43,7 @@ const REJECT_CODES: Dictionary = {
 	"da_danh_roi": "scenario.viewer.reject_already_attacked",
 	"khong_ke": "scenario.viewer.reject_not_adjacent",
 	"khong_co_dich": "scenario.viewer.reject_no_target",
+	"bi_chan": "scenario.viewer.reject_blocked",
 	"ngoai_tam": "scenario.viewer.reject_not_in_range",
 	"tran_da_het": "scenario.viewer.reject_battle_over",
 }

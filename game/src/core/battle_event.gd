@@ -43,6 +43,8 @@ enum Cause { WALK, STRIKE, PUSH, COLLISION, PULL, ENEMY_STRIKE }
 enum Reject {
 	NONE, NO_UNIT, NOT_GENERAL, ALREADY_THERE, UNREACHABLE, ALREADY_MOVED, NOTHING_TO_UNDO,
 	ALREADY_ATTACKED, NOT_ADJACENT, NO_TARGET, NOT_IN_RANGE,
+	## Đòn có địch trong tầm nhưng bị rừng hoặc kho lương chặn trước nó (Story 3.1): khác NO_TARGET.
+	BLOCKED,
 	## Trận đã kết thúc (thắng hoặc thua): mọi lệnh bị khóa (Story 2.5).
 	BATTLE_OVER,
 }

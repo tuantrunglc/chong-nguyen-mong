@@ -37,9 +37,10 @@ static func _khoai_targets(state: BattleState, khoai: Unit) -> Array[Vector2i]:
 
 
 ## Mỗi hướng nhiều nhất một ô: quân Nguyên gần nhất ở ô min_range–max_range. Tướng mình đứng chắn thì đi tiếp (lao
-## sẽ trúng tướng đó, viền vẫn ở quân Nguyên phía sau; tác giả chốt 2026-10-19). Ô kề không xét: lao bay qua quân.
-## Story 3.1: rừng hoặc kho lương ở BẤT KỲ ô nào từ ô kề (d=1) tới mục tiêu thì chặn hướng đó; vật cản sau mục
-## tiêu không ảnh hưởng. Làng để Story 3.7. Sông không chặn.
+## sẽ trúng tướng đó, viền vẫn ở quân Nguyên phía sau; tác giả chốt 2026-10-19). Quân đứng trước `min_range` (ô kề
+## với chỉ số hiện tại) thì lao bay qua.
+## Story 3.1: rừng hoặc kho lương ở BẤT KỲ ô nào từ d=1 tới mục tiêu thì chặn hướng đó; vật cản sau mục tiêu
+## không ảnh hưởng. Làng để Story 3.7. Sông không chặn.
 static func _lao_targets(state: BattleState, lao: Unit) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
 	var near: int = state.stats.min_range(lao.type)
@@ -118,8 +119,8 @@ static func resolve(state: BattleState, command: Command, events: Array[BattleEv
 					"ô %s không thẳng hàng với quân %d trong tầm %d–%d" % [where, unit.id, near, far]))
 				return
 			if not targets(state, unit).has(command.cell):
-				events.append(BattleEvent.rejected(BattleEvent.Reject.NO_TARGET,
-					"ô %s không phải quân Nguyên gần nhất trong tầm lao" % where))
+				_reject_no_target(state, unit, command.cell,
+					"ô %s không phải quân Nguyên gần nhất trong tầm lao" % where, events)
 				return
 			lao_throw(state, unit, command.cell, events)
 		UnitType.TRAN_KHANH_DU:
@@ -131,8 +132,8 @@ static func resolve(state: BattleState, command: Command, events: Array[BattleEv
 					"ô %s không thẳng hàng với quân %d trong tầm %d–%d" % [where, unit.id, PULL_MIN_RANGE, reach]))
 				return
 			if not targets(state, unit).has(command.cell):
-				events.append(BattleEvent.rejected(BattleEvent.Reject.NO_TARGET,
-					"ô %s không phải quân Nguyên đầu tiên trên hàng trong tầm kéo" % where))
+				_reject_no_target(state, unit, command.cell,
+					"ô %s không phải quân Nguyên đầu tiên trên hàng trong tầm kéo" % where, events)
 				return
 			events.append(BattleEvent.attacked(unit.id, command.cell))
 			du_pull(state, unit, command.cell, events)
@@ -153,20 +154,49 @@ static func khoai_strike(state: BattleState, khoai: Unit, cell: Vector2i, events
 			BattleEvent.Cause.PUSH, events)
 
 
+## Đòn có địch đúng ô đích nhưng bị rừng/kho lương chặn trước nó: lý do BLOCKED, không phải NO_TARGET
+## (Story 3.1 — người chơi bấm vào địch mà báo "không có đích" là sai). Còn lại giữ NO_TARGET như cũ.
+static func _reject_no_target(state: BattleState, unit: Unit, cell: Vector2i, reason: String,
+		events: Array[BattleEvent]) -> void:
+	if _blocked_target(state, unit.cell, cell):
+		events.append(BattleEvent.rejected(BattleEvent.Reject.BLOCKED,
+			"đòn bị rừng hoặc kho lương chặn trước ô %d,%d" % [cell.x, cell.y]))
+		return
+	events.append(BattleEvent.rejected(BattleEvent.Reject.NO_TARGET, reason))
+
+
+## Ô đích có quân Nguyên và có vật cản chặn giữa ô chủ đòn với nó (không tính hai đầu).
+static func _blocked_target(state: BattleState, from: Vector2i, to: Vector2i) -> bool:
+	var target: Unit = state.unit_at(to)
+	if target == null or target.faction != Unit.Faction.NGUYEN:
+		return false
+	var dir: Vector2i = Grid.straight_dir(from, to)
+	if dir == Vector2i.ZERO:
+		return false
+	var step: Vector2i = from + dir
+	while step != to:
+		if Terrain.ATTACK_BLOCKERS.has(state.terrain_at(step)):
+			return true
+		step += dir
+	return false
+
+
 ## Lao về phía cell, trúng quân đầu tiên (mọi phe) từ ô min_range; tự ghi ATTACKED với ô quân trúng (có thể là
 ## tướng mình đứng chắn trước cell). Không đẩy. Sát Thát (+1) thêm ở Story 3.13. Rừng hoặc kho lương trước mục tiêu
 ## thì lao bị chặn, không ai mất máu (Story 3.1; làng ở 3.7) — phòng thủ, vì `targets` đã loại các ô đó.
 static func lao_throw(state: BattleState, lao: Unit, cell: Vector2i, events: Array[BattleEvent]) -> void:
 	var dir: Vector2i = Grid.straight_dir(lao.cell, cell)
-	for d: int in range(state.stats.min_range(lao.type), Grid.distance(lao.cell, cell) + 1):
+	var near: int = state.stats.min_range(lao.type)
+	for d: int in range(1, Grid.distance(lao.cell, cell) + 1):
 		var step: Vector2i = lao.cell + dir * d
 		if Terrain.ATTACK_BLOCKERS.has(state.terrain_at(step)):
 			return
 		var target: Unit = state.unit_at(step)
-		if target != null:
-			events.append(BattleEvent.attacked(lao.id, target.cell))
-			Effects.damage(state, target, state.stats.damage(lao.type), BattleEvent.Cause.STRIKE, events)
-			return
+		if target == null or d < near:
+			continue  # ô trống, hoặc quân bị bay qua (trước tầm gần)
+		events.append(BattleEvent.attacked(lao.id, target.cell))
+		Effects.damage(state, target, state.stats.damage(lao.type), BattleEvent.Cause.STRIKE, events)
+		return
 	# resolve đã kiểm cell có trong targets: tới đây là targets và lao_throw lệch nhau.
 	assert(false, "RulesAttack.lao_throw: không trúng ai từ %s tới %s" % [lao.cell, cell])
 

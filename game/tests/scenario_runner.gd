@@ -18,6 +18,7 @@ const REJECT_EVENTS: Dictionary = {
 	"da_danh_roi": BattleEvent.Reject.ALREADY_ATTACKED,
 	"khong_ke": BattleEvent.Reject.NOT_ADJACENT,
 	"khong_co_dich": BattleEvent.Reject.NO_TARGET,
+	"bi_chan": BattleEvent.Reject.BLOCKED,
 	"ngoai_tam": BattleEvent.Reject.NOT_IN_RANGE,
 	"tran_da_het": BattleEvent.Reject.BATTLE_OVER,
 }
