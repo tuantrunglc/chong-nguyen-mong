@@ -79,10 +79,10 @@ tôi muốn hầm chông làm đau mọi quân đi qua,
 
 ### Review Findings
 
-- [ ] [Review][Decision] Tướng có thể tự đi vào chỗ chết trên chông — `_find_paths_hero` không so số chông với máu; ô sáng vẫn bấm được, đi một cú là gục, nếu là tướng cuối thì thua và không chơi lại được. Nhãn "−2" cũng sai khi tướng 1 máu (thực tế mất 1 rồi gục). Cần tác giả quyết: vẫn cho đi / đánh dấu ô chết / không thắp ô chết / bấm hai lần.
-- [ ] [Review][Decision] Luật hòa "ít bước hơn" chưa có trong spec — `_is_better_path` xếp: ít chông → ít bước → B→Đ→N→T. AC4/FR8/kiến trúc chỉ ghi "ít chông, hòa thì B→Đ→N→T". Tác giả duyệt (ghi vào kiến trúc) hoặc bỏ.
-- [ ] [Review][Decision] Đường đi khi rê chuột chưa hiện số máu — AC4 nói "ô sáng và đường đi hiện số máu", mới có nhãn trên ô sáng. Cần chốt cách hiện trên đường: số ở ô đích của đường, hay dấu trên từng ô chông dọc đường.
-- [ ] [Review][Decision] Không có dấu vết duyệt kịch bản trước khi viết luật — 7 kịch bản xuất hiện lần đầu ở commit e7d69cc với `da_duyet: true`, không có commit "chờ duyệt" như các story trước. Tác giả xác nhận đã duyệt nội dung 7 kịch bản.
+- [x] [Review][Decision] Tướng có thể tự đi vào chỗ chết trên chông — Tác giả chọn 1-A: Vẫn cho đi bình thường, người chơi tự chịu trách nhiệm về nước đi của mình và có thể dùng Hủy (Z) nếu chưa kết thúc lượt.
+- [x] [Review][Decision] Luật hòa "ít bước hơn" — Tác giả duyệt giữ nguyên thứ tự ưu tiên: ít chông → ít bước → B→Đ→N→T (đã cập nhật vào game-architecture.md).
+- [x] [Review][Decision] Đường đi khi rê chuột chưa hiện số máu — Tác giả duyệt để nguyên nhãn "−1", "−2" trên ô đích trong ô sáng, không cần thêm ký hiệu trên đường nét đứt để tránh rối màn hình.
+- [x] [Review][Decision] Duyệt bộ 7 kịch bản hầm chông — Tác giả chính thức duyệt nội dung toàn bộ 7 kịch bản hầm chông (`da_duyet: true`).
 - [x] [Review][Patch] Kịch bản AC3 không bắt được lỗi báo đòn: chỉ 1 địch, thắng trận thì `Rules.resolve` xoá mọi báo đòn; thêm địch thứ hai sống sót và kiểm `bao_don` [game/tests/kich_ban/dia_hinh/ham_chong_dich_guc_khi_chuan_bi.json]
 - [x] [Review][Patch] Test/kịch bản "gục giữa đường" không chứng minh được việc dừng: kiểm không còn `MOVED` sau `DIED`; thêm test GUT kéo/đẩy gục trên chông rồi dừng [game/tests/test_spikes.gd; ham_chong_guc_giua_duong.json]
 - [x] [Review][Patch] `test_enemy_pathfinding_does_not_avoid_spikes` dùng `max_steps = 1` nên không thể trượt; cần hai đường bằng nhau, một có chông [game/tests/test_spikes.gd]

@@ -816,7 +816,7 @@ Mọi luật đều đi qua đúng quy trình này. Không có ngoại lệ.
 
 **Tự đi (tướng và quân Nguyên):**
 - Đi vào **mọi ô hầm chông** trên đường đều mất 1 máu. Gục giữa đường thì dừng tại đó.
-- Tướng: người chơi bấm ô đích, game chọn đường **ít hầm chông nhất**; hòa thì chọn theo thứ tự hướng B→Đ→N→T. Ô sáng và đường đi phải hiện số máu sẽ mất. **(mặc định)**
+- Tướng: người chơi bấm ô đích, game chọn đường **ít hầm chông nhất**; hòa thì ít bước hơn, rồi chọn theo thứ tự hướng B→Đ→N→T (tác giả duyệt Story 3.4). Ô sáng và đường đi hiện số máu sẽ mất. **(mặc định)**
 - Quân Nguyên: đi đường ngắn nhất, **không tránh hầm chông**, hòa thì theo B→Đ→N→T (theo GDD: AI "ngây thơ").
 
 **Đòn của tướng.** Thứ tự xử lý: kiểm tra hợp lệ → sát thương → nếu mục tiêu còn sống thì đẩy hoặc kéo → kiểm tra thắng/thua.
