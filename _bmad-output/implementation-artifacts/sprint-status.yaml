@@ -78,8 +78,8 @@ development_status:
   2-14-hoan-thien-tran-1-va-moc-tu-choi-het-e2: in-progress
   2-15-cung-ky-cat-duoc-neu-tre: done
   epic-2-retrospective: optional
-  epic-3: backlog
-  3-1-rung-va-vat-can-chan-don: backlog
+  epic-3: in-progress
+  3-1-rung-va-vat-can-chan-don: ready-for-dev
   3-2-choi-lai-hiep: backlog
   3-3-tran-2: backlog
   3-4-ham-chong: backlog
