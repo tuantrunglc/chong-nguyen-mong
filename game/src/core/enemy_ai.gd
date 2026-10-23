@@ -7,7 +7,7 @@ extends RefCounted
 ## - Không có ô như vậy: ô gần mục tiêu nhất (số bước), hòa thì ít bước đi hơn, rồi Bắc, rồi Đông; không báo đòn.
 ## "Phía Bắc hơn" là hàng nhỏ hơn, "phía Đông hơn" là cột lớn hơn: thứ tự B→Đ→N→T áp cho chỗ hòa giữa các ô.
 ## Đòn: Bộ binh ô kề; Kỵ binh xung phong thẳng hàng; Cung kỵ (Story 2.15) bắn ô thẳng hàng cách 2–3 ô, tên bay
-## qua quân (chặn tên là Story 3.1). Nhắm làng (3.7), ô ải (3.11) thêm nhánh ở đây.
+## qua quân; rừng hoặc kho lương chặn tên (Story 3.1). Nhắm làng (3.7), ô ải (3.11) thêm nhánh ở đây.
 ## Mọi loại quân chỉ nhắm tướng có ĐƯỜNG ĐI tới (Pathfinding.distance_field); tướng bị vây hoàn toàn thì bỏ qua,
 ## kể cả Cung kỵ bắn qua được — giữ nguyên luật AI chung ở bảng thứ tự phân giải (tác giả chốt 2026-10-23).
 
@@ -88,11 +88,19 @@ static func can_hit_from(state: BattleState, unit: Unit, cell: Vector2i, target:
 				step += dir
 			return true
 		UnitType.CUNG_KY:
-			if Grid.straight_dir(cell, target) == Vector2i.ZERO:
+			var dir: Vector2i = Grid.straight_dir(cell, target)
+			if dir == Vector2i.ZERO:
 				return false
 			var distance: int = Grid.distance(cell, target)
-			return distance >= state.stats.shoot_min_range(unit.type) \
-				and distance <= state.stats.shoot_max_range(unit.type)
+			if distance < state.stats.shoot_min_range(unit.type) \
+					or distance > state.stats.shoot_max_range(unit.type):
+				return false
+			var step: Vector2i = cell + dir
+			while step != target:
+				if Terrain.ATTACK_BLOCKERS.has(state.terrain_at(step)):
+					return false  # Story 3.1: rừng, kho lương chặn tên
+				step += dir
+			return true
 	return false
 
 

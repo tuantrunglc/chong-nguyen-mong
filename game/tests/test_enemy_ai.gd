@@ -122,6 +122,30 @@ func test_archer_walks_into_shooting_range() -> void:
 
 
 ## Tầm bắn đọc từ chi_so.json, không hard-code 2–3: đổi tam_ban_gan thành 3 thì 2 ô không bắn được nữa.
+## Story 3.1: rừng hoặc kho lương nằm giữa chủ đòn và ô đích thì tên bị chặn; sông thì không.
+func test_archer_arrow_blocked_by_terrain() -> void:
+	var forest: BattleState = BoardFixture.state({Vector2i(3, 3): "C", Vector2i(3, 6): "1"},
+		{Vector2i(3, 4): "#"})
+	assert_false(EnemyAI.can_hit_from(forest, forest.unit_by_id(101), Vector2i(3, 3), Vector2i(3, 6)),
+		"rừng chắn tên")
+	var granary: BattleState = BoardFixture.state({Vector2i(3, 3): "C", Vector2i(3, 6): "1"},
+		{Vector2i(3, 5): "L"})
+	assert_false(EnemyAI.can_hit_from(granary, granary.unit_by_id(101), Vector2i(3, 3), Vector2i(3, 6)),
+		"kho lương chắn tên")
+	var next_door: BattleState = BoardFixture.state({Vector2i(3, 0): "C", Vector2i(3, 3): "1"},
+		{Vector2i(3, 1): "#"})
+	assert_false(EnemyAI.can_hit_from(next_door, next_door.unit_by_id(101), Vector2i(3, 0), Vector2i(3, 3)),
+		"vật cản ngay sau chủ đòn cũng chặn")
+	var behind: BattleState = BoardFixture.state({Vector2i(3, 0): "C", Vector2i(3, 2): "1"},
+		{Vector2i(3, 4): "#"})
+	assert_true(EnemyAI.can_hit_from(behind, behind.unit_by_id(101), Vector2i(3, 0), Vector2i(3, 2)),
+		"vật cản sau ô đích không chặn")
+	var river: BattleState = BoardFixture.state({Vector2i(3, 3): "C", Vector2i(3, 6): "1"},
+		{Vector2i(3, 5): "~"})
+	assert_true(EnemyAI.can_hit_from(river, river.unit_by_id(101), Vector2i(3, 3), Vector2i(3, 6)),
+		"sông không chặn tên")
+
+
 func test_archer_range_comes_from_stats() -> void:
 	var stats: Stats = BoardFixture.stats_with(UnitType.CUNG_KY, "tam_ban_gan", 3)
 	var state: BattleState = BoardFixture.state({Vector2i(3, 0): "C", Vector2i(3, 3): "1"}, {}, {},

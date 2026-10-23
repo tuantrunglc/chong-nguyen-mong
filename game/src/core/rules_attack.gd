@@ -37,31 +37,40 @@ static func _khoai_targets(state: BattleState, khoai: Unit) -> Array[Vector2i]:
 
 
 ## Mỗi hướng nhiều nhất một ô: quân Nguyên gần nhất ở ô min_range–max_range. Tướng mình đứng chắn thì đi tiếp (lao
-## sẽ trúng tướng đó, viền vẫn ở quân Nguyên phía sau; tác giả chốt 2026-10-19). Ô kề không xét.
-## Story 3.1: gặp rừng, kho lương, làng ở bất kỳ ô nào từ ô kề thì dừng hướng đó.
+## sẽ trúng tướng đó, viền vẫn ở quân Nguyên phía sau; tác giả chốt 2026-10-19). Ô kề không xét: lao bay qua quân.
+## Story 3.1: rừng hoặc kho lương ở BẤT KỲ ô nào từ ô kề (d=1) tới mục tiêu thì chặn hướng đó; vật cản sau mục
+## tiêu không ảnh hưởng. Làng để Story 3.7. Sông không chặn.
 static func _lao_targets(state: BattleState, lao: Unit) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
+	var near: int = state.stats.min_range(lao.type)
 	for dir: Vector2i in Grid.DIRECTIONS:
-		for d: int in range(state.stats.min_range(lao.type), state.stats.max_range(lao.type) + 1):
+		for d: int in range(1, state.stats.max_range(lao.type) + 1):
 			var cell: Vector2i = lao.cell + dir * d
 			if not state.in_bounds(cell):
 				break
-			var unit: Unit = state.unit_at(cell)
-			if unit != null and unit.faction == Unit.Faction.NGUYEN:
-				cells.append(cell)
+			if Terrain.ATTACK_BLOCKERS.has(state.terrain_at(cell)):
 				break
+			var unit: Unit = state.unit_at(cell)
+			if unit == null or unit.faction != Unit.Faction.NGUYEN:
+				continue  # ô trống, hoặc tướng mình đứng chắn: lao đi tiếp
+			if d < near:
+				continue  # ô kề: lao bay qua quân
+			cells.append(cell)
+			break
 	return cells
 
 
 ## Mỗi hướng nhiều nhất một ô: chỉ xét vật đầu tiên trong pull_range ô. Là quân Nguyên ở ô thứ PULL_MIN_RANGE trở đi
 ## thì có viền. Tướng mình hoặc quân Nguyên kề thì hướng đó rỗng (khác Lão: không bay qua).
-## Story 3.1: rừng, kho lương, làng cũng là vật đầu tiên không kéo được.
+## Story 3.1: rừng hoặc kho lương là vật đầu tiên thì hướng đó rỗng — không kéo được quân đứng sau. Làng ở 3.7.
 static func _du_targets(state: BattleState, du: Unit) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
 	for dir: Vector2i in Grid.DIRECTIONS:
 		for d: int in range(1, state.stats.pull_range(du.type) + 1):
 			var cell: Vector2i = du.cell + dir * d
 			if not state.in_bounds(cell):
+				break
+			if Terrain.ATTACK_BLOCKERS.has(state.terrain_at(cell)):
 				break
 			var unit: Unit = state.unit_at(cell)
 			if unit == null:
@@ -145,11 +154,15 @@ static func khoai_strike(state: BattleState, khoai: Unit, cell: Vector2i, events
 
 
 ## Lao về phía cell, trúng quân đầu tiên (mọi phe) từ ô min_range; tự ghi ATTACKED với ô quân trúng (có thể là
-## tướng mình đứng chắn trước cell). Không đẩy. Sát Thát (+1) thêm ở Story 3.13; rừng, kho lương, làng chặn: 3.1.
+## tướng mình đứng chắn trước cell). Không đẩy. Sát Thát (+1) thêm ở Story 3.13. Rừng hoặc kho lương trước mục tiêu
+## thì lao bị chặn, không ai mất máu (Story 3.1; làng ở 3.7) — phòng thủ, vì `targets` đã loại các ô đó.
 static func lao_throw(state: BattleState, lao: Unit, cell: Vector2i, events: Array[BattleEvent]) -> void:
 	var dir: Vector2i = Grid.straight_dir(lao.cell, cell)
 	for d: int in range(state.stats.min_range(lao.type), Grid.distance(lao.cell, cell) + 1):
-		var target: Unit = state.unit_at(lao.cell + dir * d)
+		var step: Vector2i = lao.cell + dir * d
+		if Terrain.ATTACK_BLOCKERS.has(state.terrain_at(step)):
+			return
+		var target: Unit = state.unit_at(step)
 		if target != null:
 			events.append(BattleEvent.attacked(lao.id, target.cell))
 			Effects.damage(state, target, state.stats.damage(lao.type), BattleEvent.Cause.STRIKE, events)
