@@ -26,6 +26,23 @@ static func path_to(state: BattleState, unit: Unit, cell: Vector2i) -> Array[Vec
 	return (paths[cell] as Array[Vector2i]).duplicate()
 
 
+## Số máu mất do bẫy (hầm chông) khi đi tới từng ô đi được: cell -> số máu mất (> 0).
+static func movement_penalties(state: BattleState, unit: Unit) -> Dictionary:
+	var penalties: Dictionary = {}
+	if unit.has_moved or unit.has_attacked:
+		return penalties
+	var paths: Dictionary = _paths(state, unit)
+	for cell: Variant in paths.keys():
+		var path: Array[Vector2i] = paths[cell] as Array[Vector2i]
+		var dmg: int = 0
+		for step: Vector2i in path:
+			if state.terrain_at(step) == Terrain.SPIKES:
+				dmg += 1
+		if dmg > 0:
+			penalties[cell as Vector2i] = dmg
+	return penalties
+
+
 ## Lệnh sai thì một sự kiện REJECTED và state giữ nguyên. Đúng thì đi từng ô trên đường.
 ## Lúc đi xuyên ô quân mình, hai quân tạm chung ô; validate() chỉ chạy sau khi cả lệnh xong.
 static func resolve(state: BattleState, command: Command, events: Array[BattleEvent]) -> void:

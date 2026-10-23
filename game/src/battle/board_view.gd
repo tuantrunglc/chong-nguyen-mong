@@ -190,20 +190,22 @@ func show_selection(unit_cell: Vector2i, cells: Array[Vector2i], targets: Array[
 	_pending_cell = NO_CELL
 	_path = []
 	_clear_damage_labels()
-	for cell: Variant in cell_penalties.keys():
-		var dmg: int = cell_penalties[cell] as int
-		if dmg > 0 and cell is Vector2i:
-			var label: Label = Label.new()
-			label.text = "−%d" % dmg
-			label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
-			label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			label.add_theme_font_size_override("font_size", 14)
-			label.add_theme_color_override("font_color", Color(0.95, 0.25, 0.25))
-			label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-			label.size = Vector2(30, 20)
-			label.position = _top_center(cell as Vector2i) - label.size / 2.0
-			_damage_labels.add_child(label)
+	if _damage_labels != null:
+		for cell: Variant in cell_penalties.keys():
+			var dmg: int = cell_penalties[cell] as int
+			if dmg > 0 and cell is Vector2i:
+				var label: Label = Label.new()
+				label.set_meta("cell", cell as Vector2i)
+				label.text = tr("board.damage_penalty") % dmg
+				label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+				label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				label.add_theme_font_size_override("font_size", 14)
+				label.add_theme_color_override("font_color", Color(0.95, 0.25, 0.25))
+				label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+				label.size = Vector2(30, 20)
+				label.position = _top_center(cell as Vector2i) - label.size / 2.0
+				_damage_labels.add_child(label)
 	_redraw()
 
 
@@ -250,6 +252,18 @@ func target_cells() -> Array[Vector2i]:
 
 func pending_cell() -> Vector2i:
 	return _pending_cell
+
+
+## Nhãn trừ máu hầm chông trên các ô sáng (để test): ô -> chữ ("−1", "−2"...).
+func damage_label_texts() -> Dictionary:
+	var out: Dictionary = {}
+	if _damage_labels == null:
+		return out
+	for child: Node in _damage_labels.get_children():
+		var label: Label = child as Label
+		if label != null and label.has_meta("cell"):
+			out[label.get_meta("cell") as Vector2i] = label.text
+	return out
 
 
 func path() -> Array[Vector2i]:

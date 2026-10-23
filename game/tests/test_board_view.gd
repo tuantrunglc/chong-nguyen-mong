@@ -337,6 +337,17 @@ func test_target_outline_and_pending_are_cleared() -> void:
 	assert_eq(board.pending_cell(), BoardView.NO_CELL, "chọn lại thì bỏ chờ")
 
 
+func test_damage_labels_show_and_clear() -> void:
+	var board: BoardView = _board(_make_main())
+	var penalties: Dictionary = {Vector2i(0, 5): 1, Vector2i(1, 5): 2}
+	board.show_selection(Vector2i(0, 6), [Vector2i(0, 5), Vector2i(1, 5)], [], penalties)
+	assert_eq(board.damage_label_texts(), {Vector2i(0, 5): "−1", Vector2i(1, 5): "−2"}, "hiện đúng nhãn trừ máu")
+	board.clear_selection()
+	assert_eq(board.damage_label_texts(), {}, "bỏ chọn thì xóa sạch nhãn trừ máu")
+	board.show_selection(Vector2i(0, 6), [Vector2i(0, 5)], [])
+	assert_eq(board.damage_label_texts(), {}, "ô không mất máu thì không hiện nhãn")
+
+
 # ---------- Ô đỏ báo đòn (Story 2.7) ----------
 
 ## BoardView đứng riêng (không qua main), vẽ bản chụp dựng tay.

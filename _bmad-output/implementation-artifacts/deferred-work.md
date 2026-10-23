@@ -219,3 +219,7 @@
 ## Deferred from: code review of story-3-3-tran-2 (2026-10-23)
 
 - **Kịch bản âm chứng minh rừng `2,5` là bắt buộc.** Hiện chỉ có kiểm tay ghi ở story: bỏ `#` ở `2,5`, phát lại đúng 15 lệnh thì Lão mất 1 máu ở hiệp 1 và về sau gục. Chưa thành kịch bản đã duyệt vì cần tác giả duyệt một kịch bản "không thắng" (M3), và story 3.3 không yêu cầu. Thêm khi mở rộng bộ kịch bản trận, hoặc khi có thay đổi AI/địa hình có thể làm rừng thành trang trí.
+
+## Deferred from: code review of 3-4-ham-chong (2026-10-23)
+
+- **Ý định của địch đã gục vẫn nằm trong `enemy_intents`.** Khi quân Nguyên gục trên chông lúc đi trong pha chuẩn bị, `RulesEnemyPhase.prepare` (`rules_enemy_phase.gd:78-82`) vẫn thêm intent với `stand_cell` dự định và lý do CAN_HIT. Vòng báo đòn đã bỏ qua quân null nên không sai luật; chỉ lớp debug F1 thấy dữ liệu lệch. Sửa khi có chỗ khác đọc `reason`.

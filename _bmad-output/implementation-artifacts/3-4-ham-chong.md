@@ -76,6 +76,26 @@ tôi muốn hầm chông làm đau mọi quân đi qua,
   - [x] 8.1 Cập nhật `sprint-status.yaml`: `3-4-ham-chong: done`.
   - [x] 8.2 Cập nhật story artifact và kiểm tra toàn bộ diff.
 
+### Review Findings
+
+- [ ] [Review][Decision] Tướng có thể tự đi vào chỗ chết trên chông — `_find_paths_hero` không so số chông với máu; ô sáng vẫn bấm được, đi một cú là gục, nếu là tướng cuối thì thua và không chơi lại được. Nhãn "−2" cũng sai khi tướng 1 máu (thực tế mất 1 rồi gục). Cần tác giả quyết: vẫn cho đi / đánh dấu ô chết / không thắp ô chết / bấm hai lần.
+- [ ] [Review][Decision] Luật hòa "ít bước hơn" chưa có trong spec — `_is_better_path` xếp: ít chông → ít bước → B→Đ→N→T. AC4/FR8/kiến trúc chỉ ghi "ít chông, hòa thì B→Đ→N→T". Tác giả duyệt (ghi vào kiến trúc) hoặc bỏ.
+- [ ] [Review][Decision] Đường đi khi rê chuột chưa hiện số máu — AC4 nói "ô sáng và đường đi hiện số máu", mới có nhãn trên ô sáng. Cần chốt cách hiện trên đường: số ở ô đích của đường, hay dấu trên từng ô chông dọc đường.
+- [ ] [Review][Decision] Không có dấu vết duyệt kịch bản trước khi viết luật — 7 kịch bản xuất hiện lần đầu ở commit e7d69cc với `da_duyet: true`, không có commit "chờ duyệt" như các story trước. Tác giả xác nhận đã duyệt nội dung 7 kịch bản.
+- [x] [Review][Patch] Kịch bản AC3 không bắt được lỗi báo đòn: chỉ 1 địch, thắng trận thì `Rules.resolve` xoá mọi báo đòn; thêm địch thứ hai sống sót và kiểm `bao_don` [game/tests/kich_ban/dia_hinh/ham_chong_dich_guc_khi_chuan_bi.json]
+- [x] [Review][Patch] Test/kịch bản "gục giữa đường" không chứng minh được việc dừng: kiểm không còn `MOVED` sau `DIED`; thêm test GUT kéo/đẩy gục trên chông rồi dừng [game/tests/test_spikes.gd; ham_chong_guc_giua_duong.json]
+- [x] [Review][Patch] `test_enemy_pathfinding_does_not_avoid_spikes` dùng `max_steps = 1` nên không thể trượt; cần hai đường bằng nhau, một có chông [game/tests/test_spikes.gd]
+- [x] [Review][Patch] Test "đứng yên trên chông" (GUT + `ham_chong_dung_yen.json`) không qua chuyển lượt có địch; thêm địch và `ket_thuc_luot` [game/tests/test_spikes.gd]
+- [x] [Review][Patch] Chưa có test đường dài hơn ít chông thắng đường ngắn nhiều chông (lõi AC4); test "đi vòng" hiện là hai đường cùng độ dài [game/tests/test_spikes.gd]
+- [x] [Review][Patch] AC6 thiếu ca "đi ngang qua" chông khi đẩy/kéo (cả hai kịch bản dừng trên chông); kéo xuyên qua chông chưa được phủ ở đâu; cố định máu Bộ binh trong kịch bản đẩy [game/tests/kich_ban/dia_hinh/]
+- [x] [Review][Patch] View tự đếm chông và gọi `path_to` cho từng ô (lặp tìm đường vét cạn) — chuyển sang một hàm trong core/controller trả về số máu mất cho mọi ô [game/src/battle/battle_view.gd:424]
+- [x] [Review][Patch] Test mới không gọi `state.validate()` sau khi phân giải [game/tests/test_spikes.gd]
+- [x] [Review][Patch] Nhãn "−N" còn trôi trên bàn lúc diễn hoạt di chuyển; `show_selection` thiếu guard null cho `_damage_labels` [game/src/battle/board_view.gd:192]
+- [x] [Review][Patch] Chữ nhãn `"−%d"` không đi qua `tr()` [game/src/battle/board_view.gd:197]
+- [x] [Review][Patch] Thiếu test: tướng cuối gục trên chông qua `Rules.resolve` → thua; sống qua chông rồi va chạm khi đẩy; tướng đi xuyên đồng minh đứng trên chông [game/tests/test_spikes.gd]
+- [x] [Review][Patch] Không có test nào cho nhãn số máu trên bàn (hiện, xoá khi bỏ chọn, đúng số) [game/tests/test_board_view.gd]
+- [x] [Review][Defer] Địch gục trên chông lúc chuẩn bị vẫn để lại `enemy_intents` với lý do CAN_HIT và ô đứng chưa tới [game/src/core/rules_enemy_phase.gd:78] — deferred, pre-existing
+
 ## Dev Notes
 
 ### Hiện trạng trước story này

@@ -1,37 +1,37 @@
 {
   "phien_ban_dinh_dang": 1,
-  "mo_ta": "Trần Khánh Dư kéo Kỵ binh vào ô hầm chông: Kỵ binh bị kéo 1 ô vào hầm chông và mất 1 máu.",
+  "mo_ta": "Trần Khánh Dư kéo Kỵ binh 2 bước qua hầm chông: Kỵ binh bị kéo qua hầm chông, mất 1 máu và dừng ở ô sau hầm chông.",
   "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",
       ". . . . . . .",
       ". . . . . . .",
-      ". . . . . . .",
       ". . . ^ . . .",
+      ". . . . . . .",
       ". . . . . . .",
       ". . . . . . ."
     ],
     "quan": [
       "B . . . . . .",
       ". . . . . . .",
-      ". . . . . . .",
       ". . . K . . .",
+      ". . . . . . .",
       ". . . . . . .",
       ". . . 3 . . .",
       ". . . . . . ."
     ]
   },
   "hanh_dong": [
-    { "lenh": "danh", "tuong": "3", "o": "3,3" }
+    { "lenh": "danh", "tuong": "3", "o": "3,2" }
   ],
   "sau": {
     "dia_hinh": [
       ". . . . . . .",
       ". . . . . . .",
       ". . . . . . .",
-      ". . . . . . .",
       ". . . ^ . . .",
+      ". . . . . . .",
       ". . . . . . .",
       ". . . . . . ."
     ],

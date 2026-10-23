@@ -273,6 +273,14 @@ func path_to(unit_id: int, cell: Vector2i) -> Array[Vector2i]:
 	return RulesMove.path_to(_state, unit, cell)
 
 
+## Số máu mất do bẫy (hầm chông) khi đi tới từng ô đi được của quân unit_id: ô -> số máu (> 0).
+func movement_penalties(unit_id: int) -> Dictionary:
+	var unit: Unit = _state.unit_by_id(unit_id)
+	if unit == null or Rules.is_battle_over(_state):
+		return {}
+	return RulesMove.movement_penalties(_state, unit)
+
+
 ## Các ô quân unit_id đánh được, theo thứ tự B→Đ→N→T. Không có quân đó, hoặc trận đã hết, thì [].
 func attack_targets(unit_id: int) -> Array[Vector2i]:
 	var unit: Unit = _state.unit_by_id(unit_id)

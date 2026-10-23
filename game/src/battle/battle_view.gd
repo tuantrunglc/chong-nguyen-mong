@@ -220,6 +220,8 @@ func _on_events_resolved(events: Array[BattleEvent], snapshot: BattleState) -> v
 	_playing = true
 	# Bóng xem trước là kết quả của lệnh vừa bấm: phải biến mất trước khi hoạt ảnh chạy trên bàn cũ (Story 2.12).
 	_clear_preview()
+	if _board != null:
+		_board.clear_selection()
 	_enemy_turn = _pending_enemy_turn
 	_pending_enemy_turn = false
 	# Không gọi `_update_hud()` ở đây: bản chụp đã là trạng thái SAU lệnh, vẽ số hiệp mới giữa lúc phát sẽ
@@ -421,16 +423,8 @@ func _select(id: int) -> void:
 	_selected = id
 	_cells = _controller.reachable(id)
 	_targets = _controller.attack_targets(id)
-	var cell_penalties: Dictionary = {}
+	var cell_penalties: Dictionary = _controller.movement_penalties(id)
 	var snapshot: BattleState = _controller.snapshot()
-	for cell: Vector2i in _cells:
-		var path: Array[Vector2i] = _controller.path_to(id, cell)
-		var dmg: int = 0
-		for step: Vector2i in path:
-			if snapshot.terrain_at(step) == Terrain.SPIKES:
-				dmg += 1
-		if dmg > 0:
-			cell_penalties[cell] = dmg
 	_board.show_selection(snapshot.unit_by_id(id).cell, _cells, _targets, cell_penalties)
 	_set_pending(BoardView.NO_CELL)
 	# Chuột có thể đang nằm sẵn trên một ô vừa sáng: vẽ đường đi ngay, không chờ rê sang ô khác.

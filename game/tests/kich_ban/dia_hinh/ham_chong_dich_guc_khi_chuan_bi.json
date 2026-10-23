@@ -1,6 +1,6 @@
 {
   "phien_ban_dinh_dang": 1,
-  "mo_ta": "Bộ binh 1 máu bước vào hầm chông trong pha chuẩn bị: mất 1 máu, gục tại chỗ, không báo đòn và trận thắng.",
+  "mo_ta": "Bộ binh 1 máu bước vào hầm chông trong pha chuẩn bị: mất 1 máu, gục tại chỗ, không báo đòn; quân Nguyên thứ hai vẫn báo đòn bình thường.",
   "da_duyet": true,
   "truoc": {
     "dia_hinh": [
@@ -18,7 +18,7 @@
       ". . . B . . .",
       ". . . . . . .",
       ". . . . . . .",
-      ". . . 1 . . .",
+      ". . . 1 . B .",
       ". . . . . . ."
     ],
     "mau": {
@@ -44,9 +44,12 @@
       ". . . . . . .",
       ". . . . . . .",
       ". . . . . . .",
-      ". . . 1 . . .",
+      ". . . 1 B . .",
       ". . . . . . ."
     ],
-    "ket_qua": "thang"
+    "hiep": 2,
+    "bao_don": [
+      { "thu_tu": 1, "quan": "4,5", "o": "3,5" }
+    ]
   }
 }
