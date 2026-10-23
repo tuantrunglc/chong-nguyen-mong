@@ -4,7 +4,7 @@ baseline_commit: f770d73
 
 # Story 3.3: Trận 2
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -38,19 +38,19 @@ tôi muốn trận 2 dạy dùng rừng chặn Kỵ binh và cho địch đánh 
   - [x] 3.2 Giải thích rõ: vì sao Lão đứng sau rừng là an toàn; vì sao Kỵ binh `5,4` lao trúng Bộ binh `1,4` (địch đánh nhau); vì sao Khoái phải né ô đỏ trước khi hạ chủ đòn.
   - [x] 3.3 Trình tác giả bàn + từng bước + chỗ dạy luật; **dừng, chờ tác giả đánh lại và xác nhận**.
 
-- [ ] **Task 4: Tác giả đánh lại và xác nhận** (AC: 3)
-  - [ ] 4.1 Tác giả chạy `tools/chay.sh --dev --tran=2`, đánh đúng lời giải, thấy bảng Thắng và cả hai tướng 3/3.
-  - [ ] 4.2 Chưa xác nhận thì **không** tạo kịch bản `da_duyet: true`.
+- [x] **Task 4: Tác giả đánh lại và xác nhận** (AC: 3)
+  - [x] 4.1 Tác giả chạy `tools/chay.sh --dev --tran=2`, đánh đúng lời giải, thấy bảng Thắng và cả hai tướng 3/3.
+  - [x] 4.2 Chưa xác nhận thì **không** tạo kịch bản `da_duyet: true`.
 
-- [ ] **Task 5: Chuyển lời giải thành kịch bản tự động** (AC: 4)
-  - [ ] 5.1 Dựng `tran_02_loi_giai.json` từ **bàn thật sau pha chuẩn bị hiệp 1**: `truoc.dia_hinh`, `truoc.quan`, `truoc.thu_tu_dich`, `truoc.bao_don` (đòn đã báo thật), rồi đúng chuỗi `hanh_dong` đã duyệt.
-  - [ ] 5.2 `sau` ghi bàn cuối: chỉ còn hai tướng ở ô cuối, `mau` 3/3 cho cả hai, `ket_qua: "thang"`, `da_di`/`da_danh` đúng.
-  - [ ] 5.3 `mo_ta` nói rõ "không mất tướng"; `da_duyet: true` **chỉ sau khi tác giả xác nhận**.
-  - [ ] 5.4 `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh` xanh, kịch bản mới tự chạy và đạt.
+- [x] **Task 5: Chuyển lời giải thành kịch bản tự động** (AC: 4)
+  - [x] 5.1 Dựng `tran_02_loi_giai.json` từ **bàn thật sau pha chuẩn bị hiệp 1**: `truoc.dia_hinh`, `truoc.quan`, `truoc.thu_tu_dich`, `truoc.bao_don` (đòn đã báo thật), rồi đúng chuỗi `hanh_dong` đã duyệt.
+  - [x] 5.2 `sau` ghi bàn cuối: chỉ còn hai tướng ở ô cuối, `mau` 3/3 cho cả hai, `ket_qua: "thang"`, `da_di`/`da_danh` đúng.
+  - [x] 5.3 `mo_ta` nói rõ "không mất tướng"; `da_duyet: true` **chỉ sau khi tác giả xác nhận**.
+  - [x] 5.4 `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh` xanh, kịch bản mới tự chạy và đạt.
 
-- [ ] **Task 6: Chốt story, sprint, commit** (AC: 6)
-  - [ ] 6.1 Cập nhật story (Debug Log, Completion Notes, File List, Change Log), `sprint-status.yaml` 3-3 → `review`/`done`.
-  - [ ] 6.2 Commit từng phần, lời tiếng Việt, kết `(Story 3.3)`; không gộp `img/` hay việc của story khác.
+- [x] **Task 6: Chốt story, sprint, commit** (AC: 6)
+  - [x] 6.1 Cập nhật story (Debug Log, Completion Notes, File List, Change Log), `sprint-status.yaml` 3-3 → `review`/`done`.
+  - [x] 6.2 Commit từng phần, lời tiếng Việt, kết `(Story 3.3)`; không gộp `img/` hay việc của story khác.
 
 ## Dev Notes
 
@@ -154,18 +154,30 @@ DeepSeek Harness (deepseek-flash), 2026-10-23.
 - **Lời giải (15 lệnh, 6 hiệp):** xem `tran_02_loi_giai.md`; kết thúc `THẮNG`, Khoái `3/3`, Lão `3/3`.
 - **Kiểm ngược rừng:** bỏ `#` ở `2,5` rồi phát lại đúng lời giải → hiệp 1 Kỵ binh `2,0` lao trúng Lão `2,6` (Lão còn 2 máu), về sau Lão gục, không thắng. Vậy rừng **bắt buộc**.
 - **Kiểm ngược địch đánh nhau:** hiệp 1, sau khi Khoái né, đường lao `5,4` đi tiếp tới `1,4` và Bộ binh mất 1 máu (sự kiện `MẤT MÁU` của quân 102).
+- **Tác giả xác nhận (2026-10-23):** đã chạy `tools/chay.sh --dev --tran=2`, đánh đúng 15 nước, thắng, Khoái 3/3, Lão 3/3.
+- **Kịch bản tự động:** sinh từ bàn thật sau `begin()` (đọc bàn + `state.telegraphs`, không chép tay); tự kiểm bằng `ScenarioRunner` → ĐẠT; đặt `da_duyet: true`.
+- **Xanh cuối:** `tools/test.sh` → 644/644 test, **97 kịch bản đã duyệt**, 0 trượt; bước 2 khoá `da_duyet` đạt (97 file).
 
 ### Completion Notes List
 
-- (đang làm) Story file, bàn, lời giải đã có; chờ tác giả đánh lại xác nhận trước khi tạo kịch bản `da_duyet: true`.
+- **AC 1–6 xong.** Bàn `tran_02.json`: 6×7, đúng 2 tướng (Khoái `1` ở `2,4`, Lão `2` ở `2,6`), 2 Kỵ binh (`2,0`, `5,4`) + 1 Bộ binh (`1,4`), rừng `2,5`, sông `4,5` + `5,5`, `kieu: tieu_diet`, `thu_tu_dich` đúng thứ tự đọc bàn, `tiep_vien`/`muu_ke_mo` rỗng, không `so_hiep_toi_da`/`long_dan`.
+- **Lời giải 15 lệnh, 6 hiệp, thắng, Khoái 3/3, Lão 3/3.** Ba bài lộ ra ngay trong hiệp 1: né ba ô đỏ; Kỵ binh `2,0` lao vào rừng `2,5` (Lão đứng sau rừng); Kỵ binh `5,4` lao trúng Bộ binh `1,4` của nó (địch đánh nhau).
+- **Tác giả đã đánh lại và xác nhận thắng, hai tướng 3/3** (2026-10-23) trước khi kịch bản được đặt `da_duyet: true`.
+- **Kịch bản** `game/tests/kich_ban/tran/tran_02_loi_giai.json` sinh từ **bàn thật sau pha chuẩn bị hiệp 1** (đọc `state` + `state.telegraphs`, không chép tay), `da_duyet: true`, `ket_qua: "thang"`, `mau` 3/3 cho `4,4` và `1,4`, `da_danh: ["1"]`, `da_di: []`.
+- **Không sửa** `src/core/`, `chi_so.json`, `tran_01*`, 2 kịch bản `tran/tran_01_*` (`da_duyet: false`), kịch bản đã duyệt khác. Không thêm luật mới (không hầm chông/làng/kho lương/giới hạn hiệp/mưu kế/tiếp viện).
+- **Kiểm ngược rừng:** bỏ `#` ở `2,5` rồi phát lại đúng 15 lệnh → hiệp 1 Kỵ binh `2,0` lao trúng Lão `2,6` (Lão còn 2 máu), về sau Lão gục, không thắng. Rừng là **bắt buộc**.
+- **Kiểm ngược địch đánh nhau:** hiệp 1, sau khi Khoái né, đường lao `5,4` đi tiếp tới `1,4`; sự kiện `MẤT MÁU` của quân 102 (Bộ binh) chứng minh B mất 1 máu vì đòn của Kỵ binh cùng phe.
+- **Xanh cuối:** `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh` → **644/644 test**, **97 kịch bản đã duyệt**, 0 trượt; bước 2 khoá `da_duyet` đạt với 97 file.
 
 ### File List
 
 - `game/data/tran/tran_02.json` (mới)
 - `game/data/tran/tran_02_loi_giai.md` (mới)
+- `game/tests/kich_ban/tran/tran_02_loi_giai.json` (mới, `da_duyet: true`)
 - `_bmad-output/implementation-artifacts/3-3-tran-2.md` (mới)
-- `_bmad-output/implementation-artifacts/sprint-status.yaml` (đang cập nhật)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (3-3 → done)
 
 ### Change Log
 
 - 2026-10-23: chốt 5 câu hỏi; dựng `tran_02.json` (6×7, Ải Lãnh Kinh); viết lời giải 15 lệnh thắng 3/3; kiểm ngược rừng bắt buộc. Chờ tác giả đánh lại.
+- 2026-10-23 (sau xác nhận): tác giả đánh lại đúng lời giải → thắng, hai tướng 3/3. Sinh kịch bản từ bàn thật, đặt `da_duyet: true`; `tools/test.sh` xanh 644/644, 97 kịch bản đã duyệt. Story → `done`.
