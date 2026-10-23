@@ -1,0 +1,143 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Lời giải trận 2 không mất tướng: hiệp 1 Khoái né ba ô đỏ, Kỵ binh ở 2,0 lao vào rừng, Kỵ binh ở 5,4 lao trúng Bộ binh của nó; sau đó hạ lần lượt một Kỵ binh, Bộ binh và Kỵ binh cuối, cả hai tướng còn 3/3 máu.",
+  "da_duyet": true,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . . .",
+      ". . . . . .",
+      ". . . . . .",
+      ". . . . . .",
+      ". . . . . .",
+      ". . # . ~ ~",
+      ". . . . . ."
+    ],
+    "quan": [
+      ". . K . . .",
+      ". . . . . .",
+      ". . . . . .",
+      ". . . . . .",
+      ". B 1 . . K",
+      ". . . . . .",
+      ". . 2 . . ."
+    ],
+    "thu_tu_dich": [
+      "2,0",
+      "1,4",
+      "5,4"
+    ],
+    "bao_don": [
+      {
+        "thu_tu": 1,
+        "quan": "2,0",
+        "huong": "N"
+      },
+      {
+        "thu_tu": 2,
+        "quan": "1,4",
+        "o": "2,4"
+      },
+      {
+        "thu_tu": 3,
+        "quan": "5,4",
+        "huong": "T"
+      }
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "1,3"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    },
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "1,1"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "1",
+      "o": "1,0"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    },
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "2,2"
+    },
+    {
+      "lenh": "di",
+      "tuong": "2",
+      "o": "1,4"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "2",
+      "o": "1,2"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    },
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "2,3"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "2",
+      "o": "1,2"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    },
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "4,4"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "1",
+      "o": "4,3"
+    }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . .",
+      ". . . . . .",
+      ". . . . . .",
+      ". . . . . .",
+      ". . . . . .",
+      ". . # . ~ ~",
+      ". . . . . ."
+    ],
+    "quan": [
+      ". . . . . .",
+      ". . . . . .",
+      ". . . . . .",
+      ". . . . . .",
+      ". 2 . . 1 .",
+      ". . . . . .",
+      ". . . . . ."
+    ],
+    "da_di": [],
+    "da_danh": [
+      "1"
+    ],
+    "ket_qua": "thang",
+    "mau": {
+      "4,4": 3,
+      "1,4": 3
+    }
+  }
+}
