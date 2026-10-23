@@ -4,7 +4,7 @@ baseline_commit: 1fbbf6f
 
 # Story 3.1: Rừng và vật cản chặn đòn
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -25,10 +25,10 @@ tôi muốn rừng và kho lương che chắn được đòn đánh,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Khảo sát hiện trạng và viết kịch bản chờ duyệt** (AC: 1–5)
-  - [ ] 1.1 Đọc và ghi lại hiện trạng vào Debug Log: cái gì **đã có** (Kỵ binh dừng ở rừng/kho lương từ 2.6, kịch bản `don_dich/ra_don_ky_binh_trung_rung.json` đã phủ), cái gì **thiếu** (lao, kéo, tên).
-  - [ ] 1.2 Viết các kịch bản dưới đây với `"da_duyet": false`. Bàn 7×7, địa hình `.` trừ chỗ ghi. Kỳ vọng phải tính bằng mô hình độc lập hoặc bằng tay từng ô, **không** chép từ code sắp sửa (bài học 2.8/2.9/2.15).
-  - [ ] 1.3 Chạy `tools/xem_kich_ban.sh dia_hinh` cho tác giả xem; **dừng, chờ duyệt**.
+- [x] **Task 1: Khảo sát hiện trạng và viết kịch bản chờ duyệt** (AC: 1–5)
+  - [x] 1.1 Đọc và ghi lại hiện trạng vào Debug Log: cái gì **đã có** (Kỵ binh dừng ở rừng/kho lương từ 2.6, kịch bản `don_dich/ra_don_ky_binh_trung_rung.json` đã phủ), cái gì **thiếu** (lao, kéo, tên).
+  - [x] 1.2 Viết các kịch bản dưới đây với `"da_duyet": false`. Bàn 7×7, địa hình `.` trừ chỗ ghi. Kỳ vọng phải tính bằng mô hình độc lập hoặc bằng tay từng ô, **không** chép từ code sắp sửa (bài học 2.8/2.9/2.15).
+  - [x] 1.3 Chạy `tools/xem_kich_ban.sh dia_hinh` cho tác giả xem; **dừng, chờ duyệt**.
 
   **Nhóm `dia_hinh/`:**
 
@@ -41,39 +41,39 @@ tôi muốn rừng và kho lương che chắn được đòn đánh,
   | `rung_chan_ten.json` | Cung kỵ `C` ở (3,3), rừng ở (3,4), Khoái `1` ở (3,6) | `ket_thuc_luot` | Cung kỵ **không báo đòn** (`sau.bao_don: []`, `o_do: {}`); nó đi tới ô gần Khoái nhất (tính cụ thể khi làm); Khoái **3 máu** |
   | `rung_chan_xung_phong.json` | Kỵ binh `K` ở (0,3) xung phong hướng Đông, rừng ở (2,3), Khoái `1` ở (3,3) | `ket_thuc_luot` | Đòn dừng ở rừng: **không ai mất máu**; `sau` không có `mau` |
 
-  - [ ] 1.4 Đối chiếu: kịch bản `rung_chan_xung_phong` **có thể đạt ngay** (AC 2 đã có từ 2.6) — đó là điều mong đợi, là chốt hồi quy. Bốn ca còn lại phải trượt trước Task 4–5.
-  - [ ] 1.5 Không sửa `don_dich/ra_don_ky_binh_trung_rung.json` (đã duyệt) — nó là bằng chứng AC 2 có sẵn.
+  - [x] 1.4 Đối chiếu: kịch bản `rung_chan_xung_phong` **có thể đạt ngay** (AC 2 đã có từ 2.6) — đó là điều mong đợi, là chốt hồi quy. Bốn ca còn lại phải trượt trước Task 4–5.
+  - [x] 1.5 Không sửa `don_dich/ra_don_ky_binh_trung_rung.json` (đã duyệt) — nó là bằng chứng AC 2 có sẵn.
 
-- [ ] **Task 2: Tác giả duyệt kịch bản** (AC: 5)
-  - [ ] 2.1 Khi tác giả nói "duyệt": đổi `"da_duyet": true` cho đúng file đã xem.
-  - [ ] 2.2 Commit riêng phần kịch bản.
+- [x] **Task 2: Tác giả duyệt kịch bản** (AC: 5)
+  - [x] 2.1 Khi tác giả nói "duyệt": đổi `"da_duyet": true` cho đúng file đã xem.
+  - [x] 2.2 Commit riêng phần kịch bản.
 
-- [ ] **Task 3: Chứng minh trượt** (AC: 1–4)
-  - [ ] 3.1 `tools/test.sh`: 4 kịch bản mới phải trượt vì **chưa có luật chặn** (không phải lỗi định dạng); `rung_chan_xung_phong` đạt. Ghi dòng trượt đầu tiên vào Debug Log.
-  - [ ] 3.2 Nếu ca lao hiện **đạt** (tức code đã chặn sẵn) thì dừng, báo lại — có thể hiện trạng khác giả định.
+- [x] **Task 3: Chứng minh trượt** (AC: 1–4)
+  - [x] 3.1 `tools/test.sh`: 4 kịch bản mới phải trượt vì **chưa có luật chặn** (không phải lỗi định dạng); `rung_chan_xung_phong` đạt. Ghi dòng trượt đầu tiên vào Debug Log.
+  - [x] 3.2 Nếu ca lao hiện **đạt** (tức code đã chặn sẵn) thì dừng, báo lại — có thể hiện trạng khác giả định.
 
-- [ ] **Task 4: Chặn lao của Phạm Ngũ Lão** (AC: 1)
-  - [ ] 4.1 `game/src/core/rules_attack.gd::_lao_targets`: quét từ **d=1** (ô kề) tới `max_range`; gặp `FOREST`/`GRANARY` thì **dừng hướng đó** (không thêm ô, kể cả quân Nguyên phía sau). Quân Nguyên phía trước vật cản mới có viền.
-  - [ ] 4.2 `lao_throw`: giữ nguyên vòng quét từ `min_range` tới ô đích, nhưng thêm kiểm phòng thủ: nếu gặp vật cản trước khi gặp quân thì **không gây sát thương** (dữ liệu lệch `targets` thì trả về, không `assert`). Ghi comment Story 3.1.
-  - [ ] 4.3 Hằng số dùng chung: đặt `BLOCKERS` ở một chỗ (ví dụ `Terrain` hoặc `RulesAttack`) gồm `FOREST`, `GRANARY` — **không** gồm `VILLAGE` (3.7). `EnemyAI.CHARGE_BLOCKERS` đã có `VILLAGE` từ 2.6, **không đổi**.
-  - [ ] 4.4 Test GUT: rừng ở ô kề / ở giữa / sau mục tiêu (không chặn); kho lương; sông **không** chặn.
+- [x] **Task 4: Chặn lao của Phạm Ngũ Lão** (AC: 1)
+  - [x] 4.1 `game/src/core/rules_attack.gd::_lao_targets`: quét từ **d=1** (ô kề) tới `max_range`; gặp `FOREST`/`GRANARY` thì **dừng hướng đó** (không thêm ô, kể cả quân Nguyên phía sau). Quân Nguyên phía trước vật cản mới có viền.
+  - [x] 4.2 `lao_throw`: giữ nguyên vòng quét từ `min_range` tới ô đích, nhưng thêm kiểm phòng thủ: nếu gặp vật cản trước khi gặp quân thì **không gây sát thương** (dữ liệu lệch `targets` thì trả về, không `assert`). Ghi comment Story 3.1.
+  - [x] 4.3 Hằng số dùng chung: đặt `BLOCKERS` ở một chỗ (ví dụ `Terrain` hoặc `RulesAttack`) gồm `FOREST`, `GRANARY` — **không** gồm `VILLAGE` (3.7). `EnemyAI.CHARGE_BLOCKERS` đã có `VILLAGE` từ 2.6, **không đổi**.
+  - [x] 4.4 Test GUT: rừng ở ô kề / ở giữa / sau mục tiêu (không chặn); kho lương; sông **không** chặn.
 
-- [ ] **Task 5: Chặn kéo của Trần Khánh Dư và chặn tên của Cung kỵ** (AC: 3, 4)
-  - [ ] 5.1 `rules_attack.gd::_du_targets`: trong vòng quét d=1..`pull_range`, nếu ô là `FOREST`/`GRANARY` thì `break` hướng đó (vật đầu tiên không kéo được). `du_pull` không cần đổi: mục tiêu hợp lệ thì đường kéo đã sạch vật cản phía trước.
-  - [ ] 5.2 `game/src/core/enemy_ai.gd::can_hit_from` nhánh `CUNG_KY`: nếu có `FOREST`/`GRANARY` nằm giữa (không tính ô đứng, không tính ô đích) thì `false`. Dùng cùng hằng số với Task 4.3.
-  - [ ] 5.3 **Câu hỏi 1 chưa chốt:** tên có bị chặn **lúc ra đòn** khi Cung kỵ bị đẩy/kéo làm vật cản vào giữa đường không? Mặc định của story: **chỉ chặn lúc báo** (ô đỏ đã báo thì tên vẫn trúng), vì AC nói về lúc báo và đòn "gắn với ô". Nếu tác giả muốn chặn lúc ra đòn thì thêm kiểm trong `RulesEnemyPhase._strike_all` + kịch bản riêng (việc lớn hơn, phải hỏi trước).
-  - [ ] 5.4 Sửa test cũ `test_rules_attack.gd::test_pull_blocked_by_forest_collides_before_story_3_1`: đổi tên và kỳ vọng thành "rừng là vật đầu tiên → `NO_TARGET`, không ai mất máu", hoặc bỏ nếu kịch bản `rung_chan_keo` đã phủ (kịch bản là spec, test GUT giữ ca biên).
-  - [ ] 5.5 Test GUT: Dư với rừng ở d=1, d=2, sau mục tiêu; Cung kỵ với rừng/kho lương chắn giữa, và cùng đường nhưng vật cản **sau** ô đích (không chặn).
+- [x] **Task 5: Chặn kéo của Trần Khánh Dư và chặn tên của Cung kỵ** (AC: 3, 4)
+  - [x] 5.1 `rules_attack.gd::_du_targets`: trong vòng quét d=1..`pull_range`, nếu ô là `FOREST`/`GRANARY` thì `break` hướng đó (vật đầu tiên không kéo được). `du_pull` không cần đổi: mục tiêu hợp lệ thì đường kéo đã sạch vật cản phía trước.
+  - [x] 5.2 `game/src/core/enemy_ai.gd::can_hit_from` nhánh `CUNG_KY`: nếu có `FOREST`/`GRANARY` nằm giữa (không tính ô đứng, không tính ô đích) thì `false`. Dùng cùng hằng số với Task 4.3.
+  - [x] 5.3 **Câu hỏi 1 chưa chốt:** tên có bị chặn **lúc ra đòn** khi Cung kỵ bị đẩy/kéo làm vật cản vào giữa đường không? Mặc định của story: **chỉ chặn lúc báo** (ô đỏ đã báo thì tên vẫn trúng), vì AC nói về lúc báo và đòn "gắn với ô". Nếu tác giả muốn chặn lúc ra đòn thì thêm kiểm trong `RulesEnemyPhase._strike_all` + kịch bản riêng (việc lớn hơn, phải hỏi trước).
+  - [x] 5.4 Sửa test cũ `test_rules_attack.gd::test_pull_blocked_by_forest_collides_before_story_3_1`: đổi tên và kỳ vọng thành "rừng là vật đầu tiên → `NO_TARGET`, không ai mất máu", hoặc bỏ nếu kịch bản `rung_chan_keo` đã phủ (kịch bản là spec, test GUT giữ ca biên).
+  - [x] 5.5 Test GUT: Dư với rừng ở d=1, d=2, sau mục tiêu; Cung kỵ với rừng/kho lương chắn giữa, và cùng đường nhưng vật cản **sau** ô đích (không chặn).
 
-- [ ] **Task 6: Test cũ và hồi quy** (AC: 1–4)
-  - [ ] 6.1 `grep -rn "Story 3.1" game/` — mọi comment "Story 3.1" đang chờ phải khớp code sau khi làm (gồm `rules_attack.gd`, `telegraph.gd`, `telegraph_marks.gd`, `forced_move.gd`).
-  - [ ] 6.2 Chạy toàn bộ `tools/test.sh`: các kịch bản đã duyệt khác (lao, kéo, địa hình) không được đổi kết quả. Nếu có kịch bản cũ trượt vì luật mới → **dừng, báo tác giả** (có thể kịch bản cũ mâu thuẫn spec mới).
+- [x] **Task 6: Test cũ và hồi quy** (AC: 1–4)
+  - [x] 6.1 `grep -rn "Story 3.1" game/` — mọi comment "Story 3.1" đang chờ phải khớp code sau khi làm (gồm `rules_attack.gd`, `telegraph.gd`, `telegraph_marks.gd`, `forced_move.gd`).
+  - [x] 6.2 Chạy toàn bộ `tools/test.sh`: các kịch bản đã duyệt khác (lao, kéo, địa hình) không được đổi kết quả. Nếu có kịch bản cũ trượt vì luật mới → **dừng, báo tác giả** (có thể kịch bản cũ mâu thuẫn spec mới).
 
-- [ ] **Task 7: Xanh, kiểm ngược, chạy tay, commit** (AC: 1–6)
-  - [ ] 7.1 `tools/test.sh` xanh (phiên AI: `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh`).
-  - [ ] 7.2 Kiểm ngược: (a) bỏ kiểm vật cản trong `_lao_targets` → kịch bản lao trượt; (b) bỏ kiểm trong `_du_targets` → kịch bản kéo trượt; (c) bỏ kiểm trong `can_hit_from` → kịch bản tên trượt; (d) đổi `BLOCKERS` thành chỉ `FOREST` → kịch bản kho lương trượt. Khôi phục từng cái; **file chưa commit thì sao lưu trước, đừng `git checkout`** (bài học 2.15).
-  - [ ] 7.3 Chạy tay `tools/chay.sh --dev --tran=thu_ba_tuong` (bàn có rừng ở (1,1) và (1,4)? kiểm lại) hoặc `--tran=thu_lao`: xem viền mục tiêu của Lão biến mất khi rừng chắn; chụp cửa sổ game nếu GoPeak không nối (`DISPLAY=:1 import -window <id>`).
-  - [ ] 7.4 Commit kịch bản (sau duyệt) và code **riêng**; lời tiếng Việt, kết `(Story 3.1)`. Không gộp `img/` hay việc của story khác.
+- [x] **Task 7: Xanh, kiểm ngược, chạy tay, commit** (AC: 1–6)
+  - [x] 7.1 `tools/test.sh` xanh (phiên AI: `XDG_DATA_HOME=/tmp/dsh-xdg tools/test.sh`).
+  - [x] 7.2 Kiểm ngược: (a) bỏ kiểm vật cản trong `_lao_targets` → kịch bản lao trượt; (b) bỏ kiểm trong `_du_targets` → kịch bản kéo trượt; (c) bỏ kiểm trong `can_hit_from` → kịch bản tên trượt; (d) đổi `BLOCKERS` thành chỉ `FOREST` → kịch bản kho lương trượt. Khôi phục từng cái; **file chưa commit thì sao lưu trước, đừng `git checkout`** (bài học 2.15).
+  - [x] 7.3 Chạy tay `tools/chay.sh --dev --tran=thu_ba_tuong` (bàn có rừng ở (1,1) và (1,4)? kiểm lại) hoặc `--tran=thu_lao`: xem viền mục tiêu của Lão biến mất khi rừng chắn; chụp cửa sổ game nếu GoPeak không nối (`DISPLAY=:1 import -window <id>`).
+  - [x] 7.4 Commit kịch bản (sau duyệt) và code **riêng**; lời tiếng Việt, kết `(Story 3.1)`. Không gộp `img/` hay việc của story khác.
 
 ## Dev Notes
 
@@ -168,10 +168,39 @@ Nếu thấy phải sửa `TelegraphMarks`/`_strike_all` để AC 3 chạy đư�
 
 ### Agent Model Used
 
+DeepSeek Harness (deepseek-flash), 2026-10-23.
+
 ### Debug Log References
+
+- **Nền trước story:** 626/626 test, 89 kịch bản đã duyệt, 2 chưa duyệt (của 2.14).
+- **Hiện trạng khảo sát:** Kỵ binh xung phong **đã** dừng ở rừng/kho lương/làng từ Story 2.6 (`EnemyAI.CHARGE_BLOCKERS` + `TelegraphMarks.path_cells`; kịch bản `don_dich/ra_don_ky_binh_trung_rung.json` đã duyệt) → AC 2 chỉ cần kịch bản chốt hồi quy. **Thiếu:** lao (`_lao_targets`/`lao_throw` không kiểm địa hình), kéo (`_du_targets`), tên (`can_hit_from` CUNG_KY).
+- **Trước khi có luật:** 5 kịch bản mới trượt đúng lý do — 3 ca lao và ca kéo báo "kịch bản ghi `tu_choi: khong_co_dich` nhưng luật cho chạy"; `rung_chan_ten` báo "ô 3,3 mong đợi trống, thực tế C" (Cung kỵ báo đòn xuyên rừng). `rung_chan_xung_phong` **đạt ngay** đúng như dự kiến (AC 2 có sẵn).
+- **Lỗi kịch bản bắt được khi làm luật:** bàn `rung_chan_ten` đã duyệt vây Cung kỵ bằng 3 ô sông + rừng, nên nó **không có đường tới tướng** (`NO_PATH`) — đứng yên vì lý do khác, không chứng minh tên bị chặn. Đã báo và được tác giả duyệt bỏ 3 ô sông (giữ rừng ở `3,4`); bàn sau tính lại bằng mô hình tạm độc lập: Cung kỵ đi tới **(4,5)**, không báo đòn, Khoái đủ máu.
+- **Luật:** hằng số `Terrain.ATTACK_BLOCKERS = [FOREST, GRANARY]` (làng để 3.7). `_lao_targets` quét từ **d=1** để bắt vật cản ở ô kề nhưng vẫn bay qua quân ở ô kề; vật cản **sau** mục tiêu không chặn. `lao_throw` thêm kiểm phòng thủ. `_du_targets` dừng hướng khi vật đầu tiên là vật cản. `EnemyAI.can_hit_from` nhánh CUNG_KY kiểm vật cản giữa (không tính ô đứng/ô đích).
+- **Test cũ:** `test_pull_blocked_by_forest_collides_before_story_3_1` đổi thành `test_pull_blocked_by_forest_is_not_a_target` (`REJECTED NO_TARGET`, mục tiêu đứng yên, không mất máu, Dư không tính đã đánh). Thêm ca GUT: lao (ô kề, kho lương, sau mục tiêu, sông), kéo (ô kề, sau mục tiêu), tên (rừng, kho lương, ngay sau chủ đòn, sau ô đích, sông).
+- **Kiểm ngược 4 đường (khôi phục bằng bản sao `/tmp`, không `git checkout`):** (a) bỏ chặn lao → `rung_chan_lao`, `rung_chan_lao_o_ke`, `kho_luong_chan_lao` trượt; (b) bỏ chặn kéo → `rung_chan_keo` trượt; (c) bỏ chặn tên → `rung_chan_ten` trượt ("thừa đòn 1", ô đỏ 3,6); (d) `ATTACK_BLOCKERS` chỉ còn `FOREST` → `kho_luong_chan_lao` trượt. Cả 4 khôi phục, xanh lại.
+- **Kiểm tay:** bàn tạm `thu_rung_31` (đã xoá, không commit): **có rừng** ở (3,4) → Cung kỵ đi tới (4,5), **không có ô đỏ**; **bỏ rừng** → Cung kỵ đứng (3,3), ô đỏ "1" trên Khoái. Ảnh: `build/test/shot_31_co_rung.png`, `build/test/shot_31_khong_rung.png` (`build/` bị gitignore).
+- **Xanh cuối:** `tools/test.sh` → **629/629**, 95 kịch bản đã duyệt, 0 chưa đạt.
 
 ### Completion Notes List
 
+- **AC 1–5 xong.** AC 6 chỉ là ràng buộc phạm vi: **không** thêm làng vào chặn lao/tên/kéo (để Story 3.7); Kỵ binh vẫn dừng ở làng như từ 2.6.
+- **Không sửa** `TelegraphMarks`, `RulesEnemyPhase`, `ForcedMove`, `chi_so.json`, `game/data/tran/*`, kịch bản đã duyệt khác.
+- **Câu hỏi 1 giữ mặc định:** tên chỉ bị chặn **lúc báo**; đòn đã báo vẫn trúng ô dù Cung kỵ bị đẩy/kéo sau đó. Muốn chặn cả lúc ra đòn thì là việc riêng, cần tác giả yêu cầu.
+- **Câu hỏi 2:** làng chưa chặn lao/tên/kéo — để 3.7.
+- Đã xoá bàn thử tạm `game/data/tran/thu_rung_31.json` sau khi chụp ảnh; `git status` sạch ngoài các file của story.
+
 ### File List
 
+- `game/src/core/terrain.gd` — `ATTACK_BLOCKERS` (rừng, kho lương).
+- `game/src/core/rules_attack.gd` — chặn lao (`_lao_targets`, `lao_throw`), chặn kéo (`_du_targets`).
+- `game/src/core/enemy_ai.gd` — `can_hit_from` nhánh CUNG_KY kiểm vật cản giữa.
+- `game/tests/test_rules_attack.gd` — đổi ca kéo-qua-rừng; thêm ca lao/kéo biên.
+- `game/tests/test_enemy_ai.gd` — `test_archer_arrow_blocked_by_terrain`.
+- `game/tests/kich_ban/dia_hinh/rung_chan_lao.json`, `rung_chan_lao_o_ke.json`, `kho_luong_chan_lao.json`, `rung_chan_keo.json`, `rung_chan_ten.json`, `rung_chan_xung_phong.json` (mới, đã duyệt).
+- `_bmad-output/implementation-artifacts/3-1-rung-va-vat-can-chan-don.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+
 ### Change Log
+
+- 2026-10-23: 6 kịch bản `dia_hinh/` (5 trượt đúng lý do, ca xung phong đạt ngay), tác giả duyệt; sửa bàn `rung_chan_ten` sau khi phát hiện nó vây kín Cung kỵ (được tác giả duyệt). Viết luật chặn lao/kéo/tên; kiểm ngược 4 đường; kiểm tay bằng ảnh có/không rừng. `tools/test.sh` xanh 629/629. Story → `review`.
