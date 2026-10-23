@@ -4,7 +4,7 @@ baseline_commit: 28f60ee
 
 # Story 3.2: Chơi lại hiệp
 
-Status: review
+Status: done
 
 ## Story
 
@@ -46,6 +46,32 @@ tôi muốn chơi lại hiệp một lần khi tính sai,
   - [x] 4.2 Kiểm ngược: (a) bỏ gọi `_start_round(false)` trong `replay_round` → test F2 trượt; (b) không xóa `_undo_snapshot` → test Hủy-sau-chơi-lại trượt; (c) bỏ `_replay_used = true` → test dùng-hai-lần trượt; (d) bỏ capture `_turn_start` → test chơi lại trượt. Khôi phục từng cái, **sao lưu ra `/tmp` trước, không `git checkout`** (bài học 3.1).
   - [x] 4.3 Chạy tay `tools/chay.sh --dev --tran=1`: đi 1–2 nước rồi bấm Chơi lại/R — bàn về đầu lượt, ô đỏ còn, nút mờ, nhãn "Đã dùng"; bấm R lần nữa không gì xảy ra. Chụp cửa sổ game (`DISPLAY=:1 import -window <id>`) nếu GoPeak không nối.
   - [x] 4.4 Commit riêng phần code + test; lời tiếng Việt, kết `(Story 3.2)`. Không gộp `img/`.
+### Review Findings
+
+_Code review 3 lớp (Blind Hunter, Edge Case Hunter, Acceptance Auditor) trên diff 7 file, 2026-10-23. Không có phát hiện mức Cao; **không AC nào KHÔNG ĐẠT** (AC 3 vẫn là "không kiểm được" và đã ghi rõ)._
+
+- [x] [Review][Patch] `_on_replay` bỏ chọn cả khi `replay_round()` trả `false` — phím R sau khi hết lượt chơi lại vẫn xoá tướng đang chọn/ô sáng, trái "im lặng" [game/src/battle/battle_view.gd]
+- [x] [Review][Patch] `replay_round()` thiếu lưới `validate()` như `submit()`/`preview_result()` — thêm: clone hỏng thì log ERROR và trả `false`, không phát bàn hỏng ra UI [game/src/battle/battle_controller.gd]
+- [x] [Review][Patch] Chụp `_turn_start` chỉ khi `phase == PLAYER` — đổi sang "không hết trận" để story sau (cuối hiệp/kho lương/tiếp viện) không làm nút Chơi lại mờ im lặng [game/src/battle/battle_controller.gd]
+- [x] [Review][Patch] Trường chết `_replay_left`; nhãn bị gỡ khi hết trận làm bảng nhảy ~29px — bỏ trường, giữ nhãn chiếm chỗ (text rỗng khi hết trận) [game/src/ui/hud.gd]
+- [x] [Review][Patch] Test phím R chỉ bơm `InputEventAction` nên không chứng minh phím thật/InputMap — thêm test `_press_physical(KEY_R)` + echo + `InputMap.has_action` [game/tests/test_battle_view.gd]
+- [x] [Review][Patch] Test chơi lại chỉ đọc state controller, không chứng minh bàn vẽ lại — thêm assert đồng quân Khoái về ô đầu trên `BoardView` [game/tests/test_battle_view.gd]
+- [x] [Review][Patch] Thiếu ca chơi lại ở hiệp ≥ 2 và ca "đã đánh" (máu, `has_attacked`) — thêm 2 test controller [game/tests/test_battle_controller.gd]
+- [x] [Review][Patch] Thiếu ca bấm Hủy sau chơi lại (chỉ assert `can_undo() == false`) — thêm test `undo()` trả `NOTHING_TO_UNDO` và bàn không đổi [game/tests/test_battle_controller.gd]
+- [x] [Review][Patch] Test F2 sau chơi lại chỉ so mốc + số lệnh — thêm test dựng báo cáo F2 rồi phát lại bằng `ScenarioLoader` + `ScenarioRunner`, so ảnh bàn [game/tests/test_main.gd]
+- [x] [Review][Patch] Nút Chơi lại chưa nằm trong test focus và test phím ở màn hình lỗi — thêm vào cả hai [game/tests/test_battle_view.gd]
+
+- [x] [Review][Defer] Báo cáo F2 không ghi dấu "đã chơi lại" (chỉ có dòng log); người đọc tưởng `truoc` là bàn mở hiệp — để sau nếu tác giả muốn, ghi ở `deferred-work.md`
+- [x] [Review][Defer] AC 3 (trả lại mưu kế) **và Lòng dân** đã dùng trong lượt — Lòng dân thuộc Story 3.7, mưu kế 3.12–3.13; đã ghi việc kiểm vào `deferred-work.md`
+
+- [x] [Review][Dismiss] `_start_round(false)` làm pha địch chạy lần hai — sai: `_start_round` chỉ dời mốc báo cáo F2 (`_round_start`/`_round_commands`), không chạy luật
+- [x] [Review][Dismiss] Chơi lại khi chưa đi nước nào vẫn tính đã dùng — đúng chủ ý, đã ghi ở "Câu hỏi cho tác giả" 1
+- [x] [Review][Dismiss] `_stats()` mở rộng ảnh hưởng test cũ — 644/644 xanh, không assert cũ nào đổi nghĩa
+- [x] [Review][Dismiss] `_level_with_enemy` thiếu tham số đội — đội suy từ loại quân, không phải tham số
+- [x] [Review][Dismiss] Test WON "2 sát thương lên quân 3 máu" — tham số thứ ba của `UnitPlacement` là **máu** (`1`), nên một đòn hạ thật
+- [x] [Review][Dismiss] Nhãn "Còn 1 lần" trong lúc chờ/pha địch — nhãn là **số lần còn lại của trận**, nút mờ nói vì sao chưa bấm được
+
+_Bằng chứng thêm từ Auditor: vùng bàn của ảnh đầu lượt (`rl_01`) và ảnh sau khi bấm R (`rl_03`) khác **0 điểm ảnh** — quân Nguyên, ô đỏ và cờ "đã đi" về đúng; `rl_04` giống `rl_03` toàn bộ cửa sổ._
 
 ## Dev Notes
 
@@ -145,7 +171,8 @@ DeepSeek Harness (deepseek-flash), 2026-10-23.
 - **Test:** controller (chơi lại khôi phục ô, `has_moved`, `telegraphs`, `enemy_intents`, hiệp; hủy sau chơi lại không tác dụng; chơi lại lần hai/hết trận/chưa mở trận bị từ chối; báo cáo F2 dựng lại từ bàn vừa khôi phục); view (nút + phím R, nhãn, mờ sau dùng).
 - **Kiểm ngược 4 đường (sao lưu `/tmp`, không `git checkout`):** (a) bỏ `_start_round(false)` → test F2 trượt ("2 lệnh, cần 1"); (b) không xóa `_undo_snapshot` → "Hủy không quay về trước lúc chơi lại" trượt; (c) không đặt `_replay_used` → "chỉ một lần mỗi trận"/"dùng rồi thì mờ" trượt; (d) không chụp `_turn_start` → "về ô đầu lượt"/"đi lại được" trượt. Khôi phục, xanh lại.
 - **Kiểm tay:** chạy `main.tscn` bằng script chụp tạm (`game/tests/chup_tmp.gd`, đã xoá): ảnh `build/test/rl_01..04.png`. `rl_02`: Khoái đã đi (0,6)→(0,4), ô đỏ của Lão còn, nút Chơi lại sáng, nhãn "Còn 1 lần". `rl_03`: bấm `R` → Khoái về (0,6), ô đỏ còn, nút Chơi lại mờ + nhãn "Đã dùng", nút Hủy mờ. `rl_04`: bấm `R` lần hai không đổi gì.
-- **Xanh cuối:** `tools/test.sh` → **638/638**, 96 kịch bản đã duyệt, 0 trượt.
+- **Code review 3 lớp:** không có mức Cao; 10 `patch` (đã sửa), 2 `defer`, 6 bỏ. Sửa thật: R bị từ chối vẫn bỏ chọn; thiếu `validate()` khi khôi phục; chụp mốc phụ thuộc phase; nhãn/bố cục HUD; test phím thật, bàn vẽ lại, hiệp 2, đã đánh, Hủy sau chơi lại, F2 dựng–phát lại.
+- **Xanh cuối:** `tools/test.sh` → **644/644**, 96 kịch bản đã duyệt, 0 trượt.
 
 ### Completion Notes List
 
@@ -154,6 +181,7 @@ DeepSeek Harness (deepseek-flash), 2026-10-23.
 - **Không sửa** `src/core/`, `chi_so.json`, `game/data/tran/*`, kịch bản đã duyệt. Không thêm lệnh kịch bản `choi_lai` (Câu hỏi 2 giữ "không").
 - **Câu hỏi 1:** bấm Chơi lại ngay khi chưa đi nước nào **vẫn tính** đã dùng (theo câu "đã dùng một lần trong trận"); nút vẫn sáng tới lần bấm đầu.
 - Ảnh kiểm tay nằm trong `build/` (gitignore), không commit.
+- **Sau code review:** 10 patch, 2 defer (F2 ghi dấu "đã chơi lại"; kiểm trả lại **Lòng dân** + mưu kế ở 3.7/3.12–3.13). Không đổi phạm vi: vẫn không thêm lệnh kịch bản, không đụng `src/core`.
 
 ### File List
 

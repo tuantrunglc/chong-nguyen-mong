@@ -621,6 +621,26 @@ func test_f2_copies_report_only_with_dev() -> void:
 	Log.debug_enabled = false
 
 
+## Story 3.2: chơi lại rồi đi tiếp, báo cáo F2 vẫn phát lại ra đúng bàn đang chơi.
+func test_f2_after_replay_replays_current_board() -> void:
+	AppState.launch.dev = true
+	Log.debug_enabled = true
+	var main: Node2D = _make_main()
+	var copied: Array[String] = []
+	main.clipboard_writer = func(text: String) -> void: copied.append(text)
+	var view: BattleView = main._battle_view as BattleView
+	view._on_cell_clicked(Vector2i(0, 6))
+	view._on_cell_clicked(Vector2i(0, 4))
+	view._on_replay()
+	view._on_cell_clicked(Vector2i(0, 6))
+	view._on_cell_clicked(Vector2i(0, 4))
+	_dev_tools(main).f2_pressed.emit()
+	assert_eq(copied.size(), 1, "ghi clipboard đúng một lần")
+	assert_eq(BoardFixture.picture(_replay_report(copied[0])),
+		BoardFixture.picture(main._controller.snapshot()), "F2 sau chơi lại phát lại đúng bàn")
+	Log.debug_enabled = false
+
+
 func test_f2_is_not_wired_without_dev() -> void:
 	AppState.launch.dev = false
 	var main: Node2D = _make_main()

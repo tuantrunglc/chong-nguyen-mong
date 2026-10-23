@@ -21,7 +21,7 @@ var _round_label: Label
 var _phase_label: Label
 var _undo_button: Button
 var _replay_button: Button
-## Số lần chơi lại còn lại (Story 3.2), hiện dưới nút Chơi lại.
+## Nhãn cạnh nút Chơi lại: "Còn 1 lần" / "Đã dùng" (Story 3.2).
 var _replay_label: Label
 var _end_turn_button: Button
 ## Dòng nhắc dưới các nút ("Bấm lần nữa để đánh"); rỗng thì ẩn.
@@ -29,7 +29,6 @@ var _hint_label: Label
 ## Trạng thái để tính lại nút khi khóa/mở (Story 2.11: đang phát hoạt ảnh thì không bấm được).
 var _can_undo: bool = false
 var _can_replay: bool = false
-var _replay_left: int = 0
 var _over: bool = false
 var _locked: bool = false
 
@@ -80,10 +79,9 @@ func show_turn(round_number: int, can_undo: bool, can_replay: bool, replay_left:
 	_round_label.text = tr("hud.round") % round_number
 	_can_undo = can_undo
 	_can_replay = can_replay
-	_replay_left = replay_left
 	_over = over
-	_replay_label.visible = not over
-	_replay_label.text = tr("hud.replay.used") if replay_left <= 0 else tr("hud.replay.left") % replay_left
+	# Giữ nhãn luôn chiếm chỗ để bảng không nhảy khi hết trận; hết trận thì để trống.
+	_replay_label.text = "" if over else (tr("hud.replay.used") if replay_left <= 0 else tr("hud.replay.left") % replay_left)
 	_apply_disabled()
 	visible = true
 	# Hết trận thì bảng Thắng/Thua là thứ duy nhất cần đọc.
@@ -142,7 +140,7 @@ func replay_button() -> Button:
 
 
 func replay_label_text() -> String:
-	return _replay_label.text if _replay_label.visible else ""
+	return _replay_label.text
 
 
 func end_turn_button() -> Button:

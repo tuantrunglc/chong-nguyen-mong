@@ -245,6 +245,29 @@ func test_replay_button_returns_to_turn_start_and_dims() -> void:
 	assert_false(_controller(main).can_undo(), "Hủy không quay về trước lúc chơi lại")
 
 
+## Phím R THẬT (physical key) + echo: chơi lại đúng một lần, giữ phím không lặp.
+func test_physical_r_replays_and_echo_is_ignored() -> void:
+	var main: Node2D = _make_main()
+	_press_key(main, 1)
+	_click(main, Vector2i(0, 4))
+	_press_physical(main, KEY_R)
+	assert_eq(_unit_cell(main, 1), KHOAI_CELL, "phím R thật chơi lại")
+	assert_true(InputMap.has_action(BattleInput.REPLAY_ACTION), "action có trong InputMap")
+	_click(main, KHOAI_CELL)
+	_click(main, Vector2i(0, 4))
+	_press_physical(main, KEY_R, true)
+	assert_eq(_unit_cell(main, 1), Vector2i(0, 4), "echo không chơi lại lần nữa")
+
+
+## Chơi lại phải vẽ lại bàn (đồng quân về ô cũ), không chỉ đổi state trong controller.
+func test_replay_redraws_board_tokens() -> void:
+	var main: Node2D = _make_main()
+	_click(main, KHOAI_CELL)
+	_click(main, Vector2i(0, 4))
+	_hud(main).replay_button().pressed.emit()
+	assert_eq((_board(main).tokens()[1] as UnitToken).cell, KHOAI_CELL, "đồng quân vẽ lại ở ô đầu")
+
+
 ## Phím R cũng chơi lại, và chỉ một lần.
 func test_key_r_replays_only_once() -> void:
 	var main: Node2D = _make_main()
@@ -458,7 +481,7 @@ func test_mouse_onto_button_clears_path() -> void:
 
 func test_hud_buttons_never_take_focus() -> void:
 	var main: Node2D = _make_main()
-	for button: Button in [_hud(main).undo_button(), _hud(main).end_turn_button()]:
+	for button: Button in [_hud(main).undo_button(), _hud(main).replay_button(), _hud(main).end_turn_button()]:
 		assert_eq(button.focus_mode, Control.FOCUS_NONE)
 	assert_eq(_hud(main).undo_button().text, "Hủy (Z)")
 	assert_eq(_hud(main).end_turn_button().text, "Kết thúc lượt (Space)")
@@ -559,6 +582,7 @@ func test_keys_do_nothing_on_error_screen() -> void:
 	_assert_nothing_selected(main)
 	assert_false(_hud(main).visible, "màn hình lỗi không có bảng nút")
 	_press_physical(main, KEY_Z)
+	_press_physical(main, KEY_R)
 	_press_physical(main, KEY_SPACE)
 	_assert_nothing_selected(main)
 

@@ -115,6 +115,58 @@ func test_replay_refused_after_battle_over() -> void:
 	assert_false(c.replay_round())
 
 
+## AC 1: chơi lại trả cả máu, cờ đã đi, đã đánh — không chỉ vị trí.
+func test_replay_restores_after_move_and_attack() -> void:
+	var level: LevelData = LevelData.new()
+	level.size = Vector2i(7, 7)
+	for i: int in range(level.size.x * level.size.y):
+		level.terrain.append(Terrain.PLAIN)
+	level.units.append(LevelData.UnitPlacement.new(UnitType.NGUYEN_KHOAI, Vector2i(3, 6)))
+	level.units.append(LevelData.UnitPlacement.new(UnitType.BO_BINH, Vector2i(3, 5)))
+	var c: BattleController = BattleController.new()
+	c.start(level, _stats())
+	c.begin()
+	c.submit(Command.attack(1, Vector2i(3, 5)))
+	assert_eq(c.snapshot().unit_by_id(101).hp, 1, "đòn 2 sát thương lên quân 3 máu")
+	assert_eq(c.snapshot().unit_by_id(1).has_attacked, true)
+	assert_true(c.replay_round())
+	var after: BattleState = c.snapshot()
+	assert_eq(after.unit_by_id(101).hp, 3, "máu địch trả lại")
+	assert_eq(after.unit_by_id(1).has_attacked, false, "đánh lại được")
+	assert_eq(after.unit_by_id(1).has_moved, false, "đi lại được")
+
+
+## AC 1: chơi lại ở hiệp 2 phải về đầu hiệp 2, không phải hiệp 1.
+func test_replay_in_second_round_returns_to_that_round() -> void:
+	var c: BattleController = BattleController.new()
+	c.start(_level_with_enemy(), _stats())
+	c.begin()
+	c.submit(Command.move(1, Vector2i(0, 4)))
+	c.submit(Command.end_turn())
+	assert_eq(c.snapshot().round_number, 2)
+	var round_two: BattleState = c.snapshot()
+	c.submit(Command.move(2, Vector2i(0, 5)))
+	assert_true(c.replay_round())
+	assert_eq(c.snapshot().round_number, 2, "không lùi về hiệp 1")
+	assert_eq(c.snapshot().unit_by_id(1).cell, round_two.unit_by_id(1).cell, "đúng bàn đầu hiệp 2")
+	assert_eq(c.snapshot().unit_by_id(2).cell, round_two.unit_by_id(2).cell)
+
+
+## AC 4: bấm Hủy sau khi chơi lại thì không có gì để hủy.
+func test_undo_after_replay_has_nothing_to_undo() -> void:
+	var c: BattleController = BattleController.new()
+	c.start(_level_with_enemy(), _stats())
+	c.begin()
+	c.submit(Command.move(1, Vector2i(0, 4)))
+	assert_true(c.replay_round())
+	var before: BattleState = c.snapshot()
+	var events: Array[BattleEvent] = c.undo()
+	assert_eq(events.size(), 1)
+	assert_eq(events[0].reject, BattleEvent.Reject.NOTHING_TO_UNDO)
+	assert_eq(c.snapshot().unit_by_id(1).cell, before.unit_by_id(1).cell, "bàn không đổi")
+	assert_false(c.can_undo())
+
+
 ## Báo cáo F2 sau khi chơi lại phát lại từ bàn vừa khôi phục, không phải từ bàn trước đó.
 func test_round_report_after_replay_uses_replay_board() -> void:
 	var c: BattleController = BattleController.new()

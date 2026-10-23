@@ -197,7 +197,8 @@ func _on_undo() -> void:
 func _on_replay() -> void:
 	if _controller == null or _playing or _battle_over():
 		return
-	_controller.replay_round()
+	if not _controller.replay_round():
+		return
 	_deselect()
 
 

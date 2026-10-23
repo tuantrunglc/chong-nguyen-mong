@@ -118,7 +118,7 @@ func submit(command: Command) -> Array[BattleEvent]:
 	if command.kind == Command.Kind.BEGIN_BATTLE or command.kind == Command.Kind.END_TURN:
 		_start_round(command.kind == Command.Kind.END_TURN)
 		# Bàn người chơi thấy khi hiệp bắt đầu: sau pha chuẩn bị (quân Nguyên đã đi, đòn đã báo).
-		_turn_start = _state.clone() if _state.phase == BattleState.Phase.PLAYER else null
+		_turn_start = null if Rules.is_battle_over(_state) else _state.clone()
 	events_resolved.emit(events, _state.clone())
 	return events
 
@@ -164,7 +164,14 @@ func replay_left() -> int:
 func replay_round() -> bool:
 	if not can_replay():
 		return false
-	_state = _turn_start.clone()
+	var copy: BattleState = _turn_start.clone()
+	# Lưới an toàn như submit()/preview_result(): clone() thiếu trường mới thì bàn hỏng không được phát ra UI.
+	var problems: Array[String] = copy.validate()
+	if not problems.is_empty():
+		for problem: String in problems:
+			Log.error("battle", "chơi lại vi phạm bất biến: %s" % problem)
+		return false
+	_state = copy
 	_replay_used = true
 	_undo_snapshot = null  # AC 4: Hủy sau khi chơi lại không quay về trước đó
 	# F2: mốc mới là bàn vừa khôi phục; lệnh cũ không phát lại được vì bàn đã đổi.

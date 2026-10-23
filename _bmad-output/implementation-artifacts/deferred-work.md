@@ -210,3 +210,8 @@
 - Kéo qua **làng**: `_du_targets` chỉ dừng ở `ATTACK_BLOCKERS` (rừng, kho lương), nên Dư vẫn kéo được quân đứng sau làng; quân bị kéo va vào làng và mất 1 máu (`ForcedMove.OBSTACLES` có `VILLAGE`). Trái GDD ("vật đầu tiên là làng thì không kéo được") nhưng đúng phạm vi 3.1 (làng để 3.7). Story 3.7 thêm làng vào chặn + Lòng dân sẽ xử lý; khi đó phải thêm test.
 - Không có test khóa ranh giới "làng **không** chặn lao/tên/kéo" (AC 6 của 3.1): nếu ai thêm `VILLAGE` vào `Terrain.ATTACK_BLOCKERS` sớm, chỉ `test_archer_trial_level_begins_with_a_shot` bắt được (gián tiếp). Cố ý không thêm test vì 3.7 sẽ đổi hành vi.
 - Nhánh va chạm khi kéo (`COLLIDED`/`DAMAGED COLLISION`) mất test trực tiếp sau 3.1: ca rừng đổi thành "không kéo được", chỉ còn làng chạm tới nhánh này. Làm lại cùng Story 3.7.
+
+## Deferred from: code review of story-3-2-choi-lai-hiep (2026-10-23)
+
+- **Báo cáo F2 không ghi dấu "đã chơi lại".** Sau khi chơi lại, `truoc` của báo cáo là bàn **giữa hiệp** (sau pha chuẩn bị) nên phát lại vẫn đúng, nhưng người đọc/AI tưởng đó là bàn mở hiệp; dấu vết duy nhất là log `chơi lại hiệp N`. Nếu tác giả muốn, thêm một dòng chú thích trong `current_section`/`meta` (chỉ là chữ, không thêm lệnh kịch bản).
+- **AC 3 của 3.2 mới kiểm được phần "mọi trạng thái nằm trong `BattleState.clone()`".** Khi có **mưu kế** (Story 3.12–3.13) và **Lòng dân** (Story 3.7 — GDD yêu cầu chơi lại trả lại cả Lòng dân đã dùng), phải thêm test: dùng mưu kế/Lòng dân trong lượt → chơi lại → dùng lại được. Nhớ thêm cờ mưu kế vào `BattleState.clone()` và test `validate()` của `replay_round`.
