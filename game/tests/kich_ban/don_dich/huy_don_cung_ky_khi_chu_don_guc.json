@@ -1,6 +1,6 @@
 {
   "phien_ban_dinh_dang": 1,
-  "mo_ta": "Nguyễn Khoái hạ Cung kỵ 1 máu trước khi đòn ra: đòn đã báo của Cung kỵ bị hủy, không ai trúng; Bộ binh còn lại đi và báo đòn mới.",
+  "mo_ta": "Nguyễn Khoái hạ Cung kỵ 1 máu trước khi đòn ra: đòn đã báo của Cung kỵ bị hủy, không ai trúng; Bộ binh còn lại đi lên nhưng không báo đòn.",
   "da_duyet": true,
   "truoc": {
     "dia_hinh": [
@@ -49,6 +49,8 @@
       ". . . . . . .",
       ". . . . . . ."
     ],
+    "hiep": 2,
+    "bao_don": [],
     "da_di": [],
     "da_danh": [],
     "ket_qua": "dang_choi",
