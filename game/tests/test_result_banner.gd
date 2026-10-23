@@ -25,6 +25,10 @@ func test_won_and_lost_texts() -> void:
 	assert_true(banner.is_showing())
 	assert_eq(banner.result_text(), tr("result.lost"))
 	assert_eq(banner.result_text(), "Thua!")
+	banner.show_result(BattleState.Phase.LOST, "het_hiep")
+	assert_true(banner.is_showing())
+	assert_eq(banner.result_text(), tr("result.lost_round_limit"))
+	assert_eq(banner.result_text(), "Thua: hết hiệp")
 
 
 func test_other_phases_and_hide_remove_the_banner() -> void:
@@ -50,17 +54,24 @@ func test_banner_sits_inside_the_board_area_and_does_not_cover_it() -> void:
 	assert_almost_eq(rect.get_center(), BoardView.AREA.get_center(), Vector2(1, 1), "giữa bàn")
 
 
-## Khung đủ chỗ cho chữ "Thắng!"/"Thua!", khoảng cách, nút, đệm và viền.
+## Khung đủ chỗ cho chữ "Thắng!"/"Thua!"/"Thua: hết hiệp", khoảng cách, nút, đệm và viền.
 func test_panel_fits_its_content() -> void:
 	var banner: ResultBanner = _banner()
-	for phase: BattleState.Phase in [BattleState.Phase.WON, BattleState.Phase.LOST]:
-		banner.show_result(phase)
+	var cases: Array[Dictionary] = [
+		{"phase": BattleState.Phase.WON, "reason": ""},
+		{"phase": BattleState.Phase.LOST, "reason": ""},
+		{"phase": BattleState.Phase.LOST, "reason": "het_hiep"},
+	]
+	for c: Dictionary in cases:
+		banner.show_result(c.phase, c.reason)
 		await wait_process_frames(1)
 		var panel: PanelContainer = banner.get_child(0) as PanelContainer
 		var needed: Vector2 = panel.get_combined_minimum_size()
 		assert_true(banner.panel_rect().size.x >= needed.x and banner.panel_rect().size.y >= needed.y,
-			"%s: khung %s, nội dung cần %s" % [phase, banner.panel_rect().size, needed])
-		assert_eq(banner.panel_rect(), Rect2(banner.position, banner.size), "%s: khung không giãn thêm" % phase)
+			"%s (%s): khung %s, nội dung cần %s" % [c.phase, c.reason, banner.panel_rect().size, needed])
+		assert_eq(banner.panel_rect(), Rect2(banner.position, banner.size), "%s: khung không giãn thêm" % c.phase)
+		assert_true(BoardView.AREA.encloses(banner.panel_rect()), "khung nằm trong bàn")
+		assert_lt(banner.panel_rect().size.x, BoardView.AREA.size.x / 2.0, "khung không che quá nửa bàn")
 
 
 ## Bảng không nuốt chuột: chỉ nút Chơi lại trận nhận chuột (BattleInput nhận phần còn lại qua _unhandled_input).

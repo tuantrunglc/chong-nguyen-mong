@@ -12,7 +12,7 @@ const FORMAT_VERSION: int = 1
 
 const ROOT_KEYS: Array[String] = ["phien_ban_dinh_dang", "mo_ta", "da_duyet", "truoc", "hanh_dong", "sau"]
 ## "bao_don" của "truoc": đòn quân Nguyên đã báo sẵn khi kịch bản bắt đầu (Story 2.8), không bắt buộc.
-const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich", "bao_don"]
+const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich", "bao_don", "so_hiep_toi_da"]
 ## "hiep", "da_di", "da_danh", "ket_qua", "bao_don", "o_do" không bắt buộc: không ghi thì không kiểm (review Story 1.5,
 ## tác giả chốt 2026-10-18; "ket_qua": Story 2.5; "bao_don": Story 2.6; "o_do": Story 2.7).
 const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh", "ket_qua", "bao_don",
@@ -75,6 +75,8 @@ class Section:
 	var hp: Dictionary = {}
 	## Array[Vector2i] thứ tự quân Nguyên (chỉ "truoc"), hoặc null nếu không đọc được.
 	var order: Variant = null
+	## Số hiệp tối đa (chỉ "truoc", Story 3.5); 0 là không ghi.
+	var max_rounds: int = 0
 	## "hiep" (chỉ "sau"); 0 là không ghi.
 	var round_number: int = 0
 	## "da_di" (chỉ "sau"): UnitType các tướng đã đi, theo thứ tự ký hiệu; null là không ghi.
@@ -278,6 +280,10 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 				file, result)
 	if known.has("o_do") and section.has("o_do"):
 		side.marks = _read_marks(section["o_do"], name + ".o_do", side, file, result)
+	if known.has("so_hiep_toi_da") and section.has("so_hiep_toi_da"):
+		var max_rounds: Variant = JsonFile.get_int(section, "so_hiep_toi_da", name + ".so_hiep_toi_da", 1, file, result)
+		if max_rounds != null:
+			side.max_rounds = int(max_rounds)
 	return side
 
 
@@ -625,6 +631,7 @@ static func _build_level(side: Section, name: String) -> LevelData:
 	level.format_version = FORMAT_VERSION
 	level.name = name
 	level.mission = LevelData.Mission.ELIMINATE
+	level.max_rounds = side.max_rounds
 	level.size = side.size
 	level.terrain = BoardLayers.terrain_values(side.terrain_rows)
 	for symbol: String in BoardLayers.GENERAL_SYMBOLS:

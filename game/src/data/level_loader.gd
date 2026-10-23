@@ -49,6 +49,7 @@ static func parse_level(text: String, file: String) -> LoadResult:
 			% [file, version, FORMAT_VERSION])
 	var level_name: String = _read_name(root, file, result)
 	var mission: Variant = _read_kind(root, file, result)
+	var max_rounds: int = _read_max_rounds(root, file, result)
 
 	var errors_before_terrain: int = result.errors.size()
 	var terrain_rows: Array = BoardLayers.read_layer(root, "dia_hinh", "dia_hinh", BoardText.TERRAIN_SYMBOLS, file, result)
@@ -79,6 +80,7 @@ static func parse_level(text: String, file: String) -> LoadResult:
 	level.format_version = int(version)
 	level.name = level_name
 	level.mission = mission as LevelData.Mission
+	level.max_rounds = max_rounds
 	level.size = size
 	level.terrain = BoardLayers.terrain_values(terrain_rows)
 	for symbol: String in GENERAL_SYMBOLS:
@@ -117,3 +119,10 @@ static func _read_kind(root: Dictionary, file: String, result: LoadResult) -> Va
 		result.add_error('%s: "kieu" là %s, chỉ được "tieu_diet" hoặc "giu_ai"' % [file, JsonFile.show(kind)])
 		return null
 	return KINDS[kind]
+
+
+static func _read_max_rounds(root: Dictionary, file: String, result: LoadResult) -> int:
+	if not root.has("so_hiep_toi_da"):
+		return 0
+	var val: Variant = JsonFile.get_int(root, "so_hiep_toi_da", "so_hiep_toi_da", 1, file, result)
+	return int(val) if val != null else 0

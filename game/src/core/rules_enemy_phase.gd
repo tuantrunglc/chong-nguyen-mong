@@ -11,6 +11,8 @@ static func end_player_turn(state: BattleState, events: Array[BattleEvent]) -> v
 	_strike_all(state, events)
 	if Rules.is_battle_over(state):
 		return
+	if RulesVictory.check_round_limit(state, events):
+		return
 	state.round_number += 1
 	for unit: Unit in state.units:
 		unit.has_moved = false

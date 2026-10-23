@@ -129,8 +129,8 @@ static func victory() -> BattleEvent:
 	return BattleEvent.new(Type.VICTORY)
 
 
-static func defeat() -> BattleEvent:
-	return BattleEvent.new(Type.DEFEAT)
+static func defeat(p_reason: String = "") -> BattleEvent:
+	return BattleEvent.new(Type.DEFEAT, 0, Vector2i.ZERO, Vector2i.ZERO, Cause.WALK, Reject.NONE, p_reason)
 
 
 static func telegraphed(p_unit_id: int, p_stand: Vector2i, p_to: Vector2i, p_order: int) -> BattleEvent:

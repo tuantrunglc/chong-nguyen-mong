@@ -23,6 +23,19 @@ static func check(state: BattleState, events: Array[BattleEvent]) -> void:
 		events.append(BattleEvent.defeat())
 
 
+## Kiểm tra hết hiệp ở bước 4 (cuối hiệp) của trận Tiêu diệt (Story 3.5). Thua nếu hết hiệp mà còn quân Nguyên.
+static func check_round_limit(state: BattleState, events: Array[BattleEvent]) -> bool:
+	if state.phase == BattleState.Phase.WON or state.phase == BattleState.Phase.LOST:
+		return false
+	if state.mission == LevelData.Mission.ELIMINATE and state.max_rounds > 0 and state.round_number >= state.max_rounds:
+		if _count(state, Unit.Faction.NGUYEN) > 0:
+			state.phase = BattleState.Phase.LOST
+			state.defeat_reason = "het_hiep"
+			events.append(BattleEvent.defeat("het_hiep"))
+			return true
+	return false
+
+
 static func _someone_fell(events: Array[BattleEvent]) -> bool:
 	for event: BattleEvent in events:
 		if event.type == BattleEvent.Type.DIED or event.type == BattleEvent.Type.DROWNED:

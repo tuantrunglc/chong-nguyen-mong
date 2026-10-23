@@ -23,6 +23,8 @@ class UnitPlacement:
 var format_version: int = 0
 var name: String = ""
 var mission: Mission = Mission.ELIMINATE
+## Số hiệp tối đa (Story 3.5, chỉ trận Tiêu diệt); 0 là không giới hạn.
+var max_rounds: int = 0
 var size: Vector2i = Vector2i.ZERO
 ## Theo hàng: index = hang * size.x + cot.
 var terrain: PackedInt32Array = PackedInt32Array()

@@ -312,6 +312,26 @@ func test_kind_wrong_type() -> void:
 		_errors(['"kieu" phải là một chuỗi, đang là 1']))
 
 
+func test_max_rounds_default_and_valid() -> void:
+	var def_level: LevelData = _level(_valid_level()).data as LevelData
+	assert_not_null(def_level)
+	assert_eq(def_level.max_rounds, 0)
+	var with_rounds: LevelData = _level(_with(_valid_level(), "so_hiep_toi_da", 4)).data as LevelData
+	assert_not_null(with_rounds)
+	assert_eq(with_rounds.max_rounds, 4)
+
+
+func test_max_rounds_must_be_positive_integer() -> void:
+	assert_eq(_level(_with(_valid_level(), "so_hiep_toi_da", 0)).errors,
+		_errors(['"so_hiep_toi_da" phải là số nguyên từ 1 trở lên, đang là 0']))
+	assert_eq(_level(_with(_valid_level(), "so_hiep_toi_da", -2)).errors,
+		_errors(['"so_hiep_toi_da" phải là số nguyên từ 1 trở lên, đang là -2']))
+	assert_eq(_level(_with(_valid_level(), "so_hiep_toi_da", "4")).errors,
+		_errors(['"so_hiep_toi_da" phải là số nguyên từ 1 trở lên, đang là "4"']))
+	assert_eq(_level(_with(_valid_level(), "so_hiep_toi_da", 3.5)).errors,
+		_errors(['"so_hiep_toi_da" phải là số nguyên từ 1 trở lên, đang là 3.5']))
+
+
 # ---------- File trận: bàn cờ ----------
 
 func test_layer_wrong_type() -> void:

@@ -196,7 +196,7 @@ func _report_meta() -> Dictionary:
 ## Hoạt ảnh của lệnh vừa phát xong: vẽ bản chụp cuối và bảng kết quả (Story 2.11).
 func _on_playback_finished(snapshot: BattleState) -> void:
 	_show_board(snapshot)
-	_result_banner.show_result(snapshot.phase)
+	_result_banner.show_result(snapshot.phase, snapshot.defeat_reason)
 
 
 ## Thay bàn cờ bằng màn hình lỗi. Nhãn phiên bản và chữ DEV vẫn nằm trên nó.

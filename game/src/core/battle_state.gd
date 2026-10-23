@@ -16,10 +16,14 @@ var terrain: PackedInt32Array = PackedInt32Array()
 var units: Array[Unit] = []
 ## Hiệp hiện tại (cả 4 pha), bắt đầu từ 1.
 var round_number: int = 1
+## Số hiệp tối đa (Story 3.5, chỉ trận Tiêu diệt); 0 là không giới hạn.
+var max_rounds: int = 0
 ## Chỉ đọc, dùng chung giữa các bản sao.
 var stats: Stats = null
 ## Pha hiện tại. WON hoặc LOST là hết trận: Rules.resolve từ chối mọi lệnh (Story 2.5).
 var phase: Phase = Phase.PLAYER
+## Lý do thua trận ("" nếu thua thường vì hết tướng, "het_hiep" nếu hết hiệp, Story 3.5).
+var defeat_reason: String = ""
 ## Kiểu nhiệm vụ của trận (chép từ file trận). Kịch bản luật không ghi kiểu nên là Tiêu diệt.
 var mission: LevelData.Mission = LevelData.Mission.ELIMINATE
 ## Đòn quân Nguyên đã báo trong pha chuẩn bị của hiệp này (Story 2.6), theo số thứ tự.
@@ -36,6 +40,7 @@ static func from_level(level: LevelData, p_stats: Stats) -> BattleState:
 	state.terrain = level.terrain.duplicate()
 	state.stats = p_stats
 	state.mission = level.mission
+	state.max_rounds = level.max_rounds
 	var next_enemy_id: int = FIRST_ENEMY_ID
 	for p: LevelData.UnitPlacement in level.units:
 		var id: int
@@ -54,7 +59,9 @@ func clone() -> BattleState:
 	copy.terrain = terrain.duplicate()
 	copy.stats = stats
 	copy.round_number = round_number
+	copy.max_rounds = max_rounds
 	copy.phase = phase
+	copy.defeat_reason = defeat_reason
 	copy.mission = mission
 	for u: Unit in units:
 		copy.units.append(Unit.new(u.id, u.type, u.cell, u.hp, u.has_moved, u.has_attacked))
@@ -72,6 +79,8 @@ func validate() -> Array[String]:
 	var by_cell: Dictionary = {}  # ô -> id quân đứng đó trước
 	if round_number < 1:
 		problems.append("hiệp %d, cần từ 1 trở lên" % round_number)
+	if max_rounds < 0:
+		problems.append("số hiệp tối đa %d, cần từ 0 trở lên" % max_rounds)
 	for u: Unit in units:
 		var where: String = "quân %d ở ô %d,%d" % [u.id, u.cell.x, u.cell.y]
 		if seen_ids.has(u.id):

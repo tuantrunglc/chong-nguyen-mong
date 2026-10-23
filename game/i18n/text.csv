@@ -4,6 +4,7 @@ error.data_title,Dữ liệu bị lỗi
 error.data_short,Không mở được trận vì file dữ liệu bị lỗi.
 error.back_to_menu,Về menu
 hud.round,Hiệp %d
+hud.round_limit,Hiệp %d/%d
 hud.undo,Hủy (Z)
 hud.replay,Chơi lại (R)
 hud.replay.left,Còn %d lần
@@ -14,6 +15,7 @@ hud.phase.player,"Lượt của bạn"
 hud.phase.enemy,"Quân Nguyên đang ra đòn"
 result.won,Thắng!
 result.lost,Thua!
+result.lost_round_limit,"Thua: hết hiệp"
 result.retry,Chơi lại trận
 unit.nguyen_khoai,Khoái
 unit.pham_ngu_lao,Lão

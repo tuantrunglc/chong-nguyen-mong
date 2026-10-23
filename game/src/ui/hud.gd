@@ -13,6 +13,8 @@ const PANEL_POSITION: Vector2 = Vector2(972, 52)
 const PANEL_WIDTH: float = 260.0
 const SEPARATION: int = 12
 const BUTTON_HEIGHT: float = 44.0
+## Màu chữ nổi bật cho hiệp cuối cùng của trận có giới hạn hiệp (Story 3.5).
+const FINAL_ROUND_COLOR: Color = Color(1.0, 0.42, 0.35)
 ## Dòng báo pha ("Lượt của bạn" / "Quân Nguyên đang ra đòn"), nhỏ hơn số hiệp.
 const PHASE_FONT_SIZE: int = 17
 
@@ -75,8 +77,18 @@ func _ready() -> void:
 
 ## Hiện bảng với số hiệp; nút Hủy mờ khi không có gì để hủy, nút Chơi lại mờ khi đã dùng/không chơi lại được.
 ## Hết trận (over) thì mọi nút đều mờ và ẩn số lần chơi lại.
-func show_turn(round_number: int, can_undo: bool, can_replay: bool, replay_left: int, over: bool = false) -> void:
-	_round_label.text = tr("hud.round") % round_number
+## Có giới hạn hiệp (max_rounds > 0) thì hiện "Hiệp X/Y"; hiệp cuối đổi màu nổi bật (Story 3.5).
+func show_turn(round_number: int, can_undo: bool, can_replay: bool, replay_left: int, over: bool = false,
+		max_rounds: int = 0) -> void:
+	if max_rounds > 0:
+		_round_label.text = tr("hud.round_limit") % [round_number, max_rounds]
+		if round_number >= max_rounds and not over:
+			_round_label.add_theme_color_override("font_color", FINAL_ROUND_COLOR)
+		else:
+			_round_label.remove_theme_color_override("font_color")
+	else:
+		_round_label.text = tr("hud.round") % round_number
+		_round_label.remove_theme_color_override("font_color")
 	_can_undo = can_undo
 	_can_replay = can_replay
 	_over = over
@@ -129,6 +141,11 @@ func hint_text() -> String:
 
 func round_text() -> String:
 	return _round_label.text
+
+
+## Số hiệp đang đổi màu nổi bật (để test hiệp cuối, Story 3.5).
+func round_has_highlight() -> bool:
+	return _round_label.has_theme_color_override("font_color")
 
 
 func undo_button() -> Button:
