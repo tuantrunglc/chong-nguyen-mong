@@ -1,0 +1,47 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Trận Giữ ải mặc định 5 hiệp: cầm cự qua hết hiệp 5 mà không địch nào vào ải: thắng trận.",
+  "da_duyet": true,
+  "truoc": {
+    "kieu": "giu_ai",
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      "A . . . ."
+    ],
+    "quan": [
+      "1 . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ]
+  },
+  "hanh_dong": [
+    { "lenh": "ket_thuc_luot" },
+    { "lenh": "ket_thuc_luot" },
+    { "lenh": "ket_thuc_luot" },
+    { "lenh": "ket_thuc_luot" },
+    { "lenh": "ket_thuc_luot" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      "A . . . ."
+    ],
+    "quan": [
+      "1 . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "hiep": 5,
+    "ket_qua": "thang"
+  }
+}

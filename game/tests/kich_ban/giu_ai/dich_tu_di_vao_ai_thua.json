@@ -1,0 +1,43 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Bộ binh địch tự bước vào ô ải trong pha chuẩn bị: bên ta thua ngay lập tức.",
+  "da_duyet": true,
+  "truoc": {
+    "kieu": "giu_ai",
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . A . .",
+      ". . . . ."
+    ],
+    "quan": [
+      "1 . . . .",
+      ". . . . .",
+      ". . B . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "thu_tu_dich": ["2,2"]
+  },
+  "hanh_dong": [
+    { "lenh": "ket_thuc_luot" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . A . .",
+      ". . . . ."
+    ],
+    "quan": [
+      "1 . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . B . .",
+      ". . . . ."
+    ],
+    "ket_qua": "thua"
+  }
+}

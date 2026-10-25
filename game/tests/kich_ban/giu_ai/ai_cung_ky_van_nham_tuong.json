@@ -1,0 +1,47 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Trận Giữ ải: Cung kỵ vẫn nhắm tướng Đại Việt gần nhất thay vì ô ải.",
+  "da_duyet": true,
+  "truoc": {
+    "kieu": "giu_ai",
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      "A . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      ". . . . .",
+      ". . . . .",
+      ". . C . 1",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "thu_tu_dich": ["2,2"]
+  },
+  "hanh_dong": [
+    { "lenh": "ket_thuc_luot" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      "A . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      ". . . . .",
+      ". . . . .",
+      ". . C . 1",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "bao_don": [
+      { "thu_tu": 1, "quan": "2,2", "o": "4,2" }
+    ],
+    "hiep": 2,
+    "ket_qua": "dang_choi"
+  }
+}

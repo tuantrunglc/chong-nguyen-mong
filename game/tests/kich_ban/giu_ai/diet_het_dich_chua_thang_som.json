@@ -1,0 +1,46 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Trận Giữ ải: tiêu diệt hết quân Nguyên trên bàn ở hiệp 1 nhưng chưa hết số hiệp tối đa: trận đấu tiếp tục (chưa thắng).",
+  "da_duyet": true,
+  "truoc": {
+    "kieu": "giu_ai",
+    "so_hiep_toi_da": 5,
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . A"
+    ],
+    "quan": [
+      ". . . . .",
+      ". 1 B . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "mau": {
+      "2,1": 1
+    }
+  },
+  "hanh_dong": [
+    { "lenh": "danh", "tuong": "1", "o": "2,1" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . A"
+    ],
+    "quan": [
+      ". . . . .",
+      ". 1 . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "ket_qua": "dang_choi"
+  }
+}

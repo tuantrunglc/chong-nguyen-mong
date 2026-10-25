@@ -1,0 +1,45 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Nguyễn Khoái đánh đẩy quân Nguyên vào ô ải: bên ta thua ngay lập tức.",
+  "da_duyet": true,
+  "truoc": {
+    "kieu": "giu_ai",
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . A .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      ". . . . .",
+      ". . . . .",
+      ". 1 B . .",
+      ". . . . .",
+      ". . . . ."
+    ]
+  },
+  "hanh_dong": [
+    { "lenh": "danh", "tuong": "1", "o": "2,2" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . A .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      ". . . . .",
+      ". . . . .",
+      ". 1 . B .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "mau": {
+      "3,2": 1
+    },
+    "ket_qua": "thua"
+  }
+}

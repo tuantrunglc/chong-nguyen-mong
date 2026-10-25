@@ -1,0 +1,44 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Trận Giữ ải: Bộ binh địch nhắm ô ải thay vì nhắm tướng Đại Việt ở xa.",
+  "da_duyet": true,
+  "truoc": {
+    "kieu": "giu_ai",
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . A . ."
+    ],
+    "quan": [
+      "1 . B . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "thu_tu_dich": ["2,0"]
+  },
+  "hanh_dong": [
+    { "lenh": "ket_thuc_luot" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . A . ."
+    ],
+    "quan": [
+      "1 . . . .",
+      ". . . . .",
+      ". . B . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "hiep": 2,
+    "ket_qua": "dang_choi"
+  }
+}
