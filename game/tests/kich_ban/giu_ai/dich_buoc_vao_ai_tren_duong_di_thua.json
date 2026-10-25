@@ -1,0 +1,43 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Địch đi xuyên một ô ải trên đường tới ô ải khác: thua ngay khi quân Nguyên bước vào ô ải.",
+  "da_duyet": false,
+  "truoc": {
+    "kieu": "giu_ai",
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . A . .",
+      ". . . . .",
+      ". . A . ."
+    ],
+    "quan": [
+      "1 . B . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "thu_tu_dich": ["2,0"]
+  },
+  "hanh_dong": [
+    { "lenh": "ket_thuc_luot" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . A . .",
+      ". . . . .",
+      ". . A . ."
+    ],
+    "quan": [
+      "1 . . . .",
+      ". . . . .",
+      ". . B . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "ket_qua": "thua"
+  }
+}

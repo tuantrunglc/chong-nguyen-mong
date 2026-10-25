@@ -1,0 +1,47 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Cung kỵ bắn tướng đứng trên ô ải trong trận Giữ ải.",
+  "da_duyet": false,
+  "truoc": {
+    "kieu": "giu_ai",
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . A . ."
+    ],
+    "quan": [
+      ". . . . .",
+      ". . C . .",
+      ". . . . .",
+      ". . . . .",
+      ". . 2 . ."
+    ],
+    "thu_tu_dich": ["2,1"]
+  },
+  "hanh_dong": [
+    { "lenh": "ket_thuc_luot" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . A . ."
+    ],
+    "quan": [
+      ". . . . .",
+      ". . C . .",
+      ". . . . .",
+      ". . . . .",
+      ". . 2 . ."
+    ],
+    "mau": {
+      "2,4": 1
+    },
+    "hiep": 2,
+    "ket_qua": "dang_choi"
+  }
+}

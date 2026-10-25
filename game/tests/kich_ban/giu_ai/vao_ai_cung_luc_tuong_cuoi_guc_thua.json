@@ -1,0 +1,58 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Quân Nguyên vào ải cùng lúc tướng cuối cùng gục: bên ta thua với lý do giặc vào ải.",
+  "da_duyet": false,
+  "truoc": {
+    "kieu": "giu_ai",
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . A . ."
+    ],
+    "quan": [
+      "1 . . . B",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "thu_tu_dich": ["4,0"],
+    "mau": {
+      "0,0": 1
+    },
+    "tiep_vien": [
+      {
+        "hiep": 2,
+        "o": "0,0",
+        "loai": "B"
+      },
+      {
+        "hiep": 2,
+        "o": "2,4",
+        "loai": "B"
+      }
+    ]
+  },
+  "hanh_dong": [
+    { "lenh": "ket_thuc_luot" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . A . ."
+    ],
+    "quan": [
+      ". . . . B",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . B . ."
+    ],
+    "ket_qua": "thua"
+  }
+}

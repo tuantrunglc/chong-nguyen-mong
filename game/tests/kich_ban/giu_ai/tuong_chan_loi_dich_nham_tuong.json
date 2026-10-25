@@ -1,0 +1,47 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Tướng chặn lối duy nhất tới ải: Bộ binh không có đường tới ải nên chuyển sang nhắm tướng.",
+  "da_duyet": false,
+  "truoc": {
+    "kieu": "giu_ai",
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      "# # . # #",
+      ". . . . .",
+      ". . A . ."
+    ],
+    "quan": [
+      ". . B . .",
+      ". . . . .",
+      ". . 1 . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "thu_tu_dich": ["2,0"]
+  },
+  "hanh_dong": [
+    { "lenh": "ket_thuc_luot" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      "# # . # #",
+      ". . . . .",
+      ". . A . ."
+    ],
+    "quan": [
+      ". . . . .",
+      ". . B . .",
+      ". . 1 . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "mau": {
+      "2,2": 2
+    },
+    "hiep": 2,
+    "ket_qua": "dang_choi"
+  }
+}
