@@ -94,3 +94,7 @@ var after_telegraphs: Array[ExpectedTelegraph] = []
 var checks_marks: bool = false
 ## Ô -> Array[int] số thứ tự đòn phủ ô đó, tăng dần (Story 2.7).
 var after_marks: Dictionary = {}
+## Có kiểm Lòng dân không ("sau.long_dan" có ghi, Story 3.7).
+var checks_morale: bool = false
+## Lòng dân mong đợi ("sau.long_dan", hợp lệ khi checks_morale là true; có thể là 0 khi thua do mất làng).
+var after_morale: int = 0

@@ -38,7 +38,9 @@ static func run(state: BattleState, unit: Unit, dir: Vector2i, distance: int, ca
 			return
 
 
-## Mép bàn, vật cản, tướng vào sông: đứng yên, mất máu.
+## Mép bàn, vật cản, tướng vào sông: đứng yên, mất máu. Làng: Lòng dân −1 (Story 3.7).
 static func _hit_obstacle(state: BattleState, unit: Unit, cell: Vector2i, events: Array[BattleEvent]) -> void:
 	events.append(BattleEvent.collided(unit.id, 0, cell))
 	Effects.damage(state, unit, COLLISION_DAMAGE, BattleEvent.Cause.COLLISION, events)
+	if state.in_bounds(cell) and state.terrain_at(cell) == Terrain.VILLAGE:
+		Effects.damage_morale(state, 1, cell, BattleEvent.Cause.COLLISION, events)

@@ -18,6 +18,9 @@ var units: Array[Unit] = []
 var round_number: int = 1
 ## Số hiệp tối đa (Story 3.5, chỉ trận Tiêu diệt); 0 là không giới hạn.
 var max_rounds: int = 0
+## Lòng dân hiện tại và tối đa (Story 3.7); 0 là không có làng.
+var morale: int = 0
+var max_morale: int = 0
 ## Chỉ đọc, dùng chung giữa các bản sao.
 var stats: Stats = null
 ## Pha hiện tại. WON hoặc LOST là hết trận: Rules.resolve từ chối mọi lệnh (Story 2.5).
@@ -41,6 +44,8 @@ static func from_level(level: LevelData, p_stats: Stats) -> BattleState:
 	state.stats = p_stats
 	state.mission = level.mission
 	state.max_rounds = level.max_rounds
+	state.max_morale = level.long_dan
+	state.morale = level.long_dan_hien_tai if level.long_dan_hien_tai > 0 else level.long_dan
 	var next_enemy_id: int = FIRST_ENEMY_ID
 	for p: LevelData.UnitPlacement in level.units:
 		var id: int
@@ -60,6 +65,8 @@ func clone() -> BattleState:
 	copy.stats = stats
 	copy.round_number = round_number
 	copy.max_rounds = max_rounds
+	copy.morale = morale
+	copy.max_morale = max_morale
 	copy.phase = phase
 	copy.defeat_reason = defeat_reason
 	copy.mission = mission
@@ -81,6 +88,14 @@ func validate() -> Array[String]:
 		problems.append("hiệp %d, cần từ 1 trở lên" % round_number)
 	if max_rounds < 0:
 		problems.append("số hiệp tối đa %d, cần từ 0 trở lên" % max_rounds)
+	if max_morale < 0:
+		problems.append("Lòng dân tối đa %d, cần từ 0 trở lên" % max_morale)
+	if morale < 0:
+		problems.append("Lòng dân %d, cần từ 0 trở lên" % morale)
+	if max_morale > 0 and morale > max_morale:
+		problems.append("Lòng dân %d vượt tối đa %d" % [morale, max_morale])
+	if terrain.has(Terrain.VILLAGE) and max_morale <= 0:
+		problems.append("bàn có ô làng mà thiếu Lòng dân tối đa")
 	for u: Unit in units:
 		var where: String = "quân %d ở ô %d,%d" % [u.id, u.cell.x, u.cell.y]
 		if seen_ids.has(u.id):

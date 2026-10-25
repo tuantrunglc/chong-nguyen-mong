@@ -69,7 +69,7 @@ func _ready() -> void:
 	_notice.name = "Notice"
 	add_child(_notice)
 	_battle_view = BattleView.new()
-	_battle_view.setup(_board_view, _battle_input, _hud, _tooltip)
+	_battle_view.setup(_board_view, _battle_input, _hud, _tooltip, _notice)
 	# Hoạt ảnh phát xong mới vẽ bản chụp cuối (Story 2.11).
 	_battle_view.playback_finished.connect(_on_playback_finished)
 	add_child(_battle_view)

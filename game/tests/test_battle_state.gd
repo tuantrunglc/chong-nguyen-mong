@@ -38,6 +38,7 @@ func _level() -> LevelData:
 		],
 		# Khác thứ tự đọc từ trái sang phải.
 		"thu_tu_dich": ["5,4", "1,0", "5,0"],
+		"long_dan": 3,
 	}
 	var r: LoadResult = LevelLoader.parse_level(JSON.stringify(d), "thu.json")
 	assert_true(r.ok, "trận mẫu nạp được")
@@ -323,3 +324,10 @@ func test_real_levels_are_valid() -> void:
 			continue
 		var s: BattleState = BattleState.from_level(level.data as LevelData, stats.data as Stats)
 		assert_eq(s.validate(), [] as Array[String], path)
+
+
+func test_validate_village_requires_max_morale() -> void:
+	var s: BattleState = _state()
+	assert_eq(s.validate(), [] as Array[String])
+	s.max_morale = 0
+	assert_eq(s.validate(), ["bàn có ô làng mà thiếu Lòng dân tối đa"] as Array[String])

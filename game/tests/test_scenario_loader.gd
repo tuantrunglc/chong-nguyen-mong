@@ -1249,3 +1249,34 @@ func test_viewer_shows_before_telegraphs() -> void:
 	assert_true(header.find(tr("scenario.viewer.marks")) < header.find(tr("scenario.viewer.after")), "Ô ĐỎ trước SAU")
 	assert_string_contains(text, tr("scenario.viewer.before_telegraphs"))
 	assert_string_contains(text, "1. " + tr("scenario.viewer.telegraph_cell") % [tr("scenario.unit.bo_binh"), "5,4", "4,4"])
+
+
+## Story 3.7: Ô làng "D" trong "dia_hinh" của bàn "truoc" đòi khóa "long_dan".
+func test_village_in_scenario_requires_long_dan() -> void:
+	var d: Dictionary = _valid()
+	var terrain_with_village: Array[String] = RIVER_TERRAIN.duplicate()
+	terrain_with_village[3] = ". . . D . . ."
+	d["truoc"]["dia_hinh"] = terrain_with_village
+	d["sau"]["dia_hinh"] = terrain_with_village
+	assert_eq(_errors(d), [F + ': có ô làng "D" trong "dia_hinh" mà thiếu khóa "long_dan"'] as Array[String])
+	d["truoc"]["long_dan"] = 3
+	assert_eq(_errors(d), [] as Array[String])
+	var s: ScenarioData = _scenario(d)
+	assert_eq(s.before.long_dan, 3)
+
+
+## Story 3.7: "long_dan_toi_da" cho phép kịch bản dựng Lòng dân ban đầu nhỏ hơn tối đa.
+func test_scenario_long_dan_toi_da() -> void:
+	var d: Dictionary = _valid()
+	var terrain_with_village: Array[String] = RIVER_TERRAIN.duplicate()
+	terrain_with_village[3] = ". . . D . . ."
+	d["truoc"]["dia_hinh"] = terrain_with_village
+	d["sau"]["dia_hinh"] = terrain_with_village
+	d["truoc"]["long_dan"] = 1
+	d["truoc"]["long_dan_toi_da"] = 3
+	d["sau"]["long_dan"] = 0
+	var s: ScenarioData = _scenario(d)
+	assert_eq(s.before.long_dan, 3)
+	assert_eq(s.before.long_dan_hien_tai, 1)
+	assert_true(s.checks_morale)
+	assert_eq(s.after_morale, 0)

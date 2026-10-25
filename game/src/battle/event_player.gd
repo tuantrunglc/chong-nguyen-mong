@@ -22,6 +22,7 @@ const SHAKE_DISTANCE: float = 5.0
 var instant: bool = DisplayServer.get_name() == "headless"
 
 var _board: BoardView = null
+var _notice: Notice = null
 ## Sự kiện đã phát, ghi lúc ÁP DỤNG (không phải lúc nhận), đúng thứ tự thực tế (để test).
 var _played: Array[BattleEvent] = []
 ## Mỗi lượt phát một số. Lượt cũ đang chờ timer mà thấy số đã đổi thì bỏ cuộc: F5/đổi trận giữa lúc phát
@@ -31,8 +32,9 @@ var _play_id: int = 0
 var _active_tween: Tween = null
 
 
-func setup(board: BoardView) -> void:
+func setup(board: BoardView, notice: Notice = null) -> void:
 	_board = board
+	_notice = notice
 
 
 func played() -> Array[BattleEvent]:
@@ -103,7 +105,7 @@ func _base_seconds(event: BattleEvent) -> float:
 	match event.type:
 		BattleEvent.Type.MOVED, BattleEvent.Type.ATTACKED:
 			return SECONDS_PER_EVENT
-		BattleEvent.Type.COLLIDED, BattleEvent.Type.DAMAGED, BattleEvent.Type.TELEGRAPHED:
+		BattleEvent.Type.COLLIDED, BattleEvent.Type.DAMAGED, BattleEvent.Type.TELEGRAPHED, BattleEvent.Type.VILLAGE_DAMAGED:
 			return DAMAGE_SECONDS
 		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
 			return DEATH_SECONDS
@@ -128,6 +130,10 @@ func _play_one(event: BattleEvent, seconds: float, snapshot: BattleState) -> voi
 		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
 			if token != null:
 				await _sink_or_fade(token, event, seconds)
+		BattleEvent.Type.VILLAGE_DAMAGED:
+			if _notice != null:
+				_notice.show_text(TranslationServer.translate("notice.morale_lost"))
+			await _flash_village(event.to_cell, seconds)
 		_:
 			await _wait(seconds * 0.5)
 
@@ -135,6 +141,8 @@ func _play_one(event: BattleEvent, seconds: float, snapshot: BattleState) -> voi
 ## Trạng thái cuối của một sự kiện, dùng khi không chạy Tween (test, chế độ instant, hết ngân sách pha).
 func _apply_instant(event: BattleEvent, snapshot: BattleState) -> void:
 	_played.append(event)
+	if event.type == BattleEvent.Type.VILLAGE_DAMAGED and _notice != null:
+		_notice.show_text(TranslationServer.translate("notice.morale_lost"))
 	var token: UnitToken = _token(event.unit_id)
 	if token == null:
 		return
@@ -143,6 +151,24 @@ func _apply_instant(event: BattleEvent, snapshot: BattleState) -> void:
 			token.position = _move_target(token, event, snapshot)
 		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
 			token.visible = false
+
+
+func _flash_village(cell: Vector2i, seconds: float) -> void:
+	if _board == null or not is_inside_tree():
+		await _wait(seconds)
+		return
+	var rect: Rect2 = BoardView.cell_rect(cell)
+	var flash_node: ColorRect = ColorRect.new()
+	flash_node.color = Color(1.0, 0.25, 0.25, 0.6)
+	flash_node.position = rect.position
+	flash_node.size = rect.size
+	flash_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_board.add_child(flash_node)
+	var tween: Tween = _new_tween()
+	tween.tween_property(flash_node, "color:a", 0.0, seconds)
+	await _wait(seconds)
+	if is_instance_valid(flash_node):
+		flash_node.queue_free()
 
 
 func _token(unit_id: int) -> UnitToken:

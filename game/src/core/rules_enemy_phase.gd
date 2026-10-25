@@ -38,9 +38,12 @@ static func _strike_all(state: BattleState, events: Array[BattleEvent]) -> void:
 			continue
 		var owner: Unit = state.unit_by_id(telegraph.owner_id)
 		var strike: Array[BattleEvent] = [BattleEvent.enemy_attacked(owner.id, owner.cell, hit)]
-		var victim: Unit = state.unit_at(hit)
-		if victim != null:
-			Effects.damage(state, victim, state.stats.damage(owner.type), BattleEvent.Cause.ENEMY_STRIKE, strike)
+		if state.in_bounds(hit) and state.terrain_at(hit) == Terrain.VILLAGE:
+			Effects.damage_morale(state, 1, hit, BattleEvent.Cause.ENEMY_STRIKE, strike)
+		else:
+			var victim: Unit = state.unit_at(hit)
+			if victim != null:
+				Effects.damage(state, victim, state.stats.damage(owner.type), BattleEvent.Cause.ENEMY_STRIKE, strike)
 		# Kiểm trên sự kiện của riêng đòn này rồi mới nối, để VICTORY/DEFEAT là sự kiện cuối của lệnh.
 		RulesVictory.check(state, strike)
 		events.append_array(strike)
@@ -87,13 +90,20 @@ static func prepare(state: BattleState, events: Array[BattleEvent]) -> void:
 		if intent.reason != EnemyIntent.Reason.CAN_HIT:
 			continue
 		var unit: Unit = state.unit_by_id(intent.unit_id)
-		var target: Unit = state.unit_by_id(intent.target_id)
-		if unit == null or target == null:
+		if unit == null:
 			continue
-		if not EnemyAI.can_hit_from(state, unit, unit.cell, target.cell):
+		var target_cell: Vector2i = intent.target_cell
+		if intent.target_id > 0:
+			var target: Unit = state.unit_by_id(intent.target_id)
+			if target == null:
+				continue
+			target_cell = target.cell
+		elif target_cell == Vector2i(-1, -1):
+			continue
+		if not EnemyAI.can_hit_from(state, unit, unit.cell, target_cell):
 			intent.reason = EnemyIntent.Reason.CLOSEST
 			continue
-		var telegraph: Telegraph = EnemyAI.telegraph_for(unit, unit.cell, target.cell, next_order)
+		var telegraph: Telegraph = EnemyAI.telegraph_for(unit, unit.cell, target_cell, next_order)
 		state.telegraphs.append(telegraph)
 		intent.order = next_order
 		events.append(BattleEvent.telegraphed(unit.id, unit.cell, telegraph.target_cell(state), next_order))

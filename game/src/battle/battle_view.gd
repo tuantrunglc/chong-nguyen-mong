@@ -15,6 +15,8 @@ var _input: BattleInput = null
 var _hud: Hud = null
 ## Khung thông tin khi rê chuột (Story 2.10); null thì không hiện gì.
 var _tooltip: Tooltip = null
+## Thông báo ngắn giữa bàn (Story 3.7); null thì không hiện.
+var _notice: Notice = null
 var _controller: BattleController = null
 ## Id tướng đang chọn; NONE là không chọn.
 var _selected: int = NONE
@@ -41,11 +43,12 @@ var _preview_cell: Vector2i = BoardView.NO_CELL
 var _preview_count: int = 0
 
 
-func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = null) -> void:
+func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = null, notice: Notice = null) -> void:
 	_board = board
 	_input = input
 	_hud = hud
 	_tooltip = tooltip
+	_notice = notice
 	_player = EventPlayer.new()
 	_player.setup(board)
 	add_child(_player)
@@ -218,6 +221,11 @@ func _on_events_resolved(events: Array[BattleEvent], snapshot: BattleState) -> v
 	if _controller == null:
 		return
 	_playing = true
+	if _notice != null:
+		for ev: BattleEvent in events:
+			if ev.type == BattleEvent.Type.VILLAGE_DAMAGED:
+				_notice.show_text(tr("notice.morale_lost"))
+				break
 	# Bóng xem trước là kết quả của lệnh vừa bấm: phải biến mất trước khi hoạt ảnh chạy trên bàn cũ (Story 2.12).
 	_clear_preview()
 	if _board != null:
@@ -302,8 +310,20 @@ func _update_preview(cell: Vector2i) -> void:
 		_board.preview_view().clear()
 		return
 	_preview_count += 1
+	var after_state: BattleState = result["state"] as BattleState
+	var events: Array[BattleEvent] = result["events"] as Array[BattleEvent]
 	_board.preview_view().show_ghosts(
-		_ghosts_of(before, result["state"] as BattleState, result["events"] as Array[BattleEvent]))
+		_ghosts_of(before, after_state, events),
+		_village_damage_of(before, after_state, events))
+
+
+func _village_damage_of(before: BattleState, after: BattleState, events: Array[BattleEvent]) -> Dictionary:
+	if after.morale >= before.morale:
+		return {}
+	for ev: BattleEvent in events:
+		if ev.type == BattleEvent.Type.VILLAGE_DAMAGED:
+			return { "cell": ev.to_cell, "amount": ev.amount }
+	return {}
 
 
 func _clear_preview() -> void:
@@ -437,7 +457,7 @@ func _update_hud() -> void:
 	var snapshot: BattleState = _controller.snapshot()
 	var over: bool = Rules.is_battle_over(snapshot)
 	_hud.show_turn(snapshot.round_number, _controller.can_undo(), _controller.can_replay(),
-		_controller.replay_left(), over, snapshot.max_rounds)
+		_controller.replay_left(), over, snapshot.max_rounds, snapshot.morale, snapshot.max_morale)
 	# Dòng pha luôn có khi đang chơi; lúc phát hoạt ảnh pha địch thì báo đúng pha đang chạy (Story 2.11, AC 4).
 	if not over:
 		_hud.show_phase(_playing and _enemy_turn)

@@ -19,6 +19,8 @@ const FINAL_ROUND_COLOR: Color = Color(1.0, 0.42, 0.35)
 const PHASE_FONT_SIZE: int = 17
 
 var _round_label: Label
+## Dòng Lòng dân (Story 3.7); ẩn khi trận không có làng.
+var _morale_label: Label
 ## Dòng pha, luôn hiện khi đang chơi (Story 2.11, AC 4).
 var _phase_label: Label
 var _undo_button: Button
@@ -51,6 +53,12 @@ func _ready() -> void:
 	_round_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(_round_label)
 
+	_morale_label = Label.new()
+	_morale_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_morale_label.add_theme_font_size_override("font_size", PHASE_FONT_SIZE)
+	_morale_label.visible = false
+	box.add_child(_morale_label)
+
 	_phase_label = Label.new()
 	_phase_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_phase_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -78,8 +86,9 @@ func _ready() -> void:
 ## Hiện bảng với số hiệp; nút Hủy mờ khi không có gì để hủy, nút Chơi lại mờ khi đã dùng/không chơi lại được.
 ## Hết trận (over) thì mọi nút đều mờ và ẩn số lần chơi lại.
 ## Có giới hạn hiệp (max_rounds > 0) thì hiện "Hiệp X/Y"; hiệp cuối đổi màu nổi bật (Story 3.5).
+## Có làng (max_morale > 0) thì hiện "Lòng dân: X/Y" (Story 3.7).
 func show_turn(round_number: int, can_undo: bool, can_replay: bool, replay_left: int, over: bool = false,
-		max_rounds: int = 0) -> void:
+		max_rounds: int = 0, morale: int = 0, max_morale: int = 0) -> void:
 	if max_rounds > 0:
 		_round_label.text = tr("hud.round_limit") % [round_number, max_rounds]
 		if round_number >= max_rounds and not over:
@@ -89,6 +98,11 @@ func show_turn(round_number: int, can_undo: bool, can_replay: bool, replay_left:
 	else:
 		_round_label.text = tr("hud.round") % round_number
 		_round_label.remove_theme_color_override("font_color")
+	if max_morale > 0:
+		_morale_label.text = tr("hud.morale") % [morale, max_morale]
+		_morale_label.visible = true
+	else:
+		_morale_label.visible = false
 	_can_undo = can_undo
 	_can_replay = can_replay
 	_over = over
@@ -141,6 +155,10 @@ func hint_text() -> String:
 
 func round_text() -> String:
 	return _round_label.text
+
+
+func morale_text() -> String:
+	return _morale_label.text if _morale_label.visible else ""
 
 
 ## Số hiệp đang đổi màu nổi bật (để test hiệp cuối, Story 3.5).

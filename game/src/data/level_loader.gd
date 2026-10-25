@@ -58,6 +58,7 @@ static func parse_level(text: String, file: String) -> LoadResult:
 	# Dòng hỏng có thể chứa ô ải: chỉ kiểm khi cả lớp dia_hinh đọc được.
 	if terrain_clean and mission == LevelData.Mission.HOLD_PASS and not BoardLayers.has_symbol(terrain_rows, "A"):
 		result.add_error('%s: trận "giu_ai" phải có ít nhất một ô ải "A" trong "dia_hinh"' % file)
+	var long_dan: int = _read_long_dan(root, terrain_rows, terrain_clean, file, result)
 	var errors_before_units: int = result.errors.size()
 	var unit_rows: Array = BoardLayers.read_layer(root, "quan", "quan", BoardText.UNIT_SYMBOLS, file, result,
 		size, "dia_hinh")
@@ -81,6 +82,7 @@ static func parse_level(text: String, file: String) -> LoadResult:
 	level.name = level_name
 	level.mission = mission as LevelData.Mission
 	level.max_rounds = max_rounds
+	level.long_dan = long_dan
 	level.size = size
 	level.terrain = BoardLayers.terrain_values(terrain_rows)
 	for symbol: String in GENERAL_SYMBOLS:
@@ -125,4 +127,20 @@ static func _read_max_rounds(root: Dictionary, file: String, result: LoadResult)
 	if not root.has("so_hiep_toi_da"):
 		return 0
 	var val: Variant = JsonFile.get_int(root, "so_hiep_toi_da", "so_hiep_toi_da", 1, file, result)
+	return int(val) if val != null else 0
+
+
+static func _read_long_dan(root: Dictionary, terrain_rows: Array, terrain_clean: bool, file: String, result: LoadResult) -> int:
+	if not terrain_clean:
+		return 0
+	var has_village: bool = BoardLayers.has_symbol(terrain_rows, "D")
+	if has_village and not root.has("long_dan"):
+		result.add_error('%s: có ô làng "D" trong "dia_hinh" mà thiếu khóa "long_dan"' % file)
+		return 0
+	if not root.has("long_dan"):
+		return 0
+	if not has_village:
+		result.add_error('%s: có khóa "long_dan" mà không có ô làng "D" trong "dia_hinh"' % file)
+		return 0
+	var val: Variant = JsonFile.get_int(root, "long_dan", "long_dan", 1, file, result)
 	return int(val) if val != null else 0

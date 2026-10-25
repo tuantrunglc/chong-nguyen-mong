@@ -95,6 +95,8 @@ static func line_for(intent: EnemyIntent, state: BattleState) -> String:
 	if intent.target_id != 0:
 		var general: int = UnitType.GENERALS[intent.target_id - 1]
 		parts.append(tr_static("dev.ai.target") % [_unit_name(general), intent.target_steps])
+	elif intent.target_cell != Vector2i(-1, -1):
+		parts.append(tr_static("dev.ai.target_village") % [BoardText.cell_text(intent.target_cell), intent.target_steps])
 	parts.append(tr_static(REASON_KEYS[intent.reason] as String))
 	if intent.order > 0:
 		parts.append(tr_static("dev.ai.order") % intent.order)

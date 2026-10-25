@@ -32,6 +32,8 @@ enum Type {
 	## Đòn đã báo bị hủy, phát đúng chỗ nó đáng lẽ ra đòn (Story 2.9): unit_id là chủ đòn, from_cell là ô chủ đòn
 	## lúc hủy (ZERO nếu chủ đã gục), amount là số thứ tự, cancel là lý do. Không kèm ATTACKED.
 	TELEGRAPH_CANCELLED,
+	## Làng ở to_cell bị trúng đòn/va chạm (Story 3.7): amount là số Lòng dân bị trừ, cause là nguyên nhân.
+	VILLAGE_DAMAGED,
 }
 
 ## Vì sao quân đổi ô hoặc mất máu. STRIKE: đòn có sát thương của tướng (Khoái, Lão).
@@ -142,3 +144,7 @@ static func telegraphed(p_unit_id: int, p_stand: Vector2i, p_to: Vector2i, p_ord
 static func telegraph_cancelled(p_unit_id: int, p_from: Vector2i, p_order: int, p_cancel: TelegraphCancel) -> BattleEvent:
 	return BattleEvent.new(Type.TELEGRAPH_CANCELLED, p_unit_id, p_from, Vector2i.ZERO, Cause.WALK, Reject.NONE, "",
 		0, p_order, 0, p_cancel)
+
+
+static func village_damaged(cell: Vector2i, p_amount: int = 1, p_cause: Cause = Cause.ENEMY_STRIKE) -> BattleEvent:
+	return BattleEvent.new(Type.VILLAGE_DAMAGED, 0, Vector2i.ZERO, cell, p_cause, Reject.NONE, "", 0, p_amount)

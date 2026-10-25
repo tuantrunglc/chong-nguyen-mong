@@ -160,7 +160,7 @@ static func _reject_no_target(state: BattleState, unit: Unit, cell: Vector2i, re
 		events: Array[BattleEvent]) -> void:
 	if _blocked_target(state, unit.cell, cell):
 		events.append(BattleEvent.rejected(BattleEvent.Reject.BLOCKED,
-			"đòn bị rừng hoặc kho lương chặn trước ô %d,%d" % [cell.x, cell.y]))
+			"đòn bị rừng, kho lương hoặc làng chặn trước ô %d,%d" % [cell.x, cell.y]))
 		return
 	events.append(BattleEvent.rejected(BattleEvent.Reject.NO_TARGET, reason))
 

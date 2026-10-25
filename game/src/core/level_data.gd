@@ -25,6 +25,10 @@ var name: String = ""
 var mission: Mission = Mission.ELIMINATE
 ## Số hiệp tối đa (Story 3.5, chỉ trận Tiêu diệt); 0 là không giới hạn.
 var max_rounds: int = 0
+## Lòng dân ban đầu và tối đa (Story 3.7); 0 là không có làng.
+var long_dan: int = 0
+## Lòng dân hiện tại lúc bắt đầu (kịch bản luật có thể ghi nhỏ hơn tối đa); 0 là bằng long_dan.
+var long_dan_hien_tai: int = 0
 var size: Vector2i = Vector2i.ZERO
 ## Theo hàng: index = hang * size.x + cot.
 var terrain: PackedInt32Array = PackedInt32Array()

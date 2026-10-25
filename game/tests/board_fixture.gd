@@ -69,6 +69,8 @@ static func state(units: Dictionary, terrain: Dictionary = {}, hp: Dictionary = 
 	generals.sort_custom(func(a: LevelData.UnitPlacement, b: LevelData.UnitPlacement) -> bool: return a.type < b.type)
 	level.units.append_array(generals)
 	level.units.append_array(enemies)
+	if level.terrain.has(Terrain.VILLAGE):
+		level.long_dan = 3
 	return BattleState.from_level(level, p_stats if p_stats != null else stats())
 
 

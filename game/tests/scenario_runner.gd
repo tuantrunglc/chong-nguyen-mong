@@ -211,6 +211,8 @@ static func compare(state: BattleState, scenario: ScenarioData) -> Array[String]
 		problems.append_array(_compare_telegraphs(state, scenario.after_telegraphs))
 	if scenario.checks_marks:
 		problems.append_array(_compare_marks(state, scenario.after_marks))
+	if scenario.checks_morale and state.morale != scenario.after_morale:
+		problems.append("sau: mong đợi Lòng dân %d, thực tế %d" % [scenario.after_morale, state.morale])
 	return problems
 
 

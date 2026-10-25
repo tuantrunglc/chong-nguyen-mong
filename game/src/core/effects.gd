@@ -32,5 +32,15 @@ static func damage(state: BattleState, unit: Unit, amount: int, cause: BattleEve
 		events.append(BattleEvent.died(unit.id, unit.cell))
 
 
+## Trừ amount Lòng dân, ghi VILLAGE_DAMAGED với số Lòng dân đã trừ thật (Story 3.7).
+static func damage_morale(state: BattleState, amount: int, cell: Vector2i, cause: BattleEvent.Cause,
+		events: Array[BattleEvent]) -> void:
+	if state.morale <= 0:
+		return
+	var lost: int = mini(amount, state.morale)
+	state.morale -= lost
+	events.append(BattleEvent.village_damaged(cell, lost, cause))
+
+
 static func _remove(state: BattleState, unit: Unit) -> void:
 	state.units.erase(unit)

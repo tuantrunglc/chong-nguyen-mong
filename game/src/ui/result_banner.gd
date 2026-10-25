@@ -83,6 +83,9 @@ func show_result(phase: BattleState.Phase, defeat_reason: String = "") -> void:
 			if defeat_reason == "het_hiep":
 				_title.add_theme_font_size_override("font_size", LONG_TITLE_FONT_SIZE)
 				_title.text = tr("result.lost_round_limit")
+			elif defeat_reason == "mat_lang":
+				_title.add_theme_font_size_override("font_size", LONG_TITLE_FONT_SIZE)
+				_title.text = tr("result.lost_morale")
 			else:
 				_title.add_theme_font_size_override("font_size", TITLE_FONT_SIZE)
 				_title.text = tr("result.lost")

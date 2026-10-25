@@ -7,13 +7,14 @@ extends RefCounted
 
 
 ## Gọi sau mỗi lệnh (Rules.resolve) và, từ Story 2.8, sau từng đòn địch. events là các sự kiện vừa sinh ra: chỉ
-## khi có quân gục (DIED, hoặc DROWNED vì chết đuối không có DIED) mới kiểm, nên bàn không có quân Nguyên từ đầu
-## không bị thắng ngay. Thắng được ưu tiên: hết quân Nguyên và hết tướng cùng lúc thì chỉ thắng.
+## khi có quân gục (DIED, hoặc DROWNED vì chết đuối không có DIED) hoặc làng bị hại (VILLAGE_DAMAGED, Story 3.7)
+## mới kiểm, nên bàn không có quân Nguyên từ đầu không bị thắng ngay. Thắng được ưu tiên: hết quân Nguyên và
+## hết tướng/mất làng cùng lúc thì chỉ thắng.
 ## Trận đã hết thì không làm gì (không sinh kết cục lần hai).
 static func check(state: BattleState, events: Array[BattleEvent]) -> void:
 	if state.phase == BattleState.Phase.WON or state.phase == BattleState.Phase.LOST:
 		return
-	if not _someone_fell(events):
+	if not _someone_fell(events) and not _village_damaged(events):
 		return
 	if _enemies_cleared(state):
 		state.phase = BattleState.Phase.WON
@@ -21,6 +22,10 @@ static func check(state: BattleState, events: Array[BattleEvent]) -> void:
 	elif _generals_lost(state):
 		state.phase = BattleState.Phase.LOST
 		events.append(BattleEvent.defeat())
+	elif _morale_lost(state):
+		state.phase = BattleState.Phase.LOST
+		state.defeat_reason = "mat_lang"
+		events.append(BattleEvent.defeat("mat_lang"))
 
 
 ## Kiểm tra hết hiệp ở bước 4 (cuối hiệp) của trận Tiêu diệt (Story 3.5). Thua nếu hết hiệp mà còn quân Nguyên.
@@ -41,6 +46,18 @@ static func _someone_fell(events: Array[BattleEvent]) -> bool:
 		if event.type == BattleEvent.Type.DIED or event.type == BattleEvent.Type.DROWNED:
 			return true
 	return false
+
+
+static func _village_damaged(events: Array[BattleEvent]) -> bool:
+	for event: BattleEvent in events:
+		if event.type == BattleEvent.Type.VILLAGE_DAMAGED:
+			return true
+	return false
+
+
+## Mất hết Lòng dân (Story 3.7). Chỉ áp dụng cho trận có làng (max_morale > 0).
+static func _morale_lost(state: BattleState) -> bool:
+	return state.max_morale > 0 and state.morale <= 0
 
 
 ## Tiêu diệt: không còn quân Nguyên. Giữ ải thắng theo luật khác (Story 3.11), nên không thắng ở đây.

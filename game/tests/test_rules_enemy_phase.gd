@@ -258,12 +258,20 @@ func test_damage_larger_than_hp_only_takes_remaining_hp() -> void:
 
 
 func test_cavalry_hits_granary_or_village_nobody_hurt() -> void:
-	for symbol: String in ["L", "D"]:
-		var state: BattleState = BoardFixture.state({Vector2i(0, 3): "K", Vector2i(5, 3): "1"},
-			{Vector2i(2, 3): symbol})
-		state.telegraphs.append(_charge(101, Vector2i(1, 0), 1))
-		assert_eq(_strike(state), ["ATTACKED 101 2,3", "ROUND_STARTED"] as Array[String], "trúng ô %s" % symbol)
-		assert_eq(state.unit_by_id(1).hp, 3)
+	# Kho lương cản xung phong, không ai mất máu (Story 3.1)
+	var state_granary: BattleState = BoardFixture.state({Vector2i(0, 3): "K", Vector2i(5, 3): "1"},
+		{Vector2i(2, 3): "L"})
+	state_granary.telegraphs.append(_charge(101, Vector2i(1, 0), 1))
+	assert_eq(_strike(state_granary), ["ATTACKED 101 2,3", "ROUND_STARTED"] as Array[String])
+	assert_eq(state_granary.unit_by_id(1).hp, 3)
+
+	# Làng cản xung phong, tướng không mất máu nhưng Lòng dân -1 (Story 3.7)
+	var state_village: BattleState = BoardFixture.state({Vector2i(0, 3): "K", Vector2i(5, 3): "1"},
+		{Vector2i(2, 3): "D"})
+	state_village.telegraphs.append(_charge(101, Vector2i(1, 0), 1))
+	assert_eq(_strike(state_village), ["ATTACKED 101 2,3", "VILLAGE_DAMAGED", "ROUND_STARTED"] as Array[String])
+	assert_eq(state_village.unit_by_id(1).hp, 3)
+	assert_eq(state_village.morale, 2, "Lòng dân giảm 1 khi làng bị kỵ binh đâm trúng")
 
 
 func test_cavalry_on_empty_row_misses_at_edge() -> void:

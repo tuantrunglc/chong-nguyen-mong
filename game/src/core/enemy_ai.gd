@@ -16,26 +16,49 @@ const CHARGE_BLOCKERS: Array[int] = [Terrain.FOREST, Terrain.GRANARY, Terrain.VI
 
 
 static func plan(state: BattleState, unit: Unit) -> EnemyIntent:
-	var target: Unit = null
+	var target_unit: Unit = null
+	var target_cell: Vector2i = Vector2i(-1, -1)
 	var field: Dictionary = {}
 	var best_key: Array[int] = []
+
+	# Story 3.7: Bộ binh và Kỵ binh nhắm tướng hoặc làng gần nhất; hòa bước thì ưu tiên làng (0 < 1).
+	# Cung kỵ không nhắm làng (chỉ nhắm tướng Đại Việt).
+	if unit.type != UnitType.CUNG_KY:
+		for y: int in range(state.size.y):
+			for x: int in range(state.size.x):
+				var cell: Vector2i = Vector2i(x, y)
+				if state.terrain_at(cell) != Terrain.VILLAGE:
+					continue
+				var f: Dictionary = Pathfinding.distance_field(state, unit, cell)
+				if not f.has(unit.cell):
+					continue
+				var key: Array[int] = [f[unit.cell] as int, 0, 0, cell.y, -cell.x]
+				if best_key.is_empty() or _less(key, best_key):
+					target_unit = null
+					target_cell = cell
+					field = f
+					best_key = key
+
 	for general: Unit in state.units:
 		if general.faction != Unit.Faction.DAI_VIET:
 			continue
 		var f: Dictionary = Pathfinding.distance_field(state, unit, general.cell)
 		if not f.has(unit.cell):
 			continue
-		var key: Array[int] = [f[unit.cell] as int, general.hp, general.cell.y, -general.cell.x]
-		if target == null or _less(key, best_key):
-			target = general
+		var key: Array[int] = [f[unit.cell] as int, 1, general.hp, general.cell.y, -general.cell.x]
+		if best_key.is_empty() or _less(key, best_key):
+			target_unit = general
+			target_cell = general.cell
 			field = f
 			best_key = key
-	if target == null:
+
+	if best_key.is_empty():
 		return EnemyIntent.new(unit.id, unit.type, unit.cell, unit.cell, 0, 0, EnemyIntent.Reason.NO_PATH)
+	var target_id: int = target_unit.id if target_unit != null else 0
 	var steps_to_target: int = field[unit.cell] as int
 	if not _has_attack_rule(unit.type):
-		return EnemyIntent.new(unit.id, unit.type, unit.cell, unit.cell, target.id, steps_to_target,
-			EnemyIntent.Reason.NO_ATTACK_RULE)
+		return EnemyIntent.new(unit.id, unit.type, unit.cell, unit.cell, target_id, steps_to_target,
+			EnemyIntent.Reason.NO_ATTACK_RULE, 0, target_cell)
 
 	var walk: Dictionary = {unit.cell: 0}  # ô đứng được -> số bước đi
 	var paths: Dictionary = Pathfinding.find_paths(state, unit, state.stats.move_range(unit.type))
@@ -46,7 +69,7 @@ static func plan(state: BattleState, unit: Unit) -> EnemyIntent:
 	var found: bool = false
 	var stand_key: Array[int] = []
 	for cell: Vector2i in walk.keys():
-		if not can_hit_from(state, unit, cell, target.cell):
+		if not can_hit_from(state, unit, cell, target_cell):
 			continue
 		var key: Array[int] = [walk[cell] as int, cell.y, -cell.x]
 		if not found or _less(key, stand_key):
@@ -54,8 +77,8 @@ static func plan(state: BattleState, unit: Unit) -> EnemyIntent:
 			stand_key = key
 			found = true
 	if found:
-		return EnemyIntent.new(unit.id, unit.type, unit.cell, stand, target.id, steps_to_target,
-			EnemyIntent.Reason.CAN_HIT)
+		return EnemyIntent.new(unit.id, unit.type, unit.cell, stand, target_id, steps_to_target,
+			EnemyIntent.Reason.CAN_HIT, 0, target_cell)
 
 	stand_key = []
 	for cell: Vector2i in walk.keys():
@@ -65,8 +88,8 @@ static func plan(state: BattleState, unit: Unit) -> EnemyIntent:
 		if stand_key.is_empty() or _less(key, stand_key):
 			stand = cell
 			stand_key = key
-	return EnemyIntent.new(unit.id, unit.type, unit.cell, stand, target.id, steps_to_target,
-		EnemyIntent.Reason.CLOSEST)
+	return EnemyIntent.new(unit.id, unit.type, unit.cell, stand, target_id, steps_to_target,
+		EnemyIntent.Reason.CLOSEST, 0, target_cell)
 
 
 ## Đứng ở cell thì đòn của unit có trúng ô target không. Bộ binh: ô kề. Kỵ binh: cùng hàng hoặc cùng cột, giữa hai
@@ -89,6 +112,8 @@ static func can_hit_from(state: BattleState, unit: Unit, cell: Vector2i, target:
 				step += dir
 			return true
 		UnitType.CUNG_KY:
+			if state.in_bounds(target) and state.terrain_at(target) == Terrain.VILLAGE:
+				return false  # Cung kỵ không nhắm làng (Story 3.7)
 			var dir: Vector2i = Grid.straight_dir(cell, target)
 			if dir == Vector2i.ZERO:
 				return false
@@ -99,7 +124,7 @@ static func can_hit_from(state: BattleState, unit: Unit, cell: Vector2i, target:
 			var step: Vector2i = cell + dir
 			while step != target:
 				if Terrain.ATTACK_BLOCKERS.has(state.terrain_at(step)):
-					return false  # Story 3.1: rừng, kho lương chặn tên
+					return false  # Rừng, kho lương, làng chặn tên (Story 3.1, 3.7: tác giả chốt 2026-10-24)
 				step += dir
 			return true
 	return false

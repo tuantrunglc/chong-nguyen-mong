@@ -5,6 +5,7 @@ error.data_short,Không mở được trận vì file dữ liệu bị lỗi.
 error.back_to_menu,Về menu
 hud.round,Hiệp %d
 hud.round_limit,Hiệp %d/%d
+hud.morale,"Lòng dân: %d/%d"
 hud.undo,Hủy (Z)
 hud.replay,Chơi lại (R)
 hud.replay.left,Còn %d lần
@@ -16,7 +17,9 @@ hud.phase.enemy,"Quân Nguyên đang ra đòn"
 result.won,Thắng!
 result.lost,Thua!
 result.lost_round_limit,"Thua: hết hiệp"
+result.lost_morale,"Thua: mất làng"
 result.retry,Chơi lại trận
+notice.morale_lost,"−1 Lòng dân"
 unit.nguyen_khoai,Khoái
 unit.pham_ngu_lao,Lão
 unit.tran_khanh_du,Dư
@@ -69,6 +72,7 @@ scenario.viewer.after_moved,đã đi: %s
 scenario.viewer.after_moved_none,chưa tướng nào
 scenario.viewer.after_attacked,đã đánh: %s
 scenario.viewer.after_attacked_none,chưa tướng nào
+scenario.viewer.after_morale,"Lòng dân: %d"
 scenario.viewer.after_outcome,kết quả: %s
 scenario.viewer.outcome_dang_choi,đang chơi
 scenario.viewer.outcome_thang,thắng
@@ -98,6 +102,7 @@ dev.ai.none,không có quân Nguyên
 dev.ai.moved,%s: %s → %s
 dev.ai.stayed,%s: đứng yên ở %s
 dev.ai.target,nhắm %s (cách %d bước)
+dev.ai.target_village,"nhắm Làng %s (cách %d bước)"
 dev.ai.can_hit,đứng đây vì đánh trúng được
 dev.ai.closest,"không có ô đánh trúng trong tầm đi, đi tới ô gần nhất"
 dev.ai.no_path,không có đường tới tướng nào

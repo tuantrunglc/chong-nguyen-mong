@@ -28,10 +28,13 @@ var target_steps: int
 var reason: Reason
 ## Số thứ tự đòn đã báo; 0 là không báo đòn.
 var order: int
+## Ô mục tiêu (Story 3.7: nhắm ô làng thì target_id = 0 và target_cell là ô làng; nhắm tướng thì là cell của tướng).
+var target_cell: Vector2i = Vector2i(-1, -1)
 
 
 func _init(p_unit_id: int, p_unit_type: int, p_from: Vector2i, p_stand: Vector2i, p_target_id: int,
-		p_target_steps: int, p_reason: Reason, p_order: int = 0) -> void:
+		p_target_steps: int, p_reason: Reason, p_order: int = 0,
+		p_target_cell: Vector2i = Vector2i(-1, -1)) -> void:
 	unit_id = p_unit_id
 	unit_type = p_unit_type
 	from_cell = p_from
@@ -40,7 +43,8 @@ func _init(p_unit_id: int, p_unit_type: int, p_from: Vector2i, p_stand: Vector2i
 	target_steps = p_target_steps
 	reason = p_reason
 	order = p_order
+	target_cell = p_target_cell
 
 
 func clone() -> EnemyIntent:
-	return EnemyIntent.new(unit_id, unit_type, from_cell, stand_cell, target_id, target_steps, reason, order)
+	return EnemyIntent.new(unit_id, unit_type, from_cell, stand_cell, target_id, target_steps, reason, order, target_cell)

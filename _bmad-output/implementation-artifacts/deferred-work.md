@@ -223,3 +223,7 @@
 ## Deferred from: code review of 3-4-ham-chong (2026-10-23)
 
 - **Ý định của địch đã gục vẫn nằm trong `enemy_intents`.** Khi quân Nguyên gục trên chông lúc đi trong pha chuẩn bị, `RulesEnemyPhase.prepare` (`rules_enemy_phase.gd:78-82`) vẫn thêm intent với `stand_cell` dự định và lý do CAN_HIT. Vòng báo đòn đã bỏ qua quân null nên không sai luật; chỉ lớp debug F1 thấy dữ liệu lệch. Sửa khi có chỗ khác đọc `reason`.
+
+## Deferred from: code review of 3-7-lang-va-long-dan (2026-10-24)
+
+- **AI nhắm làng ở mọi kiểu trận.** `EnemyAI.plan` thêm làng vào tập mục tiêu của Bộ binh/Kỵ binh mà không xét `state.mission`; kiến trúc (dòng 841) chỉ quy định cho "Trận Tiêu diệt có làng". Hiện chưa có trận Giữ ải có làng nên chưa sai; khi làm Story 3.11 phải chốt với tác giả luật nhắm mục tiêu của trận Giữ ải có làng và thêm kịch bản.

@@ -33,6 +33,7 @@ func _valid_level() -> Dictionary:
 		],
 		# Khác thứ tự đọc từ trái sang phải, trên xuống dưới.
 		"thu_tu_dich": ["5,4", "1,0", "5,0"],
+		"long_dan": 3,
 		"tiep_vien": [],
 		"muu_ke_mo": [],
 	}
@@ -332,6 +333,56 @@ func test_max_rounds_must_be_positive_integer() -> void:
 		_errors(['"so_hiep_toi_da" phải là số nguyên từ 1 trở lên, đang là 3.5']))
 
 
+func test_long_dan_default_and_valid() -> void:
+	var def_level: LevelData = _level(_valid_level()).data as LevelData
+	assert_not_null(def_level)
+	assert_eq(def_level.long_dan, 3)
+	var no_village_terrain: Array = [
+		". . . ~ . . .",
+		". # . ~ . . .",
+		". . . ~ . L .",
+		"^ . . . . . A",
+		". . . ~ . . .",
+		". . . ~ . . .",
+		". . . ~ . . .",
+	]
+	var without_village: LevelData = _level(_without(_with(_valid_level(), "dia_hinh", no_village_terrain), "long_dan")).data as LevelData
+	assert_not_null(without_village)
+	assert_eq(without_village.long_dan, 0)
+
+
+func test_long_dan_must_be_positive_integer() -> void:
+	assert_eq(_level(_with(_valid_level(), "long_dan", 0)).errors,
+		_errors(['"long_dan" phải là số nguyên từ 1 trở lên, đang là 0']))
+	assert_eq(_level(_with(_valid_level(), "long_dan", -2)).errors,
+		_errors(['"long_dan" phải là số nguyên từ 1 trở lên, đang là -2']))
+	assert_eq(_level(_with(_valid_level(), "long_dan", "3")).errors,
+		_errors(['"long_dan" phải là số nguyên từ 1 trở lên, đang là "3"']))
+	assert_eq(_level(_with(_valid_level(), "long_dan", 2.5)).errors,
+		_errors(['"long_dan" phải là số nguyên từ 1 trở lên, đang là 2.5']))
+
+
+func test_village_requires_long_dan() -> void:
+	assert_eq(_level(_without(_valid_level(), "long_dan")).errors,
+		_errors(['có ô làng "D" trong "dia_hinh" mà thiếu khóa "long_dan"']))
+
+
+func test_long_dan_without_village_is_rejected() -> void:
+	var no_village_terrain: Array[String] = [
+		". . . ~ . . .",
+		". # . ~ . . .",
+		". . . ~ . L .",
+		"^ . . . . . A",
+		". . . ~ . . .",
+		". . . ~ . . .",
+		". . . ~ . . .",
+	]
+	var d: Dictionary = _with(_valid_level(), "dia_hinh", no_village_terrain)
+	d["long_dan"] = 3
+	assert_eq(_level(d).errors,
+		_errors(['có khóa "long_dan" mà không có ô làng "D" trong "dia_hinh"']))
+
+
 # ---------- File trận: bàn cờ ----------
 
 func test_layer_wrong_type() -> void:
@@ -374,6 +425,7 @@ func _board_level(cols: int, rows: int) -> Dictionary:
 			cells[cols - 1] = "B"
 		units.append(" ".join(cells))
 	var d: Dictionary = _with(_valid_level(), "dia_hinh", terrain)
+	d.erase("long_dan")
 	d["quan"] = units
 	d["thu_tu_dich"] = ["%d,0" % (cols - 1)]
 	return d
@@ -819,7 +871,9 @@ func test_other_real_trial_levels_keep_enemies_still_on_begin() -> void:
 			_assert_enemies_stay_on_begin(level)
 
 
-## Story 2.15: `thu_ba_tuong` mở trận, Cung kỵ (5,2) tự đi tới chỗ bắn được và báo đòn; quân Nguyên khác đứng yên.
+## Story 2.15: `thu_ba_tuong` có Cung kỵ (5,2). Từ Story 3.7 ô (4,4) là làng ('D') nằm giữa (4,3) và (4,6),
+## mà làng chặn đường tên Cung kỵ (tác giả chọn phương án (b) như rừng), nên Cung kỵ không bắn được Dư;
+## Cung kỵ đi 3 bước tới (5,5) để áp sát Dư nhất có thể mà không báo đòn. Các quân khác đứng yên.
 func test_archer_trial_level_begins_with_a_shot() -> void:
 	var r: LoadResult = LevelLoader.load_level("res://data/tran/thu_ba_tuong.json")
 	assert_eq(r.errors, [] as Array[String])
@@ -838,14 +892,12 @@ func test_archer_trial_level_begins_with_a_shot() -> void:
 	assert_eq(where[101], "0,5", "Bộ binh đứng yên")
 	assert_eq(where[102], "2,5", "Kỵ binh đứng yên")
 	assert_eq(where[104], "5,6", "Bộ binh đứng yên")
-	assert_eq(where[103], "4,3", "Cung kỵ đi 2 bước tới chỗ bắn được Khánh Dư ở 4,6")
+	assert_eq(where[103], "5,5", "Cung kỵ đi 3 bước tới 5,5 áp sát Khánh Dư (bị làng 4,4 chặn ngắm bắn)")
 	var archer_shot: Telegraph = null
 	for telegraph: Telegraph in state.telegraphs:
 		if telegraph.owner_id == 103:
 			archer_shot = telegraph
-	assert_not_null(archer_shot, "Cung kỵ có báo đòn")
-	if archer_shot != null:
-		assert_eq(archer_shot.offset, Vector2i(0, 3), "bắn 4,6 từ 4,3")
+	assert_null(archer_shot, "Cung kỵ bị làng chặn nên không báo đòn")
 	assert_eq(state.validate(), [] as Array[String])
 
 

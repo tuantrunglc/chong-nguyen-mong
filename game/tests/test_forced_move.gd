@@ -40,11 +40,17 @@ func test_edge_in_every_direction() -> void:
 
 
 func test_obstacles_stop_and_cost_one_hp() -> void:
-	for symbol: String in ["#", "L", "D"]:
+	for symbol: String in ["#", "L"]:
 		var state: BattleState = BoardFixture.state({Vector2i(3, 3): "B"}, {Vector2i(3, 2): symbol})
 		assert_eq(_push(state, 101, N), ["COLLIDED 101 0 3,2", "DAMAGED 101 -1 COLLISION"] as Array[String], symbol)
 		assert_eq(state.unit_by_id(101).cell, Vector2i(3, 3))
 		assert_eq(state.unit_by_id(101).hp, 2)
+	# Làng là vật cản làm quân mất 1 máu, đồng thời Làng bị giảm 1 Lòng dân (Story 3.7)
+	var village_state: BattleState = BoardFixture.state({Vector2i(3, 3): "B"}, {Vector2i(3, 2): "D"})
+	assert_eq(_push(village_state, 101, N), ["COLLIDED 101 0 3,2", "DAMAGED 101 -1 COLLISION", "VILLAGE_DAMAGED"] as Array[String], "D")
+	assert_eq(village_state.unit_by_id(101).cell, Vector2i(3, 3))
+	assert_eq(village_state.unit_by_id(101).hp, 2)
+	assert_eq(village_state.morale, 2, "Lòng dân giảm 1 khi bị va chạm")
 
 
 ## Quân bị đẩy mất máu trước, quân bị va sau.

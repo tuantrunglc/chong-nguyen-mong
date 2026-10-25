@@ -45,6 +45,8 @@ func _state(units: Array[String], terrain: Array[String] = EMPTY, stats: Stats =
 	generals.sort_custom(func(a: LevelData.UnitPlacement, b: LevelData.UnitPlacement) -> bool: return a.type < b.type)
 	level.units.append_array(generals)
 	level.units.append_array(enemies)
+	if level.terrain.has(Terrain.VILLAGE):
+		level.long_dan = 3
 	var state: BattleState = BattleState.from_level(level, stats)
 	assert_eq(state.validate(), [] as Array[String], "bàn thử hợp lệ")
 	return state

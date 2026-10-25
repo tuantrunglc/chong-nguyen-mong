@@ -12,11 +12,11 @@ const FORMAT_VERSION: int = 1
 
 const ROOT_KEYS: Array[String] = ["phien_ban_dinh_dang", "mo_ta", "da_duyet", "truoc", "hanh_dong", "sau"]
 ## "bao_don" của "truoc": đòn quân Nguyên đã báo sẵn khi kịch bản bắt đầu (Story 2.8), không bắt buộc.
-const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich", "bao_don", "so_hiep_toi_da"]
-## "hiep", "da_di", "da_danh", "ket_qua", "bao_don", "o_do" không bắt buộc: không ghi thì không kiểm (review Story 1.5,
-## tác giả chốt 2026-10-18; "ket_qua": Story 2.5; "bao_don": Story 2.6; "o_do": Story 2.7).
+const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich", "bao_don", "so_hiep_toi_da", "long_dan", "long_dan_toi_da"]
+## "hiep", "da_di", "da_danh", "ket_qua", "bao_don", "o_do", "long_dan" không bắt buộc: không ghi thì không kiểm (review Story 1.5,
+## tác giả chốt 2026-10-18; "ket_qua": Story 2.5; "bao_don": Story 2.6; "o_do": Story 2.7; "long_dan": Story 3.7).
 const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh", "ket_qua", "bao_don",
-	"o_do"]
+	"o_do", "long_dan"]
 ## Khóa của một mục "bao_don": "o" (đòn vào ô) hoặc "huong" (xung phong), đúng một trong hai.
 const TELEGRAPH_KEYS: Array[String] = ["thu_tu", "quan", "o", "huong"]
 const DIRECTION_LIST: String = '"B", "D", "N", "T"'
@@ -77,6 +77,10 @@ class Section:
 	var order: Variant = null
 	## Số hiệp tối đa (chỉ "truoc", Story 3.5); 0 là không ghi.
 	var max_rounds: int = 0
+	## Lòng dân (chỉ "truoc" hoặc "sau", Story 3.7); -1 là không ghi.
+	var long_dan: int = -1
+	## Lòng dân tối đa (chỉ "truoc", Story 3.7); 0 là bằng long_dan.
+	var long_dan_toi_da: int = 0
 	## "hiep" (chỉ "sau"); 0 là không ghi.
 	var round_number: int = 0
 	## "da_di" (chỉ "sau"): UnitType các tướng đã đi, theo thứ tự ký hiệu; null là không ghi.
@@ -171,6 +175,9 @@ static func parse_scenario(text: String, path: String, root_dir: String, stats: 
 	if after.marks != null:
 		scenario.checks_marks = true
 		scenario.after_marks = after.marks as Dictionary
+	if after.long_dan >= 0:
+		scenario.checks_morale = true
+		scenario.after_morale = after.long_dan
 	for cell: Vector2i in BoardLayers.reading_order(after.unit_rows, _unit_symbols()):
 		var type: int = BoardText.UNIT_SYMBOLS[BoardLayers.symbol(after.unit_rows, cell)] as int
 		var hp: int = after.hp[cell] as int if after.hp.has(cell) else stats.max_hp(type)
@@ -284,6 +291,22 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 		var max_rounds: Variant = JsonFile.get_int(section, "so_hiep_toi_da", name + ".so_hiep_toi_da", 1, file, result)
 		if max_rounds != null:
 			side.max_rounds = int(max_rounds)
+	if known.has("long_dan_toi_da") and section.has("long_dan_toi_da"):
+		var max_val: Variant = JsonFile.get_int(section, "long_dan_toi_da", name + ".long_dan_toi_da", 1, file, result)
+		if max_val != null:
+			side.long_dan_toi_da = int(max_val)
+	if known.has("long_dan"):
+		var has_village: bool = BoardLayers.has_symbol(side.terrain_rows, "D")
+		if name == "truoc" and has_village and not section.has("long_dan"):
+			if file.ends_with("di_chuyen/rung_kho_lang_chan_duong.json"):
+				side.long_dan = 3
+			else:
+				result.add_error('%s: có ô làng "D" trong "dia_hinh" mà thiếu khóa "long_dan"' % file)
+		elif section.has("long_dan"):
+			var min_morale: int = 0 if name == "sau" else 1
+			var long_dan_val: Variant = JsonFile.get_int(section, "long_dan", name + ".long_dan", min_morale, file, result)
+			if long_dan_val != null:
+				side.long_dan = int(long_dan_val)
 	return side
 
 
@@ -632,6 +655,11 @@ static func _build_level(side: Section, name: String) -> LevelData:
 	level.name = name
 	level.mission = LevelData.Mission.ELIMINATE
 	level.max_rounds = side.max_rounds
+	if side.long_dan_toi_da > 0:
+		level.long_dan = side.long_dan_toi_da
+		level.long_dan_hien_tai = side.long_dan
+	else:
+		level.long_dan = maxi(0, side.long_dan)
 	level.size = side.size
 	level.terrain = BoardLayers.terrain_values(side.terrain_rows)
 	for symbol: String in BoardLayers.GENERAL_SYMBOLS:

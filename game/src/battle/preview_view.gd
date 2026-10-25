@@ -13,16 +13,22 @@ var _ghosts: Array[Dictionary] = []
 
 
 ## Vẽ bóng cho danh sách quân; danh sách rỗng là xóa hết.
-func show_ghosts(ghosts: Array[Dictionary]) -> void:
+## village_damage (Story 3.7): { "cell": Vector2i, "amount": int } để hiện chỉ báo mất Lòng dân trên làng.
+func show_ghosts(ghosts: Array[Dictionary], village_damage: Dictionary = {}) -> void:
 	_clear_labels()
 	_ghosts = ghosts.duplicate(true)
 	for ghost: Dictionary in _ghosts:
 		_add_labels(ghost)
+	if not village_damage.is_empty() and village_damage.has("cell"):
+		var cell: Vector2i = village_damage["cell"] as Vector2i
+		var text: String = tr("notice.morale_lost")
+		var center: Vector2 = BoardView.cell_center(cell)
+		_add_label(text, center, 14, Color(1.0, 0.4, 0.35, 0.95))
 	queue_redraw()
 
 
 func clear() -> void:
-	if _ghosts.is_empty():
+	if _ghosts.is_empty() and get_child_count() == 0:
 		return
 	_ghosts = []
 	_clear_labels()
@@ -32,6 +38,15 @@ func clear() -> void:
 ## Bóng đang hiện (để test).
 func ghosts() -> Array[Dictionary]:
 	return _ghosts.duplicate(true)
+
+
+## Chữ báo trừ Lòng dân trên làng (để test Story 3.7, AC 7).
+func village_damage_text() -> String:
+	for child: Node in get_children():
+		var label: Label = child as Label
+		if label != null and label.text.contains("Lòng dân"):
+			return label.text
+	return ""
 
 
 func _clear_labels() -> void:
