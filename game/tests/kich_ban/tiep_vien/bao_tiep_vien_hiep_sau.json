@@ -1,0 +1,45 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Báo trước ô tiếp viện cho hiệp kế tiếp trong suốt lượt người chơi.",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      ". . B . .",
+      ". . 1 . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "thu_tu_dich": ["2,0"],
+    "tiep_vien": [
+      { "hiep": 2, "o": "2,1", "loai": "B" }
+    ]
+  },
+  "hanh_dong": [
+    { "lenh": "di", "tuong": "1", "o": "1,1" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      ". . B . .",
+      ". 1 . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "bao_tiep_vien": ["2,1"]
+  }
+}

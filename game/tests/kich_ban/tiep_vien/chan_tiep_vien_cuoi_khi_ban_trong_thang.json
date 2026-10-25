@@ -1,0 +1,50 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Chặn quân tiếp viện cuối cùng khi bàn trống: thắng trận ngay đầu hiệp.",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      ". . B . .",
+      ". . 1 . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "thu_tu_dich": ["2,0"],
+    "tiep_vien": [
+      { "hiep": 2, "o": "2,1", "loai": "B" }
+    ]
+  },
+  "hanh_dong": [
+    { "lenh": "danh", "tuong": "1", "o": "2,0" },
+    { "lenh": "ket_thuc_luot" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      ". . . . .",
+      ". . 1 . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "mau": {
+      "2,1": 2
+    },
+    "hiep": 2,
+    "ket_qua": "thang"
+  }
+}
