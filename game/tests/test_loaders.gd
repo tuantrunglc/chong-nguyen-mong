@@ -440,6 +440,11 @@ func test_tiep_vien_errors_vietnamese() -> void:
 	assert_eq(_level(_with(_valid_level(), "tiep_vien", [{ "hiep": 2, "o": "0,0", "loai": "K", "mau": 0 }])).errors,
 		_errors(['"tiep_vien" mục 1: "mau" phải là số nguyên từ 1 trở lên, đang là 0']))
 
+	# tiep_vien hiep vượt quá so_hiep_toi_da
+	var d_max: Dictionary = _with(_valid_level(), "so_hiep_toi_da", 3)
+	assert_eq(_level(_with(d_max, "tiep_vien", [{ "hiep": 4, "o": "0,0", "loai": "K" }])).errors,
+		_errors(['"tiep_vien" mục 1: "hiep" là 4, vượt quá số hiệp tối đa 3']))
+
 
 # ---------- File trận: bàn cờ ----------
 

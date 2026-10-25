@@ -16,7 +16,7 @@ const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich", "b
 ## "hiep", "da_di", "da_danh", "ket_qua", "bao_don", "o_do", "long_dan" không bắt buộc: không ghi thì không kiểm (review Story 1.5,
 ## tác giả chốt 2026-10-18; "ket_qua": Story 2.5; "bao_don": Story 2.6; "o_do": Story 2.7; "long_dan": Story 3.7).
 const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh", "ket_qua", "bao_don",
-	"o_do", "long_dan"]
+	"o_do", "long_dan", "bao_tiep_vien"]
 ## Khóa của một mục "bao_don": "o" (đòn vào ô) hoặc "huong" (xung phong), đúng một trong hai.
 const TELEGRAPH_KEYS: Array[String] = ["thu_tu", "quan", "o", "huong"]
 const DIRECTION_LIST: String = '"B", "D", "N", "T"'
@@ -83,6 +83,8 @@ class Section:
 	var long_dan_toi_da: int = 0
 	## Lịch tiếp viện (chỉ "truoc", Story 3.10).
 	var reinforcements: Array[LevelData.Reinforcement] = []
+	## "bao_tiep_vien" (chỉ "sau"): Array[Vector2i]; null là không ghi hoặc sai (Story 3.10).
+	var reinforcement_warnings: Variant = null
 	## "hiep" (chỉ "sau"); 0 là không ghi.
 	var round_number: int = 0
 	## "da_di" (chỉ "sau"): UnitType các tướng đã đi, theo thứ tự ký hiệu; null là không ghi.
@@ -180,6 +182,9 @@ static func parse_scenario(text: String, path: String, root_dir: String, stats: 
 	if after.long_dan >= 0:
 		scenario.checks_morale = true
 		scenario.after_morale = after.long_dan
+	if after.reinforcement_warnings != null:
+		scenario.checks_reinforcement_warnings = true
+		scenario.after_reinforcement_warnings = after.reinforcement_warnings as Array[Vector2i]
 	for cell: Vector2i in BoardLayers.reading_order(after.unit_rows, _unit_symbols()):
 		var type: int = BoardText.UNIT_SYMBOLS[BoardLayers.symbol(after.unit_rows, cell)] as int
 		var hp: int = after.hp[cell] as int if after.hp.has(cell) else stats.max_hp(type)
@@ -248,8 +253,10 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 	_warn_unknown(section, known, name + ".", file, result)
 	var terrain_shown: String = name + ".dia_hinh"
 	var decides_size: bool = name == "truoc"
+	var errors_before_terrain: int = result.errors.size()
 	side.terrain_rows = BoardLayers.read_layer(section, "dia_hinh", terrain_shown, BoardText.TERRAIN_SYMBOLS,
 		file, result, size, "" if decides_size else SIZE_LAYER)
+	var terrain_clean: bool = result.errors.size() == errors_before_terrain and not side.terrain_rows.is_empty()
 	side.size = BoardLayers.layer_size(side.terrain_rows) if decides_size else size
 	var errors_before_units: int = result.errors.size()
 	side.unit_rows = BoardLayers.read_layer(section, "quan", name + ".quan", BoardText.UNIT_SYMBOLS, file, result,
@@ -310,9 +317,41 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 			if long_dan_val != null:
 				side.long_dan = int(long_dan_val)
 	if known.has("tiep_vien") and section.has("tiep_vien"):
-		side.reinforcements = LevelLoader._read_reinforcements(section, side.terrain_rows, side.units_clean,
+		side.reinforcements = BoardLayers.read_reinforcements(section, side.terrain_rows, terrain_clean,
+			side.size, side.max_rounds, file, result)
+	if known.has("bao_tiep_vien") and section.has("bao_tiep_vien"):
+		side.reinforcement_warnings = _read_reinforcement_warnings(section["bao_tiep_vien"], name + ".bao_tiep_vien",
 			side.size, file, result)
 	return side
+
+
+## Đọc danh sách ô đang cảnh báo tiếp viện ("sau.bao_tiep_vien", Story 3.10): Array[Vector2i].
+static func _read_reinforcement_warnings(value: Variant, shown: String, size: Vector2i, file: String,
+		result: LoadResult) -> Variant:
+	if not value is Array:
+		result.add_error(JsonFile.type_error(file, shown, "một danh sách", value))
+		return null
+	var errors_before: int = result.errors.size()
+	var warnings: Array[Vector2i] = []
+	var seen: Dictionary = {}
+	var board_rect: Rect2i = Rect2i(Vector2i.ZERO, size)
+	for item: Variant in value as Array:
+		if not item is String:
+			result.add_error('%s: phần tử %s phải là chuỗi tọa độ "cot,hang"' % [shown, JsonFile.show(item)])
+			continue
+		var cell: Variant = BoardText.parse_cell(item as String)
+		if cell == null or not board_rect.has_point(cell as Vector2i):
+			result.add_error('%s: "%s" không phải ô trong bàn' % [shown, item])
+			continue
+		var c: Vector2i = cell as Vector2i
+		if seen.has(c):
+			result.add_error('%s: ô %s ghi hai lần' % [shown, item])
+			continue
+		seen[c] = true
+		warnings.append(c)
+	if result.errors.size() != errors_before:
+		return null
+	return warnings
 
 
 ## Đòn dựng sẵn ("truoc.bao_don") phải đánh số liền từ 1, như BattleState.validate đòi. telegraphs đã xếp tăng dần.

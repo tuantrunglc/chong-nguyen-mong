@@ -138,13 +138,19 @@ func _play_one(event: BattleEvent, seconds: float, snapshot: BattleState) -> voi
 				_notice.show_text(TranslationServer.translate("notice.morale_lost"))
 			await _flash_village(event.to_cell, seconds)
 		BattleEvent.Type.REINFORCEMENT_SPAWNED:
-			if _board != null and snapshot != null:
-				_board.show_state(snapshot)
-			token = _token(event.unit_id)
+			if _board != null:
+				var hp: int = 2
+				if snapshot != null:
+					var u: Unit = snapshot.unit_by_id(event.unit_id)
+					if u != null:
+						hp = u.hp
+					elif snapshot.stats != null:
+						hp = snapshot.stats.max_hp(event.amount)
+				token = _board.add_reinforcement_token(event.unit_id, event.amount, event.to_cell, hp)
 			if token != null:
 				await _flash(token, seconds)
 		BattleEvent.Type.REINFORCEMENT_BLOCKED:
-			await _flash_village(event.to_cell, seconds)
+			await _flash_blocked(event.to_cell, seconds)
 		_:
 			await _wait(seconds * 0.5)
 
@@ -154,8 +160,15 @@ func _apply_instant(event: BattleEvent, snapshot: BattleState) -> void:
 	_played.append(event)
 	if event.type == BattleEvent.Type.VILLAGE_DAMAGED and _notice != null:
 		_notice.show_text(TranslationServer.translate("notice.morale_lost"))
-	if event.type == BattleEvent.Type.REINFORCEMENT_SPAWNED and _board != null and snapshot != null:
-		_board.show_state(snapshot)
+	if event.type == BattleEvent.Type.REINFORCEMENT_SPAWNED and _board != null:
+		var hp: int = 2
+		if snapshot != null:
+			var u: Unit = snapshot.unit_by_id(event.unit_id)
+			if u != null:
+				hp = u.hp
+			elif snapshot.stats != null:
+				hp = snapshot.stats.max_hp(event.amount)
+		_board.add_reinforcement_token(event.unit_id, event.amount, event.to_cell, hp)
 	var token: UnitToken = _token(event.unit_id)
 	if token == null:
 		return
@@ -173,6 +186,24 @@ func _flash_village(cell: Vector2i, seconds: float) -> void:
 	var rect: Rect2 = BoardView.cell_rect(cell)
 	var flash_node: ColorRect = ColorRect.new()
 	flash_node.color = Color(1.0, 0.25, 0.25, 0.6)
+	flash_node.position = rect.position
+	flash_node.size = rect.size
+	flash_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_board.add_child(flash_node)
+	var tween: Tween = _new_tween()
+	tween.tween_property(flash_node, "color:a", 0.0, seconds)
+	await _wait(seconds)
+	if is_instance_valid(flash_node):
+		flash_node.queue_free()
+
+
+func _flash_blocked(cell: Vector2i, seconds: float) -> void:
+	if _board == null or not is_inside_tree():
+		await _wait(seconds)
+		return
+	var rect: Rect2 = BoardView.cell_rect(cell)
+	var flash_node: ColorRect = ColorRect.new()
+	flash_node.color = Color(1.0, 0.65, 0.15, 0.7)
 	flash_node.position = rect.position
 	flash_node.size = rect.size
 	flash_node.mouse_filter = Control.MOUSE_FILTER_IGNORE

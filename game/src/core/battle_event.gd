@@ -165,11 +165,11 @@ static func healed(p_unit_id: int, p_amount: int, p_cell: Vector2i, p_cause: Cau
 
 
 static func reinforcement_warned(p_cell: Vector2i, p_type: int, p_round: int) -> BattleEvent:
-	return BattleEvent.new(Type.REINFORCEMENT_WARNED, 0, Vector2i.ZERO, p_cell, Cause.WALK, Reject.NONE, "", p_round, p_type)
+	return BattleEvent.new(Type.REINFORCEMENT_WARNED, 0, Vector2i.ZERO, p_cell, Cause.REINFORCEMENT, Reject.NONE, "", p_round, p_type)
 
 
 static func reinforcement_spawned(p_unit_id: int, p_cell: Vector2i, p_type: int) -> BattleEvent:
-	return BattleEvent.new(Type.REINFORCEMENT_SPAWNED, p_unit_id, Vector2i.ZERO, p_cell, Cause.WALK, Reject.NONE, "", 0, p_type)
+	return BattleEvent.new(Type.REINFORCEMENT_SPAWNED, p_unit_id, Vector2i.ZERO, p_cell, Cause.REINFORCEMENT, Reject.NONE, "", 0, p_type)
 
 
 static func reinforcement_blocked(p_cell: Vector2i, p_type: int, p_blocker_id: int) -> BattleEvent:

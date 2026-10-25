@@ -135,23 +135,92 @@ func test_battle_state_clone_and_validate_reinforcements() -> void:
 	assert_eq(copy.reinforcements[0].cell, state.reinforcements[0].cell)
 
 
-func test_reinforcement_warned_at_end_of_round() -> void:
+func test_reinforcement_warned_in_prepare_phase_for_next_round() -> void:
 	var stats: Stats = _stats()
 	var r: LoadResult = LevelLoader.parse_level(JSON.stringify(_base_level_dict()), "test.json")
 	var state: BattleState = BattleState.from_level(r.data as LevelData, stats)
-	RulesEnemyPhase.begin_battle(state, [])
-
 	var events: Array[BattleEvent] = []
-	RulesEnemyPhase.end_player_turn(state, events)
+	RulesEnemyPhase.begin_battle(state, events)
 
 	var warned: Array[BattleEvent] = []
 	for e: BattleEvent in events:
 		if e.type == BattleEvent.Type.REINFORCEMENT_WARNED:
 			warned.append(e)
-	assert_eq(warned.size(), 1, "Có đúng 1 sự kiện REINFORCEMENT_WARNED được phát ở cuối hiệp")
+	assert_eq(warned.size(), 1, "Có đúng 1 sự kiện REINFORCEMENT_WARNED được phát ở pha chuẩn bị đầu hiệp 1")
 	assert_eq(warned[0].to_cell, Vector2i(3, 0))
 	assert_eq(warned[0].amount, UnitType.KY_BINH)
 	assert_eq(warned[0].round_number, 2)
+	assert_eq(warned[0].cause, BattleEvent.Cause.REINFORCEMENT)
+	assert_true(state.reinforcement_warnings.has(Vector2i(3, 0)), "Dấu tiếp viện nằm trong BattleState ở pha PLAYER hiệp 1")
+
+
+func test_block_final_reinforcement_with_empty_board_wins() -> void:
+	var stats: Stats = _stats()
+	var dict: Dictionary = {
+		"phien_ban_dinh_dang": 1,
+		"ten": "thu",
+		"kieu": "tieu_diet",
+		"dia_hinh": [
+			". . . . .",
+			". . . . .",
+			". . . . .",
+			". . . . .",
+			". . . . ."
+		],
+		"quan": [
+			". . B . .",
+			". . 1 . .",
+			". . . . .",
+			". . . . .",
+			". . . . ."
+		],
+		"thu_tu_dich": ["2,0"],
+		"tiep_vien": [
+			{ "hiep": 2, "o": "2,1", "loai": "B" }
+		],
+		"muu_ke_mo": []
+	}
+	var r: LoadResult = LevelLoader.parse_level(JSON.stringify(dict), "test.json")
+	assert_true(r.ok, "; ".join(r.errors))
+	var state: BattleState = BattleState.from_level(r.data as LevelData, stats)
+	RulesEnemyPhase.begin_battle(state, [])
+
+	# Kiểm tra dấu báo tiếp viện đã có ở hiệp 1
+	assert_true(state.reinforcement_warnings.has(Vector2i(2, 1)), "Báo trước tiếp viện 2,1 ngay từ hiệp 1")
+
+	# Khoái đánh B ở 2,0 gục (Khoái sát thương 2, B có 2 máu)
+	var atk_events: Array[BattleEvent] = Rules.resolve(state, Command.attack(1, Vector2i(2, 0)))
+	var b_died: bool = false
+	for e: BattleEvent in atk_events:
+		if e.type == BattleEvent.Type.DIED and e.unit_id == 101:
+			b_died = true
+	assert_true(b_died, "B đã gục")
+	assert_eq(state.phase, BattleState.Phase.PLAYER, "Chưa thắng vì còn tiếp viện hiệp 2")
+
+	# Khoái vẫn đứng ở 2,1. Kết thúc lượt hiệp 1 sang hiệp 2.
+	var end_events: Array[BattleEvent] = Rules.resolve(state, Command.end_turn())
+	var has_blocked: bool = false
+	var has_victory: bool = false
+	for e: BattleEvent in end_events:
+		if e.type == BattleEvent.Type.REINFORCEMENT_BLOCKED:
+			has_blocked = true
+		if e.type == BattleEvent.Type.VICTORY:
+			has_victory = true
+	assert_true(has_blocked, "Tiếp viện hiệp 2 bị Khoái chặn ở 2,1")
+	assert_true(has_victory, "Thắng trận ngay đầu hiệp 2 khi chặn tiếp viện cuối cùng trên bàn trống")
+	assert_eq(state.phase, BattleState.Phase.WON, "Trạng thái đổi sang WON")
+
+
+func test_reinforcement_round_greater_than_max_rounds_rejected() -> void:
+	var dict: Dictionary = _base_level_dict()
+	dict["so_hiep_toi_da"] = 3
+	dict["tiep_vien"] = [
+		{ "hiep": 4, "o": "3,0", "loai": "K" }
+	]
+	var r: LoadResult = LevelLoader.parse_level(JSON.stringify(dict), "test.json")
+	assert_false(r.ok, "Bị từ chối khi hiep tiếp viện > so_hiep_toi_da")
+	assert_true(r.errors.any(func(err: String) -> bool: return err.contains("vượt quá số hiệp tối đa")),
+		"Báo lỗi tiếng Việt: " + "; ".join(r.errors))
 
 
 func test_reinforcement_spawns_on_empty_cell() -> void:

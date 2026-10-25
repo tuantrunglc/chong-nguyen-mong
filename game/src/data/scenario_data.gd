@@ -98,3 +98,7 @@ var after_marks: Dictionary = {}
 var checks_morale: bool = false
 ## Lòng dân mong đợi ("sau.long_dan", hợp lệ khi checks_morale là true; có thể là 0 khi thua do mất làng).
 var after_morale: int = 0
+## Có kiểm cảnh báo ô tiếp viện không ("sau.bao_tiep_vien" có ghi, Story 3.10).
+var checks_reinforcement_warnings: bool = false
+## Các ô mong đợi đang báo tiếp viện ở bàn sau (Story 3.10).
+var after_reinforcement_warnings: Array[Vector2i] = []

@@ -33,7 +33,7 @@ static func check_round_limit(state: BattleState, events: Array[BattleEvent]) ->
 	if state.phase == BattleState.Phase.WON or state.phase == BattleState.Phase.LOST:
 		return false
 	if state.mission == LevelData.Mission.ELIMINATE and state.max_rounds > 0 and state.round_number >= state.max_rounds:
-		if _count(state, Unit.Faction.NGUYEN) > 0:
+		if _count(state, Unit.Faction.NGUYEN) > 0 or not state.reinforcements.is_empty():
 			state.phase = BattleState.Phase.LOST
 			state.defeat_reason = "het_hiep"
 			events.append(BattleEvent.defeat("het_hiep"))

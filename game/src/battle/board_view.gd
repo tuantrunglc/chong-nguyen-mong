@@ -435,6 +435,19 @@ func _remove_token(id: int) -> void:
 	_tokens.erase(id)
 
 
+## Thêm một đồng quân mới khi tiếp viện xuất hiện (Story 3.10).
+func add_reinforcement_token(p_id: int, p_type: int, at_cell: Vector2i, p_hp: int) -> UnitToken:
+	if _tokens.has(p_id):
+		return _tokens[p_id] as UnitToken
+	var u: Unit = Unit.new(p_id, p_type, at_cell, p_hp)
+	var lift: float = _surface(at_cell)
+	var token: UnitToken = UnitToken.new()
+	token.setup(u, lift)
+	_world.add_child(token)
+	_tokens[p_id] = token
+	return token
+
+
 func _draw() -> void:
 	var surface: Rect2 = Rect2(0, 0, cols * TILE_SIZE, rows * TILE_SIZE)
 	# Mép bàn: cả bàn là một tấm dày EDGE_DEPTH, mặt trên là mặt đất.

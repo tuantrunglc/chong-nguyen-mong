@@ -4,7 +4,7 @@ baseline_commit: e7df841
 
 # Story 3.10: Quân tiếp viện
 
-Status: review
+Status: done
 
 ## Story
 
@@ -17,8 +17,8 @@ tôi muốn biết trước quân tiếp viện sẽ xuất hiện ở đâu,
 1. **Cho** file trận hoặc kịch bản có lịch tiếp viện (`tiep_vien`):
    - Mỗi mục tiếp viện gồm: `hiep` (số nguyên ≥ 2), `o` (tọa độ `"cot,hang"`), `loai` (ký hiệu `"B"`, `"K"`, `"C"`). Máu mặc định đầy theo `Stats`.
    - `LevelLoader` và `ScenarioLoader` nạp và kiểm tra dữ liệu hợp lệ: `hiep` ≥ 2, ô nằm trong bàn và là ô đi được (`Terrain.is_walkable`), loại quân Nguyên hợp lệ; báo lỗi tiếng Việt nếu sai.
-2. **Khi** tới bước 4 cuối hiệp (`_end_of_round`):
-   - Sau khi quân địch kề kho lương hồi máu và trước khi kiểm tra giới hạn hiệp, các ô tiếp viện của hiệp sau (`hiep == state.round_number + 1`) được báo trước (phát sự kiện `BattleEvent.reinforcement_warned`, đánh dấu ký hiệu riêng khác ô đỏ báo đòn, FR35).
+2. **Khi** bước vào pha chuẩn bị đầu hiệp N (`prepare()`, kể cả hiệp 1 lúc mở trận):
+   - Sau khi tiếp viện xuất hiện (bước 1a) và quân địch hành động (bước 1b), hệ thống báo trước các ô tiếp viện của hiệp kế tiếp N+1 (`hiep == state.round_number + 1`), phát sự kiện `BattleEvent.reinforcement_warned`, đánh dấu ký hiệu riêng trong `state.reinforcement_warnings` hiện suốt lượt người chơi hiệp N (FR35, tác giả chốt 2026-10-25).
 3. **Khi** sang đầu hiệp sau (bước 1a tiếp viện trong `prepare`):
    - Quân tiếp viện của hiệp đó được xử lý theo đúng thứ tự khai báo trong danh sách tiếp viện:
      - **Trường hợp ô trống:** Quân tiếp viện xuất hiện trên bàn (`BattleEvent.reinforcement_spawned`), nhận id tiếp theo (`state.next_enemy_id`).
@@ -66,9 +66,23 @@ tôi muốn biết trước quân tiếp viện sẽ xuất hiện ở đâu,
   - [x] 5.3 Cập nhật `test_loaders.gd` kiểm tra các ca báo lỗi nạp `tiep_vien` bằng tiếng Việt.
   - [x] 5.4 Chạy `tools/test.sh` xanh 4/4 bước (708/708 test GUT, 135 kịch bản đã duyệt), không vi phạm ranh giới kiến trúc.
 
-- [ ] **Task 6: Tác giả nghiệm thu và hoàn tất story** (AC: 7)
-  - [ ] 6.1 Báo cáo tác giả bằng tiếng Việt theo phong cách người test hiểu được.
-  - [ ] 6.2 Cập nhật `sprint-status.yaml` và commit tiếng Việt kết `(Story 3.10)`.
+- [x] **Task 6: Tác giả nghiệm thu và hoàn tất story** (AC: 7)
+  - [x] 6.1 Báo cáo tác giả bằng tiếng Việt theo phong cách người test hiểu được.
+  - [x] 6.2 Cập nhật `sprint-status.yaml` và commit tiếng Việt kết `(Story 3.10)`.
+
+### Review Findings
+
+Code review 2026-10-25 (commit `0dc3c07`, so với `e7df841`). `tools/test.sh` xanh nhưng mô phỏng headless bằng luật thật xác nhận 3 lỗi nặng bên dưới (bàn thử trong scratchpad: `tv1.json`, `tv2.json`, `tv3.json`). Ba lớp review chạy trong cùng phiên (không mở được agent phụ).
+
+- [x] [Review][Decision] (2026-10-25) Thời điểm báo tiếp viện: Chọn (a) báo ở pha chuẩn bị đầu hiệp N cho tiếp viện của hiệp N+1, dấu hiện suốt lượt người chơi hiệp N. Đã sửa kiến trúc dòng 841/846 và AC2 cho khớp.
+- [x] [Review][Patch] Dấu tiếp viện không bao giờ hiện cho người chơi: Đã sửa pha chuẩn bị `prepare()` báo trước tiếp viện cho hiệp kế tiếp và lưu trong `state.reinforcement_warnings` duy trì suốt lượt người chơi pha PLAYER [game/src/core/rules_enemy_phase.gd].
+- [x] [Review][Patch] Kẹt trận, không thắng được: Đã thêm `_check_victory_after_spawn()` xử lý thắng/thua sau bước 1a khi có tiếp viện xử lý (`not current_reinforcements.is_empty()`), chặn tiếp viện cuối trên bàn trống sẽ thắng ngay lập tức [game/src/core/rules_enemy_phase.gd].
+- [x] [Review][Patch] Tiếp viện có `hiep` lớn hơn `so_hiep_toi_da` bị từ chối: Báo lỗi tiếng Việt lúc nạp trong `BoardLayers.read_reinforcements`; cập nhật `RulesVictory.check_round_limit` tính cả tiếp viện chưa xuất hiện là còn quân Nguyên [game/src/data/board_layers.gd, game/src/core/rules_victory.gd].
+- [x] [Review][Patch] `ScenarioLoader`: Đã truyền đúng `terrain_clean` vào `_read_reinforcements`; chuyển hàm đọc tiếp viện sang `BoardLayers.read_reinforcements` dùng chung [game/src/data/scenario_loader.gd, game/src/data/board_layers.gd].
+- [x] [Review][Patch] `EventPlayer.gd`: `REINFORCEMENT_SPAWNED` không gọi `_board.show_state(snapshot)` giữa chừng mà thêm token mới qua `_board.add_reinforcement_token()`, giữ nguyên hoạt ảnh đi từng bước của quân cũ [game/src/battle/event_player.gd, game/src/battle/board_view.gd].
+- [x] [Review][Patch] Kiểm thử bổ sung: Đã thêm test GUT cho các ca biên (dấu báo trong snapshot, chặn tiếp viện cuối thắng trận, hiep vượt quá max rounds bị từ chối); thêm khóa `sau.bao_tiep_vien` cho `ScenarioRunner` và 2 kịch bản mới (`chan_tiep_vien_cuoi_khi_ban_trong_thang.json`, `bao_tiep_vien_hiep_sau.json`) với `da_duyet: false` [game/tests/test_reinforcements.gd, game/tests/test_loaders.gd, game/tests/scenario_runner.gd].
+- [x] [Review][Patch] `reinforcement_warned`/`reinforcement_spawned` ghi `Cause.REINFORCEMENT`; `REINFORCEMENT_BLOCKED` dùng hoạt ảnh `_flash_blocked` riêng màu cam tiếp viện; thêm tooltip `tooltip.reinforcement_warning` qua `text.csv` [game/src/core/battle_event.gd, game/src/battle/event_player.gd, game/i18n/text.csv, game/src/battle/battle_view.gd].
+- [x] [Review][Patch] Quy trình và hồ sơ: commit kịch bản mới riêng trước code (M3: commit `d5967f1`); tick Task 6 và hoàn thiện File List.
 
 ## Dev Agent Record
 
@@ -85,6 +99,29 @@ Antigravity Agent (DeepMind / Gemini), 2026-10-25.
   - `tiep_vien_chan_guc_quan.json`: ô 3,0 mong đợi trống, thực tế B
   - `tiep_vien_xuat_hien_o_trong.json`: ô 3,0 mong đợi K, thực tế trống
 - **Lần Green (Task 5):** `tools/test.sh` 4/4 bước đạt: 708/708 test GUT đạt, 135 kịch bản đã duyệt đạt, không vi phạm ranh giới kiến trúc.
+- **Sau Code Review:** `tools/test.sh` 4/4 bước đạt: 710/710 test GUT đạt, 135 kịch bản đã duyệt đạt, 4 kịch bản chưa duyệt đạt 100%.
+
+### File List
+- `_bmad-output/planning-artifacts/game-architecture.md` (cập nhật dòng 841, 846 theo quyết định báo tiếp viện đầu hiệp)
+- `_bmad-output/implementation-artifacts/3-10-quan-tiep-vien.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `game/i18n/text.csv` (thêm `tooltip.reinforcement_warning`)
+- `game/src/core/battle_event.gd` (thêm các kiểu và nguyên nhân sự kiện tiếp viện, cập nhật `Cause.REINFORCEMENT`)
+- `game/src/core/battle_state.gd` (thêm mảng tiếp viện, `reinforcement_warnings`, cập nhật clone/validate/from_level)
+- `game/src/core/rules_enemy_phase.gd` (cập nhật `prepare`, `_spawn_reinforcements`, `_warn_reinforcements`, `_check_victory_after_spawn`)
+- `game/src/core/rules_victory.gd` (điều kiện thắng Tiêu diệt tính cả tiếp viện chưa xuất hiện, `check_round_limit`)
+- `game/src/data/board_layers.gd` (hàm `read_reinforcements` dùng chung)
+- `game/src/data/level_data.gd` (lớp `Reinforcement`)
+- `game/src/data/level_loader.gd` (nạp tiếp viện qua `BoardLayers`)
+- `game/src/data/scenario_data.gd` (thêm hỗ trợ `bao_tiep_vien`)
+- `game/src/data/scenario_loader.gd` (nạp `bao_tiep_vien` và dùng `BoardLayers.read_reinforcements`)
+- `game/src/battle/board_view.gd` (vẽ viền và chevron tiếp viện, thêm `add_reinforcement_token`)
+- `game/src/battle/battle_view.gd` (hiển thị tooltip tiếp viện khi rê chuột)
+- `game/src/battle/event_player.gd` (hoạt ảnh `REINFORCEMENT_SPAWNED` qua token mới, `_flash_blocked` riêng)
+- `game/tests/scenario_runner.gd` (so khớp `bao_tiep_vien`)
+- `game/tests/test_loaders.gd` (kiểm tra lỗi nạp tiếp viện tiếng Việt)
+- `game/tests/test_reinforcements.gd` (bộ test GUT toàn diện cho tiếp viện)
+- `game/tests/kich_ban/tiep_vien/*.json` (8 kịch bản luật tiếp viện)
 
 ## Dev Notes
 

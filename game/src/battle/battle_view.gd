@@ -385,7 +385,10 @@ func _update_info(cell: Vector2i) -> void:
 		return
 	var unit: Unit = state.unit_at(cell)
 	if _tooltip != null:
-		_tooltip.show_text(_unit_text(unit, state) if unit != null else _terrain_text(state.terrain_at(cell)))
+		var text: String = _unit_text(unit, state) if unit != null else _terrain_text(state.terrain_at(cell))
+		if state.reinforcement_warnings.has(cell):
+			text += "\n" + tr("tooltip.reinforcement_warning")
+		_tooltip.show_text(text)
 	_board.telegraph_view().highlight(_telegraph_cells_of(unit, state))
 
 

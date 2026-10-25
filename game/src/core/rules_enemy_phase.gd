@@ -52,11 +52,10 @@ static func _strike_all(state: BattleState, events: Array[BattleEvent]) -> void:
 			return
 
 
-## Pha cuối hiệp (kiến trúc dòng 846, 897–908): kho lương hồi máu, báo tiếp viện, kiểm tra hết hiệp (Story 3.5, 3.9, 3.10).
+## Pha cuối hiệp (kiến trúc dòng 846, 897–908): kho lương hồi máu, kiểm tra hết hiệp (Story 3.5, 3.9).
 static func _end_of_round(state: BattleState, events: Array[BattleEvent]) -> void:
 	state.phase = BattleState.Phase.END_OF_ROUND
 	_heal_from_granaries(state, events)
-	_warn_reinforcements(state, events)
 	RulesVictory.check_round_limit(state, events)
 
 
@@ -152,6 +151,7 @@ static func prepare(state: BattleState, events: Array[BattleEvent]) -> void:
 		intent.order = next_order
 		events.append(BattleEvent.telegraphed(unit.id, unit.cell, telegraph.target_cell(state), next_order))
 		next_order += 1
+	_warn_reinforcements(state, events)
 	state.phase = BattleState.Phase.PLAYER
 
 
@@ -183,3 +183,25 @@ static func _spawn_reinforcements(state: BattleState, events: Array[BattleEvent]
 			state.next_enemy_id += 1
 			state.units.append(new_unit)
 			events.append(BattleEvent.reinforcement_spawned(new_unit.id, r.cell, r.type))
+
+	if not current_reinforcements.is_empty():
+		_check_victory_after_spawn(state, events)
+
+
+## Kiểm tra thắng/thua sau bước 1a kể cả khi không ai gục (Review Patch 2: bàn trống + hết tiếp viện → thắng).
+static func _check_victory_after_spawn(state: BattleState, events: Array[BattleEvent]) -> void:
+	if state.phase == BattleState.Phase.WON or state.phase == BattleState.Phase.LOST:
+		return
+	var enemies_count: int = 0
+	var heroes_count: int = 0
+	for u: Unit in state.units:
+		if u.faction == Unit.Faction.NGUYEN:
+			enemies_count += 1
+		elif u.faction == Unit.Faction.DAI_VIET:
+			heroes_count += 1
+	if state.mission == LevelData.Mission.ELIMINATE and enemies_count == 0 and state.reinforcements.is_empty():
+		state.phase = BattleState.Phase.WON
+		events.append(BattleEvent.victory())
+	elif heroes_count == 0:
+		state.phase = BattleState.Phase.LOST
+		events.append(BattleEvent.defeat())

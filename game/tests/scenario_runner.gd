@@ -213,6 +213,22 @@ static func compare(state: BattleState, scenario: ScenarioData) -> Array[String]
 		problems.append_array(_compare_marks(state, scenario.after_marks))
 	if scenario.checks_morale and state.morale != scenario.after_morale:
 		problems.append("sau: mong đợi Lòng dân %d, thực tế %d" % [scenario.after_morale, state.morale])
+	if scenario.checks_reinforcement_warnings:
+		problems.append_array(_compare_reinforcement_warnings(state, scenario.after_reinforcement_warnings))
+	return problems
+
+
+## So cảnh báo ô tiếp viện (Story 3.10): danh sách ô đang cảnh báo ở bàn sau.
+static func _compare_reinforcement_warnings(state: BattleState, wanted: Array[Vector2i]) -> Array[String]:
+	var problems: Array[String] = []
+	var actual: Array[Vector2i] = state.reinforcement_warnings.duplicate()
+	actual.sort()
+	var expected: Array[Vector2i] = wanted.duplicate()
+	expected.sort()
+	if actual != expected:
+		var want_str: String = ", ".join(expected.map(func(c: Vector2i) -> String: return BoardText.cell_text(c)))
+		var got_str: String = ", ".join(actual.map(func(c: Vector2i) -> String: return BoardText.cell_text(c)))
+		problems.append("sau: mong đợi báo tiếp viện [%s], thực tế [%s]" % [want_str, got_str])
 	return problems
 
 

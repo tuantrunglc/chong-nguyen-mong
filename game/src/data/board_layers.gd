@@ -186,3 +186,77 @@ static func terrain_values(rows: Array) -> PackedInt32Array:
 		for symbol_text: String in row as PackedStringArray:
 			values.append(BoardText.TERRAIN_SYMBOLS[symbol_text] as int)
 	return values
+
+
+const REINFORCEMENT_KEYS: Array[String] = ["hiep", "o", "loai", "mau"]
+
+static func read_reinforcements(root: Dictionary, terrain_rows: Array, terrain_clean: bool, size: Vector2i,
+		max_rounds: int, file: String, result: LoadResult) -> Array[LevelData.Reinforcement]:
+	var list: Array[LevelData.Reinforcement] = []
+	if not root.has("tiep_vien"):
+		return list
+	var raw: Variant = root["tiep_vien"]
+	if not raw is Array:
+		result.add_error(JsonFile.type_error(file, "tiep_vien", "một danh sách", raw))
+		return list
+	var items: Array = raw as Array
+	var board_rect: Rect2i = Rect2i(Vector2i.ZERO, size)
+	for i: int in range(items.size()):
+		var where: String = '%s: "tiep_vien" mục %d' % [file, i + 1]
+		if not items[i] is Dictionary:
+			result.add_error("%s phải là một object, đang là %s" % [where, JsonFile.show(items[i])])
+			continue
+		var d: Dictionary = items[i] as Dictionary
+		for key: Variant in d.keys():
+			if not REINFORCEMENT_KEYS.has(key):
+				result.add_warning("%s: bỏ qua khóa lạ %s" % [where, JsonFile.show(key)])
+		var round_val: Variant = null
+		if not d.has("hiep"):
+			result.add_error('%s: thiếu khóa "hiep"' % where)
+		elif not JsonFile.is_whole(d["hiep"]) or int(d["hiep"]) < 2:
+			result.add_error('%s: "hiep" phải là số nguyên từ 2 trở lên, đang là %s'
+				% [where, JsonFile.show(d["hiep"])])
+		elif max_rounds > 0 and int(d["hiep"]) > max_rounds:
+			result.add_error('%s: "hiep" là %d, vượt quá số hiệp tối đa %d'
+				% [where, int(d["hiep"]), max_rounds])
+		else:
+			round_val = int(d["hiep"])
+
+		var cell: Variant = null
+		if not d.has("o"):
+			result.add_error('%s: thiếu khóa "o"' % where)
+		else:
+			var parsed: Variant = BoardText.parse_cell(d["o"] as String) if d["o"] is String else null
+			if parsed == null or not board_rect.has_point(parsed as Vector2i):
+				result.add_error('%s: "o" là %s, không phải ô trong bàn' % [where, JsonFile.show(d["o"])])
+			else:
+				var c: Vector2i = parsed as Vector2i
+				if terrain_clean:
+					var terrain_symbol: String = (terrain_rows[c.y] as PackedStringArray)[c.x]
+					var terrain_type: int = BoardText.TERRAIN_SYMBOLS[terrain_symbol] as int
+					if not Terrain.is_walkable(terrain_type):
+						result.add_error('%s: ô %s là ô không đi vào được' % [where, BoardText.cell_text(c)])
+					else:
+						cell = c
+				else:
+					cell = c
+
+		var type_val: Variant = null
+		if not d.has("loai"):
+			result.add_error('%s: thiếu khóa "loai"' % where)
+		elif not d["loai"] is String or not ENEMY_SYMBOLS.has(d["loai"]):
+			result.add_error('%s: "loai" là %s, chỉ được "B", "K", "C"' % [where, JsonFile.show(d["loai"])])
+		else:
+			type_val = BoardText.UNIT_SYMBOLS[d["loai"]] as int
+
+		var hp_val: int = 0
+		if d.has("mau"):
+			if not JsonFile.is_whole(d["mau"]) or int(d["mau"]) < 1:
+				result.add_error('%s: "mau" phải là số nguyên từ 1 trở lên, đang là %s'
+					% [where, JsonFile.show(d["mau"])])
+			else:
+				hp_val = int(d["mau"])
+
+		if round_val != null and cell != null and type_val != null:
+			list.append(LevelData.Reinforcement.new(round_val as int, cell as Vector2i, type_val as int, hp_val))
+	return list

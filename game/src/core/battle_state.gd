@@ -64,6 +64,8 @@ static func from_level(level: LevelData, p_stats: Stats) -> BattleState:
 	state.next_enemy_id = next_id
 	for r: LevelData.Reinforcement in level.reinforcements:
 		state.reinforcements.append(r.clone())
+		if r.round == state.round_number + 1:
+			state.reinforcement_warnings.append(r.cell)
 	return state
 
 
