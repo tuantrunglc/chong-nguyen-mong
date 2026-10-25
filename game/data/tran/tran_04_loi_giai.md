@@ -14,9 +14,9 @@
 - **Chỉ số Lòng dân (`long_dan`):** Bắt đầu trận với **3 điểm**. Cần bảo vệ tuyệt đối không để mất điểm nào.
 - **Rừng rậm (`#`):** Vật cản không đi vào được; đẩy quân va vào rừng gây **1 sát thương va chạm** (`COLLIDED`). Chặn đường kéo của Dư và chặn lao của Lão.
 - **Sông (`~`):** Nằm ở góc Tây Nam (`0,4`, `1,4`, `0,5`, `1,5`).
-- **Nguyễn Khoái (`1`):** Đánh ô kề, **2 sát thương**, đẩy lùi mục tiêu **1 ô** theo hướng đánh. Nếu đẩy địch va vào vật cản (rừng/mép bàn), địch mất thêm 1 máu (tổng 3 sát thương dứt điểm Bộ binh).
+- **Nguyễn Khoái (`1`):** Đánh ô kề, **2 sát thương**, đẩy lùi mục tiêu **1 ô** theo hướng đánh. Nếu đẩy địch va vào vật cản (rừng/mép bàn), địch mất thêm 1 máu (tổng 3 sát thương dứt điểm Bộ binh). **Đặc biệt lưu ý: Đẩy địch va chạm vào Làng cũng làm Lòng dân −1** (bẫy người chơi rất dễ phạm phải nếu đẩy địch bừa bãi về phía làng!).
 - **Phạm Ngũ Lão (`2`):** Phóng lao thẳng hàng ô thứ 2–4, **1 sát thương**. Lao **bay qua ô kề** (dù có tướng mình đứng chắn ở ô kề thì lao vẫn bay qua trúng địch phía sau).
-- **Trần Khánh Dư (`3`):** Dùng đòn kéo (`keo`), nhắm quân Nguyên đầu tiên trên hàng/cột trong tầm 2–3 ô, kéo mục tiêu về phía mình 1–2 ô, 0 sát thương. Rất hữu hiệu để kéo địch lệch khỏi ô làng đang bị nhắm đánh!
+- **Trần Khánh Dư (`3`):** Dùng đòn kéo (`keo`), nhắm quân Nguyên đầu tiên trên hàng/cột trong tầm 2–3 ô, kéo mục tiêu về phía mình 1–2 ô, 0 sát thương trực tiếp. **Vật đầu tiên bất kỳ (tướng mình, làng, rừng) trên hướng kéo đều chặn đường kéo**, không thể kéo quân đứng sau vật cản. Rất hữu hiệu để kéo địch lệch khỏi ô làng đang bị nhắm đánh!
 - **Giới hạn hiệp:** Tối đa **6 hiệp** (`so_hiep_toi_da: 6`). Lời giải này hoàn thành thắng lợi ngay ở **hiệp 3**.
 
 ---
@@ -75,7 +75,7 @@ hàng 5:  ~ ~ . . . . .
 10. Bấm **Space** (Kết thúc lượt).
 
 - **Pha địch:**
-  - Kỵ binh K lao thẳng xuống Nam vào ô `2,4` trống không (đánh vào khoảng không, không trúng ai).
+  - Kỵ binh K lao thẳng xuống Nam hết cột 2 tới mép bàn (hàng 5) mà không trúng ai (toàn ô trống, không ai mất máu).
   - Bộ binh B1 từ `1,0` tiến sang `0,0` và vung đao nhắm Làng D1 ở `0,1`. K quay sang báo đòn vào Dư ở `3,2`.
 
 ---
@@ -130,6 +130,18 @@ hàng 5:  ~ ~ . . . . .
    - Khoái vung đao chém hướng Bắc gây 2 sát thương, đồng thời đẩy B1 văng vào mép bàn phía Bắc!
    - B1 va vào mép bàn chịu thêm 1 sát thương va chạm (tổng 2 + 1 = 3 sát thương) → **Bộ binh B1 gục tại chỗ!**
 6. Quân Nguyên bị quét sạch khỏi sa bàn: **Chiến thắng vang dội!**
+
+Bàn sau khi quét sạch quân Nguyên (kết thúc trận):
+```text
+hàng 0:  . . . 3 . # #
+hàng 1:  D 1 . . # . .
+hàng 2:  . . . . 2 . .
+hàng 3:  . . . . . D .
+hàng 4:  ~ ~ . . . . .
+hàng 5:  ~ ~ . . . . .
+```
+
+**Khoái 3/3 máu, Lão 3/3 máu, Dư 3/3 máu — Lòng dân 3/3 — không tướng nào mất máu, không ngôi làng nào bị hại.**
 
 ---
 
