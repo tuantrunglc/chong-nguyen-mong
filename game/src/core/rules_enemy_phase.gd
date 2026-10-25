@@ -11,8 +11,8 @@ static func end_player_turn(state: BattleState, events: Array[BattleEvent]) -> v
 	_strike_all(state, events)
 	if Rules.is_battle_over(state):
 		return
-	_heal_from_granaries(state, events)
-	if RulesVictory.check_round_limit(state, events):
+	_end_of_round(state, events)
+	if Rules.is_battle_over(state):
 		return
 	state.round_number += 1
 	for unit: Unit in state.units:
@@ -50,6 +50,14 @@ static func _strike_all(state: BattleState, events: Array[BattleEvent]) -> void:
 		events.append_array(strike)
 		if Rules.is_battle_over(state):
 			return
+
+
+## Pha cuối hiệp (kiến trúc dòng 846, 897–908): kho lương hồi máu, kiểm tra hết hiệp (Story 3.5, 3.9).
+## Story 3.10 sẽ chèn báo tiếp viện vào sau hồi máu và trước kiểm hết hiệp.
+static func _end_of_round(state: BattleState, events: Array[BattleEvent]) -> void:
+	state.phase = BattleState.Phase.END_OF_ROUND
+	_heal_from_granaries(state, events)
+	RulesVictory.check_round_limit(state, events)
 
 
 ## Cuối hiệp: mỗi quân Nguyên đứng kề ít nhất một kho lương hồi 1 máu (Story 3.9).

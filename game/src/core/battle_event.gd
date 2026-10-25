@@ -42,7 +42,8 @@ enum Type {
 ## PULL: đòn kéo của Trần Khánh Dư (Story 2.4); mọi MOVED của đòn kéo mang nguyên nhân này.
 ## ENEMY_STRIKE: đòn quân Nguyên đã báo (Story 2.8); tách khỏi STRIKE để mưu kế cộng sát thương tướng không đụng tới.
 ## SPIKES: sát thương hầm chông (Story 3.4).
-enum Cause { WALK, STRIKE, PUSH, COLLISION, PULL, ENEMY_STRIKE, SPIKES }
+## HEAL: hồi máu từ kho lương hoặc hiệu ứng (Story 3.9).
+enum Cause { WALK, STRIKE, PUSH, COLLISION, PULL, ENEMY_STRIKE, SPIKES, HEAL }
 
 ## Vì sao lệnh bị từ chối (REJECTED). Kịch bản luật ghi bằng mã "tu_choi" (ScenarioRunner.REJECT_EVENTS).
 enum Reject {
@@ -152,5 +153,5 @@ static func village_damaged(cell: Vector2i, p_amount: int = 1, p_cause: Cause = 
 	return BattleEvent.new(Type.VILLAGE_DAMAGED, 0, Vector2i.ZERO, cell, p_cause, Reject.NONE, "", 0, p_amount)
 
 
-static func healed(p_unit_id: int, p_amount: int, p_cell: Vector2i) -> BattleEvent:
-	return BattleEvent.new(Type.HEALED, p_unit_id, Vector2i.ZERO, p_cell, Cause.WALK, Reject.NONE, "", 0, p_amount)
+static func healed(p_unit_id: int, p_amount: int, p_cell: Vector2i, p_cause: Cause = Cause.HEAL) -> BattleEvent:
+	return BattleEvent.new(Type.HEALED, p_unit_id, Vector2i.ZERO, p_cell, p_cause, Reject.NONE, "", 0, p_amount)
