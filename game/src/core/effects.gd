@@ -42,5 +42,16 @@ static func damage_morale(state: BattleState, amount: int, cell: Vector2i, cause
 	events.append(BattleEvent.village_damaged(cell, lost, cause))
 
 
+## Hồi amount máu cho quân (không vượt máu tối đa). Ghi HEALED với số máu đã hồi thật (Story 3.9).
+static func heal(state: BattleState, unit: Unit, amount: int, events: Array[BattleEvent]) -> void:
+	assert(amount > 0, "Effects.heal: amount %d" % amount)
+	var max_hp: int = state.stats.max_hp(unit.type)
+	if unit.hp >= max_hp:
+		return
+	var gained: int = mini(amount, max_hp - unit.hp)
+	unit.hp += gained
+	events.append(BattleEvent.healed(unit.id, gained, unit.cell))
+
+
 static func _remove(state: BattleState, unit: Unit) -> void:
 	state.units.erase(unit)

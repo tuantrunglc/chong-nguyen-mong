@@ -105,7 +105,7 @@ func _base_seconds(event: BattleEvent) -> float:
 	match event.type:
 		BattleEvent.Type.MOVED, BattleEvent.Type.ATTACKED:
 			return SECONDS_PER_EVENT
-		BattleEvent.Type.COLLIDED, BattleEvent.Type.DAMAGED, BattleEvent.Type.TELEGRAPHED, BattleEvent.Type.VILLAGE_DAMAGED:
+		BattleEvent.Type.COLLIDED, BattleEvent.Type.DAMAGED, BattleEvent.Type.TELEGRAPHED, BattleEvent.Type.VILLAGE_DAMAGED, BattleEvent.Type.HEALED:
 			return DAMAGE_SECONDS
 		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
 			return DEATH_SECONDS
@@ -127,6 +127,9 @@ func _play_one(event: BattleEvent, seconds: float, snapshot: BattleState) -> voi
 		BattleEvent.Type.DAMAGED, BattleEvent.Type.TELEGRAPHED:
 			if token != null:
 				await _flash(token, seconds)
+		BattleEvent.Type.HEALED:
+			if token != null:
+				await _flash_heal(token, seconds)
 		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
 			if token != null:
 				await _sink_or_fade(token, event, seconds)
@@ -225,6 +228,14 @@ func _flash(token: UnitToken, seconds: float) -> void:
 	var normal: Color = token.modulate
 	var tween: Tween = _new_tween()
 	tween.tween_property(token, "modulate", Color(1.0, 0.35, 0.35, normal.a), seconds * 0.35)
+	tween.tween_property(token, "modulate", normal, seconds * 0.65)
+	await _wait(seconds)
+
+
+func _flash_heal(token: UnitToken, seconds: float) -> void:
+	var normal: Color = token.modulate
+	var tween: Tween = _new_tween()
+	tween.tween_property(token, "modulate", Color(0.4, 1.0, 0.4, normal.a), seconds * 0.35)
 	tween.tween_property(token, "modulate", normal, seconds * 0.65)
 	await _wait(seconds)
 

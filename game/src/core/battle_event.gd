@@ -34,6 +34,8 @@ enum Type {
 	TELEGRAPH_CANCELLED,
 	## Làng ở to_cell bị trúng đòn/va chạm (Story 3.7): amount là số Lòng dân bị trừ, cause là nguyên nhân.
 	VILLAGE_DAMAGED,
+	## Quân unit_id được hồi amount máu tại ô to_cell (Story 3.9).
+	HEALED,
 }
 
 ## Vì sao quân đổi ô hoặc mất máu. STRIKE: đòn có sát thương của tướng (Khoái, Lão).
@@ -148,3 +150,7 @@ static func telegraph_cancelled(p_unit_id: int, p_from: Vector2i, p_order: int, 
 
 static func village_damaged(cell: Vector2i, p_amount: int = 1, p_cause: Cause = Cause.ENEMY_STRIKE) -> BattleEvent:
 	return BattleEvent.new(Type.VILLAGE_DAMAGED, 0, Vector2i.ZERO, cell, p_cause, Reject.NONE, "", 0, p_amount)
+
+
+static func healed(p_unit_id: int, p_amount: int, p_cell: Vector2i) -> BattleEvent:
+	return BattleEvent.new(Type.HEALED, p_unit_id, Vector2i.ZERO, p_cell, Cause.WALK, Reject.NONE, "", 0, p_amount)

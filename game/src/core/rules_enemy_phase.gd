@@ -11,6 +11,7 @@ static func end_player_turn(state: BattleState, events: Array[BattleEvent]) -> v
 	_strike_all(state, events)
 	if Rules.is_battle_over(state):
 		return
+	_heal_from_granaries(state, events)
 	if RulesVictory.check_round_limit(state, events):
 		return
 	state.round_number += 1
@@ -49,6 +50,27 @@ static func _strike_all(state: BattleState, events: Array[BattleEvent]) -> void:
 		events.append_array(strike)
 		if Rules.is_battle_over(state):
 			return
+
+
+## Cuối hiệp: mỗi quân Nguyên đứng kề ít nhất một kho lương hồi 1 máu (Story 3.9).
+static func _heal_from_granaries(state: BattleState, events: Array[BattleEvent]) -> void:
+	var enemies: Array[Unit] = []
+	for unit: Unit in state.units:
+		if UnitType.is_general(unit.type):
+			continue
+		if _is_adjacent_to_granary(state, unit.cell):
+			enemies.append(unit)
+	enemies.sort_custom(func(a: Unit, b: Unit) -> bool: return a.id < b.id)
+	for enemy: Unit in enemies:
+		Effects.heal(state, enemy, 1, events)
+
+
+static func _is_adjacent_to_granary(state: BattleState, cell: Vector2i) -> bool:
+	for dir: Vector2i in Grid.DIRECTIONS:
+		var neighbor: Vector2i = cell + dir
+		if state.in_bounds(neighbor) and state.terrain_at(neighbor) == Terrain.GRANARY:
+			return true
+	return false
 
 
 ## Pha chuẩn bị của hiệp 1 (lệnh BEGIN_BATTLE): không sang hiệp, không ROUND_STARTED.

@@ -4,7 +4,7 @@ baseline_commit: 09c3912
 
 # Story 3.8: Trận 4: Bảo vệ làng
 
-Status: review
+Status: done
 
 ## Story
 
