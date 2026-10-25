@@ -101,6 +101,12 @@ static func describe(events: Array[BattleEvent]) -> Array[String]:
 			BattleEvent.Type.HEALED:
 				out.append("HEALED %d +%d %s %s" % [e.unit_id, e.amount, BoardText.cell_text(e.to_cell),
 					BattleEvent.Cause.find_key(e.cause)])
+			BattleEvent.Type.REINFORCEMENT_WARNED:
+				out.append("REINFORCEMENT_WARNED %s %d r%d" % [BoardText.cell_text(e.to_cell), e.amount, e.round_number])
+			BattleEvent.Type.REINFORCEMENT_SPAWNED:
+				out.append("REINFORCEMENT_SPAWNED %d %s %d" % [e.unit_id, BoardText.cell_text(e.to_cell), e.amount])
+			BattleEvent.Type.REINFORCEMENT_BLOCKED:
+				out.append("REINFORCEMENT_BLOCKED %s %d blocker=%d" % [BoardText.cell_text(e.to_cell), e.amount, e.other_id])
 			BattleEvent.Type.REJECTED:
 				out.append("REJECTED %s" % BattleEvent.Reject.find_key(e.reject))
 			_:

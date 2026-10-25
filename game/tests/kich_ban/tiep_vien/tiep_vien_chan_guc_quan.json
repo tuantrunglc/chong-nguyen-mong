@@ -1,0 +1,47 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Bộ binh B chỉ còn 1 máu đứng chặn ô tiếp viện (3,0): sang hiệp 2, B mất 1 máu và gục, tiếp viện bị hủy, ô (3,0) trống.",
+  "da_duyet": true,
+  "truoc": {
+    "dia_hinh": [
+      ". # . . .",
+      "# # . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      "B . . B .",
+      ". . . 1 .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "mau": {
+      "3,0": 1
+    },
+    "tiep_vien": [
+      { "hiep": 2, "o": "3,0", "loai": "K" }
+    ]
+  },
+  "hanh_dong": [
+    { "lenh": "ket_thuc_luot" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". # . . .",
+      "# # . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      "B . . . .",
+      ". . . 1 .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "hiep": 2
+  }
+}

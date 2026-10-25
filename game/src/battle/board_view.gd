@@ -19,6 +19,9 @@ const CELL_COLOR: Color = Color(0.93, 0.87, 0.73)
 const LINE_COLOR: Color = Color(0.36, 0.24, 0.14)
 const LINE_WIDTH: float = 2.0
 const BORDER_WIDTH: float = 4.0
+## Ký hiệu cảnh báo ô tiếp viện hiệp sau (Story 3.10, FR35): viền cam vàng khác ô đỏ đòn địch.
+const REINFORCEMENT_BORDER: Color = Color(1.0, 0.75, 0.2)
+const REINFORCEMENT_FILL: Color = Color(0.95, 0.65, 0.15, 0.35)
 ## Độ dày mép bàn ở cạnh trước.
 const EDGE_DEPTH: float = 12.0
 const EDGE_SHADE: float = 0.4
@@ -461,6 +464,9 @@ func _draw() -> void:
 				draw_rect(_top_rect(cell), REACH_COLOR)
 			if cell == _selected_cell:
 				draw_polyline(_ellipse(_top_center(cell), SELECT_RADIUS), SELECT_COLOR, SELECT_WIDTH, true)
+	if _state != null and not _state.reinforcement_warnings.is_empty():
+		for cell: Vector2i in _state.reinforcement_warnings:
+			_draw_reinforcement_marker(cell)
 	if _selected_cell != NO_CELL and not _path.is_empty():
 		var points: PackedVector2Array = PackedVector2Array([_top_center(_selected_cell)])
 		for cell: Vector2i in _path:
@@ -516,6 +522,20 @@ func _draw_spikes(cell: Vector2i) -> void:
 			base + Vector2(SPIKE_SIZE.x / 2.0, SPIKE_SIZE.y / 2.0),
 			base + Vector2(0, -SPIKE_SIZE.y / 2.0),
 		]), SPIKE_COLOR)
+
+
+## Ký hiệu đánh dấu ô tiếp viện hiệp sau (Story 3.10): nền vàng cam mờ, viền nổi và chevron hướng xuống.
+func _draw_reinforcement_marker(cell: Vector2i) -> void:
+	var rect: Rect2 = _top_rect(cell).grow(-3.0)
+	draw_rect(rect, REINFORCEMENT_FILL, true)
+	draw_rect(rect, REINFORCEMENT_BORDER, false, 3.0)
+	var center: Vector2 = _top_center(cell)
+	var chevron: PackedVector2Array = PackedVector2Array([
+		center + Vector2(-12, -8),
+		center + Vector2(0, 4),
+		center + Vector2(12, -8)
+	])
+	draw_polyline(chevron, REINFORCEMENT_BORDER, 3.0)
 
 
 ## Elip khép kín (vòng chọn, chấm cuối đường đi) nằm trên mặt ô nhìn chếch.

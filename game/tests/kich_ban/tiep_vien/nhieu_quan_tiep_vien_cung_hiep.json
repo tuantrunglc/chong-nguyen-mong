@@ -1,0 +1,45 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Hai quân tiếp viện (Bộ binh B ở 2,1 và Kỵ binh K ở 0,2) cùng xuất hiện ở hiệp 2: cả hai đều có mặt trên bàn và báo đòn vào Nguyễn Khoái.",
+  "da_duyet": true,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . #",
+      ". . . # ."
+    ],
+    "quan": [
+      ". . . . .",
+      ". . . . .",
+      ". . 1 . .",
+      ". . . . .",
+      ". . . . B"
+    ],
+    "tiep_vien": [
+      { "hiep": 2, "o": "2,1", "loai": "B" },
+      { "hiep": 2, "o": "0,2", "loai": "K" }
+    ]
+  },
+  "hanh_dong": [
+    { "lenh": "ket_thuc_luot" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . #",
+      ". . . # ."
+    ],
+    "quan": [
+      ". . . . .",
+      ". . B . .",
+      "K . 1 . .",
+      ". . . . .",
+      ". . . . B"
+    ],
+    "hiep": 2
+  }
+}

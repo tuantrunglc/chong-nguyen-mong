@@ -60,9 +60,10 @@ static func _morale_lost(state: BattleState) -> bool:
 	return state.max_morale > 0 and state.morale <= 0
 
 
-## Tiêu diệt: không còn quân Nguyên. Giữ ải thắng theo luật khác (Story 3.11), nên không thắng ở đây.
+## Tiêu diệt: không còn quân Nguyên trên bàn và không còn quân tiếp viện chưa xuất hiện (Story 3.10).
+## Giữ ải thắng theo luật khác (Story 3.11), nên không thắng ở đây.
 static func _enemies_cleared(state: BattleState) -> bool:
-	return state.mission == LevelData.Mission.ELIMINATE and _count(state, Unit.Faction.NGUYEN) == 0
+	return state.mission == LevelData.Mission.ELIMINATE and _count(state, Unit.Faction.NGUYEN) == 0 and state.reinforcements.is_empty()
 
 
 ## Mọi tướng trên bàn đã gục. Số tướng do file trận quy định, nên đếm quân còn lại, không viết cứng số tướng.

@@ -20,6 +20,25 @@ class UnitPlacement:
 		hp = p_hp
 
 
+## Một đợt quân tiếp viện xuất hiện theo hiệp (Story 3.10).
+class Reinforcement:
+	extends RefCounted
+
+	var round: int
+	var cell: Vector2i
+	var type: int
+	var hp: int
+
+	func _init(p_round: int, p_cell: Vector2i, p_type: int, p_hp: int = 0) -> void:
+		round = p_round
+		cell = p_cell
+		type = p_type
+		hp = p_hp
+
+	func clone() -> Reinforcement:
+		return Reinforcement.new(round, cell, type, hp)
+
+
 var format_version: int = 0
 var name: String = ""
 var mission: Mission = Mission.ELIMINATE
@@ -34,6 +53,8 @@ var size: Vector2i = Vector2i.ZERO
 var terrain: PackedInt32Array = PackedInt32Array()
 ## Tướng theo ký hiệu 1, 2, 3; rồi quân Nguyên theo thu_tu_dich.
 var units: Array[UnitPlacement] = []
+## Lịch quân tiếp viện theo hiệp (Story 3.10).
+var reinforcements: Array[Reinforcement] = []
 
 
 func terrain_at(cell: Vector2i) -> int:

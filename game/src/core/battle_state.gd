@@ -33,6 +33,12 @@ var mission: LevelData.Mission = LevelData.Mission.ELIMINATE
 var telegraphs: Array[Telegraph] = []
 ## Ý định của từng quân Nguyên trong pha chuẩn bị vừa rồi, theo thứ tự hành động (để F3 đọc từ bản chụp).
 var enemy_intents: Array[EnemyIntent] = []
+## Lịch quân tiếp viện còn lại theo hiệp (Story 3.10).
+var reinforcements: Array[LevelData.Reinforcement] = []
+## Các ô tiếp viện được cảnh báo cho hiệp sau (để UI vẽ ký hiệu riêng, Story 3.10).
+var reinforcement_warnings: Array[Vector2i] = []
+## Id kế tiếp cho quân Nguyên mới (Story 3.10).
+var next_enemy_id: int = FIRST_ENEMY_ID
 
 
 ## Tướng: id = vị trí trong UnitType.GENERALS + 1. Quân Nguyên: 101, 102… theo thứ tự level.units
@@ -46,15 +52,18 @@ static func from_level(level: LevelData, p_stats: Stats) -> BattleState:
 	state.max_rounds = level.max_rounds
 	state.max_morale = level.long_dan
 	state.morale = level.long_dan_hien_tai if level.long_dan_hien_tai > 0 else level.long_dan
-	var next_enemy_id: int = FIRST_ENEMY_ID
+	var next_id: int = FIRST_ENEMY_ID
 	for p: LevelData.UnitPlacement in level.units:
 		var id: int
 		if UnitType.is_general(p.type):
 			id = UnitType.GENERALS.find(p.type) + 1
 		else:
-			id = next_enemy_id
-			next_enemy_id += 1
+			id = next_id
+			next_id += 1
 		state.units.append(UnitFactory.create(id, p.type, p.cell, p_stats, p.hp))
+	state.next_enemy_id = next_id
+	for r: LevelData.Reinforcement in level.reinforcements:
+		state.reinforcements.append(r.clone())
 	return state
 
 
@@ -70,6 +79,10 @@ func clone() -> BattleState:
 	copy.phase = phase
 	copy.defeat_reason = defeat_reason
 	copy.mission = mission
+	copy.next_enemy_id = next_enemy_id
+	copy.reinforcement_warnings = reinforcement_warnings.duplicate()
+	for r: LevelData.Reinforcement in reinforcements:
+		copy.reinforcements.append(r.clone())
 	for u: Unit in units:
 		copy.units.append(Unit.new(u.id, u.type, u.cell, u.hp, u.has_moved, u.has_attacked))
 	for t: Telegraph in telegraphs:
@@ -128,6 +141,20 @@ func validate() -> Array[String]:
 		for u: Unit in units:
 			if u.faction == Unit.Faction.NGUYEN:
 				problems.append("đã thắng (Tiêu diệt) mà còn quân Nguyên %d" % u.id)
+		if not reinforcements.is_empty():
+			problems.append("đã thắng (Tiêu diệt) mà còn %d quân tiếp viện chưa xuất hiện" % reinforcements.size())
+	for r: LevelData.Reinforcement in reinforcements:
+		if r.round < 2:
+			problems.append("tiếp viện hiệp %d, cần từ 2 trở lên" % r.round)
+		if not in_bounds(r.cell):
+			problems.append("tiếp viện ở ô %d,%d nằm ngoài bàn" % [r.cell.x, r.cell.y])
+		elif not Terrain.is_walkable(terrain_at(r.cell)):
+			problems.append("tiếp viện ở ô %d,%d là ô không đi vào được" % [r.cell.x, r.cell.y])
+		if not UnitType.is_enemy(r.type):
+			problems.append("tiếp viện loại quân %d không phải quân Nguyên" % r.type)
+	for u: Unit in units:
+		if u.faction == Unit.Faction.NGUYEN and u.id >= next_enemy_id:
+			problems.append("quân Nguyên %d có id lớn hơn hoặc bằng next_enemy_id %d" % [u.id, next_enemy_id])
 	return problems
 
 

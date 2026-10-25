@@ -36,6 +36,12 @@ enum Type {
 	VILLAGE_DAMAGED,
 	## Quân unit_id được hồi amount máu tại ô to_cell (Story 3.9).
 	HEALED,
+	## Cuối hiệp: báo trước ô to_cell sẽ có quân tiếp viện loại amount ở hiệp round_number (Story 3.10).
+	REINFORCEMENT_WARNED,
+	## Đầu hiệp: quân tiếp viện unit_id loại amount xuất hiện tại ô to_cell (Story 3.10).
+	REINFORCEMENT_SPAWNED,
+	## Đầu hiệp: tiếp viện loại amount tại ô to_cell bị chặn bởi quân other_id (Story 3.10).
+	REINFORCEMENT_BLOCKED,
 }
 
 ## Vì sao quân đổi ô hoặc mất máu. STRIKE: đòn có sát thương của tướng (Khoái, Lão).
@@ -43,7 +49,8 @@ enum Type {
 ## ENEMY_STRIKE: đòn quân Nguyên đã báo (Story 2.8); tách khỏi STRIKE để mưu kế cộng sát thương tướng không đụng tới.
 ## SPIKES: sát thương hầm chông (Story 3.4).
 ## HEAL: hồi máu từ kho lương hoặc hiệu ứng (Story 3.9).
-enum Cause { WALK, STRIKE, PUSH, COLLISION, PULL, ENEMY_STRIKE, SPIKES, HEAL }
+## REINFORCEMENT: sát thương va chạm do tiếp viện xuất hiện trên ô đã có quân (Story 3.10).
+enum Cause { WALK, STRIKE, PUSH, COLLISION, PULL, ENEMY_STRIKE, SPIKES, HEAL, REINFORCEMENT }
 
 ## Vì sao lệnh bị từ chối (REJECTED). Kịch bản luật ghi bằng mã "tu_choi" (ScenarioRunner.REJECT_EVENTS).
 enum Reject {
@@ -155,3 +162,15 @@ static func village_damaged(cell: Vector2i, p_amount: int = 1, p_cause: Cause = 
 
 static func healed(p_unit_id: int, p_amount: int, p_cell: Vector2i, p_cause: Cause = Cause.HEAL) -> BattleEvent:
 	return BattleEvent.new(Type.HEALED, p_unit_id, Vector2i.ZERO, p_cell, p_cause, Reject.NONE, "", 0, p_amount)
+
+
+static func reinforcement_warned(p_cell: Vector2i, p_type: int, p_round: int) -> BattleEvent:
+	return BattleEvent.new(Type.REINFORCEMENT_WARNED, 0, Vector2i.ZERO, p_cell, Cause.WALK, Reject.NONE, "", p_round, p_type)
+
+
+static func reinforcement_spawned(p_unit_id: int, p_cell: Vector2i, p_type: int) -> BattleEvent:
+	return BattleEvent.new(Type.REINFORCEMENT_SPAWNED, p_unit_id, Vector2i.ZERO, p_cell, Cause.WALK, Reject.NONE, "", 0, p_type)
+
+
+static func reinforcement_blocked(p_cell: Vector2i, p_type: int, p_blocker_id: int) -> BattleEvent:
+	return BattleEvent.new(Type.REINFORCEMENT_BLOCKED, 0, Vector2i.ZERO, p_cell, Cause.REINFORCEMENT, Reject.NONE, "", 0, p_type, p_blocker_id)

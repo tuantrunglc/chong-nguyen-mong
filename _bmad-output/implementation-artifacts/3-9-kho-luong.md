@@ -4,7 +4,7 @@ baseline_commit: c3eb5bc
 
 # Story 3.9: Kho lương
 
-Status: review
+Status: done
 
 ## Story
 

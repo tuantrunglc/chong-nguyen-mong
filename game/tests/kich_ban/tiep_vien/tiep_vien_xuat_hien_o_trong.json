@@ -1,0 +1,44 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Kỵ binh tiếp viện xuất hiện ở ô trống (3,0) ở đầu hiệp 2, rồi báo đòn xung phong hướng Nam vào Nguyễn Khoái.",
+  "da_duyet": true,
+  "truoc": {
+    "dia_hinh": [
+      ". # . . .",
+      "# # . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      "B . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . 1 ."
+    ],
+    "tiep_vien": [
+      { "hiep": 2, "o": "3,0", "loai": "K" }
+    ]
+  },
+  "hanh_dong": [
+    { "lenh": "ket_thuc_luot" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". # . . .",
+      "# # . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      "B . . K .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . 1 ."
+    ],
+    "hiep": 2
+  }
+}

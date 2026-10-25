@@ -105,7 +105,7 @@ func _base_seconds(event: BattleEvent) -> float:
 	match event.type:
 		BattleEvent.Type.MOVED, BattleEvent.Type.ATTACKED:
 			return SECONDS_PER_EVENT
-		BattleEvent.Type.COLLIDED, BattleEvent.Type.DAMAGED, BattleEvent.Type.TELEGRAPHED, BattleEvent.Type.VILLAGE_DAMAGED, BattleEvent.Type.HEALED:
+		BattleEvent.Type.COLLIDED, BattleEvent.Type.DAMAGED, BattleEvent.Type.TELEGRAPHED, BattleEvent.Type.VILLAGE_DAMAGED, BattleEvent.Type.HEALED, BattleEvent.Type.REINFORCEMENT_SPAWNED, BattleEvent.Type.REINFORCEMENT_BLOCKED:
 			return DAMAGE_SECONDS
 		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
 			return DEATH_SECONDS
@@ -137,6 +137,14 @@ func _play_one(event: BattleEvent, seconds: float, snapshot: BattleState) -> voi
 			if _notice != null:
 				_notice.show_text(TranslationServer.translate("notice.morale_lost"))
 			await _flash_village(event.to_cell, seconds)
+		BattleEvent.Type.REINFORCEMENT_SPAWNED:
+			if _board != null and snapshot != null:
+				_board.show_state(snapshot)
+			token = _token(event.unit_id)
+			if token != null:
+				await _flash(token, seconds)
+		BattleEvent.Type.REINFORCEMENT_BLOCKED:
+			await _flash_village(event.to_cell, seconds)
 		_:
 			await _wait(seconds * 0.5)
 
@@ -146,6 +154,8 @@ func _apply_instant(event: BattleEvent, snapshot: BattleState) -> void:
 	_played.append(event)
 	if event.type == BattleEvent.Type.VILLAGE_DAMAGED and _notice != null:
 		_notice.show_text(TranslationServer.translate("notice.morale_lost"))
+	if event.type == BattleEvent.Type.REINFORCEMENT_SPAWNED and _board != null and snapshot != null:
+		_board.show_state(snapshot)
 	var token: UnitToken = _token(event.unit_id)
 	if token == null:
 		return

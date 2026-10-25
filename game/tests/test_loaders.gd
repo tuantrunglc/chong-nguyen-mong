@@ -383,6 +383,64 @@ func test_long_dan_without_village_is_rejected() -> void:
 		_errors(['có khóa "long_dan" mà không có ô làng "D" trong "dia_hinh"']))
 
 
+func test_tiep_vien_valid_loads() -> void:
+	var d: Dictionary = _with(_valid_level(), "tiep_vien", [
+		{ "hiep": 2, "o": "0,0", "loai": "K" },
+		{ "hiep": 3, "o": "2,2", "loai": "B", "mau": 2 }
+	])
+	var r: LoadResult = _level(d)
+	assert_true(r.ok, "; ".join(r.errors))
+	var level: LevelData = r.data as LevelData
+	assert_not_null(level)
+	assert_eq(level.reinforcements.size(), 2)
+	assert_eq(level.reinforcements[0].round, 2)
+	assert_eq(level.reinforcements[0].cell, Vector2i(0, 0))
+	assert_eq(level.reinforcements[0].type, UnitType.KY_BINH)
+	assert_eq(level.reinforcements[1].hp, 2)
+
+
+func test_tiep_vien_errors_vietnamese() -> void:
+	# tiep_vien không phải mảng
+	assert_eq(_level(_with(_valid_level(), "tiep_vien", "sai")).errors,
+		_errors(['"tiep_vien" phải là một danh sách, đang là "sai"']))
+
+	# mục không phải object
+	assert_eq(_level(_with(_valid_level(), "tiep_vien", ["sai"])).errors,
+		_errors(['"tiep_vien" mục 1 phải là một object, đang là "sai"']))
+
+	# thiếu hiep
+	assert_eq(_level(_with(_valid_level(), "tiep_vien", [{ "o": "0,0", "loai": "K" }])).errors,
+		_errors(['"tiep_vien" mục 1: thiếu khóa "hiep"']))
+
+	# hiep < 2
+	assert_eq(_level(_with(_valid_level(), "tiep_vien", [{ "hiep": 1, "o": "0,0", "loai": "K" }])).errors,
+		_errors(['"tiep_vien" mục 1: "hiep" phải là số nguyên từ 2 trở lên, đang là 1']))
+
+	# thiếu o
+	assert_eq(_level(_with(_valid_level(), "tiep_vien", [{ "hiep": 2, "loai": "K" }])).errors,
+		_errors(['"tiep_vien" mục 1: thiếu khóa "o"']))
+
+	# o ngoài bàn
+	assert_eq(_level(_with(_valid_level(), "tiep_vien", [{ "hiep": 2, "o": "99,99", "loai": "K" }])).errors,
+		_errors(['"tiep_vien" mục 1: "o" là "99,99", không phải ô trong bàn']))
+
+	# o là ô rừng (không đi vào được)
+	assert_eq(_level(_with(_valid_level(), "tiep_vien", [{ "hiep": 2, "o": "1,1", "loai": "K" }])).errors,
+		_errors(['"tiep_vien" mục 1: ô 1,1 là ô không đi vào được']))
+
+	# thiếu loai
+	assert_eq(_level(_with(_valid_level(), "tiep_vien", [{ "hiep": 2, "o": "0,0" }])).errors,
+		_errors(['"tiep_vien" mục 1: thiếu khóa "loai"']))
+
+	# loai không hợp lệ
+	assert_eq(_level(_with(_valid_level(), "tiep_vien", [{ "hiep": 2, "o": "0,0", "loai": "tuong" }])).errors,
+		_errors(['"tiep_vien" mục 1: "loai" là "tuong", chỉ được "B", "K", "C"']))
+
+	# mau < 1
+	assert_eq(_level(_with(_valid_level(), "tiep_vien", [{ "hiep": 2, "o": "0,0", "loai": "K", "mau": 0 }])).errors,
+		_errors(['"tiep_vien" mục 1: "mau" phải là số nguyên từ 1 trở lên, đang là 0']))
+
+
 # ---------- File trận: bàn cờ ----------
 
 func test_layer_wrong_type() -> void:

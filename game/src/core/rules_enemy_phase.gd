@@ -52,12 +52,22 @@ static func _strike_all(state: BattleState, events: Array[BattleEvent]) -> void:
 			return
 
 
-## Pha cuối hiệp (kiến trúc dòng 846, 897–908): kho lương hồi máu, kiểm tra hết hiệp (Story 3.5, 3.9).
-## Story 3.10 sẽ chèn báo tiếp viện vào sau hồi máu và trước kiểm hết hiệp.
+## Pha cuối hiệp (kiến trúc dòng 846, 897–908): kho lương hồi máu, báo tiếp viện, kiểm tra hết hiệp (Story 3.5, 3.9, 3.10).
 static func _end_of_round(state: BattleState, events: Array[BattleEvent]) -> void:
 	state.phase = BattleState.Phase.END_OF_ROUND
 	_heal_from_granaries(state, events)
+	_warn_reinforcements(state, events)
 	RulesVictory.check_round_limit(state, events)
+
+
+## Báo trước các ô tiếp viện sẽ xuất hiện ở hiệp sau (Story 3.10, FR35).
+static func _warn_reinforcements(state: BattleState, events: Array[BattleEvent]) -> void:
+	state.reinforcement_warnings.clear()
+	var next_round: int = state.round_number + 1
+	for r: LevelData.Reinforcement in state.reinforcements:
+		if r.round == next_round:
+			state.reinforcement_warnings.append(r.cell)
+			events.append(BattleEvent.reinforcement_warned(r.cell, r.type, r.round))
 
 
 ## Cuối hiệp: mỗi quân Nguyên đứng kề ít nhất một kho lương hồi 1 máu (Story 3.9).
@@ -90,13 +100,17 @@ static func begin_battle(state: BattleState, events: Array[BattleEvent]) -> void
 	prepare(state, events)
 
 
-## Pha địch chuẩn bị: xóa đòn cũ, rồi từng quân Nguyên theo thứ tự (id, tức thu_tu_dich) chọn mục tiêu và ô đứng
-## (EnemyAI.plan) và đi từng ô tới đó. Đi hết cả bọn rồi mới báo đòn, theo bàn cuối cùng: Kỵ binh đã báo xung phong
-## mà quân id lớn hơn đi chắn đường thì không báo (reason về CLOSEST). Số thứ tự chỉ đếm quân có đòn. Xong về PLAYER.
+## Pha địch chuẩn bị: xóa đòn cũ, tiếp viện xuất hiện (bước 1a), rồi từng quân Nguyên theo thứ tự (id, tức thu_tu_dich
+## rồi tiếp viện) chọn mục tiêu và ô đứng (EnemyAI.plan) và đi từng ô tới đó (bước 1b). Đi hết cả bọn rồi mới báo đòn,
+## theo bàn cuối cùng: Kỵ binh đã báo xung phong mà quân id lớn hơn đi chắn đường thì không báo (reason về CLOSEST).
+## Số thứ tự chỉ đếm quân có đòn. Xong về PLAYER.
 static func prepare(state: BattleState, events: Array[BattleEvent]) -> void:
 	state.phase = BattleState.Phase.ENEMY_PREPARE
 	state.telegraphs.clear()
 	state.enemy_intents.clear()
+	_spawn_reinforcements(state, events)
+	if Rules.is_battle_over(state):
+		return
 	var enemies: Array[Unit] = []
 	for unit: Unit in state.units:
 		if unit.faction == Unit.Faction.NGUYEN:
@@ -139,3 +153,33 @@ static func prepare(state: BattleState, events: Array[BattleEvent]) -> void:
 		events.append(BattleEvent.telegraphed(unit.id, unit.cell, telegraph.target_cell(state), next_order))
 		next_order += 1
 	state.phase = BattleState.Phase.PLAYER
+
+
+## Bước 1a tiếp viện (Story 3.10): xử lý theo thứ tự khai báo. Ô có quân đứng: quân đó mất 1 máu, tiếp viện bị hủy.
+## Ô trống: tiếp viện xuất hiện trên bàn, nhận id tiếp theo.
+static func _spawn_reinforcements(state: BattleState, events: Array[BattleEvent]) -> void:
+	var current_reinforcements: Array[LevelData.Reinforcement] = []
+	var remaining: Array[LevelData.Reinforcement] = []
+	for r: LevelData.Reinforcement in state.reinforcements:
+		if r.round == state.round_number:
+			current_reinforcements.append(r)
+		else:
+			remaining.append(r)
+	state.reinforcements = remaining
+	state.reinforcement_warnings.clear()
+
+	for r: LevelData.Reinforcement in current_reinforcements:
+		var occupant: Unit = state.unit_at(r.cell)
+		if occupant != null:
+			var strike: Array[BattleEvent] = []
+			Effects.damage(state, occupant, 1, BattleEvent.Cause.REINFORCEMENT, strike)
+			strike.append(BattleEvent.reinforcement_blocked(r.cell, r.type, occupant.id))
+			RulesVictory.check(state, strike)
+			events.append_array(strike)
+			if Rules.is_battle_over(state):
+				return
+		else:
+			var new_unit: Unit = UnitFactory.create(state.next_enemy_id, r.type, r.cell, state.stats, r.hp)
+			state.next_enemy_id += 1
+			state.units.append(new_unit)
+			events.append(BattleEvent.reinforcement_spawned(new_unit.id, r.cell, r.type))

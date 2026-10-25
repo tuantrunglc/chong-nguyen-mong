@@ -12,7 +12,7 @@ const FORMAT_VERSION: int = 1
 
 const ROOT_KEYS: Array[String] = ["phien_ban_dinh_dang", "mo_ta", "da_duyet", "truoc", "hanh_dong", "sau"]
 ## "bao_don" của "truoc": đòn quân Nguyên đã báo sẵn khi kịch bản bắt đầu (Story 2.8), không bắt buộc.
-const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich", "bao_don", "so_hiep_toi_da", "long_dan", "long_dan_toi_da"]
+const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich", "bao_don", "so_hiep_toi_da", "long_dan", "long_dan_toi_da", "tiep_vien"]
 ## "hiep", "da_di", "da_danh", "ket_qua", "bao_don", "o_do", "long_dan" không bắt buộc: không ghi thì không kiểm (review Story 1.5,
 ## tác giả chốt 2026-10-18; "ket_qua": Story 2.5; "bao_don": Story 2.6; "o_do": Story 2.7; "long_dan": Story 3.7).
 const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh", "ket_qua", "bao_don",
@@ -81,6 +81,8 @@ class Section:
 	var long_dan: int = -1
 	## Lòng dân tối đa (chỉ "truoc", Story 3.7); 0 là bằng long_dan.
 	var long_dan_toi_da: int = 0
+	## Lịch tiếp viện (chỉ "truoc", Story 3.10).
+	var reinforcements: Array[LevelData.Reinforcement] = []
 	## "hiep" (chỉ "sau"); 0 là không ghi.
 	var round_number: int = 0
 	## "da_di" (chỉ "sau"): UnitType các tướng đã đi, theo thứ tự ký hiệu; null là không ghi.
@@ -307,6 +309,9 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 			var long_dan_val: Variant = JsonFile.get_int(section, "long_dan", name + ".long_dan", min_morale, file, result)
 			if long_dan_val != null:
 				side.long_dan = int(long_dan_val)
+	if known.has("tiep_vien") and section.has("tiep_vien"):
+		side.reinforcements = LevelLoader._read_reinforcements(section, side.terrain_rows, side.units_clean,
+			side.size, file, result)
 	return side
 
 
@@ -662,6 +667,7 @@ static func _build_level(side: Section, name: String) -> LevelData:
 		level.long_dan = maxi(0, side.long_dan)
 	level.size = side.size
 	level.terrain = BoardLayers.terrain_values(side.terrain_rows)
+	level.reinforcements = side.reinforcements
 	for symbol: String in BoardLayers.GENERAL_SYMBOLS:
 		if side.generals.has(symbol):
 			var cell: Vector2i = side.generals[symbol] as Vector2i

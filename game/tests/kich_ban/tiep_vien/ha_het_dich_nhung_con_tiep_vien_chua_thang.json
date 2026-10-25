@@ -1,0 +1,47 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Hạ hết quân Nguyên trên bàn ở hiệp 1 nhưng vẫn còn tiếp viện ở hiệp 2: trận đấu chưa kết thúc (đang chơi).",
+  "da_duyet": true,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . B .",
+      ". . . 1 ."
+    ],
+    "mau": {
+      "3,3": 1
+    },
+    "tiep_vien": [
+      { "hiep": 2, "o": "0,0", "loai": "K" }
+    ]
+  },
+  "hanh_dong": [
+    { "lenh": "danh", "tuong": "1", "o": "3,3" }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . ."
+    ],
+    "quan": [
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . . .",
+      ". . . 1 ."
+    ],
+    "ket_qua": "dang_choi"
+  }
+}
