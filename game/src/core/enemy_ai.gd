@@ -21,36 +21,67 @@ static func plan(state: BattleState, unit: Unit) -> EnemyIntent:
 	var field: Dictionary = {}
 	var best_key: Array[int] = []
 
-	# Story 3.7: Bộ binh và Kỵ binh nhắm tướng hoặc làng gần nhất; hòa bước thì ưu tiên làng (0 < 1).
-	# Cung kỵ không nhắm làng (chỉ nhắm tướng Đại Việt).
-	if unit.type != UnitType.CUNG_KY:
-		for y: int in range(state.size.y):
-			for x: int in range(state.size.x):
-				var cell: Vector2i = Vector2i(x, y)
-				if state.terrain_at(cell) != Terrain.VILLAGE:
+	if state.mission == LevelData.Mission.HOLD_PASS:
+		# Story 3.11 (FR23): Trong trận Giữ ải, Bộ binh và Kỵ binh nhắm ô ải gần nhất; Cung kỵ nhắm tướng gần nhất.
+		if unit.type != UnitType.CUNG_KY:
+			for y: int in range(state.size.y):
+				for x: int in range(state.size.x):
+					var cell: Vector2i = Vector2i(x, y)
+					if state.terrain_at(cell) != Terrain.PASS:
+						continue
+					var f: Dictionary = Pathfinding.distance_field(state, unit, cell)
+					if not f.has(unit.cell):
+						continue
+					var key: Array[int] = [f[unit.cell] as int, cell.y, -cell.x]
+					if best_key.is_empty() or _less(key, best_key):
+						target_unit = null
+						target_cell = cell
+						field = f
+						best_key = key
+		else:
+			for general: Unit in state.units:
+				if general.faction != Unit.Faction.DAI_VIET:
 					continue
-				var f: Dictionary = Pathfinding.distance_field(state, unit, cell)
+				var f: Dictionary = Pathfinding.distance_field(state, unit, general.cell)
 				if not f.has(unit.cell):
 					continue
-				var key: Array[int] = [f[unit.cell] as int, 0, 0, cell.y, -cell.x]
+				var key: Array[int] = [f[unit.cell] as int, general.hp, general.cell.y, -general.cell.x]
 				if best_key.is_empty() or _less(key, best_key):
-					target_unit = null
-					target_cell = cell
+					target_unit = general
+					target_cell = general.cell
 					field = f
 					best_key = key
+	else:
+		# Story 3.7: Bộ binh và Kỵ binh nhắm tướng hoặc làng gần nhất; hòa bước thì ưu tiên làng (0 < 1).
+		# Cung kỵ không nhắm làng (chỉ nhắm tướng Đại Việt).
+		if unit.type != UnitType.CUNG_KY:
+			for y: int in range(state.size.y):
+				for x: int in range(state.size.x):
+					var cell: Vector2i = Vector2i(x, y)
+					if state.terrain_at(cell) != Terrain.VILLAGE:
+						continue
+					var f: Dictionary = Pathfinding.distance_field(state, unit, cell)
+					if not f.has(unit.cell):
+						continue
+					var key: Array[int] = [f[unit.cell] as int, 0, 0, cell.y, -cell.x]
+					if best_key.is_empty() or _less(key, best_key):
+						target_unit = null
+						target_cell = cell
+						field = f
+						best_key = key
 
-	for general: Unit in state.units:
-		if general.faction != Unit.Faction.DAI_VIET:
-			continue
-		var f: Dictionary = Pathfinding.distance_field(state, unit, general.cell)
-		if not f.has(unit.cell):
-			continue
-		var key: Array[int] = [f[unit.cell] as int, 1, general.hp, general.cell.y, -general.cell.x]
-		if best_key.is_empty() or _less(key, best_key):
-			target_unit = general
-			target_cell = general.cell
-			field = f
-			best_key = key
+		for general: Unit in state.units:
+			if general.faction != Unit.Faction.DAI_VIET:
+				continue
+			var f: Dictionary = Pathfinding.distance_field(state, unit, general.cell)
+			if not f.has(unit.cell):
+				continue
+			var key: Array[int] = [f[unit.cell] as int, 1, general.hp, general.cell.y, -general.cell.x]
+			if best_key.is_empty() or _less(key, best_key):
+				target_unit = general
+				target_cell = general.cell
+				field = f
+				best_key = key
 
 	if best_key.is_empty():
 		return EnemyIntent.new(unit.id, unit.type, unit.cell, unit.cell, 0, 0, EnemyIntent.Reason.NO_PATH)
@@ -97,6 +128,11 @@ static func plan(state: BattleState, unit: Unit) -> EnemyIntent:
 ## cùng hàng hoặc cùng cột, cách `tam_ban_gan`–`tam_ban_xa` ô, không xét QUÂN ở giữa, nhưng rừng hoặc kho lương
 ## giữa thì chặn (Story 3.1); làng chặn ở Story 3.7.
 static func can_hit_from(state: BattleState, unit: Unit, cell: Vector2i, target: Vector2i) -> bool:
+	if state.in_bounds(target) and state.terrain_at(target) == Terrain.PASS:
+		# Trong trận Giữ ải (Story 3.11): ô ải chỉ là mục tiêu ra đòn khi có tướng trấn giữ.
+		# Nếu ô ải trống, địch không đứng ngoài đánh không khí mà đi thẳng vào ô ải để chiếm ải.
+		if state.unit_at(target) == null:
+			return false
 	match unit.type:
 		UnitType.BO_BINH:
 			return Grid.is_adjacent(cell, target)
@@ -112,8 +148,8 @@ static func can_hit_from(state: BattleState, unit: Unit, cell: Vector2i, target:
 				step += dir
 			return true
 		UnitType.CUNG_KY:
-			if state.in_bounds(target) and state.terrain_at(target) == Terrain.VILLAGE:
-				return false  # Cung kỵ không nhắm làng (Story 3.7)
+			if state.in_bounds(target) and (state.terrain_at(target) == Terrain.VILLAGE or state.terrain_at(target) == Terrain.PASS):
+				return false  # Cung kỵ không nhắm làng (Story 3.7) và không nhắm ải (Story 3.11)
 			var dir: Vector2i = Grid.straight_dir(cell, target)
 			if dir == Vector2i.ZERO:
 				return false

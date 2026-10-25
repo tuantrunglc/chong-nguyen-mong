@@ -118,6 +118,14 @@ func test_valid_scenario_loads() -> void:
 	assert_eq(s.after_units.size(), 2)
 
 
+func test_giu_ai_mission_scenario_loads() -> void:
+	var d: Dictionary = _valid()
+	(d["truoc"] as Dictionary)["kieu"] = "giu_ai"
+	var sc: ScenarioData = _scenario(d)
+	assert_eq(sc.before.mission, LevelData.Mission.HOLD_PASS)
+	assert_eq(sc.before.max_rounds, 5)
+
+
 func test_hp_overrides_one_unit_and_others_are_full() -> void:
 	var d: Dictionary = _valid()
 	d["truoc"]["mau"] = {"5,4": 1}

@@ -12,7 +12,7 @@ const FORMAT_VERSION: int = 1
 
 const ROOT_KEYS: Array[String] = ["phien_ban_dinh_dang", "mo_ta", "da_duyet", "truoc", "hanh_dong", "sau"]
 ## "bao_don" của "truoc": đòn quân Nguyên đã báo sẵn khi kịch bản bắt đầu (Story 2.8), không bắt buộc.
-const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich", "bao_don", "so_hiep_toi_da", "long_dan", "long_dan_toi_da", "tiep_vien"]
+const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich", "bao_don", "so_hiep_toi_da", "long_dan", "long_dan_toi_da", "tiep_vien", "kieu"]
 ## "hiep", "da_di", "da_danh", "ket_qua", "bao_don", "o_do", "long_dan" không bắt buộc: không ghi thì không kiểm (review Story 1.5,
 ## tác giả chốt 2026-10-18; "ket_qua": Story 2.5; "bao_don": Story 2.6; "o_do": Story 2.7; "long_dan": Story 3.7).
 const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh", "ket_qua", "bao_don",
@@ -77,6 +77,8 @@ class Section:
 	var order: Variant = null
 	## Số hiệp tối đa (chỉ "truoc", Story 3.5); 0 là không ghi.
 	var max_rounds: int = 0
+	## Nhiệm vụ trận đấu (chỉ "truoc", Story 3.11).
+	var mission: LevelData.Mission = LevelData.Mission.ELIMINATE
 	## Lòng dân (chỉ "truoc" hoặc "sau", Story 3.7); -1 là không ghi.
 	var long_dan: int = -1
 	## Lòng dân tối đa (chỉ "truoc", Story 3.7); 0 là bằng long_dan.
@@ -300,6 +302,21 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 		var max_rounds: Variant = JsonFile.get_int(section, "so_hiep_toi_da", name + ".so_hiep_toi_da", 1, file, result)
 		if max_rounds != null:
 			side.max_rounds = int(max_rounds)
+	if known.has("kieu") and section.has("kieu"):
+		var kieu_val: Variant = section["kieu"]
+		if not kieu_val is String:
+			result.add_error(JsonFile.type_error(file, name + ".kieu", "một chuỗi", kieu_val))
+		elif kieu_val != "tieu_diet" and kieu_val != "giu_ai":
+			result.add_error('%s: "%s.kieu" là %s, chỉ được "tieu_diet" hoặc "giu_ai"' % [file, name, JsonFile.show(kieu_val)])
+		else:
+			if kieu_val == "giu_ai":
+				side.mission = LevelData.Mission.HOLD_PASS
+				if side.max_rounds == 0:
+					side.max_rounds = 5
+			else:
+				side.mission = LevelData.Mission.ELIMINATE
+	elif side.mission == LevelData.Mission.HOLD_PASS and side.max_rounds == 0:
+		side.max_rounds = 5
 	if known.has("long_dan_toi_da") and section.has("long_dan_toi_da"):
 		var max_val: Variant = JsonFile.get_int(section, "long_dan_toi_da", name + ".long_dan_toi_da", 1, file, result)
 		if max_val != null:
@@ -697,7 +714,7 @@ static func _build_level(side: Section, name: String) -> LevelData:
 	var level: LevelData = LevelData.new()
 	level.format_version = FORMAT_VERSION
 	level.name = name
-	level.mission = LevelData.Mission.ELIMINATE
+	level.mission = side.mission
 	level.max_rounds = side.max_rounds
 	if side.long_dan_toi_da > 0:
 		level.long_dan = side.long_dan_toi_da

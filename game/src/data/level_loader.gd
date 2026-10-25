@@ -50,6 +50,8 @@ static func parse_level(text: String, file: String) -> LoadResult:
 	var level_name: String = _read_name(root, file, result)
 	var mission: Variant = _read_kind(root, file, result)
 	var max_rounds: int = _read_max_rounds(root, file, result)
+	if mission == LevelData.Mission.HOLD_PASS and max_rounds == 0:
+		max_rounds = 5
 
 	var errors_before_terrain: int = result.errors.size()
 	var terrain_rows: Array = BoardLayers.read_layer(root, "dia_hinh", "dia_hinh", BoardText.TERRAIN_SYMBOLS, file, result)

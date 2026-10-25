@@ -14,7 +14,12 @@ extends RefCounted
 static func check(state: BattleState, events: Array[BattleEvent]) -> void:
 	if state.phase == BattleState.Phase.WON or state.phase == BattleState.Phase.LOST:
 		return
-	if not _someone_fell(events) and not _village_damaged(events):
+	if not _someone_fell(events) and not _village_damaged(events) and not _enemy_entered_pass(state, events):
+		return
+	if _enemy_entered_pass(state, events):
+		state.phase = BattleState.Phase.LOST
+		state.defeat_reason = "quan_nguyen_vao_ai"
+		events.append(BattleEvent.defeat("quan_nguyen_vao_ai"))
 		return
 	if _enemies_cleared(state):
 		state.phase = BattleState.Phase.WON
@@ -28,7 +33,9 @@ static func check(state: BattleState, events: Array[BattleEvent]) -> void:
 		events.append(BattleEvent.defeat("mat_lang"))
 
 
-## Kiểm tra hết hiệp ở bước 4 (cuối hiệp) của trận Tiêu diệt (Story 3.5). Thua nếu hết hiệp mà còn quân Nguyên.
+## Kiểm tra hết hiệp ở bước 4 (cuối hiệp) (Story 3.5, 3.11).
+## Tiêu diệt: thua nếu hết hiệp mà còn quân Nguyên.
+## Giữ ải: thắng nếu qua hết bước cuối hiệp của hiệp tối đa (mặc định 5).
 static func check_round_limit(state: BattleState, events: Array[BattleEvent]) -> bool:
 	if state.phase == BattleState.Phase.WON or state.phase == BattleState.Phase.LOST:
 		return false
@@ -38,6 +45,25 @@ static func check_round_limit(state: BattleState, events: Array[BattleEvent]) ->
 			state.defeat_reason = "het_hiep"
 			events.append(BattleEvent.defeat("het_hiep"))
 			return true
+	elif state.mission == LevelData.Mission.HOLD_PASS and state.max_rounds > 0 and state.round_number >= state.max_rounds:
+		state.phase = BattleState.Phase.WON
+		events.append(BattleEvent.victory())
+		return true
+	return false
+
+
+## Quân Nguyên vào ô ải bằng bất kỳ cách nào (FR37, Story 3.11).
+static func _enemy_entered_pass(state: BattleState, events: Array[BattleEvent]) -> bool:
+	if state.mission != LevelData.Mission.HOLD_PASS:
+		return false
+	for event: BattleEvent in events:
+		if event.type == BattleEvent.Type.MOVED:
+			if state.in_bounds(event.to_cell) and state.terrain_at(event.to_cell) == Terrain.PASS:
+				if event.unit_id >= BattleState.FIRST_ENEMY_ID:
+					return true
+				var u: Unit = state.unit_by_id(event.unit_id)
+				if u != null and u.faction == Unit.Faction.NGUYEN:
+					return true
 	return false
 
 

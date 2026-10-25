@@ -158,6 +158,13 @@ func test_giu_ai_mission() -> void:
 	assert_eq(level.mission, LevelData.Mission.HOLD_PASS)
 
 
+func test_giu_ai_defaults_to_five_rounds_when_missing_max_rounds() -> void:
+	var d: Dictionary = _with(_valid_level(), "kieu", "giu_ai")
+	d.erase("so_hiep_toi_da")
+	var level: LevelData = _level(d).data as LevelData
+	assert_eq(level.max_rounds, 5)
+
+
 func test_known_later_keys_give_no_warning() -> void:
 	var d: Dictionary = _with(_valid_level(), "so_hiep_toi_da", 4)
 	d["long_dan"] = 3

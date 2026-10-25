@@ -127,6 +127,10 @@ static func prepare(state: BattleState, events: Array[BattleEvent]) -> void:
 				Effects.move(state, unit, step, BattleEvent.Cause.WALK, events)
 				if state.unit_by_id(unit.id) == null:
 					break
+				if state.mission == LevelData.Mission.HOLD_PASS and state.terrain_at(step) == Terrain.PASS:
+					RulesVictory.check(state, events)
+					if Rules.is_battle_over(state):
+						return
 		state.enemy_intents.append(intent)
 	var next_order: int = 1
 	for intent: EnemyIntent in state.enemy_intents:
