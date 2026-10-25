@@ -4,7 +4,7 @@ baseline_commit: 1a887e4
 
 # Story 3.7: Làng và Lòng dân
 
-Status: review
+Status: done
 
 ## Story
 

@@ -1,0 +1,148 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Lời giải trận 4 không mất tướng và không mất Lòng dân: Hiệp 1 Dư kéo B2, Khoái chém B2 vào rừng dứt điểm, Lão né phóng lao qua Dư trúng K; Hiệp 2 Lão dứt điểm K qua Dư, Dư kéo B1 giải vây làng D1, Khoái tiến; Hiệp 3 Dư né, Khoái ép sát chém B1 va mép bàn dứt điểm trận đấu. Thắng ở hiệp 3/6, cả 3 tướng còn 3/3 máu, Lòng dân 3/3.",
+  "da_duyet": true,
+  "truoc": {
+    "long_dan": 3,
+    "so_hiep_toi_da": 6,
+    "dia_hinh": [
+      ". . . . . # #",
+      "D . . . # . .",
+      ". . . . . . .",
+      ". . . . . D .",
+      "~ ~ . . . . .",
+      "~ ~ . . . . ."
+    ],
+    "quan": [
+      ". B . . . . .",
+      ". . . . . . .",
+      ". . K . . B .",
+      ". . . . . . .",
+      ". . 1 3 2 . .",
+      ". . . . . . ."
+    ],
+    "thu_tu_dich": [
+      "1,0",
+      "2,2",
+      "5,2"
+    ],
+    "bao_don": [
+      {
+        "thu_tu": 1,
+        "quan": "2,2",
+        "huong": "N"
+      },
+      {
+        "thu_tu": 2,
+        "quan": "5,2",
+        "o": "5,3"
+      }
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "di",
+      "tuong": "3",
+      "o": "3,2"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "3",
+      "o": "5,2"
+    },
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "4,3"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "1",
+      "o": "4,2"
+    },
+    {
+      "lenh": "di",
+      "tuong": "2",
+      "o": "4,2"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "2",
+      "o": "2,2"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "2",
+      "o": "2,2"
+    },
+    {
+      "lenh": "di",
+      "tuong": "3",
+      "o": "2,0"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "3",
+      "o": "0,0"
+    },
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "1,3"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    },
+    {
+      "lenh": "di",
+      "tuong": "3",
+      "o": "3,0"
+    },
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "1,1"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "1",
+      "o": "1,0"
+    }
+  ],
+  "sau": {
+    "long_dan": 3,
+    "hiep": 3,
+    "ket_qua": "thang",
+    "dia_hinh": [
+      ". . . . . # #",
+      "D . . . # . .",
+      ". . . . . . .",
+      ". . . . . D .",
+      "~ ~ . . . . .",
+      "~ ~ . . . . ."
+    ],
+    "quan": [
+      ". . . 3 . . .",
+      ". 1 . . . . .",
+      ". . . . 2 . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "da_di": [
+      "1",
+      "3"
+    ],
+    "da_danh": [
+      "1"
+    ],
+    "mau": {
+      "1,1": 3,
+      "3,0": 3,
+      "4,2": 3
+    }
+  }
+}
