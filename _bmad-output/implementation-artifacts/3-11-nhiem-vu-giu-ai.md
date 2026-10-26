@@ -4,7 +4,7 @@ baseline_commit: 269d724
 
 # Story 3.11: Nhiệm vụ Giữ ải
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -90,6 +90,8 @@ tôi muốn có kiểu trận phải cầm cự,
   - [x] 6.2 Cập nhật `sprint-status.yaml` và commit tiếng Việt kết `(Story 3.11)`.
 
 ### Review Findings
+
+Tác giả duyệt 5 kịch bản ca biên `giu_ai/` mới (2026-10-26); `tools/test.sh` 727/727, 149 kịch bản đã duyệt. Story chốt `done`.
 
 Code review 2026-10-25 (`269d724..c1ddf6a`: commit kịch bản `1c04aa2` tách riêng trước code, đúng M3). `tools/test.sh`: 720/720 GUT, 144 kịch bản đã duyệt, 0 trượt. Mô phỏng headless bằng luật thật (bàn thử trong scratchpad: `ga1.json`, `ga2.json`, `ga3.json`) xác nhận các lỗi dưới. Ba lớp review chạy trong cùng phiên (không mở được agent phụ). Story đã `done` trước review; chuyển về `in-progress`.
 

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Trận Giữ ải: Cung kỵ báo đòn vào tướng đứng trên ô ải.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "kieu": "giu_ai",
     "dia_hinh": [

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Địch đi xuyên một ô ải trên đường tới ô ải khác: thua ngay khi quân Nguyên bước vào ô ải.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "kieu": "giu_ai",
     "dia_hinh": [

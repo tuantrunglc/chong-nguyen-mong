@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Quân tiếp viện xuất hiện trên ô ải: bên ta thua ngay lập tức.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "kieu": "giu_ai",
     "dia_hinh": [

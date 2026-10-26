@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Quân Nguyên vào ải cùng lúc tướng cuối cùng gục: bên ta thua với lý do giặc vào ải.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "kieu": "giu_ai",
     "dia_hinh": [
