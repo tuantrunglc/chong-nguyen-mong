@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Báo trước ô tiếp viện cho hiệp kế tiếp trong suốt lượt người chơi.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . .",
