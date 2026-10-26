@@ -29,6 +29,10 @@ func test_won_and_lost_texts() -> void:
 	assert_true(banner.is_showing())
 	assert_eq(banner.result_text(), tr("result.lost_round_limit"))
 	assert_eq(banner.result_text(), "Thua: hết hiệp")
+	banner.show_result(BattleState.Phase.LOST, "quan_nguyen_vao_ai")
+	assert_true(banner.is_showing())
+	assert_eq(banner.result_text(), tr("result.lost_pass"))
+	assert_eq(banner.result_text(), "Thua: giặc vào ải")
 
 
 func test_other_phases_and_hide_remove_the_banner() -> void:
@@ -61,6 +65,7 @@ func test_panel_fits_its_content() -> void:
 		{"phase": BattleState.Phase.WON, "reason": ""},
 		{"phase": BattleState.Phase.LOST, "reason": ""},
 		{"phase": BattleState.Phase.LOST, "reason": "het_hiep"},
+		{"phase": BattleState.Phase.LOST, "reason": "quan_nguyen_vao_ai"},
 	]
 	for c: Dictionary in cases:
 		banner.show_result(c.phase, c.reason)

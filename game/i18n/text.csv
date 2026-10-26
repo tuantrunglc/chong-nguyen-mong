@@ -18,6 +18,7 @@ result.won,Thắng!
 result.lost,Thua!
 result.lost_round_limit,"Thua: hết hiệp"
 result.lost_morale,"Thua: mất làng"
+result.lost_pass,"Thua: giặc vào ải"
 result.retry,Chơi lại trận
 notice.morale_lost,"−1 Lòng dân"
 unit.nguyen_khoai,Khoái

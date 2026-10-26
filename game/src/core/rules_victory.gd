@@ -64,6 +64,9 @@ static func _enemy_entered_pass(state: BattleState, events: Array[BattleEvent]) 
 				var u: Unit = state.unit_by_id(event.unit_id)
 				if u != null and u.faction == Unit.Faction.NGUYEN:
 					return true
+		elif event.type == BattleEvent.Type.REINFORCEMENT_SPAWNED:
+			if state.in_bounds(event.to_cell) and state.terrain_at(event.to_cell) == Terrain.PASS:
+				return true
 	return false
 
 

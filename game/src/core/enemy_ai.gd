@@ -16,10 +16,7 @@ const CHARGE_BLOCKERS: Array[int] = [Terrain.FOREST, Terrain.GRANARY, Terrain.VI
 
 
 static func plan(state: BattleState, unit: Unit) -> EnemyIntent:
-	var target_unit: Unit = null
-	var target_cell: Vector2i = Vector2i(-1, -1)
-	var field: Dictionary = {}
-	var best_key: Array[int] = []
+	var best: Dictionary = {"unit": null, "target_cell": Vector2i(-1, -1), "field": {}, "key": [] as Array[int]}
 
 	if state.mission == LevelData.Mission.HOLD_PASS:
 		# Story 3.11 (FR23): Trong trận Giữ ải, Bộ binh và Kỵ binh nhắm ô ải gần nhất; Cung kỵ nhắm tướng gần nhất.
@@ -33,24 +30,17 @@ static func plan(state: BattleState, unit: Unit) -> EnemyIntent:
 					if not f.has(unit.cell):
 						continue
 					var key: Array[int] = [f[unit.cell] as int, cell.y, -cell.x]
-					if best_key.is_empty() or _less(key, best_key):
-						target_unit = null
-						target_cell = cell
-						field = f
-						best_key = key
+					if (best.key as Array[int]).is_empty() or _less(key, best.key):
+						best.unit = null
+						best.target_cell = cell
+						best.field = f
+						best.key = key
+			# Quyết định tác giả Q1 (2026-10-25): Nếu không có đường tới bất kỳ ô ải nào (bị tướng chặn),
+			# chuyển sang nhắm tướng gần nhất như trận Tiêu diệt.
+			if (best.key as Array[int]).is_empty():
+				_pick_nearest_general(state, unit, best)
 		else:
-			for general: Unit in state.units:
-				if general.faction != Unit.Faction.DAI_VIET:
-					continue
-				var f: Dictionary = Pathfinding.distance_field(state, unit, general.cell)
-				if not f.has(unit.cell):
-					continue
-				var key: Array[int] = [f[unit.cell] as int, general.hp, general.cell.y, -general.cell.x]
-				if best_key.is_empty() or _less(key, best_key):
-					target_unit = general
-					target_cell = general.cell
-					field = f
-					best_key = key
+			_pick_nearest_general(state, unit, best)
 	else:
 		# Story 3.7: Bộ binh và Kỵ binh nhắm tướng hoặc làng gần nhất; hòa bước thì ưu tiên làng (0 < 1).
 		# Cung kỵ không nhắm làng (chỉ nhắm tướng Đại Việt).
@@ -64,27 +54,20 @@ static func plan(state: BattleState, unit: Unit) -> EnemyIntent:
 					if not f.has(unit.cell):
 						continue
 					var key: Array[int] = [f[unit.cell] as int, 0, 0, cell.y, -cell.x]
-					if best_key.is_empty() or _less(key, best_key):
-						target_unit = null
-						target_cell = cell
-						field = f
-						best_key = key
+					if (best.key as Array[int]).is_empty() or _less(key, best.key):
+						best.unit = null
+						best.target_cell = cell
+						best.field = f
+						best.key = key
+			_pick_nearest_general(state, unit, best, 1)
+		else:
+			_pick_nearest_general(state, unit, best)
 
-		for general: Unit in state.units:
-			if general.faction != Unit.Faction.DAI_VIET:
-				continue
-			var f: Dictionary = Pathfinding.distance_field(state, unit, general.cell)
-			if not f.has(unit.cell):
-				continue
-			var key: Array[int] = [f[unit.cell] as int, 1, general.hp, general.cell.y, -general.cell.x]
-			if best_key.is_empty() or _less(key, best_key):
-				target_unit = general
-				target_cell = general.cell
-				field = f
-				best_key = key
-
-	if best_key.is_empty():
+	if (best.key as Array[int]).is_empty():
 		return EnemyIntent.new(unit.id, unit.type, unit.cell, unit.cell, 0, 0, EnemyIntent.Reason.NO_PATH)
+	var target_unit: Unit = best.unit
+	var target_cell: Vector2i = best.target_cell
+	var field: Dictionary = best.field
 	var target_id: int = target_unit.id if target_unit != null else 0
 	var steps_to_target: int = field[unit.cell] as int
 	if not _has_attack_rule(unit.type):
@@ -148,8 +131,8 @@ static func can_hit_from(state: BattleState, unit: Unit, cell: Vector2i, target:
 				step += dir
 			return true
 		UnitType.CUNG_KY:
-			if state.in_bounds(target) and (state.terrain_at(target) == Terrain.VILLAGE or state.terrain_at(target) == Terrain.PASS):
-				return false  # Cung kỵ không nhắm làng (Story 3.7) và không nhắm ải (Story 3.11)
+			if state.in_bounds(target) and state.terrain_at(target) == Terrain.VILLAGE:
+				return false  # Cung kỵ không nhắm làng (Story 3.7)
 			var dir: Vector2i = Grid.straight_dir(cell, target)
 			if dir == Vector2i.ZERO:
 				return false
@@ -185,3 +168,25 @@ static func _less(a: Array[int], b: Array[int]) -> bool:
 		if a[i] != b[i]:
 			return a[i] < b[i]
 	return false
+
+
+## Tìm tướng Đại Việt gần nhất theo số bước đi; hòa thì ít máu hơn, rồi Bắc, rồi Đông.
+## priority: thêm vào vị trí thứ hai của key (ví dụ 1 khi so sánh với làng 0).
+static func _pick_nearest_general(state: BattleState, unit: Unit, best: Dictionary, priority: int = -1) -> void:
+	for general: Unit in state.units:
+		if general.faction != Unit.Faction.DAI_VIET:
+			continue
+		var f: Dictionary = Pathfinding.distance_field(state, unit, general.cell)
+		if not f.has(unit.cell):
+			continue
+		var key: Array[int] = []
+		if priority >= 0:
+			key = [f[unit.cell] as int, priority, general.hp, general.cell.y, -general.cell.x]
+		else:
+			key = [f[unit.cell] as int, general.hp, general.cell.y, -general.cell.x]
+		if (best.key as Array[int]).is_empty() or _less(key, best.key):
+			best.unit = general
+			best.target_cell = general.cell
+			best.field = f
+			best.key = key
+

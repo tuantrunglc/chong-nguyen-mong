@@ -121,9 +121,31 @@ func test_valid_scenario_loads() -> void:
 func test_giu_ai_mission_scenario_loads() -> void:
 	var d: Dictionary = _valid()
 	(d["truoc"] as Dictionary)["kieu"] = "giu_ai"
+	var terrain: Array = (d["truoc"] as Dictionary)["dia_hinh"] as Array
+	terrain[6] = ". . . A . . ."
+	(d["sau"] as Dictionary)["dia_hinh"] = terrain.duplicate()
 	var sc: ScenarioData = _scenario(d)
+	assert_not_null(sc)
 	assert_eq(sc.before.mission, LevelData.Mission.HOLD_PASS)
 	assert_eq(sc.before.max_rounds, 5)
+
+
+func test_giu_ai_mission_without_pass_cell_rejected() -> void:
+	var d: Dictionary = _valid()
+	(d["truoc"] as Dictionary)["kieu"] = "giu_ai"
+	var errs: Array[String] = _errors(d)
+	assert_true(errs.has(F + ': kịch bản "giu_ai" phải có ít nhất một ô ải "A" trong "truoc.dia_hinh"'))
+
+
+func test_giu_ai_mission_with_enemy_on_pass_cell_rejected() -> void:
+	var d: Dictionary = _valid()
+	(d["truoc"] as Dictionary)["kieu"] = "giu_ai"
+	var terrain: Array = (d["truoc"] as Dictionary)["dia_hinh"] as Array
+	terrain[4] = ". . . . . A ."
+	(d["truoc"] as Dictionary)["dia_hinh"] = terrain
+	(d["sau"] as Dictionary)["dia_hinh"] = terrain.duplicate()
+	var errs: Array[String] = _errors(d)
+	assert_true(errs.has(F + ': "truoc.quan" dòng 5, cột 6 (ô 5,4): trận "giu_ai" không được đặt quân Nguyên "B" trên ô ải "A"'))
 
 
 func test_hp_overrides_one_unit_and_others_are_full() -> void:

@@ -96,9 +96,10 @@ static func symbol(rows: Array, cell: Vector2i) -> String:
 	return row[cell.x]
 
 
-## Kiểm từng ô của lớp quân: quân đứng trên ô chặn, tướng lặp. Trả { ký hiệu tướng: ô }.
+## Kiểm từng ô của lớp quân: quân đứng trên ô chặn, tướng lặp, và quân Nguyên trên ô ải trong trận giu_ai.
+## Trả { ký hiệu tướng: ô }.
 static func check_unit_cells(terrain_rows: Array, unit_rows: Array, shown: String,
-		file: String, result: LoadResult) -> Dictionary:
+		file: String, result: LoadResult, mission: Variant = null) -> Dictionary:
 	var generals: Dictionary = {}
 	for r: int in range(unit_rows.size()):
 		if unit_rows[r] == null:
@@ -112,6 +113,8 @@ static func check_unit_cells(terrain_rows: Array, unit_rows: Array, shown: Strin
 			var ground: String = symbol(terrain_rows, cell)
 			if ground != "" and not Terrain.is_walkable(BoardText.TERRAIN_SYMBOLS[ground] as int):
 				result.add_error('%s: quân "%s" đứng trên ô không đi vào được "%s"' % [where, unit, ground])
+			elif mission == LevelData.Mission.HOLD_PASS and ENEMY_SYMBOLS.has(unit) and ground == "A":
+				result.add_error('%s: trận "giu_ai" không được đặt quân Nguyên "%s" trên ô ải "A"' % [where, unit])
 			if GENERAL_SYMBOLS.has(unit):
 				if generals.has(unit):
 					result.add_error('%s: tướng "%s" đã có ở ô %s'

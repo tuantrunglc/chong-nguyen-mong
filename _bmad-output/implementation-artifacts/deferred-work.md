@@ -226,4 +226,4 @@
 
 ## Deferred from: code review of 3-7-lang-va-long-dan (2026-10-24)
 
-- **AI nhắm làng ở mọi kiểu trận.** `EnemyAI.plan` thêm làng vào tập mục tiêu của Bộ binh/Kỵ binh mà không xét `state.mission`; kiến trúc (dòng 841) chỉ quy định cho "Trận Tiêu diệt có làng". Hiện chưa có trận Giữ ải có làng nên chưa sai; khi làm Story 3.11 phải chốt với tác giả luật nhắm mục tiêu của trận Giữ ải có làng và thêm kịch bản.
+- **AI nhắm làng ở mọi kiểu trận.** `EnemyAI.plan` thêm làng vào tập mục tiêu của Bộ binh/Kỵ binh mà không xét `state.mission`; kiến trúc (dòng 841) chỉ quy định cho "Trận Tiêu diệt có làng". Hiện chưa có trận Giữ ải có làng nên chưa sai; khi làm Story 3.11 phải chốt với tác giả luật nhắm mục tiêu của trận Giữ ải có làng và thêm kịch bản. → xong ở Story 3.11 (tác giả chốt 2026-10-25: trận Giữ ải không nhắm làng; hết đường tới ải thì nhắm tướng gần nhất).

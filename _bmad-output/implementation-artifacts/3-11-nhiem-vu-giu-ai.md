@@ -4,7 +4,7 @@ baseline_commit: 269d724
 
 # Story 3.11: Nhiệm vụ Giữ ải
 
-Status: done
+Status: in-progress
 
 ## Story
 
@@ -89,6 +89,20 @@ tôi muốn có kiểu trận phải cầm cự,
   - [x] 6.1 Báo cáo tác giả bằng tiếng Việt theo phong cách người test hiểu được.
   - [x] 6.2 Cập nhật `sprint-status.yaml` và commit tiếng Việt kết `(Story 3.11)`.
 
+### Review Findings
+
+Code review 2026-10-25 (`269d724..c1ddf6a`: commit kịch bản `1c04aa2` tách riêng trước code, đúng M3). `tools/test.sh`: 720/720 GUT, 144 kịch bản đã duyệt, 0 trượt. Mô phỏng headless bằng luật thật (bàn thử trong scratchpad: `ga1.json`, `ga2.json`, `ga3.json`) xác nhận các lỗi dưới. Ba lớp review chạy trong cùng phiên (không mở được agent phụ). Story đã `done` trước review; chuyển về `in-progress`.
+
+- [x] [Review][Decision] Bộ binh/Kỵ binh trong Giữ ải: chọn (b) không có đường tới ải thì nhắm tướng gần nhất như trận Tiêu diệt (tác giả chốt 2026-10-25). Đã cập nhật kiến trúc dòng 841.
+- [x] [Review][Decision] Làng trong trận Giữ ải: chọn (a) Giữ ải không nhắm làng (tác giả chốt 2026-10-25). Đã cập nhật kiến trúc dòng 841 và đóng mục hoãn trong `deferred-work.md`.
+- [x] [Review][Patch] Cung kỵ không bao giờ bắn được tướng đứng trên ô ải: đã sửa `can_hit_from` chỉ loại "ô ải trống" (`target == PASS and unit_at == null`), tướng đứng trên ải bị bắn bình thường [game/src/core/enemy_ai.gd:134]
+- [x] [Review][Patch] Quân Nguyên xuất hiện sẵn trên ô ải không bị tính là "vào ải": `LevelLoader`/`ScenarioLoader` báo lỗi tiếng Việt nếu trận `giu_ai` có quân Nguyên đặt sẵn trên ô `A`; tiếp viện xuất hiện trên ô `A` (`REINFORCEMENT_SPAWNED`) được tính là vào ải gây thua ngay lập tức [game/src/core/rules_victory.gd:67, game/src/core/rules_enemy_phase.gd:193]
+- [x] [Review][Patch] Bảng kết quả có dòng riêng cho `defeat_reason = "quan_nguyen_vao_ai"`: "Thua: giặc vào ải" (`result.lost_pass` trong `text.csv` và nhánh trong `ResultBanner`) [game/src/ui/result_banner.gd:88]
+- [x] [Review][Patch] Epics AC "ô ải được đánh dấu ở mép bàn phía nhà Trần": xác nhận ô Ải không bắt buộc ở mép bàn phía Nam để đảm bảo tự do thiết kế bản đồ; ghi rõ trong Dev Notes [game/src/data/level_loader.gd]
+- [x] [Review][Patch] `ScenarioLoader`: đã bỏ nhánh `elif` không bao giờ chạy; bắt buộc kịch bản `kieu: "giu_ai"` phải có ít nhất một ô `A` [game/src/data/scenario_loader.gd:282]
+- [x] [Review][Patch] Đã thêm 5 kịch bản mới (`da_duyet: false`, trình tác giả qua `tools/xem_kich_ban.sh giu_ai`) và test GUT bao phủ toàn bộ các ca biên [game/tests/kich_ban/giu_ai/, game/tests/test_hold_pass.gd]
+- [x] [Review][Patch] Hồ sơ: Gom khối nhắm tướng lặp trong `EnemyAI.plan` thành hàm trợ giúp `_pick_nearest_general` [game/src/core/enemy_ai.gd:175]
+
 ## Dev Agent Record
 
 ### Agent Model Used
@@ -105,25 +119,34 @@ Antigravity Agent (DeepMind / Gemini), 2026-10-25.
   - `het_hiep_toi_da_thang.json`: mong đợi "thang", thực tế "thua"
   - `cam_cu_du_5_hiep_thang.json`: mong đợi "thang" ở hiệp 5, thực tế chưa dừng
 - **Lần Green (Task 4, 5):** `tools/test.sh` 4/4 bước đạt: 720/720 test GUT đạt, 144 kịch bản đã duyệt đạt, 0 vi phạm ranh giới kiến trúc.
+- **Review Patch & TDD Red (2026-10-26):** Thêm 5 kịch bản mới (`51a1005`), ban đầu 4 kịch bản trượt chính xác theo các lỗi review. Sau khi sửa core, data, ui, test GUT đạt 727/727, toàn bộ 9/9 kịch bản chưa duyệt đạt.
 
 ### File List
 - `_bmad-output/implementation-artifacts/3-11-nhiem-vu-giu-ai.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
-- `game/src/core/rules_victory.gd` (kiểm tra quân Nguyên vào ô ải thua ngay, hết hiệp tối đa thắng trận Giữ ải)
-- `game/src/core/rules_enemy_phase.gd` (kiểm tra địch vào ải lúc đi ở `prepare`)
-- `game/src/core/enemy_ai.gd` (AI Bộ binh và Kỵ binh nhắm ô Ải gần nhất; ô ải trống thì đi vào chiếm ải)
-- `game/src/data/level_loader.gd` (mặc định 5 hiệp cho trận `giu_ai`)
-- `game/src/data/scenario_loader.gd` (hỗ trợ `truoc.kieu: "giu_ai"`, mặc định 5 hiệp)
-- `game/tests/test_hold_pass.gd` (bộ test GUT cho nhiệm vụ Giữ ải)
-- `game/tests/test_loaders.gd` (test nạp mặc định 5 hiệp cho trận Giữ ải)
-- `game/tests/test_scenario_loader.gd` (test nạp kịch bản Giữ ải)
-- `game/tests/kich_ban/giu_ai/*.json` (9 kịch bản luật Giữ ải đã được duyệt)
+- `_bmad-output/implementation-artifacts/deferred-work.md`
+- `_bmad-output/planning-artifacts/game-architecture.md`
+- `game/i18n/text.csv`
+- `game/src/core/rules_victory.gd` (kiểm tra quân Nguyên vào ô ải thua ngay, hết hiệp tối đa thắng trận Giữ ải, REINFORCEMENT_SPAWNED trên ải thua)
+- `game/src/core/rules_enemy_phase.gd` (kiểm tra địch vào ải lúc đi ở `prepare`, tiếp viện trên ải)
+- `game/src/core/enemy_ai.gd` (AI Bộ binh và Kỵ binh nhắm ô Ải gần nhất; hết đường tới ải nhắm tướng; Cung kỵ bắn tướng trên ải; hàm `_pick_nearest_general`)
+- `game/src/data/board_layers.gd` (từ chối đặt quân Nguyên trên ô ải trong trận `giu_ai`)
+- `game/src/data/level_loader.gd` (mặc định 5 hiệp cho trận `giu_ai`, từ chối quân Nguyên trên ải)
+- `game/src/data/scenario_loader.gd` (hỗ trợ `truoc.kieu: "giu_ai"`, mặc định 5 hiệp, bắt buộc có ô ải `A`)
+- `game/src/ui/result_banner.gd` (thông điệp thua riêng "Thua: giặc vào ải")
+- `game/tests/test_hold_pass.gd` (bộ test GUT cho nhiệm vụ Giữ ải: 11 tests)
+- `game/tests/test_loaders.gd` (test nạp mặc định 5 hiệp, từ chối quân Nguyên trên ải)
+- `game/tests/test_scenario_loader.gd` (test nạp kịch bản Giữ ải, từ chối thiếu ô ải, từ chối quân Nguyên trên ải)
+- `game/tests/test_result_banner.gd` (test hiển thị và kích thước khung với lý do thua giặc vào ải)
+- `game/tests/kich_ban/giu_ai/*.json` (14 kịch bản luật Giữ ải: 9 đã duyệt, 5 kịch bản mới chờ duyệt)
 
 ## Dev Notes
 
-- **Quy tắc Giữ ải (FR37):**
+- **Quy tắc Giữ ải (FR37, FR23):**
   - Trận Giữ ải có `state.mission == LevelData.Mission.HOLD_PASS`.
-  - Ô Ải (`Terrain.PASS`, ký hiệu `"A"`) là ô đi được (`Terrain.is_walkable`), có độ cao `PASS_HEIGHT`.
-  - Bất kỳ quân Nguyên nào đi vào, bị đẩy vào, hoặc bị kéo vào ô Ải -> bên ta THUA NGAY LẬP TỨC (`defeat_reason = "quan_nguyen_vao_ai"`).
-  - Tướng ta vào ô ải không thua; tướng trấn giữ ô ải là chiến thuật hợp lệ.
+  - Ô Ải (`Terrain.PASS`, ký hiệu `"A"`) là ô đi được (`Terrain.is_walkable`), có độ cao `PASS_HEIGHT`. Không bắt buộc ô Ải phải ở mép bàn phía Nam (cho phép tự do thiết kế bàn).
+  - Bất kỳ quân Nguyên nào đi vào, bị đẩy vào, bị kéo vào, hoặc xuất hiện tiếp viện trên ô Ải -> bên ta THUA NGAY LẬP TỨC (`defeat_reason = "quan_nguyen_vao_ai"`).
+  - Cấm đặt sẵn quân Nguyên trên ô Ải từ đầu trận trong file trận hoặc kịch bản.
+  - Tướng ta vào ô ải không thua; tướng trấn giữ ô ải là chiến thuật hợp lệ. Cung kỵ vẫn nhắm và bắn tướng đứng trên ải bình thường.
+  - Bộ binh và Kỵ binh nhắm ô ải gần nhất, không nhắm làng trong trận Giữ ải; nếu bị tướng chặn hết lối đi tới ải thì chuyển sang nhắm tướng gần nhất.
   - Cầm cự hết số hiệp tối đa (mặc định 5 hiệp) -> THẮNG.

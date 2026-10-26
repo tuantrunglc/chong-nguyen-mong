@@ -66,7 +66,7 @@ static func parse_level(text: String, file: String) -> LoadResult:
 		size, "dia_hinh")
 	var units_clean: bool = result.errors.size() == errors_before_units and not unit_rows.is_empty()
 
-	var generals: Dictionary = BoardLayers.check_unit_cells(terrain_rows, unit_rows, "quan", file, result)
+	var generals: Dictionary = BoardLayers.check_unit_cells(terrain_rows, unit_rows, "quan", file, result, mission)
 	if units_clean and generals.is_empty():
 		result.add_error('%s: "quan" không có tướng nào (cần ít nhất một trong 1, 2, 3)' % file)
 	# Tiêu diệt thắng khi hết quân Nguyên: bàn trống quân Nguyên từ đầu thì trận thắng ngay ở lần gục đầu tiên.

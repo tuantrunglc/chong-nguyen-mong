@@ -264,7 +264,28 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 	side.unit_rows = BoardLayers.read_layer(section, "quan", name + ".quan", BoardText.UNIT_SYMBOLS, file, result,
 		side.size, SIZE_LAYER)
 	side.units_clean = result.errors.size() == errors_before_units and not side.unit_rows.is_empty()
-	side.generals = BoardLayers.check_unit_cells(side.terrain_rows, side.unit_rows, name + ".quan", file, result)
+
+	if known.has("so_hiep_toi_da") and section.has("so_hiep_toi_da"):
+		var max_rounds: Variant = JsonFile.get_int(section, "so_hiep_toi_da", name + ".so_hiep_toi_da", 1, file, result)
+		if max_rounds != null:
+			side.max_rounds = int(max_rounds)
+	if known.has("kieu") and section.has("kieu"):
+		var kieu_val: Variant = section["kieu"]
+		if not kieu_val is String:
+			result.add_error(JsonFile.type_error(file, name + ".kieu", "một chuỗi", kieu_val))
+		elif kieu_val != "tieu_diet" and kieu_val != "giu_ai":
+			result.add_error('%s: "%s.kieu" là %s, chỉ được "tieu_diet" hoặc "giu_ai"' % [file, name, JsonFile.show(kieu_val)])
+		else:
+			if kieu_val == "giu_ai":
+				side.mission = LevelData.Mission.HOLD_PASS
+				if side.max_rounds == 0:
+					side.max_rounds = 5
+				if terrain_clean and not BoardLayers.has_symbol(side.terrain_rows, "A"):
+					result.add_error('%s: kịch bản "giu_ai" phải có ít nhất một ô ải "A" trong "%s.dia_hinh"' % [file, name])
+			else:
+				side.mission = LevelData.Mission.ELIMINATE
+
+	side.generals = BoardLayers.check_unit_cells(side.terrain_rows, side.unit_rows, name + ".quan", file, result, side.mission)
 	if name == "truoc" and side.units_clean \
 			and BoardLayers.reading_order(side.unit_rows, _unit_symbols()).is_empty():
 		result.add_error('%s: "truoc.quan" không có quân nào' % file)
@@ -298,25 +319,6 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 				file, result)
 	if known.has("o_do") and section.has("o_do"):
 		side.marks = _read_marks(section["o_do"], name + ".o_do", side, file, result)
-	if known.has("so_hiep_toi_da") and section.has("so_hiep_toi_da"):
-		var max_rounds: Variant = JsonFile.get_int(section, "so_hiep_toi_da", name + ".so_hiep_toi_da", 1, file, result)
-		if max_rounds != null:
-			side.max_rounds = int(max_rounds)
-	if known.has("kieu") and section.has("kieu"):
-		var kieu_val: Variant = section["kieu"]
-		if not kieu_val is String:
-			result.add_error(JsonFile.type_error(file, name + ".kieu", "một chuỗi", kieu_val))
-		elif kieu_val != "tieu_diet" and kieu_val != "giu_ai":
-			result.add_error('%s: "%s.kieu" là %s, chỉ được "tieu_diet" hoặc "giu_ai"' % [file, name, JsonFile.show(kieu_val)])
-		else:
-			if kieu_val == "giu_ai":
-				side.mission = LevelData.Mission.HOLD_PASS
-				if side.max_rounds == 0:
-					side.max_rounds = 5
-			else:
-				side.mission = LevelData.Mission.ELIMINATE
-	elif side.mission == LevelData.Mission.HOLD_PASS and side.max_rounds == 0:
-		side.max_rounds = 5
 	if known.has("long_dan_toi_da") and section.has("long_dan_toi_da"):
 		var max_val: Variant = JsonFile.get_int(section, "long_dan_toi_da", name + ".long_dan_toi_da", 1, file, result)
 		if max_val != null:

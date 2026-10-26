@@ -1,6 +1,6 @@
 {
   "phien_ban_dinh_dang": 1,
-  "mo_ta": "Cung kỵ bắn tướng đứng trên ô ải trong trận Giữ ải.",
+  "mo_ta": "Trận Giữ ải: Cung kỵ báo đòn vào tướng đứng trên ô ải.",
   "da_duyet": false,
   "truoc": {
     "kieu": "giu_ai",
@@ -38,10 +38,13 @@
       ". . . . .",
       ". . 2 . ."
     ],
-    "mau": {
-      "2,4": 1
-    },
     "hiep": 2,
+    "bao_don": [
+      { "thu_tu": 1, "quan": "2,1", "o": "2,4" }
+    ],
+    "o_do": {
+      "2,4": [1]
+    },
     "ket_qua": "dang_choi"
   }
 }

@@ -178,10 +178,7 @@ static func _spawn_reinforcements(state: BattleState, events: Array[BattleEvent]
 			var strike: Array[BattleEvent] = []
 			Effects.damage(state, occupant, 1, BattleEvent.Cause.REINFORCEMENT, strike)
 			strike.append(BattleEvent.reinforcement_blocked(r.cell, r.type, occupant.id))
-			RulesVictory.check(state, strike)
 			events.append_array(strike)
-			if Rules.is_battle_over(state):
-				return
 		else:
 			var new_unit: Unit = UnitFactory.create(state.next_enemy_id, r.type, r.cell, state.stats, r.hp)
 			state.next_enemy_id += 1
@@ -189,6 +186,7 @@ static func _spawn_reinforcements(state: BattleState, events: Array[BattleEvent]
 			events.append(BattleEvent.reinforcement_spawned(new_unit.id, r.cell, r.type))
 
 	if not current_reinforcements.is_empty():
+		RulesVictory.check(state, events)
 		_check_victory_after_spawn(state, events)
 
 

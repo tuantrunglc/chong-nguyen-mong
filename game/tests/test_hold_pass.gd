@@ -226,3 +226,82 @@ func test_cung_ky_still_targets_nearest_general() -> void:
 	var intent: EnemyIntent = EnemyAI.plan(state, c)
 	assert_eq(intent.target_id, 1, "Cung kỵ nhắm tướng 1")
 	assert_eq(intent.target_cell, Vector2i(4, 2), "Mục tiêu là ô của tướng 1")
+
+
+func test_cung_ky_targets_general_on_pass_cell() -> void:
+	var stats: Stats = _stats()
+	var dict: Dictionary = _base_hold_pass_dict()
+	dict["quan"] = [
+		". . . . .",
+		". . C . .",
+		". . . . .",
+		". . . . .",
+		". . 2 . ."
+	]
+	dict["thu_tu_dich"] = ["2,1"]
+	var r: LoadResult = LevelLoader.parse_level(JSON.stringify(dict), "test.json")
+	var state: BattleState = BattleState.from_level(r.data as LevelData, stats)
+
+	var c: Unit = state.unit_by_id(101)
+	var intent: EnemyIntent = EnemyAI.plan(state, c)
+	assert_eq(intent.target_id, 2, "Cung kỵ nhắm tướng 2 đang đứng trên ải")
+	assert_eq(intent.target_cell, Vector2i(2, 4), "Mục tiêu là ô 2,4")
+	assert_eq(intent.reason, EnemyIntent.Reason.CAN_HIT, "Cung kỵ có thể bắn tướng trên ải")
+
+
+func test_enemy_targets_general_when_pass_is_blocked_by_heroes() -> void:
+	var stats: Stats = _stats()
+	var dict: Dictionary = _base_hold_pass_dict()
+	dict["dia_hinh"] = [
+		". . . . .",
+		". . . . .",
+		"# # . # #",
+		". . . . .",
+		". . A . ."
+	]
+	dict["quan"] = [
+		". . B . .",
+		". . . . .",
+		". . 1 . .",
+		". . . . .",
+		". . . . ."
+	]
+	dict["thu_tu_dich"] = ["2,0"]
+	var r: LoadResult = LevelLoader.parse_level(JSON.stringify(dict), "test.json")
+	var state: BattleState = BattleState.from_level(r.data as LevelData, stats)
+
+	var b: Unit = state.unit_by_id(101)
+	var intent: EnemyIntent = EnemyAI.plan(state, b)
+	assert_eq(intent.target_id, 1, "Hết đường tới ải thì Bộ binh nhắm tướng 1 chặn đường")
+	assert_eq(intent.stand_cell, Vector2i(2, 1), "Bộ binh tiến tới ô kề tướng 1")
+	assert_eq(intent.reason, EnemyIntent.Reason.CAN_HIT, "Báo đòn vào tướng chặn đường")
+
+
+func test_reinforcement_spawning_on_pass_causes_defeat() -> void:
+	var stats: Stats = _stats()
+	var dict: Dictionary = _base_hold_pass_dict()
+	dict["tiep_vien"] = [{"hiep": 2, "o": "2,4", "loai": "B"}]
+	var r: LoadResult = LevelLoader.parse_level(JSON.stringify(dict), "test.json")
+	var state: BattleState = BattleState.from_level(r.data as LevelData, stats)
+	RulesEnemyPhase.begin_battle(state, [])
+
+	var events: Array[BattleEvent] = Rules.resolve(state, Command.end_turn())
+	assert_eq(state.phase, BattleState.Phase.LOST, "Thua khi tiếp viện xuất hiện trên ải")
+	assert_eq(state.defeat_reason, "quan_nguyen_vao_ai")
+
+
+func test_reinforcement_spawning_on_pass_and_killing_last_general_causes_defeat_by_pass() -> void:
+	var stats: Stats = _stats()
+	var dict: Dictionary = _base_hold_pass_dict()
+	dict["tiep_vien"] = [
+		{"hiep": 2, "o": "0,0", "loai": "B"},
+		{"hiep": 2, "o": "2,4", "loai": "B"}
+	]
+	var r: LoadResult = LevelLoader.parse_level(JSON.stringify(dict), "test.json")
+	var state: BattleState = BattleState.from_level(r.data as LevelData, stats)
+	state.unit_by_id(1).hp = 1
+	RulesEnemyPhase.begin_battle(state, [])
+
+	var events: Array[BattleEvent] = Rules.resolve(state, Command.end_turn())
+	assert_eq(state.phase, BattleState.Phase.LOST)
+	assert_eq(state.defeat_reason, "quan_nguyen_vao_ai", "Ưu tiên lý do thua giặc vào ải")
