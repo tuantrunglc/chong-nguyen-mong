@@ -4,7 +4,7 @@ baseline_commit: f1f443d
 
 # Story 3.12: Mưu kế Vườn không nhà trống và nút mưu kế
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -37,7 +37,7 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
   - [x] 1.4 `tests/scenario_viewer.gd` (dòng ~376): in được lệnh `muu_ke` ("Dùng mưu kế Vườn không nhà trống").
   - [x] 1.5 Test bộ nạp trong `test_scenario_loader.gd` (lệnh mới, khóa mới, câu lỗi). Câu lỗi lệnh lạ ở `test_scenario_loader.gd:360` sẽ đổi theo `COMMAND_LIST`.
 
-- [ ] **Task 2: Viết kịch bản chờ duyệt** (AC: 1–6, 8, 9) — thư mục mới `game/tests/kich_ban/muu_ke/`, mọi file `"da_duyet": false`, `truoc.muu_ke_mo: ["vuon_khong_nha_trong"]` trừ ca bị khóa. Dùng bàn 7×5 hoặc nhỏ như các kịch bản `kho_luong/`. Đề xuất (tối đa ~8, một đợt):
+- [x] **Task 2: Viết kịch bản chờ duyệt** (AC: 1–6, 8, 9) — thư mục mới `game/tests/kich_ban/muu_ke/`, mọi file `"da_duyet": false`, `truoc.muu_ke_mo: ["vuon_khong_nha_trong"]` trừ ca bị khóa. Dùng bàn 7×5 hoặc nhỏ như các kịch bản `kho_luong/`. Đề xuất (tối đa ~8, một đợt):
   - [x] `vknt_dot_kho_tru_mau.json`: 2 kho lương, Bộ binh 3 máu, Kỵ binh 2 máu, Cung kỵ 1 máu → `L` thành `.`, Bộ binh 2, Kỵ binh 1, Cung kỵ gục; `sau.muu_ke_da_dung`.
   - [x] `vknt_khong_co_kho_van_tru_mau.json`: bàn không có `L` → quân Nguyên vẫn mất 1 máu.
   - [x] `vknt_het_hoi_mau.json`: Bộ binh 2 máu kề kho lương; dùng mưu kế rồi `ket_thuc_luot` → còn 1 máu (không hồi), `hiep: 2`. (So với `kho_luong/bo_binh_ke_kho_luong_hoi_mau.json`.)
@@ -48,44 +48,44 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
   - [x] `vknt_diet_quan_cuoi_thang.json`: quân Nguyên cuối 1 máu (Tiêu diệt) → `ket_qua: "thang"`.
   - [x] (đã viết luôn trong đợt này) `vknt_ky_binh_xung_phong_qua_kho_cu.json`: Kỵ binh đã báo xung phong (`truoc.bao_don` hướng) bị kho lương chắn; đốt kho xong, kết thúc lượt → đòn đi tiếp trúng tướng phía sau. Đây là hệ quả của luật cũ (`TelegraphMarks.hit_cell` tính lúc ra đòn) — kịch bản chỉ khóa hành vi.
   - [x] 2.1 Chạy `tools/test.sh`: bộ nạp đọc được mọi file; kịch bản chưa duyệt chạy trượt vì `PENDING_RULES` — liệt kê trong Debug Log. Commit kịch bản riêng (như `1c04aa2` ở Story 3.11), lời commit tiếng Việt kết `(Story 3.12)`.
-  - [ ] 2.2 **Dừng, chờ tác giả duyệt** qua `tools/xem_kich_ban.sh muu_ke`. Tác giả bảo sai thì sửa kịch bản, không sửa code. Duyệt xong mới bật `da_duyet: true`.
+  - [x] 2.2 **Dừng, chờ tác giả duyệt** qua `tools/xem_kich_ban.sh muu_ke`. Tác giả bảo sai thì sửa kịch bản, không sửa code. Duyệt xong mới bật `da_duyet: true`.
 
-- [ ] **Task 3: Dữ liệu trận: `muu_ke_mo`** (AC: 6)
+- [x] **Task 3: Dữ liệu trận: `muu_ke_mo`** (AC: 6)
   - [x] 3.1 `src/core/stratagem.gd` (mới, `class_name Stratagem`, `RefCounted`): `enum Kind { VUON_KHONG_NHA_TRONG }` (Story 3.13 thêm `SAT_THAT`), bảng tên trong file ↔ `Kind` (`"vuon_khong_nha_trong"`), bảng phím (`VUON_KHONG_NHA_TRONG` ↔ action `stratagem_1` / `Q`). Đặt tên theo kiến trúc (`Stratagem.SAT_THAT`, dòng 683).
   - [x] 3.2 `LevelData.stratagems: Array[int]` (theo thứ tự trong file).
   - [x] 3.3 `LevelLoader`: đọc `muu_ke_mo` (không bắt buộc; thiếu = `[]`). Không phải danh sách, phần tử không phải chuỗi, tên lạ, tên trùng → lỗi tiếng Việt kiểu `tran_05.json: "muu_ke_mo" mục 1 là "sat_tat", chỉ được "vuon_khong_nha_trong"`. Xóa chú thích "biết tên nhưng chưa đọc (Story 3.12)" ở `level_loader.gd:15`. Test trong `test_loaders.gd`.
-  - [ ] 3.4 Mọi `data/tran/*.json` hiện có đều `"muu_ke_mo": []` → không đổi hành vi. **Không sửa** các trận đã có.
-  - [ ] 3.5 Thêm trận thử `data/tran/thu_muu_ke.json` (kho lương + vài quân Nguyên, trong đó một Cung kỵ, mở Vườn không nhà trống) để tác giả bấm tay: `tools/chay.sh --dev --tran=thu_muu_ke`.
+  - [x] 3.4 Mọi `data/tran/*.json` hiện có đều `"muu_ke_mo": []` → không đổi hành vi. **Không sửa** các trận đã có.
+  - [x] 3.5 Thêm trận thử `data/tran/thu_muu_ke.json` (kho lương + vài quân Nguyên, trong đó một Cung kỵ, mở Vườn không nhà trống) để tác giả bấm tay: `tools/chay.sh --dev --tran=thu_muu_ke`.
 
-- [ ] **Task 4: Luật (TDD Green)** (AC: 1–5, 8)
-  - [ ] 4.1 `BattleState`: `stratagems: Array[int]` (mưu kế mở trong trận) và `stratagems_used: Array[int]`. **Thêm vào `clone()`** (bài học: thiếu trường trong `clone()` làm hỏng hủy/xem trước/chơi lại âm thầm). `from_level` chép từ `level.stratagems`. `validate()`: mỗi mưu kế đã dùng phải nằm trong mưu kế mở, không trùng.
-  - [ ] 4.2 `Command`: `Kind.USE_STRATAGEM`, trường mới `stratagem: int` gán trong `_init` (tham số mặc định), hàm `Command.use_stratagem(kind)`. `BattleEvent`: `Reject.STRATAGEM_LOCKED`, `Reject.STRATAGEM_USED`; `Type.STRATAGEM_USED` (amount = `Stratagem.Kind`), `Type.GRANARY_BURNED` (to_cell = ô kho); `Cause.STRATAGEM` cho `DAMAGED`. Hàm tạo sự kiện kiểu `BattleEvent.healed`.
-  - [ ] 4.3 `src/core/rules_stratagem.gd` (mới, `class_name RulesStratagem`, đúng tên trong cây thư mục kiến trúc dòng 562): `resolve(state, command, events)`:
+- [x] **Task 4: Luật (TDD Green)** (AC: 1–5, 8)
+  - [x] 4.1 `BattleState`: `stratagems: Array[int]` (mưu kế mở trong trận) và `stratagems_used: Array[int]`. **Thêm vào `clone()`** (bài học: thiếu trường trong `clone()` làm hỏng hủy/xem trước/chơi lại âm thầm). `from_level` chép từ `level.stratagems`. `validate()`: mỗi mưu kế đã dùng phải nằm trong mưu kế mở, không trùng.
+  - [x] 4.2 `Command`: `Kind.USE_STRATAGEM`, trường mới `stratagem: int` gán trong `_init` (tham số mặc định), hàm `Command.use_stratagem(kind)`. `BattleEvent`: `Reject.STRATAGEM_LOCKED`, `Reject.STRATAGEM_USED`; `Type.STRATAGEM_USED` (amount = `Stratagem.Kind`), `Type.GRANARY_BURNED` (to_cell = ô kho); `Cause.STRATAGEM` cho `DAMAGED`. Hàm tạo sự kiện kiểu `BattleEvent.healed`.
+  - [x] 4.3 `src/core/rules_stratagem.gd` (mới, `class_name RulesStratagem`, đúng tên trong cây thư mục kiến trúc dòng 562): `resolve(state, command, events)`:
     1. chưa mở → `REJECTED(STRATAGEM_LOCKED)`; đã dùng → `REJECTED(STRATAGEM_USED)`; không đổi gì.
     2. Ghi `stratagems_used`, phát `STRATAGEM_USED`.
     3. Duyệt ô theo thứ tự đọc bàn (hàng rồi cột): ô `GRANARY` → đổi thành `PLAIN`, phát `GRANARY_BURNED`. Đổi địa hình: thêm một hàm trong `Effects` (vd. `Effects.burn_granary`) — `check_boundaries.sh` chỉ miễn `effects.gd` cho phép gán trạng thái; kiểm xem script có bắt `terrain[...] =` không và làm theo.
     4. Lấy **bản sao** danh sách quân Nguyên, xếp theo `id` tăng dần (id = thứ tự hành động: 101… theo `thu_tu_dich`, tiếp viện nhận id sau — xem `BattleState.from_level`, `next_enemy_id`), rồi `Effects.damage(state, unit, state.stats.<sát thương VKNT từ chi_so.json>, Cause.STRATAGEM, events)` cho quân còn trên bàn. Duyệt bản sao vì `Effects.damage` nhấc quân gục khỏi `state.units`.
     - Không đụng `has_moved`/`has_attacked`. Không dùng `randi`, không duyệt theo khóa Dictionary (test tất định).
-  - [ ] 4.4 `Rules.resolve`: nhánh `Command.Kind.USE_STRATAGEM → RulesStratagem.resolve`. `RulesVictory.check` cuối `resolve` đã lo thắng khi có `DIED` (AC 8, Giữ ải không thắng sớm — có sẵn từ 3.11). Hết trận thì `telegraphs.clear()` có sẵn.
-  - [ ] 4.5 AC 2: sau khi đốt, không còn ô `L`, nên `_heal_from_granaries` (`rules_enemy_phase.gd:73`) tự không hồi ai. **Không** thêm cờ chặn hồi máu riêng trừ khi có nguồn hồi máu khác (hiện không có); ghi chú ở `_heal_from_granaries` rằng VKNT xóa hết kho.
-  - [ ] 4.6 Gỡ `"muu_ke"` khỏi `PENDING_RULES`, thêm nhánh `"muu_ke"` trong `ScenarioRunner._run_step` gửi `Command.use_stratagem(...)` qua `controller.submit`.
-  - [ ] 4.7 `BattleController.submit`: `USE_STRATAGEM → _undo_snapshot = null` (thay chú thích "E3: mưu kế cũng xóa" ở dòng ~127). `_record`/`_command_code`/`_describe` biết lệnh `"muu_ke"` (ghi kèm tên mưu kế). Thêm `can_use_stratagem(kind) -> bool` (đang lượt người chơi, trận chưa hết, đã mở, chưa dùng) cho HUD.
-  - [ ] 4.8 Chơi lại hiệp (AC 7): **không cần code mới** — `_turn_start` là bản `clone()` có `stratagems_used` của đầu lượt. Chỉ cần test GUT: (a) dùng mưu kế trong lượt → chơi lại → dùng lại được; (b) dùng ở hiệp 1 → sang hiệp 2 → chơi lại → vẫn đã dùng.
-  - [ ] 4.9 F2 (`src/debug/bug_report.gd`): `before_layers` ghi `muu_ke_mo` (khi khác rỗng) và `muu_ke_da_dung` (khi khác rỗng); `after_layers` ghi `muu_ke_da_dung`; `command_entries` ghi `{"lenh": "muu_ke", "ten": "..."}`; `REJECT_CODES` của bug_report thêm 2 mã. Test trong `test_bug_report.gd`: báo cáo có lệnh mưu kế nạp lại được và chạy khớp.
+  - [x] 4.4 `Rules.resolve`: nhánh `Command.Kind.USE_STRATAGEM → RulesStratagem.resolve`. `RulesVictory.check` cuối `resolve` đã lo thắng khi có `DIED` (AC 8, Giữ ải không thắng sớm — có sẵn từ 3.11). Hết trận thì `telegraphs.clear()` có sẵn.
+  - [x] 4.5 AC 2: sau khi đốt, không còn ô `L`, nên `_heal_from_granaries` (`rules_enemy_phase.gd:73`) tự không hồi ai. **Không** thêm cờ chặn hồi máu riêng trừ khi có nguồn hồi máu khác (hiện không có); ghi chú ở `_heal_from_granaries` rằng VKNT xóa hết kho.
+  - [x] 4.6 (Đã làm ở Task 1.3.) Thêm nhánh `"muu_ke"` trong `ScenarioRunner._run_step` gửi `Command.use_stratagem(...)` qua `controller.submit`.
+  - [x] 4.7 `BattleController.submit`: `USE_STRATAGEM → _undo_snapshot = null` (thay chú thích "E3: mưu kế cũng xóa" ở dòng ~127). `_record`/`_command_code`/`_describe` biết lệnh `"muu_ke"` (ghi kèm tên mưu kế). Thêm `can_use_stratagem(kind) -> bool` (đang lượt người chơi, trận chưa hết, đã mở, chưa dùng) cho HUD.
+  - [x] 4.8 Chơi lại hiệp (AC 7): **không cần code mới** — `_turn_start` là bản `clone()` có `stratagems_used` của đầu lượt. Chỉ cần test GUT: (a) dùng mưu kế trong lượt → chơi lại → dùng lại được; (b) dùng ở hiệp 1 → sang hiệp 2 → chơi lại → vẫn đã dùng.
+  - [x] 4.9 F2 *(test nằm trong `test_stratagem.gd`, không phải `test_bug_report.gd`)* (`src/debug/bug_report.gd`): `before_layers` ghi `muu_ke_mo` (khi khác rỗng) và `muu_ke_da_dung` (khi khác rỗng); `after_layers` ghi `muu_ke_da_dung`; `command_entries` ghi `{"lenh": "muu_ke", "ten": "..."}`; `REJECT_CODES` của bug_report thêm 2 mã. Test trong `test_bug_report.gd`: báo cáo có lệnh mưu kế nạp lại được và chạy khớp.
 
-- [ ] **Task 5: Nút mưu kế, phím Q, hoạt ảnh** (AC: 1, 3, 6)
-  - [ ] 5.1 `Hud`: mỗi mưu kế **mở** trong trận một nút (chữ qua `tr()`, ví dụ `hud.stratagem.vuon_khong_nha_trong` = "Vườn không nhà trống (Q)"), đặt giữa Chơi lại và Kết thúc lượt; signal `stratagem_pressed(kind)`. Mưu kế không mở → không tạo nút. Đã dùng → nút mờ + nhãn "Đã dùng" (dùng lại `hud.replay.used` hoặc khóa mới). Nút theo `_apply_disabled` (mờ khi `_locked`, `_over`). `focus_mode = FOCUS_NONE` như nút khác.
-  - [ ] 5.2 `BattleInput`: action `stratagem_1` ↔ `KEY_Q` trong `ACTION_KEYS`, signal `stratagem_key_pressed(index)`. (Story 3.13 thêm `stratagem_2` ↔ `KEY_W`.) Khai báo InputMap bằng code như các phím khác, không bắt phím trực tiếp.
-  - [ ] 5.3 `BattleView`: nối signal; `_on_stratagem(kind)`: bỏ qua khi `_controller == null`, `_playing`, `_battle_over()`, hoặc `not _controller.can_use_stratagem(kind)` (phím Q khi bị khóa/đã dùng im lặng); gửi `Command.use_stratagem(kind)`; tướng đang chọn **giữ nguyên** (tác giả chốt, Quyết định 3; `_finish_playback` đã giữ chọn khi tướng chưa đánh). `_update_hud` truyền thông tin mưu kế (mở/đã dùng/dùng được) vào `Hud.show_turn` hoặc một hàm riêng `show_stratagems`.
-  - [ ] 5.4 `EventPlayer`: `GRANARY_BURNED` → nháy ô kho (như `_flash_village`) và thời lượng `DAMAGE_SECONDS`; `STRATAGEM_USED` → `Notice` "Vườn không nhà trống!" (khóa `notice.stratagem.vuon_khong_nha_trong`); `DAMAGED` cause `STRATAGEM` dùng nháy có sẵn. Tổng hoạt ảnh vẫn ≤ 3 giây (`MAX_PHASE_SECONDS` lo). Kho lương biến mất khi `BoardView.show_state` vẽ bản chụp cuối (`_rebuild_terrain`) — đủ cho story này.
-  - [ ] 5.5 Mọi chữ mới vào `i18n/text.csv`; `test_i18n.gd` phải xanh.
-  - [ ] 5.6 Test GUT cho phần hiển thị có thể test không màn hình (như `test_battle_view.gd`, `test_main.gd`): nút có/không theo `muu_ke_mo`; nút mờ sau khi dùng; phím Q gửi lệnh; Q khi bị khóa không làm gì.
+- [x] **Task 5: Nút mưu kế, phím Q, hoạt ảnh** (AC: 1, 3, 6)
+  - [x] 5.1 `Hud`: mỗi mưu kế **mở** trong trận một nút (chữ qua `tr()`, ví dụ `hud.stratagem.vuon_khong_nha_trong` = "Vườn không nhà trống (Q)"), đặt giữa Chơi lại và Kết thúc lượt; signal `stratagem_pressed(kind)`. Mưu kế không mở → không tạo nút. Đã dùng → nút mờ, chữ đổi thành "Vườn không nhà trống: đã dùng" (khóa `hud.stratagem.used`). Nút theo `_apply_disabled` (mờ khi `_locked`, `_over`). `focus_mode = FOCUS_NONE` như nút khác.
+  - [x] 5.2 `BattleInput`: action `stratagem_1` ↔ `KEY_Q` trong `ACTION_KEYS`, signal `stratagem_key_pressed(index)`. (Story 3.13 thêm `stratagem_2` ↔ `KEY_W`.) Khai báo InputMap bằng code như các phím khác, không bắt phím trực tiếp.
+  - [x] 5.3 `BattleView`: nối signal; `_on_stratagem(kind)`: bỏ qua khi `_controller == null`, `_playing`, `_battle_over()`, hoặc `not _controller.can_use_stratagem(kind)` (phím Q khi bị khóa/đã dùng im lặng); gửi `Command.use_stratagem(kind)`; tướng đang chọn **giữ nguyên** (tác giả chốt, Quyết định 3; `_finish_playback` đã giữ chọn khi tướng chưa đánh). `_update_hud` truyền thông tin mưu kế (mở/đã dùng/dùng được) vào `Hud.show_turn` hoặc một hàm riêng `show_stratagems`.
+  - [x] 5.4 `EventPlayer`: `GRANARY_BURNED` → nháy ô kho (như `_flash_village`) và thời lượng `DAMAGE_SECONDS`; `STRATAGEM_USED` → `Notice` "Vườn không nhà trống!" (khóa chung `notice.stratagem` = "%s!" + tên `stratagem.<tên>`); `DAMAGED` cause `STRATAGEM` dùng nháy có sẵn. Tổng hoạt ảnh vẫn ≤ 3 giây (`MAX_PHASE_SECONDS` lo). Kho lương biến mất khi `BoardView.show_state` vẽ bản chụp cuối (`_rebuild_terrain`) — đủ cho story này.
+  - [x] 5.5 Mọi chữ mới vào `i18n/text.csv`; `test_i18n.gd` phải xanh.
+  - [x] 5.6 Test GUT cho phần hiển thị có thể test không màn hình (như `test_battle_view.gd`, `test_main.gd`): nút có/không theo `muu_ke_mo`; nút mờ sau khi dùng; phím Q gửi lệnh; Q khi bị khóa không làm gì.
 
-- [ ] **Task 6: Kiểm tra và bàn giao** (AC: 9)
-  - [ ] 6.1 `tools/test.sh` xanh 4/4 bước; `test_determinism.gd` tự chạy kịch bản mới hai lần.
-  - [ ] 6.2 Chụp màn hình qua GoPeak (`tools/chay.sh --dev --tran=thu_muu_ke`) xem nút và bàn sau khi đốt kho.
-  - [ ] 6.3 Hướng dẫn tác giả thử tay bằng tiếng Việt (các bước, thấy gì là đúng) trong Completion Notes.
-  - [ ] 6.4 Cập nhật `sprint-status.yaml`, commit tiếng Việt kết `(Story 3.12)`.
+- [x] **Task 6: Kiểm tra và bàn giao** (AC: 9)
+  - [x] 6.1 `tools/test.sh` xanh 4/4 bước; `test_determinism.gd` tự chạy kịch bản mới hai lần.
+  - [x] 6.2 Chụp màn hình qua GoPeak (`tools/chay.sh --dev --tran=thu_muu_ke`) xem nút và bàn sau khi đốt kho.
+  - [x] 6.3 Hướng dẫn tác giả thử tay bằng tiếng Việt (các bước, thấy gì là đúng) trong Completion Notes.
+  - [x] 6.4 Cập nhật `sprint-status.yaml`, commit tiếng Việt kết `(Story 3.12)`.
 
 ## Dev Notes
 
@@ -190,5 +190,29 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 2026-10-27: tác giả duyệt cả 10 kịch bản `muu_ke/` (commit `a61b1b9`). Red: 10 kịch bản đã duyệt trượt (`test_approved_scenarios_pass`). Green: `rules_stratagem.gd` + `Effects.burn_granary` (`12eb0a6`); UI (`2aacafd`). `tools/test.sh` 752/752 GUT, 162 kịch bản đã duyệt.
+- Chụp màn hình GoPeak (`--dev --tran=thu_muu_ke`): nút "Vườn không nhà trống (Q)" hiện giữa Chơi lại và Kết thúc lượt; bấm nút → 2 kho biến mất, Bộ binh 3→2, Kỵ binh 2→1, Cung kỵ gục (ô đỏ của nó mất theo), nút mờ "Vườn không nhà trống: đã dùng". Phím `Q` bơm qua GoPeak **không** tới game (sự kiện bơm không có `physical_keycode`, InputMap khai báo theo phím vật lý); phím Q thật đã có test GUT `test_q_key_uses_stratagem` — **tác giả kiểm tay phím Q**.
+- Lệch so với story: (1) không dùng `PENDING_RULES` (test 1.3 ở trên); (2) chữ nút đã dùng là khóa riêng `hud.stratagem.used`; (3) test F2 đặt trong `test_stratagem.gd`.
+
+**Hướng dẫn tác giả thử tay** (`tools/chay.sh --dev --tran=thu_muu_ke`):
+1. Mở trận: thấy 2 ô "Kho" ở hàng trên, Bộ binh (3 máu), Kỵ binh (2), Cung kỵ (1); bên phải có nút **Vườn không nhà trống (Q)**.
+2. Bấm Khoái, đi một ô, rồi bấm phím **Q**: hiện dòng "Vườn không nhà trống!", 2 kho nháy màu lửa rồi biến mất, B còn 2, K còn 1, Cung kỵ gục. Nút mờ, ghi "đã dùng". Khoái vẫn đang được chọn.
+3. Bấm **Z**: không có gì xảy ra (mưu kế đã xóa lịch sử hủy).
+4. Bấm **Q** lần nữa: không có gì.
+5. Bấm **Chơi lại (R)**: bàn về đầu lượt, kho lương trở lại, nút mưu kế sáng lại, dùng được lần nữa.
+6. Mở trận 1 (`tools/chay.sh --dev --tran=1`): **không** có nút mưu kế; bấm Q không có gì.
 
 ### File List
+
+- `game/data/chi_so.json` (nhóm `muu_ke`)
+- `game/data/tran/thu_muu_ke.json` (mới)
+- `game/i18n/text.csv`, `game/i18n/text.vi.translation`
+- `game/src/core/stratagem.gd` (mới), `game/src/core/rules_stratagem.gd` (mới)
+- `game/src/core/battle_event.gd`, `battle_state.gd`, `command.gd`, `effects.gd`, `level_data.gd`, `rules.gd`, `rules_enemy_phase.gd`, `stats.gd`
+- `game/src/data/board_layers.gd`, `level_loader.gd`, `scenario_data.gd`, `scenario_loader.gd`, `stats_loader.gd`
+- `game/src/debug/bug_report.gd`
+- `game/src/battle/battle_controller.gd`, `battle_input.gd`, `battle_view.gd`, `event_player.gd`
+- `game/src/ui/hud.gd`
+- `game/tests/kich_ban/muu_ke/*.json` (10 kịch bản, đã duyệt)
+- `game/tests/board_fixture.gd`, `scenario_runner.gd`, `scenario_viewer.gd`, `test_loaders.gd`, `test_scenario_loader.gd`, `test_stratagem.gd` (mới), `test_stratagem_view.gd` (mới)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
