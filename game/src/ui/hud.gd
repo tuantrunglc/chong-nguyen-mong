@@ -127,7 +127,9 @@ func show_turn(round_number: int, can_undo: bool, can_replay: bool, replay_left:
 
 ## Nút mưu kế (Story 3.12): một nút cho mỗi mưu kế trận mở (mưu kế khóa thì không có nút), xếp theo thứ tự phím
 ## (Stratagem.SLOTS); đã dùng thì mờ và ghi "đã dùng". Dựng lại nút chỉ khi danh sách mưu kế mở đổi (trận mới).
-func show_stratagems(open_kinds: Array[int], used: Array[int]) -> void:
+## `sat_that_bonus` > 0: Sát Thát đang có hiệu lực trong lượt này, nút ghi "đang +N sát thương" thay cho "đã dùng"
+## (tác giả chốt 2026-10-27, Story 3.13): mưu kế này không để lại dấu gì trên bàn.
+func show_stratagems(open_kinds: Array[int], used: Array[int], sat_that_bonus: int = 0) -> void:
 	var open: Array[int] = Stratagem.in_key_order(open_kinds)
 	if open != _stratagem_kinds():
 		for button: Button in _stratagem_buttons.values():
@@ -142,7 +144,12 @@ func show_stratagems(open_kinds: Array[int], used: Array[int]) -> void:
 	for kind: int in _stratagem_buttons:
 		var key: String = "stratagem." + Stratagem.name_of(kind)
 		var button: Button = _stratagem_buttons[kind] as Button
-		button.text = tr("hud.stratagem.used") % tr(key) if used.has(kind) else tr("hud." + key)
+		if kind == Stratagem.Kind.SAT_THAT and sat_that_bonus > 0:
+			button.text = tr("hud.stratagem.active") % [tr(key), sat_that_bonus]
+		elif used.has(kind):
+			button.text = tr("hud.stratagem.used") % tr(key)
+		else:
+			button.text = tr("hud." + key)
 	_apply_disabled()
 
 

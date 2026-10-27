@@ -4,7 +4,7 @@ baseline_commit: 2545333
 
 # Story 3.13: Mưu kế Sát Thát
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -59,30 +59,30 @@ tôi muốn tăng sức đánh của cả ba tướng trong một lượt,
   - [x] `st_bi_khoa_tu_choi.json`: `muu_ke_mo: ["vuon_khong_nha_trong"]` → `sat_that` bị `tu_choi: "muu_ke_khoa"`, đòn sau đó không cộng.
   - [x] `st_lao_trung_tuong_minh.json`: Sát Thát, Lão lao về quân Nguyên, tướng mình đứng chắn ở ô 2 → tướng mình mất 2 (Quyết định 1).
   - [x] 2.1 Chạy `tools/test.sh`: bộ nạp đọc được mọi file; kịch bản mới **trượt** (chưa có luật) — liệt kê trong Debug Log. Commit kịch bản riêng, lời commit tiếng Việt kết `(Story 3.13)`.
-  - [ ] 2.2 **Dừng, chờ tác giả duyệt** qua `tools/xem_kich_ban.sh muu_ke`. Tác giả bảo sai thì sửa kịch bản, không sửa code. Duyệt xong mới bật `da_duyet: true`.
+  - [x] 2.2 **Dừng, chờ tác giả duyệt** qua `tools/xem_kich_ban.sh muu_ke`. Tác giả bảo sai thì sửa kịch bản, không sửa code. Duyệt xong mới bật `da_duyet: true`.
 
-- [ ] **Task 3: Luật (TDD Green)** (AC: 1–6)
-  - [ ] 3.1 `BattleState`: trường `sat_that_active: bool = false`. **Chép trong `clone()`** (bài học 3.2/3.12). `from_level`: `false`. `validate()`: `sat_that_active` mà `stratagems_used` không có `SAT_THAT` → lỗi. Thêm hàm `sat_that_bonus() -> int`: `stats.strike_bonus(Stratagem.Kind.SAT_THAT)` khi `sat_that_active`, ngược lại 0 (đúng tên kiến trúc dòng 777).
-  - [ ] 3.2 Bật cờ phải đi qua `Effects` hay đặt trong `RulesStratagem`? `RulesStratagem` đã tự `append` vào `state.stratagems_used` (3.12), nên đặt `state.sat_that_active = true` cùng chỗ là đúng mẫu. Kiểm `check_boundaries.sh` vẫn xanh.
-  - [ ] 3.3 `RulesStratagem.resolve`: nhánh `Stratagem.Kind.SAT_THAT: state.sat_that_active = true`. Không phát thêm sự kiện nào ngoài `STRATAGEM_USED` (đã có), không đụng `has_moved`/`has_attacked`.
-  - [ ] 3.4 `RulesAttack.khoai_strike` và `lao_throw`: sát thương = `state.stats.damage(type) + state.sat_that_bonus()` (thay hai chú thích "Sát Thát (+1) thêm ở Story 3.13"). **Chỉ hai chỗ này.** Không cộng trong `Effects.damage`, `ForcedMove` (va chạm, mép bàn, sông), hầm chông, `_scorched_earth`, `_strike_all` (đòn địch). `du_pull` không gọi `Effects.damage` nên tự giữ 0 (AC 3) — viết test khóa lại.
-  - [ ] 3.5 Tắt cờ: `RulesEnemyPhase.end_player_turn`, **dòng đầu tiên** (trước `_strike_all`): `state.sat_that_active = false`. Đặt ở đầu (không phải chỗ tăng `round_number`) để cả khi trận hết giữa pha địch, cờ cũng không nằm lại. Đây là file duy nhất đổi phase, hợp chỗ.
-  - [ ] 3.6 Chơi lại hiệp (AC 6): **không cần code mới** — `_turn_start` là `clone()` lúc cờ còn `false`. Test GUT: dùng Sát Thát → chơi lại → đòn không cộng, nút dùng lại được.
-  - [ ] 3.7 Xem trước (AC 4): **không cần code mới** — `BattleController.preview_result` chạy `Rules.resolve` trên `clone()`, nên tự cộng khi cờ bật. Test GUT trên `preview_result`: trước Sát Thát Bộ binh 3 → 1, sau Sát Thát → gục (không còn trong `state.units`).
-  - [ ] 3.8 F2 (`bug_report.gd`): không cần khóa mới. Mốc đầu báo cáo là bản chụp đầu lượt (cờ luôn `false`), lệnh `muu_ke` "sat_that" đã được ghi và phát lại nhờ 3.12. Test GUT: dùng Sát Thát, đánh, dựng báo cáo, nạp lại và chạy khớp (cùng mẫu `test_bug_report_replays_stratagem` trong `test_stratagem.gd`).
-  - [ ] 3.9 Test GUT (`tests/test_stratagem.gd` hoặc file mới `test_sat_that.gd`): Khoái bị đẩy va chạm khi Sát Thát bật — dùng `BoardFixture.stats_with(...)` hạ sát thương Khoái xuống 1 để mục tiêu 3 máu sống sót và bị đẩy → mục tiêu mất 2 (1+1), va chạm vẫn 1 cho mỗi bên. (Với chỉ số thật, Khoái 3 sát thương luôn hạ gục mọi quân Nguyên nên không có kịch bản nào đẩy được.) Cùng file: `state.validate()` rỗng sau mỗi lệnh; `clone()` giữ `sat_that_active`.
+- [x] **Task 3: Luật (TDD Green)** (AC: 1–6)
+  - [x] 3.1 `BattleState`: trường `sat_that_active: bool = false`. **Chép trong `clone()`** (bài học 3.2/3.12). `from_level`: `false`. `validate()`: `sat_that_active` mà `stratagems_used` không có `SAT_THAT` → lỗi. Thêm hàm `sat_that_bonus() -> int`: `stats.strike_bonus(Stratagem.Kind.SAT_THAT)` khi `sat_that_active`, ngược lại 0 (đúng tên kiến trúc dòng 777).
+  - [x] 3.2 Bật cờ phải đi qua `Effects` hay đặt trong `RulesStratagem`? `RulesStratagem` đã tự `append` vào `state.stratagems_used` (3.12), nên đặt `state.sat_that_active = true` cùng chỗ là đúng mẫu. Kiểm `check_boundaries.sh` vẫn xanh.
+  - [x] 3.3 `RulesStratagem.resolve`: nhánh `Stratagem.Kind.SAT_THAT: state.sat_that_active = true`. Không phát thêm sự kiện nào ngoài `STRATAGEM_USED` (đã có), không đụng `has_moved`/`has_attacked`.
+  - [x] 3.4 `RulesAttack.khoai_strike` và `lao_throw`: sát thương = `state.stats.damage(type) + state.sat_that_bonus()` (thay hai chú thích "Sát Thát (+1) thêm ở Story 3.13"). **Chỉ hai chỗ này.** Không cộng trong `Effects.damage`, `ForcedMove` (va chạm, mép bàn, sông), hầm chông, `_scorched_earth`, `_strike_all` (đòn địch). `du_pull` không gọi `Effects.damage` nên tự giữ 0 (AC 3) — viết test khóa lại.
+  - [x] 3.5 Tắt cờ: `RulesEnemyPhase.end_player_turn`, **dòng đầu tiên** (trước `_strike_all`): `state.sat_that_active = false`. Đặt ở đầu (không phải chỗ tăng `round_number`) để cả khi trận hết giữa pha địch, cờ cũng không nằm lại. Đây là file duy nhất đổi phase, hợp chỗ.
+  - [x] 3.6 Chơi lại hiệp (AC 6): **không cần code mới** — `_turn_start` là `clone()` lúc cờ còn `false`. Test GUT: dùng Sát Thát → chơi lại → đòn không cộng, nút dùng lại được.
+  - [x] 3.7 Xem trước (AC 4): **không cần code mới** — `BattleController.preview_result` chạy `Rules.resolve` trên `clone()`, nên tự cộng khi cờ bật. Test GUT trên `preview_result`: trước Sát Thát Bộ binh 3 → 1, sau Sát Thát → gục (không còn trong `state.units`).
+  - [x] 3.8 F2 (`bug_report.gd`): không cần khóa mới. Mốc đầu báo cáo là bản chụp đầu lượt (cờ luôn `false`), lệnh `muu_ke` "sat_that" đã được ghi và phát lại nhờ 3.12. Test GUT: dùng Sát Thát, đánh, dựng báo cáo, nạp lại và chạy khớp (cùng mẫu `test_bug_report_replays_stratagem` trong `test_stratagem.gd`).
+  - [x] 3.9 Test GUT (`tests/test_stratagem.gd` hoặc file mới `test_sat_that.gd`): Khoái bị đẩy va chạm khi Sát Thát bật — dùng `BoardFixture.stats_with(...)` hạ sát thương Khoái xuống 1 để mục tiêu 3 máu sống sót và bị đẩy → mục tiêu mất 2 (1+1), va chạm vẫn 1 cho mỗi bên. (Với chỉ số thật, Khoái 3 sát thương luôn hạ gục mọi quân Nguyên nên không có kịch bản nào đẩy được.) Cùng file: `state.validate()` rỗng sau mỗi lệnh; `clone()` giữ `sat_that_active`.
 
-- [ ] **Task 4: Nút, phím W, hiển thị** (AC: 1, 6, 7)
-  - [ ] 4.1 Phím `W`: chỉ cần `SLOTS` (Task 1.1) — `BattleInput` đã khai báo InputMap và phát `stratagem_key_pressed` từ bảng. Kiểm `W` không trùng action nào khác trong `ACTION_KEYS`.
-  - [ ] 4.2 `Hud.show_stratagems`: nút Sát Thát tự có nhờ `in_key_order`. Thêm trạng thái "đang hiệu lực" theo Quyết định 2 (truyền thêm `snapshot.sat_that_active` từ `BattleView._update_hud`, dòng 474).
-  - [ ] 4.3 `EventPlayer`: `STRATAGEM_USED` đã hiện `Notice` "%s!" theo tên → "Sát Thát!" có sẵn. Không thêm hoạt ảnh trên bàn.
-  - [ ] 4.4 Test GUT trong `test_stratagem_view.gd`: mở cả hai → nút Q trên nút W kể cả khi `muu_ke_mo` ghi `["sat_that", "vuon_khong_nha_trong"]`; phím `W` gửi lệnh; `W` khi bị khóa không gửi lệnh nào (kiểm `round_commands()` như bản sửa review 3.12); nút Sát Thát mờ sau khi dùng.
+- [x] **Task 4: Nút, phím W, hiển thị** (AC: 1, 6, 7)
+  - [x] 4.1 Phím `W`: chỉ cần `SLOTS` (Task 1.1) — `BattleInput` đã khai báo InputMap và phát `stratagem_key_pressed` từ bảng. Kiểm `W` không trùng action nào khác trong `ACTION_KEYS`.
+  - [x] 4.2 `Hud.show_stratagems`: nút Sát Thát tự có nhờ `in_key_order`. Thêm trạng thái "đang hiệu lực" theo Quyết định 2 (truyền thêm `snapshot.sat_that_active` từ `BattleView._update_hud`, dòng 474).
+  - [x] 4.3 `EventPlayer`: `STRATAGEM_USED` đã hiện `Notice` "%s!" theo tên → "Sát Thát!" có sẵn. Không thêm hoạt ảnh trên bàn.
+  - [x] 4.4 Test GUT trong `test_stratagem_view.gd`: mở cả hai → nút Q trên nút W kể cả khi `muu_ke_mo` ghi `["sat_that", "vuon_khong_nha_trong"]`; phím `W` gửi lệnh; `W` khi bị khóa không gửi lệnh nào (kiểm `round_commands()` như bản sửa review 3.12); nút Sát Thát mờ sau khi dùng.
 
-- [ ] **Task 5: Kiểm tra và bàn giao** (AC: 8)
-  - [ ] 5.1 `tools/test.sh` xanh 4/4 bước; `test_determinism.gd` tự chạy kịch bản mới hai lần.
-  - [ ] 5.2 Chụp màn hình qua GoPeak (`tools/chay.sh --dev --tran=thu_muu_ke`): hai nút đúng thứ tự, nút Sát Thát sau khi bấm. Phím bơm qua GoPeak không tới game (thiếu `physical_keycode`, ghi chú 3.12) → tác giả kiểm tay phím `W`.
-  - [ ] 5.3 Hướng dẫn tác giả thử tay bằng tiếng Việt (các bước, thấy gì là đúng) trong Completion Notes.
-  - [ ] 5.4 Cập nhật `sprint-status.yaml`, commit tiếng Việt kết `(Story 3.13)`.
+- [x] **Task 5: Kiểm tra và bàn giao** (AC: 8)
+  - [x] 5.1 `tools/test.sh` xanh 4/4 bước; `test_determinism.gd` tự chạy kịch bản mới hai lần.
+  - [x] 5.2 Chụp màn hình qua GoPeak (`tools/chay.sh --dev --tran=thu_muu_ke`): hai nút đúng thứ tự, nút Sát Thát sau khi bấm. Phím bơm qua GoPeak không tới game (thiếu `physical_keycode`, ghi chú 3.12) → tác giả kiểm tay phím `W`.
+  - [x] 5.3 Hướng dẫn tác giả thử tay bằng tiếng Việt (các bước, thấy gì là đúng) trong Completion Notes.
+  - [x] 5.4 Cập nhật `sprint-status.yaml`, commit tiếng Việt kết `(Story 3.13)`.
 
 ## Dev Notes
 
@@ -181,5 +181,25 @@ tôi muốn tăng sức đánh của cả ba tướng trong một lượt,
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- 2026-10-27: tác giả duyệt cả 11 kịch bản `muu_ke/st_*` (commit `57eff03`). Red: 6 kịch bản có cộng trượt (Debug Log). Green: luật (`ed491c9`) — `BattleState.sat_that_active` + `sat_that_bonus()` (có trong `clone()`, `validate()`), `RulesStratagem` bật cờ, `RulesEnemyPhase.end_player_turn` tắt cờ ở dòng đầu, `RulesAttack.khoai_strike`/`lao_throw` cộng `sat_that_bonus()`. Không cộng ở `Effects`/`ForcedMove`/hầm chông/VKNT/đòn địch. Chơi lại hiệp, xem trước, F2 không cần code mới — có test GUT trong `tests/test_sat_that.gd` (8 test). UI: `Hud.show_stratagems` nhận `sat_that_bonus`, nút ghi "Sát Thát: đang +1 sát thương" trong lượt, "đã dùng" từ hiệp sau; 3 test mới trong `test_stratagem_view.gd` (thứ tự Q/W, phím W, W khi khóa). `tools/test.sh` 769/769 GUT, 173 kịch bản đã duyệt.
+- Chụp màn hình GoPeak (`--dev --tran=thu_muu_ke`): hai nút "Vườn không nhà trống (Q)" trên, "Sát Thát (W)" dưới; bấm nút Sát Thát (log `nhận lệnh: dùng mưu kế sat_that`) → nút mờ, ghi "Sát Thát: đang +1 sát thương". Phím W bơm qua GoPeak không tới game (như phím Q ở 3.12) — **tác giả kiểm tay phím W**.
+- Lệch so với story: (1) kịch bản `st_du_keo_va_cham_khong_cong` thay bằng `st_don_dich_khong_cong` (kéo của Dư không thể va chạm); (2) test GUT đặt trong file mới `tests/test_sat_that.gd`.
+
+**Hướng dẫn tác giả thử tay** (`tools/chay.sh --dev --tran=thu_muu_ke`):
+1. Mở trận: bên phải có hai nút, **Vườn không nhà trống (Q)** ở trên, **Sát Thát (W)** ở dưới.
+2. Chọn Khoái, đi lên ô ngay dưới Bộ binh (B, 3 máu). Rê chuột lên B: bóng xem trước hiện B còn 1 máu và bị đẩy lùi.
+3. Bấm phím **W**: hiện dòng "Sát Thát!", nút mờ và ghi "Sát Thát: đang +1 sát thương". Rê lại lên B: bóng xem trước giờ cho thấy B gục. Bấm đánh: B gục ngay (2+1=3), không bị đẩy.
+4. Bấm **W** lần nữa: không có gì. Bấm **Z**: không hủy được nước đi trước Sát Thát.
+5. Bấm **Kết thúc lượt**: sang hiệp 2, nút ghi "Sát Thát: đã dùng"; Khoái đánh lại chỉ trừ 2 máu.
+6. Mở lại trận, bấm **W** rồi **Chơi lại (R)**: nút Sát Thát sáng lại, dùng được lần nữa.
 
 ### File List
+
+- `game/data/chi_so.json` (`muu_ke.sat_that`), `game/data/tran/thu_muu_ke.json` (mở thêm Sát Thát)
+- `game/i18n/text.csv`, `game/i18n/text.vi.translation`
+- `game/src/core/stratagem.gd`, `rules_stratagem.gd`, `rules_attack.gd`, `rules_enemy_phase.gd`, `battle_state.gd`, `stats.gd`
+- `game/src/data/stats_loader.gd`
+- `game/src/ui/hud.gd`, `game/src/battle/battle_view.gd`
+- `game/tests/kich_ban/muu_ke/st_*.json` (11 kịch bản, đã duyệt)
+- `game/tests/board_fixture.gd`, `test_loaders.gd`, `test_scenario_loader.gd`, `test_stratagem_view.gd`, `test_sat_that.gd` (mới)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`

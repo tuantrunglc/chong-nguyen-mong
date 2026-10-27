@@ -1,10 +1,11 @@
 extends GutTest
-## Nút mưu kế và phím Q trên màn hình trận (Story 3.12). Luật mưu kế test ở test_stratagem.gd và kịch bản muu_ke/.
+## Nút mưu kế và phím Q, W trên màn hình trận (Story 3.12–3.13). Luật mưu kế test ở test_stratagem.gd và kịch bản muu_ke/.
 
 const MAIN_SCENE: String = "res://scenes/main.tscn"
 const LEVEL_DIR: String = "user://test_stratagem_view"
 const LEVEL_FILE: String = LEVEL_DIR + "/tran_01.json"
 const VKNT: int = Stratagem.Kind.VUON_KHONG_NHA_TRONG
+const SAT_THAT: int = Stratagem.Kind.SAT_THAT
 const KHOAI_CELL: Vector2i = Vector2i(1, 6)
 
 
@@ -26,11 +27,14 @@ func after_each() -> void:
 	Log.clear()
 
 
-## Trận thử mưu kế (data/tran/thu_muu_ke.json) chép làm trận 1; open = false thì xóa mưu kế mở.
-func _make_main(open: bool = true) -> Node2D:
+## Trận thử mưu kế (data/tran/thu_muu_ke.json, mở cả hai mưu kế) chép làm trận 1; open = false thì xóa mưu kế mở;
+## open_names khác rỗng thì thay "muu_ke_mo" bằng danh sách đó.
+func _make_main(open: bool = true, open_names: Array = []) -> Node2D:
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/tran/thu_muu_ke.json"))
 	if not open:
 		data["muu_ke_mo"] = []
+	elif not open_names.is_empty():
+		data["muu_ke_mo"] = open_names
 	var file: FileAccess = FileAccess.open(LEVEL_FILE, FileAccess.WRITE)
 	file.store_string(JSON.stringify(data))
 	file.close()
@@ -58,8 +62,12 @@ func _rejected_commands(main: Node2D) -> Array[Dictionary]:
 
 
 func _press_q(main: Node2D) -> void:
+	_press(main, KEY_Q)
+
+
+func _press(main: Node2D, key: Key) -> void:
 	var ev: InputEventKey = InputEventKey.new()
-	ev.physical_keycode = KEY_Q
+	ev.physical_keycode = key
 	ev.pressed = true
 	(main._battle_input as BattleInput)._unhandled_input(ev)
 
@@ -119,3 +127,37 @@ func test_replay_re_enables_button() -> void:
 	var button: Button = _hud(main).stratagem_button(VKNT)
 	assert_false(button.disabled)
 	assert_eq(button.text, tr("hud.stratagem.vuon_khong_nha_trong"))
+
+
+## Story 3.13: nút Q nằm trên nút W, kể cả khi file trận ghi Sát Thát trước (tác giả chốt 2026-10-27).
+func test_buttons_follow_key_order() -> void:
+	var main: Node2D = _make_main(true, ["sat_that", "vuon_khong_nha_trong"])
+	var q: Button = _hud(main).stratagem_button(VKNT)
+	var w: Button = _hud(main).stratagem_button(SAT_THAT)
+	assert_not_null(w)
+	assert_eq(w.text, tr("hud.stratagem.sat_that"))
+	assert_lt(q.get_index(), w.get_index(), "nút Q trên nút W")
+
+
+## Phím W dùng Sát Thát; trong lượt đó nút mờ và ghi đang +1 sát thương; sang hiệp sau ghi đã dùng.
+func test_w_key_uses_sat_that_and_button_shows_active_then_used() -> void:
+	var main: Node2D = _make_main()
+	_press(main, KEY_W)
+	assert_true(InputMap.has_action("stratagem_2"), "phím W khai báo trong InputMap")
+	assert_eq(_controller(main).stratagems_used(), [SAT_THAT] as Array[int])
+	var button: Button = _hud(main).stratagem_button(SAT_THAT)
+	assert_true(button.disabled)
+	assert_eq(button.text, tr("hud.stratagem.active") % [tr("stratagem.sat_that"), 1])
+	_hud(main).end_turn_button().pressed.emit()
+	assert_eq(_controller(main).snapshot().round_number, 2)
+	assert_eq(button.text, tr("hud.stratagem.used") % tr("stratagem.sat_that"))
+	assert_true(button.disabled)
+
+
+## Trận không mở Sát Thát: không có nút, W không gửi lệnh nào xuống luật.
+func test_locked_sat_that_has_no_button_and_w_does_nothing() -> void:
+	var main: Node2D = _make_main(true, ["vuon_khong_nha_trong"])
+	assert_null(_hud(main).stratagem_button(SAT_THAT))
+	_press(main, KEY_W)
+	assert_eq(_controller(main).stratagems_used(), [] as Array[int])
+	assert_eq(_rejected_commands(main), [] as Array[Dictionary], "W bị chặn ở giao diện")
