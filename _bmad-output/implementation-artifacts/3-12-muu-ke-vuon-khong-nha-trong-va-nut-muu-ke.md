@@ -64,7 +64,7 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
     1. chưa mở → `REJECTED(STRATAGEM_LOCKED)`; đã dùng → `REJECTED(STRATAGEM_USED)`; không đổi gì.
     2. Ghi `stratagems_used`, phát `STRATAGEM_USED`.
     3. Duyệt ô theo thứ tự đọc bàn (hàng rồi cột): ô `GRANARY` → đổi thành `PLAIN`, phát `GRANARY_BURNED`. Đổi địa hình: thêm một hàm trong `Effects` (vd. `Effects.burn_granary`) — `check_boundaries.sh` chỉ miễn `effects.gd` cho phép gán trạng thái; kiểm xem script có bắt `terrain[...] =` không và làm theo.
-    4. Lấy **bản sao** danh sách quân Nguyên, xếp theo `id` tăng dần (id = thứ tự hành động: 101… theo `thu_tu_dich`, tiếp viện nhận id sau — xem `BattleState.from_level`, `next_enemy_id`), rồi `Effects.damage(state, unit, 1, Cause.STRATAGEM, events)` cho quân còn trên bàn. Duyệt bản sao vì `Effects.damage` nhấc quân gục khỏi `state.units`.
+    4. Lấy **bản sao** danh sách quân Nguyên, xếp theo `id` tăng dần (id = thứ tự hành động: 101… theo `thu_tu_dich`, tiếp viện nhận id sau — xem `BattleState.from_level`, `next_enemy_id`), rồi `Effects.damage(state, unit, state.stats.<sát thương VKNT từ chi_so.json>, Cause.STRATAGEM, events)` cho quân còn trên bàn. Duyệt bản sao vì `Effects.damage` nhấc quân gục khỏi `state.units`.
     - Không đụng `has_moved`/`has_attacked`. Không dùng `randi`, không duyệt theo khóa Dictionary (test tất định).
   - [ ] 4.4 `Rules.resolve`: nhánh `Command.Kind.USE_STRATAGEM → RulesStratagem.resolve`. `RulesVictory.check` cuối `resolve` đã lo thắng khi có `DIED` (AC 8, Giữ ải không thắng sớm — có sẵn từ 3.11). Hết trận thì `telegraphs.clear()` có sẵn.
   - [ ] 4.5 AC 2: sau khi đốt, không còn ô `L`, nên `_heal_from_granaries` (`rules_enemy_phase.gd:73`) tự không hồi ai. **Không** thêm cờ chặn hồi máu riêng trừ khi có nguồn hồi máu khác (hiện không có); ghi chú ở `_heal_from_granaries` rằng VKNT xóa hết kho.
@@ -76,7 +76,7 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
 - [ ] **Task 5: Nút mưu kế, phím Q, hoạt ảnh** (AC: 1, 3, 6)
   - [ ] 5.1 `Hud`: mỗi mưu kế **mở** trong trận một nút (chữ qua `tr()`, ví dụ `hud.stratagem.vuon_khong_nha_trong` = "Vườn không nhà trống (Q)"), đặt giữa Chơi lại và Kết thúc lượt; signal `stratagem_pressed(kind)`. Mưu kế không mở → không tạo nút. Đã dùng → nút mờ + nhãn "Đã dùng" (dùng lại `hud.replay.used` hoặc khóa mới). Nút theo `_apply_disabled` (mờ khi `_locked`, `_over`). `focus_mode = FOCUS_NONE` như nút khác.
   - [ ] 5.2 `BattleInput`: action `stratagem_1` ↔ `KEY_Q` trong `ACTION_KEYS`, signal `stratagem_key_pressed(index)`. (Story 3.13 thêm `stratagem_2` ↔ `KEY_W`.) Khai báo InputMap bằng code như các phím khác, không bắt phím trực tiếp.
-  - [ ] 5.3 `BattleView`: nối signal; `_on_stratagem(kind)`: bỏ qua khi `_controller == null`, `_playing`, `_battle_over()`, hoặc `not _controller.can_use_stratagem(kind)` (phím Q khi bị khóa/đã dùng im lặng); gửi `Command.use_stratagem(kind)`; tướng đang chọn **giữ nguyên** (mặc định, xem Câu hỏi 3; `_finish_playback` đã giữ chọn khi tướng chưa đánh). `_update_hud` truyền thông tin mưu kế (mở/đã dùng/dùng được) vào `Hud.show_turn` hoặc một hàm riêng `show_stratagems`.
+  - [ ] 5.3 `BattleView`: nối signal; `_on_stratagem(kind)`: bỏ qua khi `_controller == null`, `_playing`, `_battle_over()`, hoặc `not _controller.can_use_stratagem(kind)` (phím Q khi bị khóa/đã dùng im lặng); gửi `Command.use_stratagem(kind)`; tướng đang chọn **giữ nguyên** (tác giả chốt, Quyết định 3; `_finish_playback` đã giữ chọn khi tướng chưa đánh). `_update_hud` truyền thông tin mưu kế (mở/đã dùng/dùng được) vào `Hud.show_turn` hoặc một hàm riêng `show_stratagems`.
   - [ ] 5.4 `EventPlayer`: `GRANARY_BURNED` → nháy ô kho (như `_flash_village`) và thời lượng `DAMAGE_SECONDS`; `STRATAGEM_USED` → `Notice` "Vườn không nhà trống!" (khóa `notice.stratagem.vuon_khong_nha_trong`); `DAMAGED` cause `STRATAGEM` dùng nháy có sẵn. Tổng hoạt ảnh vẫn ≤ 3 giây (`MAX_PHASE_SECONDS` lo). Kho lương biến mất khi `BoardView.show_state` vẽ bản chụp cuối (`_rebuild_terrain`) — đủ cho story này.
   - [ ] 5.5 Mọi chữ mới vào `i18n/text.csv`; `test_i18n.gd` phải xanh.
   - [ ] 5.6 Test GUT cho phần hiển thị có thể test không màn hình (như `test_battle_view.gd`, `test_main.gd`): nút có/không theo `muu_ke_mo`; nút mờ sau khi dùng; phím Q gửi lệnh; Q khi bị khóa không làm gì.
@@ -113,7 +113,7 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
 - `src/data/scenario_loader.gd:13–60`: `ROOT_KEYS`, `BEFORE_KEYS`, `AFTER_KEYS`, `COMMANDS`, `REJECT_CODES`, `COMMAND_REJECTS` — lệnh và mã mới thêm ở đây.
 - `tests/scenario_runner.gd`: `PENDING_RULES`, `REJECT_EVENTS`, `_run_step`, `compare`.
 - `src/debug/bug_report.gd:101–253`: `before_layers`, `after_layers`, `command_entries` — phải biết mưu kế, nếu không báo cáo F2 phát lại sai.
-- `data/chi_so.json`: chỉ có chỉ số theo loại quân; `Stats` hỏi theo `UnitType`. Xem Câu hỏi 1 trước khi thêm tham số mưu kế.
+- `data/chi_so.json`: chỉ có chỉ số theo loại quân; `Stats` hỏi theo `UnitType`. Tham số mưu kế thêm vào đây (Quyết định 1): cần mở rộng `Stats`/`StatsLoader` cho mục `muu_ke`, kèm test câu lỗi trong `test_loaders.gd`.
 
 ### Điều phải giữ (không làm vỡ)
 
@@ -134,11 +134,11 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
 - Tất định: duyệt quân theo `id`/thứ tự, không theo khóa Dictionary.
 - Kịch bản `da_duyet: true` không được sửa để test xanh. Nghi kịch bản sai thì hỏi tác giả.
 
-### Câu hỏi cho tác giả (mặc định đang dùng nếu chưa trả lời)
+### Quyết định của tác giả (chốt 2026-10-27)
 
-1. **Số máu trừ của Vườn không nhà trống** để cố định là 1 trong code (như va chạm), hay đưa vào `chi_so.json` để tác giả tự chỉnh khi playtest? Kiến trúc (ADR 8) ghi "tham số mưu kế" nằm trong `chi_so.json`; epics 4.9 có mục kiểm độ mạnh VKNT. **Mặc định: đưa vào `chi_so.json`** (khóa `muu_ke.vuon_khong_nha_trong.sat_thuong: 1`), `StatsLoader` kiểm số nguyên ≥ 1, có câu lỗi tiếng Việt.
-2. **Bấm nút một lần là dùng ngay**, hay bấm hai lần như đánh ("Bấm lần nữa để dùng")? Mưu kế không hủy được bằng `Z`, chỉ cứu được bằng Chơi lại hiệp. **Mặc định: một lần là dùng** (FR34 "dùng bằng nút").
-3. Sau khi dùng mưu kế, **tướng đang chọn giữ nguyên hay bỏ chọn**? **Mặc định: giữ nguyên** nếu tướng còn trên bàn và chưa đánh (mưu kế không tốn hành động; `_finish_playback` đã có nhánh này).
+1. **Số máu trừ của Vườn không nhà trống** để cố định là 1 trong code (như va chạm), hay đưa vào `chi_so.json` để tác giả tự chỉnh khi playtest? Kiến trúc (ADR 8) ghi "tham số mưu kế" nằm trong `chi_so.json`; epics 4.9 có mục kiểm độ mạnh VKNT. **Tác giả chốt: đưa vào `chi_so.json`** (khóa `muu_ke.vuon_khong_nha_trong.sat_thuong: 1`), `StatsLoader` kiểm số nguyên ≥ 1, có câu lỗi tiếng Việt.
+2. **Bấm nút một lần là dùng ngay**, hay bấm hai lần như đánh ("Bấm lần nữa để dùng")? Mưu kế không hủy được bằng `Z`, chỉ cứu được bằng Chơi lại hiệp. **Tác giả chốt: bấm một lần là dùng** (FR34 "dùng bằng nút").
+3. Sau khi dùng mưu kế, **tướng đang chọn giữ nguyên hay bỏ chọn**? **Tác giả chốt: giữ nguyên** nếu tướng còn trên bàn và chưa đánh (mưu kế không tốn hành động; `_finish_playback` đã có nhánh này).
 
 ### Kiểm thử
 
@@ -157,7 +157,7 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
 ### Project Structure Notes
 
 - Mới: `game/src/core/stratagem.gd`, `game/src/core/rules_stratagem.gd`, `game/tests/test_stratagem.gd`, `game/tests/kich_ban/muu_ke/*.json`, `game/data/tran/thu_muu_ke.json`.
-- Sửa: `command.gd`, `battle_event.gd`, `battle_state.gd`, `effects.gd`, `rules.gd`, `level_data.gd`, `level_loader.gd`, `scenario_loader.gd`, `scenario_runner.gd`, `scenario_viewer.gd`, `battle_controller.gd`, `bug_report.gd`, `hud.gd`, `battle_input.gd`, `battle_view.gd`, `event_player.gd`, `i18n/text.csv`; có thể `stats.gd`/`stats_loader.gd`/`chi_so.json` (Câu hỏi 1).
+- Sửa: `command.gd`, `battle_event.gd`, `battle_state.gd`, `effects.gd`, `rules.gd`, `level_data.gd`, `level_loader.gd`, `scenario_loader.gd`, `scenario_runner.gd`, `scenario_viewer.gd`, `battle_controller.gd`, `bug_report.gd`, `hud.gd`, `battle_input.gd`, `battle_view.gd`, `event_player.gd`, `i18n/text.csv`; `stats.gd`, `stats_loader.gd`, `data/chi_so.json` (Quyết định 1).
 - Kiến trúc dự kiến `hud.gd` chứa nút mưu kế (dòng 586) — khớp.
 
 ### Project Context Rules
