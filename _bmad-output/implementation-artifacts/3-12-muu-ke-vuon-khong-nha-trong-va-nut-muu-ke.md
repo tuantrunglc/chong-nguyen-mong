@@ -4,7 +4,7 @@ baseline_commit: f1f443d
 
 # Story 3.12: Mưu kế Vườn không nhà trống và nút mưu kế
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 
@@ -30,30 +30,30 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Mở rộng định dạng kịch bản (chưa có luật)** (AC: 9)
-  - [ ] 1.1 `ScenarioLoader`: lệnh mới `"muu_ke"` với khóa `"ten"` (bắt buộc) và `"tu_choi"`; `COMMAND_LIST`, `COMMAND_REJECTS["muu_ke"] = ["muu_ke_khoa", "muu_ke_da_dung", "tran_da_het"]`; mã từ chối mới `"muu_ke_khoa"`, `"muu_ke_da_dung"` trong `REJECT_CODES`/`REJECT_LIST` (+ khóa `scenario.viewer.reject_*` trong `i18n/text.csv`).
-  - [ ] 1.2 `ScenarioLoader`: `truoc.muu_ke_mo` (danh sách tên, không ghi = không mở mưu kế nào, giống file trận) và `truoc.muu_ke_da_dung` (danh sách tên, không bắt buộc); `sau.muu_ke_da_dung` (không bắt buộc, không ghi thì không kiểm). Tên lạ, trùng, hoặc "đã dùng" mà không có trong "mở" → câu lỗi tiếng Việt kèm file và giá trị.
-  - [ ] 1.3 `ScenarioRunner`: chưa có luật thì để `"muu_ke"` trong `PENDING_RULES` (`"3.12"`) để kịch bản trượt rõ ràng; `REJECT_EVENTS` thêm 2 mã mới (ánh xạ `BattleEvent.Reject` mới — xem Task 4.2); `compare` kiểm `sau.muu_ke_da_dung` khi có ghi.
-  - [ ] 1.4 `tests/scenario_viewer.gd` (dòng ~376): in được lệnh `muu_ke` ("Dùng mưu kế Vườn không nhà trống").
-  - [ ] 1.5 Test bộ nạp trong `test_scenario_loader.gd` (lệnh mới, khóa mới, câu lỗi). Câu lỗi lệnh lạ ở `test_scenario_loader.gd:360` sẽ đổi theo `COMMAND_LIST`.
+- [x] **Task 1: Mở rộng định dạng kịch bản (chưa có luật)** (AC: 9)
+  - [x] 1.1 `ScenarioLoader`: lệnh mới `"muu_ke"` với khóa `"ten"` (bắt buộc) và `"tu_choi"`; `COMMAND_LIST`, `COMMAND_REJECTS["muu_ke"] = ["muu_ke_khoa", "muu_ke_da_dung", "tran_da_het"]`; mã từ chối mới `"muu_ke_khoa"`, `"muu_ke_da_dung"` trong `REJECT_CODES`/`REJECT_LIST` (+ khóa `scenario.viewer.reject_*` trong `i18n/text.csv`).
+  - [x] 1.2 `ScenarioLoader`: `truoc.muu_ke_mo` (danh sách tên, không ghi = không mở mưu kế nào, giống file trận) và `truoc.muu_ke_da_dung` (danh sách tên, không bắt buộc); `sau.muu_ke_da_dung` (không bắt buộc, không ghi thì không kiểm). Tên lạ, trùng, hoặc "đã dùng" mà không có trong "mở" → câu lỗi tiếng Việt kèm file và giá trị.
+  - [x] 1.3 *(Đổi cách: `test_scenario_loader.gd:775` đòi `PENDING_RULES` rỗng, nên nhánh `"muu_ke"` gửi `Command.use_stratagem` ngay; chưa có luật thì `Rules.resolve` không làm gì và kịch bản trượt ở bước so bàn.)* `ScenarioRunner`: chưa có luật thì để `"muu_ke"` trong `PENDING_RULES` (`"3.12"`) để kịch bản trượt rõ ràng; `REJECT_EVENTS` thêm 2 mã mới (ánh xạ `BattleEvent.Reject` mới — xem Task 4.2); `compare` kiểm `sau.muu_ke_da_dung` khi có ghi.
+  - [x] 1.4 `tests/scenario_viewer.gd` (dòng ~376): in được lệnh `muu_ke` ("Dùng mưu kế Vườn không nhà trống").
+  - [x] 1.5 Test bộ nạp trong `test_scenario_loader.gd` (lệnh mới, khóa mới, câu lỗi). Câu lỗi lệnh lạ ở `test_scenario_loader.gd:360` sẽ đổi theo `COMMAND_LIST`.
 
 - [ ] **Task 2: Viết kịch bản chờ duyệt** (AC: 1–6, 8, 9) — thư mục mới `game/tests/kich_ban/muu_ke/`, mọi file `"da_duyet": false`, `truoc.muu_ke_mo: ["vuon_khong_nha_trong"]` trừ ca bị khóa. Dùng bàn 7×5 hoặc nhỏ như các kịch bản `kho_luong/`. Đề xuất (tối đa ~8, một đợt):
-  - [ ] `vknt_dot_kho_tru_mau.json`: 2 kho lương, Bộ binh 3 máu, Kỵ binh 2 máu, Cung kỵ 1 máu → `L` thành `.`, Bộ binh 2, Kỵ binh 1, Cung kỵ gục; `sau.muu_ke_da_dung`.
-  - [ ] `vknt_khong_co_kho_van_tru_mau.json`: bàn không có `L` → quân Nguyên vẫn mất 1 máu.
-  - [ ] `vknt_het_hoi_mau.json`: Bộ binh 2 máu kề kho lương; dùng mưu kế rồi `ket_thuc_luot` → còn 1 máu (không hồi), `hiep: 2`. (So với `kho_luong/bo_binh_ke_kho_luong_hoi_mau.json`.)
-  - [ ] `vknt_khong_ton_hanh_dong.json`: Khoái chưa đi; dùng mưu kế, rồi Khoái đi và đánh được; `da_di`/`da_danh` đúng.
-  - [ ] `vknt_xoa_lich_su_huy.json`: Khoái đi, dùng mưu kế, `huy` → `tu_choi: "khong_con_nuoc_di"`, Khoái vẫn ở ô mới (ca AC bắt buộc).
-  - [ ] `vknt_dung_lan_hai_bi_tu_choi.json`: dùng 2 lần → lần 2 `tu_choi: "muu_ke_da_dung"`, máu chỉ trừ 1 lần.
-  - [ ] `vknt_bi_khoa_tu_choi.json`: không có `muu_ke_mo` → `tu_choi: "muu_ke_khoa"`, bàn không đổi.
-  - [ ] `vknt_diet_quan_cuoi_thang.json`: quân Nguyên cuối 1 máu (Tiêu diệt) → `ket_qua: "thang"`.
-  - [ ] (tùy, nếu tác giả muốn thêm đợt 2) `vknt_ky_binh_xung_phong_qua_kho_cu.json`: Kỵ binh đã báo xung phong (`truoc.bao_don` hướng) bị kho lương chắn; đốt kho xong, kết thúc lượt → đòn đi tiếp trúng tướng phía sau. Đây là hệ quả của luật cũ (`TelegraphMarks.hit_cell` tính lúc ra đòn) — kịch bản chỉ khóa hành vi.
-  - [ ] 2.1 Chạy `tools/test.sh`: bộ nạp đọc được mọi file; kịch bản chưa duyệt chạy trượt vì `PENDING_RULES` — liệt kê trong Debug Log. Commit kịch bản riêng (như `1c04aa2` ở Story 3.11), lời commit tiếng Việt kết `(Story 3.12)`.
+  - [x] `vknt_dot_kho_tru_mau.json`: 2 kho lương, Bộ binh 3 máu, Kỵ binh 2 máu, Cung kỵ 1 máu → `L` thành `.`, Bộ binh 2, Kỵ binh 1, Cung kỵ gục; `sau.muu_ke_da_dung`.
+  - [x] `vknt_khong_co_kho_van_tru_mau.json`: bàn không có `L` → quân Nguyên vẫn mất 1 máu.
+  - [x] `vknt_het_hoi_mau.json`: Bộ binh 2 máu kề kho lương; dùng mưu kế rồi `ket_thuc_luot` → còn 1 máu (không hồi), `hiep: 2`. (So với `kho_luong/bo_binh_ke_kho_luong_hoi_mau.json`.)
+  - [x] `vknt_khong_ton_hanh_dong.json`: Khoái chưa đi; dùng mưu kế, rồi Khoái đi và đánh được; `da_di`/`da_danh` đúng.
+  - [x] `vknt_xoa_lich_su_huy.json`: Khoái đi, dùng mưu kế, `huy` → `tu_choi: "khong_con_nuoc_di"`, Khoái vẫn ở ô mới (ca AC bắt buộc).
+  - [x] `vknt_dung_lan_hai_bi_tu_choi.json`: dùng 2 lần → lần 2 `tu_choi: "muu_ke_da_dung"`, máu chỉ trừ 1 lần.
+  - [x] `vknt_bi_khoa_tu_choi.json`: không có `muu_ke_mo` → `tu_choi: "muu_ke_khoa"`, bàn không đổi.
+  - [x] `vknt_diet_quan_cuoi_thang.json`: quân Nguyên cuối 1 máu (Tiêu diệt) → `ket_qua: "thang"`.
+  - [x] (đã viết luôn trong đợt này) `vknt_ky_binh_xung_phong_qua_kho_cu.json`: Kỵ binh đã báo xung phong (`truoc.bao_don` hướng) bị kho lương chắn; đốt kho xong, kết thúc lượt → đòn đi tiếp trúng tướng phía sau. Đây là hệ quả của luật cũ (`TelegraphMarks.hit_cell` tính lúc ra đòn) — kịch bản chỉ khóa hành vi.
+  - [x] 2.1 Chạy `tools/test.sh`: bộ nạp đọc được mọi file; kịch bản chưa duyệt chạy trượt vì `PENDING_RULES` — liệt kê trong Debug Log. Commit kịch bản riêng (như `1c04aa2` ở Story 3.11), lời commit tiếng Việt kết `(Story 3.12)`.
   - [ ] 2.2 **Dừng, chờ tác giả duyệt** qua `tools/xem_kich_ban.sh muu_ke`. Tác giả bảo sai thì sửa kịch bản, không sửa code. Duyệt xong mới bật `da_duyet: true`.
 
 - [ ] **Task 3: Dữ liệu trận: `muu_ke_mo`** (AC: 6)
-  - [ ] 3.1 `src/core/stratagem.gd` (mới, `class_name Stratagem`, `RefCounted`): `enum Kind { VUON_KHONG_NHA_TRONG }` (Story 3.13 thêm `SAT_THAT`), bảng tên trong file ↔ `Kind` (`"vuon_khong_nha_trong"`), bảng phím (`VUON_KHONG_NHA_TRONG` ↔ action `stratagem_1` / `Q`). Đặt tên theo kiến trúc (`Stratagem.SAT_THAT`, dòng 683).
-  - [ ] 3.2 `LevelData.stratagems: Array[int]` (theo thứ tự trong file).
-  - [ ] 3.3 `LevelLoader`: đọc `muu_ke_mo` (không bắt buộc; thiếu = `[]`). Không phải danh sách, phần tử không phải chuỗi, tên lạ, tên trùng → lỗi tiếng Việt kiểu `tran_05.json: "muu_ke_mo" mục 1 là "sat_tat", chỉ được "vuon_khong_nha_trong"`. Xóa chú thích "biết tên nhưng chưa đọc (Story 3.12)" ở `level_loader.gd:15`. Test trong `test_loaders.gd`.
+  - [x] 3.1 `src/core/stratagem.gd` (mới, `class_name Stratagem`, `RefCounted`): `enum Kind { VUON_KHONG_NHA_TRONG }` (Story 3.13 thêm `SAT_THAT`), bảng tên trong file ↔ `Kind` (`"vuon_khong_nha_trong"`), bảng phím (`VUON_KHONG_NHA_TRONG` ↔ action `stratagem_1` / `Q`). Đặt tên theo kiến trúc (`Stratagem.SAT_THAT`, dòng 683).
+  - [x] 3.2 `LevelData.stratagems: Array[int]` (theo thứ tự trong file).
+  - [x] 3.3 `LevelLoader`: đọc `muu_ke_mo` (không bắt buộc; thiếu = `[]`). Không phải danh sách, phần tử không phải chuỗi, tên lạ, tên trùng → lỗi tiếng Việt kiểu `tran_05.json: "muu_ke_mo" mục 1 là "sat_tat", chỉ được "vuon_khong_nha_trong"`. Xóa chú thích "biết tên nhưng chưa đọc (Story 3.12)" ở `level_loader.gd:15`. Test trong `test_loaders.gd`.
   - [ ] 3.4 Mọi `data/tran/*.json` hiện có đều `"muu_ke_mo": []` → không đổi hành vi. **Không sửa** các trận đã có.
   - [ ] 3.5 Thêm trận thử `data/tran/thu_muu_ke.json` (kho lương + vài quân Nguyên, trong đó một Cung kỵ, mở Vườn không nhà trống) để tác giả bấm tay: `tools/chay.sh --dev --tran=thu_muu_ke`.
 
@@ -185,6 +185,7 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
 ### Debug Log References
 
 - Nền trước story: `tools/test.sh` 727/727 GUT, 152 kịch bản đã duyệt, 1 chưa duyệt (`tran/tran_01_ne_o_do.json`) (HEAD `f1f443d`).
+- 2026-10-27 (Task 1–2, commit `0697924`): định dạng kịch bản có lệnh `muu_ke`, khóa `muu_ke_mo`/`muu_ke_da_dung`; `LevelLoader` đọc `muu_ke_mo`; thêm `Stratagem`, `Command.USE_STRATAGEM`, `Reject.STRATAGEM_LOCKED/USED`, cờ mưu kế trong `BattleState` (+`clone`, `validate`). 733/733 GUT. 10 kịch bản `muu_ke/` (+1 kịch bản 3.12 cũ chưa duyệt): **10/10 trượt** vì chưa có luật (Red). Kiểm chéo bằng một bản luật tạm (không commit): cả 10 đạt, tức kịch bản khớp các luật cũ (AI đứng yên khi không có đường, Kỵ binh xung phong tính ô trúng lúc ra đòn). Lưu ý cho Task 4.3: `check_boundaries.sh` không bắt `state.terrain[i] = ...` ngoài `Effects` — vẫn đặt hàm đốt kho trong `Effects` theo luật kiến trúc.
 
 ### Completion Notes List
 
