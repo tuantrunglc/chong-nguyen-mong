@@ -1,6 +1,6 @@
 class_name RulesStratagem
 extends RefCounted
-## Mưu kế của Trần Hưng Đạo (Story 3.12, FR33–FR34). Mỗi mưu kế dùng 1 lần mỗi trận, chỉ khi file trận mở nó; không
+## Mưu kế của Trần Hưng Đạo (Story 3.12–3.13, FR32–FR34). Mỗi mưu kế dùng 1 lần mỗi trận, chỉ khi file trận mở nó; không
 ## tốn hành động của tướng. Lệnh này xóa bản chụp hủy (BattleController), như đánh.
 
 
@@ -20,7 +20,9 @@ static func resolve(state: BattleState, command: Command, events: Array[BattleEv
 		Stratagem.Kind.VUON_KHONG_NHA_TRONG:
 			_scorched_earth(state, events)
 		Stratagem.Kind.SAT_THAT:
-			pass  # luật viết sau khi tác giả duyệt kịch bản st_* (Story 3.13, M3)
+			# Sát Thát (Story 3.13, FR32): đòn có sát thương của tướng +1 tới hết lượt người chơi này; xem
+			# BattleState.sat_that_bonus, RulesAttack. Không có sự kiện nào khác ngoài STRATAGEM_USED.
+			state.sat_that_active = true
 		_:
 			assert(false, "mưu kế %d có tên mà chưa có luật" % kind)
 

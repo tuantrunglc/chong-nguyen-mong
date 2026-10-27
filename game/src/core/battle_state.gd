@@ -43,6 +43,9 @@ var next_enemy_id: int = FIRST_ENEMY_ID
 ## đầu lượt giữ danh sách đã dùng lúc đó.
 var stratagems: Array[int] = []
 var stratagems_used: Array[int] = []
+## Sát Thát đang có hiệu lực trong lượt người chơi này (Story 3.13). RulesStratagem bật, RulesEnemyPhase tắt khi
+## người chơi kết thúc lượt. Bản chụp đầu lượt luôn là false, nên chơi lại hiệp trả lại cả mưu kế lẫn cờ.
+var sat_that_active: bool = false
 
 
 ## Tướng: id = vị trí trong UnitType.GENERALS + 1. Quân Nguyên: 101, 102… theo thứ tự level.units
@@ -91,6 +94,7 @@ func clone() -> BattleState:
 	copy.reinforcement_warnings = reinforcement_warnings.duplicate()
 	copy.stratagems = stratagems.duplicate()
 	copy.stratagems_used = stratagems_used.duplicate()
+	copy.sat_that_active = sat_that_active
 	for r: LevelData.Reinforcement in reinforcements:
 		copy.reinforcements.append(r.clone())
 	for u: Unit in units:
@@ -171,10 +175,17 @@ func validate() -> Array[String]:
 			problems.append("mưu kế %s đã dùng mà không mở trong trận" % Stratagem.name_of(kind))
 		if stratagems_used.count(kind) > 1:
 			problems.append("mưu kế %s bị ghi đã dùng hai lần" % Stratagem.name_of(kind))
+	if sat_that_active and not stratagems_used.has(Stratagem.Kind.SAT_THAT):
+		problems.append("Sát Thát đang có hiệu lực mà chưa ghi đã dùng")
 	for u: Unit in units:
 		if u.faction == Unit.Faction.NGUYEN and u.id >= next_enemy_id:
 			problems.append("quân Nguyên %d có id lớn hơn hoặc bằng next_enemy_id %d" % [u.id, next_enemy_id])
 	return problems
+
+
+## Sát thương cộng thêm cho đòn của tướng lúc này: tham số Sát Thát khi đang có hiệu lực, không thì 0 (kiến trúc M2).
+func sat_that_bonus() -> int:
+	return stats.strike_bonus(Stratagem.Kind.SAT_THAT) if sat_that_active else 0
 
 
 ## Hình dạng đòn đã báo; rỗng là hợp lệ. Chủ đòn đã gục vẫn hợp lệ (hủy đòn ở Story 2.9), nhưng phải từng là quân

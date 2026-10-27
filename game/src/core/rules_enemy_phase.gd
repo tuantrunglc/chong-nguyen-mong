@@ -8,6 +8,7 @@ extends RefCounted
 
 ## Ra đòn, rồi sang hiệp mới và chuẩn bị. Trận hết giữa lúc ra đòn thì dừng: không sang hiệp, không chuẩn bị.
 static func end_player_turn(state: BattleState, events: Array[BattleEvent]) -> void:
+	state.sat_that_active = false  # Sát Thát chỉ trong lượt người chơi (Story 3.13), tắt cả khi trận hết giữa pha địch
 	_strike_all(state, events)
 	if Rules.is_battle_over(state):
 		return

@@ -143,12 +143,14 @@ static func resolve(state: BattleState, command: Command, events: Array[BattleEv
 	unit.has_attacked = true
 
 
-## Sát thương rồi đẩy nếu mục tiêu còn sống (kiến trúc M2). Sát Thát (+1) thêm ở Story 3.13.
+## Sát thương rồi đẩy nếu mục tiêu còn sống (kiến trúc M2). Sát Thát cộng vào sát thương đòn, không cộng vào va
+## chạm khi bị đẩy (Story 3.13).
 static func khoai_strike(state: BattleState, khoai: Unit, cell: Vector2i, events: Array[BattleEvent]) -> void:
 	var target: Unit = state.unit_at(cell)
 	if target == null:
 		return
-	Effects.damage(state, target, state.stats.damage(khoai.type), BattleEvent.Cause.STRIKE, events)
+	Effects.damage(state, target, state.stats.damage(khoai.type) + state.sat_that_bonus(), BattleEvent.Cause.STRIKE,
+		events)
 	if target.is_alive():
 		ForcedMove.run(state, target, Grid.dir_between(khoai.cell, cell), state.stats.push_distance(khoai.type),
 			BattleEvent.Cause.PUSH, events)
@@ -182,8 +184,9 @@ static func _blocked_target(state: BattleState, from: Vector2i, to: Vector2i) ->
 
 
 ## Lao về phía cell, trúng quân đầu tiên (mọi phe) từ ô min_range; tự ghi ATTACKED với ô quân trúng (có thể là
-## tướng mình đứng chắn trước cell). Không đẩy. Sát Thát (+1) thêm ở Story 3.13. Rừng hoặc kho lương trước mục tiêu
-## thì lao bị chặn, không ai mất máu (Story 3.1; làng ở 3.7) — phòng thủ, vì `targets` đã loại các ô đó.
+## tướng mình đứng chắn trước cell). Không đẩy. Sát Thát cộng vào sát thương, kể cả khi trúng tướng mình (tác giả
+## chốt, Story 3.13). Rừng hoặc kho lương trước mục tiêu thì lao bị chặn, không ai mất máu (Story 3.1; làng ở 3.7)
+## — phòng thủ, vì `targets` đã loại các ô đó.
 static func lao_throw(state: BattleState, lao: Unit, cell: Vector2i, events: Array[BattleEvent]) -> void:
 	var dir: Vector2i = Grid.straight_dir(lao.cell, cell)
 	var near: int = state.stats.min_range(lao.type)
@@ -195,7 +198,8 @@ static func lao_throw(state: BattleState, lao: Unit, cell: Vector2i, events: Arr
 		if target == null or d < near:
 			continue  # ô trống, hoặc quân bị bay qua (trước tầm gần)
 		events.append(BattleEvent.attacked(lao.id, target.cell))
-		Effects.damage(state, target, state.stats.damage(lao.type), BattleEvent.Cause.STRIKE, events)
+		Effects.damage(state, target, state.stats.damage(lao.type) + state.sat_that_bonus(), BattleEvent.Cause.STRIKE,
+			events)
 		return
 	# resolve đã kiểm cell có trong targets: tới đây là targets và lao_throw lệch nhau.
 	assert(false, "RulesAttack.lao_throw: không trúng ai từ %s tới %s" % [lao.cell, cell])
