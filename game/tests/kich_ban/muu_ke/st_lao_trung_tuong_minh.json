@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Khoái đứng ở ô thứ 2, Bộ binh ở ô thứ 3. Dùng Sát Thát rồi Lão bấm Bộ binh: lao trúng Khoái đứng chắn, sát thương 1+1=2 (tác giả chốt: có cộng), Khoái còn 1 máu.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

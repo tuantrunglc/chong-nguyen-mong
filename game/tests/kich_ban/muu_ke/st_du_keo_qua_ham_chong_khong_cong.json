@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Dùng Sát Thát rồi Dư kéo Kỵ binh 2 máu qua hầm chông: kéo vẫn 0 sát thương, hầm chông vẫn chỉ trừ 1, Kỵ binh còn 1 máu.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

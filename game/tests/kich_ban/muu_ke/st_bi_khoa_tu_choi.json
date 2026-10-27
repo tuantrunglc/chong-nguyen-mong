@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Trận chỉ mở Vườn không nhà trống: dùng Sát Thát bị từ chối. Lão lao trúng Bộ binh 3 máu với sát thương thường 1, còn 2 máu.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

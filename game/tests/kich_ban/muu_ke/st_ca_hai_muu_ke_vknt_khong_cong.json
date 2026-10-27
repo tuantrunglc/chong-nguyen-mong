@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Trận mở cả hai mưu kế. Dùng Sát Thát rồi Vườn không nhà trống: Vườn không nhà trống không phải đòn của tướng nên không được cộng, Bộ binh 3→2, Kỵ binh 2→1.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

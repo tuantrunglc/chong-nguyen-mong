@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Khoái đánh Bộ binh ở 1,2 trước (sát thương 2: còn 1 máu, bị đẩy lên 1,1), rồi mới dùng Sát Thát, rồi Lão lao trúng Bộ binh ở 5,1 (sát thương 1+1=2: còn 1 máu). Đòn đánh trước không được tính lại.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

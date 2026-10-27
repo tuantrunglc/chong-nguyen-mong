@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Dùng Sát Thát hai lần: lần hai bị từ chối vì đã dùng trong trận, không cộng dồn. Lão lao trúng Bộ binh 3 máu: sát thương 1+1=2, còn 1 máu.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

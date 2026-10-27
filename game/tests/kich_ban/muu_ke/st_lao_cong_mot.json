@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Dùng Sát Thát rồi Lão lao trúng Bộ binh 3 máu ở 3,1: sát thương 1+1=2, Bộ binh còn 1 máu.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Dùng Sát Thát rồi kết thúc lượt (Bộ binh đứng kề Khoái nên không đi, báo đòn vào Khoái). Sang hiệp 2, Khoái đánh Bộ binh 3 máu: sát thương thường 2, Bộ binh còn 1 máu và bị đẩy lên 3,1.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Bộ binh ở 3,3 đã báo đòn vào Khoái ở 3,4. Dùng Sát Thát rồi kết thúc lượt: đòn quân Nguyên không được cộng, Khoái chỉ mất 1 máu (3→2).",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",
