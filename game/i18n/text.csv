@@ -13,6 +13,7 @@ hud.replay.used,Đã dùng
 hud.end_turn,Kết thúc lượt (Space)
 hud.stratagem.vuon_khong_nha_trong,Vườn không nhà trống (Q)
 hud.stratagem.used,%s: đã dùng
+stratagem.vuon_khong_nha_trong,Vườn không nhà trống
 hud.confirm_attack,Bấm lần nữa để đánh
 hud.phase.player,"Lượt của bạn"
 hud.phase.enemy,"Quân Nguyên đang ra đòn"
@@ -84,7 +85,6 @@ scenario.viewer.after_stratagems_used,mưu kế đã dùng: %s
 scenario.viewer.after_stratagems_used_none,chưa dùng mưu kế nào
 scenario.viewer.stratagems_open,Mưu kế mở: %s
 scenario.viewer.stratagems_used_before,đã dùng từ trước: %s
-stratagem.vuon_khong_nha_trong,Vườn không nhà trống
 scenario.viewer.after_outcome,kết quả: %s
 scenario.viewer.outcome_dang_choi,đang chơi
 scenario.viewer.outcome_thang,thắng

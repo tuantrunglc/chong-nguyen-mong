@@ -156,11 +156,7 @@ func can_use_stratagem(kind: int) -> bool:
 		and _state.stratagems.has(kind) and not _state.stratagems_used.has(kind)
 
 
-## Mưu kế mở trong trận và đã dùng (bản sao, cho HUD).
-func stratagems() -> Array[int]:
-	return _state.stratagems.duplicate() if _state != null else [] as Array[int]
-
-
+## Mưu kế đã dùng (bản sao; HUD đọc từ bản chụp, hàm này cho test).
 func stratagems_used() -> Array[int]:
 	return _state.stratagems_used.duplicate() if _state != null else [] as Array[int]
 

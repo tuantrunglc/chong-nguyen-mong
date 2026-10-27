@@ -1101,5 +1101,5 @@ func test_stats_stratagem_errors_vietnamese() -> void:
 	d["muu_ke"] = {}
 	assert_eq(_stats(d).errors, [STATS_FILE + ': thiếu khóa "muu_ke.vuon_khong_nha_trong"'] as Array[String])
 	d["muu_ke"] = {"vuon_khong_nha_trong": {"sat_thuong": 0}}
-	assert_eq(_stats(d).errors.size(), 1)
-	assert_string_contains(_stats(d).errors[0], '"muu_ke.vuon_khong_nha_trong.sat_thuong"')
+	assert_eq(_stats(d).errors, [STATS_FILE
+		+ ': "muu_ke.vuon_khong_nha_trong.sat_thuong" phải là số nguyên từ 1 trở lên, đang là 0'] as Array[String])

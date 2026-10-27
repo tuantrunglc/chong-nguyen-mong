@@ -151,8 +151,6 @@ func _play_one(event: BattleEvent, seconds: float, snapshot: BattleState) -> voi
 				await _flash(token, seconds)
 		BattleEvent.Type.REINFORCEMENT_BLOCKED:
 			await _flash_blocked(event.to_cell, seconds)
-		BattleEvent.Type.STRATAGEM_USED:
-			_show_stratagem_notice(event)
 		BattleEvent.Type.GRANARY_BURNED:
 			await _flash_burn(event.to_cell, seconds)
 		_:
@@ -171,6 +169,7 @@ func _apply_instant(event: BattleEvent, snapshot: BattleState) -> void:
 	_played.append(event)
 	if event.type == BattleEvent.Type.VILLAGE_DAMAGED and _notice != null:
 		_notice.show_text(TranslationServer.translate("notice.morale_lost"))
+	# STRATAGEM_USED không có động tác (0 giây) nên luôn tới đây, không qua _play_one.
 	if event.type == BattleEvent.Type.STRATAGEM_USED:
 		_show_stratagem_notice(event)
 	if event.type == BattleEvent.Type.REINFORCEMENT_SPAWNED and _board != null:

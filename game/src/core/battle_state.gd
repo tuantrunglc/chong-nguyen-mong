@@ -162,7 +162,11 @@ func validate() -> Array[String]:
 			problems.append("tiếp viện ở ô %d,%d là ô không đi vào được" % [r.cell.x, r.cell.y])
 		if not UnitType.is_enemy(r.type):
 			problems.append("tiếp viện loại quân %d không phải quân Nguyên" % r.type)
+	var used_seen: Array[int] = []
 	for kind: int in stratagems_used:
+		if used_seen.has(kind):
+			continue  # mỗi mưu kế báo một lần, dù bị ghi trùng mấy lần
+		used_seen.append(kind)
 		if not stratagems.has(kind):
 			problems.append("mưu kế %s đã dùng mà không mở trong trận" % Stratagem.name_of(kind))
 		if stratagems_used.count(kind) > 1:

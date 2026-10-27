@@ -4,7 +4,7 @@ baseline_commit: f1f443d
 
 # Story 3.12: Mưu kế Vườn không nhà trống và nút mưu kế
 
-Status: review
+Status: in-progress
 
 ## Story
 
@@ -86,6 +86,25 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
   - [x] 6.2 Chụp màn hình qua GoPeak (`tools/chay.sh --dev --tran=thu_muu_ke`) xem nút và bàn sau khi đốt kho.
   - [x] 6.3 Hướng dẫn tác giả thử tay bằng tiếng Việt (các bước, thấy gì là đúng) trong Completion Notes.
   - [x] 6.4 Cập nhật `sprint-status.yaml`, commit tiếng Việt kết `(Story 3.12)`.
+
+### Review Findings
+
+Đã sửa cả 11 mục Patch (2026-10-27). `tools/test.sh` 756/756 GUT, 162 kịch bản đã duyệt. Kiểm đột biến mục 2: bỏ chốt `can_use_stratagem` trong `BattleView._on_stratagem` thì 2 test `test_stratagem_view.gd` trượt. Mục 1: bảng `Stratagem.SLOTS` = `[Kind, action, phím]`, `BattleInput` khai báo phím từ bảng, `Hud.show_stratagems` xếp theo `Stratagem.in_key_order`.
+
+- [x] [Review][Patch] Chuyển bảng `Kind ↔ action ↔ phím` vào `Stratagem` (Task 3.1), `BattleInput` đọc từ bảng, HUD xếp nút theo thứ tự phím (Q, W) chứ không theo `muu_ke_mo` — tác giả chốt 2026-10-27 [game/src/core/stratagem.gd]
+- [x] [Review][Patch] Test giao diện vẫn qua dù bỏ chốt `can_use_stratagem` trong `_on_stratagem` (luật đã từ chối nên trạng thái không đổi); cần kiểm thêm là không có lệnh bị từ chối nào trong `round_commands()` [game/tests/test_stratagem_view.gd:63]
+- [x] [Review][Patch] `validate()` báo lỗi "mưu kế bị ghi đã dùng hai lần" lặp theo số lần trùng, và chưa có test cho luật trùng này [game/src/core/battle_state.gd:168]
+- [x] [Review][Patch] Gõ sai tên trong `truoc.muu_ke_mo` sinh thêm lỗi thứ hai gây hiểu nhầm ("muu_ke_mo không mở") cho `muu_ke_da_dung`; cần bỏ qua bước so chéo khi `muu_ke_mo` đã có lỗi [game/src/data/scenario_loader.gd:363]
+- [x] [Review][Patch] Nhánh `STRATAGEM_USED` trong `_play_one` không bao giờ chạy (thời lượng 0 nên luôn đi qua `_apply_instant`); xóa nhánh thừa [game/src/battle/event_player.gd:154]
+- [x] [Review][Patch] Test lỗi `muu_ke.vuon_khong_nha_trong.sat_thuong` < 1 chỉ kiểm có tên khóa, chưa kiểm đúng nguyên câu lỗi kèm giá trị như các test lỗi loader khác [game/tests/test_loaders.gd]
+- [x] [Review][Patch] `match kind:` thiếu nhánh mặc định: một mưu kế mới có tên nhưng chưa có luật sẽ bị đánh dấu đã dùng mà không làm gì; thêm `assert` ở nhánh `_` [game/src/core/rules_stratagem.gd:19]
+- [x] [Review][Patch] Chưa có test cho ca trận Tiêu diệt: mưu kế diệt hết quân trên bàn nhưng vẫn còn tiếp viện chưa ra thì chưa thắng (thêm test GUT, không thêm kịch bản mới chưa duyệt) [game/tests/test_stratagem.gd]
+- [x] [Review][Patch] `BattleEvent.Reject.STRATAGEM_USED` trùng tên với `BattleEvent.Type.STRATAGEM_USED` mà nghĩa ngược nhau; đổi tên Reject thành `STRATAGEM_ALREADY_USED` [game/src/core/battle_event.gd:71]
+- [x] [Review][Patch] `BattleController.stratagems()` không ai gọi (HUD đọc từ bản chụp); xóa [game/src/battle/battle_controller.gd:160]
+- [x] [Review][Patch] Khóa `stratagem.vuon_khong_nha_trong` nằm lẫn trong khối `scenario.viewer.*`; chuyển cạnh các khóa `hud.stratagem.*`/`notice.stratagem` [game/i18n/text.csv:87]
+- [x] [Review][Defer] `Stats.new(values)` cho bỏ trống tham số mưu kế (giá trị mặc định `{}`), nhiều test cũ vẫn tạo `Stats` một tham số; nếu test sau này dùng mưu kế thì assert ở debug, ở bản phát hành trừ 0 máu [game/src/core/stats.gd:12] — deferred, chỉ ảnh hưởng test; bộ nạp đã bắt buộc nhóm `muu_ke`
+- [x] [Review][Defer] Báo lỗi F2 `before_layers` không ghi `kieu`, `tiep_vien`, `long_dan`, `so_hiep_toi_da`: kịch bản sinh ra từ trận Giữ ải hoặc trận còn tiếp viện sẽ chạy lại sai kết quả [game/src/debug/bug_report.gd:103] — deferred, pre-existing
+- [x] [Review][Defer] Ô nháy khi đốt kho có thể nằm thấp hơn mặt khối kho lương khoảng 16px (dùng `cell_rect` mặt đất, giống nháy làng) [game/src/battle/event_player.gd:204] — deferred, chưa kiểm trên màn hình; tác giả xem khi thử tay
 
 ## Dev Notes
 

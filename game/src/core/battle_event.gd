@@ -67,8 +67,8 @@ enum Reject {
 	BATTLE_OVER,
 	## Mưu kế không mở trong trận này ("muu_ke_mo", Story 3.12).
 	STRATAGEM_LOCKED,
-	## Mưu kế đã dùng trong trận (mỗi mưu kế 1 lần, Story 3.12).
-	STRATAGEM_USED,
+	## Mưu kế đã dùng trong trận (mỗi mưu kế 1 lần, Story 3.12). Khác Type.STRATAGEM_USED (dùng thành công).
+	STRATAGEM_ALREADY_USED,
 }
 
 ## Vì sao đòn đã báo bị hủy (TELEGRAPH_CANCELLED, Story 2.9). Đúng ba đường TelegraphMarks trả ô trúng rỗng:

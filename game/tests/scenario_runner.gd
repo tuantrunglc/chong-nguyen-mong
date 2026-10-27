@@ -22,7 +22,7 @@ const REJECT_EVENTS: Dictionary = {
 	"ngoai_tam": BattleEvent.Reject.NOT_IN_RANGE,
 	"tran_da_het": BattleEvent.Reject.BATTLE_OVER,
 	"muu_ke_khoa": BattleEvent.Reject.STRATAGEM_LOCKED,
-	"muu_ke_da_dung": BattleEvent.Reject.STRATAGEM_USED,
+	"muu_ke_da_dung": BattleEvent.Reject.STRATAGEM_ALREADY_USED,
 }
 
 ## Tên đầy đủ cho câu so sánh. Ký hiệu lấy ngược từ BoardText (unit_symbol, terrain_symbol).

@@ -17,6 +17,9 @@ func after_each() -> void:
 	for action: String in BattleInput.ACTION_KEYS:
 		if InputMap.has_action(action):
 			InputMap.erase_action(action)
+	for slot: Array in Stratagem.SLOTS:
+		if InputMap.has_action(slot[1] as String):
+			InputMap.erase_action(slot[1] as String)
 	if FileAccess.file_exists(LEVEL_FILE):
 		DirAccess.remove_absolute(LEVEL_FILE)
 	DirAccess.remove_absolute(LEVEL_DIR)
@@ -45,6 +48,15 @@ func _controller(main: Node2D) -> BattleController:
 	return main._controller as BattleController
 
 
+## Lệnh bị luật từ chối trong hiệp (F2 ghi cả lệnh bị từ chối): giao diện phải chặn trước, không gửi xuống luật.
+func _rejected_commands(main: Node2D) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for entry: Dictionary in _controller(main).round_commands():
+		if int(entry.get("tu_choi", BattleEvent.Reject.NONE)) != BattleEvent.Reject.NONE:
+			out.append(entry)
+	return out
+
+
 func _press_q(main: Node2D) -> void:
 	var ev: InputEventKey = InputEventKey.new()
 	ev.physical_keycode = KEY_Q
@@ -65,6 +77,7 @@ func test_locked_stratagem_has_no_button_and_q_does_nothing() -> void:
 	assert_null(_hud(main).stratagem_button(VKNT), "mưu kế khóa thì không hiện nút")
 	_press_q(main)
 	assert_eq(_controller(main).stratagems_used(), [] as Array[int])
+	assert_eq(_rejected_commands(main), [] as Array[Dictionary], "Q bị chặn ở giao diện, không gửi lệnh xuống luật")
 
 
 func test_button_uses_stratagem_once_then_dims() -> void:
@@ -78,6 +91,7 @@ func test_button_uses_stratagem_once_then_dims() -> void:
 	assert_eq(button.text, tr("hud.stratagem.used") % tr("stratagem.vuon_khong_nha_trong"))
 	_press_q(main)
 	assert_eq(_controller(main).snapshot().unit_by_id(101).hp, 2, "Q lần hai không trừ máu nữa")
+	assert_eq(_rejected_commands(main), [] as Array[Dictionary], "Q lần hai bị chặn ở giao diện")
 
 
 func test_q_key_uses_stratagem() -> void:

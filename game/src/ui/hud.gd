@@ -125,9 +125,10 @@ func show_turn(round_number: int, can_undo: bool, can_replay: bool, replay_left:
 		hide_phase()
 
 
-## Nút mưu kế (Story 3.12): một nút cho mỗi mưu kế trận mở (mưu kế khóa thì không có nút); đã dùng thì mờ và ghi
-## "đã dùng". Dựng lại nút chỉ khi danh sách mưu kế mở đổi (trận mới).
-func show_stratagems(open: Array[int], used: Array[int]) -> void:
+## Nút mưu kế (Story 3.12): một nút cho mỗi mưu kế trận mở (mưu kế khóa thì không có nút), xếp theo thứ tự phím
+## (Stratagem.SLOTS); đã dùng thì mờ và ghi "đã dùng". Dựng lại nút chỉ khi danh sách mưu kế mở đổi (trận mới).
+func show_stratagems(open_kinds: Array[int], used: Array[int]) -> void:
+	var open: Array[int] = Stratagem.in_key_order(open_kinds)
 	if open != _stratagem_kinds():
 		for button: Button in _stratagem_buttons.values():
 			button.queue_free()

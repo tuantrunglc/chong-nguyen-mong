@@ -353,14 +353,18 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 	if known.has("bao_tiep_vien") and section.has("bao_tiep_vien"):
 		side.reinforcement_warnings = _read_reinforcement_warnings(section["bao_tiep_vien"], name + ".bao_tiep_vien",
 			side.size, file, result)
+	var open_clean: bool = true
 	if known.has("muu_ke_mo") and section.has("muu_ke_mo"):
+		var errors_before_open: int = result.errors.size()
 		side.stratagems = BoardLayers.read_stratagems(section["muu_ke_mo"], name + ".muu_ke_mo", file, result)
+		open_clean = result.errors.size() == errors_before_open
 	if known.has("muu_ke_da_dung") and section.has("muu_ke_da_dung"):
 		var used: Array[int] = BoardLayers.read_stratagems(section["muu_ke_da_dung"], name + ".muu_ke_da_dung",
 			file, result)
 		side.stratagems_used = used
 		# Bàn trước: chỉ dùng được mưu kế đã mở. Bàn sau thì để bộ chạy so (luật không cho dùng mưu kế khóa).
-		if name == "truoc":
+		# "muu_ke_mo" đã sai thì không so chéo: lỗi thứ hai chỉ gây hiểu nhầm.
+		if name == "truoc" and open_clean:
 			for kind: int in used:
 				if not side.stratagems.has(kind):
 					result.add_error('%s: "truoc.muu_ke_da_dung" có "%s" mà "truoc.muu_ke_mo" không mở'

@@ -79,6 +79,36 @@ func test_clone_and_validate_keep_stratagem_flags() -> void:
 	assert_eq(state.validate(), ["mưu kế vuon_khong_nha_trong đã dùng mà không mở trong trận"] as Array[String])
 
 
+## Ghi đã dùng trùng: báo đúng một câu, dù trùng mấy lần.
+func test_validate_reports_duplicate_used_once() -> void:
+	var state: BattleState = _state({Vector2i(6, 0): "B", Vector2i(3, 6): "1"})
+	state.stratagems_used = [VKNT, VKNT, VKNT] as Array[int]
+	assert_eq(state.validate(), ["mưu kế vuon_khong_nha_trong bị ghi đã dùng hai lần"] as Array[String])
+
+
+## Trận Tiêu diệt: mưu kế diệt hết quân trên bàn nhưng còn tiếp viện chưa ra thì chưa thắng.
+func test_clearing_board_with_reinforcements_pending_is_not_victory() -> void:
+	var state: BattleState = _state({Vector2i(6, 0): "B", Vector2i(3, 6): "1"}, {}, {Vector2i(6, 0): 1})
+	state.reinforcements.append(LevelData.Reinforcement.new(2, Vector2i(0, 0), UnitType.BO_BINH))
+	var events: Array[BattleEvent] = Rules.resolve(state, Command.use_stratagem(VKNT))
+	assert_eq(state.validate(), [] as Array[String])
+	assert_true(_types(events).has("DIED"), "quân trên bàn gục")
+	assert_false(_types(events).has("VICTORY"))
+	assert_eq(state.phase, BattleState.Phase.PLAYER, "còn tiếp viện nên chưa thắng")
+
+
+## HUD xếp nút theo thứ tự phím (Stratagem.SLOTS), không theo thứ tự "muu_ke_mo" (tác giả chốt 2026-10-27).
+func test_key_order_follows_slots() -> void:
+	var slot_order: Array[int] = []
+	for slot: Array in Stratagem.SLOTS:
+		slot_order.append(slot[0] as int)
+	var reversed: Array[int] = slot_order.duplicate()
+	reversed.reverse()
+	assert_eq(Stratagem.in_key_order(reversed), slot_order)
+	assert_eq(Stratagem.in_key_order([] as Array[int]), [] as Array[int])
+	assert_eq(Stratagem.SLOTS[0], [VKNT, "stratagem_1", KEY_Q], "Vườn không nhà trống là phím Q")
+
+
 func _level() -> LevelData:
 	var level: LevelData = LevelData.new()
 	level.size = Vector2i(5, 5)

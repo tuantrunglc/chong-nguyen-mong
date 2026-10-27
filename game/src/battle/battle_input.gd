@@ -24,10 +24,6 @@ const UNDO_ACTION: String = "undo_move"
 ## Chơi lại hiệp (Story 3.2).
 const REPLAY_ACTION: String = "replay_round"
 const END_TURN_ACTION: String = "end_turn"
-## Action -> mưu kế (Story 3.12; Sát Thát thêm "stratagem_2" phím W ở Story 3.13).
-const STRATAGEM_ACTIONS: Dictionary = {
-	"stratagem_1": Stratagem.Kind.VUON_KHONG_NHA_TRONG,
-}
 ## Action -> phím vật lý, cho mọi phím tắt của bàn cờ.
 const ACTION_KEYS: Dictionary = {
 	"select_general_1": KEY_1,
@@ -36,7 +32,6 @@ const ACTION_KEYS: Dictionary = {
 	UNDO_ACTION: KEY_Z,
 	REPLAY_ACTION: KEY_R,
 	END_TURN_ACTION: KEY_SPACE,
-	"stratagem_1": KEY_Q,
 }
 
 var _board: BoardView = null
@@ -57,12 +52,19 @@ func hovered_cell() -> Vector2i:
 func _ready() -> void:
 	get_window().mouse_exited.connect(_on_mouse_exited)
 	for action: String in ACTION_KEYS:
-		if InputMap.has_action(action):
-			continue
-		InputMap.add_action(action)
-		var ev: InputEventKey = InputEventKey.new()
-		ev.physical_keycode = ACTION_KEYS[action] as Key
-		InputMap.action_add_event(action, ev)
+		_declare(action, ACTION_KEYS[action] as Key)
+	# Phím mưu kế lấy từ bảng của Stratagem (Story 3.12).
+	for slot: Array in Stratagem.SLOTS:
+		_declare(slot[1] as String, slot[2] as Key)
+
+
+func _declare(action: String, key: Key) -> void:
+	if InputMap.has_action(action):
+		return
+	InputMap.add_action(action)
+	var ev: InputEventKey = InputEventKey.new()
+	ev.physical_keycode = key
+	InputMap.action_add_event(action, ev)
 
 
 ## Chuột ra khỏi cửa sổ (hay khung itch.io) không sinh sự kiện di chuột: coi như ra ngoài bàn.
@@ -86,9 +88,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(END_TURN_ACTION, false, true):
 		end_turn_pressed.emit()
 		return
-	for action: String in STRATAGEM_ACTIONS:
-		if event.is_action_pressed(action, false, true):
-			stratagem_key_pressed.emit(STRATAGEM_ACTIONS[action] as int)
+	for slot: Array in Stratagem.SLOTS:
+		if event.is_action_pressed(slot[1] as String, false, true):
+			stratagem_key_pressed.emit(slot[0] as int)
 			return
 	if _board == null:
 		return

@@ -1361,3 +1361,13 @@ func test_scenario_stratagem_used_must_be_open() -> void:
 	assert_eq(_errors(d), [
 		F + ': "truoc.muu_ke_da_dung" có "vuon_khong_nha_trong" mà "truoc.muu_ke_mo" không mở',
 	] as Array[String])
+
+
+## "muu_ke_mo" gõ sai thì chỉ báo lỗi đó, không thêm lỗi so chéo gây hiểu nhầm cho "muu_ke_da_dung".
+func test_scenario_stratagem_typo_reports_one_error() -> void:
+	var d: Dictionary = _valid()
+	d["truoc"]["muu_ke_mo"] = ["vuon_khong_nha_trongg"]
+	d["truoc"]["muu_ke_da_dung"] = ["vuon_khong_nha_trong"]
+	assert_eq(_errors(d), [
+		F + ': "truoc.muu_ke_mo" mục 1 là "vuon_khong_nha_trongg", chỉ được "vuon_khong_nha_trong"',
+	] as Array[String])

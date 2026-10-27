@@ -11,7 +11,7 @@ static func resolve(state: BattleState, command: Command, events: Array[BattleEv
 			"trận này không mở mưu kế %s" % Stratagem.name_of(kind)))
 		return
 	if state.stratagems_used.has(kind):
-		events.append(BattleEvent.rejected(BattleEvent.Reject.STRATAGEM_USED,
+		events.append(BattleEvent.rejected(BattleEvent.Reject.STRATAGEM_ALREADY_USED,
 			"mưu kế %s đã dùng trong trận" % Stratagem.name_of(kind)))
 		return
 	state.stratagems_used.append(kind)
@@ -19,6 +19,8 @@ static func resolve(state: BattleState, command: Command, events: Array[BattleEv
 	match kind:
 		Stratagem.Kind.VUON_KHONG_NHA_TRONG:
 			_scorched_earth(state, events)
+		_:
+			assert(false, "mưu kế %d có tên mà chưa có luật" % kind)
 
 
 ## Vườn không nhà trống (kiến trúc, bảng phân giải "Mưu kế"): mọi ô kho lương thành đất trống (theo thứ tự đọc bàn),

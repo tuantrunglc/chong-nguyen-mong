@@ -227,3 +227,9 @@
 ## Deferred from: code review of 3-7-lang-va-long-dan (2026-10-24)
 
 - **AI nhắm làng ở mọi kiểu trận.** `EnemyAI.plan` thêm làng vào tập mục tiêu của Bộ binh/Kỵ binh mà không xét `state.mission`; kiến trúc (dòng 841) chỉ quy định cho "Trận Tiêu diệt có làng". Hiện chưa có trận Giữ ải có làng nên chưa sai; khi làm Story 3.11 phải chốt với tác giả luật nhắm mục tiêu của trận Giữ ải có làng và thêm kịch bản. → xong ở Story 3.11 (tác giả chốt 2026-10-25: trận Giữ ải không nhắm làng; hết đường tới ải thì nhắm tướng gần nhất).
+
+## Deferred from: code review of 3-12-muu-ke-vuon-khong-nha-trong-va-nut-muu-ke (2026-10-27)
+
+- **`Stats.new(values)` cho bỏ trống tham số mưu kế.** `stats.gd:12` có giá trị mặc định `stratagems = {}`; nhiều test cũ (test_rules_enemy_phase, test_rules_move, test_spikes, test_battle_state, test_scenario_loader) tạo `Stats` một tham số. Nếu sau này các test đó dùng mưu kế thì `stratagem_damage` assert ở debug, ở bản phát hành trừ 0 máu. Bộ nạp đã bắt buộc nhóm `muu_ke` nên dữ liệu thật an toàn.
+- **Báo lỗi F2 thiếu lớp kiểu trận.** `BugReport.before_layers` (`bug_report.gd:103`) không ghi `kieu`, `tiep_vien`, `long_dan`, `so_hiep_toi_da`. Kịch bản sinh từ trận Giữ ải (mưu kế diệt hết quân mà trận vẫn tiếp) hoặc trận còn tiếp viện sẽ bị nạp như trận Tiêu diệt và chạy lại ra "thắng". Có từ trước Story 3.12.
+- **Ô nháy đốt kho có thể lệch xuống dưới mặt khối kho lương** (~16px, `_flash_burn` dùng `cell_rect` mặt đất, như nháy làng). Chưa kiểm trên màn hình.
