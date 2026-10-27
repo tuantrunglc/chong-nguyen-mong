@@ -4,7 +4,7 @@ baseline_commit: 898098c
 
 # Story 2.14: Hoàn thiện trận 1 và mốc tự chơi hết E2
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -50,7 +50,7 @@ tôi muốn trận 1 đã có lời giải được kiểm chứng,
   - [x] 5.1 Hướng dẫn trong Completion Notes: `tools/chay.sh --tran=1`, làm đúng `tran_01_loi_giai.md`, thấy bảng **Thắng** và không mất tướng nào. **Tác giả báo đã chơi: thắng, không mất tướng (2026-10-23).**
   - [x] 5.2 Ghi nhận kết quả tác giả báo lại: **thắng, không mất tướng**; không nêu lỗi nào (2026-10-23).
 
-- [ ] **Task 6: Deploy itch (riêng tư)** (AC: 4)
+- [x] **Task 6: Deploy itch (riêng tư)** (AC: 4) — tác giả chốt story xong (2026-10-27), deploy itch làm sau khi đăng nhập butler.
   - [x] 6.1 `tools/itch.cfg` **đã điền** `ITCH_TARGET=tuantrunglc/hao-khi-dong-a` từ Story 0.5 — không phải chỗ trống. Bản web đã build lại (`v0.1.0 · 25cf3a0-sua`, 2026-10-22). Thử `tools/deploy_itch.sh`: **butler chưa đăng nhập trên máy này** → chặn thật là bước đăng nhập, không phải `itch.cfg`.
   - [ ] 6.2 Khi đã có: `tools/build_web.sh` rồi `tools/deploy_itch.sh`; giữ trang ở chế độ riêng tư (script không tự đổi hiển thị). Ghi link trong Completion Notes.
   - [ ] 6.3 Nếu chưa có trang: ghi rõ "chặn: chưa cấu hình itch", không tự tạo trang.
@@ -221,3 +221,4 @@ Cả hai đang để `da_duyet: false`. **Tác giả đánh tay xong và xác nh
 - 2026-10-22: bố cục cuối trận 1 (dời một Bộ binh xuống `2,4` để hiệp 1 có ô đỏ + sát sông), lời giải 3 hiệp không mất tướng, kịch bản tự động `tran/tran_01_loi_giai.json`; 618/618 test. Chờ tác giả: đánh lại bằng tay (AC 2), duyệt kịch bản, deploy itch (AC 4 — chặn vì `itch.cfg`), mốc E2 (AC 5).
 - 2026-10-22 (sau code review): sửa sơ đồ hiệp 1 trong tài liệu (Khoái `1,5`, hiện sông), thêm kịch bản nhánh né `tran_01_ne_o_do.json` (4 hiệp), khóa thêm 102/103 + ô đỏ `2,6` trong `test_main`, sửa comment và số liệu story, build lại web; deploy chặn ở butler chưa đăng nhập (không phải `itch.cfg`). 618/618 test.
 - 2026-10-23: tác giả báo đã tự chơi hết E2 bằng tay — **thắng trận 1, không mất tướng**, không thấy chán, **không có luật nào phải sửa trước Epic 3**. Đóng Task 5 và Task 7; story vẫn `in-progress` vì Task 6 (deploy itch) còn chặn ở bước đăng nhập butler.
+- 2026-10-27: tác giả chốt story **xong**. Bật `da_duyet: true` cho `tran/tran_01_loi_giai.json` (tác giả đã đánh tay thắng, không mất tướng — 2026-10-23). `tran_01_ne_o_do.json` vẫn `da_duyet: false`, chờ tác giả duyệt riêng. Deploy itch (6.2) chưa làm: butler chưa đăng nhập; làm sau.
