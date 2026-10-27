@@ -1,0 +1,69 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Nguyễn Khoái chưa đi. Dùng Vườn không nhà trống (hai Bộ binh còn 2 máu) không tốn lượt của tướng: Khoái vẫn đi lên 3,3 rồi đánh Bộ binh ở 3,2 gục được.",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      "L . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . B",
+      ". . . . . . .",
+      ". . . B . . .",
+      ". . . . . . .",
+      ". . . 1 . . ."
+    ],
+    "muu_ke_mo": [
+      "vuon_khong_nha_trong"
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "muu_ke",
+      "ten": "vuon_khong_nha_trong"
+    },
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "3,3"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "1",
+      "o": "3,2"
+    }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . B",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . .",
+      ". . . . . . ."
+    ],
+    "mau": {
+      "6,0": 2
+    },
+    "da_di": [
+      "1"
+    ],
+    "da_danh": [
+      "1"
+    ],
+    "muu_ke_da_dung": [
+      "vuon_khong_nha_trong"
+    ],
+    "ket_qua": "dang_choi"
+  }
+}

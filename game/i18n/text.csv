@@ -54,6 +54,7 @@ scenario.viewer.step_move,%s đi tới %s
 scenario.viewer.step_attack,%s đánh ô %s
 scenario.viewer.step_undo,Hủy nước đi gần nhất
 scenario.viewer.step_end_turn,Kết thúc lượt (chạy pha địch)
+scenario.viewer.step_stratagem,Dùng mưu kế %s
 scenario.viewer.rejected," → bị từ chối: %s"
 scenario.viewer.reject_no_unit,không có quân đó
 scenario.viewer.reject_not_general,quân đó không phải tướng
@@ -67,6 +68,8 @@ scenario.viewer.reject_no_target,ô đó không có quân Nguyên đánh đượ
 scenario.viewer.reject_blocked,đòn bị rừng hoặc kho lương chặn
 scenario.viewer.reject_not_in_range,ô đó không thẳng hàng hoặc ngoài tầm đánh
 scenario.viewer.reject_battle_over,trận đã kết thúc (thắng hoặc thua)
+scenario.viewer.reject_stratagem_locked,trận này không mở mưu kế đó
+scenario.viewer.reject_stratagem_used,mưu kế đó đã dùng trong trận
 scenario.viewer.after_state,Sau lệnh: %s
 scenario.viewer.after_round,hiệp %d
 scenario.viewer.after_moved,đã đi: %s
@@ -74,6 +77,11 @@ scenario.viewer.after_moved_none,chưa tướng nào
 scenario.viewer.after_attacked,đã đánh: %s
 scenario.viewer.after_attacked_none,chưa tướng nào
 scenario.viewer.after_morale,"Lòng dân: %d"
+scenario.viewer.after_stratagems_used,mưu kế đã dùng: %s
+scenario.viewer.after_stratagems_used_none,chưa dùng mưu kế nào
+scenario.viewer.stratagems_open,Mưu kế mở: %s
+scenario.viewer.stratagems_used_before,đã dùng từ trước: %s
+stratagem.vuon_khong_nha_trong,Vườn không nhà trống
 scenario.viewer.after_outcome,kết quả: %s
 scenario.viewer.outcome_dang_choi,đang chơi
 scenario.viewer.outcome_thang,thắng

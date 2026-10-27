@@ -1,0 +1,45 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Trận không mở Vườn không nhà trống (không có \"muu_ke_mo\"): dùng bị từ chối; kho lương và máu quân Nguyên giữ nguyên.",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". L . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      "B . . . . . B",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . ."
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "muu_ke",
+      "ten": "vuon_khong_nha_trong",
+      "tu_choi": "muu_ke_khoa"
+    }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". L . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      "B . . . . . B",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . ."
+    ],
+    "muu_ke_da_dung": []
+  }
+}

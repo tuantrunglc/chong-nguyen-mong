@@ -12,11 +12,12 @@ const FORMAT_VERSION: int = 1
 
 const ROOT_KEYS: Array[String] = ["phien_ban_dinh_dang", "mo_ta", "da_duyet", "truoc", "hanh_dong", "sau"]
 ## "bao_don" của "truoc": đòn quân Nguyên đã báo sẵn khi kịch bản bắt đầu (Story 2.8), không bắt buộc.
-const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich", "bao_don", "so_hiep_toi_da", "long_dan", "long_dan_toi_da", "tiep_vien", "kieu"]
+const BEFORE_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "thu_tu_dich", "bao_don", "so_hiep_toi_da", "long_dan", "long_dan_toi_da", "tiep_vien", "kieu",
+	"muu_ke_mo", "muu_ke_da_dung"]
 ## "hiep", "da_di", "da_danh", "ket_qua", "bao_don", "o_do", "long_dan" không bắt buộc: không ghi thì không kiểm (review Story 1.5,
 ## tác giả chốt 2026-10-18; "ket_qua": Story 2.5; "bao_don": Story 2.6; "o_do": Story 2.7; "long_dan": Story 3.7).
 const AFTER_KEYS: Array[String] = ["dia_hinh", "quan", "mau", "hiep", "da_di", "da_danh", "ket_qua", "bao_don",
-	"o_do", "long_dan", "bao_tiep_vien"]
+	"o_do", "long_dan", "bao_tiep_vien", "muu_ke_da_dung"]
 ## Khóa của một mục "bao_don": "o" (đòn vào ô) hoặc "huong" (xung phong), đúng một trong hai.
 const TELEGRAPH_KEYS: Array[String] = ["thu_tu", "quan", "o", "huong"]
 const DIRECTION_LIST: String = '"B", "D", "N", "T"'
@@ -30,8 +31,9 @@ const COMMANDS: Dictionary = {
 	"danh": ["tuong", "o", "tu_choi"],
 	"huy": ["tu_choi"],
 	"ket_thuc_luot": [],
+	"muu_ke": ["ten", "tu_choi"],
 }
-const COMMAND_LIST: String = '"di", "danh", "huy", "ket_thuc_luot"'
+const COMMAND_LIST: String = '"di", "danh", "huy", "ket_thuc_luot", "muu_ke"'
 ## Mã lý do luật từ chối lệnh (khóa "tu_choi") -> câu cho công cụ duyệt. Lý do mới thêm ở story của nó.
 const REJECT_CODES: Dictionary = {
 	"khong_co_quan": "scenario.viewer.reject_no_unit",
@@ -46,10 +48,12 @@ const REJECT_CODES: Dictionary = {
 	"bi_chan": "scenario.viewer.reject_blocked",
 	"ngoai_tam": "scenario.viewer.reject_not_in_range",
 	"tran_da_het": "scenario.viewer.reject_battle_over",
+	"muu_ke_khoa": "scenario.viewer.reject_stratagem_locked",
+	"muu_ke_da_dung": "scenario.viewer.reject_stratagem_used",
 }
 const REJECT_LIST: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", ' \
 	+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich", "bi_chan", "ngoai_tam", ' \
-	+ '"tran_da_het"'
+	+ '"tran_da_het", "muu_ke_khoa", "muu_ke_da_dung"'
 ## Lệnh -> các mã "tu_choi" luật của lệnh đó trả được. Lệnh mới thêm ở story của nó.
 const COMMAND_REJECTS: Dictionary = {
 	"di": ["khong_co_quan", "khong_phai_tuong", "da_danh_roi", "da_di_roi", "da_dung_o_do", "khong_toi_duoc",
@@ -57,6 +61,7 @@ const COMMAND_REJECTS: Dictionary = {
 	"danh": ["khong_co_quan", "khong_phai_tuong", "da_danh_roi", "khong_ke", "khong_co_dich", "bi_chan",
 		"ngoai_tam", "tran_da_het"],
 	"huy": ["khong_con_nuoc_di", "tran_da_het"],
+	"muu_ke": ["muu_ke_khoa", "muu_ke_da_dung", "tran_da_het"],
 }
 
 
@@ -99,6 +104,10 @@ class Section:
 	var telegraphs: Variant = null
 	## "o_do" (chỉ "sau"): ô -> Array[int] số thứ tự tăng dần; null là không ghi hoặc sai.
 	var marks: Variant = null
+	## "muu_ke_mo" (chỉ "truoc", Story 3.12): Stratagem.Kind; không ghi là không mở mưu kế nào (như file trận).
+	var stratagems: Array[int] = []
+	## "muu_ke_da_dung": Array[int] Stratagem.Kind; null là không ghi.
+	var stratagems_used: Variant = null
 
 
 ## Mọi file .json trong root_dir và thư mục con, sắp theo đường dẫn. Thư mục không có thì [].
@@ -184,6 +193,9 @@ static func parse_scenario(text: String, path: String, root_dir: String, stats: 
 	if after.long_dan >= 0:
 		scenario.checks_morale = true
 		scenario.after_morale = after.long_dan
+	if after.stratagems_used != null:
+		scenario.checks_stratagems_used = true
+		scenario.after_stratagems_used = after.stratagems_used as Array[int]
 	if after.reinforcement_warnings != null:
 		scenario.checks_reinforcement_warnings = true
 		scenario.after_reinforcement_warnings = after.reinforcement_warnings as Array[Vector2i]
@@ -341,6 +353,18 @@ static func _read_side(section: Dictionary, name: String, known: Array[String], 
 	if known.has("bao_tiep_vien") and section.has("bao_tiep_vien"):
 		side.reinforcement_warnings = _read_reinforcement_warnings(section["bao_tiep_vien"], name + ".bao_tiep_vien",
 			side.size, file, result)
+	if known.has("muu_ke_mo") and section.has("muu_ke_mo"):
+		side.stratagems = BoardLayers.read_stratagems(section["muu_ke_mo"], name + ".muu_ke_mo", file, result)
+	if known.has("muu_ke_da_dung") and section.has("muu_ke_da_dung"):
+		var used: Array[int] = BoardLayers.read_stratagems(section["muu_ke_da_dung"], name + ".muu_ke_da_dung",
+			file, result)
+		side.stratagems_used = used
+		# Bàn trước: chỉ dùng được mưu kế đã mở. Bàn sau thì để bộ chạy so (luật không cho dùng mưu kế khóa).
+		if name == "truoc":
+			for kind: int in used:
+				if not side.stratagems.has(kind):
+					result.add_error('%s: "truoc.muu_ke_da_dung" có "%s" mà "truoc.muu_ke_mo" không mở'
+						% [file, Stratagem.name_of(kind)])
 	return side
 
 
@@ -662,6 +686,9 @@ static func _read_step(item: Variant, number: int, before: Section, size: Vector
 		general = _read_general(d, where, before, result)
 	if fields.has("o"):
 		cell = _read_step_cell(d, where, size, result)
+	var stratagem: int = -1
+	if fields.has("ten"):
+		stratagem = _read_stratagem_name(d, where, result)
 	var reject: String = ""
 	if d.has("tu_choi") and fields.has("tu_choi"):
 		var value: Variant = d["tu_choi"]
@@ -677,7 +704,19 @@ static func _read_step(item: Variant, number: int, before: Section, size: Vector
 			reject = value as String
 	if result.errors.size() != errors_before:
 		return null
-	return ScenarioData.ScenarioStep.new(kind as String, general, cell, reject)
+	return ScenarioData.ScenarioStep.new(kind as String, general, cell, reject, stratagem)
+
+
+## Trả Stratagem.Kind của khóa "ten" (lệnh "muu_ke", Story 3.12), hoặc -1 nếu sai (đã thêm lỗi).
+static func _read_stratagem_name(d: Dictionary, where: String, result: LoadResult) -> int:
+	if not d.has("ten"):
+		result.add_error('%s: thiếu khóa "ten"' % where)
+		return -1
+	var value: Variant = d["ten"]
+	if not value is String or not Stratagem.NAMES.has(value):
+		result.add_error('%s: "ten" là %s, chỉ được %s' % [where, JsonFile.show(value), Stratagem.name_list()])
+		return -1
+	return Stratagem.NAMES[value] as int
 
 
 ## Trả UnitType của tướng, hoặc -1 nếu sai (đã thêm lỗi).
@@ -726,6 +765,9 @@ static func _build_level(side: Section, name: String) -> LevelData:
 	level.size = side.size
 	level.terrain = BoardLayers.terrain_values(side.terrain_rows)
 	level.reinforcements = side.reinforcements
+	level.stratagems = side.stratagems
+	if side.stratagems_used != null:
+		level.stratagems_used = side.stratagems_used as Array[int]
 	for symbol: String in BoardLayers.GENERAL_SYMBOLS:
 		if side.generals.has(symbol):
 			var cell: Vector2i = side.generals[symbol] as Vector2i

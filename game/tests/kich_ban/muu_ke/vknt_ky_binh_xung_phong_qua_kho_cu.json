@@ -1,0 +1,61 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Kỵ binh ở 3,0 đã báo xung phong về phía Nam nhưng kho lương ở 3,2 chắn (đòn trúng kho, không ai mất máu). Đốt kho bằng Vườn không nhà trống (Kỵ binh còn 1 máu) rồi kết thúc lượt: đòn đi tiếp, trúng Khoái ở 3,4 (3→2 máu).",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . L . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . K . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . ."
+    ],
+    "muu_ke_mo": [
+      "vuon_khong_nha_trong"
+    ],
+    "bao_don": [
+      {
+        "thu_tu": 1,
+        "quan": "3,0",
+        "huong": "N"
+      }
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "muu_ke",
+      "ten": "vuon_khong_nha_trong"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . K . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . ."
+    ],
+    "mau": {
+      "3,0": 1,
+      "3,4": 2
+    },
+    "hiep": 2
+  }
+}

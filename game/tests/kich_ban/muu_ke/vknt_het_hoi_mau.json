@@ -1,0 +1,56 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Bộ binh 2 máu đứng kề kho lương. Dùng Vườn không nhà trống (kho thành đất trống, Bộ binh còn 1 máu) rồi kết thúc lượt: cuối hiệp Bộ binh không được hồi máu, vẫn 1 máu.",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . L . . .",
+      "~ ~ ~ ~ ~ ~ ~",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . .",
+      ". . . B . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . ."
+    ],
+    "mau": {
+      "3,1": 2
+    },
+    "muu_ke_mo": [
+      "vuon_khong_nha_trong"
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "muu_ke",
+      "ten": "vuon_khong_nha_trong"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      "~ ~ ~ ~ ~ ~ ~",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . .",
+      ". . . B . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . ."
+    ],
+    "mau": {
+      "3,1": 1
+    },
+    "hiep": 2
+  }
+}

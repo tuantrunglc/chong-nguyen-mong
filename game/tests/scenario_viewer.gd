@@ -141,6 +141,14 @@ static func render(scenario: ScenarioData, stats: Stats) -> String:
 				text += _t("scenario.viewer.rejected") % _t(ScenarioLoader.REJECT_CODES[step.reject] as String)
 			lines.append("  %d. %s" % [i + 1, text])
 	lines.append("")
+	# Mưu kế mở / đã dùng ở bàn trước (Story 3.12): chỉ in khi kịch bản có mưu kế, để kịch bản cũ không đổi.
+	if not scenario.before.stratagems.is_empty():
+		var text: String = _t("scenario.viewer.stratagems_open") % _stratagem_names(scenario.before.stratagems, "")
+		if not scenario.before.stratagems_used.is_empty():
+			text += " · " + _t("scenario.viewer.stratagems_used_before") \
+				% _stratagem_names(scenario.before.stratagems_used, "")
+		lines.append(text)
+		lines.append("")
 
 	var size: Vector2i = scenario.before.size
 	var before_units: Dictionary = {}  # ô -> [type, hp]
@@ -250,6 +258,9 @@ static func _after_state(scenario: ScenarioData) -> String:
 		parts.append(_t("scenario.viewer.after_attacked") % shown)
 	if scenario.checks_morale:
 		parts.append(_t("scenario.viewer.after_morale") % scenario.after_morale)
+	if scenario.checks_stratagems_used:
+		parts.append(_t("scenario.viewer.after_stratagems_used")
+			% _stratagem_names(scenario.after_stratagems_used, "scenario.viewer.after_stratagems_used_none"))
 	if not scenario.after_outcome.is_empty():
 		parts.append(_t("scenario.viewer.after_outcome") % _t("scenario.viewer.outcome_" + scenario.after_outcome))
 	if parts.is_empty():
@@ -377,7 +388,21 @@ static func _step_text(step: ScenarioData.ScenarioStep) -> String:
 			return _t("scenario.viewer.step_undo")
 		"ket_thuc_luot":
 			return _t("scenario.viewer.step_end_turn")
+		"muu_ke":
+			return _t("scenario.viewer.step_stratagem") % _stratagem_name(step.stratagem)
 	return step.kind
+
+
+## Tên mưu kế hiển thị (Story 3.12).
+static func _stratagem_name(kind: int) -> String:
+	return _t("stratagem." + Stratagem.name_of(kind))
+
+
+static func _stratagem_names(kinds: Array[int], none_key: String) -> String:
+	var names: PackedStringArray = PackedStringArray()
+	for kind: int in kinds:
+		names.append(_stratagem_name(kind))
+	return ", ".join(names) if not names.is_empty() else _t(none_key)
 
 
 static func _unit_name(type: int) -> String:

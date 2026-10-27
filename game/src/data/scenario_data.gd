@@ -11,7 +11,7 @@ const NO_CELL: Vector2i = Vector2i(-1, -1)
 class ScenarioStep:
 	extends RefCounted
 
-	## "di", "danh", "huy", "ket_thuc_luot"
+	## "di", "danh", "huy", "ket_thuc_luot", "muu_ke"
 	var kind: String
 	## UnitType của tướng ra lệnh; -1 nếu lệnh không cần tướng.
 	var general: int
@@ -19,12 +19,16 @@ class ScenarioStep:
 	## Mã lý do luật phải từ chối lệnh ("tu_choi", một khóa của ScenarioLoader.REJECT_CODES);
 	## "" là lệnh phải chạy được.
 	var reject: String
+	## Stratagem.Kind của lệnh "muu_ke" (khóa "ten", Story 3.12); -1 với lệnh khác.
+	var stratagem: int
 
-	func _init(p_kind: String, p_general: int = -1, p_cell: Vector2i = NO_CELL, p_reject: String = "") -> void:
+	func _init(p_kind: String, p_general: int = -1, p_cell: Vector2i = NO_CELL, p_reject: String = "",
+			p_stratagem: int = -1) -> void:
 		kind = p_kind
 		general = p_general
 		cell = p_cell
 		reject = p_reject
+		stratagem = p_stratagem
 
 
 ## Một quân mong đợi ở bàn sau. hp đã đổi "không ghi" thành máu đầy lúc nạp.
@@ -102,3 +106,7 @@ var after_morale: int = 0
 var checks_reinforcement_warnings: bool = false
 ## Các ô mong đợi đang báo tiếp viện ở bàn sau (Story 3.10).
 var after_reinforcement_warnings: Array[Vector2i] = []
+## Có kiểm mưu kế đã dùng không ("sau.muu_ke_da_dung" có ghi, kể cả [], Story 3.12).
+var checks_stratagems_used: bool = false
+## Stratagem.Kind mong đợi đã dùng ở bàn sau, theo thứ tự đã dùng.
+var after_stratagems_used: Array[int] = []

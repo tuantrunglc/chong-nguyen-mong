@@ -24,6 +24,8 @@ const REJECT_CODES: Dictionary = {
 	BattleEvent.Reject.BLOCKED: "bi_chan",
 	BattleEvent.Reject.NOT_IN_RANGE: "ngoai_tam",
 	BattleEvent.Reject.BATTLE_OVER: "tran_da_het",
+	BattleEvent.Reject.STRATAGEM_LOCKED: "muu_ke_khoa",
+	BattleEvent.Reject.STRATAGEM_USED: "muu_ke_da_dung",
 }
 
 ## Tên đầy đủ cho phần "bàn hiện tại" (chữ chẩn đoán, không qua `tr()` như log — báo cáo dán cho AI, không phải UI).

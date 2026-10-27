@@ -1,0 +1,58 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Dùng Vườn không nhà trống hai lần: lần 2 bị từ chối vì mưu kế đã dùng trong trận; quân Nguyên chỉ mất 1 máu (3→2).",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      "B . . . . . B",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . ."
+    ],
+    "muu_ke_mo": [
+      "vuon_khong_nha_trong"
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "muu_ke",
+      "ten": "vuon_khong_nha_trong"
+    },
+    {
+      "lenh": "muu_ke",
+      "ten": "vuon_khong_nha_trong",
+      "tu_choi": "muu_ke_da_dung"
+    }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      "B . . . . . B",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . ."
+    ],
+    "mau": {
+      "0,0": 2,
+      "6,0": 2
+    },
+    "muu_ke_da_dung": [
+      "vuon_khong_nha_trong"
+    ]
+  }
+}

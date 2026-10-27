@@ -12,7 +12,6 @@ const KINDS: Dictionary = {
 	"giu_ai": LevelData.Mission.HOLD_PASS,
 }
 
-## muu_ke_mo: biết tên nhưng chưa đọc (Story 3.12).
 const KNOWN_KEYS: Array[String] = [
 	"phien_ban_dinh_dang", "ten", "kieu", "dia_hinh", "quan", "thu_tu_dich",
 	"tiep_vien", "muu_ke_mo", "so_hiep_toi_da", "long_dan",
@@ -78,6 +77,9 @@ static func parse_level(text: String, file: String) -> LoadResult:
 		size, file, result)
 	var reinforcements: Array[LevelData.Reinforcement] = BoardLayers.read_reinforcements(root, terrain_rows,
 		terrain_clean, size, max_rounds, file, result)
+	var stratagems: Array[int] = []
+	if root.has("muu_ke_mo"):
+		stratagems = BoardLayers.read_stratagems(root["muu_ke_mo"], "muu_ke_mo", file, result)
 
 	if not result.ok:
 		return result
@@ -90,6 +92,7 @@ static func parse_level(text: String, file: String) -> LoadResult:
 	level.size = size
 	level.terrain = BoardLayers.terrain_values(terrain_rows)
 	level.reinforcements = reinforcements
+	level.stratagems = stratagems
 	for symbol: String in GENERAL_SYMBOLS:
 		if generals.has(symbol):
 			level.units.append(LevelData.UnitPlacement.new(BoardText.UNIT_SYMBOLS[symbol] as int, generals[symbol] as Vector2i))

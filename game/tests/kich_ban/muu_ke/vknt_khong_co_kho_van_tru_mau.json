@@ -1,0 +1,53 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Bàn không có kho lương: dùng Vườn không nhà trống thì quân Nguyên vẫn mất 1 máu (Bộ binh 3→2, Kỵ binh 2→1).",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      "~ ~ ~ ~ ~ ~ ~",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . .",
+      "B . . K . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . ."
+    ],
+    "muu_ke_mo": [
+      "vuon_khong_nha_trong"
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "muu_ke",
+      "ten": "vuon_khong_nha_trong"
+    }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      "~ ~ ~ ~ ~ ~ ~",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . .",
+      "B . . K . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . ."
+    ],
+    "mau": {
+      "0,1": 2,
+      "3,1": 1
+    },
+    "muu_ke_da_dung": [
+      "vuon_khong_nha_trong"
+    ]
+  }
+}

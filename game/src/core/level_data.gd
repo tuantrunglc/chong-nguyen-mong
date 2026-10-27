@@ -55,6 +55,10 @@ var terrain: PackedInt32Array = PackedInt32Array()
 var units: Array[UnitPlacement] = []
 ## Lịch quân tiếp viện theo hiệp (Story 3.10).
 var reinforcements: Array[Reinforcement] = []
+## Mưu kế mở trong trận ("muu_ke_mo", Stratagem.Kind theo thứ tự trong file, Story 3.12).
+var stratagems: Array[int] = []
+## Mưu kế đã dùng lúc bắt đầu (chỉ kịch bản luật ghi, "truoc.muu_ke_da_dung"); file trận luôn rỗng.
+var stratagems_used: Array[int] = []
 
 
 func terrain_at(cell: Vector2i) -> int:

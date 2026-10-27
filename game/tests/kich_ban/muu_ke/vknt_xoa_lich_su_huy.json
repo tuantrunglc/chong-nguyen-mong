@@ -1,0 +1,65 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Khoái đi lên 3,3 rồi dùng Vườn không nhà trống: bấm Hủy (Z) bị từ chối vì không còn nước đi để hủy; Khoái vẫn đứng ở 3,3.",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      "B . . . . . B",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . ."
+    ],
+    "muu_ke_mo": [
+      "vuon_khong_nha_trong"
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "3,3"
+    },
+    {
+      "lenh": "muu_ke",
+      "ten": "vuon_khong_nha_trong"
+    },
+    {
+      "lenh": "huy",
+      "tu_choi": "khong_con_nuoc_di"
+    }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      "B . . . . . B",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . .",
+      ". . . . . . ."
+    ],
+    "mau": {
+      "0,0": 2,
+      "6,0": 2
+    },
+    "da_di": [
+      "1"
+    ],
+    "muu_ke_da_dung": [
+      "vuon_khong_nha_trong"
+    ]
+  }
+}

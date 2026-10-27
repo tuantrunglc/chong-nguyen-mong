@@ -1061,3 +1061,25 @@ func _assert_enemies_stay_on_begin(level: LevelData) -> void:
 	var before: Array[String] = BoardFixture.picture(controller.snapshot())
 	controller.begin()
 	assert_eq(BoardFixture.picture(controller.snapshot()), before, "mở trận: quân Nguyên đứng yên")
+
+
+## Story 3.12: "muu_ke_mo" là danh sách tên mưu kế, theo thứ tự trong file.
+func test_muu_ke_mo_loads() -> void:
+	var level: LevelData = _level(_valid_level()).data as LevelData
+	assert_eq(level.stratagems, [] as Array[int], "danh sách rỗng: không mở mưu kế nào")
+	var d: Dictionary = _with(_valid_level(), "muu_ke_mo", ["vuon_khong_nha_trong"])
+	var r: LoadResult = _level(d)
+	assert_true(r.ok, "; ".join(r.errors))
+	assert_eq((r.data as LevelData).stratagems, [Stratagem.Kind.VUON_KHONG_NHA_TRONG] as Array[int])
+	d.erase("muu_ke_mo")
+	assert_eq((_level(d).data as LevelData).stratagems, [] as Array[int], "không ghi: không mở mưu kế nào")
+
+
+func test_muu_ke_mo_errors_vietnamese() -> void:
+	assert_eq(_level(_with(_valid_level(), "muu_ke_mo", "vuon_khong_nha_trong")).errors,
+		_errors(['"muu_ke_mo" phải là một danh sách, đang là "vuon_khong_nha_trong"']))
+	assert_eq(_level(_with(_valid_level(), "muu_ke_mo", ["sat_tat", 2])).errors,
+		_errors(['"muu_ke_mo" mục 1 là "sat_tat", chỉ được "vuon_khong_nha_trong"',
+			'"muu_ke_mo" mục 2 là 2, chỉ được "vuon_khong_nha_trong"']))
+	assert_eq(_level(_with(_valid_level(), "muu_ke_mo", ["vuon_khong_nha_trong", "vuon_khong_nha_trong"])).errors,
+		_errors(['"muu_ke_mo" mục 2: "vuon_khong_nha_trong" bị ghi hai lần']))

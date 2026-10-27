@@ -357,7 +357,7 @@ func test_step_errors() -> void:
 	assert_eq(_errors(d), [
 		F + ': "hanh_dong" mục 1 phải là một object, đang là "di"',
 		F + ': "hanh_dong" mục 2: thiếu khóa "lenh"',
-		F + ': "hanh_dong" mục 3: lệnh lạ "chay", chỉ được "di", "danh", "huy", "ket_thuc_luot"',
+		F + ': "hanh_dong" mục 3: lệnh lạ "chay", chỉ được "di", "danh", "huy", "ket_thuc_luot", "muu_ke"',
 		F + ': "hanh_dong" mục 4 (di): thiếu khóa "o"',
 		F + ': "hanh_dong" mục 5 (di): "tuong" là "4", chỉ được "1", "2", "3"',
 		F + ': "hanh_dong" mục 6 (danh): tướng "3" không có trong "truoc.quan"',
@@ -390,7 +390,7 @@ func test_step_reject_code_errors() -> void:
 	var r: LoadResult = _parse(d)
 	var codes: String = '"khong_co_quan", "khong_phai_tuong", "da_dung_o_do", "khong_toi_duoc", ' \
 		+ '"da_di_roi", "khong_con_nuoc_di", "da_danh_roi", "khong_ke", "khong_co_dich", "bi_chan", ' \
-		+ '"ngoai_tam", "tran_da_het"'
+		+ '"ngoai_tam", "tran_da_het", "muu_ke_khoa", "muu_ke_da_dung"'
 	assert_eq(r.errors, [
 		F + ': "hanh_dong" mục 1 (di): "tu_choi" là "sai_ma", chỉ được ' + codes,
 		F + ': "hanh_dong" mục 2 (di): "tu_choi" là true, chỉ được ' + codes,
@@ -614,7 +614,7 @@ func test_many_errors_are_listed_together() -> void:
 	assert_eq(_errors(d), [
 		F + ': thiếu khóa "mo_ta"',
 		F + ': "truoc.mau" ô 5,4: máu phải là số nguyên từ 1 tới 3, đang là 9',
-		F + ': "hanh_dong" mục 1: lệnh lạ "x", chỉ được "di", "danh", "huy", "ket_thuc_luot"',
+		F + ': "hanh_dong" mục 1: lệnh lạ "x", chỉ được "di", "danh", "huy", "ket_thuc_luot", "muu_ke"',
 		F + ': "sau.dia_hinh" dòng 1: có 3 ô, "truoc.dia_hinh" có 7',
 	] as Array[String])
 
@@ -1310,3 +1310,54 @@ func test_scenario_long_dan_toi_da() -> void:
 	assert_eq(s.before.long_dan_hien_tai, 1)
 	assert_true(s.checks_morale)
 	assert_eq(s.after_morale, 0)
+
+
+## Story 3.12: lệnh "muu_ke" (khóa "ten"), "truoc.muu_ke_mo", "muu_ke_da_dung" ở cả hai bàn.
+func test_scenario_stratagem_keys() -> void:
+	var d: Dictionary = _valid()
+	d["truoc"]["muu_ke_mo"] = ["vuon_khong_nha_trong"]
+	d["hanh_dong"] = [{"lenh": "muu_ke", "ten": "vuon_khong_nha_trong", "tu_choi": "muu_ke_da_dung"}]
+	d["truoc"]["muu_ke_da_dung"] = ["vuon_khong_nha_trong"]
+	d["sau"]["muu_ke_da_dung"] = ["vuon_khong_nha_trong"]
+	var s: ScenarioData = _scenario(d)
+	assert_eq(s.before.stratagems, [Stratagem.Kind.VUON_KHONG_NHA_TRONG] as Array[int])
+	assert_eq(s.before.stratagems_used, [Stratagem.Kind.VUON_KHONG_NHA_TRONG] as Array[int])
+	assert_eq(s.steps[0].kind, "muu_ke")
+	assert_eq(s.steps[0].stratagem, Stratagem.Kind.VUON_KHONG_NHA_TRONG)
+	assert_eq(s.steps[0].reject, "muu_ke_da_dung")
+	assert_true(s.checks_stratagems_used)
+	assert_eq(s.after_stratagems_used, [Stratagem.Kind.VUON_KHONG_NHA_TRONG] as Array[int])
+
+
+## Không ghi "muu_ke_mo" là không mở mưu kế nào; không ghi "sau.muu_ke_da_dung" là không kiểm.
+func test_scenario_stratagem_keys_optional() -> void:
+	var s: ScenarioData = _scenario(_valid())
+	assert_eq(s.before.stratagems, [] as Array[int])
+	assert_eq(s.before.stratagems_used, [] as Array[int])
+	assert_false(s.checks_stratagems_used)
+
+
+func test_scenario_stratagem_errors() -> void:
+	var d: Dictionary = _valid()
+	d["truoc"]["muu_ke_mo"] = ["sat_tat", "vuon_khong_nha_trong", "vuon_khong_nha_trong"]
+	d["truoc"]["muu_ke_da_dung"] = "vuon_khong_nha_trong"
+	d["hanh_dong"] = [{"lenh": "muu_ke"}, {"lenh": "muu_ke", "ten": 1},
+		{"lenh": "muu_ke", "ten": "vuon_khong_nha_trong", "tu_choi": "khong_ke"}]
+	assert_eq(_errors(d), [
+		F + ': "truoc.muu_ke_mo" mục 1 là "sat_tat", chỉ được "vuon_khong_nha_trong"',
+		F + ': "truoc.muu_ke_mo" mục 3: "vuon_khong_nha_trong" bị ghi hai lần',
+		F + ': "truoc.muu_ke_da_dung" phải là một danh sách, đang là "vuon_khong_nha_trong"',
+		F + ': "hanh_dong" mục 1 (muu_ke): thiếu khóa "ten"',
+		F + ': "hanh_dong" mục 2 (muu_ke): "ten" là 1, chỉ được "vuon_khong_nha_trong"',
+		F + ': "hanh_dong" mục 3 (muu_ke): "tu_choi" là "khong_ke", lệnh "muu_ke" chỉ bị từ chối vì '
+			+ '"muu_ke_khoa", "muu_ke_da_dung", "tran_da_het"',
+	] as Array[String])
+
+
+## Bàn trước không được ghi đã dùng một mưu kế chưa mở.
+func test_scenario_stratagem_used_must_be_open() -> void:
+	var d: Dictionary = _valid()
+	d["truoc"]["muu_ke_da_dung"] = ["vuon_khong_nha_trong"]
+	assert_eq(_errors(d), [
+		F + ': "truoc.muu_ke_da_dung" có "vuon_khong_nha_trong" mà "truoc.muu_ke_mo" không mở',
+	] as Array[String])

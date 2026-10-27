@@ -21,6 +21,8 @@ const REJECT_EVENTS: Dictionary = {
 	"bi_chan": BattleEvent.Reject.BLOCKED,
 	"ngoai_tam": BattleEvent.Reject.NOT_IN_RANGE,
 	"tran_da_het": BattleEvent.Reject.BATTLE_OVER,
+	"muu_ke_khoa": BattleEvent.Reject.STRATAGEM_LOCKED,
+	"muu_ke_da_dung": BattleEvent.Reject.STRATAGEM_USED,
 }
 
 ## Tên đầy đủ cho câu so sánh. Ký hiệu lấy ngược từ BoardText (unit_symbol, terrain_symbol).
@@ -130,6 +132,8 @@ static func _run_step(controller: BattleController, step: ScenarioData.ScenarioS
 			events.append_array(controller.submit(Command.attack(general.id, step.cell)))
 		"ket_thuc_luot":
 			events.append_array(controller.submit(Command.end_turn()))
+		"muu_ke":
+			events.append_array(controller.submit(Command.use_stratagem(step.stratagem)))
 		"huy":
 			events.append_array(controller.undo())
 		_:
@@ -211,6 +215,9 @@ static func compare(state: BattleState, scenario: ScenarioData) -> Array[String]
 		problems.append_array(_compare_telegraphs(state, scenario.after_telegraphs))
 	if scenario.checks_marks:
 		problems.append_array(_compare_marks(state, scenario.after_marks))
+	if scenario.checks_stratagems_used and state.stratagems_used != scenario.after_stratagems_used:
+		problems.append("sau: mong đợi mưu kế đã dùng %s, thực tế %s"
+			% [_stratagem_names(scenario.after_stratagems_used), _stratagem_names(state.stratagems_used)])
 	if scenario.checks_morale and state.morale != scenario.after_morale:
 		problems.append("sau: mong đợi Lòng dân %d, thực tế %d" % [scenario.after_morale, state.morale])
 	if scenario.checks_reinforcement_warnings:
@@ -331,3 +338,11 @@ static func _compare_cell(cell: Vector2i, want: ScenarioData.ExpectedUnit, got: 
 ## "1 (Nguyễn Khoái, 3 máu)"
 static func _describe(type: int, hp: int) -> String:
 	return "%s (%s, %d máu)" % [unit_symbol(type), UNIT_NAMES.get(type, "?"), hp]
+
+
+## "[vuon_khong_nha_trong]" cho câu so sánh; "[]" khi chưa dùng mưu kế nào.
+static func _stratagem_names(kinds: Array[int]) -> String:
+	var names: PackedStringArray = PackedStringArray()
+	for kind: int in kinds:
+		names.append(Stratagem.name_of(kind))
+	return "[%s]" % ", ".join(names)

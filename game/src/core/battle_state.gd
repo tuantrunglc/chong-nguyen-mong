@@ -39,6 +39,10 @@ var reinforcements: Array[LevelData.Reinforcement] = []
 var reinforcement_warnings: Array[Vector2i] = []
 ## Id kế tiếp cho quân Nguyên mới (Story 3.10).
 var next_enemy_id: int = FIRST_ENEMY_ID
+## Mưu kế mở trong trận và mưu kế đã dùng (Stratagem.Kind, Story 3.12). Chơi lại hiệp trả lại mưu kế vì bản chụp
+## đầu lượt giữ danh sách đã dùng lúc đó.
+var stratagems: Array[int] = []
+var stratagems_used: Array[int] = []
 
 
 ## Tướng: id = vị trí trong UnitType.GENERALS + 1. Quân Nguyên: 101, 102… theo thứ tự level.units
@@ -62,6 +66,8 @@ static func from_level(level: LevelData, p_stats: Stats) -> BattleState:
 			next_id += 1
 		state.units.append(UnitFactory.create(id, p.type, p.cell, p_stats, p.hp))
 	state.next_enemy_id = next_id
+	state.stratagems = level.stratagems.duplicate()
+	state.stratagems_used = level.stratagems_used.duplicate()
 	for r: LevelData.Reinforcement in level.reinforcements:
 		state.reinforcements.append(r.clone())
 		if r.round == state.round_number + 1:
@@ -83,6 +89,8 @@ func clone() -> BattleState:
 	copy.mission = mission
 	copy.next_enemy_id = next_enemy_id
 	copy.reinforcement_warnings = reinforcement_warnings.duplicate()
+	copy.stratagems = stratagems.duplicate()
+	copy.stratagems_used = stratagems_used.duplicate()
 	for r: LevelData.Reinforcement in reinforcements:
 		copy.reinforcements.append(r.clone())
 	for u: Unit in units:
@@ -154,6 +162,11 @@ func validate() -> Array[String]:
 			problems.append("tiếp viện ở ô %d,%d là ô không đi vào được" % [r.cell.x, r.cell.y])
 		if not UnitType.is_enemy(r.type):
 			problems.append("tiếp viện loại quân %d không phải quân Nguyên" % r.type)
+	for kind: int in stratagems_used:
+		if not stratagems.has(kind):
+			problems.append("mưu kế %s đã dùng mà không mở trong trận" % Stratagem.name_of(kind))
+		if stratagems_used.count(kind) > 1:
+			problems.append("mưu kế %s bị ghi đã dùng hai lần" % Stratagem.name_of(kind))
 	for u: Unit in units:
 		if u.faction == Unit.Faction.NGUYEN and u.id >= next_enemy_id:
 			problems.append("quân Nguyên %d có id lớn hơn hoặc bằng next_enemy_id %d" % [u.id, next_enemy_id])

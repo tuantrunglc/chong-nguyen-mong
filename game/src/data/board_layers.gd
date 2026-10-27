@@ -263,3 +263,25 @@ static func read_reinforcements(root: Dictionary, terrain_rows: Array, terrain_c
 		if round_val != null and cell != null and type_val != null:
 			list.append(LevelData.Reinforcement.new(round_val as int, cell as Vector2i, type_val as int, hp_val))
 	return list
+
+
+## Danh sách tên mưu kế (Story 3.12): "muu_ke_mo" của file trận, "muu_ke_mo"/"muu_ke_da_dung" của kịch bản.
+## Trả Array[int] (Stratagem.Kind) theo thứ tự trong file; sai thì thêm lỗi và bỏ mục sai.
+static func read_stratagems(value: Variant, shown: String, file: String, result: LoadResult) -> Array[int]:
+	var list: Array[int] = []
+	if not value is Array:
+		result.add_error(JsonFile.type_error(file, shown, "một danh sách", value))
+		return list
+	var items: Array = value as Array
+	for i: int in range(items.size()):
+		var item: Variant = items[i]
+		if not item is String or not Stratagem.NAMES.has(item):
+			result.add_error('%s: "%s" mục %d là %s, chỉ được %s'
+				% [file, shown, i + 1, JsonFile.show(item), Stratagem.name_list()])
+			continue
+		var kind: int = Stratagem.NAMES[item] as int
+		if list.has(kind):
+			result.add_error('%s: "%s" mục %d: %s bị ghi hai lần' % [file, shown, i + 1, JsonFile.show(item)])
+			continue
+		list.append(kind)
+	return list
