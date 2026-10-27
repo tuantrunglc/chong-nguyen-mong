@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Dùng Vườn không nhà trống: 2 kho lương thành đất trống; Bộ binh 3→2 máu, Kỵ binh 2→1 máu, Cung kỵ 1 máu gục.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

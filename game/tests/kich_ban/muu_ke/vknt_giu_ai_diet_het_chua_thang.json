@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Trận Giữ ải, hai quân Nguyên đều 1 máu: Vườn không nhà trống làm cả hai gục nhưng chưa thắng — Giữ ải chỉ thắng khi qua hết hiệp cuối.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "kieu": "giu_ai",
     "dia_hinh": [

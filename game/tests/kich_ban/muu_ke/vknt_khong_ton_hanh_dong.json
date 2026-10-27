@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Nguyễn Khoái chưa đi. Dùng Vườn không nhà trống (hai Bộ binh còn 2 máu) không tốn lượt của tướng: Khoái vẫn đi lên 3,3 rồi đánh Bộ binh ở 3,2 gục được.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       "L . . . . . .",

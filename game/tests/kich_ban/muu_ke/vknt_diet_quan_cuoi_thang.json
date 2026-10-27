@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Trận Tiêu diệt, quân Nguyên cuối cùng là Bộ binh 1 máu: dùng Vườn không nhà trống làm nó gục, thắng ngay.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Kỵ binh ở 3,0 đã báo xung phong về phía Nam nhưng kho lương ở 3,2 chắn (đòn trúng kho, không ai mất máu). Đốt kho bằng Vườn không nhà trống (Kỵ binh còn 1 máu) rồi kết thúc lượt: đòn đi tiếp, trúng Khoái ở 3,4 (3→2 máu).",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Bộ binh 2 máu đứng kề kho lương. Dùng Vườn không nhà trống (kho thành đất trống, Bộ binh còn 1 máu) rồi kết thúc lượt: cuối hiệp Bộ binh không được hồi máu, vẫn 1 máu.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

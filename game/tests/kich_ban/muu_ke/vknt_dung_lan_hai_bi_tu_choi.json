@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Dùng Vườn không nhà trống hai lần: lần 2 bị từ chối vì mưu kế đã dùng trong trận; quân Nguyên chỉ mất 1 máu (3→2).",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

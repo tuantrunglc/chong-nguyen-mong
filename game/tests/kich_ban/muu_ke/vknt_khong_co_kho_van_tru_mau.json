@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Bàn không có kho lương: dùng Vườn không nhà trống thì quân Nguyên vẫn mất 1 máu (Bộ binh 3→2, Kỵ binh 2→1).",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",

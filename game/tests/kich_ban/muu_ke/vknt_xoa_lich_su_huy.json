@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Khoái đi lên 3,3 rồi dùng Vườn không nhà trống: bấm Hủy (Z) bị từ chối vì không còn nước đi để hủy; Khoái vẫn đứng ở 3,3.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "dia_hinh": [
       ". . . . . . .",
