@@ -4,7 +4,7 @@ baseline_commit: f1f443d
 
 # Story 3.12: Mưu kế Vườn không nhà trống và nút mưu kế
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -88,6 +88,8 @@ tôi muốn tung mưu kế của Trần Hưng Đạo đúng lúc,
   - [x] 6.4 Cập nhật `sprint-status.yaml`, commit tiếng Việt kết `(Story 3.12)`.
 
 ### Review Findings
+
+Tác giả chốt story `done` (2026-10-27).
 
 Đã sửa cả 11 mục Patch (2026-10-27). `tools/test.sh` 756/756 GUT, 162 kịch bản đã duyệt. Kiểm đột biến mục 2: bỏ chốt `can_use_stratagem` trong `BattleView._on_stratagem` thì 2 test `test_stratagem_view.gd` trượt. Mục 1: bảng `Stratagem.SLOTS` = `[Kind, action, phím]`, `BattleInput` khai báo phím từ bảng, `Hud.show_stratagems` xếp theo `Stratagem.in_key_order`.
 
