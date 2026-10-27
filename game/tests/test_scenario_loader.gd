@@ -1344,11 +1344,11 @@ func test_scenario_stratagem_errors() -> void:
 	d["hanh_dong"] = [{"lenh": "muu_ke"}, {"lenh": "muu_ke", "ten": 1},
 		{"lenh": "muu_ke", "ten": "vuon_khong_nha_trong", "tu_choi": "khong_ke"}]
 	assert_eq(_errors(d), [
-		F + ': "truoc.muu_ke_mo" mục 1 là "sat_tat", chỉ được "vuon_khong_nha_trong"',
+		F + ': "truoc.muu_ke_mo" mục 1 là "sat_tat", chỉ được "vuon_khong_nha_trong", "sat_that"',
 		F + ': "truoc.muu_ke_mo" mục 3: "vuon_khong_nha_trong" bị ghi hai lần',
 		F + ': "truoc.muu_ke_da_dung" phải là một danh sách, đang là "vuon_khong_nha_trong"',
 		F + ': "hanh_dong" mục 1 (muu_ke): thiếu khóa "ten"',
-		F + ': "hanh_dong" mục 2 (muu_ke): "ten" là 1, chỉ được "vuon_khong_nha_trong"',
+		F + ': "hanh_dong" mục 2 (muu_ke): "ten" là 1, chỉ được "vuon_khong_nha_trong", "sat_that"',
 		F + ': "hanh_dong" mục 3 (muu_ke): "tu_choi" là "khong_ke", lệnh "muu_ke" chỉ bị từ chối vì '
 			+ '"muu_ke_khoa", "muu_ke_da_dung", "tran_da_het"',
 	] as Array[String])
@@ -1369,5 +1369,5 @@ func test_scenario_stratagem_typo_reports_one_error() -> void:
 	d["truoc"]["muu_ke_mo"] = ["vuon_khong_nha_trongg"]
 	d["truoc"]["muu_ke_da_dung"] = ["vuon_khong_nha_trong"]
 	assert_eq(_errors(d), [
-		F + ': "truoc.muu_ke_mo" mục 1 là "vuon_khong_nha_trongg", chỉ được "vuon_khong_nha_trong"',
+		F + ': "truoc.muu_ke_mo" mục 1 là "vuon_khong_nha_trongg", chỉ được "vuon_khong_nha_trong", "sat_that"',
 	] as Array[String])

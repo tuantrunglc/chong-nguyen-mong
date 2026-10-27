@@ -1,0 +1,65 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Dùng Sát Thát hai lần: lần hai bị từ chối vì đã dùng trong trận, không cộng dồn. Lão lao trúng Bộ binh 3 máu: sát thương 1+1=2, còn 1 máu.",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . .",
+      ". . . B . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 2 . . ."
+    ],
+    "muu_ke_mo": [
+      "sat_that"
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "muu_ke",
+      "ten": "sat_that"
+    },
+    {
+      "lenh": "muu_ke",
+      "ten": "sat_that",
+      "tu_choi": "muu_ke_da_dung"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "2",
+      "o": "3,1"
+    }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . .",
+      ". . . B . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 2 . . ."
+    ],
+    "mau": {
+      "3,1": 1
+    },
+    "da_danh": [
+      "2"
+    ],
+    "muu_ke_da_dung": [
+      "sat_that"
+    ]
+  }
+}

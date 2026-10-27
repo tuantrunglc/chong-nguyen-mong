@@ -53,6 +53,7 @@ func _valid_stats() -> Dictionary:
 		},
 		"muu_ke": {
 			"vuon_khong_nha_trong": {"sat_thuong": 1},
+			"sat_that": {"cong_sat_thuong": 1},
 		},
 	}
 
@@ -1082,8 +1083,8 @@ func test_muu_ke_mo_errors_vietnamese() -> void:
 	assert_eq(_level(_with(_valid_level(), "muu_ke_mo", "vuon_khong_nha_trong")).errors,
 		_errors(['"muu_ke_mo" phải là một danh sách, đang là "vuon_khong_nha_trong"']))
 	assert_eq(_level(_with(_valid_level(), "muu_ke_mo", ["sat_tat", 2])).errors,
-		_errors(['"muu_ke_mo" mục 1 là "sat_tat", chỉ được "vuon_khong_nha_trong"',
-			'"muu_ke_mo" mục 2 là 2, chỉ được "vuon_khong_nha_trong"']))
+		_errors(['"muu_ke_mo" mục 1 là "sat_tat", chỉ được "vuon_khong_nha_trong", "sat_that"',
+			'"muu_ke_mo" mục 2 là 2, chỉ được "vuon_khong_nha_trong", "sat_that"']))
 	assert_eq(_level(_with(_valid_level(), "muu_ke_mo", ["vuon_khong_nha_trong", "vuon_khong_nha_trong"])).errors,
 		_errors(['"muu_ke_mo" mục 2: "vuon_khong_nha_trong" bị ghi hai lần']))
 
@@ -1099,7 +1100,26 @@ func test_stats_stratagem_errors_vietnamese() -> void:
 	assert_eq(_stats(_without(_valid_stats(), "muu_ke")).errors, [STATS_FILE + ': thiếu khóa "muu_ke"'] as Array[String])
 	var d: Dictionary = _valid_stats()
 	d["muu_ke"] = {}
-	assert_eq(_stats(d).errors, [STATS_FILE + ': thiếu khóa "muu_ke.vuon_khong_nha_trong"'] as Array[String])
-	d["muu_ke"] = {"vuon_khong_nha_trong": {"sat_thuong": 0}}
+	assert_eq(_stats(d).errors, [STATS_FILE + ': thiếu khóa "muu_ke.vuon_khong_nha_trong"',
+		STATS_FILE + ': thiếu khóa "muu_ke.sat_that"'] as Array[String])
+	d["muu_ke"] = {"vuon_khong_nha_trong": {"sat_thuong": 0}, "sat_that": {"cong_sat_thuong": 1}}
 	assert_eq(_stats(d).errors, [STATS_FILE
 		+ ': "muu_ke.vuon_khong_nha_trong.sat_thuong" phải là số nguyên từ 1 trở lên, đang là 0'] as Array[String])
+
+
+## Story 3.13: Sát Thát cộng bao nhiêu sát thương nằm trong chi_so.json, như tham số Vườn không nhà trống.
+func test_stats_strike_bonus() -> void:
+	var r: LoadResult = _stats(_valid_stats())
+	assert_true(r.ok, "; ".join(r.errors))
+	assert_eq((r.data as Stats).strike_bonus(Stratagem.Kind.SAT_THAT), 1)
+
+
+func test_stats_strike_bonus_errors_vietnamese() -> void:
+	var d: Dictionary = _valid_stats()
+	(d["muu_ke"] as Dictionary).erase("sat_that")
+	assert_eq(_stats(d).errors, [STATS_FILE + ': thiếu khóa "muu_ke.sat_that"'] as Array[String])
+	d["muu_ke"]["sat_that"] = {}
+	assert_eq(_stats(d).errors, [STATS_FILE + ': thiếu khóa "muu_ke.sat_that.cong_sat_thuong"'] as Array[String])
+	d["muu_ke"]["sat_that"] = {"cong_sat_thuong": 0}
+	assert_eq(_stats(d).errors, [STATS_FILE
+		+ ': "muu_ke.sat_that.cong_sat_thuong" phải là số nguyên từ 1 trở lên, đang là 0'] as Array[String])

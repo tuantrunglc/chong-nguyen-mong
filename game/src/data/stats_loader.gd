@@ -20,6 +20,7 @@ const UNITS: Array = [
 ## Tham số mưu kế (Story 3.12, tác giả chốt 2026-10-27): [nhóm, tên trong file, Stratagem.Kind, các khóa bắt buộc].
 const STRATAGEMS: Array = [
 	["muu_ke", "vuon_khong_nha_trong", Stratagem.Kind.VUON_KHONG_NHA_TRONG, ["sat_thuong"]],
+	["muu_ke", "sat_that", Stratagem.Kind.SAT_THAT, ["cong_sat_thuong"]],
 ]
 
 ## Giá trị nhỏ nhất cho từng khóa.
@@ -34,6 +35,7 @@ const MIN_VALUE: Dictionary = {
 	"tam_keo": 0,
 	"tam_ban_gan": 1,
 	"tam_ban_xa": 1,
+	"cong_sat_thuong": 1,
 }
 
 ## Cặp [gần, xa]: gần không được lớn hơn xa.

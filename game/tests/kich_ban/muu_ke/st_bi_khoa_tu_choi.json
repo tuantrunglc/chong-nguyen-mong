@@ -1,0 +1,59 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Trận chỉ mở Vườn không nhà trống: dùng Sát Thát bị từ chối. Lão lao trúng Bộ binh 3 máu với sát thương thường 1, còn 2 máu.",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . .",
+      ". . . B . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 2 . . ."
+    ],
+    "muu_ke_mo": [
+      "vuon_khong_nha_trong"
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "muu_ke",
+      "ten": "sat_that",
+      "tu_choi": "muu_ke_khoa"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "2",
+      "o": "3,1"
+    }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . .",
+      ". . . B . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 2 . . ."
+    ],
+    "mau": {
+      "3,1": 2
+    },
+    "da_danh": [
+      "2"
+    ],
+    "muu_ke_da_dung": []
+  }
+}

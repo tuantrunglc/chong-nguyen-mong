@@ -18,9 +18,12 @@ static func values() -> Dictionary:
 	return values
 
 
-## Tham số mưu kế (Story 3.12): Vườn không nhà trống trừ 1 máu.
+## Tham số mưu kế: Vườn không nhà trống trừ 1 máu (Story 3.12), Sát Thát cộng 1 sát thương (Story 3.13).
 static func stratagem_values() -> Dictionary:
-	return {Stratagem.Kind.VUON_KHONG_NHA_TRONG: {"sat_thuong": 1}}
+	return {
+		Stratagem.Kind.VUON_KHONG_NHA_TRONG: {"sat_thuong": 1},
+		Stratagem.Kind.SAT_THAT: {"cong_sat_thuong": 1},
+	}
 
 
 static func stats() -> Stats:

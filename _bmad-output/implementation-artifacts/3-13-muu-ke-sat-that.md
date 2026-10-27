@@ -4,7 +4,7 @@ baseline_commit: 2545333
 
 # Story 3.13: Mưu kế Sát Thát
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 
@@ -38,27 +38,27 @@ tôi muốn tăng sức đánh của cả ba tướng trong một lượt,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Tên mưu kế và dữ liệu (chưa có luật)** (AC: 1, 6, 7)
-  - [ ] 1.1 `src/core/stratagem.gd`: `enum Kind { VUON_KHONG_NHA_TRONG, SAT_THAT }`; `NAMES["sat_that"] = Kind.SAT_THAT`; `SLOTS` thêm `[Kind.SAT_THAT, "stratagem_2", KEY_W]` (comment ở đầu `SLOTS` đã ghi sẵn dòng này). **Thêm cuối enum**, không chèn giữa: `Kind` là số nguyên, đổi thứ tự sẽ làm lệch mọi chỗ đã lưu số.
-  - [ ] 1.2 Câu lỗi tên lạ lấy từ `Stratagem.name_list()`, nên sẽ thành `chỉ được "vuon_khong_nha_trong", "sat_that"`. Sửa đúng các câu mong đợi trong `test_loaders.gd:1085–1086` và `test_scenario_loader.gd:1347, 1351, 1372` (đây là test câu lỗi, không phải kịch bản đã duyệt).
-  - [ ] 1.3 `data/chi_so.json`: `"muu_ke": { ..., "sat_that": { "cong_sat_thuong": 1 } }`. `StatsLoader.STRATAGEMS` thêm `["muu_ke", "sat_that", Stratagem.Kind.SAT_THAT, ["cong_sat_thuong"]]`; `MIN_VALUE["cong_sat_thuong"] = 1`. `Stats`: thêm `strike_bonus(kind) -> int` đọc `cong_sat_thuong` (cùng mẫu `stratagem_damage`, assert khi thiếu khóa). Test câu lỗi **đúng nguyên câu** trong `test_loaders.gd` (thiếu khóa, giá trị 0) — bài học review 3.12.
-  - [ ] 1.4 `tests/board_fixture.gd:22` `stratagem_values()` thêm `Stratagem.Kind.SAT_THAT: {"cong_sat_thuong": 1}`.
-  - [ ] 1.5 `i18n/text.csv`, đặt cạnh các khóa `hud.stratagem.*`/`stratagem.*` có sẵn (dòng 14–16): `hud.stratagem.sat_that` = "Sát Thát (W)", `stratagem.sat_that` = "Sát Thát", và `hud.stratagem.active` = "%s: đang +%d sát thương" (Quyết định 2). Chạy lại bước sinh `text.vi.translation` như Story 3.12.
-  - [ ] 1.6 Trận thử: thêm `"sat_that"` vào `muu_ke_mo` của `data/tran/thu_muu_ke.json` (trận thử dev, không phải trận chiến dịch) để tác giả bấm tay cả Q và W. **Không sửa** `tran_0x.json` (Sát Thát mở ở trận 6 là việc của Story 4.2/4.5).
+- [x] **Task 1: Tên mưu kế và dữ liệu (chưa có luật)** (AC: 1, 6, 7)
+  - [x] 1.1 `src/core/stratagem.gd`: `enum Kind { VUON_KHONG_NHA_TRONG, SAT_THAT }`; `NAMES["sat_that"] = Kind.SAT_THAT`; `SLOTS` thêm `[Kind.SAT_THAT, "stratagem_2", KEY_W]` (comment ở đầu `SLOTS` đã ghi sẵn dòng này). **Thêm cuối enum**, không chèn giữa: `Kind` là số nguyên, đổi thứ tự sẽ làm lệch mọi chỗ đã lưu số.
+  - [x] 1.2 Câu lỗi tên lạ lấy từ `Stratagem.name_list()`, nên sẽ thành `chỉ được "vuon_khong_nha_trong", "sat_that"`. Sửa đúng các câu mong đợi trong `test_loaders.gd:1085–1086` và `test_scenario_loader.gd:1347, 1351, 1372` (đây là test câu lỗi, không phải kịch bản đã duyệt).
+  - [x] 1.3 `data/chi_so.json`: `"muu_ke": { ..., "sat_that": { "cong_sat_thuong": 1 } }`. `StatsLoader.STRATAGEMS` thêm `["muu_ke", "sat_that", Stratagem.Kind.SAT_THAT, ["cong_sat_thuong"]]`; `MIN_VALUE["cong_sat_thuong"] = 1`. `Stats`: thêm `strike_bonus(kind) -> int` đọc `cong_sat_thuong` (cùng mẫu `stratagem_damage`, assert khi thiếu khóa). Test câu lỗi **đúng nguyên câu** trong `test_loaders.gd` (thiếu khóa, giá trị 0) — bài học review 3.12.
+  - [x] 1.4 `tests/board_fixture.gd:22` `stratagem_values()` thêm `Stratagem.Kind.SAT_THAT: {"cong_sat_thuong": 1}`.
+  - [x] 1.5 `i18n/text.csv`, đặt cạnh các khóa `hud.stratagem.*`/`stratagem.*` có sẵn (dòng 14–16): `hud.stratagem.sat_that` = "Sát Thát (W)", `stratagem.sat_that` = "Sát Thát", và `hud.stratagem.active` = "%s: đang +%d sát thương" (Quyết định 2). Chạy lại bước sinh `text.vi.translation` như Story 3.12.
+  - [x] 1.6 Trận thử: thêm `"sat_that"` vào `muu_ke_mo` của `data/tran/thu_muu_ke.json` (trận thử dev, không phải trận chiến dịch) để tác giả bấm tay cả Q và W. **Không sửa** `tran_0x.json` (Sát Thát mở ở trận 6 là việc của Story 4.2/4.5).
 
-- [ ] **Task 2: Viết kịch bản chờ duyệt** (AC: 1–6, 8) — `game/tests/kich_ban/muu_ke/`, tiền tố `st_`, mọi file `"da_duyet": false`, bàn nhỏ (7×5) như `vknt_*`. Định dạng lệnh `{"lenh": "muu_ke", "ten": "sat_that"}` đã có từ 3.12, **không cần mở rộng bộ nạp kịch bản**. Đề xuất (một đợt):
-  - [ ] `st_khoai_cong_mot_guc_khong_day.json`: Sát Thát, Khoái đánh Bộ binh 3 máu → gục (3 sát thương), không đẩy; `sau.muu_ke_da_dung: ["sat_that"]`.
-  - [ ] `st_lao_cong_mot.json`: Sát Thát, Lão lao trúng Bộ binh 3 máu → còn 1.
-  - [ ] `st_du_keo_qua_ham_chong_khong_cong.json`: Sát Thát, Dư kéo Bộ binh qua một ô `^` → chỉ mất 1 máu (hầm chông không cộng; kéo 0 sát thương).
-  - [ ] `st_du_keo_va_cham_khong_cong.json`: Sát Thát, Dư kéo quân Nguyên bị quân khác chặn → mỗi bên mất 1, không phải 2.
-  - [ ] `st_danh_truoc_khi_dung_khong_cong.json`: Khoái đánh Bộ binh (3 → 1, bị đẩy), **rồi** Sát Thát, rồi Lão lao trúng một Bộ binh khác (3 → 1). Đòn trước không tính lại.
-  - [ ] `st_het_hieu_luc_hiep_sau.json`: Sát Thát, `ket_thuc_luot`, hiệp 2 Khoái đánh Bộ binh 3 máu → còn 1 (sát thương thường). Bàn phải dựng sao cho pha địch không làm lệch (quân Nguyên không có đường tới tướng thì đứng yên — xem `vknt_ky_binh_xung_phong_qua_kho_cu.json` và luật AI trong kiến trúc).
-  - [ ] `st_ca_hai_muu_ke_vknt_khong_cong.json`: mở cả hai; Sát Thát rồi Vườn không nhà trống → quân Nguyên chỉ mất 1 máu (VKNT không được cộng).
-  - [ ] `st_khong_ton_hanh_dong_xoa_huy.json`: Khoái đi, Sát Thát, `huy` → `tu_choi: "khong_con_nuoc_di"`, Khoái vẫn ở ô mới; rồi Khoái đánh với sát thương đã cộng.
-  - [ ] `st_dung_lan_hai_bi_tu_choi.json`: dùng 2 lần → lần 2 `tu_choi: "muu_ke_da_dung"`; đòn sau đó chỉ cộng 1 (không cộng dồn).
-  - [ ] `st_bi_khoa_tu_choi.json`: `muu_ke_mo: ["vuon_khong_nha_trong"]` → `sat_that` bị `tu_choi: "muu_ke_khoa"`, đòn sau đó không cộng.
-  - [ ] `st_lao_trung_tuong_minh.json`: Sát Thát, Lão lao về quân Nguyên, tướng mình đứng chắn ở ô 2 → tướng mình mất 2 (Quyết định 1).
-  - [ ] 2.1 Chạy `tools/test.sh`: bộ nạp đọc được mọi file; kịch bản mới **trượt** (chưa có luật) — liệt kê trong Debug Log. Commit kịch bản riêng, lời commit tiếng Việt kết `(Story 3.13)`.
+- [x] **Task 2: Viết kịch bản chờ duyệt** (AC: 1–6, 8) — `game/tests/kich_ban/muu_ke/`, tiền tố `st_`, mọi file `"da_duyet": false`, bàn nhỏ (7×5) như `vknt_*`. Định dạng lệnh `{"lenh": "muu_ke", "ten": "sat_that"}` đã có từ 3.12, **không cần mở rộng bộ nạp kịch bản**. Đề xuất (một đợt):
+  - [x] `st_khoai_cong_mot_guc_khong_day.json`: Sát Thát, Khoái đánh Bộ binh 3 máu → gục (3 sát thương), không đẩy; `sau.muu_ke_da_dung: ["sat_that"]`.
+  - [x] `st_lao_cong_mot.json`: Sát Thát, Lão lao trúng Bộ binh 3 máu → còn 1.
+  - [x] `st_du_keo_qua_ham_chong_khong_cong.json`: Sát Thát, Dư kéo Bộ binh qua một ô `^` → chỉ mất 1 máu (hầm chông không cộng; kéo 0 sát thương).
+  - [x] *(Thay bằng `st_don_dich_khong_cong.json`: Bộ binh đã báo đòn vào Khoái, dùng Sát Thát rồi kết thúc lượt → Khoái chỉ mất 1. Kéo của Dư không bao giờ va chạm được: quân bị kéo đi qua các ô trống giữa nó và Dư, rồi dừng sát Dư không va.)* `st_du_keo_va_cham_khong_cong.json`: Sát Thát, Dư kéo quân Nguyên bị quân khác chặn → mỗi bên mất 1, không phải 2.
+  - [x] `st_danh_truoc_khi_dung_khong_cong.json`: Khoái đánh Bộ binh (3 → 1, bị đẩy), **rồi** Sát Thát, rồi Lão lao trúng một Bộ binh khác (3 → 1). Đòn trước không tính lại.
+  - [x] `st_het_hieu_luc_hiep_sau.json`: Sát Thát, `ket_thuc_luot`, hiệp 2 Khoái đánh Bộ binh 3 máu → còn 1 (sát thương thường). Bàn phải dựng sao cho pha địch không làm lệch (quân Nguyên không có đường tới tướng thì đứng yên — xem `vknt_ky_binh_xung_phong_qua_kho_cu.json` và luật AI trong kiến trúc).
+  - [x] `st_ca_hai_muu_ke_vknt_khong_cong.json`: mở cả hai; Sát Thát rồi Vườn không nhà trống → quân Nguyên chỉ mất 1 máu (VKNT không được cộng).
+  - [x] `st_khong_ton_hanh_dong_xoa_huy.json`: Khoái đi, Sát Thát, `huy` → `tu_choi: "khong_con_nuoc_di"`, Khoái vẫn ở ô mới; rồi Khoái đánh với sát thương đã cộng.
+  - [x] `st_dung_lan_hai_bi_tu_choi.json`: dùng 2 lần → lần 2 `tu_choi: "muu_ke_da_dung"`; đòn sau đó chỉ cộng 1 (không cộng dồn).
+  - [x] `st_bi_khoa_tu_choi.json`: `muu_ke_mo: ["vuon_khong_nha_trong"]` → `sat_that` bị `tu_choi: "muu_ke_khoa"`, đòn sau đó không cộng.
+  - [x] `st_lao_trung_tuong_minh.json`: Sát Thát, Lão lao về quân Nguyên, tướng mình đứng chắn ở ô 2 → tướng mình mất 2 (Quyết định 1).
+  - [x] 2.1 Chạy `tools/test.sh`: bộ nạp đọc được mọi file; kịch bản mới **trượt** (chưa có luật) — liệt kê trong Debug Log. Commit kịch bản riêng, lời commit tiếng Việt kết `(Story 3.13)`.
   - [ ] 2.2 **Dừng, chờ tác giả duyệt** qua `tools/xem_kich_ban.sh muu_ke`. Tác giả bảo sai thì sửa kịch bản, không sửa code. Duyệt xong mới bật `da_duyet: true`.
 
 - [ ] **Task 3: Luật (TDD Green)** (AC: 1–6)
@@ -176,6 +176,7 @@ tôi muốn tăng sức đánh của cả ba tướng trong một lượt,
 ### Debug Log References
 
 - Nền trước story: HEAD `2545333` (Story 3.12 done).
+- 2026-10-27 (Task 1–2): thêm `Stratagem.Kind.SAT_THAT`, phím W trong `SLOTS`, `muu_ke.sat_that.cong_sat_thuong` + `Stats.strike_bonus`, chữ `hud.stratagem.sat_that`/`active`, `stratagem.sat_that`; trận thử mở cả hai mưu kế. 758/758 GUT. Nhánh `SAT_THAT` trong `RulesStratagem` tạm `pass` (nhánh `_` assert làm vỡ cả bộ test). 11 kịch bản `muu_ke/st_*` chờ duyệt: **6 trượt** (các ca có cộng: `st_khoai_cong_mot_guc_khong_day`, `st_lao_cong_mot`, `st_danh_truoc_khi_dung_khong_cong`, `st_khong_ton_hanh_dong_xoa_huy`, `st_dung_lan_hai_bi_tu_choi`, `st_lao_trung_tuong_minh`), 5 đạt sẵn vì khóa hành vi "không cộng" của luật cũ (`st_du_keo_qua_ham_chong_khong_cong`, `st_don_dich_khong_cong`, `st_het_hieu_luc_hiep_sau`, `st_ca_hai_muu_ke_vknt_khong_cong`, `st_bi_khoa_tu_choi`).
 
 ### Completion Notes List
 

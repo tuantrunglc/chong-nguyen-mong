@@ -1,0 +1,64 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Dùng Sát Thát rồi kết thúc lượt (Bộ binh đứng kề Khoái nên không đi, báo đòn vào Khoái). Sang hiệp 2, Khoái đánh Bộ binh 3 máu: sát thương thường 2, Bộ binh còn 1 máu và bị đẩy lên 3,1.",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . B . . .",
+      ". . . 1 . . .",
+      ". . . . . . ."
+    ],
+    "muu_ke_mo": [
+      "sat_that"
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "muu_ke",
+      "ten": "sat_that"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "1",
+      "o": "3,2"
+    }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . .",
+      ". . . B . . .",
+      ". . . . . . .",
+      ". . . 1 . . .",
+      ". . . . . . ."
+    ],
+    "mau": {
+      "3,1": 1
+    },
+    "hiep": 2,
+    "da_danh": [
+      "1"
+    ],
+    "muu_ke_da_dung": [
+      "sat_that"
+    ]
+  }
+}

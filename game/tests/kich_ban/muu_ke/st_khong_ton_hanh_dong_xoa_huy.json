@@ -1,0 +1,70 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Khoái đi lên 3,3 rồi dùng Sát Thát: Hủy (Z) bị từ chối vì không còn nước đi để hủy. Khoái vẫn đánh được, sát thương 2+1=3 hạ gục Bộ binh 3 máu ở 3,2.",
+  "da_duyet": false,
+  "truoc": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . B",
+      ". . . . . . .",
+      ". . . B . . .",
+      ". . . . . . .",
+      ". . . 1 . . ."
+    ],
+    "muu_ke_mo": [
+      "sat_that"
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "3,3"
+    },
+    {
+      "lenh": "muu_ke",
+      "ten": "sat_that"
+    },
+    {
+      "lenh": "huy",
+      "tu_choi": "khong_con_nuoc_di"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "1",
+      "o": "3,2"
+    }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . . . . ."
+    ],
+    "quan": [
+      ". . . . . . B",
+      ". . . . . . .",
+      ". . . . . . .",
+      ". . . 1 . . .",
+      ". . . . . . ."
+    ],
+    "da_di": [
+      "1"
+    ],
+    "da_danh": [
+      "1"
+    ],
+    "muu_ke_da_dung": [
+      "sat_that"
+    ],
+    "ket_qua": "dang_choi"
+  }
+}

@@ -19,6 +19,8 @@ static func resolve(state: BattleState, command: Command, events: Array[BattleEv
 	match kind:
 		Stratagem.Kind.VUON_KHONG_NHA_TRONG:
 			_scorched_earth(state, events)
+		Stratagem.Kind.SAT_THAT:
+			pass  # luật viết sau khi tác giả duyệt kịch bản st_* (Story 3.13, M3)
 		_:
 			assert(false, "mưu kế %d có tên mà chưa có luật" % kind)
 

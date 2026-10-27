@@ -10,6 +10,7 @@
     "cung_ky": { "mau": 1, "tam_di": 3, "sat_thuong": 1, "tam_ban_gan": 2, "tam_ban_xa": 3 }
   },
   "muu_ke": {
-    "vuon_khong_nha_trong": { "sat_thuong": 1 }
+    "vuon_khong_nha_trong": { "sat_thuong": 1 },
+    "sat_that": { "cong_sat_thuong": 1 }
   }
 }

@@ -1,20 +1,21 @@
 class_name Stratagem
 extends RefCounted
 ## Mưu kế của Trần Hưng Đạo (Story 3.12). Mỗi mưu kế dùng 1 lần mỗi trận; file trận ghi mưu kế mở ("muu_ke_mo").
-## Mưu kế mới thêm ở story của nó (Sát Thát: Story 3.13).
+## Mưu kế mới thêm ở story của nó, luôn ở cuối enum (Kind là số nguyên).
 
-enum Kind { VUON_KHONG_NHA_TRONG }
+enum Kind { VUON_KHONG_NHA_TRONG, SAT_THAT }
 
 ## Tên trong file trận và kịch bản -> Kind, theo thứ tự phím (Q, W).
 const NAMES: Dictionary = {
 	"vuon_khong_nha_trong": Kind.VUON_KHONG_NHA_TRONG,
+	"sat_that": Kind.SAT_THAT,
 }
 
 ## Ô mưu kế theo thứ tự phím: [Kind, action trong InputMap, phím vật lý] (tác giả chốt 2026-10-27). BattleInput khai
-## báo phím từ bảng này, HUD xếp nút theo thứ tự này (không theo thứ tự "muu_ke_mo"). Sát Thát (Story 3.13) thêm
-## [Kind.SAT_THAT, "stratagem_2", KEY_W].
+## báo phím từ bảng này, HUD xếp nút theo thứ tự này (không theo thứ tự "muu_ke_mo").
 const SLOTS: Array = [
 	[Kind.VUON_KHONG_NHA_TRONG, "stratagem_1", KEY_Q],
+	[Kind.SAT_THAT, "stratagem_2", KEY_W],
 ]
 
 

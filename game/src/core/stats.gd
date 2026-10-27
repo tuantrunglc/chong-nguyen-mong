@@ -70,3 +70,10 @@ func stratagem_damage(kind: int) -> int:
 	var params: Dictionary = _stratagems.get(kind, {}) as Dictionary
 	assert(params.has("sat_thuong"), "chỉ số thiếu sat_thuong của mưu kế %d" % kind)
 	return int(params.get("sat_thuong", 0))
+
+
+## Sát thương Sát Thát cộng vào đòn của tướng (Story 3.13). Bộ nạp đã kiểm khóa và giá trị ≥ 1.
+func strike_bonus(kind: int) -> int:
+	var params: Dictionary = _stratagems.get(kind, {}) as Dictionary
+	assert(params.has("cong_sat_thuong"), "chỉ số thiếu cong_sat_thuong của mưu kế %d" % kind)
+	return int(params.get("cong_sat_thuong", 0))

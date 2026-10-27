@@ -12,8 +12,11 @@ hud.replay.left,Còn %d lần
 hud.replay.used,Đã dùng
 hud.end_turn,Kết thúc lượt (Space)
 hud.stratagem.vuon_khong_nha_trong,Vườn không nhà trống (Q)
+hud.stratagem.sat_that,Sát Thát (W)
 hud.stratagem.used,%s: đã dùng
+hud.stratagem.active,%s: đang +%d sát thương
 stratagem.vuon_khong_nha_trong,Vườn không nhà trống
+stratagem.sat_that,Sát Thát
 hud.confirm_attack,Bấm lần nữa để đánh
 hud.phase.player,"Lượt của bạn"
 hud.phase.enemy,"Quân Nguyên đang ra đòn"
