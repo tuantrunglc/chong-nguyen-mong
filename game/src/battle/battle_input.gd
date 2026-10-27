@@ -1,13 +1,15 @@
 class_name BattleInput
 extends Node
 ## Chuột và phím tắt trên bàn cờ -> signal. Không biết luật, không giữ trạng thái trận.
-## Phím 1-2-3, Z (hủy), Space (kết thúc lượt) khai báo trong InputMap bằng code (như DevTools). Dùng _unhandled_input để nút của
+## Phím 1-2-3, Z (hủy), R (chơi lại), Q (mưu kế), Space (kết thúc lượt) khai báo trong InputMap bằng code (như DevTools). Dùng _unhandled_input để nút của
 ## màn hình lỗi (Control) nhận bấm trước.
 
 signal general_key_pressed(index: int)
 signal undo_pressed
 signal replay_pressed
 signal end_turn_pressed
+## Phím mưu kế (Story 3.12): kind là Stratagem.Kind.
+signal stratagem_key_pressed(kind: int)
 signal cell_clicked(cell: Vector2i)
 ## Chỉ phát khi ô dưới chuột đổi; ra ngoài bàn thì cell là BoardView.NO_CELL.
 signal cell_hovered(cell: Vector2i)
@@ -22,6 +24,10 @@ const UNDO_ACTION: String = "undo_move"
 ## Chơi lại hiệp (Story 3.2).
 const REPLAY_ACTION: String = "replay_round"
 const END_TURN_ACTION: String = "end_turn"
+## Action -> mưu kế (Story 3.12; Sát Thát thêm "stratagem_2" phím W ở Story 3.13).
+const STRATAGEM_ACTIONS: Dictionary = {
+	"stratagem_1": Stratagem.Kind.VUON_KHONG_NHA_TRONG,
+}
 ## Action -> phím vật lý, cho mọi phím tắt của bàn cờ.
 const ACTION_KEYS: Dictionary = {
 	"select_general_1": KEY_1,
@@ -30,6 +36,7 @@ const ACTION_KEYS: Dictionary = {
 	UNDO_ACTION: KEY_Z,
 	REPLAY_ACTION: KEY_R,
 	END_TURN_ACTION: KEY_SPACE,
+	"stratagem_1": KEY_Q,
 }
 
 var _board: BoardView = null
@@ -79,6 +86,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(END_TURN_ACTION, false, true):
 		end_turn_pressed.emit()
 		return
+	for action: String in STRATAGEM_ACTIONS:
+		if event.is_action_pressed(action, false, true):
+			stratagem_key_pressed.emit(STRATAGEM_ACTIONS[action] as int)
+			return
 	if _board == null:
 		return
 	var mouse: InputEventMouse = event as InputEventMouse

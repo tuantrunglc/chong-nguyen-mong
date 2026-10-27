@@ -105,7 +105,7 @@ func _base_seconds(event: BattleEvent) -> float:
 	match event.type:
 		BattleEvent.Type.MOVED, BattleEvent.Type.ATTACKED:
 			return SECONDS_PER_EVENT
-		BattleEvent.Type.COLLIDED, BattleEvent.Type.DAMAGED, BattleEvent.Type.TELEGRAPHED, BattleEvent.Type.VILLAGE_DAMAGED, BattleEvent.Type.HEALED, BattleEvent.Type.REINFORCEMENT_SPAWNED, BattleEvent.Type.REINFORCEMENT_BLOCKED:
+		BattleEvent.Type.COLLIDED, BattleEvent.Type.DAMAGED, BattleEvent.Type.TELEGRAPHED, BattleEvent.Type.VILLAGE_DAMAGED, BattleEvent.Type.HEALED, BattleEvent.Type.REINFORCEMENT_SPAWNED, BattleEvent.Type.REINFORCEMENT_BLOCKED, BattleEvent.Type.GRANARY_BURNED:
 			return DAMAGE_SECONDS
 		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
 			return DEATH_SECONDS
@@ -151,8 +151,19 @@ func _play_one(event: BattleEvent, seconds: float, snapshot: BattleState) -> voi
 				await _flash(token, seconds)
 		BattleEvent.Type.REINFORCEMENT_BLOCKED:
 			await _flash_blocked(event.to_cell, seconds)
+		BattleEvent.Type.STRATAGEM_USED:
+			_show_stratagem_notice(event)
+		BattleEvent.Type.GRANARY_BURNED:
+			await _flash_burn(event.to_cell, seconds)
 		_:
 			await _wait(seconds * 0.5)
+
+
+## Dòng báo tên mưu kế vừa dùng (Story 3.12), ví dụ "Vườn không nhà trống!".
+func _show_stratagem_notice(event: BattleEvent) -> void:
+	if _notice != null:
+		_notice.show_text(TranslationServer.translate("notice.stratagem") % TranslationServer.translate(
+			"stratagem." + Stratagem.name_of(event.amount)))
 
 
 ## Trạng thái cuối của một sự kiện, dùng khi không chạy Tween (test, chế độ instant, hết ngân sách pha).
@@ -160,6 +171,8 @@ func _apply_instant(event: BattleEvent, snapshot: BattleState) -> void:
 	_played.append(event)
 	if event.type == BattleEvent.Type.VILLAGE_DAMAGED and _notice != null:
 		_notice.show_text(TranslationServer.translate("notice.morale_lost"))
+	if event.type == BattleEvent.Type.STRATAGEM_USED:
+		_show_stratagem_notice(event)
 	if event.type == BattleEvent.Type.REINFORCEMENT_SPAWNED and _board != null:
 		var hp: int = 2
 		if snapshot != null:
@@ -180,30 +193,26 @@ func _apply_instant(event: BattleEvent, snapshot: BattleState) -> void:
 
 
 func _flash_village(cell: Vector2i, seconds: float) -> void:
-	if _board == null or not is_inside_tree():
-		await _wait(seconds)
-		return
-	var rect: Rect2 = BoardView.cell_rect(cell)
-	var flash_node: ColorRect = ColorRect.new()
-	flash_node.color = Color(1.0, 0.25, 0.25, 0.6)
-	flash_node.position = rect.position
-	flash_node.size = rect.size
-	flash_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_board.add_child(flash_node)
-	var tween: Tween = _new_tween()
-	tween.tween_property(flash_node, "color:a", 0.0, seconds)
-	await _wait(seconds)
-	if is_instance_valid(flash_node):
-		flash_node.queue_free()
+	await _flash_cell(cell, Color(1.0, 0.25, 0.25, 0.6), seconds)
 
 
 func _flash_blocked(cell: Vector2i, seconds: float) -> void:
+	await _flash_cell(cell, Color(1.0, 0.65, 0.15, 0.7), seconds)
+
+
+## Kho lương bị đốt (Vườn không nhà trống, Story 3.12): nháy màu lửa; kho biến mất khi bàn vẽ bản chụp cuối.
+func _flash_burn(cell: Vector2i, seconds: float) -> void:
+	await _flash_cell(cell, Color(1.0, 0.45, 0.05, 0.85), seconds)
+
+
+## Nháy một ô bằng màu color rồi mờ dần trong seconds giây.
+func _flash_cell(cell: Vector2i, color: Color, seconds: float) -> void:
 	if _board == null or not is_inside_tree():
 		await _wait(seconds)
 		return
 	var rect: Rect2 = BoardView.cell_rect(cell)
 	var flash_node: ColorRect = ColorRect.new()
-	flash_node.color = Color(1.0, 0.65, 0.15, 0.7)
+	flash_node.color = color
 	flash_node.position = rect.position
 	flash_node.size = rect.size
 	flash_node.mouse_filter = Control.MOUSE_FILTER_IGNORE

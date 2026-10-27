@@ -11,6 +11,8 @@ hud.replay,Chơi lại (R)
 hud.replay.left,Còn %d lần
 hud.replay.used,Đã dùng
 hud.end_turn,Kết thúc lượt (Space)
+hud.stratagem.vuon_khong_nha_trong,Vườn không nhà trống (Q)
+hud.stratagem.used,%s: đã dùng
 hud.confirm_attack,Bấm lần nữa để đánh
 hud.phase.player,"Lượt của bạn"
 hud.phase.enemy,"Quân Nguyên đang ra đòn"
@@ -21,6 +23,7 @@ result.lost_morale,"Thua: mất làng"
 result.lost_pass,"Thua: giặc vào ải"
 result.retry,Chơi lại trận
 notice.morale_lost,"−1 Lòng dân"
+notice.stratagem,%s!
 unit.nguyen_khoai,Khoái
 unit.pham_ngu_lao,Lão
 unit.tran_khanh_du,Dư

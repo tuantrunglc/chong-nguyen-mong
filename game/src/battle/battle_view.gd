@@ -58,9 +58,11 @@ func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = nu
 	input.undo_pressed.connect(_on_undo)
 	input.replay_pressed.connect(_on_replay)
 	input.end_turn_pressed.connect(_on_end_turn)
+	input.stratagem_key_pressed.connect(_on_stratagem)
 	hud.undo_pressed.connect(_on_undo)
 	hud.replay_pressed.connect(_on_replay)
 	hud.end_turn_pressed.connect(_on_end_turn)
+	hud.stratagem_pressed.connect(_on_stratagem)
 
 
 ## Bắt đầu trận mới (kể cả nạp lại): bỏ chọn, hiện bảng nút.
@@ -203,6 +205,14 @@ func _on_replay() -> void:
 	if not _controller.replay_round():
 		return
 	_deselect()
+
+
+## Dùng mưu kế (Story 3.12): bấm một lần là dùng; tướng đang chọn giữ nguyên (tác giả chốt 2026-10-27). Mưu kế khóa
+## hoặc đã dùng thì phím Q im lặng (nút đã mờ hoặc không có).
+func _on_stratagem(kind: int) -> void:
+	if _controller == null or _playing or _battle_over() or not _controller.can_use_stratagem(kind):
+		return
+	_controller.submit(Command.use_stratagem(kind))
 
 
 ## Kết thúc lượt rồi bỏ chọn (tác giả chốt).
@@ -461,6 +471,7 @@ func _update_hud() -> void:
 	var over: bool = Rules.is_battle_over(snapshot)
 	_hud.show_turn(snapshot.round_number, _controller.can_undo(), _controller.can_replay(),
 		_controller.replay_left(), over, snapshot.max_rounds, snapshot.morale, snapshot.max_morale)
+	_hud.show_stratagems(snapshot.stratagems, snapshot.stratagems_used)
 	# Dòng pha luôn có khi đang chơi; lúc phát hoạt ảnh pha địch thì báo đúng pha đang chạy (Story 2.11, AC 4).
 	if not over:
 		_hud.show_phase(_playing and _enemy_turn)
