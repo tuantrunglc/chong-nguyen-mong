@@ -3,7 +3,7 @@ extends RefCounted
 ## Nạp data/chi_so.json thành Stats. Gom mọi lỗi rồi mới trả về; không ghi log (bên gọi ghi).
 ## Duyệt theo danh sách cố định dưới đây, không theo khóa của JSON, để lỗi luôn ra cùng thứ tự.
 
-const GROUPS: Array[String] = ["tuong", "quan_nguyen"]
+const GROUPS: Array[String] = ["tuong", "quan_nguyen", "muu_ke"]
 
 ## [nhóm, tên trong file, UnitType, các khóa bắt buộc]
 const UNITS: Array = [
@@ -15,6 +15,11 @@ const UNITS: Array = [
 	["quan_nguyen", "ky_binh", UnitType.KY_BINH, ["mau", "tam_di", "sat_thuong"]],
 	["quan_nguyen", "cung_ky", UnitType.CUNG_KY,
 		["mau", "tam_di", "sat_thuong", "tam_ban_gan", "tam_ban_xa"]],
+]
+
+## Tham số mưu kế (Story 3.12, tác giả chốt 2026-10-27): [nhóm, tên trong file, Stratagem.Kind, các khóa bắt buộc].
+const STRATAGEMS: Array = [
+	["muu_ke", "vuon_khong_nha_trong", Stratagem.Kind.VUON_KHONG_NHA_TRONG, ["sat_thuong"]],
 ]
 
 ## Giá trị nhỏ nhất cho từng khóa.
@@ -60,7 +65,8 @@ static func parse_stats(text: String, file: String) -> LoadResult:
 			_warn_unknown(root[group] as Dictionary, _unit_names(group), group + ".", file, result)
 
 	var values: Dictionary = {}
-	for entry: Array in UNITS:
+	var stratagem_values: Dictionary = {}
+	for entry: Array in UNITS + STRATAGEMS:
 		var group: String = entry[0]
 		if not groups.has(group):
 			continue
@@ -87,16 +93,19 @@ static func parse_stats(text: String, file: String) -> LoadResult:
 			if unit_values.has(near) and unit_values.has(far) and int(unit_values[near]) > int(unit_values[far]):
 				result.add_error('%s: "%s.%s" (%d) lớn hơn "%s.%s" (%d)'
 					% [file, shown, near, unit_values[near], shown, far, unit_values[far]])
-		values[entry[2] as int] = unit_values
+		if group == "muu_ke":
+			stratagem_values[entry[2] as int] = unit_values
+		else:
+			values[entry[2] as int] = unit_values
 
 	if result.ok:
-		result.data = Stats.new(values)
+		result.data = Stats.new(values, stratagem_values)
 	return result
 
 
 static func _unit_names(group: String) -> Array:
 	var names: Array = []
-	for entry: Array in UNITS:
+	for entry: Array in UNITS + STRATAGEMS:
 		if entry[0] == group:
 			names.append(entry[1])
 	return names

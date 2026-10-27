@@ -51,6 +51,9 @@ func _valid_stats() -> Dictionary:
 			"ky_binh": {"mau": 2, "tam_di": 3, "sat_thuong": 1},
 			"cung_ky": {"mau": 1, "tam_di": 3, "sat_thuong": 1, "tam_ban_gan": 2, "tam_ban_xa": 3},
 		},
+		"muu_ke": {
+			"vuon_khong_nha_trong": {"sat_thuong": 1},
+		},
 	}
 
 
@@ -1083,3 +1086,20 @@ func test_muu_ke_mo_errors_vietnamese() -> void:
 			'"muu_ke_mo" mục 2 là 2, chỉ được "vuon_khong_nha_trong"']))
 	assert_eq(_level(_with(_valid_level(), "muu_ke_mo", ["vuon_khong_nha_trong", "vuon_khong_nha_trong"])).errors,
 		_errors(['"muu_ke_mo" mục 2: "vuon_khong_nha_trong" bị ghi hai lần']))
+
+
+## Story 3.12: tham số mưu kế nằm trong chi_so.json (tác giả chốt 2026-10-27).
+func test_stats_stratagem_damage() -> void:
+	var r: LoadResult = _stats(_valid_stats())
+	assert_true(r.ok, "; ".join(r.errors))
+	assert_eq((r.data as Stats).stratagem_damage(Stratagem.Kind.VUON_KHONG_NHA_TRONG), 1)
+
+
+func test_stats_stratagem_errors_vietnamese() -> void:
+	assert_eq(_stats(_without(_valid_stats(), "muu_ke")).errors, [STATS_FILE + ': thiếu khóa "muu_ke"'] as Array[String])
+	var d: Dictionary = _valid_stats()
+	d["muu_ke"] = {}
+	assert_eq(_stats(d).errors, [STATS_FILE + ': thiếu khóa "muu_ke.vuon_khong_nha_trong"'] as Array[String])
+	d["muu_ke"] = {"vuon_khong_nha_trong": {"sat_thuong": 0}}
+	assert_eq(_stats(d).errors.size(), 1)
+	assert_string_contains(_stats(d).errors[0], '"muu_ke.vuon_khong_nha_trong.sat_thuong"')

@@ -18,15 +18,20 @@ static func values() -> Dictionary:
 	return values
 
 
+## Tham số mưu kế (Story 3.12): Vườn không nhà trống trừ 1 máu.
+static func stratagem_values() -> Dictionary:
+	return {Stratagem.Kind.VUON_KHONG_NHA_TRONG: {"sat_thuong": 1}}
+
+
 static func stats() -> Stats:
-	return Stats.new(values())
+	return Stats.new(values(), stratagem_values())
 
 
 ## Chỉ số của fixture với một khóa bị đổi — để test chứng minh luật đọc số từ chi_so, không hard-code.
 static func stats_with(type: int, key: String, value: int) -> Stats:
 	var changed: Dictionary = values()
 	(changed[type] as Dictionary)[key] = value
-	return Stats.new(changed)
+	return Stats.new(changed, stratagem_values())
 
 
 ## Bàn trống cỡ size, ô (c, r) thay bằng ký hiệu.

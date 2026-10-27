@@ -5,10 +5,13 @@ extends RefCounted
 
 ## UnitType -> { khóa: int }
 var _values: Dictionary = {}
+## Stratagem.Kind -> { khóa: int } (nhóm "muu_ke", Story 3.12).
+var _stratagems: Dictionary = {}
 
 
-func _init(values: Dictionary) -> void:
+func _init(values: Dictionary, stratagems: Dictionary = {}) -> void:
 	_values = values.duplicate(true)
+	_stratagems = stratagems.duplicate(true)
 
 
 ## Bộ nạp đã kiểm đủ khóa, nên khóa thiếu ở đây là lỗi lập trình (gõ sai tên khóa): assert, bản build trả 0.
@@ -60,3 +63,10 @@ func shoot_min_range(type: int) -> int:
 
 func shoot_max_range(type: int) -> int:
 	return value(type, "tam_ban_xa")
+
+
+## Số máu mỗi quân Nguyên mất khi dùng Vườn không nhà trống (Story 3.12). Bộ nạp đã kiểm khóa và giá trị ≥ 1.
+func stratagem_damage(kind: int) -> int:
+	var params: Dictionary = _stratagems.get(kind, {}) as Dictionary
+	assert(params.has("sat_thuong"), "chỉ số thiếu sat_thuong của mưu kế %d" % kind)
+	return int(params.get("sat_thuong", 0))

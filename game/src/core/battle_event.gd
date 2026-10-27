@@ -42,6 +42,10 @@ enum Type {
 	REINFORCEMENT_SPAWNED,
 	## Đầu hiệp: tiếp viện loại amount tại ô to_cell bị chặn bởi quân other_id (Story 3.10).
 	REINFORCEMENT_BLOCKED,
+	## Người chơi dùng mưu kế: amount là Stratagem.Kind (Story 3.12). Luôn là sự kiện đầu của lệnh.
+	STRATAGEM_USED,
+	## Kho lương ở to_cell bị đốt, thành đất trống (Vườn không nhà trống, Story 3.12).
+	GRANARY_BURNED,
 }
 
 ## Vì sao quân đổi ô hoặc mất máu. STRIKE: đòn có sát thương của tướng (Khoái, Lão).
@@ -50,7 +54,8 @@ enum Type {
 ## SPIKES: sát thương hầm chông (Story 3.4).
 ## HEAL: hồi máu từ kho lương hoặc hiệu ứng (Story 3.9).
 ## REINFORCEMENT: sát thương va chạm do tiếp viện xuất hiện trên ô đã có quân (Story 3.10).
-enum Cause { WALK, STRIKE, PUSH, COLLISION, PULL, ENEMY_STRIKE, SPIKES, HEAL, REINFORCEMENT }
+## STRATAGEM: sát thương của mưu kế (Vườn không nhà trống, Story 3.12).
+enum Cause { WALK, STRIKE, PUSH, COLLISION, PULL, ENEMY_STRIKE, SPIKES, HEAL, REINFORCEMENT, STRATAGEM }
 
 ## Vì sao lệnh bị từ chối (REJECTED). Kịch bản luật ghi bằng mã "tu_choi" (ScenarioRunner.REJECT_EVENTS).
 enum Reject {
@@ -178,3 +183,12 @@ static func reinforcement_spawned(p_unit_id: int, p_cell: Vector2i, p_type: int)
 
 static func reinforcement_blocked(p_cell: Vector2i, p_type: int, p_blocker_id: int) -> BattleEvent:
 	return BattleEvent.new(Type.REINFORCEMENT_BLOCKED, 0, Vector2i.ZERO, p_cell, Cause.REINFORCEMENT, Reject.NONE, "", 0, p_type, p_blocker_id)
+
+
+static func stratagem_used(p_kind: int) -> BattleEvent:
+	return BattleEvent.new(Type.STRATAGEM_USED, 0, Vector2i.ZERO, Vector2i.ZERO, Cause.STRATAGEM, Reject.NONE, "", 0,
+		p_kind)
+
+
+static func granary_burned(p_cell: Vector2i) -> BattleEvent:
+	return BattleEvent.new(Type.GRANARY_BURNED, 0, Vector2i.ZERO, p_cell, Cause.STRATAGEM)

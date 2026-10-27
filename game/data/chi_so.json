@@ -8,5 +8,8 @@
     "bo_binh": { "mau": 3, "tam_di": 2, "sat_thuong": 1 },
     "ky_binh": { "mau": 2, "tam_di": 3, "sat_thuong": 1 },
     "cung_ky": { "mau": 1, "tam_di": 3, "sat_thuong": 1, "tam_ban_gan": 2, "tam_ban_xa": 3 }
+  },
+  "muu_ke": {
+    "vuon_khong_nha_trong": { "sat_thuong": 1 }
   }
 }

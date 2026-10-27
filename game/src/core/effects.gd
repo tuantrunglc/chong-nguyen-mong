@@ -53,5 +53,12 @@ static func heal(state: BattleState, unit: Unit, amount: int, events: Array[Batt
 	events.append(BattleEvent.healed(unit.id, gained, unit.cell))
 
 
+## Đốt kho lương ở cell (Vườn không nhà trống, Story 3.12): ô thành đất trống, đi vào được. Ghi GRANARY_BURNED.
+static func burn_granary(state: BattleState, cell: Vector2i, events: Array[BattleEvent]) -> void:
+	assert(state.terrain_at(cell) == Terrain.GRANARY, "Effects.burn_granary: ô %d,%d không phải kho lương" % [cell.x, cell.y])
+	state.terrain[cell.y * state.size.x + cell.x] = Terrain.PLAIN
+	events.append(BattleEvent.granary_burned(cell))
+
+
 static func _remove(state: BattleState, unit: Unit) -> void:
 	state.units.erase(unit)

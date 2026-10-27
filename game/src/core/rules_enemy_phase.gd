@@ -69,7 +69,8 @@ static func _warn_reinforcements(state: BattleState, events: Array[BattleEvent])
 			events.append(BattleEvent.reinforcement_warned(r.cell, r.type, r.round))
 
 
-## Cuối hiệp: mỗi quân Nguyên đứng kề ít nhất một kho lương hồi 1 máu (Story 3.9).
+## Cuối hiệp: mỗi quân Nguyên đứng kề ít nhất một kho lương hồi 1 máu (Story 3.9). Vườn không nhà trống đốt hết kho
+## nên sau đó không ai hồi (Story 3.12).
 static func _heal_from_granaries(state: BattleState, events: Array[BattleEvent]) -> void:
 	var enemies: Array[Unit] = []
 	for unit: Unit in state.units:

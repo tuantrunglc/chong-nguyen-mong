@@ -106,7 +106,9 @@ func submit(command: Command) -> Array[BattleEvent]:
 		Command.Kind.MOVE:
 			_undo_snapshot = before  # thay bản cũ: chỉ hủy được nước gần nhất
 		Command.Kind.ATTACK:
-			_undo_snapshot = null  # đánh xóa lịch sử hủy (FR10); E3: mưu kế cũng xóa
+			_undo_snapshot = null  # đánh xóa lịch sử hủy (FR10)
+		Command.Kind.USE_STRATAGEM:
+			_undo_snapshot = null  # dùng mưu kế cũng xóa (FR10, Story 3.12)
 		Command.Kind.END_TURN:
 			Log.debug("battle", "sang hiệp %d" % _state.round_number)
 			_undo_snapshot = null
@@ -146,6 +148,21 @@ func undo() -> Array[BattleEvent]:
 
 func can_undo() -> bool:
 	return _undo_snapshot != null
+
+
+## Dùng được mưu kế kind không (Story 3.12): trận mở mưu kế đó, chưa dùng, đang lượt người chơi, trận chưa hết.
+func can_use_stratagem(kind: int) -> bool:
+	return _state != null and _state.phase == BattleState.Phase.PLAYER and not Rules.is_battle_over(_state) \
+		and _state.stratagems.has(kind) and not _state.stratagems_used.has(kind)
+
+
+## Mưu kế mở trong trận và đã dùng (bản sao, cho HUD).
+func stratagems() -> Array[int]:
+	return _state.stratagems.duplicate() if _state != null else [] as Array[int]
+
+
+func stratagems_used() -> Array[int]:
+	return _state.stratagems_used.duplicate() if _state != null else [] as Array[int]
 
 
 ## Chơi lại hiệp được không (FR39): chưa dùng lần nào trong trận, đang ở lượt người chơi, trận chưa hết.
@@ -213,7 +230,7 @@ func _record(command: Command, reject: BattleEvent.Reject) -> void:
 	if command.kind == Command.Kind.END_TURN and reject != BattleEvent.Reject.NONE:
 		return
 	_round_commands.append({"lenh": _command_code(command), "tuong": command.unit_id,
-		"o": command.cell, "tu_choi": reject})
+		"o": command.cell, "muu_ke": command.stratagem, "tu_choi": reject})
 
 
 func _record_undo(reject: BattleEvent.Reject) -> void:
@@ -228,6 +245,8 @@ static func _command_code(command: Command) -> String:
 			return "danh"
 		Command.Kind.END_TURN:
 			return "ket_thuc_luot"
+		Command.Kind.USE_STRATAGEM:
+			return "muu_ke"
 	return ""
 
 
@@ -305,6 +324,8 @@ static func _describe(command: Command) -> String:
 			return "kết thúc lượt"
 		Command.Kind.BEGIN_BATTLE:
 			return "mở trận"
+		Command.Kind.USE_STRATAGEM:
+			return "dùng mưu kế %s" % Stratagem.name_of(command.stratagem)
 	return str(command.kind)
 
 

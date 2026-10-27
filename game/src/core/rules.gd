@@ -18,6 +18,8 @@ static func resolve(state: BattleState, command: Command) -> Array[BattleEvent]:
 			RulesEnemyPhase.end_player_turn(state, events)
 		Command.Kind.BEGIN_BATTLE:
 			RulesEnemyPhase.begin_battle(state, events)
+		Command.Kind.USE_STRATAGEM:
+			RulesStratagem.resolve(state, command, events)
 	# Lệnh bị từ chối thì không có gì đổi, nên không kiểm kết cục.
 	if not _was_rejected(events):
 		RulesVictory.check(state, events)

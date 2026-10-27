@@ -107,6 +107,11 @@ static func before_layers(state: BattleState) -> Dictionary:
 		layers["mau"] = hp
 	layers["thu_tu_dich"] = enemy_order(state)
 	_add_strikes(layers, state)
+	# Mưu kế (Story 3.12): chỉ ghi khi trận có mưu kế, để báo cáo trận cũ giữ nguyên.
+	if not state.stratagems.is_empty():
+		layers["muu_ke_mo"] = stratagem_names(state.stratagems)
+	if not state.stratagems_used.is_empty():
+		layers["muu_ke_da_dung"] = stratagem_names(state.stratagems_used)
 	return layers
 
 
@@ -121,7 +126,17 @@ static func after_layers(state: BattleState) -> Dictionary:
 	layers["da_di"] = general_symbols(state, true)
 	layers["da_danh"] = general_symbols(state, false)
 	layers["ket_qua"] = outcome(state)
+	if not state.stratagems.is_empty():
+		layers["muu_ke_da_dung"] = stratagem_names(state.stratagems_used)
 	return layers
+
+
+## Tên mưu kế trong file ("vuon_khong_nha_trong"), theo thứ tự.
+static func stratagem_names(kinds: Array[int]) -> Array[String]:
+	var names: Array[String] = []
+	for kind: int in kinds:
+		names.append(Stratagem.name_of(kind))
+	return names
 
 
 ## Ghi `bao_don` chỉ khi MỌI đòn serialize được. Bỏ một đòn (chủ đã gục, ô đích ngoài bàn, hướng lạ) mà vẫn ghi
@@ -245,6 +260,8 @@ static func command_entries(commands: Array[Dictionary]) -> Array:
 		if code == "di" or code == "danh":
 			entry["tuong"] = str(int(record.get("tuong", 0)))
 			entry["o"] = BoardText.cell_text(record.get("o", Vector2i.ZERO) as Vector2i)
+		if code == "muu_ke":
+			entry["ten"] = Stratagem.name_of(int(record.get("muu_ke", -1)))
 		var reject: int = int(record.get("tu_choi", BattleEvent.Reject.NONE))
 		if reject != BattleEvent.Reject.NONE and REJECT_CODES.has(reject):
 			entry["tu_choi"] = str(REJECT_CODES[reject])
