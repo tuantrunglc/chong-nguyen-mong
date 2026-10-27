@@ -233,3 +233,7 @@
 - **`Stats.new(values)` cho bỏ trống tham số mưu kế.** `stats.gd:12` có giá trị mặc định `stratagems = {}`; nhiều test cũ (test_rules_enemy_phase, test_rules_move, test_spikes, test_battle_state, test_scenario_loader) tạo `Stats` một tham số. Nếu sau này các test đó dùng mưu kế thì `stratagem_damage` assert ở debug, ở bản phát hành trừ 0 máu. Bộ nạp đã bắt buộc nhóm `muu_ke` nên dữ liệu thật an toàn.
 - **Báo lỗi F2 thiếu lớp kiểu trận.** `BugReport.before_layers` (`bug_report.gd:103`) không ghi `kieu`, `tiep_vien`, `long_dan`, `so_hiep_toi_da`. Kịch bản sinh từ trận Giữ ải (mưu kế diệt hết quân mà trận vẫn tiếp) hoặc trận còn tiếp viện sẽ bị nạp như trận Tiêu diệt và chạy lại ra "thắng". Có từ trước Story 3.12.
 - **Ô nháy đốt kho có thể lệch xuống dưới mặt khối kho lương** (~16px, `_flash_burn` dùng `cell_rect` mặt đất, như nháy làng). Chưa kiểm trên màn hình.
+
+## Deferred from: code review of 3-13-muu-ke-sat-that (2026-10-27)
+
+- **Chữ nút Sát Thát sau khi thắng ngay trong lượt.** Đòn cuối hạ quân Nguyên cuối khi Sát Thát đang bật: `sat_that_active` không bị tắt (chỉ tắt ở `end_player_turn`), nên nút trên màn hình kết thúc vẫn ghi "Sát Thát: đang +1 sát thương" (`hud.gd:147`). Nút đã mờ, luật không ảnh hưởng.
