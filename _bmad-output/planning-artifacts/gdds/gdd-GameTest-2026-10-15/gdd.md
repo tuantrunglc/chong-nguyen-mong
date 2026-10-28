@@ -249,7 +249,7 @@ AI phải tất định và đọc được: người chơi đoán được quâ
 | 2 | Tiêu diệt | Kỵ binh xung phong, dùng rừng chặn đường, địch đánh trúng nhau | 2 Kỵ binh, 1 Bộ binh | Rừng, sông | 6×7 | Ải Lãnh Kinh |
 | 3 | Tiêu diệt | Trần Khánh Dư ra trận: đòn kéo, hầm chông; **giới hạn hiệp** | 2 Bộ binh, 2 Cung kỵ | Hầm chông, rừng | 6×6 | Phục kích ở ải Nội Bàng (theo *Việt Nam sử lược*) |
 | 4 | Tiêu diệt | **Bảo vệ làng**: làng và Lòng dân (vẫn có giới hạn hiệp) | Chốt khi thiết kế trận (gợi ý 2 Bộ binh, 1 Kỵ binh, 1 Cung kỵ) | Làng, sông, rừng | 7×7 | Làng quanh Vạn Kiếp |
-| 5 | Giữ ải | Kho lương, *Vườn không nhà trống*, quân tiếp viện | 4 quân khởi đầu, +1 mỗi hiệp | Kho lương, sông | 8×8 | Thăng Long bỏ ngỏ |
+| 5 | Giữ ải | Kho lương, *Vườn không nhà trống*, quân tiếp viện | 2 Bộ binh, 1 Cung kỵ; +1 Kỵ binh hiệp 3 | Kho lương, sông | 8×8 | Thăng Long bỏ ngỏ |
 | 6 | Giữ ải | Tổng hợp mọi luật, *Sát Thát* | 5 quân khởi đầu, +1–2 mỗi hiệp | Đủ các loại | 10×8 | Phục binh hai bờ Bạch Đằng |
 
 - **Cỡ bàn và sự kiện thật** chỉ là gợi ý, chốt khi thiết kế từng trận. Xem `history-notes-1288.md`. Thêm 2026-10-20.
