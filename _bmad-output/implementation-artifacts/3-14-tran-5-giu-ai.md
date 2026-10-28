@@ -158,7 +158,7 @@ tôi muốn trận 5 dạy kho lương, Vườn không nhà trống và quân ti
 - Trận 5 là **trận giới thiệu** (tác giả chốt 2026-10-27): Vườn không nhà trống và chặn tiếp viện là cách thắng gọn được dạy trong lời giải, không phải cách duy nhất.
 - GDD dòng trận 5 (Campaign Structure) sửa theo Quyết định 1: "2 Bộ binh, 1 Cung kỵ; +1 Kỵ binh hiệp 3".
 - **Tác giả đánh tay** (AC 3): `tools/chay.sh --dev --tran=5`, làm theo `game/data/tran/tran_05_loi_giai.md`. Thấy bảng **Thắng** ở cuối hiệp 5, Khoái 3/3, Lão 3/3, Dư 2/3 là đúng. Xong thì nói "duyệt" để bật `da_duyet: true` cho `tran/tran_05_loi_giai.json`.
-- Deploy itch chưa làm (xem Task 5.4).
+- Deploy itch xong 2026-10-28 (xem Task 5.4), trang riêng tư.
 
 ### File List
 
