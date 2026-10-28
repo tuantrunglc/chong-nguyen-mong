@@ -65,7 +65,7 @@ hàng 3:  ~ ~ . . # . . .
 hàng 4:  . . . . . . ~ ~
 hàng 5:  . . # . 1 2 . .
 hàng 6:  . . . . . . . .
-hàng 7:  . . . A A 3 . ◇      ◇ = ô báo tiếp viện 7,7
+hàng 7:  . . . A A 3 . ◇      ◇ = ô báo tiếp viện 7,7 (trong game: ô vàng có mũi tên)
 ```
 
 - Bộ binh `3,1` còn 1 máu, Bộ binh `3,2` còn 2 máu (không hồi vì kho đã cháy). Không có ô đỏ.

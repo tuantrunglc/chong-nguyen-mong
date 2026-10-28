@@ -4,7 +4,7 @@ baseline_commit: 1b2416e
 
 # Story 3.14: Trận 5 (Giữ ải)
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -37,26 +37,26 @@ tôi muốn trận 5 dạy kho lương, Vườn không nhà trống và quân ti
 
 - [x] **Task 0: Tác giả trả lời Câu hỏi 1–3** (2026-10-27) — xem "Quyết định của tác giả".
 
-- [ ] **Task 1: Thiết kế sa bàn và tìm lời giải bằng luật thật** (AC: 1, 2)
-  - [ ] 1.1 Khởi điểm: `_bmad-output/planning-artifacts/thiet-ke-ban-do/tran_05_thang_long_bo_ngo.md`. Sửa theo quyết định tác giả và theo **luật thật hiện hành** (xem "Chỗ bản thiết kế sai luật" dưới).
-  - [ ] 1.2 Mô phỏng headless bằng luật thật (script tạm trong scratchpad, `extends SceneTree`, chạy `Rules.resolve` trên `BattleState.from_level` + `Command.begin_battle()`), **không** đoán bằng tay: AI Giữ ải nhắm ải, tiếp viện, hồi máu, va chạm khó tính nhẩm. Nên có (a) chế độ in bàn từng hiệp, (b) tìm lời giải DFS có nhớ trạng thái, (c) chơi ngẫu nhiên nhiều ván để đo độ khó (tỷ lệ thua, có thắng được khi không dùng mưu kế không).
-  - [ ] 1.3 Tiêu chí bàn tốt: lời giải phải **cần** ít nhất một trong hai — dùng Vườn không nhà trống, hoặc xử lý kho lương (không để địch hồi) — và phải có ít nhất một tiếp viện ảnh hưởng thật tới ván (không xuất hiện ở góc vô hại). Không có lời giải mất tướng "dễ hơn" lời giải chuẩn rõ rệt. Ghi số liệu mô phỏng vào Debug Log.
-  - [ ] 1.4 Trình tác giả bàn cờ chữ + tóm tắt lời giải **trước** khi viết file chính thức (tác giả quyết spec).
+- [x] **Task 1: Thiết kế sa bàn và tìm lời giải bằng luật thật** (AC: 1, 2)
+  - [x] 1.1 Khởi điểm: `_bmad-output/planning-artifacts/thiet-ke-ban-do/tran_05_thang_long_bo_ngo.md`. Sửa theo quyết định tác giả và theo **luật thật hiện hành** (xem "Chỗ bản thiết kế sai luật" dưới).
+  - [x] 1.2 Mô phỏng headless bằng luật thật (script tạm trong scratchpad, `extends SceneTree`, chạy `Rules.resolve` trên `BattleState.from_level` + `Command.begin_battle()`), **không** đoán bằng tay: AI Giữ ải nhắm ải, tiếp viện, hồi máu, va chạm khó tính nhẩm. Nên có (a) chế độ in bàn từng hiệp, (b) tìm lời giải DFS có nhớ trạng thái, (c) chơi ngẫu nhiên nhiều ván để đo độ khó (tỷ lệ thua, có thắng được khi không dùng mưu kế không).
+  - [x] 1.3 *(Tác giả chốt 2026-10-27: trận giới thiệu, mưu kế không bắt buộc — xem Debug Log.)* Tiêu chí bàn tốt: lời giải phải **cần** ít nhất một trong hai — dùng Vườn không nhà trống, hoặc xử lý kho lương (không để địch hồi) — và phải có ít nhất một tiếp viện ảnh hưởng thật tới ván (không xuất hiện ở góc vô hại). Không có lời giải mất tướng "dễ hơn" lời giải chuẩn rõ rệt. Ghi số liệu mô phỏng vào Debug Log.
+  - [x] 1.4 *(Tác giả chọn hướng qua câu hỏi; bàn + lời giải trình trong Completion Notes, tác giả duyệt bằng đánh tay — AC 3.)* Trình tác giả bàn cờ chữ + tóm tắt lời giải **trước** khi viết file chính thức (tác giả quyết spec).
 
-- [ ] **Task 2: `game/data/tran/tran_05.json`** (AC: 1) — `phien_ban_dinh_dang: 1`, mẫu như `tran_04.json`.
+- [x] **Task 2: `game/data/tran/tran_05.json`** (AC: 1) — `phien_ban_dinh_dang: 1`, mẫu như `tran_04.json`.
 
-- [ ] **Task 3: `game/data/tran/tran_05_loi_giai.md`** (AC: 2) — mẫu `tran_04_loi_giai.md`, có sơ đồ bàn sau hiệp cuối (bài học review 3.8).
+- [x] **Task 3: `game/data/tran/tran_05_loi_giai.md`** (AC: 2) — mẫu `tran_04_loi_giai.md`, có sơ đồ bàn sau hiệp cuối (bài học review 3.8).
 
-- [ ] **Task 4: Kịch bản và test** (AC: 4, 5)
-  - [ ] 4.1 `tests/kich_ban/tran/tran_05_loi_giai.json`: `truoc` là bàn sau chuẩn bị hiệp 1 (quân đã đi, `bao_don` đã có, `tiep_vien` còn lại, `muu_ke_mo`); `hanh_dong` gồm cả `{"lenh": "muu_ke", "ten": "vuon_khong_nha_trong"}`; `sau.ket_qua: "thang"`. Có thể dựng nhanh bằng F2 trong game rồi sửa (xem `BugReport.scenario_data`), nhưng F2 **không ghi** `kieu`/`tiep_vien`/`so_hiep_toi_da` (mục hoãn của 3.12) — phải thêm tay.
-  - [ ] 4.2 `tests/test_tran_05.gd` theo AC 5. Kiểm thêm: đầu hiệp có tiếp viện thì quân mới xuất hiện đúng ô; sau khi dùng mưu kế bàn không còn `L`.
+- [x] **Task 4: Kịch bản và test** (AC: 4, 5)
+  - [x] 4.1 `tests/kich_ban/tran/tran_05_loi_giai.json`: `truoc` là bàn sau chuẩn bị hiệp 1 (quân đã đi, `bao_don` đã có, `tiep_vien` còn lại, `muu_ke_mo`); `hanh_dong` gồm cả `{"lenh": "muu_ke", "ten": "vuon_khong_nha_trong"}`; `sau.ket_qua: "thang"`. Có thể dựng nhanh bằng F2 trong game rồi sửa (xem `BugReport.scenario_data`), nhưng F2 **không ghi** `kieu`/`tiep_vien`/`so_hiep_toi_da` (mục hoãn của 3.12) — phải thêm tay.
+  - [x] 4.2 `tests/test_tran_05.gd` theo AC 5. Kiểm thêm: đầu hiệp có tiếp viện thì quân mới xuất hiện đúng ô; sau khi dùng mưu kế bàn không còn `L`.
 
 - [ ] **Task 5: Kiểm tra, build, bàn giao** (AC: 3, 6, 7)
-  - [ ] 5.1 `tools/test.sh` xanh 4/4.
-  - [ ] 5.2 Chụp màn hình GoPeak (`tools/chay.sh --dev --tran=5`): bàn đầu trận, ô báo tiếp viện, nút Vườn không nhà trống.
-  - [ ] 5.3 Hướng dẫn tác giả đánh tay bằng tiếng Việt (từng nước, thấy gì là đúng) trong Completion Notes.
-  - [ ] 5.4 Build web + deploy itch (AC 6).
-  - [ ] 5.5 Cập nhật story, `sprint-status.yaml`; commit.
+  - [x] 5.1 `tools/test.sh` xanh 4/4.
+  - [x] 5.2 Chụp màn hình GoPeak (`tools/chay.sh --dev --tran=5`): bàn đầu trận, ô báo tiếp viện, nút Vườn không nhà trống.
+  - [x] 5.3 Hướng dẫn tác giả đánh tay bằng tiếng Việt (từng nước, thấy gì là đúng) trong Completion Notes.
+  - [ ] 5.4 Build web + deploy itch (AC 6). *Build xong (10,6 MB nén). Deploy chưa làm: lệnh đẩy itch bị chặn ở quyền của phiên AI — chờ tác giả cho phép hoặc tự chạy `tools/deploy_itch.sh`.*
+  - [x] 5.5 Cập nhật story, `sprint-status.yaml`; commit.
 
 ## Dev Notes
 
@@ -129,9 +129,27 @@ tôi muốn trận 5 dạy kho lương, Vườn không nhà trống và quân ti
 ### Debug Log References
 
 - Nền trước story: HEAD `1b2416e`; `tools/test.sh` 769/769 GUT, 173 kịch bản đã duyệt.
+- Mô phỏng headless bằng luật thật (script tạm `sim5.gd` trong scratchpad, không thuộc repo): chế độ đứng yên, tìm chùm (beam 30–60, chấm điểm sau pha địch), không dùng mưu kế, đánh ngẫu nhiên.
+  - Bản nháp `tran_05.json` (08:28, tướng hàng 5): thắng dễ cả khi **không** dùng mưu kế; Cung kỵ + 1 Bộ binh gục ngay hiệp 1; ngẫu nhiên 300 ván thắng 10.
+  - Ba bố cục khác (v2–v4) và hai phương án tăng quân (GDD gốc 4 + 1/hiệp = 8 quân; 3 + tiếp viện hiệp 2/3/4): **tất cả đều thắng được không cần mưu kế**, tướng còn 8–9/9 máu. Kết luận: với chỉ số hiện hành, 5 hiệp Giữ ải không ép được mưu kế bắt buộc → hỏi tác giả; tác giả chốt **trận giới thiệu** (mưu kế giúp, không bắt buộc), giữ quân đã chốt.
+  - Bố cục chọn (v4): Kỵ binh tiếp viện ở `7,7` cùng hàng ải → đứng yên thì **thua ở hiệp 3** (Kỵ binh phi vào ải `4,7`), nên tiếp viện ảnh hưởng thật và người chơi phải học chặn ô tiếp viện. Bộ binh khởi đầu kề kho; không dùng mưu kế ở hiệp 1 thì Bộ binh vừa bị lao trúng hồi lại 3 máu (đã chạy thử).
+  - Lời giải: beam tìm, rút gọn hiệp 3–5 còn "kết thúc lượt", phát lại bằng luật thật: thắng hiệp 5, Khoái 3/3, Lão 3/3, Dư 2/3, 0 lỗi validate.
+- Chụp GoPeak (`--dev --tran=5`): bàn đầu trận khớp sơ đồ; bấm tay hiệp 1 → 2 đúng từng ô như lời giải, ô báo tiếp viện `7,7` hiện ô vàng có mũi tên. Nút mưu kế bị khóa trong lúc hoạt ảnh đi chạy (đúng thiết kế 2.11) — bấm lại sau khi đồng quân dừng.
+- `tools/test.sh` 773/773 GUT (+4 `test_tran_05.gd`), 173 kịch bản đã duyệt, 2 chưa duyệt (`tran_01_ne_o_do`, `tran_05_loi_giai`), 0 chưa đạt.
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Trận 5 là **trận giới thiệu** (tác giả chốt 2026-10-27): Vườn không nhà trống và chặn tiếp viện là cách thắng gọn được dạy trong lời giải, không phải cách duy nhất.
+- GDD dòng trận 5 (Campaign Structure) sửa theo Quyết định 1: "2 Bộ binh, 1 Cung kỵ; +1 Kỵ binh hiệp 3".
+- **Tác giả đánh tay** (AC 3): `tools/chay.sh --dev --tran=5`, làm theo `game/data/tran/tran_05_loi_giai.md`. Thấy bảng **Thắng** ở cuối hiệp 5, Khoái 3/3, Lão 3/3, Dư 2/3 là đúng. Xong thì nói "duyệt" để bật `da_duyet: true` cho `tran/tran_05_loi_giai.json`.
+- Deploy itch chưa làm (xem Task 5.4).
 
 ### File List
+
+- `game/data/tran/tran_05.json` (mới)
+- `game/data/tran/tran_05_loi_giai.md` (mới)
+- `game/tests/kich_ban/tran/tran_05_loi_giai.json` (mới, `da_duyet: false`)
+- `game/tests/test_tran_05.gd` (mới)
+- `_bmad-output/planning-artifacts/gdds/gdd-GameTest-2026-10-15/gdd.md` (dòng trận 5)
+- `_bmad-output/implementation-artifacts/3-14-tran-5-giu-ai.md`, `sprint-status.yaml`
