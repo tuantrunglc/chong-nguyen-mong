@@ -51,11 +51,11 @@ tôi muốn trận 5 dạy kho lương, Vườn không nhà trống và quân ti
   - [x] 4.1 `tests/kich_ban/tran/tran_05_loi_giai.json`: `truoc` là bàn sau chuẩn bị hiệp 1 (quân đã đi, `bao_don` đã có, `tiep_vien` còn lại, `muu_ke_mo`); `hanh_dong` gồm cả `{"lenh": "muu_ke", "ten": "vuon_khong_nha_trong"}`; `sau.ket_qua: "thang"`. Có thể dựng nhanh bằng F2 trong game rồi sửa (xem `BugReport.scenario_data`), nhưng F2 **không ghi** `kieu`/`tiep_vien`/`so_hiep_toi_da` (mục hoãn của 3.12) — phải thêm tay.
   - [x] 4.2 `tests/test_tran_05.gd` theo AC 5. Kiểm thêm: đầu hiệp có tiếp viện thì quân mới xuất hiện đúng ô; sau khi dùng mưu kế bàn không còn `L`.
 
-- [ ] **Task 5: Kiểm tra, build, bàn giao** (AC: 3, 6, 7)
+- [x] **Task 5: Kiểm tra, build, bàn giao** (AC: 3, 6, 7)
   - [x] 5.1 `tools/test.sh` xanh 4/4.
   - [x] 5.2 Chụp màn hình GoPeak (`tools/chay.sh --dev --tran=5`): bàn đầu trận, ô báo tiếp viện, nút Vườn không nhà trống.
   - [x] 5.3 Hướng dẫn tác giả đánh tay bằng tiếng Việt (từng nước, thấy gì là đúng) trong Completion Notes.
-  - [ ] 5.4 Build web + deploy itch (AC 6). *Build xong (10,6 MB nén). Deploy chưa làm: lệnh đẩy itch bị chặn ở quyền của phiên AI — chờ tác giả cho phép hoặc tự chạy `tools/deploy_itch.sh`.*
+  - [x] 5.4 Build web + deploy itch (AC 6). Tác giả cho phép (2026-10-28): build `v0.1.0 · 6e26a58` (10,6 MB nén), `tools/deploy_itch.sh` đẩy lên `tuantrunglc/hao-khi-dong-a:html5`, trang vẫn riêng tư — https://tuantrunglc.itch.io/hao-khi-dong-a
   - [x] 5.5 Cập nhật story, `sprint-status.yaml`; commit.
 
 ### Review Findings
