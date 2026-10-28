@@ -13,7 +13,7 @@
 - **Giữ ải:** quân Nguyên vào ô `A` bằng bất kỳ cách nào (tự đi, bị đẩy, bị kéo, tiếp viện hiện lên) là **thua ngay**. Thắng khi qua hết cuối hiệp 5. **Diệt hết quân Nguyên chưa phải là thắng**: vẫn phải giữ cho đủ 5 hiệp.
 - **Kho lương (`L`):** cuối mỗi hiệp, quân Nguyên bị thương đứng kề kho (trên, dưới, trái, phải) **hồi 1 máu**. Kho là vật cản như rừng.
 - **Vườn không nhà trống (nút hoặc phím `Q`, 1 lần mỗi trận):** mọi kho lương thành đất trống, **mọi quân Nguyên mất 1 máu**. Không tốn lượt của tướng. Dùng xong thì **không hủy nước đi trước đó được nữa**.
-- **Quân tiếp viện:** cuối hiệp trước, ô quân mới sẽ hiện lên được **đánh dấu riêng** (khác ô đỏ). Đầu hiệp sau, quân mới hiện ở ô đó. **Nếu ô đó đang có quân đứng** (kể cả tướng mình) thì quân đứng đó mất 1 máu và **quân tiếp viện bị hủy**.
+- **Quân tiếp viện:** ở hiệp trước, ngay khi quân Nguyên đi và báo đòn xong, ô quân mới sẽ hiện lên được **đánh dấu riêng** (khác ô đỏ) và giữ suốt lượt của bạn. Đầu hiệp sau, quân mới hiện ở ô đó. **Nếu ô đó đang có quân đứng** (kể cả tướng mình) thì quân đứng đó mất 1 máu và **quân tiếp viện bị hủy**.
 - **Kỵ binh** trong trận Giữ ải nhắm ô ải: ô ải trống thì nó phi thẳng vào.
 - **Khoái:** chém ô kề, 2 sát thương, đẩy 1 ô (mục tiêu gục thì không đẩy). **Lão:** lao thẳng hàng, bay qua ô kề, trúng vật đầu tiên ở ô 2–4, 1 sát thương. **Dư:** kéo, 0 sát thương.
 - **Sông** (`0,3`, `1,3`, `6,4`, `7,4`): quân Nguyên bị đẩy/kéo xuống là chết đuối. Lời giải này không cần tới sông, nhưng đây là một cách giữ ải khác.
@@ -40,9 +40,9 @@ hàng 7:  . . . A A . . .
 
 ---
 
-## Hiệp 1 — Né tên, đốt kho trước khi giặc kịp hồi máu
+## Hiệp 1 — Đốt kho trước khi giặc kịp hồi máu
 
-1. Bấm `3` chọn **Dư**, bấm ô **`5,7`**: Dư rời ô đỏ `3,6`.
+1. Bấm `3` chọn **Dư**, bấm ô **`5,7`**: Dư rời ô đỏ `3,6` và đứng sẵn cách ô `7,7` hai bước, để hiệp 2 kịp lên chặn tiếp viện (xem hiệp 2).
 2. Bấm **Vườn không nhà trống** (hoặc phím `Q`):
    - hiện dòng "Vườn không nhà trống!";
    - hai kho `2,0` và `5,0` cháy, thành đất trống;
@@ -52,7 +52,7 @@ hàng 7:  . . . A A . . .
 4. Bấm `1` chọn **Khoái**, bấm ô **`4,5`**.
 5. Bấm **Kết thúc lượt** (`Space`).
 
-**Vì sao dùng mưu kế ngay hiệp 1?** Nếu không đốt kho, Bộ binh `5,1` vừa bị Lão lao trúng (còn 2 máu) vẫn đứng kề kho `5,0`. Cuối hiệp nó **hồi lại 3 máu**, như chưa bị đánh. Cung kỵ cũng còn sống để bắn tiếp. Đốt kho ngay lúc giặc còn đứng cạnh kho thì vừa trừ máu cả ba, vừa cắt đường hồi máu đến hết trận.
+**Vì sao dùng mưu kế ngay hiệp 1?** Nếu không đốt kho, Bộ binh `5,1` vừa bị Lão lao trúng (còn 2 máu) vẫn đứng kề kho `5,0`. Cuối hiệp nó **hồi về đủ 3 máu**, như chưa bị đánh. Mưu kế còn hạ luôn Cung kỵ (1 máu) mà không tốn lượt tướng nào, nên Lão rảnh tay lao Bộ binh. Đốt kho ngay lúc giặc còn đứng cạnh kho thì vừa trừ máu cả ba, vừa cắt đường hồi máu đến hết trận.
 
 ## Hiệp 2 — Diệt hai Bộ binh, đứng chặn ô tiếp viện
 

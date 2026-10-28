@@ -81,9 +81,17 @@ func test_level_5_data() -> void:
 	assert_eq(level.reinforcements.size(), 1)
 	var r: LevelData.Reinforcement = level.reinforcements[0]
 	assert_eq([r.round, r.cell, r.type], [3, SPAWN_CELL, UnitType.KY_BINH], "1 Kỵ binh tiếp viện hiệp 3 ở 7,7")
+	assert_eq(level.terrain_at(r.cell), Terrain.PLAIN, "ô tiếp viện đi được, không phải ải")
 	# thu_tu_dich đọc thẳng từ file (không so với chính level.units).
 	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(LEVEL_PATH)) as Dictionary
 	assert_eq(raw["thu_tu_dich"], ["1,0", "6,0", "3,2"], "thu_tu_dich đúng thứ tự đọc bàn")
+	# Thứ tự hành động thật của quân Nguyên trong level cũng phải đúng thứ tự đọc bàn.
+	var enemy_cells: Array[Vector2i] = []
+	for p: LevelData.UnitPlacement in level.units:
+		if not UnitType.is_general(p.type):
+			enemy_cells.append(p.cell)
+	var reading_order: Array[Vector2i] = [Vector2i(1, 0), Vector2i(6, 0), Vector2i(3, 2)]
+	assert_eq(enemy_cells, reading_order, "thu_tu_dich thật của level đúng thứ tự đọc bàn")
 
 
 ## Bàn thật sau pha chuẩn bị hiệp 1 phải đúng là "truoc" của kịch bản lời giải.
@@ -114,10 +122,10 @@ func test_opened_board_matches_scenario() -> void:
 	assert_eq(got_reinf, want_reinf, "tiep_vien khớp")
 	var want_strikes: Array = []
 	for t: ScenarioData.ExpectedTelegraph in scenario.before_telegraphs:
-		want_strikes.append([t.owner_cell, t.target, t.order])
+		want_strikes.append([t.owner_cell, t.kind, t.target, t.order])
 	var got_strikes: Array = []
 	for t: Telegraph in state.telegraphs:
-		got_strikes.append([state.unit_by_id(t.owner_id).cell, TelegraphMarks.hit_cell(state, t), t.order])
+		got_strikes.append([state.unit_by_id(t.owner_id).cell, t.kind, TelegraphMarks.hit_cell(state, t), t.order])
 	assert_eq(got_strikes, want_strikes, "đòn đã báo khớp")
 	# thu_tu_dich của kịch bản: đọc thẳng từ JSON, phải khớp thứ tự hành động thật (id tăng dần).
 	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SCENARIO_PATH)) as Dictionary
@@ -148,6 +156,9 @@ func test_solution_wins_without_losing_a_general() -> void:
 				command = Command.use_stratagem(step.stratagem)
 			"ket_thuc_luot":
 				command = Command.end_turn()
+			_:
+				fail_test("bước %d: lệnh lạ \"%s\"" % [i + 1, step.kind])
+				return
 		var events: Array[BattleEvent] = Rules.resolve(state, command)
 		assert_false(_rejected(events), "bước %d (%s) chạy được" % [i + 1, step.kind])
 		assert_eq(state.validate(), [] as Array[String], "validate sạch sau bước %d" % (i + 1))
@@ -186,3 +197,7 @@ func test_unblocked_reinforcement_takes_the_pass() -> void:
 	assert_eq(state.phase, BattleState.Phase.LOST)
 	assert_eq(state.defeat_reason, "quan_nguyen_vao_ai", "thua vì giặc vào ải")
 	assert_eq(state.round_number, 3)
+	var intruder: Unit = state.unit_at(Vector2i(4, 7))
+	assert_not_null(intruder, "có quân trên ải 4,7")
+	if intruder != null:
+		assert_eq(intruder.type, UnitType.KY_BINH, "chính Kỵ binh tiếp viện phi vào ải 4,7")

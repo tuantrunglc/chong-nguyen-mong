@@ -237,3 +237,8 @@
 ## Deferred from: code review of 3-13-muu-ke-sat-that (2026-10-27)
 
 - **Chữ nút Sát Thát sau khi thắng ngay trong lượt.** Đòn cuối hạ quân Nguyên cuối khi Sát Thát đang bật: `sat_that_active` không bị tắt (chỉ tắt ở `end_player_turn`), nên nút trên màn hình kết thúc vẫn ghi "Sát Thát: đang +1 sát thương" (`hud.gd:147`). Nút đã mờ, luật không ảnh hưởng.
+
+## Deferred from: code review of 3-14-tran-5-giu-ai (2026-10-28)
+
+- **Test chập chờn ở màn hình trận.** `tests/test_battle_view.gd › test_preview_clears_when_attack_animation_starts` trượt 1/773 ở một lần chạy `tools/test.sh` ("điều kiện trước: đang có bóng"), chạy lại thì xanh. File không thuộc Story 3.14; có từ trước. Cần tìm nguồn phụ thuộc thời gian/khung hình.
+- **Trận Giữ ải chưa ép được áp lực tới hiệp cuối, mưu kế chưa có lợi rõ.** Mô phỏng ~105 bố cục trận 5 với quân đã chốt (2 Bộ binh, 1 Cung kỵ, +1 Kỵ binh hiệp 3) và `chi_so.json` hiện hành: bàn thắng được thì luôn có lối 9/9 máu không cần Vườn không nhà trống, giặc hết từ hiệp 2–4. Nguyên nhân: Bộ binh/Kỵ binh Giữ ải nhắm ô ải, không nhắm tướng; ba tướng gây ~3 sát thương/hiệp, Dư kéo/đẩy xuống sông. Tác giả chốt 2026-10-28 giữ trận 5 làm trận giới thiệu; cần story cân bằng luật/chỉ số trước các trận Giữ ải sau.

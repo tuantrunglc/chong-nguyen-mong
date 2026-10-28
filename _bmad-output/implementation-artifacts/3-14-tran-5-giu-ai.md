@@ -24,7 +24,7 @@ tôi muốn trận 5 dạy kho lương, Vườn không nhà trống và quân ti
    - Quân Nguyên khởi đầu: 2 Bộ binh (`B`), 1 Cung kỵ (`C`); `tiep_vien`: 1 Kỵ binh (`K`) ở hiệp 3 (tác giả chốt 2026-10-27).
    - `thu_tu_dich` đúng thứ tự đọc bàn (hàng trên → dưới, trái → phải); `ten` là "Trận 5 — Thăng Long Bỏ Ngỏ".
 2. **Cho** `game/data/tran/tran_05_loi_giai.md` (FR43):
-   - Sơ đồ bàn đầu trận (**sau** pha chuẩn bị hiệp 1, có ô đỏ và ô báo tiếp viện) và bàn sau từng hiệp, tới hết hiệp 5.
+   - Sơ đồ bàn đầu trận (**sau** pha chuẩn bị hiệp 1, có ô đỏ), ô báo tiếp viện ở bàn của hiệp trước khi tiếp viện tới (tác giả chốt 2026-10-28), và bàn sau từng hiệp, tới hết hiệp 5.
    - Lời giải từng nước, **không mất tướng** — không tướng nào gục, được phép mất máu (tác giả chốt), không quân Nguyên nào vào ải.
    - Chỉ rõ điểm dạy: (a) kho lương hồi 1 máu cuối hiệp cho quân Nguyên bị thương đứng kề; (b) thời điểm dùng Vườn không nhà trống (đốt kho + trừ 1 máu mọi quân Nguyên) và vì sao lúc đó; (c) đọc ô báo tiếp viện và chặn/đón tiếp viện; (d) Giữ ải: diệt hết quân trên bàn không thắng sớm, phải qua hết hiệp 5.
 3. **Khi** tác giả chạy `tools/chay.sh --dev --tran=5` đánh lại đúng lời giải **thì** thắng, không mất tướng.
@@ -57,6 +57,21 @@ tôi muốn trận 5 dạy kho lương, Vườn không nhà trống và quân ti
   - [x] 5.3 Hướng dẫn tác giả đánh tay bằng tiếng Việt (từng nước, thấy gì là đúng) trong Completion Notes.
   - [ ] 5.4 Build web + deploy itch (AC 6). *Build xong (10,6 MB nén). Deploy chưa làm: lệnh đẩy itch bị chặn ở quyền của phiên AI — chờ tác giả cho phép hoặc tự chạy `tools/deploy_itch.sh`.*
   - [x] 5.5 Cập nhật story, `sprint-status.yaml`; commit.
+
+### Review Findings
+
+*Code review 2026-10-28 (Blind Hunter, Edge Case Hunter, Acceptance Auditor). Hai lớp đã chạy lại headless bằng luật thật: mọi bàn, máu trong `tran_05_loi_giai.md` khớp; `tools/test.sh` xanh 773/773.*
+
+- [x] [Review][Defer] Áp lực Giữ ải tới hiệp 5 và mưu kế có lợi rõ: không làm được với quân + chỉ số đã chốt — deferred, tác giả chốt 2026-10-28 giữ bàn cũ (trận giới thiệu). Mô phỏng ~105 bố cục (9 thử tay, 96 sinh ngẫu nhiên theo khuôn AC 1, tìm chùm bằng luật thật): bàn thắng được thì lối tốt nhất luôn 9/9 máu cả khi không dùng mưu kế; còn lại là bàn không thắng nổi. Bàn hiện tại cũng có lối thắng 9/9 (lời giải chuẩn giữ 2/3 cho Dư để dạy chặn tiếp viện). Nguyên nhân: Bộ binh/Kỵ binh Giữ ải nhắm ô ải chứ không nhắm tướng, tướng gây ~3 sát thương/hiệp + Dư kéo/đẩy xuống sông, giặc tổng 9 máu. Cần story cân bằng (luật/chỉ số) hoặc trận 6+.
+- [x] [Review][Patch] Sửa chữ AC 2: "ô báo tiếp viện" nằm ở bàn của hiệp trước khi tiếp viện tới, không phải bàn đầu trận (tác giả chốt 2026-10-28) [_bmad-output/implementation-artifacts/3-14-tran-5-giu-ai.md:27]
+- [x] [Review][Patch] Lý do dùng mưu kế ở hiệp 1 có câu sai ("Cung kỵ cũng còn sống để bắn tiếp": Lão hạ được Cung kỵ từ `3,5`); tên mục "Né tên" và bước Dư→`5,7` dạy sai ý (Cung kỵ gục ngay ở bước 2; thật ra Dư đi để kịp tới `7,7` ở hiệp 2) [game/data/tran/tran_05_loi_giai.md:43]
+- [x] [Review][Patch] "cuối hiệp trước, ô quân mới được đánh dấu" sai thời điểm: ô được báo ở pha chuẩn bị của hiệp trước, hiện suốt lượt người chơi hiệp đó (dòng 72 đã đúng) [game/data/tran/tran_05_loi_giai.md:16]
+- [x] [Review][Patch] `thu_tu_dich` của level chỉ so với chuỗi chép tay; thiếu kiểm thứ tự quân Nguyên trong `level.units` đúng thứ tự đọc bàn như `test_tran_04.gd:40-45` [game/tests/test_tran_05.gd:86]
+- [x] [Review][Patch] Test đứng yên chỉ kiểm lý do thua, không kiểm quân vào ải là Kỵ binh tiếp viện ở `4,7` [game/tests/test_tran_05.gd:170]
+- [x] [Review][Patch] `match step.kind` không có nhánh mặc định: bước lạ làm `command` null, test sập thay vì trượt rõ ràng [game/tests/test_tran_05.gd:141]
+- [x] [Review][Patch] So đòn đã báo bỏ qua kiểu đòn (ô/hướng) [game/tests/test_tran_05.gd:115]
+- [x] [Review][Patch] Test dữ liệu chưa kiểm ô tiếp viện đi được và không phải `A` (AC 1) [game/tests/test_tran_05.gd:80]
+- [x] [Review][Defer] Test chập chờn `test_battle_view.gd › test_preview_clears_when_attack_animation_starts` trượt 1 lần rồi xanh [game/tests/test_battle_view.gd] — deferred, pre-existing
 
 ## Dev Notes
 
