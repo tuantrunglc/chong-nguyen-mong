@@ -171,9 +171,11 @@ tôi muốn tăng sức đánh của cả ba tướng trong một lượt,
 
 ### Review Findings
 
+Đã sửa mục Patch (2026-10-28): `test_flag_off_when_battle_lost_in_enemy_phase` trong `test_sat_that.gd`; kiểm đột biến — dời dòng tắt cờ xuống sau `_strike_all` thì test trượt. `tools/test.sh` 774/774. Còn chờ tác giả thử tay phím `W` rồi chốt `done`.
+
 Code review 2026-10-27 (làm trực tiếp, không dùng agent con), diff `2545333..faa09dc`. `tools/test.sh` 769/769 GUT, 173 kịch bản đã duyệt. Luật đúng spec: chỉ `khoai_strike` và `lao_throw` cộng `sat_that_bonus()`; va chạm, mép bàn, sông, hầm chông, Vườn không nhà trống, đòn địch đều không cộng (đã soát mọi chỗ gọi `Effects.damage`). `clone()`, `validate()`, chơi lại hiệp, xem trước, F2 đều đúng.
 
-- [ ] [Review][Patch] Chưa có test khóa lý do đặt dòng tắt cờ ở **đầu** `end_player_turn`: chuyển dòng `state.sat_that_active = false` xuống sau `_strike_all` (hoặc tới chỗ tăng hiệp) thì không test nào trượt. Thêm GUT trong `test_sat_that.gd`: dùng Sát Thát, kết thúc lượt mà quân Nguyên đánh gục tướng cuối (trận thua giữa pha địch) → `sat_that_active` là `false`, `validate()` rỗng [game/src/core/rules_enemy_phase.gd:11]
+- [x] [Review][Patch] Chưa có test khóa lý do đặt dòng tắt cờ ở **đầu** `end_player_turn`: chuyển dòng `state.sat_that_active = false` xuống sau `_strike_all` (hoặc tới chỗ tăng hiệp) thì không test nào trượt. Thêm GUT trong `test_sat_that.gd`: dùng Sát Thát, kết thúc lượt mà quân Nguyên đánh gục tướng cuối (trận thua giữa pha địch) → `sat_that_active` là `false`, `validate()` rỗng [game/src/core/rules_enemy_phase.gd:11]
 - [x] [Review][Defer] Thắng ngay trong lượt (đòn cuối hạ quân Nguyên cuối) khi Sát Thát đang bật: nút trên màn hình kết thúc vẫn ghi "Sát Thát: đang +1 sát thương" (nút đã mờ, chỉ là chữ) [game/src/ui/hud.gd:147] — deferred, chỉ là chữ, không ảnh hưởng luật
 
 ## Dev Agent Record

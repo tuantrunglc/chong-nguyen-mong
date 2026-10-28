@@ -28,6 +28,18 @@ func test_flag_on_for_player_turn_only() -> void:
 	assert_eq(state.validate(), [] as Array[String])
 
 
+## Trận thua giữa pha địch (end_player_turn dừng sau _strike_all): cờ vẫn phải tắt, vì dòng tắt nằm đầu hàm.
+func test_flag_off_when_battle_lost_in_enemy_phase() -> void:
+	var state: BattleState = _state({Vector2i(3, 2): "B", Vector2i(3, 3): "1"}, {Vector2i(3, 3): 1})
+	state.telegraphs.append(Telegraph.new(101, Telegraph.Kind.CELL, Vector2i(0, 1), 1))
+	Rules.resolve(state, Command.use_stratagem(SAT_THAT))
+	assert_true(state.sat_that_active)
+	Rules.resolve(state, Command.end_turn())
+	assert_eq(state.phase, BattleState.Phase.LOST, "Bộ binh đánh gục tướng cuối")
+	assert_false(state.sat_that_active, "trận hết giữa pha địch thì Sát Thát vẫn hết hiệu lực")
+	assert_eq(state.validate(), [] as Array[String])
+
+
 func test_clone_keeps_flag_and_validate_checks_it() -> void:
 	var state: BattleState = _state({Vector2i(6, 0): "B", Vector2i(3, 6): "1"})
 	Rules.resolve(state, Command.use_stratagem(SAT_THAT))
