@@ -3,6 +3,8 @@ app.title,Hào Khí Đông A
 error.data_title,Dữ liệu bị lỗi
 error.data_short,Không mở được trận vì file dữ liệu bị lỗi.
 error.back_to_menu,Về menu
+menu.new_game,Chơi mới
+menu.subtitle,"Kháng chiến chống Nguyên Mông, 1288"
 hud.round,Hiệp %d
 hud.round_limit,Hiệp %d/%d
 hud.morale,"Lòng dân: %d/%d"

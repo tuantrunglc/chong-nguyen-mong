@@ -23,6 +23,8 @@ var _old_window_title: String = ""
 
 
 func before_each() -> void:
+	# Story 4.1: không chọn trận thì mở màn hình chính; test trận vào thẳng trận 1 (test màn hình chính đặt lại "").
+	AppState.launch.tran = "1"
 	_old_window_title = get_window().title
 	DirAccess.make_dir_recursive_absolute(PROBE_DIR)
 	SaveProbe.path = PROBE_FILE
@@ -179,7 +181,7 @@ func test_dev_badge_shows_open_count() -> void:
 	assert_eq(badge_text, "DEV · lần mở thứ 2")
 
 
-func test_loads_level_1_by_default() -> void:
+func test_tran_1_loads_level_1() -> void:
 	var main: Node2D = _make_main()
 	assert_has(Log.get_lines(), "[INFO][battle] nạp trận tran_01")
 	assert_not_null(AppState.stats, "đã có chỉ số")
@@ -279,7 +281,8 @@ func test_back_button_returns_to_menu() -> void:
 	button.pressed.emit()
 	assert_eq(main._screen, main.Screen.MENU)
 	assert_null(main._error_screen)
-	assert_true(main._board_view.visible, "bàn cờ hiện lại")
+	assert_true(main.main_menu().visible, "hiện màn hình chính (Story 4.1)")
+	assert_false(main._board_view.visible, "bàn cờ ẩn sau màn hình chính")
 	assert_has(Log.get_lines(), "[INFO][app] về menu")
 
 
@@ -337,12 +340,16 @@ func test_three_generals_level_opens_by_name_in_dev() -> void:
 	assert_eq((tokens[3] as UnitToken).name_text(), tr("unit.tran_khanh_du"))
 
 
-func test_level_name_without_dev_opens_level_1() -> void:
+## Story 4.1: chưa bật dev thì tran bị bỏ, nên mở màn hình chính (trước đây: mở trận 1).
+func test_level_name_without_dev_shows_menu() -> void:
 	AppState.launch.tran = "thu_ba_tuong"
 	AppState.launch.require_dev_for_tran()
 	var main: Node2D = _make_main()
-	assert_has(Log.get_lines(), "[INFO][battle] nạp trận tran_01")
-	assert_eq(_tokens(main).size(), 5)
+	assert_eq(main._screen, main.Screen.MENU)
+	assert_true(main.main_menu().visible)
+	assert_eq(_tokens(main).size(), 0)
+	for line: String in Log.get_lines():
+		assert_false(line.begins_with("[INFO][battle] nạp trận"), "không nạp trận nào: " + line)
 
 
 func test_back_to_menu_leaves_empty_board() -> void:
@@ -350,7 +357,7 @@ func test_back_to_menu_leaves_empty_board() -> void:
 	assert_eq(_tokens(main).size(), 0, "màn hình lỗi: không có đồng quân")
 	_find_button(main._error_screen).pressed.emit()
 	assert_eq(_tokens(main).size(), 0, "về menu: bàn trống")
-	assert_true(main._board_view.visible)
+	assert_false(main._board_view.visible, "về menu: bàn cờ ẩn sau màn hình chính (Story 4.1)")
 
 
 func test_back_to_menu_after_battle_clears_everything() -> void:
@@ -662,3 +669,94 @@ func test_f2_still_copies_on_error_screen() -> void:
 	assert_string_contains(copied[0], "## Nhật ký")
 	assert_false(copied[0].contains("```json"), "không có trận thì không có kịch bản")
 	assert_eq(main.notice().text(), tr("dev.copied_no_battle"))
+
+
+## Story 4.1 (FR45): mở game không chọn trận thì hiện màn hình chính, chưa nạp trận nào.
+func test_no_tran_shows_main_menu() -> void:
+	AppState.launch.tran = ""
+	var main: Node2D = _make_main()
+	var menu: MainMenu = main.main_menu()
+	assert_eq(main._screen, main.Screen.MENU)
+	assert_true(menu.visible)
+	assert_null(main._controller)
+	assert_false(main._board_view.visible, "bàn cờ ẩn")
+	assert_false(main._title_label.visible, "tiêu đề trận ẩn (màn hình chính đã có tên game)")
+	assert_false(main._hud.visible, "HUD ẩn")
+	assert_true(main._version_label.visible, "nhãn phiên bản vẫn hiện")
+	assert_lt(menu.get_index(), main._version_label.get_index(), "nhãn phiên bản nằm trên màn hình chính")
+	assert_eq(menu.new_game_button().text, tr("menu.new_game"))
+	var texts: Array[String] = _label_texts(menu)
+	assert_has(texts, tr("app.title"))
+	assert_has(texts, tr("menu.subtitle"))
+	assert_eq(_tokens(main).size(), 0)
+
+
+## Bấm "Chơi mới" thì vào trận 1, như trận 1 mở trước đây.
+func test_new_game_opens_level_1() -> void:
+	AppState.launch.tran = ""
+	var main: Node2D = _make_main()
+	main.main_menu().new_game_button().pressed.emit()
+	assert_eq(main._screen, main.Screen.BATTLE)
+	assert_eq(main._level_id, "tran_01")
+	assert_false(main.main_menu().visible)
+	assert_true(main._board_view.visible)
+	assert_true(main._title_label.visible)
+	assert_true(main._hud.visible)
+	assert_has(Log.get_lines(), "[INFO][app] chơi mới")
+	assert_has(Log.get_lines(), "[INFO][battle] nạp trận tran_01")
+	assert_eq(_tokens(main).size(), 5)
+
+
+## Bật dev và chọn trận thì vào thẳng trận đó, không qua màn hình chính.
+func test_dev_tran_skips_main_menu() -> void:
+	AppState.launch.dev = true
+	AppState.launch.tran = "3"
+	var main: Node2D = _make_main()
+	assert_eq(main._screen, main.Screen.BATTLE)
+	assert_false(main.main_menu().visible)
+	assert_has(Log.get_lines(), "[INFO][battle] nạp trận tran_03")
+
+
+## Phím tắt trận ở màn hình chính không làm gì: không vào trận, không ghi lệnh, không có cảnh báo hay lỗi.
+func test_battle_keys_do_nothing_on_main_menu() -> void:
+	AppState.launch.tran = ""
+	var main: Node2D = _make_main()
+	Log.clear()
+	var old_debug: bool = Log.debug_enabled
+	Log.debug_enabled = true  # "nhận lệnh" là dòng DEBUG
+	for key: Key in [KEY_SPACE, KEY_Z, KEY_R, KEY_Q, KEY_W, KEY_1, KEY_2, KEY_3]:
+		var ev: InputEventKey = InputEventKey.new()
+		ev.physical_keycode = key
+		ev.pressed = true
+		(main._battle_input as BattleInput)._unhandled_input(ev)
+	Log.debug_enabled = old_debug
+	assert_eq(main._screen, main.Screen.MENU)
+	assert_null(main._controller)
+	for line: String in Log.get_lines():
+		assert_false(line.begins_with("[WARN]") or line.begins_with("[ERROR]"), line)
+		assert_false(line.contains("nhận lệnh"), "không có lệnh nào: " + line)
+
+
+## Màn hình lỗi → Về menu → sửa file → Chơi mới: vào được trận, không giữ dữ liệu lỗi.
+func test_new_game_after_error_screen() -> void:
+	var main: Node2D = _make_main(_broken_level_dir())
+	assert_eq(main._screen, main.Screen.ERROR)
+	_find_button(main._error_screen).pressed.emit()
+	assert_true(main.main_menu().visible)
+	main.level_dir = "res://data/tran"
+	main.main_menu().new_game_button().pressed.emit()
+	assert_eq(main._screen, main.Screen.BATTLE)
+	assert_null(main._error_screen)
+	assert_eq(_tokens(main).size(), 5)
+
+
+## F5 ở màn hình chính khi chưa mở trận nào: mở trận 1 (kiến trúc: F5 chạy ở mọi màn hình).
+func test_f5_on_fresh_main_menu_opens_level_1() -> void:
+	AppState.launch.dev = true
+	AppState.launch.tran = ""
+	var main: Node2D = _make_main()
+	assert_eq(main._screen, main.Screen.MENU)
+	_press_f5(main)
+	assert_eq(main._screen, main.Screen.BATTLE)
+	assert_eq(main._level_id, "tran_01")
+	assert_false(main.main_menu().visible)

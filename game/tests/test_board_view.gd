@@ -12,6 +12,8 @@ const EDGE_STEP: float = 2.0
 
 
 func before_each() -> void:
+	# Story 4.1: không chọn trận thì mở màn hình chính; test trận vào thẳng trận 1 (test màn hình chính đặt lại "").
+	AppState.launch.tran = "1"
 	DirAccess.make_dir_recursive_absolute(PROBE_DIR)
 	SaveProbe.path = PROBE_FILE
 

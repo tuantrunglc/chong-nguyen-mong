@@ -1,6 +1,7 @@
 extends Node2D
-## Màn hình gốc: tiêu đề, bàn cờ và nhãn phiên bản ở góc dưới phải.
-## Lúc mở game nạp chi_so.json và file trận; dữ liệu lỗi thì hiện màn hình lỗi thay cho bàn cờ.
+## Màn hình gốc: đổi giữa màn hình chính, trận và màn hình lỗi; nhãn phiên bản ở góc dưới phải trên mọi màn.
+## Mở game thì hiện màn hình chính (Story 4.1); có chọn trận (chỉ khi bật dev) thì vào thẳng trận đó.
+## Vào trận thì nạp chi_so.json và file trận; dữ liệu lỗi thì hiện màn hình lỗi thay cho bàn cờ.
 
 enum Screen { MENU, BATTLE, TRANSITION, ERROR }
 
@@ -10,8 +11,8 @@ const VERSION_MARGIN: int = 8
 ## Tiêu đề nằm phía trên bàn cờ (vùng bàn cờ BoardView.AREA bắt đầu ở y = 52).
 const TITLE_TOP: int = 4
 const TITLE_HEIGHT: int = 44
-## Chưa có màn hình chính (story 4.1): không chọn trận thì mở trận 1.
-const DEFAULT_TRAN: int = 1
+## "Chơi mới" mở trận này; F5 khi chưa mở trận nào cũng vậy.
+const FIRST_LEVEL_ID: String = "tran_01"
 
 ## Test đổi được trước khi add_child.
 var stats_path: String = "res://data/chi_so.json"
@@ -25,6 +26,7 @@ var _coord_overlay: CoordOverlay = null
 ## Chỉ có khi bật dev (F3, Story 2.6).
 var _ai_overlay: AiIntentOverlay = null
 var _error_screen: ErrorScreen = null
+var _main_menu: MainMenu
 var _title_label: Label
 var _board_view: BoardView
 var _battle_input: BattleInput
@@ -73,6 +75,13 @@ func _ready() -> void:
 	# Hoạt ảnh phát xong mới vẽ bản chụp cuối (Story 2.11).
 	_battle_view.playback_finished.connect(_on_playback_finished)
 	add_child(_battle_view)
+	# Nằm dưới nhãn phiên bản và chữ DEV (thêm sau).
+	_main_menu = MainMenu.new()
+	_main_menu.size = BoardView.viewport_size
+	_main_menu.visible = false
+	_main_menu.setup()
+	_main_menu.new_game_pressed.connect(_on_new_game)
+	add_child(_main_menu)
 
 	_version_label = Label.new()
 	_version_label.text = "v%s · %s" % [_read_version(), BuildInfo.read_commit(BUILD_INFO_PATH)]
@@ -105,15 +114,27 @@ func _ready() -> void:
 	# Công cụ AI (Story 0.6): chỉ khi bật dev trên desktop có cửa sổ.
 	McpRuntime.start_if_enabled(self, AppState.launch.dev)
 
+	# Chọn trận chỉ có khi bật dev (AppState đã bỏ tran nếu chưa bật): vào thẳng trận, không qua màn hình chính.
+	_level_id = AppState.launch.level_id()
+	if _level_id.is_empty():
+		_show_menu()
+	else:
+		_start_battle()
+
+
+## Nút "Chơi mới" của màn hình chính: vào trận 1.
+func _on_new_game() -> void:
+	Log.info("app", "chơi mới")
+	_level_id = FIRST_LEVEL_ID
 	_start_battle()
 
 
-## Nạp chỉ số và trận. Luôn nạp cả hai file để liệt kê đủ lỗi của cả hai. F5 gọi lại hàm này (_reload_data).
+## Nạp chỉ số và trận _level_id (chưa có thì trận 1). Luôn nạp cả hai file để liệt kê đủ lỗi của cả hai.
+## F5 (_reload_data) và nút "Chơi lại trận" gọi lại hàm này.
 func _start_battle() -> void:
-	var level_id: String = AppState.launch.level_id()
-	if level_id.is_empty():
-		level_id = "tran_%02d" % DEFAULT_TRAN
-	_level_id = level_id
+	if _level_id.is_empty():
+		_level_id = FIRST_LEVEL_ID
+	var level_id: String = _level_id
 	var stats_result: LoadResult = StatsLoader.load_stats(stats_path)
 	var level_result: LoadResult = LevelLoader.load_level("%s/%s.json" % [level_dir, level_id])
 
@@ -143,6 +164,7 @@ func _start_battle() -> void:
 	# Hiệp 1 cũng bắt đầu bằng pha địch chuẩn bị (Story 2.6): bàn người chơi thấy là bàn sau khi quân Nguyên đã đi.
 	_battle_view.begin_battle()
 	_hide_error()
+	_set_menu_visible(false)
 	_screen = Screen.BATTLE
 
 
@@ -207,6 +229,7 @@ func _show_error(errors: Array[String]) -> void:
 	_result_banner.hide_result()
 	_show_board(null)
 	_board_view.visible = false
+	_set_menu_visible(false)
 	_error_screen = ErrorScreen.new()
 	var rect: Rect2 = _board_view.board_rect()
 	_error_screen.position = rect.position
@@ -218,13 +241,15 @@ func _show_error(errors: Array[String]) -> void:
 	_screen = Screen.ERROR
 
 
-## Menu tạm cho tới story 4.1: bàn cờ trống.
+## Màn hình chính (Story 4.1): dừng trận, xóa bàn rồi ẩn bàn cờ và tiêu đề sau màn hình chính.
 func _show_menu() -> void:
 	_hide_error()
 	_controller = null
 	_battle_view.stop()
 	_result_banner.hide_result()
 	_show_board(null)
+	_board_view.visible = false
+	_set_menu_visible(true)
 	_screen = Screen.MENU
 	Log.info("app", "về menu")
 
@@ -261,6 +286,17 @@ func _hide_error() -> void:
 		_error_screen.queue_free()
 		_error_screen = null
 	_board_view.visible = true
+
+
+## Màn hình chính và tiêu đề trận không hiện cùng lúc (màn hình chính đã có tên game).
+func _set_menu_visible(shown: bool) -> void:
+	_main_menu.visible = shown
+	_title_label.visible = not shown
+
+
+## Màn hình chính (để test).
+func main_menu() -> MainMenu:
+	return _main_menu
 
 
 func _read_version() -> String:

@@ -10,11 +10,14 @@ const KHOAI_CELL: Vector2i = Vector2i(1, 6)
 
 
 func before_each() -> void:
+	# Story 4.1: không chọn trận thì mở màn hình chính; test trận vào thẳng trận 1 (test màn hình chính đặt lại "").
+	AppState.launch.tran = "1"
 	DirAccess.make_dir_recursive_absolute(LEVEL_DIR)
 
 
 func after_each() -> void:
 	AppState.stats = null
+	AppState.launch.tran = ""
 	for action: String in BattleInput.ACTION_KEYS:
 		if InputMap.has_action(action):
 			InputMap.erase_action(action)
