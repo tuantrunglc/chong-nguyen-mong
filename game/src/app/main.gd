@@ -1,7 +1,8 @@
 extends Node2D
-## Màn hình gốc: đổi giữa màn hình chính, trận và màn hình lỗi; nhãn phiên bản ở góc dưới phải trên mọi màn.
-## Mở game thì hiện màn hình chính (Story 4.1); có chọn trận (chỉ khi bật dev) thì vào thẳng trận đó.
-## Vào trận thì nạp chi_so.json và file trận; dữ liệu lỗi thì hiện màn hình lỗi thay cho bàn cờ.
+## Màn hình gốc: đổi giữa màn hình chính, trận, màn chuyển trận và màn hình lỗi; nhãn phiên bản ở góc dưới phải
+## trên mọi màn. Mở game thì hiện màn hình chính (Story 4.1); có chọn trận (chỉ khi bật dev) thì vào thẳng trận đó.
+## Vào trận thì nạp chi_so.json, chien_dich.json và file trận; dữ liệu lỗi thì hiện màn hình lỗi thay cho bàn cờ.
+## Thắng trận trong chuỗi thì "Tiếp" sang màn chuyển trận rồi trận kế (Story 4.2).
 
 enum Screen { MENU, BATTLE, TRANSITION, ERROR }
 
@@ -11,15 +12,18 @@ const VERSION_MARGIN: int = 8
 ## Tiêu đề nằm phía trên bàn cờ (vùng bàn cờ BoardView.AREA bắt đầu ở y = 52).
 const TITLE_TOP: int = 4
 const TITLE_HEIGHT: int = 44
-## "Chơi mới" mở trận này; F5 khi chưa mở trận nào cũng vậy.
-const FIRST_LEVEL_ID: String = "tran_01"
+## Thư mục file trận thật. Chuỗi trận luôn kiểm tên trận ở đây, kể cả khi test đổi level_dir để mở trận thử.
+const DATA_LEVEL_DIR: String = "res://data/tran"
 
 ## Test đổi được trước khi add_child.
 var stats_path: String = "res://data/chi_so.json"
-var level_dir: String = "res://data/tran"
+var campaign_path: String = "res://data/chien_dich.json"
+var level_dir: String = DATA_LEVEL_DIR
 
 var _screen: Screen = Screen.MENU
 var _level: LevelData = null
+## Null tới khi nạp xong data/chien_dich.json không lỗi.
+var _campaign: CampaignData = null
 var _controller: BattleController = null
 ## Chỉ có khi bật dev (F1).
 var _coord_overlay: CoordOverlay = null
@@ -27,6 +31,7 @@ var _coord_overlay: CoordOverlay = null
 var _ai_overlay: AiIntentOverlay = null
 var _error_screen: ErrorScreen = null
 var _main_menu: MainMenu
+var _level_transition: LevelTransition
 var _title_label: Label
 var _board_view: BoardView
 var _battle_input: BattleInput
@@ -65,15 +70,24 @@ func _ready() -> void:
 	_tooltip = Tooltip.new()
 	add_child(_tooltip)
 	_result_banner = ResultBanner.new()
+	_result_banner.next_pressed.connect(_show_transition)
 	_result_banner.retry_pressed.connect(_start_battle)
+	_result_banner.menu_pressed.connect(_show_menu)
 	add_child(_result_banner)
-	# Che bàn cờ, HUD, tooltip, bảng kết quả; nằm dưới thông báo (F2 ở menu), nhãn phiên bản và chữ DEV.
+	# Hai màn che bàn cờ, HUD, tooltip, bảng kết quả; nằm dưới thông báo (F2), nhãn phiên bản và chữ DEV.
 	_main_menu = MainMenu.new()
 	_main_menu.size = BoardView.viewport_size
 	_main_menu.visible = false
 	_main_menu.setup()
 	_main_menu.new_game_pressed.connect(_on_new_game)
 	add_child(_main_menu)
+	_level_transition = LevelTransition.new()
+	_level_transition.size = BoardView.viewport_size
+	_level_transition.visible = false
+	_level_transition.setup()
+	_level_transition.next_pressed.connect(_start_battle)
+	_level_transition.menu_pressed.connect(_show_menu)
+	add_child(_level_transition)
 	_notice = Notice.new()
 	_notice.name = "Notice"
 	add_child(_notice)
@@ -107,7 +121,7 @@ func _ready() -> void:
 		dev_tools.f1_pressed.connect(_toggle_coords)
 		_ai_overlay = AiIntentOverlay.new()
 		add_child(_ai_overlay)
-		# Bật F3 trong trận rồi về menu: bảng nằm dưới menu, không vẽ đè lên tên game.
+		# Bật F3 trong trận rồi về menu (hay sang màn chuyển trận): bảng nằm dưới hai màn đó, không vẽ đè lên chữ.
 		move_child(_ai_overlay, _main_menu.get_index())
 		dev_tools.f3_pressed.connect(_toggle_ai_intents)
 		dev_tools.f5_pressed.connect(_reload_data)
@@ -124,24 +138,30 @@ func _ready() -> void:
 		_start_battle()
 
 
-## Nút "Chơi mới" của màn hình chính: vào trận 1.
+## Nút "Chơi mới" của màn hình chính: vào trận đầu của chuỗi trận.
 func _on_new_game() -> void:
 	Log.info("app", "chơi mới")
-	_level_id = FIRST_LEVEL_ID
+	_level_id = ""
 	_start_battle()
 
 
-## Nạp chỉ số và trận _level_id (chưa có thì trận 1). Luôn nạp cả hai file để liệt kê đủ lỗi của cả hai.
-## F5 (_reload_data) và nút "Chơi lại trận" gọi lại hàm này.
+## Nạp chỉ số, chuỗi trận và trận _level_id (chưa có thì trận đầu của chuỗi). Luôn nạp đủ các file để liệt kê đủ
+## lỗi của cả ba; chuỗi trận hỏng mà chưa chọn trận thì không có trận nào để nạp.
+## F5 (_reload_data), nút "Đánh lại trận này" và nút "Tiếp" của màn chuyển trận gọi lại hàm này.
 func _start_battle() -> void:
-	if _level_id.is_empty():
-		_level_id = FIRST_LEVEL_ID
-	var level_id: String = _level_id
 	var stats_result: LoadResult = StatsLoader.load_stats(stats_path)
-	var level_result: LoadResult = LevelLoader.load_level("%s/%s.json" % [level_dir, level_id])
+	var campaign_result: LoadResult = CampaignLoader.load_campaign(campaign_path, DATA_LEVEL_DIR)
+	if _level_id.is_empty() and campaign_result.ok:
+		_level_id = (campaign_result.data as CampaignData).first_level()
+	var level_id: String = _level_id
+	var results: Array[LoadResult] = [stats_result, campaign_result]
+	var level_result: LoadResult = null
+	if not level_id.is_empty():
+		level_result = LevelLoader.load_level("%s/%s.json" % [level_dir, level_id])
+		results.append(level_result)
 
 	var errors: Array[String] = []
-	for r: LoadResult in [stats_result, level_result]:
+	for r: LoadResult in results:
 		for w: String in r.warnings:
 			Log.warn("data", w)
 		errors.append_array(r.errors)
@@ -150,11 +170,13 @@ func _start_battle() -> void:
 	if not errors.is_empty():
 		# Nạp lại mà lỗi thì không giữ dữ liệu của lần nạp trước.
 		AppState.stats = null
+		_campaign = null
 		_level = null
 		_show_error(errors)
 		return
 
 	AppState.stats = stats_result.data as Stats
+	_campaign = campaign_result.data as CampaignData
 	_level = level_result.data as LevelData
 	Log.info("battle", "nạp trận %s" % level_id)
 	_result_banner.hide_result()
@@ -166,19 +188,20 @@ func _start_battle() -> void:
 	# Hiệp 1 cũng bắt đầu bằng pha địch chuẩn bị (Story 2.6): bàn người chơi thấy là bàn sau khi quân Nguyên đã đi.
 	_battle_view.begin_battle()
 	_hide_error()
-	_set_menu_visible(false)
+	_set_cover(null)
 	_screen = Screen.BATTLE
 
 
-## F5 (chỉ khi bật dev): đọc lại chi_so.json và file trận từ đĩa rồi mở lại trận từ đầu, ở mọi màn hình
-## (trận, lỗi, menu; tác giả chốt 2026-10-18). Không đếm lại lần mở, không khởi động lại MCP.
+## F5 (chỉ khi bật dev): đọc lại chi_so.json, chien_dich.json và file trận từ đĩa rồi mở lại trận từ đầu, ở mọi
+## màn hình (trận, lỗi, menu; tác giả chốt 2026-10-18). Ở màn chuyển trận là trận kế (Story 4.2).
+## Không đếm lại lần mở, không khởi động lại MCP.
 func _reload_data() -> void:
 	Log.info("dev", "f5: nạp lại chi_so.json và file trận")
 	_start_battle()
 
 
 ## F2 (chỉ khi bật dev): sao chép báo lỗi vào clipboard rồi báo trên màn hình (Story 2.13).
-## Không có trận (màn hình lỗi/menu) vẫn chép nhật ký + phiên bản — lỗi nạp dữ liệu là lúc cần báo cáo nhất.
+## Không có trận (màn hình lỗi/menu/chuyển trận) vẫn chép nhật ký + phiên bản — lỗi nạp dữ liệu là lúc cần báo cáo nhất.
 func _on_f2() -> void:
 	var meta: Dictionary = _report_meta()
 	if _controller == null:
@@ -218,20 +241,49 @@ func _report_meta() -> Dictionary:
 
 
 ## Hoạt ảnh của lệnh vừa phát xong: vẽ bản chụp cuối và bảng kết quả (Story 2.11).
+## Trận có trong chuỗi thì thắng có nút "Tiếp" (Story 4.2).
 func _on_playback_finished(snapshot: BattleState) -> void:
 	_show_board(snapshot)
-	_result_banner.show_result(snapshot.phase, snapshot.defeat_reason)
+	var in_campaign: bool = _campaign != null and _campaign.contains(_level_id)
+	_result_banner.show_result(snapshot.phase, snapshot.defeat_reason, in_campaign)
+
+
+## Nút "Tiếp" của bảng Thắng! (Story 4.2): màn chuyển trận sang trận kế, hoặc màn kết thúc nếu vừa thắng trận cuối.
+## Đây là chỗ duy nhất biết "vừa thắng trận X": Story 4.3 gắn tự lưu ở đây.
+func _show_transition() -> void:
+	var won_id: String = _level_id
+	var won_level: LevelData = _level
+	_stop_battle()
+	if _campaign.is_last(won_id):
+		_level_transition.show_campaign_end()
+		Log.info("app", "thắng cả chiến dịch")
+	else:
+		var next_id: String = _campaign.next_after(won_id)
+		var next_result: LoadResult = LevelLoader.load_level("%s/%s.json" % [level_dir, next_id])
+		for w: String in next_result.warnings:
+			Log.warn("data", w)
+		_level_id = next_id
+		if not next_result.ok:
+			for e: String in next_result.errors:
+				Log.error("data", e)
+			_level = null
+			_show_error(next_result.errors)
+			return
+		_level = next_result.data as LevelData
+		var opened: Array[int] = []
+		for kind: int in _level.stratagems:
+			if not won_level.stratagems.has(kind):
+				opened.append(kind)
+		_level_transition.show_next(_level.name, opened)
+		Log.info("app", "chuyển trận %s -> %s" % [won_id, next_id])
+	_set_cover(_level_transition)
+	_screen = Screen.TRANSITION
 
 
 ## Thay bàn cờ bằng màn hình lỗi. Nhãn phiên bản và chữ DEV vẫn nằm trên nó.
 func _show_error(errors: Array[String]) -> void:
-	_hide_error()
-	_controller = null
-	_battle_view.stop()
-	_result_banner.hide_result()
-	_show_board(null)
-	_board_view.visible = false
-	_set_menu_visible(false)
+	_stop_battle()
+	_set_cover(null)
 	_error_screen = ErrorScreen.new()
 	var rect: Rect2 = _board_view.board_rect()
 	_error_screen.position = rect.position
@@ -245,15 +297,20 @@ func _show_error(errors: Array[String]) -> void:
 
 ## Màn hình chính (Story 4.1): dừng trận, xóa bàn rồi ẩn bàn cờ và tiêu đề sau màn hình chính.
 func _show_menu() -> void:
+	_stop_battle()
+	_set_cover(_main_menu)
+	_screen = Screen.MENU
+	Log.info("app", "về menu")
+
+
+## Rời trận (màn hình lỗi, menu, màn chuyển trận): bỏ controller, dừng hoạt ảnh, ẩn bảng kết quả, xóa và ẩn bàn cờ.
+func _stop_battle() -> void:
 	_hide_error()
 	_controller = null
 	_battle_view.stop()
 	_result_banner.hide_result()
 	_show_board(null)
 	_board_view.visible = false
-	_set_menu_visible(true)
-	_screen = Screen.MENU
-	Log.info("app", "về menu")
 
 
 ## Vẽ bản chụp lên bàn cờ (và tọa độ F1 nếu bật dev); null là bàn trống.
@@ -290,15 +347,22 @@ func _hide_error() -> void:
 	_board_view.visible = true
 
 
-## Màn hình chính và tiêu đề trận không hiện cùng lúc (màn hình chính đã có tên game).
-func _set_menu_visible(shown: bool) -> void:
-	_main_menu.visible = shown
-	_title_label.visible = not shown
+## Hiện một màn che (màn hình chính, màn chuyển trận) hoặc không màn nào (null). Có màn che thì ẩn tiêu đề trận
+## (màn hình chính đã có tên game).
+func _set_cover(cover: Control) -> void:
+	_main_menu.visible = cover == _main_menu
+	_level_transition.visible = cover == _level_transition
+	_title_label.visible = cover == null
 
 
 ## Màn hình chính (để test).
 func main_menu() -> MainMenu:
 	return _main_menu
+
+
+## Màn chuyển trận (để test).
+func level_transition() -> LevelTransition:
+	return _level_transition
 
 
 func _read_version() -> String:

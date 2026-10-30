@@ -1505,11 +1505,14 @@ func test_win_shows_banner_and_locks_the_board() -> void:
 	assert_eq(_controller(main).snapshot().phase, BattleState.Phase.WON, "kết cục giữ nguyên")
 
 
+## Story 4.2: trận thử tên "tran_01" nằm trong chuỗi trận, nên thắng thì chỉ có "Tiếp" (nút "Đánh lại trận này" ẩn).
+## Nút "Đánh lại trận này" vẫn nối vào việc mở lại trận (hiện khi thua, test ở test_main.gd).
 func test_retry_button_reloads_the_battle() -> void:
 	var main: Node2D = _make_win_main()
 	_win(main)
 	assert_true(_banner(main).is_showing(), "điều kiện trước: đã thắng")
-	assert_true(_banner(main).retry_button().visible, "nút Chơi lại trận hiện cùng bảng")
+	assert_true(_banner(main).next_button().visible, "thắng trận trong chuỗi: có nút Tiếp")
+	assert_false(_banner(main).retry_button().visible, "thắng trận trong chuỗi: không có nút Đánh lại")
 	_banner(main).retry_button().pressed.emit()
 	_assert_fresh_win_battle(main)
 

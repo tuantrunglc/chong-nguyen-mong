@@ -9,6 +9,8 @@ const PROBE_FILE: String = PROBE_DIR + "/thu_luu.json"
 const LEVEL_DIR: String = PROBE_DIR + "/tran"
 const BROKEN_LEVEL: String = LEVEL_DIR + "/tran_01.json"
 const BROKEN_STATS: String = PROBE_DIR + "/chi_so.json"
+## chien_dich.json lỗi (Story 4.2): có tên trận không có file.
+const BROKEN_CAMPAIGN: String = PROBE_DIR + "/chien_dich.json"
 ## Bản sao chi_so.json thật, sửa tầm đi của Khoái (F5, Story 1.6).
 const F5_STATS: String = PROBE_DIR + "/chi_so_f5.json"
 const F5_LOG: String = "[INFO][dev] f5: nạp lại chi_so.json và file trận"
@@ -39,7 +41,7 @@ func after_each() -> void:
 	AppState.stats = null
 	if FileAccess.file_exists(BROKEN_LEVEL):
 		DirAccess.remove_absolute(BROKEN_LEVEL)
-	for path: String in [BROKEN_STATS, F5_STATS]:
+	for path: String in [BROKEN_STATS, F5_STATS, BROKEN_CAMPAIGN, LEVEL_DIR + "/tran_04.json", LEVEL_DIR + "/tran_05.json"]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(LEVEL_DIR)
@@ -796,3 +798,253 @@ func test_f5_on_fresh_main_menu_opens_level_1() -> void:
 	assert_eq(main._screen, main.Screen.BATTLE)
 	assert_eq(main._level_id, "tran_01")
 	assert_false(main.main_menu().visible)
+
+
+# ---------- Chuỗi trận và màn chuyển trận (Story 4.2) ----------
+
+## Kết thúc trận đang mở bằng pha cho trước, như lúc hoạt ảnh của lệnh cuối phát xong.
+func _finish(main: Node2D, phase: BattleState.Phase, reason: String = "") -> void:
+	var snapshot: BattleState = (main._controller as BattleController).snapshot()
+	snapshot.phase = phase
+	snapshot.defeat_reason = reason
+	main._on_playback_finished(snapshot)
+
+
+func _banner(main: Node2D) -> ResultBanner:
+	return main._result_banner as ResultBanner
+
+
+func _transition(main: Node2D) -> LevelTransition:
+	return main.level_transition()
+
+
+func _open(level: String) -> Node2D:
+	AppState.launch.tran = level
+	return _make_main()
+
+
+func test_won_level_in_campaign_shows_next_only() -> void:
+	var main: Node2D = _make_main()
+	_finish(main, BattleState.Phase.WON)
+	assert_true(_banner(main).is_showing())
+	assert_true(_banner(main).next_button().visible, "thắng trận trong chuỗi: nút Tiếp")
+	assert_false(_banner(main).retry_button().visible)
+	assert_false(_banner(main).menu_button().visible)
+
+
+func test_next_shows_transition_to_level_2() -> void:
+	var main: Node2D = _make_main()
+	_finish(main, BattleState.Phase.WON)
+	_banner(main).next_button().pressed.emit()
+	assert_eq(main._screen, main.Screen.TRANSITION)
+	assert_null(main._controller, "rời trận")
+	assert_true(_transition(main).visible)
+	assert_false(main.main_menu().visible)
+	assert_false(main._board_view.visible, "bàn cờ ẩn")
+	assert_false(main._title_label.visible, "tiêu đề trận ẩn")
+	assert_false(main._hud.visible, "HUD ẩn")
+	assert_false(_banner(main).is_showing(), "bảng kết quả ẩn")
+	assert_true(main._version_label.visible)
+	var texts: Array[String] = _label_texts(_transition(main))
+	assert_has(texts, "Trận 2 — Ải Lãnh Kinh", "tên trận kế lấy từ file trận")
+	assert_eq(_transition(main).stratagem_lines(), [] as Array[String], "trận 2 không mở mưu kế mới")
+	assert_true(_transition(main).next_button().visible)
+	assert_false(_transition(main).menu_button().visible)
+	assert_eq(main._level_id, "tran_02")
+	assert_has(Log.get_lines(), "[INFO][app] chuyển trận tran_01 -> tran_02")
+
+
+## AC3: vào trận mới thì các tướng đủ máu theo chi_so.json, không mang máu từ trận trước.
+func test_next_level_starts_with_full_hp() -> void:
+	var main: Node2D = _make_main()
+	_finish(main, BattleState.Phase.WON)
+	_banner(main).next_button().pressed.emit()
+	_transition(main).next_button().pressed.emit()
+	assert_eq(main._screen, main.Screen.BATTLE)
+	assert_eq(main._level_id, "tran_02")
+	assert_false(_transition(main).visible)
+	assert_true(main._board_view.visible)
+	assert_true(main._title_label.visible)
+	assert_has(Log.get_lines(), "[INFO][battle] nạp trận tran_02")
+	var generals: int = 0
+	for unit: Unit in (main._controller as BattleController).snapshot().units:
+		if UnitType.is_general(unit.type):
+			generals += 1
+			assert_eq(unit.hp, AppState.stats.max_hp(unit.type), "tướng %d đủ máu" % unit.id)
+	assert_gt(generals, 0)
+
+
+func test_transition_to_level_5_lists_new_stratagem() -> void:
+	var main: Node2D = _open("4")
+	_finish(main, BattleState.Phase.WON)
+	_banner(main).next_button().pressed.emit()
+	assert_eq(main._level_id, "tran_05")
+	assert_eq(_transition(main).stratagem_lines(),
+		[tr("transition.new_stratagem") % tr("stratagem.vuon_khong_nha_trong")] as Array[String],
+		"trận 5 mở Vườn không nhà trống, trận 4 chưa có")
+
+
+func test_last_level_won_shows_campaign_end_then_menu() -> void:
+	var main: Node2D = _open("5")
+	_finish(main, BattleState.Phase.WON)
+	assert_true(_banner(main).next_button().visible, "trận cuối vẫn có Tiếp")
+	_banner(main).next_button().pressed.emit()
+	assert_eq(main._screen, main.Screen.TRANSITION)
+	assert_has(_label_texts(_transition(main)), tr("transition.campaign_won"))
+	assert_false(_transition(main).next_button().visible)
+	assert_true(_transition(main).menu_button().visible)
+	assert_eq(main._level_id, "tran_05", "F5 ở màn kết thúc mở lại trận cuối")
+	assert_has(Log.get_lines(), "[INFO][app] thắng cả chiến dịch")
+	_transition(main).menu_button().pressed.emit()
+	assert_eq(main._screen, main.Screen.MENU)
+	assert_true(main.main_menu().visible)
+	assert_false(_transition(main).visible)
+
+
+func test_lost_shows_retry_and_menu() -> void:
+	var main: Node2D = _make_main()
+	_finish(main, BattleState.Phase.LOST, "het_hiep")
+	assert_false(_banner(main).next_button().visible)
+	assert_true(_banner(main).retry_button().visible)
+	assert_true(_banner(main).menu_button().visible)
+	_banner(main).menu_button().pressed.emit()
+	assert_eq(main._screen, main.Screen.MENU)
+	assert_true(main.main_menu().visible)
+	assert_null(main._controller)
+
+
+func test_lost_retry_reopens_the_same_level() -> void:
+	var main: Node2D = _open("3")
+	var old: BattleController = main._controller
+	_finish(main, BattleState.Phase.LOST)
+	_banner(main).retry_button().pressed.emit()
+	assert_eq(main._screen, main.Screen.BATTLE)
+	assert_eq(main._level_id, "tran_03")
+	assert_ne(main._controller, old, "trận mở lại từ đầu")
+	assert_false(_banner(main).is_showing())
+
+
+func test_dev_level_outside_campaign_has_no_next() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _open("thu_muu_ke")
+	_finish(main, BattleState.Phase.WON)
+	assert_false(_banner(main).next_button().visible, "trận thử không nằm trong chuỗi")
+	assert_true(_banner(main).retry_button().visible)
+	assert_true(_banner(main).menu_button().visible)
+
+
+func test_dev_level_in_campaign_continues_from_there() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _open("3")
+	_finish(main, BattleState.Phase.WON)
+	_banner(main).next_button().pressed.emit()
+	_transition(main).next_button().pressed.emit()
+	assert_eq(main._level_id, "tran_04")
+	assert_eq(main._screen, main.Screen.BATTLE)
+
+
+## Phím trận và chuột trên bàn ở màn chuyển trận không làm gì (như ở màn hình chính, Story 4.1).
+func test_battle_keys_do_nothing_on_transition() -> void:
+	var main: Node2D = _make_main()
+	_finish(main, BattleState.Phase.WON)
+	_banner(main).next_button().pressed.emit()
+	var input: BattleInput = main._battle_input as BattleInput
+	watch_signals(input)
+	Log.clear()
+	for key: Key in [KEY_SPACE, KEY_Z, KEY_R, KEY_Q, KEY_1]:
+		var ev: InputEventKey = InputEventKey.new()
+		ev.physical_keycode = key
+		ev.pressed = true
+		input._unhandled_input(ev)
+	var click: InputEventMouseButton = InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = main._board_view.get_global_transform_with_canvas() * BoardView.cell_center(Vector2i(0, 5))
+	input._unhandled_input(click)
+	for sig: String in ["end_turn_pressed", "undo_pressed", "replay_pressed", "stratagem_key_pressed",
+			"general_key_pressed", "cell_clicked"]:
+		assert_signal_emitted(input, sig, "BattleInput nhận được: " + sig)
+	assert_eq(main._screen, main.Screen.TRANSITION)
+	assert_null(main._controller)
+	assert_eq((main._battle_view as BattleView).selected_id(), BattleView.NONE)
+	for line: String in Log.get_lines():
+		assert_false(line.begins_with("[WARN]") or line.begins_with("[ERROR]"), line)
+
+
+func test_f2_on_transition_copies_and_notice_is_above() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main()
+	_finish(main, BattleState.Phase.WON)
+	_banner(main).next_button().pressed.emit()
+	var copied: Array[String] = []
+	main.clipboard_writer = func(text: String) -> void: copied.append(text)
+	_dev_tools(main).f2_pressed.emit()
+	assert_eq(copied.size(), 1)
+	assert_eq(main.notice().text(), tr("dev.copied_no_battle"))
+	assert_gt(main.notice().get_index(), _transition(main).get_index(), "thông báo vẽ sau màn chuyển trận")
+
+
+func test_f5_on_transition_opens_next_level() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main()
+	_finish(main, BattleState.Phase.WON)
+	_banner(main).next_button().pressed.emit()
+	_press_f5(main)
+	assert_eq(main._screen, main.Screen.BATTLE)
+	assert_eq(main._level_id, "tran_02")
+	assert_false(_transition(main).visible)
+
+
+func test_transition_layer_order() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main()
+	var index: int = _transition(main).get_index()
+	for below: Node in [main._board_view, main._hud, main._tooltip, main._result_banner, main._ai_overlay]:
+		assert_lt(below.get_index(), index, "%s nằm dưới màn chuyển trận" % below.name)
+	for above: Node in [main.notice(), main._version_label]:
+		assert_gt(above.get_index(), index, "%s nằm trên màn chuyển trận" % above.name)
+
+
+## "Chơi mới" mở trận đầu của chien_dich.json (không viết cứng tran_01).
+func test_new_game_opens_first_level_of_campaign() -> void:
+	AppState.launch.tran = ""
+	_write_text(BROKEN_CAMPAIGN, JSON.stringify({"phien_ban_dinh_dang": 1, "tran": ["tran_03", "tran_04"]}))
+	var main: Node2D = (load(MAIN_SCENE) as PackedScene).instantiate() as Node2D
+	main.campaign_path = BROKEN_CAMPAIGN
+	add_child_autofree(main)
+	main.main_menu().new_game_button().pressed.emit()
+	assert_eq(main._level_id, "tran_03")
+	assert_eq(main._screen, main.Screen.BATTLE)
+
+
+func test_broken_campaign_shows_error_on_new_game() -> void:
+	AppState.launch.tran = ""
+	_write_text(BROKEN_CAMPAIGN, JSON.stringify({"phien_ban_dinh_dang": 1, "tran": ["tran_01", "tran_09"]}))
+	var main: Node2D = (load(MAIN_SCENE) as PackedScene).instantiate() as Node2D
+	main.campaign_path = BROKEN_CAMPAIGN
+	add_child_autofree(main)
+	main.main_menu().new_game_button().pressed.emit()
+	assert_eq(main._screen, main.Screen.ERROR)
+	assert_null(main._controller)
+	assert_has(Log.get_lines(),
+		'[ERROR][data] user://test_main/chien_dich.json: "tran" có "tran_09" nhưng không có file data/tran/tran_09.json')
+
+
+## Mưu kế "vừa mở" chỉ là mưu kế trận kế có mà trận vừa thắng chưa có (trận 6 sẽ mở thêm Sát Thát).
+func test_transition_lists_only_stratagems_not_open_before() -> void:
+	var source: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/tran/tran_05.json")) as Dictionary
+	DirAccess.make_dir_recursive_absolute(LEVEL_DIR)
+	var before: Dictionary = source.duplicate(true)
+	before["muu_ke_mo"] = ["vuon_khong_nha_trong"]
+	_write_text(LEVEL_DIR + "/tran_04.json", JSON.stringify(before))
+	var after: Dictionary = source.duplicate(true)
+	after["ten"] = "Trận thử mưu kế"
+	after["muu_ke_mo"] = ["vuon_khong_nha_trong", "sat_that"]
+	_write_text(LEVEL_DIR + "/tran_05.json", JSON.stringify(after))
+	AppState.launch.tran = "4"
+	var main: Node2D = _make_main(LEVEL_DIR)
+	_finish(main, BattleState.Phase.WON)
+	_banner(main).next_button().pressed.emit()
+	assert_has(_label_texts(_transition(main)), "Trận thử mưu kế")
+	assert_eq(_transition(main).stratagem_lines(),
+		[tr("transition.new_stratagem") % tr("stratagem.sat_that")] as Array[String], "Vườn không nhà trống đã có từ trước")

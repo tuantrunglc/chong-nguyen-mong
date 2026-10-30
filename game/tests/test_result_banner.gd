@@ -58,17 +58,18 @@ func test_banner_sits_inside_the_board_area_and_does_not_cover_it() -> void:
 	assert_almost_eq(rect.get_center(), BoardView.AREA.get_center(), Vector2(1, 1), "giữa bàn")
 
 
-## Khung đủ chỗ cho chữ "Thắng!"/"Thua!"/"Thua: hết hiệp", khoảng cách, nút, đệm và viền.
+## Khung đủ chỗ cho chữ "Thắng!"/"Thua!"/"Thua: hết hiệp", khoảng cách, các nút (một hoặc hai), đệm và viền.
 func test_panel_fits_its_content() -> void:
 	var banner: ResultBanner = _banner()
 	var cases: Array[Dictionary] = [
-		{"phase": BattleState.Phase.WON, "reason": ""},
+		{"phase": BattleState.Phase.WON, "reason": "", "next": true},
+		{"phase": BattleState.Phase.WON, "reason": "", "next": false},
 		{"phase": BattleState.Phase.LOST, "reason": ""},
 		{"phase": BattleState.Phase.LOST, "reason": "het_hiep"},
 		{"phase": BattleState.Phase.LOST, "reason": "quan_nguyen_vao_ai"},
 	]
 	for c: Dictionary in cases:
-		banner.show_result(c.phase, c.reason)
+		banner.show_result(c.phase, c.reason, c.get("next", false))
 		await wait_process_frames(1)
 		var panel: PanelContainer = banner.get_child(0) as PanelContainer
 		var needed: Vector2 = panel.get_combined_minimum_size()
@@ -79,21 +80,65 @@ func test_panel_fits_its_content() -> void:
 		assert_lt(banner.panel_rect().size.x, BoardView.AREA.size.x / 2.0, "khung không che quá nửa bàn")
 
 
-## Bảng không nuốt chuột: chỉ nút Chơi lại trận nhận chuột (BattleInput nhận phần còn lại qua _unhandled_input).
-func test_only_the_retry_button_takes_the_mouse() -> void:
+## Bảng không nuốt chuột: chỉ các nút nhận chuột (BattleInput nhận phần còn lại qua _unhandled_input).
+func test_only_the_buttons_take_the_mouse() -> void:
 	var banner: ResultBanner = _banner()
+	var buttons: Array[Button] = [banner.next_button(), banner.retry_button(), banner.menu_button()]
 	var stack: Array[Node] = [banner]
 	while not stack.is_empty():
 		var node: Node = stack.pop_back()
 		stack.append_array(node.get_children())
-		if node is Control and node != banner.retry_button():
+		if node is Button:
+			assert_true(buttons.has(node as Button), "nút lạ: " + str(node.get_path()))
+		elif node is Control:
 			assert_eq((node as Control).mouse_filter, Control.MOUSE_FILTER_IGNORE, str(node.get_path()))
-	assert_ne(banner.retry_button().mouse_filter, Control.MOUSE_FILTER_IGNORE)
-	assert_eq(banner.retry_button().focus_mode, Control.FOCUS_NONE, "Space không bấm lại nút")
+	for button: Button in buttons:
+		assert_ne(button.mouse_filter, Control.MOUSE_FILTER_IGNORE, button.text)
+		assert_eq(button.focus_mode, Control.FOCUS_NONE, "Space không bấm lại nút " + button.text)
 
 
-func test_retry_button_emits_signal() -> void:
+func test_buttons_emit_signals() -> void:
 	var banner: ResultBanner = _banner()
 	watch_signals(banner)
+	banner.next_button().pressed.emit()
 	banner.retry_button().pressed.emit()
+	banner.menu_button().pressed.emit()
+	assert_signal_emitted(banner, "next_pressed")
 	assert_signal_emitted(banner, "retry_pressed")
+	assert_signal_emitted(banner, "menu_pressed")
+
+
+func test_button_texts() -> void:
+	var banner: ResultBanner = _banner()
+	assert_eq(banner.next_button().text, tr("result.next"))
+	assert_eq(banner.retry_button().text, tr("result.retry"))
+	assert_eq(banner.retry_button().text, "Đánh lại trận này")
+	assert_eq(banner.menu_button().text, tr("result.menu"))
+
+
+## Story 4.2 (tác giả chốt 2026-10-30): thắng trận trong chuỗi chỉ có "Tiếp"; thua, hoặc thắng trận ngoài chuỗi
+## (trận thử mở bằng dev), có "Đánh lại trận này" và "Về menu".
+func test_won_in_campaign_shows_only_next() -> void:
+	var banner: ResultBanner = _banner()
+	banner.show_result(BattleState.Phase.WON, "", true)
+	assert_true(banner.next_button().visible)
+	assert_false(banner.retry_button().visible)
+	assert_false(banner.menu_button().visible)
+
+
+func test_won_outside_campaign_shows_retry_and_menu() -> void:
+	var banner: ResultBanner = _banner()
+	banner.show_result(BattleState.Phase.WON, "", false)
+	assert_false(banner.next_button().visible)
+	assert_true(banner.retry_button().visible)
+	assert_true(banner.menu_button().visible)
+
+
+func test_lost_shows_retry_and_menu_for_every_reason() -> void:
+	var banner: ResultBanner = _banner()
+	for reason: String in ["", "het_hiep", "mat_lang", "quan_nguyen_vao_ai"]:
+		# can_continue không đổi gì khi thua.
+		banner.show_result(BattleState.Phase.LOST, reason, true)
+		assert_false(banner.next_button().visible, reason)
+		assert_true(banner.retry_button().visible, reason)
+		assert_true(banner.menu_button().visible, reason)

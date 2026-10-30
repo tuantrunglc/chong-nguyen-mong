@@ -27,7 +27,14 @@ result.lost,Thua!
 result.lost_round_limit,"Thua: hết hiệp"
 result.lost_morale,"Thua: mất làng"
 result.lost_pass,"Thua: giặc vào ải"
-result.retry,Chơi lại trận
+result.retry,Đánh lại trận này
+result.next,Tiếp
+result.menu,Về menu
+transition.next_level,Trận tiếp theo
+transition.new_stratagem,"Mưu kế mới: %s"
+transition.next,Tiếp
+transition.campaign_won,Đã thắng cả chiến dịch
+transition.menu,Về menu
 notice.morale_lost,"−1 Lòng dân"
 notice.stratagem,%s!
 unit.nguyen_khoai,Khoái
