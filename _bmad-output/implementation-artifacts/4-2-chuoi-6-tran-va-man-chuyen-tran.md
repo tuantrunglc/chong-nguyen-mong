@@ -4,7 +4,7 @@ baseline_commit: 5d07683
 
 # Story 4.2: Chuỗi 6 trận và màn chuyển trận
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -37,51 +37,51 @@ tôi muốn đi qua các trận liên tiếp,
 
 - [x] **Task 0: Tác giả trả lời Câu hỏi 1–4** — xong 2026-10-30, xem "Quyết định của tác giả".
 
-- [ ] **Task 1: Dữ liệu và bộ nạp chiến dịch** (AC: 1)
-  - [ ] 1.1 `game/data/chien_dich.json` theo định dạng AC1 (5 trận). Kiểm preset export đã có filter `*.json` (có rồi, chỉ soát).
-  - [ ] 1.2 `src/core/campaign_data.gd`: `class_name CampaignData extends RefCounted`, chỉ đọc: `levels: Array[String]`; `first_level() -> String`; `next_after(level_id) -> String` (`""` khi là trận cuối **hoặc** không có trong chuỗi); `contains(level_id) -> bool`; `is_last(level_id) -> bool`. Không I/O (luật `src/core`). Kiến trúc gọi tên `campaign_progress.gd` cho "tiến độ, mưu kế đã mở": tiến độ để Story 4.3 (lưu), mưu kế đã mở nằm ở file trận theo quyết định 4 → story này chỉ cần `CampaignData`; ghi lý do trong Completion Notes.
-  - [ ] 1.3 `src/data/campaign_loader.gd`: `CampaignLoader.load_campaign(path, level_dir) -> LoadResult` theo mẫu `StatsLoader` (`JsonFile.read_text/parse_object/missing_file`, gom mọi lỗi, không ghi log). Cảnh báo khóa lạ như `StatsLoader._warn_unknown`. Lỗi kiểm `phien_ban_dinh_dang` theo cách `LevelLoader` đang kiểm.
-  - [ ] 1.4 Câu lỗi (test so nguyên văn), dạng `data/chien_dich.json: ...`: thiếu khóa `"tran"`; `"tran"` phải là danh sách tên trận; danh sách rỗng; phần tử thứ N không phải chuỗi; tên trận trùng; không có file `data/tran/<ten>.json`.
+- [x] **Task 1: Dữ liệu và bộ nạp chiến dịch** (AC: 1)
+  - [x] 1.1 `game/data/chien_dich.json` theo định dạng AC1 (5 trận). Kiểm preset export đã có filter `*.json` (có rồi, chỉ soát).
+  - [x] 1.2 `src/core/campaign_data.gd`: `class_name CampaignData extends RefCounted`, chỉ đọc: `levels: Array[String]`; `first_level() -> String`; `next_after(level_id) -> String` (`""` khi là trận cuối **hoặc** không có trong chuỗi); `contains(level_id) -> bool`; `is_last(level_id) -> bool`. Không I/O (luật `src/core`). Kiến trúc gọi tên `campaign_progress.gd` cho "tiến độ, mưu kế đã mở": tiến độ để Story 4.3 (lưu), mưu kế đã mở nằm ở file trận theo quyết định 4 → story này chỉ cần `CampaignData`; ghi lý do trong Completion Notes.
+  - [x] 1.3 `src/data/campaign_loader.gd`: `CampaignLoader.load_campaign(path, level_dir) -> LoadResult` theo mẫu `StatsLoader` (`JsonFile.read_text/parse_object/missing_file`, gom mọi lỗi, không ghi log). Cảnh báo khóa lạ như `StatsLoader._warn_unknown`. Lỗi kiểm `phien_ban_dinh_dang` theo cách `LevelLoader` đang kiểm.
+  - [x] 1.4 Câu lỗi (test so nguyên văn), dạng `data/chien_dich.json: ...`: thiếu khóa `"tran"`; `"tran"` phải là danh sách tên trận; danh sách rỗng; phần tử thứ N không phải chuỗi; tên trận trùng; không có file `data/tran/<ten>.json`.
 
-- [ ] **Task 2: Bảng kết quả** (AC: 2, 4, 5, 7) — `src/ui/result_banner.gd`
-  - [ ] 2.1 Thay một nút `retry_pressed` bằng ba nút, đều `FOCUS_NONE`: **"Tiếp"** (`next_pressed`), **"Đánh lại trận này"** (`retry_pressed`), **"Về menu"** (`menu_pressed`). `show_result(phase, defeat_reason, can_continue: bool)`: WON + `can_continue` → chỉ "Tiếp"; WON + không `can_continue` (trận ngoài chuỗi) → "Đánh lại trận này" + "Về menu"; LOST → "Đánh lại trận này" + "Về menu".
-  - [ ] 2.2 Khóa chữ: đổi `result.retry` thành "Đánh lại trận này"; thêm `result.next` "Tiếp", `result.menu` "Về menu". Khung vẫn bọc vừa nội dung (`_relayout`) với hai nút.
-  - [ ] 2.3 Bỏ chú thích "Nút này bỏ khi có menu ở Story 4.2"; thêm hàm truy cập nút cho test (`next_button()`, `retry_button()`, `menu_button()`).
+- [x] **Task 2: Bảng kết quả** (AC: 2, 4, 5, 7) — `src/ui/result_banner.gd`
+  - [x] 2.1 Thay một nút `retry_pressed` bằng ba nút, đều `FOCUS_NONE`: **"Tiếp"** (`next_pressed`), **"Đánh lại trận này"** (`retry_pressed`), **"Về menu"** (`menu_pressed`). `show_result(phase, defeat_reason, can_continue: bool)`: WON + `can_continue` → chỉ "Tiếp"; WON + không `can_continue` (trận ngoài chuỗi) → "Đánh lại trận này" + "Về menu"; LOST → "Đánh lại trận này" + "Về menu".
+  - [x] 2.2 Khóa chữ: đổi `result.retry` thành "Đánh lại trận này"; thêm `result.next` "Tiếp", `result.menu` "Về menu". Khung vẫn bọc vừa nội dung (`_relayout`) với hai nút.
+  - [x] 2.3 Bỏ chú thích "Nút này bỏ khi có menu ở Story 4.2"; thêm hàm truy cập nút cho test (`next_button()`, `retry_button()`, `menu_button()`).
 
-- [ ] **Task 3: Màn chuyển trận** (AC: 2, 4, 8) — `src/ui/level_transition.gd`
-  - [ ] 3.1 `class_name LevelTransition extends Control`, dựng bằng code theo mẫu `MainMenu` (nền `MainMenu.BACKGROUND_COLOR`, `TitleLabel`, `CenterContainer`, nút `FOCUS_NONE`, cỡ `BoardView.viewport_size`). Không cần `.tscn` (như 4.1).
-  - [ ] 3.2 `show_next(level_name: String, new_stratagems: Array[int])` → tiêu đề trận kế, các dòng mưu kế mới (`tr("transition.new_stratagem") % tr("stratagem.<ten>")`), nút "Tiếp" (`next_pressed`). `show_campaign_end()` → dòng `transition.campaign_won`, nút "Về menu" (`menu_pressed`).
-  - [ ] 3.3 Khóa chữ `transition.*` mới; chạy lại bước sinh `text.vi.translation` như 4.1.
+- [x] **Task 3: Màn chuyển trận** (AC: 2, 4, 8) — `src/ui/level_transition.gd`
+  - [x] 3.1 `class_name LevelTransition extends Control`, dựng bằng code theo mẫu `MainMenu` (nền `MainMenu.BACKGROUND_COLOR`, `TitleLabel`, `CenterContainer`, nút `FOCUS_NONE`, cỡ `BoardView.viewport_size`). Không cần `.tscn` (như 4.1).
+  - [x] 3.2 `show_next(level_name: String, new_stratagems: Array[int])` → tiêu đề trận kế, các dòng mưu kế mới (`tr("transition.new_stratagem") % tr("stratagem.<ten>")`), nút "Tiếp" (`next_pressed`). `show_campaign_end()` → dòng `transition.campaign_won`, nút "Về menu" (`menu_pressed`).
+  - [x] 3.3 Khóa chữ `transition.*` mới; chạy lại bước sinh `text.vi.translation` như 4.1.
 
-- [ ] **Task 4: `src/app/main.gd` nối chuỗi trận** (AC: 1–8)
-  - [ ] 4.1 Nạp `chien_dich.json` trong `_start_battle()` cùng chỉ số và trận (biến test đổi được: `campaign_path`), gom lỗi của cả ba file; giữ dữ liệu ở `_campaign` (hoặc `AppState.campaign` nếu 4.3 cần — chọn một, ghi lý do). Lỗi thì màn hình lỗi như hiện nay. F5 nạp lại cả ba.
-  - [ ] 4.2 `_on_new_game()` mở `_campaign.first_level()`. Lưu ý: `_campaign` có thể chưa nạp khi đang ở menu → nạp chiến dịch trước rồi lấy trận đầu; lỗi thì màn hình lỗi. Bỏ `FIRST_LEVEL_ID` hoặc chỉ giữ làm giá trị dự phòng khi F5 lúc chưa mở trận nào (ghi rõ).
-  - [ ] 4.3 `_on_playback_finished`: truyền `can_continue = _campaign.contains(_level_id)` cho `show_result`. Nối `next_pressed` → `_show_transition()`, `retry_pressed` → `_start_battle`, `menu_pressed` → `_show_menu`.
-  - [ ] 4.4 `_show_transition()`: dừng trận như `_show_menu` (controller null, `_battle_view.stop()`, ẩn bảng kết quả, xóa bàn, ẩn bàn cờ và tiêu đề), `_screen = Screen.TRANSITION`. Trận cuối → `show_campaign_end()`. Ngược lại nạp file trận kế bằng `LevelLoader` để lấy `name` và `stratagems` (lỗi → màn hình lỗi), đặt `_level_id` = trận kế, `show_next(...)`. Mưu kế mới = `next.stratagems` trừ `_level.stratagems`. Log `Log.info("app", "chuyển trận %s -> %s")`, màn kết thúc log `"thắng cả chiến dịch"`. Đây là chỗ duy nhất biết "vừa thắng trận X" → Story 4.3 sẽ gắn tự lưu ở đây (ghi chú trong code).
-  - [ ] 4.5 Nút "Tiếp" của màn chuyển trận → `_start_battle()` (trận kế, `_level_id` đã đặt ở 4.4); "Về menu" → `_show_menu()`.
-  - [ ] 4.6 Thứ tự con: màn chuyển trận nằm dưới `_notice`, nhãn phiên bản, chữ DEV; trên bàn cờ, HUD, tooltip, bảng kết quả; bảng F3 nằm dưới nó (bài học review 4.1). Ẩn màn chuyển trận khi vào trận, màn hình lỗi, menu (gom vào một hàm như `_set_menu_visible`).
+- [x] **Task 4: `src/app/main.gd` nối chuỗi trận** (AC: 1–8)
+  - [x] 4.1 Nạp `chien_dich.json` trong `_start_battle()` cùng chỉ số và trận (biến test đổi được: `campaign_path`), gom lỗi của cả ba file; giữ dữ liệu ở `_campaign` (hoặc `AppState.campaign` nếu 4.3 cần — chọn một, ghi lý do). Lỗi thì màn hình lỗi như hiện nay. F5 nạp lại cả ba.
+  - [x] 4.2 `_on_new_game()` mở `_campaign.first_level()`. Lưu ý: `_campaign` có thể chưa nạp khi đang ở menu → nạp chiến dịch trước rồi lấy trận đầu; lỗi thì màn hình lỗi. Bỏ `FIRST_LEVEL_ID` hoặc chỉ giữ làm giá trị dự phòng khi F5 lúc chưa mở trận nào (ghi rõ).
+  - [x] 4.3 `_on_playback_finished`: truyền `can_continue = _campaign.contains(_level_id)` cho `show_result`. Nối `next_pressed` → `_show_transition()`, `retry_pressed` → `_start_battle`, `menu_pressed` → `_show_menu`.
+  - [x] 4.4 `_show_transition()`: dừng trận như `_show_menu` (controller null, `_battle_view.stop()`, ẩn bảng kết quả, xóa bàn, ẩn bàn cờ và tiêu đề), `_screen = Screen.TRANSITION`. Trận cuối → `show_campaign_end()`. Ngược lại nạp file trận kế bằng `LevelLoader` để lấy `name` và `stratagems` (lỗi → màn hình lỗi), đặt `_level_id` = trận kế, `show_next(...)`. Mưu kế mới = `next.stratagems` trừ `_level.stratagems`. Log `Log.info("app", "chuyển trận %s -> %s")`, màn kết thúc log `"thắng cả chiến dịch"`. Đây là chỗ duy nhất biết "vừa thắng trận X" → Story 4.3 sẽ gắn tự lưu ở đây (ghi chú trong code).
+  - [x] 4.5 Nút "Tiếp" của màn chuyển trận → `_start_battle()` (trận kế, `_level_id` đã đặt ở 4.4); "Về menu" → `_show_menu()`.
+  - [x] 4.6 Thứ tự con: màn chuyển trận nằm dưới `_notice`, nhãn phiên bản, chữ DEV; trên bàn cờ, HUD, tooltip, bảng kết quả; bảng F3 nằm dưới nó (bài học review 4.1). Ẩn màn chuyển trận khi vào trận, màn hình lỗi, menu (gom vào một hàm như `_set_menu_visible`).
 
-- [ ] **Task 5: Sửa test cũ bị ảnh hưởng** (AC: 9)
-  - [ ] 5.1 Test dùng `retry_button()` / `retry_pressed` của `ResultBanner` và test "Chơi mới" mở `tran_01`: `test_result_banner.gd`, `test_main.gd`, `test_battle_view.gd` (soát `grep -rn "retry\|FIRST_LEVEL_ID\|tran_01" game/tests`). Test dựng `main.tscn` với `level_dir` riêng (`user://test_main/tran`) cần `campaign_path` trỏ tới file chiến dịch hợp lệ cho thư mục đó, hoặc test chỉ kiểm lỗi trận.
-  - [ ] 5.2 Không đổi ý nghĩa test cũ; test nào đổi ý nghĩa (vd. bảng Thắng! không còn "Chơi lại trận") thì ghi rõ trong Completion Notes.
+- [x] **Task 5: Sửa test cũ bị ảnh hưởng** (AC: 9)
+  - [x] 5.1 Test dùng `retry_button()` / `retry_pressed` của `ResultBanner` và test "Chơi mới" mở `tran_01`: `test_result_banner.gd`, `test_main.gd`, `test_battle_view.gd` (soát `grep -rn "retry\|FIRST_LEVEL_ID\|tran_01" game/tests`). Test dựng `main.tscn` với `level_dir` riêng (`user://test_main/tran`) cần `campaign_path` trỏ tới file chiến dịch hợp lệ cho thư mục đó, hoặc test chỉ kiểm lỗi trận.
+  - [x] 5.2 Không đổi ý nghĩa test cũ; test nào đổi ý nghĩa (vd. bảng Thắng! không còn "Chơi lại trận") thì ghi rõ trong Completion Notes.
 
-- [ ] **Task 6: Test mới** (AC: 1–8)
-  - [ ] 6.1 `test_loaders.gd` (hoặc `test_campaign_loader.gd`): file đúng → `levels` đúng thứ tự; mỗi câu lỗi ở 1.4 ra **nguyên văn**; file thật `data/chien_dich.json` nạp không lỗi, mọi trận trong đó nạp được bằng `LevelLoader`.
-  - [ ] 6.2 `CampaignData`: `first_level`, `next_after` (giữa chuỗi, trận cuối, trận ngoài chuỗi), `is_last`.
-  - [ ] 6.3 `ResultBanner`: WON + tiếp được → chỉ nút "Tiếp" hiện; WON ngoài chuỗi → "Đánh lại" + "Về menu"; LOST (mọi `defeat_reason`) → "Đánh lại" + "Về menu"; nút `FOCUS_NONE`; khung bọc hết nút.
-  - [ ] 6.4 Luồng `main`: thắng trận 1 (dùng cách test hiện có đưa trận về WON, vd. kịch bản lời giải hoặc dựng `snapshot` WON qua `_on_playback_finished`) → bấm "Tiếp" → `_screen == TRANSITION`, tên trận 2, không có dòng mưu kế → bấm "Tiếp" → `_level_id == "tran_02"`, `_screen == BATTLE`, mọi tướng đủ máu theo `chi_so.json`.
-  - [ ] 6.5 Trận 4 → trận 5: màn chuyển trận có dòng "Vườn không nhà trống". Trận cuối (5) thắng → màn kết thúc, chỉ nút "Về menu" → `_screen == MENU`.
-  - [ ] 6.6 Thua → "Về menu" → `MENU`; "Đánh lại trận này" → cùng `_level_id`, trận mở lại từ đầu.
-  - [ ] 6.7 Dev `--tran=thu_muu_ke` thắng → không có "Tiếp". Dev `--tran=3` thắng → "Tiếp" → trận 4.
-  - [ ] 6.8 Ở màn chuyển trận: phím trận + chuột không làm gì (theo mẫu test 4.1 đã sửa: kiểm `BattleInput` có phát signal, rồi kiểm không có controller/không chọn quân/không log lỗi); F2 chép được và thông báo nằm trên màn chuyển trận; F5 mở trận kế; thứ tự con (4.6).
-  - [ ] 6.9 `chien_dich.json` lỗi → "Chơi mới" ra màn hình lỗi có câu lỗi chiến dịch.
-  - [ ] 6.10 Mọi test mới phải trượt được khi bỏ phần code tương ứng (bài học 3.12/3.13/4.1) — thử ít nhất một lần bằng cách tạm cất phần sửa code, ghi kết quả vào Debug Log.
+- [x] **Task 6: Test mới** (AC: 1–8)
+  - [x] 6.1 `test_loaders.gd` (hoặc `test_campaign_loader.gd`): file đúng → `levels` đúng thứ tự; mỗi câu lỗi ở 1.4 ra **nguyên văn**; file thật `data/chien_dich.json` nạp không lỗi, mọi trận trong đó nạp được bằng `LevelLoader`.
+  - [x] 6.2 `CampaignData`: `first_level`, `next_after` (giữa chuỗi, trận cuối, trận ngoài chuỗi), `is_last`.
+  - [x] 6.3 `ResultBanner`: WON + tiếp được → chỉ nút "Tiếp" hiện; WON ngoài chuỗi → "Đánh lại" + "Về menu"; LOST (mọi `defeat_reason`) → "Đánh lại" + "Về menu"; nút `FOCUS_NONE`; khung bọc hết nút.
+  - [x] 6.4 Luồng `main`: thắng trận 1 (dùng cách test hiện có đưa trận về WON, vd. kịch bản lời giải hoặc dựng `snapshot` WON qua `_on_playback_finished`) → bấm "Tiếp" → `_screen == TRANSITION`, tên trận 2, không có dòng mưu kế → bấm "Tiếp" → `_level_id == "tran_02"`, `_screen == BATTLE`, mọi tướng đủ máu theo `chi_so.json`.
+  - [x] 6.5 Trận 4 → trận 5: màn chuyển trận có dòng "Vườn không nhà trống". Trận cuối (5) thắng → màn kết thúc, chỉ nút "Về menu" → `_screen == MENU`.
+  - [x] 6.6 Thua → "Về menu" → `MENU`; "Đánh lại trận này" → cùng `_level_id`, trận mở lại từ đầu.
+  - [x] 6.7 Dev `--tran=thu_muu_ke` thắng → không có "Tiếp". Dev `--tran=3` thắng → "Tiếp" → trận 4.
+  - [x] 6.8 Ở màn chuyển trận: phím trận + chuột không làm gì (theo mẫu test 4.1 đã sửa: kiểm `BattleInput` có phát signal, rồi kiểm không có controller/không chọn quân/không log lỗi); F2 chép được và thông báo nằm trên màn chuyển trận; F5 mở trận kế; thứ tự con (4.6).
+  - [x] 6.9 `chien_dich.json` lỗi → "Chơi mới" ra màn hình lỗi có câu lỗi chiến dịch.
+  - [x] 6.10 Mọi test mới phải trượt được khi bỏ phần code tương ứng (bài học 3.12/3.13/4.1) — thử ít nhất một lần bằng cách tạm cất phần sửa code, ghi kết quả vào Debug Log.
 
-- [ ] **Task 7: Kiểm tra và bàn giao** (AC: 9)
-  - [ ] 7.1 `tools/test.sh` xanh 4/4.
+- [x] **Task 7: Kiểm tra và bàn giao** (AC: 9)
+  - [x] 7.1 `tools/test.sh` xanh 4/4.
   - [ ] 7.2 Chụp màn hình GoPeak (`tools/chay.sh --dev --tran=4`): bảng "Thắng!" có nút "Tiếp" (đánh theo `tran_04_loi_giai.md` hoặc đưa trận về WON bằng cách có sẵn trong dev), màn chuyển trận sang trận 5 có dòng mưu kế; màn kết thúc sau trận 5. Ảnh nào không chụp được thì ghi rõ, **không** đánh `[x]` nói quá.
-  - [ ] 7.3 Hướng dẫn tác giả thử tay bằng tiếng Việt trong Completion Notes (từng bước, thấy gì là đúng).
-  - [ ] 7.4 Cập nhật story, `sprint-status.yaml`; commit. Deploy itch **chỉ khi tác giả cho phép**.
+  - [x] 7.3 Hướng dẫn tác giả thử tay bằng tiếng Việt trong Completion Notes (từng bước, thấy gì là đúng).
+  - [x] 7.4 Cập nhật story, `sprint-status.yaml`; commit. Deploy itch **chỉ khi tác giả cho phép**.
 
 ## Dev Notes
 
@@ -155,8 +155,43 @@ tôi muốn đi qua các trận liên tiếp,
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5), 2026-10-30.
+
 ### Debug Log References
+
+- Nền trước story: HEAD `5d07683`; `tools/test.sh` 782/782 GUT.
+- Đỏ trước: `test_campaign.gd` (chưa có `CampaignData`/`CampaignLoader`), `test_result_banner.gd` (`show_result` chưa nhận đối số thứ ba) đều trượt trước khi viết code.
+- Đổi `main.gd` xong: 1 test cũ trượt đúng dự kiến (`test_battle_view.gd › test_retry_button_reloads_the_battle`: trận thử tên `tran_01` giờ nằm trong chuỗi nên thắng chỉ có "Tiếp").
+- Task 6.10, thử đột biến `main.gd` (mỗi lần một chỗ, xong trả lại): bỏ truyền `in_campaign` → 2 test trượt; "Chơi mới" viết cứng `tran_01` → 1 trượt; màn chuyển trận thêm sau `_notice` → 2 trượt; không lọc mưu kế đã có → **0 trượt** lúc đầu, thêm `test_transition_lists_only_stratagems_not_open_before` → 1 trượt.
+- Cuối: `tools/test.sh` 824/824 GUT, 173 kịch bản đã duyệt. Commit `398403b`.
+- GoPeak (`tools/chay.sh --dev --tran=3`): đánh lời giải trận 3 bằng `inject_mouse_click` (bấm tướng rồi bấm ô; phím "3" bơm vào không khớp phím vật lý nên chọn tướng bằng chuột) → bảng "Thắng!" chỉ có nút "Tiếp" → màn chuyển trận "Trận tiếp theo · Trận 4 — Làng Quanh Vạn Kiếp", nút "Tiếp", chữ DEV và nhãn phiên bản nằm trên → bấm "Tiếp" → log `nạp trận tran_04`, ba tướng 3/3 máu. **Chưa chụp** màn sang trận 5 (dòng mưu kế) và màn kết thúc (phải đánh tay thêm trận 4, 5); hai màn này có test tự động (`test_transition_to_level_5_lists_new_stratagem`, `test_last_level_won_shows_campaign_end_then_menu`). Task 7.2 để chưa đánh dấu vì lý do này.
 
 ### Completion Notes List
 
+- **Dữ liệu:** `game/data/chien_dich.json` liệt kê `tran_01`…`tran_05` (tác giả chốt 5 trận; Story 4.5 thêm `"tran_06"`). Mưu kế mở vẫn ghi trong file trận.
+- **Kiến trúc:** chỉ thêm `CampaignData` (`src/core/campaign_data.gd`, chỉ đọc, không I/O). Không tạo `campaign_progress.gd` như cây thư mục kiến trúc: tiến độ là việc của Story 4.3 (lưu), mưu kế đã mở nằm ở file trận theo quyết định 4. `_campaign` giữ trong `main.gd` (chưa đưa lên `AppState`): 4.3 cần thì chuyển.
+- **Kiểm tên trận trong chuỗi:** `CampaignLoader` kiểm mỗi tên có file trong `res://data/tran` (`main.DATA_LEVEL_DIR`), không theo `level_dir` mà test đổi để mở trận thử. Bản thật hai thư mục là một.
+- **`main.gd`:** nạp `chien_dich.json` cùng chỉ số và trận ở mọi lần mở trận (F5 nạp lại cả ba); "Chơi mới" mở trận đầu của chuỗi; gom việc rời trận vào `_stop_battle()`, việc ẩn/hiện màn che vào `_set_cover()`; `_show_transition()` là chỗ duy nhất biết "vừa thắng trận X" (ghi chú cho 4.3). Bỏ hằng `FIRST_LEVEL_ID`: chuỗi trận hỏng mà chưa chọn trận thì chỉ báo lỗi chuỗi trận.
+- **Bảng kết quả:** ba nút `FOCUS_NONE`; đổi chữ `result.retry` thành "Đánh lại trận này".
+- **Màn chuyển trận:** `src/ui/level_transition.gd`, dựng bằng code như `MainMenu`, không có `.tscn` (giống 4.1).
+- **Test đổi ý nghĩa:** `test_battle_view.gd › test_retry_button_reloads_the_battle`: thắng trận trong chuỗi giờ chỉ có "Tiếp"; test vẫn kiểm nút "Đánh lại trận này" mở lại trận. `test_result_banner.gd`: test một nút "Chơi lại trận" đổi thành test ba nút.
+- **Hướng dẫn tác giả thử tay** (`tools/chay.sh`, không cần `--dev`):
+  1. Màn hình chính → "Chơi mới" → trận 1. Đánh thắng: bảng "Thắng!" chỉ có nút **"Tiếp"**.
+  2. Bấm "Tiếp": màn nâu sẫm ghi "Trận tiếp theo" và **"Trận 2 — Ải Lãnh Kinh"**, nút "Tiếp". Bấm "Tiếp" → vào trận 2, các tướng đủ máu.
+  3. Thua một trận: bảng "Thua!" có **"Đánh lại trận này"** (mở lại đúng trận đó) và **"Về menu"** (về màn hình chính).
+  4. Thắng trận 4 → màn chuyển trận có thêm dòng vàng **"Mưu kế mới: Vườn không nhà trống"**.
+  5. Thắng trận 5 → màn **"Đã thắng cả chiến dịch"**, chỉ có nút "Về menu".
+  - Đi nhanh bằng dev: `tools/chay.sh --dev --tran=4` (rồi thắng trận 4) hoặc `--tran=5`. Trận thử như `--tran=thu_muu_ke` thắng thì có "Đánh lại trận này" và "Về menu", không có "Tiếp".
+  - Chữ trên các màn sửa trong `game/i18n/text.csv` (khóa `result.*`, `transition.*`).
+
 ### File List
+
+- `game/data/chien_dich.json` (mới)
+- `game/src/core/campaign_data.gd` (mới), `game/src/core/campaign_data.gd.uid` (mới)
+- `game/src/data/campaign_loader.gd` (mới), `game/src/data/campaign_loader.gd.uid` (mới)
+- `game/src/ui/level_transition.gd` (mới), `game/src/ui/level_transition.gd.uid` (mới)
+- `game/src/ui/result_banner.gd`
+- `game/src/app/main.gd`
+- `game/i18n/text.csv`, `game/i18n/text.vi.translation`
+- `game/tests/test_campaign.gd` (mới) + `.uid`, `game/tests/test_level_transition.gd` (mới) + `.uid`, `game/tests/test_main.gd`, `game/tests/test_result_banner.gd`, `game/tests/test_battle_view.gd`
+- `_bmad-output/implementation-artifacts/4-2-chuoi-6-tran-va-man-chuyen-tran.md`, `_bmad-output/implementation-artifacts/sprint-status.yaml`
