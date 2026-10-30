@@ -67,6 +67,13 @@ func _ready() -> void:
 	_result_banner = ResultBanner.new()
 	_result_banner.retry_pressed.connect(_start_battle)
 	add_child(_result_banner)
+	# Che bàn cờ, HUD, tooltip, bảng kết quả; nằm dưới thông báo (F2 ở menu), nhãn phiên bản và chữ DEV.
+	_main_menu = MainMenu.new()
+	_main_menu.size = BoardView.viewport_size
+	_main_menu.visible = false
+	_main_menu.setup()
+	_main_menu.new_game_pressed.connect(_on_new_game)
+	add_child(_main_menu)
 	_notice = Notice.new()
 	_notice.name = "Notice"
 	add_child(_notice)
@@ -75,13 +82,6 @@ func _ready() -> void:
 	# Hoạt ảnh phát xong mới vẽ bản chụp cuối (Story 2.11).
 	_battle_view.playback_finished.connect(_on_playback_finished)
 	add_child(_battle_view)
-	# Nằm dưới nhãn phiên bản và chữ DEV (thêm sau).
-	_main_menu = MainMenu.new()
-	_main_menu.size = BoardView.viewport_size
-	_main_menu.visible = false
-	_main_menu.setup()
-	_main_menu.new_game_pressed.connect(_on_new_game)
-	add_child(_main_menu)
 
 	_version_label = Label.new()
 	_version_label.text = "v%s · %s" % [_read_version(), BuildInfo.read_commit(BUILD_INFO_PATH)]
@@ -107,6 +107,8 @@ func _ready() -> void:
 		dev_tools.f1_pressed.connect(_toggle_coords)
 		_ai_overlay = AiIntentOverlay.new()
 		add_child(_ai_overlay)
+		# Bật F3 trong trận rồi về menu: bảng nằm dưới menu, không vẽ đè lên tên game.
+		move_child(_ai_overlay, _main_menu.get_index())
 		dev_tools.f3_pressed.connect(_toggle_ai_intents)
 		dev_tools.f5_pressed.connect(_reload_data)
 		dev_tools.f2_pressed.connect(_on_f2)

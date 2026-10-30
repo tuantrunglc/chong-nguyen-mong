@@ -4,7 +4,7 @@ baseline_commit: 0c484a2
 
 # Story 4.1: Màn hình chính
 
-Status: review
+Status: done
 
 ## Story
 
@@ -57,9 +57,20 @@ tôi muốn có màn hình chính để bắt đầu hoặc chơi tiếp,
 
 - [x] **Task 5: Kiểm tra và bàn giao** (AC: 6)
   - [x] 5.1 `tools/test.sh` xanh 4/4.
-  - [x] 5.2 Chụp màn hình GoPeak: `tools/chay.sh --dev` (không `--tran`) → màn hình chính; bấm "Chơi mới" bằng `inject_mouse_click` → trận 1. `tools/chay.sh --dev --tran=3` → vào thẳng trận 3.
+  - [x] 5.2 Chụp màn hình GoPeak: `tools/chay.sh --dev` (không `--tran`) → màn hình chính; bấm "Chơi mới" bằng `inject_mouse_click` → trận 1. `tools/chay.sh --dev --tran=3` → vào thẳng trận 3. *(Có ảnh màn hình chính và trận 1; `--tran=3` chỉ có log `nạp trận tran_03`, không chụp được vì GoPeak ngắt kết nối.)*
   - [x] 5.3 Hướng dẫn tác giả thử tay bằng tiếng Việt trong Completion Notes (desktop và bản web: mở link itch **không** có `?dev=1` phải thấy màn hình chính).
   - [x] 5.4 Cập nhật story, `sprint-status.yaml` (và `epic-4: in-progress`); commit. Deploy itch **chỉ khi tác giả cho phép** — chưa deploy.
+
+### Review Findings
+
+Code review 2026-10-30 (Blind Hunter, Edge Case Hunter, Acceptance Auditor), diff `e2b69ea..5fbde0c`. 6 patch, 0 decision, 0 defer, 10 bỏ qua. Đã sửa cả 6; `tools/test.sh` 782/782 (bỏ phần sửa code thì 3 test mới trượt).
+
+- [x] [Review][Patch] F2 ở màn hình chính: chép được nhưng thông báo "đã chép" bị menu che (AC5). `_notice` thêm trước `_main_menu`, menu tô nền đặc. Đưa menu xuống dưới `_notice`; thêm test F2 ở menu kiểm thứ tự con [game/src/app/main.gd:79]
+- [x] [Review][Patch] F3 (dev): bảng ý định AI vẽ đè lên menu. Bật F3 trong trận → lỗi → Về menu thì còn ô đen 640 px ở góc trên trái. `_ai_overlay` thêm sau menu; đặt nó dưới menu [game/src/app/main.gd:108]
+- [x] [Review][Patch] Nút "Chơi mới" nhận focus (mặc định), khác mẫu `FOCUS_NONE` của HUD/ResultBanner. Nhấn chuột lên nút rồi nhả ra ngoài thì Space vẫn bắt đầu trận (trái AC5) [game/src/ui/main_menu.gd:44]
+- [x] [Review][Patch] `test_battle_keys_do_nothing_on_main_menu` không trượt được: "nhận lệnh" chỉ ghi khi có controller; không thử chuột trên bàn (AC5); `Log.debug_enabled` trả lại giữa test chứ không ở `after_each` [game/tests/test_main.gd:721]
+- [x] [Review][Patch] Task 5.2 đánh `[x]` nhưng `--dev --tran=3` không có ảnh chụp (GoPeak ngắt), chỉ có log. Ghi rõ trong task [_bmad-output/implementation-artifacts/4-1-man-hinh-chinh.md:60]
+- [x] [Review][Patch] Dev Agent Record: "Agent Model Used" trống; Completion Notes còn dòng mẫu "Ultimate context engine analysis completed…" [_bmad-output/implementation-artifacts/4-1-man-hinh-chinh.md:125]
 
 ## Dev Notes
 
@@ -124,6 +135,8 @@ tôi muốn có màn hình chính để bắt đầu hoặc chơi tiếp,
 
 ### Agent Model Used
 
+Claude Opus (dev); code review 2026-10-30: Claude Opus 5.5.
+
 ### Debug Log References
 
 - Nền trước story: HEAD `0c484a2`; `tools/test.sh` 774/774 GUT.
@@ -132,7 +145,6 @@ tôi muốn có màn hình chính để bắt đầu hoặc chơi tiếp,
 
 ### Completion Notes List
 
-- Ultimate context engine analysis completed - comprehensive developer guide created.
 - `MainMenu` (`src/ui/main_menu.gd`) dựng bằng code như `ErrorScreen`/`Hud`, không tạo `main_menu.tscn`: dự án chưa có scene UI nào ngoài `main.tscn`, giữ một mẫu. Nút nằm trong hộp `_buttons` để Story 4.3 thêm "Chơi tiếp" phía trên.
 - `main.gd`: `_ready` đọc `AppState.launch.level_id()` vào `_level_id`; rỗng → `_show_menu()`, có → `_start_battle()`. `_start_battle()` mở `_level_id` (rỗng thì `FIRST_LEVEL_ID = "tran_01"`), nên "Chơi lại trận", F5 ở mọi màn hình và "Chơi mới" đi chung một đường. Màn hình chính và tiêu đề trận không hiện cùng lúc (`_set_menu_visible`). Bỏ `DEFAULT_TRAN`.
 - Test đổi ý nghĩa (theo spec 4.1): `test_level_name_without_dev_opens_level_1` → `test_level_name_without_dev_shows_menu`; `test_back_button_returns_to_menu` và `test_back_to_menu_leaves_empty_board` giờ khẳng định bàn cờ **ẩn** sau màn hình chính (trước: bàn cờ hiện). `test_loads_level_1_by_default` đổi tên `test_tran_1_loads_level_1` (nội dung giữ).

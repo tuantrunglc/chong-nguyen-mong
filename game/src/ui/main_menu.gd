@@ -44,6 +44,8 @@ func setup() -> void:
 	_new_game_button = Button.new()
 	_new_game_button.text = tr("menu.new_game")
 	_new_game_button.custom_minimum_size = BUTTON_SIZE
+	# Như nút HUD: không giữ focus, để Space/Enter ở menu không bấm nút (AC5).
+	_new_game_button.focus_mode = Control.FOCUS_NONE
 	_new_game_button.pressed.connect(func() -> void: new_game_pressed.emit())
 	_buttons.add_child(_new_game_button)
 	queue_redraw()

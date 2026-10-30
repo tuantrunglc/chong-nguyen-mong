@@ -684,7 +684,10 @@ func test_no_tran_shows_main_menu() -> void:
 	assert_false(main._hud.visible, "HUD ẩn")
 	assert_true(main._version_label.visible, "nhãn phiên bản vẫn hiện")
 	assert_lt(menu.get_index(), main._version_label.get_index(), "nhãn phiên bản nằm trên màn hình chính")
+	for hidden: Node in [main._board_view, main._hud, main._tooltip, main._result_banner]:
+		assert_lt(hidden.get_index(), menu.get_index(), "%s nằm dưới màn hình chính" % hidden.name)
 	assert_eq(menu.new_game_button().text, tr("menu.new_game"))
+	assert_eq(menu.new_game_button().focus_mode, Control.FOCUS_NONE, "nút không giữ focus: Space ở menu không bấm nút")
 	var texts: Array[String] = _label_texts(menu)
 	assert_has(texts, tr("app.title"))
 	assert_has(texts, tr("menu.subtitle"))
@@ -717,24 +720,57 @@ func test_dev_tran_skips_main_menu() -> void:
 	assert_has(Log.get_lines(), "[INFO][battle] nạp trận tran_03")
 
 
-## Phím tắt trận ở màn hình chính không làm gì: không vào trận, không ghi lệnh, không có cảnh báo hay lỗi.
+## Phím tắt trận và chuột trên bàn ở màn hình chính không làm gì: không vào trận, không chọn quân, không có cảnh báo hay lỗi.
+## Kiểm trước là BattleInput có nhận phím và chuột (phát signal), để test không đạt suông khi phím không khớp action.
 func test_battle_keys_do_nothing_on_main_menu() -> void:
 	AppState.launch.tran = ""
 	var main: Node2D = _make_main()
+	var input: BattleInput = main._battle_input as BattleInput
+	watch_signals(input)
 	Log.clear()
-	var old_debug: bool = Log.debug_enabled
-	Log.debug_enabled = true  # "nhận lệnh" là dòng DEBUG
 	for key: Key in [KEY_SPACE, KEY_Z, KEY_R, KEY_Q, KEY_W, KEY_1, KEY_2, KEY_3]:
 		var ev: InputEventKey = InputEventKey.new()
 		ev.physical_keycode = key
 		ev.pressed = true
-		(main._battle_input as BattleInput)._unhandled_input(ev)
-	Log.debug_enabled = old_debug
+		input._unhandled_input(ev)
+	var click: InputEventMouseButton = InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = main._board_view.get_global_transform_with_canvas() * BoardView.cell_center(Vector2i(0, 6))
+	input._unhandled_input(click)
+	for sig: String in ["end_turn_pressed", "undo_pressed", "replay_pressed", "stratagem_key_pressed",
+			"general_key_pressed", "cell_clicked"]:
+		assert_signal_emitted(input, sig, "BattleInput nhận được: " + sig)
 	assert_eq(main._screen, main.Screen.MENU)
 	assert_null(main._controller)
+	assert_true(main.main_menu().visible)
+	assert_eq((main._battle_view as BattleView).selected_id(), BattleView.NONE, "không chọn quân")
 	for line: String in Log.get_lines():
 		assert_false(line.begins_with("[WARN]") or line.begins_with("[ERROR]"), line)
-		assert_false(line.contains("nhận lệnh"), "không có lệnh nào: " + line)
+
+
+## F2 ở màn hình chính (dev): chép báo lỗi "không có trận", thông báo nằm trên menu nên nhìn thấy.
+func test_f2_on_main_menu_shows_notice_above_menu() -> void:
+	AppState.launch.dev = true
+	AppState.launch.tran = ""
+	var main: Node2D = _make_main()
+	var copied: Array[String] = []
+	main.clipboard_writer = func(text: String) -> void: copied.append(text)
+	_dev_tools(main).f2_pressed.emit()
+	assert_eq(copied.size(), 1)
+	assert_eq(main.notice().text(), tr("dev.copied_no_battle"))
+	assert_gt(main.notice().get_index(), main.main_menu().get_index(), "thông báo vẽ sau màn hình chính")
+
+
+## F3 (dev): bảng ý định AI nằm dưới màn hình chính, bật trong trận rồi về menu không vẽ đè tên game.
+func test_ai_overlay_stays_under_main_menu() -> void:
+	AppState.launch.dev = true
+	var main: Node2D = _make_main()
+	_dev_tools(main).f3_pressed.emit()
+	assert_true(main._ai_overlay.visible, "F3 bật trong trận")
+	main._show_menu()
+	assert_true(main.main_menu().visible)
+	assert_lt(main._ai_overlay.get_index(), main.main_menu().get_index(), "bảng F3 vẽ trước màn hình chính")
 
 
 ## Màn hình lỗi → Về menu → sửa file → Chơi mới: vào được trận, không giữ dữ liệu lỗi.
