@@ -4,18 +4,27 @@ extends GutTest
 const MAIN_SCENE: String = "res://scenes/main.tscn"
 const LEVEL_DIR: String = "user://test_stratagem_view"
 const LEVEL_FILE: String = LEVEL_DIR + "/tran_01.json"
+## Thắng trận trong chuỗi thì tự lưu (Story 4.3): file lưu riêng, kể cả khi chạy GUT không qua tools/test.sh.
+const SAVE_FILE: String = LEVEL_DIR + "/luu_game.json"
 const VKNT: int = Stratagem.Kind.VUON_KHONG_NHA_TRONG
 const SAT_THAT: int = Stratagem.Kind.SAT_THAT
 const KHOAI_CELL: Vector2i = Vector2i(1, 6)
 
 
+var _old_save_path: String = ""
+
+
 func before_each() -> void:
+	_old_save_path = SaveSystem.path
+	SaveSystem.path = SAVE_FILE
 	# Story 4.1: không chọn trận thì mở màn hình chính; test trận vào thẳng trận 1 (test màn hình chính đặt lại "").
 	AppState.launch.tran = "1"
 	DirAccess.make_dir_recursive_absolute(LEVEL_DIR)
 
 
 func after_each() -> void:
+	SaveSystem.clear()
+	SaveSystem.path = _old_save_path
 	AppState.stats = null
 	AppState.launch.tran = ""
 	for action: String in BattleInput.ACTION_KEYS:

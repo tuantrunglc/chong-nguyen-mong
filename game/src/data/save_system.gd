@@ -26,6 +26,9 @@ static func load_save() -> LoadResult:
 		return LoadResult.new()
 	var text: String = JsonFile.read_text(path)
 	if text.is_empty():
+		# Chuỗi rỗng là file rỗng, hoặc có file mà không mở được để đọc.
+		if FileAccess.get_open_error() != OK:
+			return JsonFile.missing_file(path)
 		var result: LoadResult = LoadResult.new()
 		result.add_error("%s: file lưu rỗng" % JsonFile.label(path))
 		return result
@@ -60,20 +63,27 @@ static func parse_save(text: String, file: String) -> LoadResult:
 	return result
 
 
-## Ghi trận kế tiếp. Trả false nếu không mở được file để ghi.
-static func save_next_level(level_id: String) -> bool:
-	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
+## Ghi trận kế tiếp, trả OK hoặc mã lỗi. Ghi ra file tạm rồi mới đổi tên thành file lưu: ghi hỏng giữa chừng (đầy
+## đĩa, tắt game) thì file lưu cũ còn nguyên.
+static func save_next_level(level_id: String) -> Error:
+	var tmp_path: String = path + ".tmp"
+	var file: FileAccess = FileAccess.open(tmp_path, FileAccess.WRITE)
 	if file == null:
-		return false
-	file.store_string(JSON.stringify({"phien_ban": FORMAT_VERSION, "tran_tiep": level_id}))
+		return FileAccess.get_open_error()
+	var stored: bool = file.store_string(JSON.stringify({"phien_ban": FORMAT_VERSION, "tran_tiep": level_id}))
+	var error: Error = file.get_error()
 	file.close()
-	return true
+	if not stored or error != OK:
+		DirAccess.remove_absolute(tmp_path)
+		return error if error != OK else ERR_FILE_CANT_WRITE
+	return DirAccess.rename_absolute(tmp_path, path)
 
 
-## Xóa file lưu (thắng hết chuỗi trận). Không có file thì thôi.
-static func clear() -> void:
-	if FileAccess.file_exists(path):
-		DirAccess.remove_absolute(path)
+## Xóa file lưu (thắng hết chuỗi trận), trả OK hoặc mã lỗi. Không có file thì là OK.
+static func clear() -> Error:
+	if not FileAccess.file_exists(path):
+		return OK
+	return DirAccess.remove_absolute(path)
 
 
 static func has_file() -> bool:

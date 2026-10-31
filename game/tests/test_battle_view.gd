@@ -6,6 +6,8 @@ extends GutTest
 const MAIN_SCENE: String = "res://scenes/main.tscn"
 const PROBE_DIR: String = "user://test_battle_view"
 const PROBE_FILE: String = PROBE_DIR + "/thu_luu.json"
+## Thắng trận trong chuỗi thì tự lưu (Story 4.3): file lưu riêng, kể cả khi chạy GUT không qua tools/test.sh.
+const SAVE_FILE: String = PROBE_DIR + "/luu_game.json"
 const BROKEN_DIR: String = PROBE_DIR + "/tran"
 const BROKEN_LEVEL: String = BROKEN_DIR + "/tran_01.json"
 ## Trận thử cho đòn đánh (Story 2.1): trận 1 thật chỉ có một Bộ binh kề Lão (2,5 kề 2,6),
@@ -44,7 +46,12 @@ const KHOAI_CELL: Vector2i = Vector2i(0, 6)
 const LAO_CELL: Vector2i = Vector2i(2, 6)
 
 
+var _old_save_path: String = ""
+
+
 func before_each() -> void:
+	_old_save_path = SaveSystem.path
+	SaveSystem.path = SAVE_FILE
 	# Story 4.1: không chọn trận thì mở màn hình chính; test trận vào thẳng trận 1 (test màn hình chính đặt lại "").
 	AppState.launch.tran = "1"
 	DirAccess.make_dir_recursive_absolute(PROBE_DIR)
@@ -52,6 +59,8 @@ func before_each() -> void:
 
 
 func after_each() -> void:
+	SaveSystem.clear()
+	SaveSystem.path = _old_save_path
 	AppState.launch.dev = false
 	AppState.launch.tran = ""
 	AppState.launch.warnings.clear()

@@ -2,7 +2,8 @@ extends GutTest
 ## Đọc, ghi, xóa file lưu (Story 4.3, FR46). Câu lỗi so nguyên văn.
 
 const FILE: String = "user://test_save_system.json"
-const F: String = "user://test_save_system.json"
+## Tên file trong câu lỗi (JsonFile.label chỉ bỏ "res://").
+const F: String = FILE
 
 var _old_path: String = ""
 
@@ -32,8 +33,9 @@ func test_no_file_is_ok_without_data() -> void:
 
 
 func test_save_then_load_round_trips() -> void:
-	assert_true(SaveSystem.save_next_level("tran_03"))
+	assert_eq(SaveSystem.save_next_level("tran_03"), OK)
 	assert_eq(JSON.parse_string(FileAccess.get_file_as_string(FILE)), {"phien_ban": 1.0, "tran_tiep": "tran_03"})
+	assert_false(FileAccess.file_exists(FILE + ".tmp"), "không để lại file tạm")
 	var r: LoadResult = SaveSystem.load_save()
 	assert_eq(r.errors, [] as Array[String])
 	assert_eq((r.data as SaveSystem.SaveData).next_level, "tran_03")
@@ -41,9 +43,23 @@ func test_save_then_load_round_trips() -> void:
 
 func test_clear_removes_file() -> void:
 	SaveSystem.save_next_level("tran_02")
-	SaveSystem.clear()
+	assert_eq(SaveSystem.clear(), OK)
 	assert_false(FileAccess.file_exists(FILE))
-	SaveSystem.clear()  # không có file: không lỗi
+	assert_eq(SaveSystem.clear(), OK, "không có file: không lỗi")
+
+
+## Ghi lần hai đè lên file cũ (đổi tên file tạm thành file lưu đã có).
+func test_save_overwrites_previous_save() -> void:
+	SaveSystem.save_next_level("tran_02")
+	assert_eq(SaveSystem.save_next_level("tran_04"), OK)
+	assert_eq((SaveSystem.load_save().data as SaveSystem.SaveData).next_level, "tran_04")
+
+
+## Không ghi được (thư mục không có): trả mã lỗi, không có file lưu.
+func test_save_into_missing_folder_returns_error() -> void:
+	SaveSystem.path = "user://khong_co_thu_muc_nay/save.json"
+	assert_ne(SaveSystem.save_next_level("tran_02"), OK)
+	assert_false(FileAccess.file_exists(SaveSystem.path))
 
 
 func test_unknown_key_is_warning_only() -> void:
@@ -63,6 +79,13 @@ func test_broken_files_report_vietnamese_errors() -> void:
 		'{"phien_ban": 1}': [F + ': thiếu khóa "tran_tiep"'],
 		'{"phien_ban": 1, "tran_tiep": 3}': [F + ': "tran_tiep" phải là tên trận (chuỗi không rỗng), đang là 3'],
 		'{"phien_ban": 1, "tran_tiep": ""}': [F + ': "tran_tiep" phải là tên trận (chuỗi không rỗng), đang là ""'],
+		'{"phien_ban": 1.5, "tran_tiep": "tran_02"}': [F + ': "phien_ban" phải là số nguyên từ 1 trở lên, đang là 1.5'],
+		'{"phien_ban": true, "tran_tiep": "tran_02"}': [F + ': "phien_ban" phải là số nguyên từ 1 trở lên, đang là true'],
+		'{"phien_ban": null, "tran_tiep": "tran_02"}': [F + ': "phien_ban" phải là số nguyên từ 1 trở lên, đang là null'],
+		'{"phien_ban": 0, "tran_tiep": "tran_02"}': [F + ': "phien_ban" là 0, game chỉ đọc được bản 1'],
+		'{"phien_ban": 1, "tran_tiep": null}': [F + ': "tran_tiep" phải là tên trận (chuỗi không rỗng), đang là null'],
+		'{"phien_ban": 1, "tran_tiep": ["tran_02"]}':
+			[F + ': "tran_tiep" phải là tên trận (chuỗi không rỗng), đang là ["tran_02"]'],
 	}
 	for text: String in cases:
 		_write(text)

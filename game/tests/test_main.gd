@@ -11,8 +11,9 @@ const BROKEN_LEVEL: String = LEVEL_DIR + "/tran_01.json"
 const BROKEN_STATS: String = PROBE_DIR + "/chi_so.json"
 ## chien_dich.json lỗi (Story 4.2): có tên trận không có file.
 const BROKEN_CAMPAIGN: String = PROBE_DIR + "/chien_dich.json"
-## Bản sao chi_so.json thật, sửa tầm đi của Khoái (F5, Story 1.6).
+## File lưu riêng của file test này (Story 4.3), không đụng file lưu thật.
 const SAVE_FILE: String = "user://test_main_save.json"
+## Bản sao chi_so.json thật, sửa tầm đi của Khoái (F5, Story 1.6).
 const F5_STATS: String = PROBE_DIR + "/chi_so_f5.json"
 const F5_LOG: String = "[INFO][dev] f5: nạp lại chi_so.json và file trận"
 const BROKEN_STATS_ERROR: String = "user://test_main/chi_so.json: nội dung phải là một object JSON"
@@ -23,10 +24,13 @@ const BROKEN_ERRORS: Array[String] = [
 ]
 
 var _old_window_title: String = ""
+## Đường dẫn file lưu trước test (hook tests/pre_run.gd đã đặt): trả lại sau test, không đặt về DEFAULT_PATH.
+var _old_save_path: String = ""
 
 
 func before_each() -> void:
 	# Story 4.3: file lưu riêng cho từng test, không đụng file thật; mỗi test bắt đầu không có file lưu.
+	_old_save_path = SaveSystem.path
 	SaveSystem.path = SAVE_FILE
 	if FileAccess.file_exists(SAVE_FILE):
 		DirAccess.remove_absolute(SAVE_FILE)
@@ -41,6 +45,7 @@ func before_each() -> void:
 func after_each() -> void:
 	if FileAccess.file_exists(SAVE_FILE):
 		DirAccess.remove_absolute(SAVE_FILE)
+	SaveSystem.path = _old_save_path
 	get_window().title = _old_window_title
 	AppState.launch.dev = false
 	AppState.launch.tran = ""
@@ -1105,14 +1110,42 @@ func test_no_save_no_continue_button() -> void:
 	assert_true(main.main_menu().new_game_button().visible)
 
 
-## Thắng trận giữa chuỗi rồi "Tiếp": lưu trận kế tiếp (FR46).
+## Thắng trận giữa chuỗi: lưu trận kế tiếp ngay lúc hiện bảng Thắng!, chưa cần bấm "Tiếp" (FR46): thắng xong đóng
+## tab vẫn còn tiến độ.
 func test_winning_saves_next_level() -> void:
 	var main: Node2D = _make_main()
 	_finish(main, BattleState.Phase.WON)
-	assert_false(FileAccess.file_exists(SAVE_FILE), "chưa bấm Tiếp thì chưa lưu")
-	_banner(main).next_button().pressed.emit()
 	assert_eq(JSON.parse_string(FileAccess.get_file_as_string(SAVE_FILE)), {"phien_ban": 1.0, "tran_tiep": "tran_02"})
 	assert_has(Log.get_lines(), "[INFO][save] đã lưu: trận tiếp tran_02")
+
+
+## Thua: không đụng file lưu.
+func test_losing_keeps_save() -> void:
+	_write_save('{"phien_ban": 1, "tran_tiep": "tran_03"}')
+	var main: Node2D = _make_main()
+	_finish(main, BattleState.Phase.LOST)
+	assert_eq(JSON.parse_string(FileAccess.get_file_as_string(SAVE_FILE)), {"phien_ban": 1.0, "tran_tiep": "tran_03"})
+
+
+## Không ghi được file lưu: log ERROR, trận vẫn sang màn chuyển trận như thường.
+func test_save_failure_logs_error_and_keeps_going() -> void:
+	SaveSystem.path = "user://khong_co_thu_muc_nay/save.json"
+	var main: Node2D = _make_main()
+	_finish(main, BattleState.Phase.WON)
+	var found: bool = false
+	for line: String in Log.get_lines():
+		if line.begins_with("[ERROR][save] user://khong_co_thu_muc_nay/save.json: không ghi được file lưu (mã lỗi "):
+			found = true
+	assert_true(found, "log ERROR khi không ghi được")
+	_banner(main).next_button().pressed.emit()
+	assert_eq(main._screen, main.Screen.TRANSITION)
+
+
+## "Chơi tiếp" khi không có trận đã lưu (nút ẩn, tín hiệu phát thẳng): không làm gì.
+func test_continue_without_save_does_nothing() -> void:
+	var main: Node2D = _menu_after_open()
+	main.main_menu().continue_pressed.emit()
+	assert_eq(main._screen, main.Screen.MENU)
 
 
 ## Mở lại game (main mới) sau khi lưu: có "Chơi tiếp" trên "Chơi mới"; bấm thì vào đúng trận đã lưu, tướng đủ máu.
@@ -1147,11 +1180,13 @@ func test_back_to_menu_after_save_shows_continue() -> void:
 ## Thắng trận cuối: xóa file lưu, màn hình chính không còn "Chơi tiếp".
 func test_last_level_won_clears_save() -> void:
 	_write_save('{"phien_ban": 1, "tran_tiep": "tran_05"}')
-	var main: Node2D = _open("5")
+	var main: Node2D = _menu_after_open()
+	main.main_menu().continue_button().pressed.emit()
+	assert_eq(main._level_id, "tran_05")
 	_finish(main, BattleState.Phase.WON)
-	_banner(main).next_button().pressed.emit()
 	assert_false(FileAccess.file_exists(SAVE_FILE))
 	assert_has(Log.get_lines(), "[INFO][save] xóa file lưu: đã thắng cả chiến dịch")
+	_banner(main).next_button().pressed.emit()
 	_transition(main).menu_button().pressed.emit()
 	assert_false(main.main_menu().continue_button().visible)
 
@@ -1182,3 +1217,6 @@ func test_broken_save_shows_notice_and_allows_new_game() -> void:
 		menu.new_game_button().pressed.emit()
 		assert_eq(main._level_id, "tran_01", text)
 		assert_eq(main._screen, main.Screen.BATTLE, text)
+		# Mỗi ca một main: bỏ main của ca này trước ca sau.
+		remove_child(main)
+		main.free()

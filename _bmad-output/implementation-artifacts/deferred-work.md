@@ -247,3 +247,7 @@
 
 - **Ảnh màn chuyển trận sang trận 5 và màn kết thúc chưa chụp** (Task 7.2). Có test tự động; tác giả xem khi đánh tay trận 4, 5.
 - **`chien_dich.json` hỏng chặn cả trận thử dev.** `main.gd` nạp chiến dịch ở mọi lần vào trận, nên file chiến dịch sửa dở làm `--dev --tran=thu_*` cũng ra màn hình lỗi. Đúng AC 1; xem lại nếu gây phiền khi thiết kế trận.
+
+## Deferred from: code review of 4-3-tu-luu (2026-10-31)
+
+- **Tự lưu chưa kiểm trên bản itch** (AC 6). `user://` trên web là IndexedDB (đã thử ở Story 0.5); cần deploy (tác giả cho phép) rồi thắng trận 1 → tải lại trang → "Chơi tiếp" vào trận 2. Lưu xong mà `user://` không bền thì log có `WARN [save]`.

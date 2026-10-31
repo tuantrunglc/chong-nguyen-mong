@@ -5,13 +5,20 @@ extends GutTest
 const MAIN_SCENE: String = "res://scenes/main.tscn"
 const PROBE_DIR: String = "user://test_board_view"
 const PROBE_FILE: String = PROBE_DIR + "/thu_luu.json"
+## Thắng trận trong chuỗi thì tự lưu (Story 4.3): file lưu riêng, kể cả khi chạy GUT không qua tools/test.sh.
+const SAVE_FILE: String = PROBE_DIR + "/luu_game.json"
 const LEVEL_DIR: String = PROBE_DIR + "/tran"
 const PASS_LEVEL: String = LEVEL_DIR + "/tran_01.json"
 ## Khoảng cách (px) từ góc ô vào phía tâm khi thử điểm sát mép, hoặc ra ngoài cạnh bàn.
 const EDGE_STEP: float = 2.0
 
 
+var _old_save_path: String = ""
+
+
 func before_each() -> void:
+	_old_save_path = SaveSystem.path
+	SaveSystem.path = SAVE_FILE
 	# Story 4.1: không chọn trận thì mở màn hình chính; test trận vào thẳng trận 1 (test màn hình chính đặt lại "").
 	AppState.launch.tran = "1"
 	DirAccess.make_dir_recursive_absolute(PROBE_DIR)
@@ -19,6 +26,8 @@ func before_each() -> void:
 
 
 func after_each() -> void:
+	SaveSystem.clear()
+	SaveSystem.path = _old_save_path
 	AppState.launch.dev = false
 	AppState.launch.tran = ""
 	AppState.launch.warnings.clear()

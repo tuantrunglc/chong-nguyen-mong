@@ -150,6 +150,8 @@ func _on_new_game() -> void:
 
 ## Nút "Chơi tiếp" (Story 4.3): vào trận kế tiếp đã lưu. Nút chỉ hiện khi file lưu dùng được.
 func _on_continue() -> void:
+	if _saved_level_id.is_empty():
+		return
 	Log.info("app", "chơi tiếp %s" % _saved_level_id)
 	_level_id = _saved_level_id
 	_start_battle()
@@ -251,15 +253,17 @@ func _report_meta() -> Dictionary:
 
 
 ## Hoạt ảnh của lệnh vừa phát xong: vẽ bản chụp cuối và bảng kết quả (Story 2.11).
-## Trận có trong chuỗi thì thắng có nút "Tiếp" (Story 4.2).
+## Trận có trong chuỗi thì thắng có nút "Tiếp" (Story 4.2), và tự lưu ngay lúc hiện bảng Thắng! (Story 4.3).
 func _on_playback_finished(snapshot: BattleState) -> void:
 	_show_board(snapshot)
 	var in_campaign: bool = _campaign != null and _campaign.contains(_level_id)
+	if snapshot.phase == BattleState.Phase.WON and in_campaign:
+		_save_progress(_level_id)
 	_result_banner.show_result(snapshot.phase, snapshot.defeat_reason, in_campaign)
 
 
 ## Nút "Tiếp" của bảng Thắng! (Story 4.2): màn chuyển trận sang trận kế, hoặc màn kết thúc nếu vừa thắng trận cuối.
-## Đây là chỗ duy nhất biết "vừa thắng trận X": Story 4.3 gắn tự lưu ở đây.
+## Tự lưu đã chạy lúc hiện bảng Thắng! (_on_playback_finished), không chờ nút này.
 func _show_transition() -> void:
 	var won_id: String = _level_id
 	var won_level: LevelData = _level
@@ -267,12 +271,8 @@ func _show_transition() -> void:
 	if _campaign.is_last(won_id):
 		_level_transition.show_campaign_end()
 		Log.info("app", "thắng cả chiến dịch")
-		# Hết chuỗi trận: không còn gì để chơi tiếp (Story 4.3).
-		SaveSystem.clear()
-		Log.info("save", "xóa file lưu: đã thắng cả chiến dịch")
 	else:
 		var next_id: String = _campaign.next_after(won_id)
-		_save_progress(next_id)
 		var next_result: LoadResult = LevelLoader.load_level("%s/%s.json" % [level_dir, next_id])
 		for w: String in next_result.warnings:
 			Log.warn("data", w)
@@ -322,13 +322,26 @@ func _show_menu(log_line: String = "về menu") -> void:
 	Log.info("app", log_line)
 
 
-## Tự lưu sau trận thắng (Story 4.3, FR46). Ghi hỏng thì báo trong log, vẫn sang màn chuyển trận.
-func _save_progress(next_id: String) -> void:
-	if SaveSystem.save_next_level(next_id):
-		Log.info("save", "đã lưu: trận tiếp %s" % next_id)
-	else:
-		Log.error("save", "%s: không ghi được file lưu (mã lỗi %d)"
-			% [JsonFile.label(SaveSystem.path), FileAccess.get_open_error()])
+## Tự lưu khi thắng trận won_id của chuỗi (Story 4.3, FR46): ghi trận kế tiếp; thắng trận cuối thì xóa file lưu (không
+## còn gì để chơi tiếp). Ghi/xóa hỏng thì báo trong log, trận vẫn chạy tiếp như thường.
+func _save_progress(won_id: String) -> void:
+	var file: String = JsonFile.label(SaveSystem.path)
+	if _campaign.is_last(won_id):
+		var cleared: Error = SaveSystem.clear()
+		if cleared == OK:
+			Log.info("save", "xóa file lưu: đã thắng cả chiến dịch")
+		else:
+			Log.error("save", "%s: không xóa được file lưu (mã lỗi %d)" % [file, cleared])
+		return
+	var next_id: String = _campaign.next_after(won_id)
+	var saved: Error = SaveSystem.save_next_level(next_id)
+	if saved != OK:
+		Log.error("save", "%s: không ghi được file lưu (mã lỗi %d)" % [file, saved])
+		return
+	Log.info("save", "đã lưu: trận tiếp %s" % next_id)
+	# Trên web, iframe bị chặn bộ nhớ (hay cửa sổ ẩn danh) thì user:// chỉ nằm trong bộ nhớ tạm: tải lại trang là mất.
+	if not OS.is_userfs_persistent():
+		Log.warn("save", "user:// không bền: tải lại trang sẽ mất tiến độ")
 
 
 ## Đọc file lưu cho màn hình chính: dùng được thì có "Chơi tiếp"; hỏng (kể cả trận không có trong chuỗi trận) thì
