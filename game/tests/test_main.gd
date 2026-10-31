@@ -994,6 +994,8 @@ func test_battle_keys_do_nothing_on_transition() -> void:
 	assert_eq(main._screen, main.Screen.TRANSITION)
 	assert_null(main._controller)
 	assert_eq((main._battle_view as BattleView).selected_id(), BattleView.NONE)
+	assert_false((main._battle_view as BattleView).fast_forward(), "T ở màn chuyển trận không bật tua")
+	assert_false(FileAccess.file_exists(SETTINGS_FILE), "T ở màn chuyển trận không ghi cài đặt")
 	for line: String in Log.get_lines():
 		assert_false(line.begins_with("[WARN]") or line.begins_with("[ERROR]"), line)
 
@@ -1301,6 +1303,25 @@ func test_fast_forward_works_while_playing() -> void:
 	assert_false(_fast_button(main).disabled, "nút tua không bị khóa")
 	_press_t(main)
 	assert_true(view.fast_forward())
+
+
+## Bấm tua giữa pha địch đang phát: tốc độ của EventPlayer đổi ngay, không chờ pha sau (AC 3); tắt thì về thường.
+## Giữa lệnh của người chơi đang phát thì bật tua không đổi tốc độ.
+func test_fast_forward_mid_phase_changes_speed_at_once() -> void:
+	var main: Node2D = _make_main()
+	var view: BattleView = main._battle_view as BattleView
+	(main._hud as Hud).set_locked(true)
+	view._playing = true
+	view._enemy_turn = true
+	assert_eq(view.event_player().speed(), 1.0, "điều kiện trước: tốc độ thường")
+	_press_t(main)
+	assert_eq(view.event_player().speed(), EventPlayer.FAST_SPEED, "phím T giữa pha địch: tua ngay")
+	_fast_button(main).pressed.emit()
+	assert_eq(view.event_player().speed(), 1.0, "nút tua giữa pha địch: tắt ngay")
+	view._enemy_turn = false
+	_press_t(main)
+	assert_true(view.fast_forward(), "điều kiện trước: tua đang bật")
+	assert_eq(view.event_player().speed(), 1.0, "lệnh người chơi đang phát: vẫn tốc độ thường")
 
 
 ## Tua chỉ áp cho pha địch: Kết thúc lượt phát ở tốc độ 3, lệnh của người chơi ở tốc độ thường.

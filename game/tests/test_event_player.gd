@@ -128,3 +128,25 @@ func test_speed_change_mid_play_shortens_the_rest() -> void:
 	assert_lte(elapsed, 0.3 + 2.7 / EventPlayer.FAST_SPEED + 0.25, "tua giữa chừng (đo được %.2f s)" % elapsed)
 	assert_gte(elapsed, 0.3, "phần đầu vẫn ở tốc độ thường")
 	assert_eq(player.played().size(), 60, "không bỏ sự kiện nào")
+
+
+## Tắt tua giữa lúc phát: phần còn lại về tốc độ thường (AC 3), tổng vẫn ≤ trần 3 s.
+func test_speed_back_to_normal_mid_play_slows_the_rest() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(0, 0): "1", Vector2i(3, 0): "B"})
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	board.show_state(state)
+	var player: EventPlayer = _player(board)
+	player.instant = false
+	player.set_speed(EventPlayer.FAST_SPEED)
+	var events: Array[BattleEvent] = []
+	for i: int in range(60):
+		events.append(BattleEvent.moved(BO_BINH, Vector2i(3, 0), Vector2i(3, 0), BattleEvent.Cause.WALK))
+	get_tree().create_timer(0.3).timeout.connect(func() -> void: player.set_speed(1.0))
+	var started: int = Time.get_ticks_msec()
+	await player.play(events, state)
+	var elapsed: float = float(Time.get_ticks_msec() - started) / 1000.0
+	# 0,3 s ở tốc độ tua, 0,7 s ngân sách còn lại nhân 3 = 2,1 s; nếu tắt không ăn thì cả pha chỉ ~1 s.
+	assert_gte(elapsed, 0.3 + 0.7 * EventPlayer.FAST_SPEED - 0.4, "tắt tua giữa chừng (đo được %.2f s)" % elapsed)
+	assert_lte(elapsed, EventPlayer.MAX_PHASE_SECONDS + 0.25, "vẫn trong trần pha (đo được %.2f s)" % elapsed)
+	assert_eq(player.played().size(), 60, "không bỏ sự kiện nào")

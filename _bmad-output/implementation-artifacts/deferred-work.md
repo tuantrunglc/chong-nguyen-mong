@@ -251,3 +251,8 @@
 ## Deferred from: code review of 4-3-tu-luu (2026-10-31)
 
 - **Tự lưu chưa kiểm trên bản itch** (AC 6). `user://` trên web là IndexedDB (đã thử ở Story 0.5); cần deploy (tác giả cho phép) rồi thắng trận 1 → tải lại trang → "Chơi tiếp" vào trận 2. Lưu xong mà `user://` không bền thì log có `WARN [save]`.
+
+## Deferred from: code review of 4-4-tua-nhanh-pha-dich (2026-10-31)
+
+- **Va chạm vượt trần pha.** `event_player.gd › _collide` chờ `seconds` rồi thêm `0,6 × seconds` (rung lần hai), mà hạn chót chỉ kiểm trước mỗi sự kiện; va chạm cuối pha có thể làm pha dài hơn trần (tua nhanh: dư ~0,03 s). Có từ trước Story 4.4; test tua chỉ dùng sự kiện đi/chết nên không bắt được.
+- **`PlayerSettings.save()` ghi lại cả file và ghi thẳng.** Tạo `ConfigFile` mới chỉ có `[hoat_anh] toc_do` rồi ghi đè: thêm cài đặt thứ hai (âm lượng…) thì bấm tua sẽ xóa mất. Cũng chưa ghi an toàn kiểu file lưu 4.3 (hỏng giữa chừng thì lần sau chỉ WARN, về mặc định). Sửa khi thêm cài đặt thứ hai: nạp file cũ (nếu đọc được) rồi `set_value`.

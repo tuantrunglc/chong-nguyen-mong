@@ -5,7 +5,7 @@ baseline_commit: 1f1b36c
 
 # Story 4.4: Tua nhanh pha địch
 
-Status: review
+Status: done
 
 ## Story
 
@@ -32,10 +32,22 @@ tôi muốn tua nhanh hoạt ảnh của địch,
 - [x] **Task 2: `EventPlayer`** (AC: 2, 3, 6) — `const FAST_SPEED: float = 3.0`; `var speed: float = 1.0` qua `set_speed(s)`: thời lượng mỗi sự kiện, sàn `MIN_EVENT_SECONDS` và ngân sách `MAX_PHASE_SECONDS` đều chia cho `speed`; đổi giữa chừng thì co/giãn phần ngân sách còn lại, có hiệu lực từ sự kiện kế tiếp (động tác đang chạy ≤ 0,22 s). Không bỏ sự kiện.
 - [x] **Task 3: HUD + phím** (AC: 1, 3) — `Hud`: signal `fast_forward_pressed`, nút dưới "Kết thúc lượt", `show_fast_forward(on)`, không bị `set_locked` khóa; khóa chữ `hud.fast.off`/`hud.fast.on` trong `i18n/text.csv`. `BattleInput`: action `fast_forward` = `KEY_T`, signal `fast_forward_pressed`.
 - [x] **Task 4: `BattleView`** (AC: 2, 3) — `set_fast_forward(on)`, `fast_forward()`; signal `fast_forward_changed(on)`; bấm nút/phím (cả khi `_playing`, chỉ cần có trận) → đổi cờ, cập nhật HUD, nếu đang phát pha địch thì `_player.set_speed(...)` ngay. Mỗi lần phát: `_player.set_speed(FAST_SPEED if _fast and _enemy_turn else 1.0)` trước khi phát (kể cả nhánh `instant`).
-- [x] **Task 5: `main.gd` + `AppState`** (AC: 4, 5) — `AppState.settings: PlayerSettings`; `_ready` nạp cài đặt (log `INFO [settings] tốc độ hoạt ảnh N`, warning → `WARN [settings]`), gọi `_battle_view.set_fast_forward(...)`; `fast_forward_changed` → lưu file, log `INFO [settings] tua nhanh: bật/tắt`, lỗi ghi → `ERROR [settings]`.
+- [x] **Task 5: `main.gd` + `AppState`** (AC: 4, 5) — `AppState.settings: PlayerSettings`; `_ready` nạp cài đặt (log `INFO [settings] tốc độ hoạt ảnh pha địch N`, warning → `WARN [settings]`), gọi `_battle_view.set_fast_forward(...)`; `fast_forward_changed` → lưu file, log `INFO [settings] tua nhanh: bật/tắt`, lỗi ghi → `ERROR [settings]`.
 - [x] **Task 6: Cô lập test** (AC: 7) — `tests/pre_run.gd` đặt `PlayerSettings.path` sang file test; các file test bấm tua tự đặt đường dẫn riêng và trả lại sau test.
 - [x] **Task 7: Test** (AC: 7) — `tests/test_player_settings.gd`; thêm vào `test_event_player.gd`, `test_battle_view.gd` (hoặc `test_main.gd`) như AC 7.
 - [x] **Task 8: Bàn giao** — `tools/test.sh` xanh; kiểm đột biến; hướng dẫn thử tay; story, `sprint-status.yaml`; commit. Deploy itch chỉ khi tác giả cho phép.
+
+### Review Findings
+
+Code review 2026-10-31 (Blind Hunter, Edge Case Hunter, Acceptance Auditor). `tools/test.sh` 859/859 xanh lúc review.
+
+- [x] [Review][Decision] (Tác giả chốt 2026-10-31: giữ nguyên, thông báo luôn hiện 2,5 s để kịp đọc) Thông báo trên bàn không tua theo — Khi tua bật, thông báo "mất sĩ khí"/mưu kế (`notice.gd`: hiện 2,5 s + mờ 0,35 s) vẫn chạy tốc độ thường; pha địch xong trong ≤ 1 s nên thông báo còn trên màn hình ~2 s sang lượt người chơi. AC 6 chỉ nói đổi tốc độ Tween của pha; chưa rõ thông báo có tính không.
+- [x] [Review][Patch] Thiếu test bấm tua giữa pha địch ở mức BattleView (bật và tắt): bỏ `_apply_speed()` trong `set_fast_forward()` không test nào trượt (AC 3) [game/src/battle/battle_view.gd:132]
+- [x] [Review][Patch] Thiếu test tắt tua giữa chừng ở EventPlayer (3 → 1, phần còn lại về tốc độ thường, tổng vẫn ≤ 3 s) (AC 3) [game/tests/test_event_player.gd:113]
+- [x] [Review][Patch] Câu log lúc nạp lệch Task 5: code in "tốc độ hoạt ảnh pha địch N", Task 5 ghi "tốc độ hoạt ảnh N"; sửa Task 5 theo câu của code [game/src/app/main.gd:334]
+- [x] [Review][Patch] Test màn chuyển trận gõ T nhưng không kiểm tua vẫn tắt và không ghi settings.cfg (bản menu có kiểm) [game/tests/test_main.gd:997]
+- [x] [Review][Defer] Sự kiện va chạm chạy 1,6 lần khe thời gian của nó, có thể vượt trần pha một chút [game/src/battle/event_player.gd:280] — deferred, pre-existing
+- [x] [Review][Defer] `PlayerSettings.save()` ghi lại cả file từ đầu (mất mục khác nếu sau này thêm cài đặt) và ghi thẳng, không an toàn như file lưu 4.3 [game/src/data/player_settings.gd:49] — deferred, hiện file chỉ có một khóa; làm khi thêm cài đặt thứ hai
 
 ## Dev Notes
 
