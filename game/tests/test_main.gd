@@ -694,6 +694,8 @@ func test_no_tran_shows_main_menu() -> void:
 	assert_has(texts, tr("app.title"))
 	assert_has(texts, tr("menu.subtitle"))
 	assert_eq(_tokens(main).size(), 0)
+	assert_has(Log.get_lines(), "[INFO][app] mở màn hình chính")
+	assert_does_not_have(Log.get_lines(), "[INFO][app] về menu", "mở game lần đầu: chưa rời màn nào")
 
 
 ## Bấm "Chơi mới" thì vào trận 1, như trận 1 mở trước đây.
@@ -1048,3 +1050,30 @@ func test_transition_lists_only_stratagems_not_open_before() -> void:
 	assert_has(_label_texts(_transition(main)), "Trận thử mưu kế")
 	assert_eq(_transition(main).stratagem_lines(),
 		[tr("transition.new_stratagem") % tr("stratagem.sat_that")] as Array[String], "Vườn không nhà trống đã có từ trước")
+
+
+## Về menu bỏ cả dữ liệu trận vừa rời: F2 ở menu không ghi tên trận cũ; F5 vẫn mở lại trận đang chọn.
+func test_back_to_menu_drops_level_data() -> void:
+	var main: Node2D = _make_main()
+	assert_not_null(main._level)
+	main._show_menu()
+	assert_null(main._level)
+	assert_null(AppState.stats)
+	assert_eq(main._report_meta()["ten_tran"], "", "F2 ở menu: không có tên trận")
+	assert_eq(main._level_id, "tran_01", "vẫn nhớ trận đang chọn cho F5")
+
+
+## Về menu quên ô chuột đang trỏ trên bàn: vào trận lại, ô cũ không sáng lại khi chuột đã ở chỗ khác (menu chặn chuột).
+func test_back_to_menu_forgets_hovered_cell() -> void:
+	var main: Node2D = _make_main()
+	var input: BattleInput = main._battle_input as BattleInput
+	var board: BoardView = main._board_view as BoardView
+	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+	motion.position = board.get_global_transform_with_canvas() * BoardView.cell_center(Vector2i(1, 1))
+	input._unhandled_input(motion)
+	assert_eq(input.hovered_cell(), Vector2i(1, 1))
+	main._show_menu()
+	assert_eq(input.hovered_cell(), BoardView.NO_CELL)
+	main.main_menu().new_game_button().pressed.emit()
+	input.refresh_hover()
+	assert_eq(input.hovered_cell(), BoardView.NO_CELL, "không chọn lại ô cũ")

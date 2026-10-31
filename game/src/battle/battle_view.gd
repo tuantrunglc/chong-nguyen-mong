@@ -91,6 +91,8 @@ func stop() -> void:
 		_player.stop()
 	_deselect()
 	_hide_info()
+	if _input != null:
+		_input.clear_hover()
 	_hud.visible = false
 
 

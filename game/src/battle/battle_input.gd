@@ -108,6 +108,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		_set_hovered(cell)
 
 
+## Quên lần di chuột cuối khi trận dừng (màn hình lỗi, menu, màn chuyển trận). Không phát cell_hovered: không còn
+## trận để hiện. Vào trận mới, refresh_hover() không chọn lại ô cũ khi chuột đã rời bàn cờ (màn che chặn chuột).
+func clear_hover() -> void:
+	_last_motion = null
+	_hovered = BoardView.NO_CELL
+
+
 ## Chọn lại ô dưới chuột đứng yên: đồng quân vừa dời tới có thể che ô mặt đất đang trỏ.
 ## Gọi sau khi bàn cờ vẽ bản chụp mới.
 func refresh_hover() -> void:

@@ -133,7 +133,7 @@ func _ready() -> void:
 	# Chọn trận chỉ có khi bật dev (AppState đã bỏ tran nếu chưa bật): vào thẳng trận, không qua màn hình chính.
 	_level_id = AppState.launch.level_id()
 	if _level_id.is_empty():
-		_show_menu()
+		_show_menu("mở màn hình chính")
 	else:
 		_start_battle()
 
@@ -296,11 +296,15 @@ func _show_error(errors: Array[String]) -> void:
 
 
 ## Màn hình chính (Story 4.1): dừng trận, xóa bàn rồi ẩn bàn cờ và tiêu đề sau màn hình chính.
-func _show_menu() -> void:
+## Bỏ cả dữ liệu trận vừa rời (F2 ở menu không ghi tên trận cũ); giữ _level_id để F5 mở lại trận đang chọn.
+## Lúc mở game ghi log khác "về menu", vì chưa rời màn nào.
+func _show_menu(log_line: String = "về menu") -> void:
 	_stop_battle()
+	_level = null
+	AppState.stats = null
 	_set_cover(_main_menu)
 	_screen = Screen.MENU
-	Log.info("app", "về menu")
+	Log.info("app", log_line)
 
 
 ## Rời trận (màn hình lỗi, menu, màn chuyển trận): bỏ controller, dừng hoạt ảnh, ẩn bảng kết quả, xóa và ẩn bàn cờ.
