@@ -4,7 +4,7 @@ baseline_commit: 5d07683
 
 # Story 4.2: Chuỗi 6 trận và màn chuyển trận
 
-Status: review
+Status: done
 
 ## Story
 
@@ -82,6 +82,13 @@ tôi muốn đi qua các trận liên tiếp,
   - [ ] 7.2 Chụp màn hình GoPeak (`tools/chay.sh --dev --tran=4`): bảng "Thắng!" có nút "Tiếp" (đánh theo `tran_04_loi_giai.md` hoặc đưa trận về WON bằng cách có sẵn trong dev), màn chuyển trận sang trận 5 có dòng mưu kế; màn kết thúc sau trận 5. Ảnh nào không chụp được thì ghi rõ, **không** đánh `[x]` nói quá.
   - [x] 7.3 Hướng dẫn tác giả thử tay bằng tiếng Việt trong Completion Notes (từng bước, thấy gì là đúng).
   - [x] 7.4 Cập nhật story, `sprint-status.yaml`; commit. Deploy itch **chỉ khi tác giả cho phép**.
+
+### Review Findings
+
+Code review 2026-10-31 (làm trực tiếp, không dùng agent con), diff `14d641d..8e805d9`, chạy lại trên HEAD `8ea77be` (đã có bản sửa nốt 4.1: về menu bỏ `_level`/`AppState.stats`, quên ô chuột). `tools/test.sh` 826/826 GUT. Đã soát: bộ nạp chiến dịch gom đủ lỗi và kiểm phiên bản như `LevelLoader`; "Chơi mới" lấy trận đầu chuỗi; bảng kết quả chọn nút đúng theo WON/LOST và trận trong/ngoài chuỗi, khung nới theo nút đang hiện; `_show_transition` chỉ chạy từ nút "Tiếp" (chỉ hiện khi trận có trong chuỗi), tính mưu kế mới đúng (trận kế trừ trận vừa thắng), lỗi file trận kế ra màn hình lỗi; F5 ở màn chuyển trận mở trận kế, ở màn kết thúc mở lại trận cuối; thứ tự con (thông báo F2, nhãn phiên bản, chữ DEV nằm trên; bảng F3 nằm dưới); tướng hồi đầy máu vì mỗi trận dựng `BattleState` mới từ file trận. Không có mục Patch.
+
+- [x] [Review][Defer] Task 7.2 mới chụp được trận 3 → màn chuyển trận → trận 4; chưa có ảnh màn sang trận 5 (dòng mưu kế) và màn kết thúc — đã có test tự động; tác giả xem khi thử tay (bước 4–5 trong Completion Notes) — deferred, cần đánh tay hai trận
+- [x] [Review][Defer] `chien_dich.json` hỏng thì mọi lần vào trận đều ra màn hình lỗi, kể cả trận thử `--dev --tran=thu_*` không thuộc chuỗi [game/src/app/main.gd:154] — deferred, đúng AC 1 (nạp cùng chỉ số và trận); chỉ ảnh hưởng lúc tác giả sửa dở file chiến dịch
 
 ## Dev Notes
 
