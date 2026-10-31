@@ -32,6 +32,8 @@ var _ai_overlay: AiIntentOverlay = null
 var _error_screen: ErrorScreen = null
 var _main_menu: MainMenu
 var _level_transition: LevelTransition
+## Trận kế tiếp đọc từ file lưu lúc hiện màn hình chính; "" khi không có file lưu dùng được (Story 4.3).
+var _saved_level_id: String = ""
 var _title_label: Label
 var _board_view: BoardView
 var _battle_input: BattleInput
@@ -80,6 +82,7 @@ func _ready() -> void:
 	_main_menu.visible = false
 	_main_menu.setup()
 	_main_menu.new_game_pressed.connect(_on_new_game)
+	_main_menu.continue_pressed.connect(_on_continue)
 	add_child(_main_menu)
 	_level_transition = LevelTransition.new()
 	_level_transition.size = BoardView.viewport_size
@@ -142,6 +145,13 @@ func _ready() -> void:
 func _on_new_game() -> void:
 	Log.info("app", "chơi mới")
 	_level_id = ""
+	_start_battle()
+
+
+## Nút "Chơi tiếp" (Story 4.3): vào trận kế tiếp đã lưu. Nút chỉ hiện khi file lưu dùng được.
+func _on_continue() -> void:
+	Log.info("app", "chơi tiếp %s" % _saved_level_id)
+	_level_id = _saved_level_id
 	_start_battle()
 
 
@@ -257,8 +267,12 @@ func _show_transition() -> void:
 	if _campaign.is_last(won_id):
 		_level_transition.show_campaign_end()
 		Log.info("app", "thắng cả chiến dịch")
+		# Hết chuỗi trận: không còn gì để chơi tiếp (Story 4.3).
+		SaveSystem.clear()
+		Log.info("save", "xóa file lưu: đã thắng cả chiến dịch")
 	else:
 		var next_id: String = _campaign.next_after(won_id)
+		_save_progress(next_id)
 		var next_result: LoadResult = LevelLoader.load_level("%s/%s.json" % [level_dir, next_id])
 		for w: String in next_result.warnings:
 			Log.warn("data", w)
@@ -302,9 +316,44 @@ func _show_menu(log_line: String = "về menu") -> void:
 	_stop_battle()
 	_level = null
 	AppState.stats = null
+	_refresh_save()
 	_set_cover(_main_menu)
 	_screen = Screen.MENU
 	Log.info("app", log_line)
+
+
+## Tự lưu sau trận thắng (Story 4.3, FR46). Ghi hỏng thì báo trong log, vẫn sang màn chuyển trận.
+func _save_progress(next_id: String) -> void:
+	if SaveSystem.save_next_level(next_id):
+		Log.info("save", "đã lưu: trận tiếp %s" % next_id)
+	else:
+		Log.error("save", "%s: không ghi được file lưu (mã lỗi %d)"
+			% [JsonFile.label(SaveSystem.path), FileAccess.get_open_error()])
+
+
+## Đọc file lưu cho màn hình chính: dùng được thì có "Chơi tiếp"; hỏng (kể cả trận không có trong chuỗi trận) thì
+## một dòng báo nhẹ và log ERROR. Chuỗi trận hỏng thì không có "Chơi tiếp": "Chơi mới" sẽ hiện lỗi chuỗi trận.
+func _refresh_save() -> void:
+	_saved_level_id = ""
+	var save_result: LoadResult = SaveSystem.load_save()
+	for w: String in save_result.warnings:
+		Log.warn("save", w)
+	var errors: Array[String] = save_result.errors.duplicate()
+	var saved: String = ""
+	if save_result.data != null:
+		saved = (save_result.data as SaveSystem.SaveData).next_level
+	if not saved.is_empty():
+		var campaign_result: LoadResult = CampaignLoader.load_campaign(campaign_path, DATA_LEVEL_DIR)
+		if not campaign_result.ok:
+			saved = ""
+		elif not (campaign_result.data as CampaignData).contains(saved):
+			errors.append('%s: "tran_tiep" là %s, không có trong chuỗi trận'
+				% [JsonFile.label(SaveSystem.path), JsonFile.show(saved)])
+			saved = ""
+	for e: String in errors:
+		Log.error("save", e)
+	_saved_level_id = saved
+	_main_menu.show_save(not saved.is_empty(), not errors.is_empty())
 
 
 ## Rời trận (màn hình lỗi, menu, màn chuyển trận): bỏ controller, dừng hoạt ảnh, ẩn bảng kết quả, xóa và ẩn bàn cờ.

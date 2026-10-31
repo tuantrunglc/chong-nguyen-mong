@@ -151,6 +151,7 @@ else
 	ma_gut=0
 	"$GODOT" --headless --path "$GAME" -s res://addons/gut/gut_cmdln.gd \
 		-gdir=res://tests -ginclude_subdirs -gexit "-gjunit_xml_file=$GUT_XML" \
+		-gpre_run_script=res://tests/pre_run.gd \
 		>"$GUT_LOG" 2>&1 || ma_gut=$?
 
 	if [[ ! -f "$GUT_XML" ]]; then
