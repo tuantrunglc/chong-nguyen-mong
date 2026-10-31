@@ -17,6 +17,8 @@ const DEATH_SECONDS: float = 0.22
 const LUNGE_DISTANCE: float = 12.0
 ## Rung khi va chạm (px).
 const SHAKE_DISTANCE: float = 5.0
+## Tốc độ khi tua nhanh pha địch (Story 4.4, FR42): mọi thời lượng, sàn và trần của pha đều chia cho số này.
+const FAST_SPEED: float = 3.0
 
 ## Bật khi chạy không có màn hình (GUT): áp dụng ngay, không chờ khung hình nào, để test không phải await.
 var instant: bool = DisplayServer.get_name() == "headless"
@@ -30,6 +32,10 @@ var _played: Array[BattleEvent] = []
 var _play_id: int = 0
 ## Tween đang chạy, để `stop()` giết ngay (không để đồng quân trôi tiếp trên bàn vừa vẽ lại).
 var _active_tween: Tween = null
+## Tốc độ phát: 1 là thường, FAST_SPEED là tua nhanh (Story 4.4). Đổi bằng set_speed().
+var _speed: float = 1.0
+## Hạn chót (ms, Time.get_ticks_msec) của lượt `play()` đang chạy; set_speed() giữa chừng co/giãn phần còn lại.
+var _deadline: int = 0
 
 
 func setup(board: BoardView, notice: Notice = null) -> void:
@@ -50,6 +56,21 @@ func total_seconds(events: Array[BattleEvent]) -> float:
 	return minf(sum, MAX_PHASE_SECONDS)
 
 
+## Đổi tốc độ phát (Story 4.4). Đang phát thì có hiệu lực từ sự kiện kế tiếp (động tác đang chạy dài ≤ 0,22 s),
+## và phần ngân sách còn lại của pha co/giãn theo. Không bỏ sự kiện nào: chỉ thời gian chờ đổi.
+func set_speed(value: float) -> void:
+	if value <= 0.0 or value == _speed:
+		return
+	var now: int = Time.get_ticks_msec()
+	if _deadline > now:
+		_deadline = now + int(float(_deadline - now) * _speed / value)
+	_speed = value
+
+
+func speed() -> float:
+	return _speed
+
+
 ## Áp dụng ngay toàn bộ, không Tween (test và chế độ instant).
 func play_now(events: Array[BattleEvent], snapshot: BattleState = null) -> void:
 	_begin(events)
@@ -62,17 +83,19 @@ func play_now(events: Array[BattleEvent], snapshot: BattleState = null) -> void:
 func play(events: Array[BattleEvent], snapshot: BattleState = null) -> void:
 	var id: int = _begin(events)
 	var scale: float = _time_scale(events)
-	var deadline: int = Time.get_ticks_msec() + int(MAX_PHASE_SECONDS * 1000.0)
+	# Tua nhanh (Story 4.4): trần của cả pha cũng chia cho tốc độ.
+	_deadline = Time.get_ticks_msec() + int(MAX_PHASE_SECONDS * 1000.0 / _speed)
 	for event: BattleEvent in events:
 		if id != _play_id:
 			return
-		var seconds: float = _base_seconds(event) * scale
-		var remaining: float = float(deadline - Time.get_ticks_msec()) / 1000.0
+		# Đọc tốc độ ở từng sự kiện: bấm tua giữa chừng thì phần còn lại nhanh theo.
+		var seconds: float = _base_seconds(event) * scale / _speed
+		var remaining: float = float(_deadline - Time.get_ticks_msec()) / 1000.0
 		if seconds <= 0.0 or remaining <= 0.0:
 			# Hết ngân sách (hoặc sự kiện không có động tác): áp nốt ngay, không chờ thêm khung hình nào.
 			_apply_instant(event, snapshot)
 			continue
-		await _play_one(event, minf(maxf(seconds, MIN_EVENT_SECONDS), remaining), snapshot)
+		await _play_one(event, minf(maxf(seconds, MIN_EVENT_SECONDS / _speed), remaining), snapshot)
 
 
 ## Dừng giữa chừng (đổi trận, màn hình lỗi): vô hiệu lượt phát đang chờ và giết Tween đang chạy.

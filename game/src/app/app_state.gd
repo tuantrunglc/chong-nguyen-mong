@@ -5,6 +5,8 @@ extends Node
 var launch: LaunchOptions
 ## Null tới khi nạp xong data/chi_so.json không lỗi.
 var stats: Stats = null
+## Cài đặt người chơi (Story 4.4); main.gd nạp từ user://settings.cfg lúc mở game.
+var settings: PlayerSettings = PlayerSettings.new()
 
 
 func _ready() -> void:

@@ -9,6 +9,8 @@ const NONE: int = 0
 ## Phát xong hoạt ảnh của một lệnh (hoặc không có gì để phát): bàn đã sẵn sàng vẽ bản chụp cuối.
 ## `main.gd` vẽ bàn ở đây để hoạt ảnh chạy trên bàn cũ (Story 2.11).
 signal playback_finished(snapshot: BattleState)
+## Người chơi bật/tắt tua nhanh (Story 4.4); `main.gd` lưu vào user://settings.cfg.
+signal fast_forward_changed(on: bool)
 
 var _board: BoardView = null
 var _input: BattleInput = null
@@ -41,6 +43,8 @@ var _playback_generation: int = 0
 var _preview_cell: Vector2i = BoardView.NO_CELL
 ## Số lần đã tính xem trước (để test AC 4: rê trong cùng ô không tính lại).
 var _preview_count: int = 0
+## Tua nhanh pha địch đang bật (Story 4.4). Giữ qua các trận; main.gd đặt từ settings.cfg lúc mở game.
+var _fast: bool = false
 
 
 func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = null, notice: Notice = null) -> void:
@@ -59,10 +63,12 @@ func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = nu
 	input.replay_pressed.connect(_on_replay)
 	input.end_turn_pressed.connect(_on_end_turn)
 	input.stratagem_key_pressed.connect(_on_stratagem)
+	input.fast_forward_pressed.connect(_on_fast_forward)
 	hud.undo_pressed.connect(_on_undo)
 	hud.replay_pressed.connect(_on_replay)
 	hud.end_turn_pressed.connect(_on_end_turn)
 	hud.stratagem_pressed.connect(_on_stratagem)
+	hud.fast_forward_pressed.connect(_on_fast_forward)
 
 
 ## Bắt đầu trận mới (kể cả nạp lại): bỏ chọn, hiện bảng nút.
@@ -120,6 +126,32 @@ func begin_battle() -> void:
 	_pending_enemy_turn = true
 	_controller.begin()
 	_pending_enemy_turn = false
+
+
+## Bật/tắt tua nhanh không phát signal (main.gd gọi lúc mở game theo settings.cfg).
+func set_fast_forward(on: bool) -> void:
+	_fast = on
+	_hud.show_fast_forward(on)
+	_apply_speed()
+
+
+func fast_forward() -> bool:
+	return _fast
+
+
+## Nút/phím tua (Story 4.4): bấm được cả lúc đang phát (các lệnh khác bị khóa), có hiệu lực ngay cho phần còn lại của
+## pha địch. Không có trận (menu, màn lỗi) thì không làm gì.
+func _on_fast_forward() -> void:
+	if _controller == null:
+		return
+	set_fast_forward(not _fast)
+	fast_forward_changed.emit(_fast)
+
+
+## Tốc độ phát: tua chỉ áp cho pha địch; lệnh của người chơi luôn tốc độ thường.
+func _apply_speed() -> void:
+	if _player != null:
+		_player.set_speed(EventPlayer.FAST_SPEED if _fast and _enemy_turn else 1.0)
 
 
 ## Đang phát hoạt ảnh (để test).
@@ -248,6 +280,7 @@ func _on_events_resolved(events: Array[BattleEvent], snapshot: BattleState) -> v
 	# nói dối ("Hiệp 2" khi quân Nguyên còn đang đi). HUD cập nhật một lần khi phát xong.
 	_hud.set_locked(true)
 	_hud.show_phase(_enemy_turn)
+	_apply_speed()
 	var generation: int = _playback_generation
 	# Chế độ không màn hình (test) hoặc không có gì để phát: làm ngay trong cùng khung hình, không await.
 	if _player.instant or events.is_empty():

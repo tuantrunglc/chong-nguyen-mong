@@ -85,3 +85,46 @@ func test_play_stays_under_three_seconds_on_the_clock() -> void:
 	var elapsed: float = float(Time.get_ticks_msec() - started) / 1000.0
 	assert_lte(elapsed, EventPlayer.MAX_PHASE_SECONDS + 0.15, "phát thật ≤ 3 s (đo được %.2f s)" % elapsed)
 	assert_eq(player.played().size(), 60, "vẫn phát đủ sự kiện, phần cuối áp ngay khi hết ngân sách")
+
+
+## Tua nhanh (Story 4.4, FR42): tốc độ 3 thì cả pha ≤ 1 s trên đồng hồ thật, vẫn đủ sự kiện, đúng thứ tự.
+func test_fast_speed_plays_every_event_under_one_second() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(0, 0): "1", Vector2i(3, 0): "B"})
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	board.show_state(state)
+	var player: EventPlayer = _player(board)
+	player.instant = false
+	player.set_speed(EventPlayer.FAST_SPEED)
+	var events: Array[BattleEvent] = []
+	for i: int in range(60):
+		events.append(BattleEvent.moved(BO_BINH, Vector2i(3, 0), Vector2i(3, 0), BattleEvent.Cause.WALK))
+	events.append(BattleEvent.died(BO_BINH, Vector2i(3, 0)))
+	var started: int = Time.get_ticks_msec()
+	await player.play(events, state)
+	var elapsed: float = float(Time.get_ticks_msec() - started) / 1000.0
+	assert_lte(elapsed, EventPlayer.MAX_PHASE_SECONDS / EventPlayer.FAST_SPEED + 0.15,
+		"tua: ≤ 1 s (đo được %.2f s)" % elapsed)
+	assert_eq(player.played().size(), 61, "không bỏ sự kiện nào")
+	assert_eq(player.played()[60].type, BattleEvent.Type.DIED, "đúng thứ tự")
+
+
+## Bấm tua giữa lúc phát: phần còn lại nhanh theo (60 sự kiện ở tốc độ thường mất 3 s).
+func test_speed_change_mid_play_shortens_the_rest() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(0, 0): "1", Vector2i(3, 0): "B"})
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	board.show_state(state)
+	var player: EventPlayer = _player(board)
+	player.instant = false
+	var events: Array[BattleEvent] = []
+	for i: int in range(60):
+		events.append(BattleEvent.moved(BO_BINH, Vector2i(3, 0), Vector2i(3, 0), BattleEvent.Cause.WALK))
+	get_tree().create_timer(0.3).timeout.connect(func() -> void: player.set_speed(EventPlayer.FAST_SPEED))
+	var started: int = Time.get_ticks_msec()
+	await player.play(events, state)
+	var elapsed: float = float(Time.get_ticks_msec() - started) / 1000.0
+	# 0,3 s ở tốc độ thường, 2,7 s còn lại chia 3 = 0,9 s.
+	assert_lte(elapsed, 0.3 + 2.7 / EventPlayer.FAST_SPEED + 0.25, "tua giữa chừng (đo được %.2f s)" % elapsed)
+	assert_gte(elapsed, 0.3, "phần đầu vẫn ở tốc độ thường")
+	assert_eq(player.played().size(), 60, "không bỏ sự kiện nào")

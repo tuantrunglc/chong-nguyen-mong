@@ -99,6 +99,9 @@ func _ready() -> void:
 	# Hoạt ảnh phát xong mới vẽ bản chụp cuối (Story 2.11).
 	_battle_view.playback_finished.connect(_on_playback_finished)
 	add_child(_battle_view)
+	# Tua nhanh pha địch (Story 4.4): cài đặt người chơi nạp một lần lúc mở game, bấm tua thì lưu ngay.
+	_load_settings()
+	_battle_view.fast_forward_changed.connect(_on_fast_forward_changed)
 
 	_version_label = Label.new()
 	_version_label.text = "v%s · %s" % [_read_version(), BuildInfo.read_commit(BUILD_INFO_PATH)]
@@ -320,6 +323,24 @@ func _show_menu(log_line: String = "về menu") -> void:
 	_set_cover(_main_menu)
 	_screen = Screen.MENU
 	Log.info("app", log_line)
+
+
+## Nạp user://settings.cfg (Story 4.4). Hỏng thì dùng mặc định, chỉ có WARN: mất cài đặt không mất gì của người chơi.
+func _load_settings() -> void:
+	var result: LoadResult = PlayerSettings.load_settings()
+	for w: String in result.warnings:
+		Log.warn("settings", w)
+	AppState.settings = result.data as PlayerSettings
+	Log.info("settings", "tốc độ hoạt ảnh pha địch %d" % int(AppState.settings.animation_speed))
+	_battle_view.set_fast_forward(AppState.settings.is_fast())
+
+
+func _on_fast_forward_changed(on: bool) -> void:
+	AppState.settings.animation_speed = PlayerSettings.FAST_SPEED if on else PlayerSettings.NORMAL_SPEED
+	Log.info("settings", "tua nhanh: %s" % ("bật" if on else "tắt"))
+	var saved: Error = AppState.settings.save()
+	if saved != OK:
+		Log.error("settings", "%s: không ghi được file cài đặt (mã lỗi %d)" % [JsonFile.label(PlayerSettings.path), saved])
 
 
 ## Tự lưu khi thắng trận won_id của chuỗi (Story 4.3, FR46): ghi trận kế tiếp; thắng trận cuối thì xóa file lưu (không

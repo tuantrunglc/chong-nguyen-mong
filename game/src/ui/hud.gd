@@ -9,6 +9,8 @@ signal replay_pressed
 signal end_turn_pressed
 ## Bấm nút mưu kế kind (Stratagem.Kind).
 signal stratagem_pressed(kind: int)
+## Bấm nút "Tua nhanh" (Story 4.4).
+signal fast_forward_pressed
 
 ## Góc trên trái và bề rộng: bên phải bàn cờ (bàn nằm trong BoardView.AREA, x 16–956).
 const PANEL_POSITION: Vector2 = Vector2(972, 52)
@@ -30,6 +32,8 @@ var _replay_button: Button
 ## Nhãn cạnh nút Chơi lại: "Còn 1 lần" / "Đã dùng" (Story 3.2).
 var _replay_label: Label
 var _end_turn_button: Button
+## Nút bật/tắt tua nhanh pha địch (Story 4.4): không bị set_locked khóa, vì lúc pha địch đang phát mới cần bấm.
+var _fast_button: Button
 ## Chỗ đặt nút mưu kế (giữa Chơi lại và Kết thúc lượt); Stratagem.Kind -> Button của mưu kế trận mở.
 var _stratagem_box: VBoxContainer
 var _stratagem_buttons: Dictionary = {}
@@ -86,6 +90,8 @@ func _ready() -> void:
 	box.add_child(_stratagem_box)
 	_end_turn_button = _button(tr("hud.end_turn"), box)
 	_end_turn_button.pressed.connect(func() -> void: end_turn_pressed.emit())
+	_fast_button = _button(tr("hud.fast.off"), box)
+	_fast_button.pressed.connect(func() -> void: fast_forward_pressed.emit())
 	_hint_label = Label.new()
 	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -179,6 +185,11 @@ func _apply_disabled() -> void:
 		(_stratagem_buttons[kind] as Button).disabled = _over or _locked or _stratagems_used.has(kind)
 
 
+## Chữ nút tua nhanh: "Tua nhanh (T): bật" / "Tua nhanh (T): tắt" (Story 4.4).
+func show_fast_forward(on: bool) -> void:
+	_fast_button.text = tr("hud.fast.on") if on else tr("hud.fast.off")
+
+
 ## Dòng báo pha (Story 2.11, AC 4). `enemy_turn` true khi đang phát hoạt ảnh của quân Nguyên.
 func show_phase(enemy_turn: bool) -> void:
 	_phase_label.text = tr("hud.phase.enemy") if enemy_turn else tr("hud.phase.player")
@@ -232,6 +243,10 @@ func replay_label_text() -> String:
 
 func end_turn_button() -> Button:
 	return _end_turn_button
+
+
+func fast_forward_button() -> Button:
+	return _fast_button
 
 
 func _button(text: String, box: VBoxContainer) -> Button:

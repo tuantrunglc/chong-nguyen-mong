@@ -13,6 +13,8 @@ const BROKEN_STATS: String = PROBE_DIR + "/chi_so.json"
 const BROKEN_CAMPAIGN: String = PROBE_DIR + "/chien_dich.json"
 ## File lưu riêng của file test này (Story 4.3), không đụng file lưu thật.
 const SAVE_FILE: String = "user://test_main_save.json"
+## File cài đặt riêng của file test này (Story 4.4).
+const SETTINGS_FILE: String = "user://test_main_settings.cfg"
 ## Bản sao chi_so.json thật, sửa tầm đi của Khoái (F5, Story 1.6).
 const F5_STATS: String = PROBE_DIR + "/chi_so_f5.json"
 const F5_LOG: String = "[INFO][dev] f5: nạp lại chi_so.json và file trận"
@@ -26,12 +28,17 @@ const BROKEN_ERRORS: Array[String] = [
 var _old_window_title: String = ""
 ## Đường dẫn file lưu trước test (hook tests/pre_run.gd đã đặt): trả lại sau test, không đặt về DEFAULT_PATH.
 var _old_save_path: String = ""
+var _old_settings_path: String = ""
 
 
 func before_each() -> void:
 	# Story 4.3: file lưu riêng cho từng test, không đụng file thật; mỗi test bắt đầu không có file lưu.
 	_old_save_path = SaveSystem.path
 	SaveSystem.path = SAVE_FILE
+	_old_settings_path = PlayerSettings.path
+	PlayerSettings.path = SETTINGS_FILE
+	if FileAccess.file_exists(SETTINGS_FILE):
+		DirAccess.remove_absolute(SETTINGS_FILE)
 	if FileAccess.file_exists(SAVE_FILE):
 		DirAccess.remove_absolute(SAVE_FILE)
 	# Story 4.1: không chọn trận thì mở màn hình chính; test trận vào thẳng trận 1 (test màn hình chính đặt lại "").
@@ -46,6 +53,10 @@ func after_each() -> void:
 	if FileAccess.file_exists(SAVE_FILE):
 		DirAccess.remove_absolute(SAVE_FILE)
 	SaveSystem.path = _old_save_path
+	if FileAccess.file_exists(SETTINGS_FILE):
+		DirAccess.remove_absolute(SETTINGS_FILE)
+	PlayerSettings.path = _old_settings_path
+	AppState.settings = PlayerSettings.new()
 	get_window().title = _old_window_title
 	AppState.launch.dev = false
 	AppState.launch.tran = ""
@@ -744,7 +755,7 @@ func test_battle_keys_do_nothing_on_main_menu() -> void:
 	var input: BattleInput = main._battle_input as BattleInput
 	watch_signals(input)
 	Log.clear()
-	for key: Key in [KEY_SPACE, KEY_Z, KEY_R, KEY_Q, KEY_W, KEY_1, KEY_2, KEY_3]:
+	for key: Key in [KEY_SPACE, KEY_Z, KEY_R, KEY_Q, KEY_W, KEY_T, KEY_1, KEY_2, KEY_3]:
 		var ev: InputEventKey = InputEventKey.new()
 		ev.physical_keycode = key
 		ev.pressed = true
@@ -755,12 +766,14 @@ func test_battle_keys_do_nothing_on_main_menu() -> void:
 	click.position = main._board_view.get_global_transform_with_canvas() * BoardView.cell_center(Vector2i(0, 6))
 	input._unhandled_input(click)
 	for sig: String in ["end_turn_pressed", "undo_pressed", "replay_pressed", "stratagem_key_pressed",
-			"general_key_pressed", "cell_clicked"]:
+			"fast_forward_pressed", "general_key_pressed", "cell_clicked"]:
 		assert_signal_emitted(input, sig, "BattleInput nhận được: " + sig)
 	assert_eq(main._screen, main.Screen.MENU)
 	assert_null(main._controller)
 	assert_true(main.main_menu().visible)
 	assert_eq((main._battle_view as BattleView).selected_id(), BattleView.NONE, "không chọn quân")
+	assert_false((main._battle_view as BattleView).fast_forward(), "T ở menu không bật tua")
+	assert_false(FileAccess.file_exists(SETTINGS_FILE), "T ở menu không ghi cài đặt")
 	for line: String in Log.get_lines():
 		assert_false(line.begins_with("[WARN]") or line.begins_with("[ERROR]"), line)
 
@@ -965,7 +978,7 @@ func test_battle_keys_do_nothing_on_transition() -> void:
 	var input: BattleInput = main._battle_input as BattleInput
 	watch_signals(input)
 	Log.clear()
-	for key: Key in [KEY_SPACE, KEY_Z, KEY_R, KEY_Q, KEY_1]:
+	for key: Key in [KEY_SPACE, KEY_Z, KEY_R, KEY_Q, KEY_T, KEY_1]:
 		var ev: InputEventKey = InputEventKey.new()
 		ev.physical_keycode = key
 		ev.pressed = true
@@ -976,7 +989,7 @@ func test_battle_keys_do_nothing_on_transition() -> void:
 	click.position = main._board_view.get_global_transform_with_canvas() * BoardView.cell_center(Vector2i(0, 5))
 	input._unhandled_input(click)
 	for sig: String in ["end_turn_pressed", "undo_pressed", "replay_pressed", "stratagem_key_pressed",
-			"general_key_pressed", "cell_clicked"]:
+			"fast_forward_pressed", "general_key_pressed", "cell_clicked"]:
 		assert_signal_emitted(input, sig, "BattleInput nhận được: " + sig)
 	assert_eq(main._screen, main.Screen.TRANSITION)
 	assert_null(main._controller)
@@ -1220,3 +1233,125 @@ func test_broken_save_shows_notice_and_allows_new_game() -> void:
 		# Mỗi ca một main: bỏ main của ca này trước ca sau.
 		remove_child(main)
 		main.free()
+
+
+# ---------- Tua nhanh pha địch (Story 4.4) ----------
+
+func _fast_button(main: Node2D) -> Button:
+	return (main._hud as Hud).fast_forward_button()
+
+
+func _press_t(main: Node2D) -> void:
+	var ev: InputEventKey = InputEventKey.new()
+	ev.physical_keycode = KEY_T
+	ev.pressed = true
+	(main._battle_input as BattleInput)._unhandled_input(ev)
+
+
+func _write_settings(text: String) -> void:
+	var file: FileAccess = FileAccess.open(SETTINGS_FILE, FileAccess.WRITE)
+	file.store_string(text)
+	file.close()
+
+
+## Chưa có settings.cfg: tua tắt; nút dưới "Kết thúc lượt", không giữ focus.
+func test_fast_forward_off_by_default() -> void:
+	var main: Node2D = _make_main()
+	var button: Button = _fast_button(main)
+	assert_eq(button.text, "Tua nhanh (T): tắt")
+	assert_eq(button.focus_mode, Control.FOCUS_NONE)
+	assert_gt(button.get_index(), (main._hud as Hud).end_turn_button().get_index(), "dưới Kết thúc lượt")
+	assert_false((main._battle_view as BattleView).fast_forward())
+	assert_has(Log.get_lines(), "[INFO][settings] tốc độ hoạt ảnh pha địch 1")
+
+
+## Bấm nút: bật, đổi chữ, lưu ngay settings.cfg ([hoat_anh] toc_do = 3.0), log; bấm lần nữa thì tắt.
+func test_fast_forward_button_toggles_and_saves() -> void:
+	var main: Node2D = _make_main()
+	_fast_button(main).pressed.emit()
+	assert_eq(_fast_button(main).text, "Tua nhanh (T): bật")
+	assert_true((main._battle_view as BattleView).fast_forward())
+	var config: ConfigFile = ConfigFile.new()
+	assert_eq(config.load(SETTINGS_FILE), OK)
+	assert_eq(config.get_value("hoat_anh", "toc_do"), 3.0)
+	assert_has(Log.get_lines(), "[INFO][settings] tua nhanh: bật")
+	_fast_button(main).pressed.emit()
+	assert_eq(_fast_button(main).text, "Tua nhanh (T): tắt")
+	config = ConfigFile.new()
+	config.load(SETTINGS_FILE)
+	assert_eq(config.get_value("hoat_anh", "toc_do"), 1.0)
+	assert_has(Log.get_lines(), "[INFO][settings] tua nhanh: tắt")
+
+
+## Phím T làm như nút.
+func test_key_t_toggles_fast_forward() -> void:
+	var main: Node2D = _make_main()
+	_press_t(main)
+	assert_true((main._battle_view as BattleView).fast_forward())
+	assert_eq(_fast_button(main).text, "Tua nhanh (T): bật")
+
+
+## Đang phát hoạt ảnh (các nút khác khóa): nút tua vẫn bấm được, phím T vẫn chạy.
+func test_fast_forward_works_while_playing() -> void:
+	var main: Node2D = _make_main()
+	var view: BattleView = main._battle_view as BattleView
+	(main._hud as Hud).set_locked(true)
+	view._playing = true
+	assert_true((main._hud as Hud).end_turn_button().disabled, "điều kiện trước: nút khác đang khóa")
+	assert_false(_fast_button(main).disabled, "nút tua không bị khóa")
+	_press_t(main)
+	assert_true(view.fast_forward())
+
+
+## Tua chỉ áp cho pha địch: Kết thúc lượt phát ở tốc độ 3, lệnh của người chơi ở tốc độ thường.
+func test_fast_speed_only_for_enemy_phase() -> void:
+	var main: Node2D = _make_main()
+	var view: BattleView = main._battle_view as BattleView
+	_press_t(main)
+	main._controller.submit(Command.move(1, Vector2i(0, 5)))
+	assert_eq(view.event_player().played().size(), 1, "điều kiện trước: lệnh đi đã phát")
+	assert_eq(view.event_player().speed(), 1.0, "lệnh đi của người chơi: tốc độ thường")
+	(main._hud as Hud).end_turn_button().pressed.emit()
+	assert_eq(view.event_player().speed(), EventPlayer.FAST_SPEED, "pha địch: tua")
+	_press_t(main)
+	(main._hud as Hud).end_turn_button().pressed.emit()
+	assert_eq(view.event_player().speed(), 1.0, "tắt tua: pha địch tốc độ thường")
+
+
+## Mở lại game: đọc settings.cfg, nút hiện "bật", pha chuẩn bị lúc mở trận (pha địch) đã phát ở tốc độ tua.
+func test_fast_forward_kept_after_reopen() -> void:
+	var first: Node2D = _make_main()
+	_fast_button(first).pressed.emit()
+	Log.clear()
+	var main: Node2D = _make_main()
+	assert_true((main._battle_view as BattleView).fast_forward())
+	assert_eq(_fast_button(main).text, "Tua nhanh (T): bật")
+	assert_eq((main._battle_view as BattleView).event_player().speed(), EventPlayer.FAST_SPEED)
+	assert_has(Log.get_lines(), "[INFO][settings] tốc độ hoạt ảnh pha địch 3")
+
+
+## settings.cfg hỏng hay giá trị lạ: không sập, tốc độ thường, log WARN có tên file; bấm tua thì ghi đè file.
+func test_broken_settings_warn_and_use_normal_speed() -> void:
+	var cases: Dictionary = {
+		"[hoat_anh\ntoc_do=": "[WARN][settings] user://test_main_settings.cfg: không đọc được file cài đặt (mã lỗi ",
+		"[hoat_anh]\ntoc_do=7\n": '[WARN][settings] user://test_main_settings.cfg: "toc_do" là 7, dùng 1',
+	}
+	for text: String in cases:
+		_write_settings(text)
+		Log.clear()
+		var main: Node2D = _make_main()
+		assert_false((main._battle_view as BattleView).fast_forward(), text)
+		var found: bool = false
+		for line: String in Log.get_lines():
+			if line.begins_with(cases[text] as String):
+				found = true
+		assert_true(found, "log WARN cho %s: %s" % [text, Log.get_lines()])
+		assert_eq(main._screen, main.Screen.BATTLE, "vẫn vào trận")
+		_fast_button(main).pressed.emit()
+		var config: ConfigFile = ConfigFile.new()
+		assert_eq(config.load(SETTINGS_FILE), OK, "bấm tua ghi đè file hỏng")
+		assert_eq(config.get_value("hoat_anh", "toc_do"), 3.0)
+		remove_child(main)
+		main.free()
+	# Ca file hỏng: Godot tự in một dòng lỗi phân tích ConfigFile ra console.
+	assert_engine_error("ConfigFile parse error")
