@@ -283,7 +283,7 @@ func _on_playback_finished(snapshot: BattleState) -> void:
 	if _hint_pending:
 		_hint_pending = false
 		if snapshot.phase == BattleState.Phase.PLAYER and _level != null:
-			_hint_panel.show_hint(_level.hints)
+			_hint_panel.show_hint(_level.hints, _board_view.board_rect())
 	var in_campaign: bool = _campaign != null and _campaign.contains(_level_id)
 	if snapshot.phase == BattleState.Phase.WON and in_campaign:
 		_save_progress(_level_id)

@@ -22,6 +22,15 @@ const HINT_FONT_SIZE: int = 20
 const BODY_FONT_SIZE: int = 17
 const NOTE_FONT_SIZE: int = 15
 const PANEL_WIDTH: float = 720.0
+## Bảng gợi ý đầu trận: rộng hơn và đệm mỏng hơn để thấp, nhét vừa dải trống dưới hoặc trên bàn cờ.
+const HINT_PANEL_WIDTH: float = 900.0
+const HINT_PADDING: int = 5
+const HINT_SEPARATION: int = 2
+const HINT_LINE_FONT_SIZE: int = 18
+## Khoảng giữ trống: mép trên (chữ tên game), mép dưới (nhãn FPS và phiên bản), và khe giữa bàn với bảng.
+const TOP_LIMIT: float = 48.0
+const BOTTOM_LIMIT: float = 714.0
+const BOARD_GAP: float = 4.0
 const HELP_COLUMN_WIDTH: float = 190.0
 ## Bảng thao tác theo bảng Controls của GDD: [khóa tên thao tác, khóa cách làm].
 const HELP_ROWS: Array[Array] = [
@@ -37,7 +46,11 @@ const HELP_ROWS: Array[Array] = [
 ]
 
 var _center: CenterContainer
+var _panel: PanelContainer
+var _style: StyleBoxFlat
 var _box: VBoxContainer
+## Bề rộng chữ trong bảng đang dựng (hint và help dùng bề rộng khác nhau).
+var _content_width: float = PANEL_WIDTH - 2.0 * PADDING - 2.0 * BORDER_WIDTH
 var _lines: Array[String] = []
 
 
@@ -47,37 +60,57 @@ func _ready() -> void:
 	_center = CenterContainer.new()
 	_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_center)
-	var panel: PanelContainer = PanelContainer.new()
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0)
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = BACKGROUND_COLOR
-	style.border_color = BORDER_COLOR
-	style.set_border_width_all(BORDER_WIDTH)
-	style.set_content_margin_all(PADDING)
-	panel.add_theme_stylebox_override("panel", style)
-	_center.add_child(panel)
+	_panel = PanelContainer.new()
+	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_style = StyleBoxFlat.new()
+	_style.bg_color = BACKGROUND_COLOR
+	_style.border_color = BORDER_COLOR
+	_style.set_border_width_all(BORDER_WIDTH)
+	_panel.add_theme_stylebox_override("panel", _style)
+	_center.add_child(_panel)
 	_box = VBoxContainer.new()
 	_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_box.add_theme_constant_override("separation", SEPARATION)
-	panel.add_child(_box)
+	_panel.add_child(_box)
+	_set_layout(PANEL_WIDTH, PADDING)
 
 
-## Gợi ý đầu trận: các dòng gợi ý và một dòng nhắc phím ?, ở nửa dưới bàn cờ để còn thấy bàn.
-func show_hint(keys: Array[String]) -> void:
+## Gợi ý đầu trận: các dòng gợi ý và một dòng nhắc phím ?. Đặt ở dải trống ngay dưới bàn cờ, không có chỗ thì
+## ngay trên bàn; cả hai đều không vừa thì mới dán sát đáy màn hình và đè lên mép dưới bàn (bàn lớn lấp gần hết vùng chơi).
+## board_rect: khung bàn cờ trên màn hình (BoardView.board_rect()); rỗng thì coi như không biết bàn nằm đâu.
+func show_hint(keys: Array[String], board_rect: Rect2 = Rect2()) -> void:
 	_clear()
+	_set_layout(HINT_PANEL_WIDTH, HINT_PADDING, HINT_SEPARATION)
 	_lines.clear()
 	for key: String in keys:
 		_lines.append(tr(key))
-		_add_label(_lines[_lines.size() - 1], HINT_FONT_SIZE, HINT_COLOR)
+		_add_label(_lines[_lines.size() - 1], HINT_LINE_FONT_SIZE, HINT_COLOR)
 	_add_label(tr("hint.more"), NOTE_FONT_SIZE, NOTE_COLOR)
-	_open(Rect2(BoardView.AREA.position.x, BoardView.AREA.get_center().y, BoardView.AREA.size.x,
-		BoardView.AREA.size.y / 2.0))
+	_open(_hint_area(board_rect))
+
+
+## Dải màn hình để đặt bảng gợi ý (xem show_hint). Cao tối thiểu bằng chiều cao bảng.
+func _hint_area(board_rect: Rect2) -> Rect2:
+	var area: Rect2 = BoardView.AREA
+	var needed: float = _panel.get_combined_minimum_size().y
+	# Hết chỗ trống: dán sát đáy màn hình để che ít bàn nhất (bàn 10×8 gần lấp hết vùng chơi).
+	var fallback: Rect2 = Rect2(area.position.x, BOTTOM_LIMIT - needed, area.size.x, needed)
+	if board_rect.size == Vector2.ZERO:
+		return fallback
+	var below: Rect2 = Rect2(area.position.x, board_rect.end.y + BOARD_GAP, area.size.x,
+		BOTTOM_LIMIT - board_rect.end.y - BOARD_GAP)
+	if below.size.y >= needed:
+		return below
+	var above: Rect2 = Rect2(area.position.x, TOP_LIMIT, area.size.x, board_rect.position.y - BOARD_GAP - TOP_LIMIT)
+	if above.size.y >= needed:
+		return above
+	return fallback
 
 
 ## Bảng "?" : gợi ý của trận (nếu có) rồi bảng thao tác, giữa bàn cờ.
 func show_help(keys: Array[String]) -> void:
 	_clear()
+	_set_layout(PANEL_WIDTH, PADDING)
 	_lines.clear()
 	for key: String in keys:
 		_lines.append(tr(key))
@@ -95,7 +128,7 @@ func show_help(keys: Array[String]) -> void:
 		grid.add_child(name_label)
 		var how_label: Label = _label(tr(row[1] as String), BODY_FONT_SIZE, Color.WHITE)
 		how_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		how_label.custom_minimum_size = Vector2(PANEL_WIDTH - HELP_COLUMN_WIDTH - 24.0 - 2.0 * PADDING - 2.0 * BORDER_WIDTH, 0)
+		how_label.custom_minimum_size = Vector2(_content_width - HELP_COLUMN_WIDTH - 24.0, 0)
 		grid.add_child(how_label)
 	_add_label(tr("help.close"), NOTE_FONT_SIZE, NOTE_COLOR)
 	_open(BoardView.AREA)
@@ -110,6 +143,11 @@ func hide_panel() -> void:
 
 func is_open() -> bool:
 	return visible
+
+
+## Khung bảng đang hiện trên màn hình (để test vị trí).
+func panel_rect() -> Rect2:
+	return _panel.get_global_rect()
 
 
 ## Các dòng gợi ý đang hiện, đã dịch (để test).
@@ -154,6 +192,14 @@ func _open(area: Rect2) -> void:
 	visible = true
 
 
+## Đổi bề rộng và độ đệm của khung cho kiểu bảng sắp dựng.
+func _set_layout(panel_width: float, padding: int, separation: int = SEPARATION) -> void:
+	_box.add_theme_constant_override("separation", separation)
+	_panel.custom_minimum_size = Vector2(panel_width, 0)
+	_style.set_content_margin_all(padding)
+	_content_width = panel_width - 2.0 * padding - 2.0 * BORDER_WIDTH
+
+
 func _clear() -> void:
 	for child: Node in _box.get_children():
 		_box.remove_child(child)
@@ -164,7 +210,7 @@ func _add_label(text: String, font_size: int, color: Color) -> void:
 	var label: Label = _label(text, font_size, color)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	# Nhãn tự xuống dòng phải có bề rộng sẵn, nếu không bảng tính chiều cao theo bề rộng 0 (cao hàng nghìn px).
-	label.custom_minimum_size = Vector2(PANEL_WIDTH - 2.0 * PADDING - 2.0 * BORDER_WIDTH, 0)
+	label.custom_minimum_size = Vector2(_content_width, 0)
 	_box.add_child(label)
 
 

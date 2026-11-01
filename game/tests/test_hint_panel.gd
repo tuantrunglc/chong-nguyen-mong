@@ -178,3 +178,21 @@ func test_leaving_the_battle_closes_the_panel() -> void:
 	assert_false(_panel(main).is_open(), "về menu thì bảng đóng")
 	_question_mark(main)
 	assert_false(_panel(main).is_open(), "ở menu thì phím ? không mở bảng")
+
+
+## Gợi ý đầu trận không đè lên bàn cờ khi còn dải trống ngay dưới hoặc trên bàn (tác giả báo bị đè, 2026-11-01).
+func test_hint_does_not_cover_board_when_there_is_room() -> void:
+	var overlapping: Array[String] = []
+	for tran: String in ["1", "2", "3", "4", "5", "6"]:
+		AppState.launch.tran = tran
+		var main: Node2D = await _make_main()
+		var panel: HintPanel = _panel(main)
+		if not panel.is_open():
+			continue
+		await get_tree().process_frame
+		var board: Rect2 = (main._board_view as BoardView).board_rect()
+		if panel.panel_rect().intersects(board):
+			overlapping.append(tran)
+		main.queue_free()
+		await get_tree().process_frame
+	assert_eq(overlapping, [] as Array[String], "bảng gợi ý đè lên bàn cờ ở các trận này (không đủ chỗ trống?)")
