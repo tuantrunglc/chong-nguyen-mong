@@ -51,6 +51,8 @@ const CONTENT_MARGIN: float = 8.0
 const WIDTH_SLACK: float = 4.0
 
 var _label: Label
+## Chữ gốc chưa ngắt dòng (text() trả lại đúng chữ này).
+var _text: String = ""
 
 
 func _init() -> void:
@@ -65,7 +67,9 @@ func _init() -> void:
 	add_theme_stylebox_override("panel", style)
 	_label = Label.new()
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# Không dùng tự xuống dòng của Label: nó đo chiều cao theo bề rộng đang có (của lần hiện trước), nên khung cứ cao
+	# như cột (đo thật: 164×589 px cho hai dòng chữ, 340×2101 px cho một dòng dài). Tự ngắt dòng ở _fit_width.
+	_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	add_child(_label)
 
 
@@ -74,7 +78,7 @@ func show_text(text: String) -> void:
 	if text.is_empty():
 		hide_tooltip()
 		return
-	_label.text = text
+	_text = text
 	visible = true
 	_fit_width(text)
 	reset_size()
@@ -82,23 +86,35 @@ func show_text(text: String) -> void:
 	place_at(viewport.get_mouse_position() if viewport != null else Vector2.ZERO)
 
 
-## Cho Label bề rộng bằng dòng dài nhất, không quá `MAX_WIDTH`.
-## Bắt buộc phải có: Label bật autowrap có bề rộng tối thiểu 1 px, nên `reset_size()` một mình sẽ bóp khung
-## thành một cột hẹp và chữ rơi xuống mỗi dòng một ký tự (đo thật: khung 17×637 px).
+## Ngắt dòng theo từ cho vừa MAX_WIDTH rồi cho Label bề rộng bằng dòng dài nhất.
 func _fit_width(text: String) -> void:
 	var font: Font = _label.get_theme_font("font")
 	if font == null:
+		_label.text = text
 		return
 	var font_size: int = _label.get_theme_font_size("font_size")
-	var widest: float = 0.0
-	for line: String in text.split("\n"):
-		widest = maxf(widest, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
 	var room: float = MAX_WIDTH - CONTENT_MARGIN * 2.0
+	var lines: PackedStringArray = PackedStringArray()
+	var widest: float = 0.0
+	for source: String in text.split("\n"):
+		var current: String = ""
+		for word: String in source.split(" "):
+			var trial: String = word if current.is_empty() else current + " " + word
+			if not current.is_empty() and font.get_string_size(trial, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > room:
+				lines.append(current)
+				widest = maxf(widest, font.get_string_size(current, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
+				current = word
+			else:
+				current = trial
+		lines.append(current)
+		widest = maxf(widest, font.get_string_size(current, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
+	_label.text = "\n".join(lines)
 	_label.custom_minimum_size = Vector2(minf(widest + WIDTH_SLACK, room), 0.0)
 
 
 func hide_tooltip() -> void:
 	visible = false
+	_text = ""
 	_label.text = ""
 
 
@@ -120,7 +136,7 @@ func place_at(anchor: Vector2) -> void:
 
 ## Nội dung đang hiện (để test).
 func text() -> String:
-	return _label.text if _label != null else ""
+	return _text
 
 
 ## Đang hiện và có chữ (để test).
