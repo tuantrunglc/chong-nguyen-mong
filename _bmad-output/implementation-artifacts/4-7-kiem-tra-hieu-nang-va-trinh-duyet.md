@@ -4,7 +4,7 @@ baseline_commit: 810188a
 
 # Story 4.7: Kiểm tra hiệu năng và trình duyệt
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -51,9 +51,9 @@ tôi muốn biết game chạy ổn trên máy người thân,
   - [x] 4.2 Chạy `tools/build_web.sh` trên commit hiện tại, ghi bản nén/chưa nén (AC 3). **Không** chạy `deploy_itch.sh` khi chưa được phép.
   - [x] 4.3 Soạn mục "Đo hiệu năng và trình duyệt (Story 4.7)" trong `NEXT-STEPS.md`: bảng trống cho tác giả điền (3 trình duyệt × mở được / chữ đúng / lưu còn / FPS trận 1 / FPS min trận 6) và các bước từng nước: `tools/chay_web.sh` → mở link `?dev=1&tran=6` → chơi hiệp 4–5 → đọc "FPS …" → báo AI. Có bước đo tải 20 Mbps bằng DevTools (Network › Throttling › tạo profile 20 Mbps, tick Disable cache, F5, đọc Finish/Load).
   - [x] 4.4 Chụp GoPeak (`tools/chay.sh --dev`) xác nhận chữ FPS ở góc, không đè HUD/nút.
-- [ ] **Task 5: Bàn giao** (AC: 3, 6, 7, 9)
-  - [ ] 5.1 `tools/test.sh` xanh. Cập nhật Dev Agent Record, `sprint-status.yaml`, `NEXT-STEPS.md` (số đo AI đo được: dung lượng, pha dài nhất, không kẹt).
-  - [ ] 5.2 **[Tác giả đo]** các ô AC 3, 6, 7 còn trống: story chỉ `done` sau khi tác giả đo xong và nói "duyệt" (hoặc ghi rõ ô nào hoãn và vì sao). Khi tác giả đo thì AI điền số vào `NEXT-STEPS.md`, không tự đoán số.
+- [x] **Task 5: Bàn giao** (AC: 3, 6, 7, 9)
+  - [x] 5.1 `tools/test.sh` xanh. Cập nhật Dev Agent Record, `sprint-status.yaml`, `NEXT-STEPS.md` (số đo AI đo được: dung lượng, pha dài nhất, không kẹt).
+  - [x] 5.2 **[Tác giả đo]** các ô AC 3, 6, 7 còn trống: story chỉ `done` sau khi tác giả đo xong và nói "duyệt" (hoặc ghi rõ ô nào hoãn và vì sao). Khi tác giả đo thì AI điền số vào `NEXT-STEPS.md`, không tự đoán số.
 
 ## Dev Notes
 
@@ -124,6 +124,7 @@ Bàn ≤ 10×8, ít node, `Compatibility` renderer. Nghi phạm theo thứ tự:
 
 ### Completion Notes List
 
+- 2026-11-01: tác giả báo đã đo xong AC 3, 6, 7 trên máy thật (game web nhẹ), sẽ tự điền bảng trong `NEXT-STEPS.md` sau. Số của tác giả chưa có trong repo; AI không điền thay.
 - Ultimate context engine analysis completed - comprehensive developer guide created
 
 ### File List
