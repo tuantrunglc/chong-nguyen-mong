@@ -7,6 +7,9 @@ var launch: LaunchOptions
 var stats: Stats = null
 ## Cài đặt người chơi (Story 4.4); main.gd nạp từ user://settings.cfg lúc mở game.
 var settings: PlayerSettings = PlayerSettings.new()
+## Tắt thì bảng gợi ý đầu trận không tự hiện (Story 4.8). tests/pre_run.gd tắt để test cũ không bị bảng chặn;
+## nút/phím "?" vẫn mở được bảng.
+var hints_enabled: bool = true
 
 
 func _ready() -> void:

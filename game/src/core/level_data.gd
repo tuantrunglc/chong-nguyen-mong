@@ -59,6 +59,8 @@ var reinforcements: Array[Reinforcement] = []
 var stratagems: Array[int] = []
 ## Mưu kế đã dùng lúc bắt đầu (chỉ kịch bản luật ghi, "truoc.muu_ke_da_dung"); file trận luôn rỗng.
 var stratagems_used: Array[int] = []
+## Khóa dịch của gợi ý luật đầu trận ("goi_y", Story 4.8): 0–2 khóa, chữ nằm trong i18n/text.csv. Rỗng là không gợi ý.
+var hints: Array[String] = []
 
 
 func terrain_at(cell: Vector2i) -> int:

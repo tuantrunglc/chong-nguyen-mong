@@ -167,3 +167,35 @@ dev.copied,Đã sao chép báo lỗi
 dev.fps,FPS %d (thấp nhất %d)
 dev.copied_no_battle,Đã sao chép báo lỗi (không có trận)
 board.damage_penalty,−%d
+hud.help,"? Thao tác"
+help.title,Thao tác và phím tắt
+help.close,Bấm bất kỳ đâu để tiếp tục
+hint.more,"Bấm ? để xem phím tắt. Bấm bất kỳ đâu để tiếp tục."
+help.select,Chọn tướng
+help.select.how,Bấm vào tướng · phím 1 2 3
+help.move,Đi
+help.move.how,Bấm vào ô sáng
+help.attack,Đánh
+help.attack.how,Bấm vào mục tiêu trong tầm (tướng đã đi rồi thì bấm thêm lần nữa để xác nhận)
+help.info,Xem thông tin
+help.info.how,Rê chuột lên quân hoặc lên ô
+help.stratagem,Dùng mưu kế
+help.stratagem.how,Bấm nút mưu kế · phím Q W
+help.undo,Hủy nước đi
+help.undo.how,Bấm nút Hủy · phím Z
+help.end_turn,Kết thúc lượt
+help.end_turn.how,Bấm nút Kết thúc lượt · phím Space
+help.replay,Chơi lại hiệp
+help.replay.how,Bấm nút Chơi lại · phím R
+help.fast,Tua nhanh pha địch
+help.fast.how,Bấm nút Tua nhanh · phím T
+hint.tran_01.1,Ô đỏ là nơi địch sắp đánh. Nguyễn Khoái đẩy được địch xuống sông.
+hint.tran_02.1,Kỵ binh xung phong thẳng hàng: đứng ra khỏi hàng hoặc dùng rừng chặn đường.
+hint.tran_02.2,Địch đánh trúng nhau được.
+hint.tran_03.1,Trần Khánh Dư kéo địch về phía mình; hầm chông làm mất 1 máu.
+hint.tran_03.2,Hết số hiệp (hiện ở bảng bên phải) mà còn quân Nguyên là thua.
+hint.tran_04.1,Bảo vệ làng: mỗi lần làng bị đánh Lòng dân giảm 1. Hết Lòng dân là thua.
+hint.tran_05.1,Giữ ải: sống hết hiệp cuối và không để quân Nguyên vào ô ải. Cuối hiệp có ô báo tiếp viện.
+hint.tran_05.2,Kho lương chặn đòn; Vườn không nhà trống (Q) đốt kho lương và trừ máu địch.
+hint.tran_06.1,Tổng hợp mọi luật đã học; quân tiếp viện đến mỗi hiệp.
+hint.tran_06.2,Sát Thát (W): đòn của tướng +1 sát thương trong lượt đó.

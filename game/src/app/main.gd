@@ -43,6 +43,10 @@ var _battle_view: BattleView
 var _hud: Hud
 var _tooltip: Tooltip
 var _result_banner: ResultBanner
+## Bảng gợi ý đầu trận và bảng thao tác (Story 4.8).
+var _hint_panel: HintPanel
+## Còn chờ hiện gợi ý đầu trận: đặt lúc mở trận, hiện khi pha địch mở trận phát xong.
+var _hint_pending: bool = false
 var _notice: Notice
 var _version_label: Label
 ## Số lần mở game (SaveProbe) — báo cáo F2 ghi kèm.
@@ -93,6 +97,13 @@ func _ready() -> void:
 	_level_transition.next_pressed.connect(_start_battle)
 	_level_transition.menu_pressed.connect(_show_menu)
 	add_child(_level_transition)
+	# Bảng gợi ý (Story 4.8): trên mọi màn của trận, dưới thông báo và nhãn phiên bản. Nằm sau BattleInput trong cây
+	# nên nhận phím trước nó (đang mở thì nuốt phím).
+	_hint_panel = HintPanel.new()
+	_hint_panel.size = BoardView.viewport_size
+	_hint_panel.help_requested.connect(_show_help)
+	add_child(_hint_panel)
+	_hud.help_pressed.connect(_show_help)
 	_notice = Notice.new()
 	_notice.name = "Notice"
 	add_child(_notice)
@@ -169,7 +180,8 @@ func _on_continue() -> void:
 ## Nạp chỉ số, chuỗi trận và trận _level_id (chưa có thì trận đầu của chuỗi). Luôn nạp đủ các file để liệt kê đủ
 ## lỗi của cả ba; chuỗi trận hỏng mà chưa chọn trận thì không có trận nào để nạp.
 ## F5 (_reload_data), nút "Đánh lại trận này" và nút "Tiếp" của màn chuyển trận gọi lại hàm này.
-func _start_battle() -> void:
+## show_hints false (F5 của dev): nạp lại dữ liệu giữa trận không hiện lại gợi ý đầu trận.
+func _start_battle(show_hints: bool = true) -> void:
 	var stats_result: LoadResult = StatsLoader.load_stats(stats_path)
 	var campaign_result: LoadResult = CampaignLoader.load_campaign(campaign_path, DATA_LEVEL_DIR)
 	if _level_id.is_empty() and campaign_result.ok:
@@ -201,6 +213,8 @@ func _start_battle() -> void:
 	_level = level_result.data as LevelData
 	Log.info("battle", "nạp trận %s" % level_id)
 	_result_banner.hide_result()
+	_hint_panel.hide_panel()
+	_hint_pending = show_hints and AppState.hints_enabled and not _level.hints.is_empty()
 	_controller = BattleController.new()
 	_controller.start(_level, AppState.stats)
 	# Bàn "trước lệnh" phải có trước: hoạt ảnh chạy trên nó, xong mới vẽ bản chụp cuối (Story 2.11).
@@ -218,7 +232,7 @@ func _start_battle() -> void:
 ## Không đếm lại lần mở, không khởi động lại MCP.
 func _reload_data() -> void:
 	Log.info("dev", "f5: nạp lại chi_so.json và file trận")
-	_start_battle()
+	_start_battle(false)
 
 
 ## F2 (chỉ khi bật dev): sao chép báo lỗi vào clipboard rồi báo trên màn hình (Story 2.13).
@@ -265,6 +279,11 @@ func _report_meta() -> Dictionary:
 ## Trận có trong chuỗi thì thắng có nút "Tiếp" (Story 4.2), và tự lưu ngay lúc hiện bảng Thắng! (Story 4.3).
 func _on_playback_finished(snapshot: BattleState) -> void:
 	_show_board(snapshot)
+	# Gợi ý đầu trận hiện ngay khi pha địch mở trận phát xong, một lần cho mỗi lần mở trận (Story 4.8).
+	if _hint_pending:
+		_hint_pending = false
+		if snapshot.phase == BattleState.Phase.PLAYER and _level != null:
+			_hint_panel.show_hint(_level.hints)
 	var in_campaign: bool = _campaign != null and _campaign.contains(_level_id)
 	if snapshot.phase == BattleState.Phase.WON and in_campaign:
 		_save_progress(_level_id)
@@ -398,12 +417,22 @@ func _refresh_save() -> void:
 
 ## Rời trận (màn hình lỗi, menu, màn chuyển trận): bỏ controller, dừng hoạt ảnh, ẩn bảng kết quả, xóa và ẩn bàn cờ.
 func _stop_battle() -> void:
+	_hint_pending = false
+	_hint_panel.hide_panel()
 	_hide_error()
 	_controller = null
 	_battle_view.stop()
 	_result_banner.hide_result()
 	_show_board(null)
 	_board_view.visible = false
+
+
+## Nút hoặc phím "?" (Story 4.8): gợi ý của trận (nếu có) và bảng thao tác. Chỉ khi đang có trận.
+func _show_help() -> void:
+	if _screen != Screen.BATTLE or _level == null:
+		return
+	_hint_pending = false
+	_hint_panel.show_help(_level.hints)
 
 
 ## Vẽ bản chụp lên bàn cờ (và tọa độ F1 nếu bật dev); null là bàn trống.

@@ -33,5 +33,6 @@
     { "hiep": 5, "o": "9,4", "loai": "K" },
     { "hiep": 5, "o": "0,6", "loai": "B" }
   ],
-  "muu_ke_mo": ["vuon_khong_nha_trong", "sat_that"]
+  "muu_ke_mo": ["vuon_khong_nha_trong", "sat_that"],
+  "goi_y": ["hint.tran_06.1", "hint.tran_06.2"]
 }

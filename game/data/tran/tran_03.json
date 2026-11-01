@@ -21,5 +21,6 @@
   ],
   "thu_tu_dich": ["4,0", "3,2", "2,4"],
   "tiep_vien": [],
-  "muu_ke_mo": []
+  "muu_ke_mo": [],
+  "goi_y": ["hint.tran_03.1", "hint.tran_03.2"]
 }

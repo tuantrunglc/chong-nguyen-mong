@@ -27,5 +27,6 @@
   "tiep_vien": [
     { "hiep": 3, "o": "7,7", "loai": "K" }
   ],
-  "muu_ke_mo": ["vuon_khong_nha_trong"]
+  "muu_ke_mo": ["vuon_khong_nha_trong"],
+  "goi_y": ["hint.tran_05.1", "hint.tran_05.2"]
 }

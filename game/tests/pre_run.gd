@@ -14,3 +14,5 @@ func run() -> void:
 	PlayerSettings.path = TEST_SETTINGS_PATH
 	if FileAccess.file_exists(TEST_SETTINGS_PATH):
 		DirAccess.remove_absolute(TEST_SETTINGS_PATH)
+	# Story 4.8: gợi ý đầu trận sẽ nuốt cú bấm đầu của mọi test mở trận thật; test của 4.8 tự bật lại.
+	AppState.hints_enabled = false

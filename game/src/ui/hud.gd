@@ -11,6 +11,8 @@ signal end_turn_pressed
 signal stratagem_pressed(kind: int)
 ## Bấm nút "Tua nhanh" (Story 4.4).
 signal fast_forward_pressed
+## Bấm nút "?" (Story 4.8): bảng gợi ý và thao tác.
+signal help_pressed
 
 ## Góc trên trái và bề rộng: bên phải bàn cờ (bàn nằm trong BoardView.AREA, x 16–956).
 const PANEL_POSITION: Vector2 = Vector2(972, 52)
@@ -34,6 +36,8 @@ var _replay_label: Label
 var _end_turn_button: Button
 ## Nút bật/tắt tua nhanh pha địch (Story 4.4): không bị set_locked khóa, vì lúc pha địch đang phát mới cần bấm.
 var _fast_button: Button
+## Nút "?" (Story 4.8): như nút tua, không bị set_locked khóa.
+var _help_button: Button
 ## Chỗ đặt nút mưu kế (giữa Chơi lại và Kết thúc lượt); Stratagem.Kind -> Button của mưu kế trận mở.
 var _stratagem_box: VBoxContainer
 var _stratagem_buttons: Dictionary = {}
@@ -92,6 +96,8 @@ func _ready() -> void:
 	_end_turn_button.pressed.connect(func() -> void: end_turn_pressed.emit())
 	_fast_button = _button(tr("hud.fast.off"), box)
 	_fast_button.pressed.connect(func() -> void: fast_forward_pressed.emit())
+	_help_button = _button(tr("hud.help"), box)
+	_help_button.pressed.connect(func() -> void: help_pressed.emit())
 	_hint_label = Label.new()
 	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -247,6 +253,10 @@ func end_turn_button() -> Button:
 
 func fast_forward_button() -> Button:
 	return _fast_button
+
+
+func help_button() -> Button:
+	return _help_button
 
 
 func _button(text: String, box: VBoxContainer) -> Button:

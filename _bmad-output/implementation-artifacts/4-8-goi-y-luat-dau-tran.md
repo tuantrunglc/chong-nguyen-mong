@@ -4,7 +4,7 @@ baseline_commit: b66d6fc
 
 # Story 4.8: Gợi ý luật đầu trận
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -37,27 +37,27 @@ _Đây là phần hướng dẫn của prototype (tác giả chốt 2026-10-18):
 
 ## Tasks / Subtasks
 
-- [ ] **Task 0: Tác giả trả lời Câu hỏi 1–4** (cuối file) và duyệt chữ gợi ý ở AC 5.
-- [ ] **Task 1: Dữ liệu `goi_y`** (AC: 1, 5)
-  - [ ] 1.1 `LevelData` thêm `hints: Array[String]` (khóa dịch). `LevelLoader`: `"goi_y"` vào `KNOWN_KEYS`, `_read_hints` kiểm mảng 1–2 chuỗi không rỗng, lỗi mẫu `'%s: "goi_y" ...'` như `_read_name`/`_read_max_rounds`. Không có khóa thì `hints = []`.
-  - [ ] 1.2 Thêm `goi_y` vào 6 file `data/tran/tran_01..06.json` (trận thử `thu_*` không cần). Thêm khóa `hint.tran_0N.M` vào `i18n/text.csv` đúng chữ AC 5 (sau khi tác giả duyệt). Nhớ chép lại `text.vi.translation` (như 4.7: chạy `tools/test.sh` hoặc `--import` sinh lại file).
-  - [ ] 1.3 Test loader: khóa hợp lệ, thiếu khóa, sai kiểu (chuỗi thay vì mảng, phần tử số, mảng rỗng, 3 phần tử). Test dữ liệu: mọi trận trong `chien_dich.json` có `goi_y` (theo Câu hỏi 1), mọi khóa có trong `text.csv` (`TranslationServer.translate(key) != key`), mỗi dòng ≤ 120 ký tự.
-- [ ] **Task 2: Bảng gợi ý** (AC: 2, 3, 4, 6)
-  - [ ] 2.1 Tạo `game/src/ui/hint_panel.gd` (`class_name HintPanel`, `Control` toàn cửa sổ, `mouse_filter = STOP`, ẩn mặc định; theo mẫu `result_banner.gd`/`level_transition.gd`, người gọi đặt `size`). API: `show_hint(keys: Array[String])` (phần gợi ý + dòng nhắc "?"), `show_help(keys: Array[String])` (gợi ý nếu có + bảng thao tác), `hide_panel()`, `is_open()`. Tín hiệu `closed`.
-  - [ ] 2.2 `_gui_input`: chuột trái bấm bất kỳ → đóng, `accept_event()`. Phím `Esc`/`?` đóng. Chữ bảng thao tác lấy từ khóa `help.*` trong `text.csv` (9 dòng của AC 4, mỗi dòng "Thao tác — chuột — phím").
-  - [ ] 2.3 Chặn phím trận khi đang mở: `BattleInput.set_process_unhandled_input(false)` (hoặc cờ `blocked`) khi `open`, bật lại khi `closed`; không đổi tên hay hành vi action đã có. Nhớ bật lại khi chuyển màn (menu, màn chuyển trận, màn lỗi): bảng đóng khi rời trận.
-  - [ ] 2.4 `Hud` thêm nút "?" (`hud.help`), tín hiệu `help_pressed`; không bị `set_locked` khóa (như nút Tua nhanh, `_fast_button`). Phím `?` nhận trong `BattleInput` (hoặc `main.gd` `_unhandled_input`) qua `InputEventKey.unicode == 63`, không echo; không dùng `physical_keycode` (layout).
-- [ ] **Task 3: Nối vào `main.gd`** (AC: 2, 3, 7)
-  - [ ] 3.1 Dựng `HintPanel` trong `main.tscn`/`_ready` (như `_result_banner`), thứ tự: trên `_board_view`, `_hud`, `_tooltip`, `_result_banner`, `_level_transition`; dưới `Notice` và `_version_label`, `FpsOverlay` (CanvasLayer). Cập nhật `test_transition_layer_order` nếu thứ tự lớp đổi (đã có test thứ tự lớp ở `test_main.gd`).
-  - [ ] 3.2 Hiện gợi ý khi pha địch mở trận phát xong (`_on_playback_finished` lần đầu của trận, xem `main.gd:266`): chỉ lần đầu của mỗi lần `_start_battle()`, không phải mỗi pha. `AppState.hints_enabled` false thì bỏ qua. Không hiện khi `Chơi lại hiệp`, F5 giữa trận. Đóng bảng khi `_stop_battle()`/`_show_menu()`/`_show_transition()`.
-  - [ ] 3.3 `tests/pre_run.gd` đặt `AppState.hints_enabled = false` (như `SaveSystem.path`), để test cũ không bị chặn; test mới tự bật.
-- [ ] **Task 4: Test GUT** (AC: 1–4, 7)
-  - [ ] 4.1 `tests/test_hint_panel.gd`: mở/đóng bằng bấm chuột (bấm xuyên không chọn tướng: kiểm sau bấm `_controller` không có lệnh mới), Esc, `?`; phím `Space` khi mở không kết thúc lượt; sau đóng thì phím lại hoạt động; chữ có đủ 9 thao tác; nút "?" bấm được khi `Hud.set_locked(true)`.
-  - [ ] 4.2 `test_main.gd`: mở trận 1 với `hints_enabled = true` → sau khi pha mở trận phát xong bảng hiện đúng chữ trận 1; "Chơi lại hiệp" (R) không hiện lại; "Đánh lại trận" hiện lại (theo Câu hỏi 2); trận không có `goi_y` thì không hiện; sang trận kế đóng bảng cũ.
-  - [ ] 4.3 Test phím `?` trên layout khác nhau: `InputEventKey` với `unicode = 63` và `physical_keycode` khác nhau đều mở.
+- [x] **Task 0: Tác giả trả lời Câu hỏi 1–4** (cuối file) và duyệt chữ gợi ý ở AC 5.
+- [x] **Task 1: Dữ liệu `goi_y`** (AC: 1, 5)
+  - [x] 1.1 `LevelData` thêm `hints: Array[String]` (khóa dịch). `LevelLoader`: `"goi_y"` vào `KNOWN_KEYS`, `_read_hints` kiểm mảng 1–2 chuỗi không rỗng, lỗi mẫu `'%s: "goi_y" ...'` như `_read_name`/`_read_max_rounds`. Không có khóa thì `hints = []`.
+  - [x] 1.2 Thêm `goi_y` vào 6 file `data/tran/tran_01..06.json` (trận thử `thu_*` không cần). Thêm khóa `hint.tran_0N.M` vào `i18n/text.csv` đúng chữ AC 5 (sau khi tác giả duyệt). Nhớ chép lại `text.vi.translation` (như 4.7: chạy `tools/test.sh` hoặc `--import` sinh lại file).
+  - [x] 1.3 Test loader: khóa hợp lệ, thiếu khóa, sai kiểu (chuỗi thay vì mảng, phần tử số, mảng rỗng, 3 phần tử). Test dữ liệu: mọi trận trong `chien_dich.json` có `goi_y` (theo Câu hỏi 1), mọi khóa có trong `text.csv` (`TranslationServer.translate(key) != key`), mỗi dòng ≤ 120 ký tự.
+- [x] **Task 2: Bảng gợi ý** (AC: 2, 3, 4, 6)
+  - [x] 2.1 Tạo `game/src/ui/hint_panel.gd` (`class_name HintPanel`, `Control` toàn cửa sổ, `mouse_filter = STOP`, ẩn mặc định; theo mẫu `result_banner.gd`/`level_transition.gd`, người gọi đặt `size`). API: `show_hint(keys: Array[String])` (phần gợi ý + dòng nhắc "?"), `show_help(keys: Array[String])` (gợi ý nếu có + bảng thao tác), `hide_panel()`, `is_open()`. Tín hiệu `closed`.
+  - [x] 2.2 `_gui_input`: chuột trái bấm bất kỳ → đóng, `accept_event()`. Phím `Esc`/`?` đóng. Chữ bảng thao tác lấy từ khóa `help.*` trong `text.csv` (9 dòng của AC 4, mỗi dòng "Thao tác — chuột — phím").
+  - [x] 2.3 Chặn phím trận khi đang mở: `BattleInput.set_process_unhandled_input(false)` (hoặc cờ `blocked`) khi `open`, bật lại khi `closed`; không đổi tên hay hành vi action đã có. Nhớ bật lại khi chuyển màn (menu, màn chuyển trận, màn lỗi): bảng đóng khi rời trận.
+  - [x] 2.4 `Hud` thêm nút "?" (`hud.help`), tín hiệu `help_pressed`; không bị `set_locked` khóa (như nút Tua nhanh, `_fast_button`). Phím `?` nhận trong `BattleInput` (hoặc `main.gd` `_unhandled_input`) qua `InputEventKey.unicode == 63`, không echo; không dùng `physical_keycode` (layout).
+- [x] **Task 3: Nối vào `main.gd`** (AC: 2, 3, 7)
+  - [x] 3.1 Dựng `HintPanel` trong `main.tscn`/`_ready` (như `_result_banner`), thứ tự: trên `_board_view`, `_hud`, `_tooltip`, `_result_banner`, `_level_transition`; dưới `Notice` và `_version_label`, `FpsOverlay` (CanvasLayer). Cập nhật `test_transition_layer_order` nếu thứ tự lớp đổi (đã có test thứ tự lớp ở `test_main.gd`).
+  - [x] 3.2 Hiện gợi ý khi pha địch mở trận phát xong (`_on_playback_finished` lần đầu của trận, xem `main.gd:266`): chỉ lần đầu của mỗi lần `_start_battle()`, không phải mỗi pha. `AppState.hints_enabled` false thì bỏ qua. Không hiện khi `Chơi lại hiệp`, F5 giữa trận. Đóng bảng khi `_stop_battle()`/`_show_menu()`/`_show_transition()`.
+  - [x] 3.3 `tests/pre_run.gd` đặt `AppState.hints_enabled = false` (như `SaveSystem.path`), để test cũ không bị chặn; test mới tự bật.
+- [x] **Task 4: Test GUT** (AC: 1–4, 7)
+  - [x] 4.1 `tests/test_hint_panel.gd`: mở/đóng bằng bấm chuột (bấm xuyên không chọn tướng: kiểm sau bấm `_controller` không có lệnh mới), Esc, `?`; phím `Space` khi mở không kết thúc lượt; sau đóng thì phím lại hoạt động; chữ có đủ 9 thao tác; nút "?" bấm được khi `Hud.set_locked(true)`.
+  - [x] 4.2 `test_main.gd`: mở trận 1 với `hints_enabled = true` → sau khi pha mở trận phát xong bảng hiện đúng chữ trận 1; "Chơi lại hiệp" (R) không hiện lại; "Đánh lại trận" hiện lại (theo Câu hỏi 2); trận không có `goi_y` thì không hiện; sang trận kế đóng bảng cũ.
+  - [x] 4.3 Test phím `?` trên layout khác nhau: `InputEventKey` với `unicode = 63` và `physical_keycode` khác nhau đều mở.
 - [ ] **Task 5: Chụp và bàn giao** (AC: 6, 8)
-  - [ ] 5.1 Chụp GoPeak `tools/chay.sh --dev --tran=1` (và 4, 6): bảng đầu trận, bảng "?" có bảng thao tác; kiểm chữ có dấu, không che cột nút, không tràn khung. (`inject_*` có thể không có tác dụng như 4.6: dùng script tạm trong scratchpad đẩy chuột bằng `root.push_input`.)
-  - [ ] 5.2 `tools/test.sh` xanh. Cập nhật Dev Agent Record, `sprint-status.yaml`.
+  - [x] 5.1 Chụp GoPeak `tools/chay.sh --dev --tran=1` (và 4, 6): bảng đầu trận, bảng "?" có bảng thao tác; kiểm chữ có dấu, không che cột nút, không tràn khung. (`inject_*` có thể không có tác dụng như 4.6: dùng script tạm trong scratchpad đẩy chuột bằng `root.push_input`.)
+  - [x] 5.2 `tools/test.sh` xanh. Cập nhật Dev Agent Record, `sprint-status.yaml`.
   - [ ] 5.3 **Tác giả thử tay** (Cho/Khi/Thì): (a) `tools/chay.sh`, Chơi mới: thấy bảng trận 1 sau khi địch đi xong; bấm bất kỳ đâu → tắt, không có tướng nào bị chọn. (b) Gõ Space khi bảng đang hiện: không kết thúc lượt. (c) Bấm "?" hoặc gõ Shift+`/`: thấy bảng thao tác. (d) Qua trận 3, 4: bảng đúng chữ. Story chỉ `done` sau khi tác giả duyệt.
 
 ## Dev Notes
@@ -126,8 +126,19 @@ Rất nhiều test (`test_main.gd`, `test_battle_view.gd`, `test_stratagem_view.
 
 ### Debug Log References
 
+- Tác giả chốt "theo đề xuất hết" (2026-11-01): cả 6 trận có gợi ý; hiện ở đầu mỗi lần mở trận (kể cả "Đánh lại trận này", `--dev --tran=N`), không hiện khi Chơi lại hiệp hay F5; phím trận bị nuốt khi bảng mở (chỉ Esc, ? tắt); bấm "?" hiện cả gợi ý và bảng thao tác.
+- `tools/test.sh`: 905/905 (+13: `test_hint_panel` 8, `test_hints_data` 5). Đột biến: đổi `mouse_filter` bảng sang IGNORE và bỏ nuốt phím thì 5 assert của `test_hint_panel` trượt (bấm xuyên xuống tướng, Space kết thúc lượt).
+- Lỗi thật tìm ra khi chụp GoPeak: nhãn tự xuống dòng không có bề rộng sẵn nên bảng cao 2439 px (nằm ngoài màn, test không thấy vì chỉ kiểm `is_open`). Sửa bằng `custom_minimum_size.x` cho nhãn. Chụp lại: bảng đầu trận trận 1 và bảng "?" (gợi ý + 9 thao tác) hiển thị đúng chữ, không che cột nút.
+- Bảng đầu trận nằm nửa dưới bàn và có thể che hàng tướng ở bàn nhỏ (trận 1); chấp nhận vì bấm là tắt.
+- F5 (dev) gọi `_start_battle(false)`; nút Đánh lại/Tiếp gọi `_start_battle()` mặc định hiện gợi ý.
+
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
 
 ### File List
+
+- `game/src/ui/hint_panel.gd` (mới), `game/src/ui/hud.gd` (nút "?"), `game/src/app/main.gd`, `game/src/app/app_state.gd` (`hints_enabled`)
+- `game/src/core/level_data.gd` (`hints`), `game/src/data/level_loader.gd` (`goi_y`)
+- `game/data/tran/tran_01..06.json` (`goi_y`), `game/i18n/text.csv`, `game/i18n/text.vi.translation`
+- `game/tests/pre_run.gd`, `game/tests/test_hint_panel.gd` (mới), `game/tests/test_hints_data.gd` (mới)

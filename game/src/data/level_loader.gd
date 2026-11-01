@@ -14,8 +14,11 @@ const KINDS: Dictionary = {
 
 const KNOWN_KEYS: Array[String] = [
 	"phien_ban_dinh_dang", "ten", "kieu", "dia_hinh", "quan", "thu_tu_dich",
-	"tiep_vien", "muu_ke_mo", "so_hiep_toi_da", "long_dan",
+	"tiep_vien", "muu_ke_mo", "so_hiep_toi_da", "long_dan", "goi_y",
 ]
+
+## Số khóa gợi ý tối đa mỗi trận (epic 4.8: 1–2 dòng).
+const MAX_HINTS: int = 2
 
 const GENERAL_SYMBOLS: Array[String] = BoardLayers.GENERAL_SYMBOLS
 
@@ -81,6 +84,8 @@ static func parse_level(text: String, file: String) -> LoadResult:
 	if root.has("muu_ke_mo"):
 		stratagems = BoardLayers.read_stratagems(root["muu_ke_mo"], "muu_ke_mo", file, result)
 
+	var hints: Array[String] = _read_hints(root, file, result)
+
 	if not result.ok:
 		return result
 	var level: LevelData = LevelData.new()
@@ -93,6 +98,7 @@ static func parse_level(text: String, file: String) -> LoadResult:
 	level.terrain = BoardLayers.terrain_values(terrain_rows)
 	level.reinforcements = reinforcements
 	level.stratagems = stratagems
+	level.hints = hints
 	for symbol: String in GENERAL_SYMBOLS:
 		if generals.has(symbol):
 			level.units.append(LevelData.UnitPlacement.new(BoardText.UNIT_SYMBOLS[symbol] as int, generals[symbol] as Vector2i))
@@ -136,6 +142,28 @@ static func _read_max_rounds(root: Dictionary, file: String, result: LoadResult)
 		return 0
 	var val: Variant = JsonFile.get_int(root, "so_hiep_toi_da", "so_hiep_toi_da", 1, file, result)
 	return int(val) if val != null else 0
+
+
+## "goi_y" (Story 4.8): mảng 1–2 khóa dịch, mỗi khóa là chuỗi không rỗng. Không có khóa này thì không gợi ý.
+static func _read_hints(root: Dictionary, file: String, result: LoadResult) -> Array[String]:
+	var hints: Array[String] = []
+	if not root.has("goi_y"):
+		return hints
+	var raw: Variant = root["goi_y"]
+	if not raw is Array:
+		result.add_error(JsonFile.type_error(file, "goi_y", "một mảng khóa dịch", raw))
+		return hints
+	var items: Array = raw as Array
+	if items.is_empty() or items.size() > MAX_HINTS:
+		result.add_error('%s: "goi_y" phải có 1 đến %d khóa dịch, đang có %d' % [file, MAX_HINTS, items.size()])
+		return hints
+	for i: int in range(items.size()):
+		var item: Variant = items[i]
+		if not item is String or (item as String).strip_edges().is_empty():
+			result.add_error(JsonFile.type_error(file, "goi_y[%d]" % i, "một khóa dịch (chuỗi không rỗng)", item))
+			continue
+		hints.append((item as String).strip_edges())
+	return hints
 
 
 static func _read_long_dan(root: Dictionary, terrain_rows: Array, terrain_clean: bool, file: String, result: LoadResult) -> int:
