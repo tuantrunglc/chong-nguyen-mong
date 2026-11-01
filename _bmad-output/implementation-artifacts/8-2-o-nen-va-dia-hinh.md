@@ -4,7 +4,7 @@ baseline_commit: 142292a
 
 # Story 8.2: Ô nền và địa hình
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -43,29 +43,29 @@ _Chốt 2026-11-01 (tác giả): 6 trận hiện có đều là đất liền v�
 
 ## Tasks / Subtasks
 
-- [ ] **Task 0: Tác giả trả lời Câu hỏi 1–3** (cuối file), hoặc nhận mặc định.
-- [ ] **Task 1: Chọn ô và biến thể** (AC: 1, 3)
-  - [ ] 1.1 Tạo `src/battle/ground_art.gd` (`class_name GroundArt`, `extends RefCounted`, chỉ hàm static, **không** `Node`): `static func mask(state: BattleState, vx: int, vy: int) -> int` (công thức AC 1, kẹp biên bằng `clampi` theo `state.size`; không gọi `terrain_at` với ô ngoài bàn: `terrain_at` không tự kiểm biên); `static func variant(cell: Vector2i, count: int) -> int` (hàm băm AC 3, luôn trong `[0, count)`, kể cả ô âm); các hàm trả đường dẫn hình ngắn cho `Art.tex()`: `ground_path(mask)`, `spikes_path(cell)`, `pass_path(cell)`, `block_path(kind, cell)`, `backdrop_path(tx, ty)`.
-  - [ ] 1.2 Test (Task 5) viết **trước**, chạy thấy trượt.
-- [ ] **Task 2: Mặt đất và nền quanh bàn** (AC: 1, 4, 5, 9)
-  - [ ] 2.1 `GroundView` (`src/battle/ground_view.gd`, `extends Node2D`, `show_behind_parent = true`, thêm làm con của `BoardView`): với `show_behind_parent` node con được vẽ **trước** `_draw` của cha, nên mặt đất nằm dưới lưới, ô sáng, vòng chọn mà `BoardView._draw` vẽ. Con này phải ở **chỉ số 0** để vẽ dưới `_telegraph` (ô đỏ); kiểm bằng ảnh chụp rằng ô sáng, ô đỏ, lưới, chữ vẫn nằm trên mặt đất. API: `show_state(state)`; `_draw` lát lưới lệch nửa ô theo AC 1 bằng `draw_texture_rect_region` (cắt gọn mặt bàn) và vẽ ô hầm chông.
-  - [ ] 2.2 Nền quanh bàn: một node con riêng (hoặc `GroundView` thứ hai) `show_behind_parent`, phủ toàn cửa sổ **trong tọa độ màn hình**: vì `BoardView` có `position` và `scale` (thu theo bậc nguyên), tính vùng cần lát trong tọa độ local bằng `Rect2(-position / scale, viewport_size / scale)`. Vẽ lại **chỉ khi** `setup()` đổi cỡ bàn.
-  - [ ] 2.3 Sửa `BoardView._draw`: bỏ vẽ màu ô, sông, hầm chông, mép bàn màu cát; giữ vòng lặp từng hàng (bệ ô ải, ô sáng, vòng chọn) với bệ ô ải bằng hình (AC 2); lưới mờ (AC 9); mép dưới màu đất (AC 5). Giữ `_draw_river`, `_draw_spikes`, `TERRAIN_COLORS` chỉ khi còn dùng (màu dự phòng khi thiếu hình, hoặc xóa nếu không ai dùng; `test_main.gd` dùng `TERRAIN_KEYS`, **giữ** `TERRAIN_KEYS`).
-- [ ] **Task 3: Khối nhô lên bằng hình** (AC: 2, 3, 6, 8)
-  - [ ] 3.1 `TerrainBlock`: `_draw` vẽ hình `Art.tex(GroundArt.block_path(kind, cell))` ở vị trí AC 2; bỏ `draw_raised` và nhãn chữ khi `BoardView.SHOW_TERRAIN_LABELS` là `false`. Giữ `position`, `ORIGIN_ABOVE_CENTER`, `cell`, `kind` (test cũ đọc).
-  - [ ] 3.2 `BoardView._rebuild_terrain`: ô phẳng (sông, hầm chông, ô ải) chỉ thêm nhãn khi `SHOW_TERRAIN_LABELS`.
-- [ ] **Task 4: Màu báo hiệu** (AC: 7)
-  - [ ] 4.1 Đổi `REACH_COLOR` (và viền ô sáng nếu cần) sau khi xem ảnh chụp thật. 4.2 Kiểm đường đi, viền mục tiêu, ô đỏ trên cỏ, sông, hầm chông: ghi vào Completion Notes ô nào kém rõ, màu đã đổi.
-- [ ] **Task 5: Test GUT** (AC: 1, 3, 6, 7, 8, 10, 11)
-  - [ ] 5.1 `tests/test_ground_art.gd`: `GroundArt.mask` với các bàn dựng bằng `BoardFixture`/`BoardText` (xem `tests/board_fixture.gd`): toàn đất → 15; toàn sông → 0; một ô sông ở giữa bàn: bốn điểm giao quanh nó có `mask` 14, 13, 11, 7 đúng chỗ (viết bàn 3×3, tính tay từng điểm); ô sông ở góc và ở mép: tọa độ ngoài bàn kẹp đúng; rừng, kho, làng, hầm chông, ô ải đều tính là đất; `variant` luôn trong khoảng, cùng đầu vào cùng đầu ra, ô âm không lỗi, và đủ các biến thể xuất hiện trên bàn 10×8 (không dồn một kiểu).
-  - [ ] 5.2 `tests/test_board_view.gd` (thêm, không sửa test cũ): dựng bàn có đủ 7 loại ô, `show_state`, chờ một khung hình, **không** có dòng `[ERROR][hinh]` trong `Log` (mọi hình có thật); `BoardView.SHOW_TERRAIN_LABELS == false` thì `_terrain_labels` không có nhãn; geometry không đổi (các test cũ đã kiểm: chạy lại xanh).
-  - [ ] 5.3 Nền quanh bàn: với bàn 5×5 và 10×8, vùng lát trong tọa độ màn hình phủ trọn `Rect2(0, 0, 1280, 720)` (trừ mặt bàn). Cung cấp hàm `GroundView.backdrop_rect()` hoặc tương đương để test.
-  - [ ] 5.4 **Thử làm hỏng:** đổi tạm bit trong `mask` → test 5.1 trượt; đổi tạm `variant` thành số ngẫu nhiên → test tất định trượt. Hoàn lại.
-- [ ] **Task 6: Chụp và bàn giao** (AC: 7, 10, 11)
-  - [ ] 6.1 Chụp bằng GoPeak `capture_screenshot` (`tools/chay.sh --dev --tran=N`, N=1..6; chờ khoảng 5 giây; xong thì tắt game): trận 1 (cỏ và sông), trận 2 (rừng), trận 4 (làng), trận 3 (hầm chông), trận 5 (ô ải), trận 6 (bàn lớn nhất, kho). Lưu ảnh vào `_bmad-output/implementation-artifacts/anh/8-2-*.png` (thư mục đã có, theo mẫu các story trước).
-  - [ ] 6.2 Ảnh có **ô sáng** và **ô đỏ báo đòn** cùng lúc, và có đường đi trên sông: `inject_mouse_click` của GoPeak **không có tác dụng** trên game này (ghi ở bộ nhớ dự án và Story 4.6); dùng script tạm trong scratchpad (`push_input` vào viewport gốc) hoặc `tools/chay.sh --dev` kèm tham số có sẵn nếu có, **không** sửa code game để tiện chụp.
-  - [ ] 6.3 `tools/test.sh` xanh; `tools/build_web.sh`; ghi FPS trận 6 và dung lượng.
-  - [ ] 6.4 Cập nhật Dev Agent Record, File List, `sprint-status.yaml` (`8-2-...: review`). Cập nhật `CREDITS.md` **không cần** (hình đã có dòng ở 8.1).
+- [x] **Task 0: Tác giả trả lời Câu hỏi 1–3** (cuối file), hoặc nhận mặc định.
+- [x] **Task 1: Chọn ô và biến thể** (AC: 1, 3)
+  - [x] 1.1 Tạo `src/battle/ground_art.gd` (`class_name GroundArt`, `extends RefCounted`, chỉ hàm static, **không** `Node`): `static func mask(state: BattleState, vx: int, vy: int) -> int` (công thức AC 1, kẹp biên bằng `clampi` theo `state.size`; không gọi `terrain_at` với ô ngoài bàn: `terrain_at` không tự kiểm biên); `static func variant(cell: Vector2i, count: int) -> int` (hàm băm AC 3, luôn trong `[0, count)`, kể cả ô âm); các hàm trả đường dẫn hình ngắn cho `Art.tex()`: `ground_path(mask)`, `spikes_path(cell)`, `pass_path(cell)`, `block_path(kind, cell)`, `backdrop_path(tx, ty)`.
+  - [x] 1.2 Test (Task 5) viết **trước**, chạy thấy trượt.
+- [x] **Task 2: Mặt đất và nền quanh bàn** (AC: 1, 4, 5, 9)
+  - [x] 2.1 `GroundView` (`src/battle/ground_view.gd`, `extends Node2D`, `show_behind_parent = true`, thêm làm con của `BoardView`): với `show_behind_parent` node con được vẽ **trước** `_draw` của cha, nên mặt đất nằm dưới lưới, ô sáng, vòng chọn mà `BoardView._draw` vẽ. Con này phải ở **chỉ số 0** để vẽ dưới `_telegraph` (ô đỏ); kiểm bằng ảnh chụp rằng ô sáng, ô đỏ, lưới, chữ vẫn nằm trên mặt đất. API: `show_state(state)`; `_draw` lát lưới lệch nửa ô theo AC 1 bằng `draw_texture_rect_region` (cắt gọn mặt bàn) và vẽ ô hầm chông.
+  - [x] 2.2 Nền quanh bàn: một node con riêng (hoặc `GroundView` thứ hai) `show_behind_parent`, phủ toàn cửa sổ **trong tọa độ màn hình**: vì `BoardView` có `position` và `scale` (thu theo bậc nguyên), tính vùng cần lát trong tọa độ local bằng `Rect2(-position / scale, viewport_size / scale)`. Vẽ lại **chỉ khi** `setup()` đổi cỡ bàn.
+  - [x] 2.3 Sửa `BoardView._draw`: bỏ vẽ màu ô, sông, hầm chông, mép bàn màu cát; giữ vòng lặp từng hàng (bệ ô ải, ô sáng, vòng chọn) với bệ ô ải bằng hình (AC 2); lưới mờ (AC 9); mép dưới màu đất (AC 5). Giữ `_draw_river`, `_draw_spikes`, `TERRAIN_COLORS` chỉ khi còn dùng (màu dự phòng khi thiếu hình, hoặc xóa nếu không ai dùng; `test_main.gd` dùng `TERRAIN_KEYS`, **giữ** `TERRAIN_KEYS`).
+- [x] **Task 3: Khối nhô lên bằng hình** (AC: 2, 3, 6, 8)
+  - [x] 3.1 `TerrainBlock`: `_draw` vẽ hình `Art.tex(GroundArt.block_path(kind, cell))` ở vị trí AC 2; bỏ `draw_raised` và nhãn chữ khi `BoardView.SHOW_TERRAIN_LABELS` là `false`. Giữ `position`, `ORIGIN_ABOVE_CENTER`, `cell`, `kind` (test cũ đọc).
+  - [x] 3.2 `BoardView._rebuild_terrain`: ô phẳng (sông, hầm chông, ô ải) chỉ thêm nhãn khi `SHOW_TERRAIN_LABELS`.
+- [x] **Task 4: Màu báo hiệu** (AC: 7)
+  - [x] 4.1 Đổi `REACH_COLOR` (và viền ô sáng nếu cần) sau khi xem ảnh chụp thật. 4.2 Kiểm đường đi, viền mục tiêu, ô đỏ trên cỏ, sông, hầm chông: ghi vào Completion Notes ô nào kém rõ, màu đã đổi.
+- [x] **Task 5: Test GUT** (AC: 1, 3, 6, 7, 8, 10, 11)
+  - [x] 5.1 `tests/test_ground_art.gd`: `GroundArt.mask` với các bàn dựng bằng `BoardFixture`/`BoardText` (xem `tests/board_fixture.gd`): toàn đất → 15; toàn sông → 0; một ô sông ở giữa bàn: bốn điểm giao quanh nó có `mask` 14, 13, 11, 7 đúng chỗ (viết bàn 3×3, tính tay từng điểm); ô sông ở góc và ở mép: tọa độ ngoài bàn kẹp đúng; rừng, kho, làng, hầm chông, ô ải đều tính là đất; `variant` luôn trong khoảng, cùng đầu vào cùng đầu ra, ô âm không lỗi, và đủ các biến thể xuất hiện trên bàn 10×8 (không dồn một kiểu).
+  - [x] 5.2 `tests/test_board_view.gd` (thêm, không sửa test cũ): dựng bàn có đủ 7 loại ô, `show_state`, chờ một khung hình, **không** có dòng `[ERROR][hinh]` trong `Log` (mọi hình có thật); `BoardView.SHOW_TERRAIN_LABELS == false` thì `_terrain_labels` không có nhãn; geometry không đổi (các test cũ đã kiểm: chạy lại xanh).
+  - [x] 5.3 Nền quanh bàn: với bàn 5×5 và 10×8, vùng lát trong tọa độ màn hình phủ trọn `Rect2(0, 0, 1280, 720)` (trừ mặt bàn). Cung cấp hàm `GroundView.backdrop_rect()` hoặc tương đương để test.
+  - [x] 5.4 **Thử làm hỏng:** đổi tạm bit trong `mask` → test 5.1 trượt; đổi tạm `variant` thành số ngẫu nhiên → test tất định trượt. Hoàn lại.
+- [x] **Task 6: Chụp và bàn giao** (AC: 7, 10, 11)
+  - [x] 6.1 Chụp bằng GoPeak `capture_screenshot` (`tools/chay.sh --dev --tran=N`, N=1..6; chờ khoảng 5 giây; xong thì tắt game): trận 1 (cỏ và sông), trận 2 (rừng), trận 4 (làng), trận 3 (hầm chông), trận 5 (ô ải), trận 6 (bàn lớn nhất, kho). Lưu ảnh vào `_bmad-output/implementation-artifacts/anh/8-2-*.png` (thư mục đã có, theo mẫu các story trước).
+  - [x] 6.2 Ảnh có **ô sáng** và **ô đỏ báo đòn** cùng lúc, và có đường đi trên sông: `inject_mouse_click` của GoPeak **không có tác dụng** trên game này (ghi ở bộ nhớ dự án và Story 4.6); dùng script tạm trong scratchpad (`push_input` vào viewport gốc) hoặc `tools/chay.sh --dev` kèm tham số có sẵn nếu có, **không** sửa code game để tiện chụp.
+  - [x] 6.3 `tools/test.sh` xanh; `tools/build_web.sh`; ghi FPS trận 6 và dung lượng.
+  - [x] 6.4 Cập nhật Dev Agent Record, File List, `sprint-status.yaml` (`8-2-...: review`). Cập nhật `CREDITS.md` **không cần** (hình đã có dòng ở 8.1).
 
 ## Dev Notes
 
@@ -148,8 +148,42 @@ Commit gần đây: `142292a` đóng 8.1; `d8f13ce` nạp 415 hình, `Art`, test
 
 ### Agent Model Used
 
+Claude Sonnet 5.5 (claude-sonnet-5-5)
+
 ### Debug Log References
+
+- Lớp script mới (`GroundArt`...) chỉ nhận được sau `godot --headless --path game --import`; `tools/test.sh` tự làm bước này ("Quét project"). Chạy GUT trần trước đó báo `Identifier "GroundArt" not declared`.
+- `show_behind_parent` đặt cho `BackdropView` và `GroundView`: vẽ **trước** `_draw` của BoardView. `BoardView._draw` cũ vẽ cả mặt đất màu cát nên phải bỏ, chỉ còn vẽ cạnh trước, lưới, bệ ô ải, ô sáng.
+- Hai test cũ trong `test_main.gd` đòi ô sông có chữ ("Sông"): sửa theo công tắc `SHOW_TERRAIN_LABELS` (quyết định bỏ chữ theo mặc định Câu hỏi 1, tác giả chưa xác nhận).
+- Phát hiện khi chụp trận 4: **tooltip rê chuột thành cột đen cao 164×589 px đè lên bàn** (chính là lỗi "thông tin bị đè lên map" tác giả báo). Nguyên nhân: `Label` tự xuống dòng đo chiều cao theo bề rộng của lần hiện trước. Đã sửa trong commit riêng `85d67c1` (tự ngắt dòng bằng code, tắt autowrap của Label) kèm `tests/test_tooltip.gd`. Test đỏ trước khi sửa (khung 164×589 và 340×2101), xanh sau.
 
 ### Completion Notes List
 
+- **Mặt đất:** `GroundArt` (chọn ô ghép `mask`, biến thể `variant`, đường dẫn hình), `GroundView` (lát lưới lệch nửa ô, cắt gọn mặt bàn, vẽ hầm chông), `BackdropView` (nền rừng phủ cả cửa sổ, tính vùng từ position và scale của BoardView). Sông chạy ra mép bàn, bờ uốn mềm như ảnh thử đã duyệt.
+- **Khối nhô lên:** `TerrainBlock` vẽ hình rừng (hai kiểu theo chẵn lẻ cột+hàng), kho lương, làng; `position`, `ORIGIN_ABOVE_CENTER`, `BLOCK_HEIGHT` và vùng bấm giữ nguyên. Ô ải: bệ đá 64×64 nâng nửa `PASS_HEIGHT` (`PASS_SPRITE_LIFT`) để mặt đá khớp chỗ quân đứng.
+- **Báo hiệu:** ô sáng đổi từ xanh lá sang trắng ngả xanh dương alpha 0.5 kèm viền trắng 2 px (`REACH_COLOR`, `REACH_BORDER_*`); nhìn rõ trên cỏ (ảnh `8-2-3-tran-6-o-sang.png`). Ô đỏ, số thứ tự, mũi tên, vòng chọn, viền mục tiêu không đổi và vẫn nổi rõ (ảnh trận 1, trận 4: ô đỏ phủ cả hình làng).
+- **Mặc định theo 3 câu hỏi:** bỏ chữ trên ô (`SHOW_TERRAIN_LABELS = false`), lưới mờ (đen alpha 0.25, 1 px), có nền rừng quanh bàn, mép dưới màu `#4c3e24`. Đổi một dòng hằng là quay lại như cũ.
+- **Test:** `test_ground_art.gd` (8 test: công thức `mask` kiểm tay từng điểm, kẹp biên, mọi loại ô tính là đất, `variant` trong khoảng và tất định, mọi hình tồn tại); `test_board_view.gd` thêm 5 test (đủ 7 loại ô không thiếu hình, không còn chữ, thứ tự lớp, nền phủ đủ 1280×720 ở 4 cỡ bàn, màu ô sáng); `test_tooltip.gd` (3 test). **Thử làm hỏng:** đổi một bit của `mask` và thay `variant` bằng `randi()` làm 4 test `test_ground_art` trượt; đổi tên hình rừng khỏi tồn tại làm test "không thiếu hình" trượt với dòng lỗi tiếng Việt. Đã hoàn lại.
+- **`tools/test.sh`: 931/931 đạt**, kịch bản luật 175 đã duyệt, 6 trận còn thắng. `check_boundaries.sh` đạt.
+- **Bản web:** 11.0 MB nén (không đổi so với 8.1), 40.8 MB chưa nén; giới hạn 25 MB.
+- **FPS trận 6 (10×8)** đo bằng bộ đếm `--dev` trên máy của tác giả (Mac): khoảng 95–99 FPS khi chơi. Chưa đo trên laptop card tích hợp qua trình duyệt (NFR1): để lúc tác giả thử bản web. Số "thấp nhất" 8–11 chỉ gặp lúc nạp trận, đang có công cụ chụp ảnh chạy.
+- **Cần tác giả xem bằng mắt:**
+  - **Hầm chông lệch màu cỏ:** nền hầm chông vàng ô-liu, cỏ xanh xám, nên mỗi ô hầm chông nhìn như một miếng đất vuông dán lên (ảnh `8-2-2-tran-6.png`). Không sửa hình. Đề xuất: vẽ lại hầm chông có nền trong suốt (viền cỏ), hoặc làm bộ cỏ cùng tông.
+  - **Nền rừng** lát ô 64 px nên thấy đường nối giữa các ô và lặp họa tiết; chưa có ô chuyển tiếp. Chấp nhận được khi chơi, nhưng nhìn kỹ thì "kẻ ô".
+  - **Cỏ nền** lặp một ô 64 px, nhìn hơi đều; chưa dùng `tex_o_co_le_*` vì lệch tông (cùng lý do hầm chông).
+  - **Hai kiểu ô ải** trộn trong cùng bàn (nâu be và xám) vì chọn theo ô; nếu muốn đồng nhất một trận một kiểu thì bàn lại.
+  - **Chưa chụp** đường đi (xanh đậm) trên mặt nước và ô sáng cùng ô đỏ trong một ảnh; ô sáng và ô đỏ mỗi thứ có ảnh riêng.
+- **Phạm vi không làm (theo story):** kho cháy, làng cháy khói, hố bẫy, cỏ lẻ, khung vàng `tex_khung_*`.
+
 ### File List
+
+- `game/src/battle/ground_art.gd`, `ground_view.gd`, `backdrop_view.gd` (+ `.uid`) (mới)
+- `game/src/battle/board_view.gd`, `terrain_block.gd` (sửa)
+- `game/src/ui/tooltip.gd` (sửa, commit riêng `85d67c1`)
+- `game/tests/test_ground_art.gd`, `test_tooltip.gd` (mới, + `.uid`); `test_board_view.gd`, `test_main.gd` (sửa)
+- `_bmad-output/implementation-artifacts/anh/8-2-1-tran-1.png`, `8-2-2-tran-6.png`, `8-2-3-tran-6-o-sang.png`, `8-2-4-tran-4-lang.png` (mới)
+- `_bmad-output/planning-artifacts/epics.md`, `_bmad-output/implementation-artifacts/sprint-status.yaml`, `8-2-o-nen-va-dia-hinh.md`
+
+## Change Log
+
+- 2026-11-01: Story 8.2 làm xong: mặt đất ghép cỏ–sông, địa hình bằng hình, nền rừng quanh bàn, ô sáng đổi màu, bỏ chữ trên ô, lưới mờ. Sửa tooltip kéo cột đen. Chờ tác giả duyệt.

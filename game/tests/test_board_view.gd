@@ -497,3 +497,55 @@ func test_red_on_forest_block() -> void:
 	assert_eq(_label_texts(view), {Vector2i(3, 3): "1"})
 	var face: Rect2 = view.top_rect(Vector2i(3, 3))
 	assert_eq(face.position.y, BoardView.cell_rect(Vector2i(3, 3)).position.y - BoardView.BLOCK_HEIGHT, "mặt trên khối")
+
+
+# ---------- Hình địa hình và nền (Story 8.2) ----------
+
+## Bàn 10×8 có đủ 7 loại ô: mọi hình có thật, không dòng [ERROR][hinh] nào.
+func test_every_terrain_kind_draws_without_missing_art() -> void:
+	Log.clear()
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	var cells: Dictionary = {
+		Vector2i(1, 1): "~", Vector2i(2, 1): "~", Vector2i(3, 3): "#", Vector2i(4, 3): "#", Vector2i(5, 3): "^",
+		Vector2i(6, 3): "L", Vector2i(7, 3): "D", Vector2i(8, 3): "A", Vector2i(0, 7): "A", Vector2i(9, 0): "^",
+	}
+	board.show_state(BoardFixture.state({}, cells, {}, Vector2i(10, 8)))
+	await get_tree().process_frame
+	await get_tree().process_frame
+	for line: String in Log.get_lines():
+		assert_false(line.begins_with("[ERROR][hinh]"), line)
+	assert_eq(_blocks(board).size(), 4, "rừng ×2, kho lương, làng đều là khối nhô lên")
+
+
+func test_terrain_text_labels_are_off_by_default() -> void:
+	assert_false(BoardView.SHOW_TERRAIN_LABELS)
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	board.show_state(BoardFixture.state({}, {Vector2i(1, 1): "~", Vector2i(2, 2): "^", Vector2i(3, 3): "#"}))
+	assert_eq(board._terrain_labels.get_child_count(), 0, "ô sông và hầm chông không còn chữ")
+	for block: TerrainBlock in _blocks(board):
+		assert_eq(block.get_child_count(), 0, "khối không còn nhãn chữ")
+
+
+func test_ground_layers_sit_behind_the_board_and_in_order() -> void:
+	var board: BoardView = _board(_make_main())
+	assert_true(board._backdrop.show_behind_parent, "nền rừng vẽ trước BoardView")
+	assert_true(board._ground.show_behind_parent, "mặt đất vẽ trước BoardView")
+	assert_eq(board._backdrop.get_index(), 0, "nền rừng dưới cùng")
+	assert_eq(board._ground.get_index(), 1, "mặt đất trên nền rừng, dưới ô đỏ báo đòn")
+	assert_lt(board._ground.get_index(), board.telegraph_view().get_index(), "ô đỏ trên mặt đất")
+
+
+## Nền rừng phủ đủ cửa sổ 1280×720 ở mọi cỡ bàn (vùng cần lát đổi từ tọa độ màn hình về local).
+func test_backdrop_covers_the_whole_window_for_every_board_size() -> void:
+	for board: BoardView in _boards():
+		var local: Rect2 = board._backdrop.screen_rect()
+		var on_screen: Rect2 = Rect2(board.position + local.position * board.scale, local.size * board.scale)
+		assert_true(on_screen.is_equal_approx(Rect2(Vector2.ZERO, BoardView.viewport_size)),
+			"bàn %dx%d: %s" % [board.cols, board.rows, on_screen])
+
+
+func test_reach_cells_stand_out_from_grass_water_and_red() -> void:
+	assert_gt(BoardView.REACH_COLOR.b, BoardView.REACH_COLOR.g - 0.2, "ô sáng ngả xanh dương, không phải xanh lá")
+	assert_gt(BoardView.REACH_COLOR.r, 0.5, "ô sáng nhạt, khác cỏ xanh lá và nước teal")

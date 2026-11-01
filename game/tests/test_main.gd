@@ -346,7 +346,8 @@ func test_level_1_shows_terrain_and_units() -> void:
 	assert_eq((tokens[101] as UnitToken).name_text(), tr("unit.bo_binh"))
 	assert_eq((tokens[1] as UnitToken).hp_text(), str(AppState.stats.max_hp(UnitType.NGUYEN_KHOAI)))
 	assert_eq((tokens[103] as UnitToken).hp_text(), str(AppState.stats.max_hp(UnitType.BO_BINH)))
-	assert_has(_label_texts(main._board_view), tr("terrain.river"), "ô sông có chữ")
+	# Từ Story 8.2 ô địa hình là hình, không ghi chữ (BoardView.SHOW_TERRAIN_LABELS); bật lại thì ô sông có chữ.
+	assert_eq(_label_texts(main._board_view).has(tr("terrain.river")), BoardView.SHOW_TERRAIN_LABELS, "chữ trên ô sông theo công tắc")
 
 
 func test_three_generals_level_opens_by_name_in_dev() -> void:
@@ -358,7 +359,8 @@ func test_three_generals_level_opens_by_name_in_dev() -> void:
 	assert_eq(tokens.keys(), [1, 2, 3, 101, 102, 103, 104])
 	var texts: Array[String] = _label_texts(main._board_view)
 	for key: String in BoardView.TERRAIN_KEYS.values():
-		assert_has(texts, tr(key), "đủ chữ địa hình: " + key)
+		# Từ Story 8.2 ô địa hình là hình: chữ chỉ hiện khi bật BoardView.SHOW_TERRAIN_LABELS.
+		assert_eq(texts.has(tr(key)), BoardView.SHOW_TERRAIN_LABELS, "chữ địa hình theo công tắc: " + key)
 	assert_true(tokens.has(3), "có tướng 3")
 	if not tokens.has(3):
 		return

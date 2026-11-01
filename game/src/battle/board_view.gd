@@ -15,9 +15,12 @@ static var viewport_size: Vector2 = Vector2(
 )
 ## Vùng trống cho bàn (tọa độ màn hình): dưới tiêu đề, trái bảng HUD, trên nhãn phiên bản.
 const AREA: Rect2 = Rect2(16, 52, 940, 612)
-const CELL_COLOR: Color = Color(0.93, 0.87, 0.73)
 const LINE_COLOR: Color = Color(0.36, 0.24, 0.14)
-const LINE_WIDTH: float = 2.0
+## Lưới ô mờ trên mặt đất bằng hình (Story 8.2), để vẫn đếm được ô khi tính đòn.
+const GRID_COLOR: Color = Color(0.0, 0.0, 0.0, 0.25)
+const GRID_WIDTH: float = 1.0
+## Mép dưới của bàn (cạnh trước), màu đất tối để nối với nền rừng quanh bàn.
+const EDGE_COLOR: Color = Color("4c3e24")
 const BORDER_WIDTH: float = 4.0
 ## Ký hiệu cảnh báo ô tiếp viện hiệp sau (Story 3.10, FR35): viền cam vàng khác ô đỏ đòn địch.
 const REINFORCEMENT_BORDER: Color = Color(1.0, 0.75, 0.2)
@@ -29,22 +32,9 @@ const EDGE_SHADE: float = 0.4
 const BLOCK_HEIGHT: float = 16.0
 const PASS_HEIGHT: float = BLOCK_HEIGHT / 2.0
 const BLOCK_KINDS: Array[int] = [Terrain.FOREST, Terrain.GRANARY, Terrain.VILLAGE]
-## Sông trũng xuống; bờ sông ở cạnh trên lộ ra, tối hơn mặt nước.
-const RIVER_DEPTH: float = 6.0
-const RIVER_BANK_SHADE: float = 0.4
 ## Chừa thêm phía trên vật cao nhất ở hàng đầu (để tính khung bàn).
 const TOP_MARGIN: float = 4.0
 
-## Màu từng loại ô (màu UI, không phải số cân bằng).
-const TERRAIN_COLORS: Dictionary = {
-	Terrain.PLAIN: CELL_COLOR,
-	Terrain.RIVER: Color(0.49, 0.71, 0.87),
-	Terrain.FOREST: Color(0.33, 0.55, 0.31),
-	Terrain.SPIKES: Color(0.80, 0.62, 0.45),
-	Terrain.GRANARY: Color(0.85, 0.70, 0.30),
-	Terrain.VILLAGE: Color(0.76, 0.52, 0.40),
-	Terrain.PASS: Color(0.70, 0.70, 0.72),
-}
 ## Khóa dịch của chữ ngắn trên ô. Đất trống không có chữ.
 const TERRAIN_KEYS: Dictionary = {
 	Terrain.RIVER: "terrain.river",
@@ -55,14 +45,16 @@ const TERRAIN_KEYS: Dictionary = {
 	Terrain.PASS: "terrain.pass",
 }
 const TERRAIN_FONT_SIZE: int = 12
-## Ký hiệu hầm chông: ba mũi nhọn ở nửa trên ô (nửa dưới để chữ).
-const SPIKE_COLOR: Color = Color(0.45, 0.30, 0.18)
-const SPIKE_SIZE: Vector2 = Vector2(10, 14)
-const SPIKE_OFFSETS: Array[Vector2] = [Vector2(-16, -10), Vector2(0, -14), Vector2(16, -10)]
+## Chữ ngắn trên ô địa hình (Sông, Rừng...). Tắt từ Story 8.2: hình đã đủ rõ, tooltip vẫn có tên. Đặt true để hiện lại.
+const SHOW_TERRAIN_LABELS: bool = false
+## Bệ ô ải bằng hình 64×64 gồm mặt đá và chân bệ; đặt nửa PASS_HEIGHT trên mặt đất để mặt đá khớp chỗ quân đứng.
+const PASS_SPRITE_LIFT: float = PASS_HEIGHT / 2.0
 ## Ô ngoài bàn (cell_at).
 const NO_CELL: Vector2i = Vector2i(-1, -1)
-## Ô đi tới được: xanh lá nhạt, khác đỏ của ô báo đòn (E2) và khác màu sông.
-const REACH_COLOR: Color = Color(0.45, 0.78, 0.40, 0.55)
+## Ô đi tới được: trắng ngả xanh dương có viền sáng, khác cỏ xanh lá, nước và đỏ của ô báo đòn (E2).
+const REACH_COLOR: Color = Color(0.78, 0.90, 1.0, 0.50)
+const REACH_BORDER_COLOR: Color = Color(1.0, 1.0, 1.0, 0.95)
+const REACH_BORDER_WIDTH: float = 2.0
 ## Viền quanh ô mục tiêu đánh được (tác giả chốt 2026-10-18: trắng), chỉ viền, không tô: ô đỏ báo đòn E2 tô kín.
 ## Ô chờ xác nhận (tướng đã đi, bấm lần đầu) viền dày gấp đôi.
 const TARGET_COLOR: Color = Color(1.0, 1.0, 1.0)
@@ -88,6 +80,9 @@ var rows: int = EMPTY_SIZE.y
 
 ## Bản chụp đang vẽ; null là bàn trống.
 var _state: BattleState = null
+## Nền rừng quanh bàn và mặt đất bằng hình, vẽ trước (dưới) phần vẽ của chính BoardView (Story 8.2).
+var _backdrop: BackdropView
+var _ground: GroundView
 ## Chữ của ô phẳng (sông, hầm chông, ô ải), nằm dưới đồng quân.
 var _terrain_labels: Node2D
 ## Khối địa hình và đồng quân, sắp theo y (tức theo hang): vật ở hàng dưới, gần người xem, vẽ sau.
@@ -288,12 +283,20 @@ func setup(new_cols: int = EMPTY_SIZE.x, new_rows: int = EMPTY_SIZE.y) -> void:
 	var factor: float = fit_scale(local.size, AREA.size)
 	scale = Vector2(factor, factor)
 	position = (AREA.get_center() - local.get_center() * factor).round()
+	if _ground != null:
+		_ground.setup(cols, rows)
+		_backdrop.queue_redraw()
 	_redraw()
 
 
 func _ready() -> void:
 	# Thứ tự con: ô đỏ báo đòn, chữ ô phẳng, khối và đồng quân, viền mục tiêu, số thứ tự đòn. Overlay F1 do
 	# main.gd thêm vào sau cùng. Ô đỏ đứng trước chữ ô phẳng để chữ địa hình vẫn đọc được.
+	# Hai con đầu tiên vẽ trước BoardView._draw (show_behind_parent): nền rừng, rồi mặt đất.
+	_backdrop = BackdropView.new()
+	add_child(_backdrop)
+	_ground = GroundView.new()
+	add_child(_ground)
 	_telegraph = TelegraphView.new()
 	add_child(_telegraph)
 	_terrain_labels = Node2D.new()
@@ -321,6 +324,7 @@ func show_state(state: BattleState) -> void:
 		clear_selection()
 	# Bàn đổi thì bóng xem trước của lệnh cũ không còn nghĩa.
 	_preview.clear()
+	_ground.show_state(state)
 	_rebuild_terrain()
 	_sync_tokens()
 	_telegraph.show_state(state)
@@ -394,6 +398,8 @@ func _rebuild_terrain() -> void:
 				_world.add_child(block)
 				continue
 			# Ô phẳng: chữ ở phần dưới ô, không bị đồng quân đứng giữa ô che hết.
+			if not SHOW_TERRAIN_LABELS:
+				continue
 			var label: Label = Label.new()
 			label.text = text
 			label.add_theme_font_size_override("font_size", TERRAIN_FONT_SIZE)
@@ -450,21 +456,14 @@ func add_reinforcement_token(p_id: int, p_type: int, at_cell: Vector2i, p_hp: in
 
 func _draw() -> void:
 	var surface: Rect2 = Rect2(0, 0, cols * TILE_SIZE, rows * TILE_SIZE)
-	# Mép bàn: cả bàn là một tấm dày EDGE_DEPTH, mặt trên là mặt đất.
-	draw_raised(self, Rect2(surface.position + Vector2(0, EDGE_DEPTH), surface.size), EDGE_DEPTH, CELL_COLOR, EDGE_SHADE)
-	if _state != null:
-		for r: int in range(rows):
-			for c: int in range(cols):
-				var cell: Vector2i = Vector2i(c, r)
-				match _state.terrain_at(cell):
-					Terrain.RIVER:
-						_draw_river(cell)
-					Terrain.SPIKES:
-						_draw_spikes(cell)
+	# Mặt đất (cỏ, sông, hầm chông) do GroundView vẽ phía dưới. Mép bàn: cạnh trước dày EDGE_DEPTH.
+	var edge: Rect2 = Rect2(0, surface.end.y, surface.size.x, EDGE_DEPTH)
+	draw_rect(edge, EDGE_COLOR)
+	draw_rect(edge, LINE_COLOR, false, 1.5)
 	for c: int in range(1, cols):
-		draw_line(Vector2(c * TILE_SIZE, 0), Vector2(c * TILE_SIZE, surface.end.y), LINE_COLOR, LINE_WIDTH, true)
+		draw_line(Vector2(c * TILE_SIZE, 0), Vector2(c * TILE_SIZE, surface.end.y), GRID_COLOR, GRID_WIDTH, true)
 	for r: int in range(1, rows):
-		draw_line(Vector2(0, r * TILE_SIZE), Vector2(surface.end.x, r * TILE_SIZE), LINE_COLOR, LINE_WIDTH, true)
+		draw_line(Vector2(0, r * TILE_SIZE), Vector2(surface.end.x, r * TILE_SIZE), GRID_COLOR, GRID_WIDTH, true)
 	draw_rect(surface, LINE_COLOR, false, BORDER_WIDTH)
 	# Bệ ô ải, ô sáng và vòng chọn vẽ trên mặt đất, từng hàng từ trên xuống (quân đứng lên bệ được,
 	# xem BLOCK_KINDS): bệ ô ải ở hàng dưới che ô sáng ở hàng trên, ô sáng trên bệ nằm trên mặt bệ.
@@ -472,9 +471,10 @@ func _draw() -> void:
 		for c: int in range(cols):
 			var cell: Vector2i = Vector2i(c, r)
 			if _state != null and _state.terrain_at(cell) == Terrain.PASS:
-				draw_raised(self, cell_rect(cell), PASS_HEIGHT, TERRAIN_COLORS[Terrain.PASS] as Color, EDGE_SHADE)
+				draw_texture(Art.tex(GroundArt.pass_path(cell)), cell_rect(cell).position - Vector2(0, PASS_SPRITE_LIFT))
 			if _lit_cells.has(cell):
 				draw_rect(_top_rect(cell), REACH_COLOR)
+				draw_rect(_top_rect(cell).grow(-REACH_BORDER_WIDTH / 2.0), REACH_BORDER_COLOR, false, REACH_BORDER_WIDTH)
 			if cell == _selected_cell:
 				draw_polyline(_ellipse(_top_center(cell), SELECT_RADIUS), SELECT_COLOR, SELECT_WIDTH, true)
 	if _state != null and not _state.reinforcement_warnings.is_empty():
@@ -508,33 +508,6 @@ func _draw_targets() -> void:
 	for cell: Vector2i in _target_cells:
 		var width: float = PENDING_WIDTH if cell == _pending_cell else TARGET_WIDTH
 		_target_layer.draw_rect(_top_rect(cell).grow(-TARGET_INSET), TARGET_COLOR, false, width)
-
-
-## Sông trũng: cả ô là bờ tối, mặt nước bỏ dải RIVER_DEPTH ở trên cùng. Ô ngay phía trên cũng là sông thì không có
-## bờ, nước liền một mạch; hàng 0 luôn có bờ.
-func _draw_river(cell: Vector2i) -> void:
-	var color: Color = TERRAIN_COLORS[Terrain.RIVER] as Color
-	var ground: Rect2 = cell_rect(cell)
-	var above: Vector2i = cell + Vector2i(0, -1)
-	# terrain_at không tự kiểm biên: chỉ hỏi khi ô phía trên còn trong bàn.
-	if above.y >= 0 and _state.terrain_at(above) == Terrain.RIVER:
-		draw_rect(ground, color)
-		return
-	draw_rect(ground, color.darkened(RIVER_BANK_SHADE))
-	draw_rect(Rect2(ground.position + Vector2(0, RIVER_DEPTH), ground.size - Vector2(0, RIVER_DEPTH)), color)
-
-
-## Hầm chông: ô phẳng màu riêng, ba mũi nhọn quanh tâm.
-func _draw_spikes(cell: Vector2i) -> void:
-	var center: Vector2 = cell_center(cell)
-	draw_rect(cell_rect(cell), TERRAIN_COLORS[Terrain.SPIKES] as Color)
-	for offset: Vector2 in SPIKE_OFFSETS:
-		var base: Vector2 = center + offset
-		draw_colored_polygon(PackedVector2Array([
-			base + Vector2(-SPIKE_SIZE.x / 2.0, SPIKE_SIZE.y / 2.0),
-			base + Vector2(SPIKE_SIZE.x / 2.0, SPIKE_SIZE.y / 2.0),
-			base + Vector2(0, -SPIKE_SIZE.y / 2.0),
-		]), SPIKE_COLOR)
 
 
 ## Ký hiệu đánh dấu ô tiếp viện hiệp sau (Story 3.10): nền vàng cam mờ, viền nổi và chevron hướng xuống.
