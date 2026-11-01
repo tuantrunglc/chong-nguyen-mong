@@ -4,7 +4,7 @@ baseline_commit: 64b31ba
 
 # Story 4.6: Tinh chỉnh 6 trận
 
-Status: in-progress
+Status: done
 
 
 ## Story
@@ -74,7 +74,7 @@ tôi muốn cả 6 trận vẫn giải được sau mỗi lần tôi chỉnh ch�
 
 - [x] [Review][Patch] (Tác giả chọn 1a, 2026-11-01) Thêm test khẳng định hôm nay `chi_so_kich_ban.json` và `chi_so.json` giống hệt về giá trị (`StatsSnapshot.differences()` rỗng), lý do trượt in rõ khóa nào lệch và nhắc "chép bản chụp lại sau khi chỉnh". Sửa Task 2.4 cho khớp (không còn "chỉ thông tin") và bỏ cách ghi file chỉ-thông-tin nếu thừa; `test_stats_diff_is_reported` hiện là test không thể trượt [game/tests/test_loi_giai_6_tran.gd:63]
 - [x] [Review][Dismiss] (Tác giả chọn 2c, 2026-11-01) Giữ chỉ báo va chạm một nhãn "Va −1", bóng máu đã đủ cho người chơi. Không sửa [game/src/battle/preview_marks.gd:43]
-- [ ] [Review][Decision→Tác giả] (Tác giả chọn 3a, 2026-11-01) Tác giả tự thử 3 ca chưa chụp (đòn dời, trúng giặc, trúng tướng ta) trong game rồi duyệt; dev không cần chụp thêm. Việc này không chặn các patch, nhưng story chỉ `done` sau khi tác giả duyệt — Task 4.5
+- [x] [Review][Decision→Tác giả] (Tác giả chọn 3a, 2026-11-01) Tác giả tự thử 3 ca chưa chụp (đòn dời, trúng giặc, trúng tướng ta) trong game rồi duyệt; dev không cần chụp thêm. Việc này không chặn các patch, nhưng story chỉ `done` sau khi tác giả duyệt — Task 4.5
 - [x] [Review][Patch] Tướng gục chỉ phát hiện qua sự kiện DIED/DROWNED với id 1–3, tên lấy `UnitType.GENERALS[id-1]`; tướng biến mất không kèm sự kiện thì vẫn "đạt", trận ít hơn 3 tướng có thể gán tên sai. Đổi thành so tướng đầu trận (`general_ids`) với cuối trận, tên theo loại quân thật [game/tests/solution_check.gd:132]
 - [x] [Review][Patch] `begin_battle` bị từ chối không được kiểm, lời giải chạy tiếp trên bàn chưa mở và báo lỗi ở "bước 1" gây hiểu lầm. Dùng cùng vòng kiểm `REJECTED` như các bước sau, báo "mở trận bị từ chối" [game/tests/solution_check.gd:86]
 - [x] [Review][Patch] `_general_id` trả 0 khi tướng không có trong `GENERALS`, lệnh bị từ chối với lý do khó hiểu. Báo rõ "tướng không có trong danh sách" [game/tests/solution_check.gd:143]
