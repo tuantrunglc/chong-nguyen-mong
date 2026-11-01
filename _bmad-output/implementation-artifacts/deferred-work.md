@@ -279,3 +279,7 @@
 - `UnitToken.hit()` vẫn là vòng tròn tại tâm đồng cũ, lệch với hình mới.
 - Hằng thừa sau khi bỏ đồng tròn (`NGUYEN_COLOR`, `DAI_VIET_COLOR`, `RADIUS`...) trong `unit_token.gd`.
 - `_name_label` đặt màu chữ Đại Việt cho cả quân Nguyên khi hết `_attacked` (nhãn đang ẩn).
+
+## Deferred from: code review of 8-5-giao-dien (2026-11-01)
+
+- Chưa có test i18n kiểm khóa `hud.mission.*` có mặt trong bản dịch biên dịch; dự án chưa có test i18n nào.

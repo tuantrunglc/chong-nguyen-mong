@@ -435,14 +435,18 @@ func _update_info(cell: Vector2i) -> void:
 		var text: String = _unit_text(unit, state) if unit != null else _terrain_text(state.terrain_at(cell))
 		if state.reinforcement_warnings.has(cell):
 			text += "\n" + tr("tooltip.reinforcement_warning")
-		# Tướng Đại Việt có chân dung; quân có dòng "Máu" ở dòng thứ hai nên đặt biểu tượng máu ở đó.
+		# Tướng Đại Việt có chân dung; biểu tượng máu đặt ở dòng UNIT_HP_LINE.
 		var portrait: Texture2D = null
 		if unit != null and unit.faction == Unit.Faction.DAI_VIET:
 			var portrait_path: String = UiStyle.portrait_path(unit.type)
 			if not portrait_path.is_empty():
 				portrait = Art.tex(portrait_path)
-		_tooltip.show_text(text, portrait, 1 if unit != null else -1)
+		_tooltip.show_text(text, portrait, UNIT_HP_LINE if unit != null else -1)
 	_board.telegraph_view().highlight(_telegraph_cells_of(unit, state))
+
+
+## Số thứ tự (từ 0) của dòng "Máu" trong _unit_text: khung thông tin đặt biểu tượng máu ở dòng này.
+const UNIT_HP_LINE: int = 1
 
 
 func _unit_text(unit: Unit, state: BattleState) -> String:

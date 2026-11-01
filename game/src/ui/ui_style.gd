@@ -23,6 +23,15 @@ const BUTTON_TEXTURES: Dictionary = {
 const BUTTON_MARGIN: float = 4.0
 ## Lề trong của nút (chữ cách viền).
 const BUTTON_CONTENT_MARGIN: float = 8.0
+## Màu chữ nút theo trạng thái: sáng trên nền nút tối; nút mờ dịu hơn hẳn để thấy là không bấm được.
+const BUTTON_FONT_COLORS: Dictionary = {
+	"font_color": Color(0.96, 0.90, 0.74),
+	"font_hover_color": Color(1.0, 0.96, 0.80),
+	"font_focus_color": Color(0.96, 0.90, 0.74),
+	"font_pressed_color": Color(0.85, 0.76, 0.56),
+	"font_hover_pressed_color": Color(0.85, 0.76, 0.56),
+	"font_disabled_color": Color(0.58, 0.53, 0.46),
+}
 
 const ICON_ROUND: String = "giao_dien/tex_hiep_24x24.png"
 const ICON_HP: String = "giao_dien/tex_icon_mau.png"
@@ -51,10 +60,13 @@ const PORTRAITS: Dictionary = {
 const PORTRAIT_SIZE: float = 96.0
 
 static var _button_styles: Dictionary = {}
+## Khung mẫu dựng một lần theo (đường dẫn, lề hình, lề trong); mỗi lần gọi trả bản sao để người dùng đổi lề riêng.
+static var _frame_templates: Dictionary = {}
 
 
 static func reset_for_test() -> void:
 	_button_styles = {}
+	_frame_templates = {}
 
 
 ## Khung bảng. content_margin < 0 thì lấy lề 9-slice. fallback dùng khi ENABLED = false.
@@ -67,6 +79,8 @@ static func tooltip(content_margin: float = -1.0, fallback: StyleBox = null) -> 
 
 
 static func button(state: int) -> StyleBoxTexture:
+	if not BUTTON_TEXTURES.has(state):
+		state = ButtonState.NORMAL
 	if _button_styles.has(state):
 		return _button_styles[state] as StyleBoxTexture
 	var style: StyleBoxTexture = _texture_box(BUTTON_TEXTURES[state] as String, BUTTON_MARGIN)
@@ -84,6 +98,8 @@ static func apply_button(target: Button) -> void:
 	target.add_theme_stylebox_override("pressed", button(ButtonState.PRESSED))
 	target.add_theme_stylebox_override("disabled", button(ButtonState.DISABLED))
 	target.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	for color_name: String in BUTTON_FONT_COLORS:
+		target.add_theme_color_override(color_name, BUTTON_FONT_COLORS[color_name] as Color)
 
 
 ## Đường dẫn chân dung của tướng, "" nếu không phải tướng Đại Việt.
@@ -94,9 +110,12 @@ static func portrait_path(unit_type: int) -> String:
 static func _frame(path: String, margin: float, content_margin: float, fallback: StyleBox) -> StyleBox:
 	if not ENABLED and fallback != null:
 		return fallback
-	var style: StyleBoxTexture = _texture_box(path, margin)
-	style.set_content_margin_all(margin if content_margin < 0.0 else content_margin)
-	return style
+	var key: String = "%s|%s|%s" % [path, margin, content_margin]
+	if not _frame_templates.has(key):
+		var template: StyleBoxTexture = _texture_box(path, margin)
+		template.set_content_margin_all(margin if content_margin < 0.0 else content_margin)
+		_frame_templates[key] = template
+	return (_frame_templates[key] as StyleBoxTexture).duplicate() as StyleBoxTexture
 
 
 static func _texture_box(path: String, margin: float) -> StyleBoxTexture:

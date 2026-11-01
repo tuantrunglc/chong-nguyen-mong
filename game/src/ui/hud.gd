@@ -19,7 +19,7 @@ const PANEL_POSITION: Vector2 = Vector2(972, 52)
 const PANEL_WIDTH: float = 260.0
 const SEPARATION: int = 12
 ## Khung bảng nhô ra khỏi cột nút bấy nhiêu px mỗi phía; khoảng cách biểu tượng với chữ.
-const FRAME_PADDING: float = 12.0
+const FRAME_PADDING: float = 8.0
 const ICON_GAP: int = 6
 const BUTTON_HEIGHT: float = 44.0
 ## Màu chữ nổi bật cho hiệp cuối cùng của trận có giới hạn hiệp (Story 3.5).
@@ -336,6 +336,7 @@ func _icon_row(parent: Container, icon_path: String) -> HBoxContainer:
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon.visible = UiStyle.ENABLED
 	if not icon_path.is_empty():
 		icon.texture = Art.tex(icon_path)
 	row.add_child(icon)

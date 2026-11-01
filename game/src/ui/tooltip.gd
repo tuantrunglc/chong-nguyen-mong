@@ -110,7 +110,7 @@ func show_text(text: String, portrait: Texture2D = null, icon_line: int = -1) ->
 		return
 	_text = text
 	_portrait.texture = portrait
-	_portrait.visible = portrait != null
+	_portrait.visible = portrait != null and UiStyle.ENABLED
 	visible = true
 	_fit_width(text, icon_line)
 	reset_size()
@@ -135,28 +135,30 @@ func _fit_width(text: String, icon_line: int = -1) -> void:
 	var source_index: int = 0
 	for source: String in text.split("\n"):
 		var indent: String = ""
-		if source_index == icon_line:
+		if source_index == icon_line and UiStyle.ENABLED:
 			icon_row = lines.size()
-			# Chừa chỗ biểu tượng bằng dấu cách (chữ gốc vẫn giữ nguyên ở _text).
+			# Chừa chỗ biểu tượng bằng dấu cách (chữ gốc vẫn giữ nguyên ở _text). Mọi dòng ngắt của dòng nguồn này
+			# giữ cùng thụt lề cho thẳng cột.
 			var space: float = maxf(font.get_string_size(" ", HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x, 1.0)
 			indent = " ".repeat(int(ceil((UiStyle.ICON_SIZE + ICON_GAP) / space)))
-		var current: String = indent
+		var current: String = ""
 		for word: String in source.split(" "):
-			var trial: String = word if current.is_empty() else current + (" " if current != indent else "") + word
-			if current != indent and not current.is_empty() and font.get_string_size(trial, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > room:
-				lines.append(current)
-				widest = maxf(widest, font.get_string_size(current, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
+			var trial: String = word if current.is_empty() else current + " " + word
+			if not current.is_empty() and font.get_string_size(indent + trial, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > room:
+				lines.append(indent + current)
+				widest = maxf(widest, font.get_string_size(indent + current, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
 				current = word
 			else:
 				current = trial
-		lines.append(current)
-		widest = maxf(widest, font.get_string_size(current, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
+		lines.append(indent + current)
+		widest = maxf(widest, font.get_string_size(indent + current, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
 		source_index += 1
 	_label.text = "\n".join(lines)
 	_label.custom_minimum_size = Vector2(minf(widest + WIDTH_SLACK, room), 0.0)
 	if icon_row >= 0:
 		var line_height: float = font.get_height(font_size)
-		_icon.position = Vector2(0.0, icon_row * line_height + (line_height - UiStyle.ICON_SIZE) / 2.0)
+		var step: float = line_height + _label.get_theme_constant("line_spacing")
+		_icon.position = Vector2(0.0, icon_row * step + (line_height - UiStyle.ICON_SIZE) / 2.0)
 		_icon.size = Vector2(UiStyle.ICON_SIZE, UiStyle.ICON_SIZE)
 		_icon.visible = true
 

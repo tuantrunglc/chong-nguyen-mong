@@ -25,7 +25,7 @@ const PANEL_WIDTH: float = 720.0
 ## Bảng gợi ý đầu trận: rộng hơn và đệm mỏng hơn để thấp, nhét vừa dải trống dưới hoặc trên bàn cờ.
 const HINT_PANEL_WIDTH: float = 900.0
 const HINT_PADDING: int = 5
-const HINT_SEPARATION: int = 2
+const HINT_SEPARATION: int = 0
 const HINT_LINE_FONT_SIZE: int = 18
 ## Khoảng giữ trống: mép trên (chữ tên game), mép dưới (nhãn FPS và phiên bản), và khe giữa bàn với bảng.
 const TOP_LIMIT: float = 48.0
@@ -197,8 +197,15 @@ func _open(area: Rect2) -> void:
 func _set_layout(panel_width: float, padding: int, separation: int = SEPARATION) -> void:
 	_box.add_theme_constant_override("separation", separation)
 	_panel.custom_minimum_size = Vector2(panel_width, 0)
-	_style.set_content_margin_all(padding)
-	_content_width = panel_width - 2.0 * padding - 2.0 * BORDER_WIDTH
+	# Khung hình có lề 9-slice: lề trong không được nhỏ hơn nó, nếu không chữ đè lên góc trang trí. Khung phẳng cũ
+	# (ENABLED = false) vẫn trừ thêm viền.
+	var inset: float = float(padding)
+	var border: float = 2.0 * BORDER_WIDTH
+	if _style is StyleBoxTexture:
+		inset = maxf(inset, UiStyle.PANEL_MARGIN)
+		border = 0.0
+	_style.set_content_margin_all(inset)
+	_content_width = panel_width - 2.0 * inset - border
 
 
 func _clear() -> void:

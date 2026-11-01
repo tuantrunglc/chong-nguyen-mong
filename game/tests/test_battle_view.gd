@@ -1681,10 +1681,14 @@ func test_hovering_general_shows_portrait_but_enemy_and_terrain_do_not() -> void
 	view._update_info(enemy.cell)
 	assert_false(tip.portrait_visible(), "quân Nguyên không có chân dung")
 	assert_true(tip.icon_visible(), "quân Nguyên vẫn có biểu tượng máu")
+	var empty_cell: Vector2i = Vector2i(-1, -1)
 	for r: int in range(state.size.y):
 		for c: int in range(state.size.x):
-			if state.unit_at(Vector2i(c, r)) == null:
-				view._update_info(Vector2i(c, r))
-				assert_false(tip.portrait_visible(), "địa hình không có chân dung")
-				assert_false(tip.icon_visible(), "địa hình không có biểu tượng máu")
-				return
+			if empty_cell.x < 0 and state.unit_at(Vector2i(c, r)) == null:
+				empty_cell = Vector2i(c, r)
+	assert_true(state.in_bounds(empty_cell), "bàn phải có ít nhất một ô trống để thử địa hình")
+	view._update_info(empty_cell)
+	assert_false(tip.portrait_visible(), "địa hình không có chân dung")
+	assert_false(tip.icon_visible(), "địa hình không có biểu tượng máu")
+	assert_true(view._unit_text(general, state).split("\n")[BattleView.UNIT_HP_LINE].begins_with("Máu"),
+		"dòng UNIT_HP_LINE đúng là dòng Máu")
