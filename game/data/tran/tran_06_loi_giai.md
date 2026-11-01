@@ -2,7 +2,7 @@
 
 **Mục tiêu:** Giữ ba ô ải `A` (`1,7`, `2,7` và `8,7`) qua hết **5 hiệp**, không quân Nguyên nào vào ải, **không tướng nào gục**. Trận này cho phép mất máu (tác giả chốt 2026-10-31, như trận 5). Lời giải dưới đây thắng ở cuối hiệp 5, cả ba tướng 3/3 máu.
 
-**Đây là trận bắt buộc dùng Sát Thát.** Mô phỏng bằng luật thật (Story 4.5): cấm Sát Thát thì không có cách đánh nào thắng mà không mất tướng. Mọi lối đều để giặc vào ải hoặc mất tướng, chậm nhất ở hiệp 4.
+**Sát Thát giúp thắng gọn, nhưng chưa bắt buộc.** Lời giải này dùng Sát Thát ở hiệp 2 để chém gục ngay Bộ binh sát ải. Code review Story 4.5 (2026-11-01) đã tìm ra lối thắng khác không dùng Sát Thát, có lối không dùng mưu kế nào, nhờ chặn tiếp viện hoặc kéo giặc lên chông. Làm trận "bắt buộc Sát Thát" cần cân bằng lại chỉ số hoặc AI Giữ ải, để ở story sau (tác giả chốt 2026-11-01).
 
 **Cách đọc ô:** `cột,hàng`, gốc ở góc trên trái, tính từ 0, giống phím F1 trong game. Bàn **10 cột × 8 hàng**. Các bàn dưới đây là bàn **đầu lượt người chơi**, tức sau khi quân Nguyên đã đi và báo đòn.
 
@@ -14,7 +14,7 @@
 
 - **Giữ ải:** quân Nguyên vào ô `A` bằng bất kỳ cách nào (tự đi, bị đẩy, bị kéo, tiếp viện hiện lên) là **thua ngay**. Thắng khi qua hết cuối hiệp 5. **Diệt hết quân Nguyên chưa phải là thắng.**
 - **Bộ binh và Kỵ binh nhắm ô ải:** ải trống thì chúng đi thẳng vào. Ải có tướng đứng thì chúng đứng cạnh và đánh tướng đó. **Cung kỵ** luôn nhắm tướng gần nhất.
-- **Sát Thát (nút hoặc phím `W`, 1 lần mỗi trận):** từ lúc bấm tới hết lượt người chơi đó, **Khoái chém 3** (thay vì 2), **Lão lao 2** (thay vì 1). Dư kéo vẫn 0. Va chạm, chông, sông không được cộng. Không tốn lượt tướng. Dùng xong thì không hủy nước đi trước đó được nữa.
+- **Sát Thát (nút hoặc phím `W`, 1 lần mỗi trận):** từ lúc bấm tới hết lượt người chơi đó, **Khoái chém 3** (thay vì 2), **Lão lao 2** (thay vì 1). Dư kéo vẫn 0. Va chạm, chông, sông không được cộng. Lao của Lão trúng **tướng mình** đứng chắn thì cũng được cộng (tướng đó mất 2). Không tốn lượt tướng. Dùng xong thì không hủy nước đi trước đó được nữa.
 - **Vườn không nhà trống (nút hoặc phím `Q`, 1 lần mỗi trận):** mọi kho lương thành đất trống, **mọi quân Nguyên mất 1 máu**. Không tốn lượt tướng.
 - **Quân tiếp viện:** ô quân mới sẽ hiện lên được **đánh dấu riêng** (khác ô đỏ) từ hiệp trước, giữ suốt lượt của bạn. Đầu hiệp sau, quân mới hiện ở ô đó rồi **đi và báo đòn ngay**. Ô đó đang có quân đứng thì quân đứng đó mất 1 máu và quân tiếp viện bị hủy.
 - **Chông (`^`):** ai đi qua cũng mất 1 máu, kể cả chỉ đi ngang. **Quân Nguyên không tránh chông**: Cung kỵ (1 máu) đi qua chông là gục.
@@ -83,7 +83,7 @@ hàng 7:  . A A . . . . . A .
 4. Bấm `3` chọn **Dư**, bấm ô **`8,5`**.
 5. Bấm **Kết thúc lượt**.
 
-**Vì sao phải dùng Sát Thát ở đây?** Bộ binh `8,6` có 3 máu, đứng sát ải. Hiệp sau nó sẽ bước vào ải, nên phải hạ nó ngay hiệp này. Không có Sát Thát, Khoái chỉ chém được 2: Bộ binh còn 1 máu và bị đẩy lên `8,5`, vẫn sống. Muốn hạ nó thì phải dồn thêm tướng khác vào, và cánh trái bị bỏ trống. Đánh lại đúng lời giải này mà bỏ riêng nước Sát Thát thì giặc vào ải ở hiệp 4. Mô phỏng mọi cách đánh không dùng Sát Thát cũng đều thua.
+**Vì sao dùng Sát Thát ở đây?** Bộ binh `8,6` có 3 máu, đứng sát ải, hiệp sau sẽ bước vào ải. Có Sát Thát, Khoái chém 3: Bộ binh gục ngay, không bị đẩy, Dư rảnh tay. Không có Sát Thát, Khoái chỉ chém được 2: Bộ binh còn 1 máu và bị đẩy lên `8,5`, vẫn sống; các nước sau của lời giải này không còn đúng nữa. Vẫn có cách khác (ví dụ Khoái đứng `7,6` chém, đẩy Bộ binh sang ô tiếp viện `9,6` để chặn tiếp viện hiệp 3, hoặc Dư kéo nó lên chông `8,3`), nhưng tốn thêm nước và dễ mất máu hơn.
 
 ## Hiệp 3 — Giặc tự lao vào chông
 
@@ -130,6 +130,8 @@ hàng 7:  . A A . . . . . A .
 4. Bấm **Kết thúc lượt**.
 
 **Vì sao Lão đứng lên ải `1,7`?** Bộ binh sắp hiện ở `0,6` chỉ cách ải `1,7` hai bước. Ải trống thì nó bước thẳng vào: **thua ngay**. Có tướng đứng trên ải thì nó chỉ đứng cạnh và báo đòn đánh tướng đó.
+
+**Khoái và Dư đứng đâu cũng được.** Kỵ binh sắp hiện ở `9,4` cách ải `8,7` bốn bước mà chỉ đi được 3, và hiệp 5 là hiệp cuối nên nó không còn lượt đi nào sau đó: nó không kịp vào ải. Hai nước trên chỉ để Khoái đứng gần chỗ Kỵ binh sẽ tới, hiệp 5 chém được ngay. Mô phỏng: cho Khoái về `6,6`, Dư về `6,5` rồi đánh tiếp như dưới (chỉ Lão đi) vẫn thắng, cả ba tướng 3/3.
 
 ## Hiệp 5 — Hiệp cuối: né đòn và hạ Kỵ binh
 

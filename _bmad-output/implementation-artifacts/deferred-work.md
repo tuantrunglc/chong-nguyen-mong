@@ -256,3 +256,9 @@
 
 - **Va chạm vượt trần pha.** `event_player.gd › _collide` chờ `seconds` rồi thêm `0,6 × seconds` (rung lần hai), mà hạn chót chỉ kiểm trước mỗi sự kiện; va chạm cuối pha có thể làm pha dài hơn trần (tua nhanh: dư ~0,03 s). Có từ trước Story 4.4; test tua chỉ dùng sự kiện đi/chết nên không bắt được.
 - **`PlayerSettings.save()` ghi lại cả file và ghi thẳng.** Tạo `ConfigFile` mới chỉ có `[hoat_anh] toc_do` rồi ghi đè: thêm cài đặt thứ hai (âm lượng…) thì bấm tua sẽ xóa mất. Cũng chưa ghi an toàn kiểu file lưu 4.3 (hỏng giữa chừng thì lần sau chỉ WARN, về mặc định). Sửa khi thêm cài đặt thứ hai: nạp file cũ (nếu đọc được) rồi `set_value`.
+
+## Deferred from: code review of 4-5-tran-6 (2026-11-01)
+
+- **Người đã thắng chuỗi 5 trận cũ không vào thẳng được trận 6.** Thắng trận cuối thì `main.gd › _save_progress` xóa file lưu; sau khi thêm trận 6, người đó không còn "Chơi tiếp", phải chơi lại từ trận 1 (hoặc `--tran=6`). Lưu giữa chuỗi thì không sao (lưu id trận, không lưu chỉ số). Đáng làm nếu sau này phát hành rồi mới thêm trận.
+- **`LevelLoader` không chặn ô tiếp viện đặt trên ải `A`** (hay ô không đi được). Hiện chỉ test của từng trận kiểm; trận mới quên kiểm thì lọt.
+- **Trận 6 (và trận 5) không ép được "bắt buộc mưu kế" với chỉ số và AI Giữ ải hiện hành.** Sau review 4.5 đã sàng thêm 158 bàn ngẫu nhiên bằng bộ tìm có nhìn trước pha địch: 0 bàn bắt buộc Sát Thát; bàn chỉ rơi vào hai cực (giặc vào ải ngay hiệp 1, hoặc thắng thoải mái tướng gần đủ máu, nhiều bàn không cần mưu kế nào). Gốc: Bộ binh/Kỵ binh Giữ ải nhắm ải chứ không nhắm tướng; ba tướng gây ~3 sát thương/hiệp; ô tiếp viện chặn được. Tác giả chốt 2026-11-01: mở story cân bằng riêng (chỉ số hoặc AI Giữ ải), đề xuất gộp vào 4.6 Tinh chỉnh 6 trận; trận 6 tạm giữ bàn hiện tại, không ghi "bắt buộc".

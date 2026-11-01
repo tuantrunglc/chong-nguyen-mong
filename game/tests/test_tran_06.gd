@@ -1,7 +1,7 @@
 extends GutTest
 ## Trận 6 — Phục Binh Bạch Đằng (Story 4.5): nạp được, bàn thật khớp "truoc" của kịch bản lời giải, lời giải thắng ở
-## hiệp 5 không mất tướng và có dùng Sát Thát (validate sau mỗi lệnh), bỏ Sát Thát khỏi lời giải thì không thắng,
-## đứng yên thì thua vì Kỵ binh phi vào ải.
+## hiệp 5 không mất tướng và có dùng Sát Thát (validate sau mỗi lệnh), đứng yên thì thua vì Kỵ binh phi vào ải.
+## Trận chưa "bắt buộc" Sát Thát (code review 4.5): có lối thắng khác, chờ story cân bằng.
 
 const LEVEL_PATH: String = "res://data/tran/tran_06.json"
 const SCENARIO_PATH: String = "res://tests/kich_ban/tran/tran_06_loi_giai.json"
@@ -37,6 +37,7 @@ func _level() -> LevelData:
 func _scenario() -> ScenarioData:
 	var result: LoadResult = ScenarioLoader.load_scenario(SCENARIO_PATH, SCENARIO_ROOT, _stats)
 	assert_eq(result.errors, [] as Array[String], "kịch bản trận 6 nạp được")
+	assert_eq(result.warnings, [] as Array[String], "kịch bản trận 6 không có cảnh báo")
 	return result.data as ScenarioData
 
 
@@ -50,20 +51,6 @@ func _opened(level: LevelData) -> BattleState:
 
 func _rejected(events: Array[BattleEvent]) -> bool:
 	return events.any(func(e: BattleEvent) -> bool: return e.type == BattleEvent.Type.REJECTED)
-
-
-## Lệnh của một bước kịch bản; bước lạ thì null (test gọi phải báo trượt).
-func _command(step: ScenarioData.ScenarioStep) -> Command:
-	match step.kind:
-		"di":
-			return Command.move(UnitType.GENERALS.find(step.general) + 1, step.cell)
-		"danh":
-			return Command.attack(UnitType.GENERALS.find(step.general) + 1, step.cell)
-		"muu_ke":
-			return Command.use_stratagem(step.stratagem)
-		"ket_thuc_luot":
-			return Command.end_turn()
-	return null
 
 
 func test_level_6_data() -> void:
@@ -148,10 +135,14 @@ func test_opened_board_matches_scenario() -> void:
 	assert_eq(got_strikes, want_strikes, "đòn đã báo khớp")
 	# thu_tu_dich của kịch bản: đọc thẳng từ JSON, phải khớp thứ tự hành động thật (id tăng dần).
 	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SCENARIO_PATH)) as Dictionary
-	var enemy_cells: Array = []
+	var enemies: Array[Unit] = []
 	for u: Unit in state.units:
 		if not UnitType.is_general(u.type):
-			enemy_cells.append(BoardText.cell_text(u.cell))
+			enemies.append(u)
+	enemies.sort_custom(func(a: Unit, b: Unit) -> bool: return a.id < b.id)
+	var enemy_cells: Array = []
+	for u: Unit in enemies:
+		enemy_cells.append(BoardText.cell_text(u.cell))
 	assert_eq((raw["truoc"] as Dictionary)["thu_tu_dich"], enemy_cells, "thu_tu_dich của kịch bản đúng thứ tự thật")
 
 
@@ -167,10 +158,19 @@ func test_solution_wins_without_losing_a_general() -> void:
 	var sat_that_hit: bool = false
 	for i: int in range(scenario.steps.size()):
 		var step: ScenarioData.ScenarioStep = scenario.steps[i]
-		var command: Command = _command(step)
-		if command == null:
-			fail_test("bước %d: lệnh lạ \"%s\"" % [i + 1, step.kind])
-			return
+		var command: Command
+		match step.kind:
+			"di":
+				command = Command.move(UnitType.GENERALS.find(step.general) + 1, step.cell)
+			"danh":
+				command = Command.attack(UnitType.GENERALS.find(step.general) + 1, step.cell)
+			"muu_ke":
+				command = Command.use_stratagem(step.stratagem)
+			"ket_thuc_luot":
+				command = Command.end_turn()
+			_:
+				fail_test("bước %d: lệnh lạ \"%s\"" % [i + 1, step.kind])
+				return
 		var target: Unit = state.unit_at(step.cell) if step.kind == "danh" else null
 		var events: Array[BattleEvent] = Rules.resolve(state, command)
 		assert_false(_rejected(events), "bước %d (%s) chạy được" % [i + 1, step.kind])
@@ -205,30 +205,6 @@ func test_solution_wins_without_losing_a_general() -> void:
 		assert_not_null(g, "tướng %d còn sống" % id)
 		hp.append(g.hp if g != null else 0)
 	assert_eq(hp, [3, 3, 3], "cả ba tướng 3/3")
-
-
-## Bỏ riêng nước Sát Thát khỏi lời giải (mọi nước khác giữ nguyên): không thắng được không mất tướng.
-## Không phải chứng minh "bắt buộc Sát Thát" (việc đó mô phỏng ở Story 4.5), chỉ giữ cho lời giải dựa thật vào Sát Thát.
-func test_solution_without_sat_that_does_not_win() -> void:
-	var level: LevelData = _level()
-	var scenario: ScenarioData = _scenario()
-	if level == null or scenario == null:
-		return
-	var state: BattleState = _opened(level)
-	for i: int in range(scenario.steps.size()):
-		var step: ScenarioData.ScenarioStep = scenario.steps[i]
-		if step.kind == "muu_ke" and step.stratagem == SAT_THAT:
-			continue
-		if Rules.is_battle_over(state):
-			break
-		var command: Command = _command(step)
-		if command == null:
-			fail_test("bước %d: lệnh lạ \"%s\"" % [i + 1, step.kind])
-			return
-		Rules.resolve(state, command)
-		assert_eq(state.validate(), [] as Array[String], "validate sạch sau bước %d" % (i + 1))
-	var all_alive: bool = state.unit_by_id(1) != null and state.unit_by_id(2) != null and state.unit_by_id(3) != null
-	assert_false(state.phase == BattleState.Phase.WON and all_alive, "không Sát Thát thì lời giải không còn thắng đủ tướng")
 
 
 ## Đứng yên: Kỵ binh 8,5 phi vào ải 8,7 ngay đầu hiệp 2 — thua.

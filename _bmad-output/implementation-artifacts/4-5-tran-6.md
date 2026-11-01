@@ -40,10 +40,10 @@ _Cắt được nếu trễ (epics.md:184, 1305): khi cắt, `chien_dich.json` g
 
 - [x] **Task 0: Tác giả trả lời Câu hỏi 1–6** (2026-10-31) — xem "Quyết định của tác giả"; AC 1, 2 đã sửa cho khớp.
 
-- [x] **Task 1: Thiết kế sa bàn và tìm lời giải bằng luật thật** (AC: 1, 2)
+- [ ] **Task 1: Thiết kế sa bàn và tìm lời giải bằng luật thật** (AC: 1, 2)
   - [x] 1.1 Khởi điểm: `_bmad-output/planning-artifacts/thiet-ke-ban-do/tran_06_bach_dang.md`, sửa theo quyết định tác giả và theo **luật thật hiện hành** (xem "Chỗ bản thiết kế sai luật" dưới).
-  - [x] 1.2 Mô phỏng headless bằng luật thật như 3.14 (script tạm trong scratchpad, `extends SceneTree`, `Rules.resolve` trên `BattleState.from_level` + `Command.begin_battle()`), **không** đoán bằng tay. Cần: (a) in bàn từng hiệp, (b) tìm lời giải (beam/DFS có nhớ trạng thái), (c) chơi ngẫu nhiên nhiều ván đo độ khó, (d) thử "không dùng Sát Thát" để xem Sát Thát có cần không. *(Làm (a), (b), (d); (c) chơi ngẫu nhiên không làm, thay bằng tìm kiếm chùm rất rộng khi cấm Sát Thát — xem Debug Log.)*
-  - [x] 1.3 Tiêu chí bàn tốt (tác giả chốt 2026-10-31): trận khó nhất chuỗi; **bắt buộc Sát Thát** — mô phỏng tìm kiếm với mưu kế Sát Thát bị cấm phải **không** tìm được lối thắng mà không tướng nào gục; ít nhất một tiếp viện ảnh hưởng thật; mỗi luật đã dạy có ít nhất một chỗ dùng được. Ghi số liệu mô phỏng vào Debug Log. Được thay bố cục, cơ cấu quân, lịch tiếp viện trong khuôn AC 1. **Không** sửa `chi_so.json` hay luật để đạt tiêu chí; không đạt được thì **dừng**, báo tác giả bằng số liệu (tác giả chốt; bài học 3.14: Giữ ải với chỉ số hiện hành khó ép áp lực). *(Đạt "bắt buộc Sát Thát" và "tiếp viện ảnh hưởng thật"; chưa đạt "mỗi luật có chỗ dùng": lời giải không dùng kho lương hồi máu, chặn tiếp viện, va chạm. Đã báo tác giả, tác giả duyệt bàn 2026-11-01.)*
+  - [ ] 1.2 Mô phỏng headless bằng luật thật như 3.14 (script tạm trong scratchpad, `extends SceneTree`, `Rules.resolve` trên `BattleState.from_level` + `Command.begin_battle()`), **không** đoán bằng tay. Cần: (a) in bàn từng hiệp, (b) tìm lời giải (beam/DFS có nhớ trạng thái), (c) chơi ngẫu nhiên nhiều ván đo độ khó, (d) thử "không dùng Sát Thát" để xem Sát Thát có cần không. *(Làm (a), (b), (d); (c) chơi ngẫu nhiên không làm, thay bằng tìm kiếm chùm rất rộng khi cấm Sát Thát — xem Debug Log. Code review: (d) kết luận sai, tìm chùm không thấy lối chặn tiếp viện/kéo lên chông.)*
+  - [ ] 1.3 Tiêu chí bàn tốt (tác giả chốt 2026-10-31): trận khó nhất chuỗi; **bắt buộc Sát Thát** — mô phỏng tìm kiếm với mưu kế Sát Thát bị cấm phải **không** tìm được lối thắng mà không tướng nào gục; ít nhất một tiếp viện ảnh hưởng thật; mỗi luật đã dạy có ít nhất một chỗ dùng được. Ghi số liệu mô phỏng vào Debug Log. Được thay bố cục, cơ cấu quân, lịch tiếp viện trong khuôn AC 1. **Không** sửa `chi_so.json` hay luật để đạt tiêu chí; không đạt được thì **dừng**, báo tác giả bằng số liệu (tác giả chốt; bài học 3.14: Giữ ải với chỉ số hiện hành khó ép áp lực). *(Đạt "bắt buộc Sát Thát" và "tiếp viện ảnh hưởng thật"; chưa đạt "mỗi luật có chỗ dùng": lời giải không dùng kho lương hồi máu, chặn tiếp viện, va chạm. Đã báo tác giả, tác giả duyệt bàn 2026-11-01. Code review 2026-11-01: "bắt buộc Sát Thát" **không đạt** (có lối thắng không Sát Thát); thử lại 158 bàn cũng không đạt → tác giả chốt chuyển sang story cân bằng, xem Review Findings.)*
   - [x] 1.4 Trình tác giả bàn cờ chữ + tóm tắt lời giải **trước** khi viết file chính thức.
 
 - [x] **Task 2: `game/data/tran/tran_06.json`** (AC: 1) — `phien_ban_dinh_dang: 1`, mẫu như `tran_05.json`.
@@ -60,12 +60,28 @@ _Cắt được nếu trễ (epics.md:184, 1305): khi cắt, `chien_dich.json` g
 
 - [x] **Task 6: GDD** (AC: 7) — sửa dòng trận 6 trong `gdds/gdd-GameTest-2026-10-15/gdd.md` (Campaign Structure, ~dòng 253).
 
-- [x] **Task 7: Kiểm tra, build, bàn giao** (AC: 3, 8, 9)
+- [ ] **Task 7: Kiểm tra, build, bàn giao** (AC: 3, 8, 9)
   - [x] 7.1 `tools/test.sh` xanh 4/4.
   - [x] 7.2 Chụp GoPeak (`tools/chay.sh --dev --tran=6`): bàn đầu trận vừa màn hình (nếu 10×8), ô báo tiếp viện, nút Sát Thát.
   - [x] 7.3 Hướng dẫn tác giả đánh tay (từng nước, thấy gì là đúng) và thử chuỗi: thắng trận 5 → màn chuyển trận báo Sát Thát → trận 6 → thắng → màn "thắng cả chiến dịch".
-  - [x] 7.4 Build web + deploy itch chỉ khi tác giả cho phép (AC 8). *(Chưa build/deploy: chờ tác giả cho phép.)*
+  - [ ] 7.4 Build web + deploy itch chỉ khi tác giả cho phép (AC 8). *(Chưa build/deploy: chờ tác giả cho phép.)*
   - [x] 7.5 Cập nhật story, `sprint-status.yaml`; commit.
+
+### Review Findings
+
+*Code review 2026-11-01 (Blind Hunter, Edge Case Hunter, Acceptance Auditor). `tools/test.sh` xanh 867/867. Ba lối thắng không dùng Sát Thát đã chạy lại headless bằng luật thật (script trong scratchpad của phiên review): không lệnh nào bị từ chối, `validate()` rỗng sau mỗi lệnh.*
+
+- [x] [Review][Defer] (Tác giả chốt 2026-11-01: thử thiết kế lại trước; không đạt → **mở story cân bằng riêng**, trận 6 tạm giữ bàn hiện tại, bỏ chữ "bắt buộc") Sau review đã thử lại bằng bộ tìm có nhìn trước pha địch (beam K40–K400, B15–B150, 2 kiểu chấm điểm, cho Vườn không nhà trống chen giữa lượt; bộ sinh mới không dùng lại ô tiếp viện, ô tiếp viện không kề nhau): 158 bàn ngẫu nhiên (104 khuôn "giặc bắc sông", 54 khuôn "giặc sát sông") → 134 dễ ngay, 5 ứng viên tầng 1 đều trượt tầng 2 (K150 B60: thắng không cần Sát Thát, 3 bàn thắng không cần mưu kế nào), 19 "khó quá" (10 kiểm rộng: 9 thua ngay hiệp 1, 1 thắng nhưng cũng không cần Sát Thát). 0 bàn bắt buộc Sát Thát. Bàn chỉ có hai cực: giặc vào ải hiệp 1 không cứu được, hoặc thắng thoải mái tướng gần đủ máu — cùng gốc với review 3.14 (Bộ binh/Kỵ binh Giữ ải nhắm ải, ít đánh tướng). — deferred, cần story cân bằng chỉ số/AI Giữ ải (đề xuất gộp vào 4.6 Tinh chỉnh 6 trận)
+  - Phát hiện gốc: Trận 6 thắng được mà không dùng Sát Thát, thậm chí không dùng mưu kế nào — trái quyết định 6 của tác giả ("bắt buộc Sát Thát"), AC 2 ("vì sao không thắng được nếu không dùng Sát Thát") và Task 1.3. Tác giả duyệt bàn 2026-11-01 dựa trên kết quả mô phỏng sai (tìm chùm K200 B80 không vét hết). Lối 1 (chỉ VKNT, máu 3/2/3): hiệp 2 Khoái đứng `7,6` đánh Bộ binh `8,6`, đẩy nó sang `9,6` là ô tiếp viện hiệp 3 → tiếp viện bị chặn, Bộ binh gục; hiệp 4 Lão đứng `0,6` chặn tiếp viện hiệp 5. Lối 2 (không mưu kế nào, máu 1/1/3): cũng nhờ chặn tiếp viện. Lối 3 (chỉ VKNT, máu 3/3/2): Dư đi qua chông `8,3` kéo Bộ binh `8,5` lên chông. Gốc rễ: ô tiếp viện dùng lại (`9,4` hiệp 3 và 5, `0,6` hiệp 4 và 5) và sát nhau (`9,5`, `9,6`), nên đẩy hay đứng lên ô đó là xóa được tiếp viện; cùng vấn đề cân bằng đã hoãn ở review 3.14. Kéo theo: `tran_06_loi_giai.md:5`, `:86` ("mô phỏng mọi cách đánh không dùng Sát Thát cũng đều thua"), dòng GDD `gdd.md:253` ("bắt buộc dùng"), Debug Log đều ghi sai; `test_solution_without_sat_that_does_not_win` xanh chỉ vì phát lại một chuỗi đã gãy (bước 14, 17, 18 bị từ chối mà test không kiểm).
+- [x] [Review][Patch] Bỏ mọi câu "bắt buộc Sát Thát"/"không dùng thì không thắng" (lời giải dòng 5, 86; GDD dòng 253; Debug Log, Completion Notes); viết lại thành "Sát Thát giúp thắng gọn" đúng như mô phỏng; bỏ hoặc sửa `test_solution_without_sat_that_does_not_win` (đang phát lại chuỗi gãy, không chứng minh gì) [game/data/tran/tran_06_loi_giai.md:5]
+- [x] [Review][Patch] `mo_ta` của kịch bản đặt sự kiện sai hiệp: Cung kỵ tự lên chông gục ở đầu hiệp 3 và hiệp 4, không phải trong hiệp 2, 3 [game/tests/kich_ban/tran/tran_06_loi_giai.json:4]
+- [x] [Review][Patch] `match step.kind` trong `_command()` không có nhánh `_:` như mẫu `test_tran_05.gd` (AC 5) [game/tests/test_tran_06.gd:57]
+- [x] [Review][Patch] Kiểm `thu_tu_dich` của kịch bản duyệt `state.units` theo thứ tự lưu, không sắp theo id như chú thích nói [game/tests/test_tran_06.gd]
+- [x] [Review][Patch] `_scenario()` kiểm `errors` mà không kiểm `warnings` như `_level()` [game/tests/test_tran_06.gd]
+- [x] [Review][Patch] Lời giải không giải thích nước chặn ở hiệp 4 (Khoái `8,5`, Dư `9,6` chặn Kỵ binh tiếp viện đi đường tắt tới ải `8,7`); tóm tắt Sát Thát không nói +1 cũng áp lên tướng ta bị lao của Lão trúng [game/data/tran/tran_06_loi_giai.md]
+- [x] [Review][Patch] Debug Log đếm "2 lần chông" bỏ sót 2 lần chông ở pha chuẩn bị hiệp 1; Task 1.2 (c), 1.3, 7.4 đánh [x] dù ghi "không làm", "chưa đạt", "chưa build" [_bmad-output/implementation-artifacts/4-5-tran-6.md:45]
+- [x] [Review][Defer] Người đã thắng chuỗi 5 trận cũ bị xóa file lưu, cập nhật xong không "Chơi tiếp" vào trận 6 được, phải chơi lại từ trận 1 [game/src/app/main.gd:350] — deferred, hệ quả của thiết kế lưu 4.3, prototype chưa phát hành công khai
+- [x] [Review][Defer] `LevelLoader` không chặn ô tiếp viện đặt trên ải `A`; hiện chỉ test từng trận kiểm [game/src/] — deferred, pre-existing
 
 ## Dev Notes
 
@@ -162,17 +178,18 @@ Claude Opus 5.5 (claude-opus-5-5)
   - Hai bố cục làm tay theo bản thiết kế (v1, v2): thắng dễ cả khi cấm Sát Thát, tướng 3/3 máu. Nguyên nhân như 3.14: Bộ binh/Kỵ binh Giữ ải nhắm ải, ải trống thì đi thẳng vào, ít đánh tướng.
   - Sinh ngẫu nhiên theo khuôn AC 1: khuôn thường (2–3 ải, giặc phía bắc sông) 54 bàn → 46 dễ, 0 ứng viên thật. Khuôn "áp lực cao" (3 ải, giặc gần sông, tiếp viện ở hai mép gần ải) 210 bàn → 94 dễ, 43 quá khó, 53 thua ngay đầu trận, 20 ứng viên ở chùm hẹp (K25 B8).
   - Kiểm lại ứng viên ở chùm rộng (K80 B30, cấm Sát Thát): 15/20 vẫn thắng (ảo do chùm hẹp), còn 6 (5037, 6014, 6038, 9012, 9024, 9037). Chùm rất rộng (K200 B80, ~1,1–1,5 triệu lệnh): 9024 và 9037 vẫn không có lối thắng không mất tướng, mọi nhánh vỡ ở hiệp 4.
-  - Chọn 9037 (cả 5 quân sống qua pha chuẩn bị; 9024 mất 3/5 quân vì tự đi qua chông). Dời Kỵ binh tiếp viện hiệp 5 từ ô chông `9,3` sang `9,4`, kiểm lại: cấm Sát Thát K200 B80 không lời giải (vỡ hiệp 4); có Sát Thát thắng hiệp 5, cả ba tướng 3/3.
-  - Lời giải: Vườn không nhà trống hiệp 1, Sát Thát hiệp 2 (Khoái chém 3 máu Bộ binh sát ải `8,7`). Phát lại lời giải bỏ riêng nước Sát Thát: Bộ binh còn 1 máu bị đẩy lên `8,5`, giặc vào ải ở hiệp 4. Đứng yên: Kỵ binh `8,5` vào ải `8,7` đầu hiệp 2.
-  - Sự kiện trong lời giải: 10 gục + 1 chết đuối, 2 lần chông (Cung kỵ tiếp viện tự đi qua chông), đốt 1 kho, 7 tiếp viện xuất hiện (không ô nào bị chặn), không va chạm, không kho hồi máu, chỉ 1 đòn địch được báo cả trận.
+  - Chọn 9037 (cả 5 quân sống qua pha chuẩn bị; 9024 mất 3/5 quân vì tự đi qua chông). Dời Kỵ binh tiếp viện hiệp 5 từ ô chông `9,3` sang `9,4`, kiểm lại: cấm Sát Thát K200 B80 không lời giải (vỡ hiệp 4; **sai** — tìm chùm không nhìn trước pha địch nên bỏ sót lối chặn tiếp viện, xem Review Findings); có Sát Thát thắng hiệp 5, cả ba tướng 3/3.
+  - Lời giải: Vườn không nhà trống hiệp 1, Sát Thát hiệp 2 (Khoái chém 3 máu Bộ binh sát ải `8,7`). Phát lại lời giải bỏ riêng nước Sát Thát (chuỗi gãy: bước 14, 17, 18 bị từ chối, nên không chứng minh gì — code review): Bộ binh còn 1 máu bị đẩy lên `8,5`, giặc vào ải ở hiệp 4. Đứng yên: Kỵ binh `8,5` vào ải `8,7` đầu hiệp 2.
+  - Sự kiện trong lời giải: 10 gục + 1 chết đuối, 4 lần chông (2 ở pha chuẩn bị hiệp 1: Bộ binh qua `2,3`, Kỵ binh dừng trên `2,3`; 2 Cung kỵ tiếp viện tự đi qua chông), đốt 1 kho, 7 tiếp viện xuất hiện (không ô nào bị chặn), không va chạm, không kho hồi máu, chỉ 1 đòn địch được báo cả trận.
 - Kiểm đột biến: bỏ `tran_06` khỏi `chien_dich.json` thì 4 test trượt (`test_campaign`, 3 test chuỗi trong `test_main`).
 - Chụp GoPeak (`--dev --tran=6`): bàn 10×8 vừa màn hình 1280×720, đúng vị trí quân như sơ đồ lời giải, ô báo tiếp viện `0,0` và `9,5`, đủ nút Vườn không nhà trống (Q) và Sát Thát (W). Log không có WARN/ERROR.
 - `tools/test.sh` 867/867 GUT (+5 `test_tran_06.gd`, +1 `test_main.gd`), 173 kịch bản đã duyệt, 3 chưa duyệt (`tran_01_ne_o_do`, `tran_05_loi_giai`, `tran_06_loi_giai`), 0 chưa đạt.
+- Sau code review (2026-11-01): bỏ `test_solution_without_sat_that_does_not_win` (phát lại chuỗi gãy, không chứng minh gì); `tools/test.sh` 866/866 GUT, 173 kịch bản đã duyệt, 3 chưa duyệt, 0 chưa đạt. Mô phỏng hiệp 4: Khoái `6,6`, Dư `6,5` (không chặn) vẫn thắng 3/3/3 — nước của hai tướng này không bắt buộc, đã ghi vào lời giải.
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
-- Trận 6 "Phục Binh Bạch Đằng": Giữ ải 5 hiệp, 10×8, 3 ô ải, 5 quân khởi đầu + 7 tiếp viện (1–2 mỗi hiệp 2–5), mở cả hai mưu kế. Bắt buộc Sát Thát theo mô phỏng (Debug Log). Tác giả duyệt bàn 2026-11-01 sau khi biết: khó vì phải diệt giặc đủ nhanh (tướng không bị dồn máu), và lời giải không dùng kho lương hồi máu / chặn tiếp viện / va chạm.
+- Trận 6 "Phục Binh Bạch Đằng": Giữ ải 5 hiệp, 10×8, 3 ô ải, 5 quân khởi đầu + 7 tiếp viện (1–2 mỗi hiệp 2–5), mở cả hai mưu kế. ~~Bắt buộc Sát Thát theo mô phỏng~~: code review 2026-11-01 tìm ra lối thắng không Sát Thát; Sát Thát chỉ giúp thắng gọn, "bắt buộc" chuyển sang story cân bằng (tác giả chốt). Tác giả duyệt bàn 2026-11-01 sau khi biết: khó vì phải diệt giặc đủ nhanh (tướng không bị dồn máu), và lời giải không dùng kho lương hồi máu / chặn tiếp viện / va chạm.
 - Chuỗi chiến dịch có 6 trận; thắng trận 5 → màn chuyển trận báo mở Sát Thát; thắng trận 6 → "thắng cả chiến dịch", xóa file lưu.
 - GDD dòng trận 6 (Campaign Structure) sửa theo quyết định tác giả và bàn đã chốt.
 - **Tác giả đánh tay** (AC 3): `tools/chay.sh --dev --tran=6`, làm theo `game/data/tran/tran_06_loi_giai.md`. Thấy bảng **Thắng** ở cuối hiệp 5, cả ba tướng 3/3 là đúng. Xong thì nói "duyệt" để bật `da_duyet: true` cho `tran/tran_06_loi_giai.json`.
