@@ -1411,13 +1411,15 @@ Là người chơi,
 tôi muốn bàn cờ có cỏ, sông, rừng, làng như một chiến trường thật,
 để nhìn là biết chỗ nào là gì.
 
+_Chốt 2026-11-01: 6 trận hiện có đều là đất liền và sông, nên chỉ dùng **ô ghép** (không làm nền vẽ liền; biển là Trận Bạch Đằng ở E7). Ô báo đòn, ô sáng, đường đi, vòng chọn vẫn vẽ bằng code._
+
 **Tiêu chí nghiệm thu:**
 
-**Khi** vào bất kỳ trận nào
-**Thì** ô đất, sông (ghép bờ 16 ô), rừng, hầm chông, kho lương, làng, ô ải và viền quanh bàn hiện bằng hình thay cho hình vẽ bằng code
-**Và** trận biển (Vân Đồn) dùng nền vẽ liền một tấm; vật trên bàn vẫn là hình rời
-**Và** luật ô (đi được, chặn) không đổi; mọi test luật vẫn xanh
-**Và** ô đỏ báo đòn, ô sáng, đường đi vẫn nổi rõ trên nền mới
+**Khi** vào bất kỳ trận nào trong 6 trận
+**Thì** mặt đất, sông (ghép bờ cỏ–sông 16 ô), rừng, hầm chông, kho lương, làng, ô ải và nền rừng quanh bàn hiện bằng hình thay cho hình vẽ bằng code
+**Và** luật ô, hình học bàn (`cell_at`, `pick_cell`, `board_rect`, độ cao khối) không đổi; mọi test luật và test bàn cờ cũ vẫn xanh
+**Và** ô đỏ báo đòn, số thứ tự, ô sáng, đường đi, vòng chọn, viền mục tiêu vẫn nổi rõ trên nền mới (ô sáng đổi màu nếu chìm trên cỏ)
+**Và** kho lương cháy, làng cháy khói là trạng thái động, để Story 8.4
 
 ### Story 8.3: Quân đứng yên
 

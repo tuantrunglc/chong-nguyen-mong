@@ -107,7 +107,7 @@ development_status:
   epic-4-retrospective: optional
   epic-8: in-progress  # hình và âm thanh; làm trước E5–E7 (tác giả chốt 2026-11-01)
   8-1-nen-mong-nap-hinh: done
-  8-2-o-nen-va-dia-hinh: backlog
+  8-2-o-nen-va-dia-hinh: ready-for-dev
   8-3-quan-dung-yen: backlog
   8-4-hoat-anh-va-hieu-ung: backlog
   8-5-giao-dien: backlog
