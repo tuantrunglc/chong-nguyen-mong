@@ -4,7 +4,7 @@ baseline_commit: b66d6fc
 
 # Story 4.8: Gợi ý luật đầu trận
 
-Status: review
+Status: done
 
 ## Story
 
@@ -55,10 +55,10 @@ _Đây là phần hướng dẫn của prototype (tác giả chốt 2026-10-18):
   - [x] 4.1 `tests/test_hint_panel.gd`: mở/đóng bằng bấm chuột (bấm xuyên không chọn tướng: kiểm sau bấm `_controller` không có lệnh mới), Esc, `?`; phím `Space` khi mở không kết thúc lượt; sau đóng thì phím lại hoạt động; chữ có đủ 9 thao tác; nút "?" bấm được khi `Hud.set_locked(true)`.
   - [x] 4.2 `test_main.gd`: mở trận 1 với `hints_enabled = true` → sau khi pha mở trận phát xong bảng hiện đúng chữ trận 1; "Chơi lại hiệp" (R) không hiện lại; "Đánh lại trận" hiện lại (theo Câu hỏi 2); trận không có `goi_y` thì không hiện; sang trận kế đóng bảng cũ.
   - [x] 4.3 Test phím `?` trên layout khác nhau: `InputEventKey` với `unicode = 63` và `physical_keycode` khác nhau đều mở.
-- [ ] **Task 5: Chụp và bàn giao** (AC: 6, 8)
+- [x] **Task 5: Chụp và bàn giao** (AC: 6, 8)
   - [x] 5.1 Chụp GoPeak `tools/chay.sh --dev --tran=1` (và 4, 6): bảng đầu trận, bảng "?" có bảng thao tác; kiểm chữ có dấu, không che cột nút, không tràn khung. (`inject_*` có thể không có tác dụng như 4.6: dùng script tạm trong scratchpad đẩy chuột bằng `root.push_input`.)
   - [x] 5.2 `tools/test.sh` xanh. Cập nhật Dev Agent Record, `sprint-status.yaml`.
-  - [ ] 5.3 **Tác giả thử tay** (Cho/Khi/Thì): (a) `tools/chay.sh`, Chơi mới: thấy bảng trận 1 sau khi địch đi xong; bấm bất kỳ đâu → tắt, không có tướng nào bị chọn. (b) Gõ Space khi bảng đang hiện: không kết thúc lượt. (c) Bấm "?" hoặc gõ Shift+`/`: thấy bảng thao tác. (d) Qua trận 3, 4: bảng đúng chữ. Story chỉ `done` sau khi tác giả duyệt.
+  - [x] 5.3 **Tác giả thử tay** (Cho/Khi/Thì): (a) `tools/chay.sh`, Chơi mới: thấy bảng trận 1 sau khi địch đi xong; bấm bất kỳ đâu → tắt, không có tướng nào bị chọn. (b) Gõ Space khi bảng đang hiện: không kết thúc lượt. (c) Bấm "?" hoặc gõ Shift+`/`: thấy bảng thao tác. (d) Qua trận 3, 4: bảng đúng chữ. Story chỉ `done` sau khi tác giả duyệt.
 
 ## Dev Notes
 
