@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Lời giải trận 5 (Giữ ải) không mất tướng: Hiệp 1 Dư né tên Cung kỵ sang 5,7, dùng Vườn không nhà trống (đốt 2 kho, Cung kỵ gục, hai Bộ binh còn 2 máu), Lão lao trúng Bộ binh 5,1, Khoái lên 4,5; Hiệp 2 Khoái chém gục Bộ binh 3,2, Lão lao qua Khoái hạ Bộ binh 3,1, Dư đứng lên ô báo tiếp viện 7,7; Hiệp 3 Kỵ binh tiếp viện bị chặn (Dư mất 1 máu); hiệp 3–5 chỉ kết thúc lượt, bàn trống quân vẫn phải giữ đủ 5 hiệp. Thắng ở hiệp 5, Khoái 3/3, Lão 3/3, Dư 2/3.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "kieu": "giu_ai",
     "so_hiep_toi_da": 5,

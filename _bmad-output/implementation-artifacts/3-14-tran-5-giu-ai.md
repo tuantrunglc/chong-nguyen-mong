@@ -4,7 +4,7 @@ baseline_commit: 1b2416e
 
 # Story 3.14: Trận 5 (Giữ ải)
 
-Status: review
+Status: done
 
 ## Story
 

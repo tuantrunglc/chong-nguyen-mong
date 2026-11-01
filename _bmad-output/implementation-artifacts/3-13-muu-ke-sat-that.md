@@ -4,7 +4,7 @@ baseline_commit: 2545333
 
 # Story 3.13: Mưu kế Sát Thát
 
-Status: in-progress
+Status: done
 
 ## Story
 

@@ -1,7 +1,7 @@
 {
   "phien_ban_dinh_dang": 1,
   "mo_ta": "Lời giải trận 6 (Giữ ải, Sát Thát giúp thắng gọn) không mất tướng: Hiệp 1 dùng Vườn không nhà trống (đốt kho 8,1, Kỵ binh 2,3 và Cung kỵ 4,4 gục, mọi quân Nguyên mất 1 máu), Dư kéo Bộ binh 7,2 xuống sông 7,3, Khoái chém gục Kỵ binh 8,5, Lão lao gục Bộ binh 2,4; Hiệp 2 dùng Sát Thát: Lão lao gục Cung kỵ tiếp viện 2,1, Khoái chém Bộ binh tiếp viện 8,6 mất 3 máu gục ngay sát ải 8,7; Hiệp 3 đầu hiệp Cung kỵ tiếp viện 9,4 tự đi lên chông 9,3 gục, Khoái hạ Cung kỵ 9,5; Hiệp 4 đầu hiệp Cung kỵ tiếp viện 0,6 tự đi lên chông 0,4 gục, Lão đứng lên ải 1,7; Hiệp 5 Khoái chém gục Kỵ binh tiếp viện 7,5. Thắng ở hiệp 5, cả ba tướng 3/3.",
-  "da_duyet": false,
+  "da_duyet": true,
   "truoc": {
     "kieu": "giu_ai",
     "so_hiep_toi_da": 5,

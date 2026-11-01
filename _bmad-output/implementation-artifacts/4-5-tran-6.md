@@ -4,7 +4,7 @@ baseline_commit: 1334262
 
 # Story 4.5: Trận 6
 
-Status: review
+Status: done
 
 
 ## Story
