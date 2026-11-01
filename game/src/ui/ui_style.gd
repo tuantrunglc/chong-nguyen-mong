@@ -97,6 +97,13 @@ static func button(state: int) -> StyleBoxTexture:
 
 ## Gắn đủ 4 trạng thái và bỏ viền focus (nút không nhận focus, xem Hud).
 static func apply_button(target: Button) -> void:
+	# Tiếng rê và bấm nút (Story 8.7), không phụ thuộc công tắc ENABLED; nút đang mờ thì im.
+	if not target.has_meta("sound_wired"):
+		target.set_meta("sound_wired", true)
+		target.mouse_entered.connect(func() -> void:
+			if not target.disabled:
+				Sound.ui_hover())
+		target.pressed.connect(Sound.ui_click)
 	if not ENABLED:
 		return
 	target.add_theme_stylebox_override("normal", button(ButtonState.NORMAL))

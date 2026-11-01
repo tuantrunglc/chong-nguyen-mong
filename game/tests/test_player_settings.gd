@@ -92,3 +92,31 @@ func test_unreadable_file_warns_and_uses_normal_speed() -> void:
 	assert_false((r.data as PlayerSettings).is_fast())
 	# ConfigFile không có cách đọc im lặng: Godot tự in một dòng lỗi phân tích ra console (đúng: file hỏng thật).
 	assert_engine_error("ConfigFile parse error")
+
+
+## Tắt tiếng (Story 8.7): mặc định bật, ghi và đọc lại được, file cũ không có mục này vẫn nạp.
+func test_sound_defaults_to_on_and_round_trips() -> void:
+	assert_false(PlayerSettings.new().muted)
+	var settings: PlayerSettings = PlayerSettings.new()
+	settings.muted = true
+	assert_eq(settings.save(), OK)
+	assert_string_contains(FileAccess.get_file_as_string(FILE), "[am_thanh]")
+	var r: LoadResult = PlayerSettings.load_settings()
+	assert_eq(r.warnings, [] as Array[String])
+	assert_true((r.data as PlayerSettings).muted)
+
+
+func test_old_file_without_sound_section_keeps_sound_on() -> void:
+	_write("[hoat_anh]\ntoc_do=3.0\n")
+	var r: LoadResult = PlayerSettings.load_settings()
+	assert_eq(r.warnings, [] as Array[String])
+	assert_false((r.data as PlayerSettings).muted)
+	assert_true((r.data as PlayerSettings).is_fast(), "tốc độ vẫn đọc đúng")
+
+
+func test_odd_sound_value_warns_and_keeps_sound_on() -> void:
+	_write("[am_thanh]\ntat_tieng=\"co\"\n")
+	var r: LoadResult = PlayerSettings.load_settings()
+	assert_true(r.ok)
+	assert_eq(r.warnings, [FILE + ': "tat_tieng" là "co", dùng bật tiếng'] as Array[String])
+	assert_false((r.data as PlayerSettings).muted)

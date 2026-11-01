@@ -153,6 +153,7 @@ func _base_seconds(event: BattleEvent) -> float:
 
 func _play_one(event: BattleEvent, seconds: float, snapshot: BattleState) -> void:
 	_played.append(event)
+	_cue(event, snapshot)
 	var token: UnitToken = _token(event.unit_id)
 	match event.type:
 		BattleEvent.Type.MOVED:
@@ -223,6 +224,7 @@ func _show_stratagem_notice(event: BattleEvent) -> void:
 ## Trạng thái cuối của một sự kiện, dùng khi không chạy Tween (test, chế độ instant, hết ngân sách pha).
 func _apply_instant(event: BattleEvent, snapshot: BattleState) -> void:
 	_played.append(event)
+	_cue(event, snapshot)
 	if event.type == BattleEvent.Type.VILLAGE_DAMAGED and _notice != null:
 		_notice.show_text(TranslationServer.translate("notice.morale_lost"))
 	# STRATAGEM_USED không có động tác (0 giây) nên luôn tới đây, không qua _play_one.
@@ -245,6 +247,23 @@ func _apply_instant(event: BattleEvent, snapshot: BattleState) -> void:
 			token.position = _move_target(token, event, snapshot)
 		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
 			token.visible = false
+
+
+## Tiếng đi kèm sự kiện (Story 8.7). Không có hoạt ảnh (instant, headless) thì không có tiếng. Loại quân ra đòn lấy từ
+## snapshot (bàn trước lệnh), không có thì từ đồng quân trên bàn.
+func _cue(event: BattleEvent, snapshot: BattleState) -> void:
+	if instant or Sound.host == null:
+		return
+	var unit_type: int = -1
+	if event.type == BattleEvent.Type.ATTACKED:
+		var unit: Unit = snapshot.unit_by_id(event.unit_id) if snapshot != null else null
+		if unit != null:
+			unit_type = unit.type
+		else:
+			var token: UnitToken = _token(event.unit_id)
+			if token != null:
+				unit_type = token.unit_type
+	Sound.host.play_sfx(SoundMap.sfx_for_event(event, unit_type))
 
 
 func _flash_village(cell: Vector2i, seconds: float) -> void:

@@ -229,7 +229,10 @@ func _set_pending(cell: Vector2i) -> void:
 func _on_undo() -> void:
 	if _controller == null or _playing or _battle_over():
 		return
-	_controller.undo()
+	var undo_events: Array[BattleEvent] = _controller.undo()
+	var rejected: bool = not undo_events.is_empty() and undo_events[0].type == BattleEvent.Type.REJECTED
+	if Sound.host != null and not rejected:
+		Sound.host.play_sfx(SoundMap.HUY_NUOC)
 
 
 ## Chơi lại hiệp (Story 3.2): về bàn đầu lượt người chơi; controller phát bản chụp mới, view vẽ lại rồi bỏ chọn.

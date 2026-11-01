@@ -246,3 +246,29 @@ func test_instant_mode_makes_no_clips_or_effects() -> void:
 	player.instant = true
 	await player.play(events, state)
 	assert_eq(board.fx_layer().active_count(), 0, "instant không tạo hiệu ứng")
+
+
+## Tiếng đi kèm sự kiện (Story 8.7): đúng thứ tự nhật ký, đúng loại quân ra đòn; chế độ instant thì im.
+func test_events_make_their_sounds_in_log_order() -> void:
+	var sound: Sound = Sound.new()
+	add_child_autofree(sound)
+	Sound.host = sound
+	sound.unlock()
+	var units: Dictionary = {Vector2i(0, 0): "1", Vector2i(3, 0): "B"}
+	var board: BoardView = _board(units)
+	var player: EventPlayer = _player(board)
+	var events: Array[BattleEvent] = [
+		BattleEvent.moved(KHOAI, Vector2i(0, 0), Vector2i(1, 0), BattleEvent.Cause.WALK),
+		BattleEvent.attacked(KHOAI, Vector2i(2, 0)),
+		BattleEvent.collided(BO_BINH, KHOAI, Vector2i(2, 0)),
+		BattleEvent.enemy_attacked(BO_BINH, Vector2i(3, 0), Vector2i(2, 0)),
+		BattleEvent.drowned(BO_BINH, Vector2i(3, 0)),
+	]
+	player.instant = true
+	player.play_now(events, BoardFixture.state(units))
+	assert_eq(sound.played_log.size(), 0, "instant (không hoạt ảnh) thì không có tiếng")
+	player.instant = false
+	player.play_now(events, BoardFixture.state(units))
+	assert_eq(sound.played_log, [SoundMap.CHEM, SoundMap.VA_CHAM, SoundMap.DAP_KHIENG, SoundMap.ROI_SONG] as Array[String],
+		"đi bộ im; Khoái chém, va chạm, bộ binh đánh khiên, rơi sông")
+	Sound.host = null

@@ -19,6 +19,8 @@ hud.replay.used,Đã dùng
 hud.end_turn,Kết thúc lượt (Space)
 hud.fast.off,Tua nhanh (T): tắt
 hud.fast.on,Tua nhanh (T): bật
+hud.sound.on,Âm thanh (M): bật
+hud.sound.off,Âm thanh (M): tắt
 hud.stratagem.vuon_khong_nha_trong,Vườn không nhà trống (Q)
 hud.stratagem.sat_that,Sát Thát (W)
 hud.stratagem.used,%s: đã dùng

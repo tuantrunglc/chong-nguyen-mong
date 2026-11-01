@@ -9,6 +9,10 @@ enum Screen { MENU, BATTLE, TRANSITION, ERROR }
 const BUILD_INFO_PATH: String = "res://build_info.json"
 const VERSION_FONT_SIZE: int = 14
 const VERSION_MARGIN: int = 8
+const SOUND_BUTTON_SIZE: Vector2 = Vector2(176, 32)
+const SOUND_BUTTON_MARGIN: float = 8.0
+## Phím M bật/tắt âm thanh, khai báo trong InputMap như các phím khác.
+const SOUND_ACTION: String = "toggle_sound"
 ## Tiêu đề nằm phía trên bàn cờ (vùng bàn cờ BoardView.AREA bắt đầu ở y = 52).
 const TITLE_TOP: int = 4
 const TITLE_HEIGHT: int = 44
@@ -51,6 +55,9 @@ var _notice: Notice
 var _version_label: Label
 ## Số lần mở game (SaveProbe) — báo cáo F2 ghi kèm.
 var _opens: int = 0
+## Âm thanh (Story 8.7): bộ phát và nút Âm thanh ở góc trên phải.
+var _sound: Sound
+var _sound_button: Button
 ## Id trận đang mở ("tran_01"), cho báo cáo F2.
 var _level_id: String = ""
 ## Test thay được để bắt chuỗi thay vì ghi clipboard thật (headless không có clipboard). Callable() = dùng DisplayServer.
@@ -59,6 +66,11 @@ var clipboard_writer: Callable = Callable()
 
 func _ready() -> void:
 	get_window().title = tr("app.title")
+	# Âm thanh dựng trước mọi màn để nút và trận gọi được ngay (Story 8.7).
+	_sound = Sound.new()
+	_sound.name = "Sound"
+	add_child(_sound)
+	Sound.host = _sound
 
 	_title_label = Label.new()
 	_title_label.text = tr("app.title")
@@ -117,6 +129,20 @@ func _ready() -> void:
 	_load_settings()
 	_battle_view.fast_forward_changed.connect(_on_fast_forward_changed)
 
+	_sound_button = Button.new()
+	_sound_button.focus_mode = Control.FOCUS_NONE
+	_sound_button.size = SOUND_BUTTON_SIZE
+	_sound_button.position = Vector2(BoardView.viewport_size.x - SOUND_BUTTON_SIZE.x - SOUND_BUTTON_MARGIN, SOUND_BUTTON_MARGIN)
+	UiStyle.apply_button(_sound_button)
+	_sound_button.pressed.connect(_toggle_sound)
+	add_child(_sound_button)
+	_refresh_sound_button()
+	if not InputMap.has_action(SOUND_ACTION):
+		InputMap.add_action(SOUND_ACTION)
+		var sound_key: InputEventKey = InputEventKey.new()
+		sound_key.physical_keycode = KEY_M
+		InputMap.action_add_event(SOUND_ACTION, sound_key)
+
 	_version_label = Label.new()
 	_version_label.text = "v%s · %s" % [_read_version(), BuildInfo.read_commit(BUILD_INFO_PATH)]
 	_version_label.add_theme_font_size_override("font_size", VERSION_FONT_SIZE)
@@ -160,6 +186,37 @@ func _ready() -> void:
 		_show_menu("mở màn hình chính")
 	else:
 		_start_battle()
+
+
+## Lần bấm chuột hoặc nhấn phím đầu tiên mở khóa âm thanh (trình duyệt chặn âm thanh tự phát, Story 8.7).
+func _input(event: InputEvent) -> void:
+	if _sound.is_unlocked():
+		return
+	var button: InputEventMouseButton = event as InputEventMouseButton
+	var key: InputEventKey = event as InputEventKey
+	if (button != null and button.pressed) or (key != null and key.pressed):
+		_sound.unlock()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(SOUND_ACTION, false, true):
+		_toggle_sound()
+		get_viewport().set_input_as_handled()
+
+
+## Nút hoặc phím M: tắt/bật cả nhạc và tiếng, lưu ngay như tua nhanh.
+func _toggle_sound() -> void:
+	_sound.set_muted(not _sound.is_muted())
+	AppState.settings.muted = _sound.is_muted()
+	_refresh_sound_button()
+	Log.info("settings", "âm thanh: %s" % ("tắt" if _sound.is_muted() else "bật"))
+	var saved: Error = AppState.settings.save()
+	if saved != OK:
+		Log.error("settings", "%s: không ghi được file cài đặt (mã lỗi %d)" % [JsonFile.label(PlayerSettings.path), saved])
+
+
+func _refresh_sound_button() -> void:
+	_sound_button.text = tr("hud.sound.off") if _sound.is_muted() else tr("hud.sound.on")
 
 
 ## Nút "Chơi mới" của màn hình chính: vào trận đầu của chuỗi trận.
@@ -226,6 +283,7 @@ func _start_battle(show_hints: bool = true) -> void:
 	_hide_error()
 	_set_cover(null)
 	_screen = Screen.BATTLE
+	_sound.play_music(SoundMap.music_for_level(level_id))
 
 
 ## F5 (chỉ khi bật dev): đọc lại chi_so.json, chien_dich.json và file trận từ đĩa rồi mở lại trận từ đầu, ở mọi
@@ -289,6 +347,9 @@ func _on_playback_finished(snapshot: BattleState) -> void:
 	if snapshot.phase == BattleState.Phase.WON and in_campaign:
 		_save_progress(_level_id)
 	_result_banner.show_result(snapshot.phase, snapshot.defeat_reason, in_campaign)
+	# Thắng/thua: nhạc nền nhỏ dần tắt, kèn của sự kiện VICTORY/DEFEAT đã vang (Story 8.7).
+	if snapshot.phase == BattleState.Phase.WON or snapshot.phase == BattleState.Phase.LOST:
+		_sound.stop_music()
 
 
 ## Nút "Tiếp" của bảng Thắng! (Story 4.2): màn chuyển trận sang trận kế, hoặc màn kết thúc nếu vừa thắng trận cuối.
@@ -299,6 +360,7 @@ func _show_transition() -> void:
 	_stop_battle()
 	if _campaign.is_last(won_id):
 		_level_transition.show_campaign_end()
+		_sound.play_music(SoundMap.MUSIC_CAMPAIGN_END)
 		Log.info("app", "thắng cả chiến dịch")
 	else:
 		var next_id: String = _campaign.next_after(won_id)
@@ -319,6 +381,7 @@ func _show_transition() -> void:
 				opened.append(kind)
 		_level_transition.show_next(_level.name, opened, _level.mission, next_id)
 		Log.info("app", "chuyển trận %s -> %s" % [won_id, next_id])
+		_sound.stop_music()
 	_set_cover(_level_transition)
 	_screen = Screen.TRANSITION
 
@@ -348,6 +411,7 @@ func _show_menu(log_line: String = "về menu") -> void:
 	_refresh_save()
 	_set_cover(_main_menu)
 	_screen = Screen.MENU
+	_sound.play_music(SoundMap.MUSIC_MENU)
 	Log.info("app", log_line)
 
 
@@ -359,6 +423,7 @@ func _load_settings() -> void:
 	AppState.settings = result.data as PlayerSettings
 	Log.info("settings", "tốc độ hoạt ảnh pha địch %d" % int(AppState.settings.animation_speed))
 	_battle_view.set_fast_forward(AppState.settings.is_fast())
+	_sound.set_muted(AppState.settings.muted)
 
 
 func _on_fast_forward_changed(on: bool) -> void:

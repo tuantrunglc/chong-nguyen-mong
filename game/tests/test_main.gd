@@ -1293,6 +1293,69 @@ func _write_settings(text: String) -> void:
 	file.close()
 
 
+## Âm thanh (Story 8.7): nút góc trên phải, phím M, lưu settings.cfg, mở khóa ở lần bấm đầu.
+func _sound_button(main: Node2D) -> Button:
+	return main._sound_button as Button
+
+
+func test_sound_button_is_top_right_and_toggles_and_saves() -> void:
+	var main: Node2D = _make_main()
+	var button: Button = _sound_button(main)
+	assert_eq(button.text, "Âm thanh (M): bật")
+	assert_eq(button.focus_mode, Control.FOCUS_NONE)
+	assert_gt(button.position.x + button.size.x, BoardView.viewport_size.x - 20.0, "sát mép phải")
+	assert_lt(button.position.y, 20.0, "sát mép trên")
+	assert_false((main._sound as Sound).is_muted())
+	button.pressed.emit()
+	assert_eq(button.text, "Âm thanh (M): tắt")
+	assert_true((main._sound as Sound).is_muted())
+	var config: ConfigFile = ConfigFile.new()
+	assert_eq(config.load(SETTINGS_FILE), OK)
+	assert_eq(config.get_value("am_thanh", "tat_tieng"), true)
+	button.pressed.emit()
+	assert_false((main._sound as Sound).is_muted())
+	config.load(SETTINGS_FILE)
+	assert_eq(config.get_value("am_thanh", "tat_tieng"), false)
+
+
+func test_sound_key_m_toggles() -> void:
+	var main: Node2D = _make_main()
+	var ev: InputEventKey = InputEventKey.new()
+	ev.physical_keycode = KEY_M
+	ev.pressed = true
+	main._unhandled_input(ev)
+	assert_true((main._sound as Sound).is_muted())
+
+
+func test_saved_mute_is_applied_on_start() -> void:
+	_write_settings("[am_thanh]\ntat_tieng=true\n")
+	var main: Node2D = _make_main()
+	assert_true((main._sound as Sound).is_muted())
+	assert_eq(_sound_button(main).text, "Âm thanh (M): tắt")
+
+
+func test_first_click_or_key_unlocks_sound_but_motion_does_not() -> void:
+	var main: Node2D = _make_main()
+	var sound: Sound = main._sound as Sound
+	assert_false(sound.is_unlocked())
+	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+	main._input(motion)
+	assert_false(sound.is_unlocked(), "rê chuột không tính là bấm")
+	var click: InputEventMouseButton = InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	main._input(click)
+	assert_true(sound.is_unlocked())
+
+
+func test_music_follows_screens() -> void:
+	var main: Node2D = _make_main()
+	var sound: Sound = main._sound as Sound
+	assert_eq(sound.wanted_music(), SoundMap.music_for_level("1"), "vào thẳng trận: nhạc trận")
+	main._show_menu()
+	assert_eq(sound.wanted_music(), SoundMap.MUSIC_MENU)
+
+
 ## Chưa có settings.cfg: tua tắt; nút dưới "Kết thúc lượt", không giữ focus.
 func test_fast_forward_off_by_default() -> void:
 	var main: Node2D = _make_main()

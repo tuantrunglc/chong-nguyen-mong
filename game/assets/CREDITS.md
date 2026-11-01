@@ -46,6 +46,8 @@ Trước khi phát hành, phần ghi công trong game (màn hình chính) lấy 
 
 | Hạng mục | File | Nguồn (link) | Tác giả | Giấy phép | AI | Ghi chú | Ngày thêm |
 |---|---|---|---|---|---|---|---|
+| SFX chiến đấu, môi trường, giao diện | `assets/audio/sfx/sfx_*.wav` | https://pixel-boy.itch.io/ninja-adventure-asset-pack | Pixel-boy & AAA | CC0 1.0 Universal | Không | 20 file SFX: chém, phóng lao, kéo, khiên, ngựa phi, cung tên, va chạm, rơi sông, chông, gục, lửa, hồi máu, tiếp viện, Sát Thát, làng, rê chuột, bấm nút, hủy, thắng, thua | 2026-11-01 |
+| BGM nhạc nền và khải hoàn | `assets/audio/music/bgm_*.ogg` | https://pixel-boy.itch.io/ninja-adventure-asset-pack | Pixel-boy & AAA | CC0 1.0 Universal | Không | 4 bản nhạc: Menu chính (Intro), Chiến trận (Fight), Căng thẳng (Tension), Thắng chiến dịch (End Theme) | 2026-11-01 |
 
 ## Khai báo dùng AI (cho trang itch.io, sau này Steam)
 
