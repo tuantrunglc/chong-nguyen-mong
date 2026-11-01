@@ -6,13 +6,13 @@ extends GutTest
 const LEVEL_PATH: String = "res://data/tran/tran_02.json"
 const SCENARIO_PATH: String = "res://tests/kich_ban/tran/tran_02_loi_giai.json"
 const SCENARIO_ROOT: String = "res://tests/kich_ban"
-const STATS_PATH: String = "res://data/chi_so.json"
+const STATS_PATH: String = StatsSnapshot.PATH  # bản chụp chỉ số của kịch bản (Story 4.6)
 const LEVEL_NAME: String = "Trận 2 — Ải Lãnh Kinh"
 
 
 func test_level_2_loads_and_matches_approved_scenario() -> void:
 	var stats_result: LoadResult = StatsLoader.load_stats(STATS_PATH)
-	assert_eq(stats_result.errors, [] as Array[String], "chi_so.json nạp được")
+	assert_eq(stats_result.errors, [] as Array[String], "bản chụp chỉ số nạp được")
 	var stats: Stats = stats_result.data as Stats
 	assert_not_null(stats)
 	if stats == null:

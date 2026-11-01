@@ -1,7 +1,7 @@
 extends GutTest
 ## Trận 1 thật: chọn tướng (Story 1.4: phím 1-2-3, bấm, bỏ chọn, ô sáng, đường đi) và đi, hủy,
 ## kết thúc lượt, bảng nút (Story 1.5).
-## Trận 1 và chi_so.json thật: tướng ở 0,6 và 2,6, sông cột 3 (trừ hàng 3), tầm đi 3.
+## Trận 1 thật, chỉ số theo bản chụp của kịch bản (Story 4.6): tướng ở 0,6 và 2,6, sông cột 3 (trừ hàng 3), tầm đi 3.
 
 const MAIN_SCENE: String = "res://scenes/main.tscn"
 const PROBE_DIR: String = "user://test_battle_view"
@@ -91,6 +91,7 @@ func after_each() -> void:
 
 func _make_main(level_dir: String = "") -> Node2D:
 	var main: Node2D = (load(MAIN_SCENE) as PackedScene).instantiate() as Node2D
+	main.stats_path = StatsSnapshot.PATH
 	if not level_dir.is_empty():
 		main.level_dir = level_dir
 	add_child_autofree(main)
@@ -430,6 +431,7 @@ func _make_main_in_viewport() -> Node2D:
 	viewport.size = Vector2i(1280, 720)
 	add_child_autofree(viewport)
 	var main: Node2D = (load(MAIN_SCENE) as PackedScene).instantiate() as Node2D
+	main.stats_path = StatsSnapshot.PATH
 	viewport.add_child(main)
 	await _wait_layout()
 	return main
@@ -1341,6 +1343,19 @@ func test_preview_shows_every_affected_unit() -> void:
 	assert_eq(_unit_at(main, Vector2i(5, 4)).hp, 2, "đánh thật: quân chắn còn 2 máu, khớp bóng")
 
 
+## Story 4.6: rê lên mục tiêu thì ngoài bóng còn chỉ báo va chạm ở ô quân bị đẩy; rời mục tiêu thì mất.
+func test_preview_marks_collision_and_clears() -> void:
+	var main: Node2D = _make_push_collision_main()
+	_press_physical(main, KEY_1)
+	_hover_by_mouse(main, Vector2i(4, 4))
+	var kinds: Array = []
+	for mark: Dictionary in _board(main).preview_view().marks():
+		kinds.append([mark["kind"], mark["cell"]])
+	assert_has(kinds, [PreviewMarks.Kind.COLLISION, Vector2i(4, 4)], "va chạm báo ở ô quân bị đẩy")
+	_hover_by_mouse(main, Vector2i(0, 0))
+	assert_eq(_board(main).preview_view().marks(), [] as Array[Dictionary], "rời mục tiêu thì hết chỉ báo")
+
+
 ## Bóng của quân chết đuối nằm ở ô sông (ô cuối nó tới), không phải ô xuất phát — nhánh `last_cell` của
 ## `_ghosts_of` (Story 2.12 review vòng 2; trước đó chỉ có bằng chứng ảnh, không có test).
 func test_preview_ghost_of_drowned_unit_sits_on_river_cell() -> void:
@@ -1376,7 +1391,9 @@ func test_preview_hp_label_stays_inside_its_cell() -> void:
 	var preview: PreviewView = _board(main).preview_view()
 	var ghosts: Array[Dictionary] = preview.ghosts()
 	assert_eq(ghosts.size(), 2, "điều kiện trước: hai bóng")
-	var labels: Array[Node] = preview.get_children()
+	# Nhãn chỉ báo chuỗi hệ quả (Story 4.6) không phải nhãn số máu.
+	var labels: Array[Node] = preview.get_children().filter(
+		func(n: Node) -> bool: return not n.has_meta(PreviewView.MARK_META))
 	assert_eq(labels.size(), ghosts.size(), "mỗi bóng đúng một nhãn số máu")
 	for i: int in range(mini(labels.size(), ghosts.size())):
 		var cell: Vector2i = ghosts[i]["cell"] as Vector2i

@@ -5,7 +5,7 @@ extends GutTest
 const LEVEL_PATH: String = "res://data/tran/tran_05.json"
 const SCENARIO_PATH: String = "res://tests/kich_ban/tran/tran_05_loi_giai.json"
 const SCENARIO_ROOT: String = "res://tests/kich_ban"
-const STATS_PATH: String = "res://data/chi_so.json"
+const STATS_PATH: String = StatsSnapshot.PATH  # bản chụp chỉ số của kịch bản (Story 4.6)
 const LEVEL_NAME: String = "Trận 5 — Thăng Long Bỏ Ngỏ"
 const VKNT: int = Stratagem.Kind.VUON_KHONG_NHA_TRONG
 const SPAWN_CELL: Vector2i = Vector2i(7, 7)

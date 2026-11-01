@@ -141,6 +141,11 @@ fi
 # tests/test_scenarios.gd ghi kết quả từng kịch bản luật vào file này (dòng: trạng thái duyệt, đạt/trượt, tên).
 export KET_QUA_KICH_BAN="$KET_QUA_DIR/kich_ban.txt"
 rm -f "$KET_QUA_KICH_BAN"
+# tests/test_loi_giai_6_tran.gd ghi kết quả lời giải từng trận (dòng: đạt/trượt, câu tóm tắt) và chỗ chỉ số thật khác
+# bản chụp của kịch bản luật (Story 4.6).
+export KET_QUA_LOI_GIAI="$KET_QUA_DIR/loi_giai.txt"
+export KET_QUA_CHI_SO="$KET_QUA_DIR/chi_so_khac.txt"
+rm -f "$KET_QUA_LOI_GIAI" "$KET_QUA_CHI_SO"
 chi_tiet_4=()
 tong=0
 so_truot=0
@@ -281,6 +286,43 @@ if (( da_quet )); then
 		(( so_sai == 0 )) || dong_kich_ban+=" · $so_sai sai định dạng"
 		bao_cao+=("$dong_kich_ban")
 		bao_cao+=("${cho_duyet[@]+"${cho_duyet[@]}"}")
+	fi
+fi
+
+# ---------- Lời giải 6 trận (Story 4.6) ----------
+# Mỗi lời giải chạy lại từ file trận với chỉ số THẬT; hỏng thì GUT đã trượt, ở đây in từng trận cho tác giả đọc.
+if (( da_quet )); then
+	if [[ ! -f "$KET_QUA_LOI_GIAI" ]]; then
+		if (( so_truot > 0 )); then
+			bao_cao+=("      Lời giải các trận: chưa chạy được (xem test trượt ở trên)")
+		else
+			bao_cao+=("      Lời giải các trận: không đọc được kết quả")
+			ly_do_truot+=("không đọc được kết quả lời giải các trận")
+		fi
+	else
+		so_con_thang=0
+		so_hong=0
+		dong_tran=()
+		while IFS=$'\t' read -r ket_qua tom_tat; do
+			[[ -n "$ket_qua" ]] || continue
+			if [[ "$ket_qua" == "dat" ]]; then
+				so_con_thang=$((so_con_thang + 1))
+				dong_tran+=("        ✅ $tom_tat")
+			else
+				so_hong=$((so_hong + 1))
+				dong_tran+=("        ❌ $tom_tat")
+			fi
+		done <"$KET_QUA_LOI_GIAI"
+		bao_cao+=("      Lời giải các trận: $so_con_thang còn thắng · $so_hong hỏng")
+		bao_cao+=("${dong_tran[@]+"${dong_tran[@]}"}")
+		(( so_hong == 0 )) || ly_do_truot+=("$so_hong lời giải trận không còn thắng")
+	fi
+	# Chỉ báo, không làm trượt: kịch bản luật đang chạy theo bản chụp, không theo số vừa sửa.
+	if [[ -s "$KET_QUA_CHI_SO" ]]; then
+		bao_cao+=("      ℹ️  Chỉ số thật khác bản chụp của kịch bản luật (game/tests/chi_so_kich_ban.json):")
+		while IFS= read -r dong_chi_so; do
+			[[ -n "$dong_chi_so" ]] && bao_cao+=("        $dong_chi_so")
+		done <"$KET_QUA_CHI_SO"
 	fi
 fi
 

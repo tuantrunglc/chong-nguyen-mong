@@ -7,7 +7,7 @@ extends SceneTree
 ## Chữ cho tác giả đọc đi qua bản dịch (khóa scenario.*); câu lỗi của bộ nạp thì không (như file trận).
 
 const ROOT: String = "res://tests/kich_ban"
-const STATS_PATH: String = "res://data/chi_so.json"
+const STATS_PATH: String = StatsSnapshot.PATH  # bản chụp chỉ số của kịch bản (Story 4.6)
 const ALL_FLAG: String = "--tat_ca"
 ## Bề ngang phần bàn trước (kể cả lề), để bàn sau thẳng cột.
 const LEFT_WIDTH: int = 24

@@ -1,6 +1,10 @@
+---
+baseline_commit: 64b31ba
+---
+
 # Story 4.6: Tinh chỉnh 6 trận
 
-Status: ready-for-dev
+Status: review
 
 
 ## Story
@@ -39,30 +43,30 @@ tôi muốn cả 6 trận vẫn giải được sau mỗi lần tôi chỉnh ch�
 ## Tasks / Subtasks
 
 - [x] **Task 0: Tác giả trả lời Câu hỏi 1–3** (2026-11-01) — xem "Quyết định của tác giả"; AC 3, 6, 7 đã sửa cho khớp.
-- [ ] **Task 1: Bộ kiểm lời giải 6 trận** (AC: 1, 2, 5)
-  - [ ] 1.1 Tạo `game/tests/solution_check.gd` (`class_name SolutionCheck`, `RefCounted`, thư mục `tests/` như `scenario_runner.gd`): hàm tĩnh nhận `level_path`, `scenario_path`, `Stats` → trả kết quả `{passed: bool, reason: String, round: int, generals: Array}`. Đọc **các bước** từ kịch bản bằng `ScenarioLoader.load_scenario(path, "res://tests/kich_ban", stats)` (`.steps`), **không** dùng `truoc`/`sau` của kịch bản.
-  - [ ] 1.2 Chạy: `BattleState.from_level(level, stats)` → `Rules.resolve(state, Command.begin_battle())` → từng bước. `match step.kind` có nhánh `_:` báo lỗi "bước N: lệnh lạ". Hỗ trợ `di`, `danh`, `muu_ke`, `ket_thuc_luot` (6 lời giải hiện chỉ dùng 4 lệnh này — đã kiểm 2026-11-01); gặp `huy` thì báo lỗi rõ chứ không bỏ qua.
-  - [ ] 1.3 Lý do trượt, tiếng Việt, theo thứ tự ưu tiên: lệnh bị từ chối (ghi số bước, tướng, ô, câu `reason` của sự kiện REJECTED) → `validate()` không rỗng → trận chưa hết khi hết bước → thua (ghi hiệp, `defeat_reason` đổi ra chữ: dùng đúng khóa dịch mà màn thua đang dùng) → thắng nhưng có tướng gục (ghi tên tướng). Dừng ngay ở lỗi đầu tiên.
-  - [ ] 1.4 Danh sách 6 trận lấy từ `game/data/chien_dich.json` (Story 4.2: `CampaignLoader` ở `src/data/campaign_loader.gd`, `CampaignData` ở `src/core/campaign_data.gd`), không viết cứng 6; kịch bản lời giải theo quy ước tên `tests/kich_ban/tran/<id>_loi_giai.json`. Thiếu kịch bản cho một trận trong chuỗi thì báo trượt rõ.
-  - [ ] 1.5 `game/tests/test_loi_giai_6_tran.gd`: một test chạy cả chuỗi với `chi_so.json` thật (mọi trận phải đạt); ghi kết quả từng trận ra file cho `tools/test.sh` đọc (mẫu: `KET_QUA_KICH_BAN` ở `tools/test.sh:142` và `test_scenarios.gd:4,9` `RESULT_ENV`). Đặt tên biến môi trường mới, ví dụ `KET_QUA_LOI_GIAI`.
-  - [ ] 1.6 Test đột biến (AC 5): đọc chữ của `chi_so.json`, sửa một số trong Dictionary, `JSON.stringify` rồi nạp bằng `StatsLoader.parse_stats(text, "chi_so_dot_bien")` (`stats_loader.gd:52`) — **không** ghi file vào `data/`. Ba ca (a)(b)(c) phải ra đúng lý do. Gợi ý số (phải tự kiểm bằng chạy thử, không đoán): Khoái `tam_di` 3 → 1 (lệnh đi bị từ chối); Bộ binh `mau` 3 → 9 (thua/không hạ kịp); Cung kỵ `sat_thuong` 1 → 3 (tướng gục).
-- [ ] **Task 2: Mục "Lời giải 6 trận" trong `tools/test.sh`** (AC: 3)
-  - [ ] 2.1 Đọc file kết quả ở 1.5, in mục như AC 3 (cùng kiểu `bao_cao+=(...)` với mục "Kịch bản luật", `tools/test.sh:244–282`). Lời giải hỏng → đưa vào `ly_do_truot`, mã thoát khác 0.
-  - [ ] 2.2 Chưa chạy được GUT (quét project hỏng) thì dòng ghi "chưa chạy được", như mục kịch bản.
-  - [ ] 2.3 Bản chụp chỉ số (Quyết định 1a): chép `game/data/chi_so.json` → `game/tests/kich_ban/chi_so_kich_ban.json` (nằm trong `tests/` nên preset export đã loại). Đổi `STATS_PATH` của `test_scenarios.gd`, `test_determinism.gd` (nếu nạp chỉ số), `test_tran_02..06.gd` và mọi test chạy kịch bản luật sang bản chụp — `grep -rn "chi_so.json" game/tests` để không sót (2026-11-01 có 13 file: `scenario_viewer.gd`, `test_battle_state.gd`, `test_determinism.gd`, `test_hold_pass.gd`, `test_loaders.gd`, `test_main.gd`, `test_reinforcements.gd`, `test_scenarios.gd`, `test_tran_02..06.gd`). Test luật có con số cụ thể (`test_battle_state`, `test_hold_pass`, `test_reinforcements`) cũng chuyển sang bản chụp. Giữ số thật cho: `test_loaders.gd` (kiểm file thật nạp được) và `test_main.gd` (mở game thật) — nếu `test_main.gd` có chỗ so con số cụ thể thì báo lại trong Debug Log, không tự quyết. `scenario_viewer.gd`/`tools/xem_kich_ban.sh` cũng phải dùng bản chụp, để tác giả xem đúng số kịch bản đang chạy.
-  - [ ] 2.4 Test so giá trị hai file (nạp cả hai bằng `StatsLoader`, so từng khóa): hôm nay giống hệt. Ghi khác biệt ra file kết quả để `tools/test.sh` in dòng "Chỉ số thật khác bản chụp kịch bản: …" (thông tin, **không** làm trượt).
-  - [ ] 2.5 Kiểm đột biến bằng tay rồi trả lại: sửa tạm một số trong `data/chi_so.json` → `tools/test.sh`: kịch bản luật vẫn xanh, mục "Lời giải 6 trận" đổi theo, dòng "khác bản chụp" hiện. Ghi kết quả vào Debug Log; **trả số cũ trước khi commit**.
-- [ ] **Task 3: Story 4.9 có mục quan sát** (AC: 4) — thêm vào phần quan sát của Story 4.9 trong `epics.md` (và file story 4.9 nếu đã có): "Người chơi thắng trận 1–2 không mất tướng ngay lần đầu không".
-- [ ] **Task 4: Trau chuốt xem trước** (AC: 6) — tác giả chốt giữ.
-  - [ ] 4.1 Đọc `battle_view.gd` `_update_preview`/`_ghosts_of` (dòng ~341–410) và `preview_view.gd`: dữ liệu đã có sẵn trong `events` của `preview_result` (COLLIDED/DAMAGED với `cause`, DROWNED, DIED, TELEGRAPH_CANCELLED…) và `after_state.telegraphs`.
-  - [ ] 4.2 Ô đỏ xem trước: tính `TelegraphMarks.hit_cell(after_state, t)` cho mọi đòn, vẽ lớp ô đỏ "sau đòn" (mờ/khác nét) thay cho ô đỏ thật khi đang xem trước; đòn bị hủy thì ô đỏ cũ có dấu gạch. Đòn sẽ trúng quân Nguyên khác hoặc tướng mình: chỉ báo rõ trên ô đó.
-  - [ ] 4.3 Chữ chỉ báo va chạm/chết đuối qua `tr()` (khóa mới trong file dịch, dạng `preview.<muc>`), font đủ dấu, không che số thứ tự đòn (NFR9, đã ghi ở đầu `preview_view.gd`).
-  - [ ] 4.4 Không test tự động cho phần vẽ (project-context: UI test tay); có test cho **phần tính** (hàm thuần lấy `before`, `after`, `events` → danh sách chỉ báo) đặt trong `src/battle/`, test bằng `BattleState` dựng sẵn. Giữ test "bấm thật khớp xem trước" của 2.12.
-  - [ ] 4.5 Chụp GoPeak (`tools/chay.sh --dev --tran=N`) các ca: đẩy va rừng, đẩy xuống sông, đẩy chủ đòn làm ô đỏ dịch, đẩy làm đòn trúng quân Nguyên khác.
-- [ ] **Task 5: Kiểm tra, bàn giao** (AC: 7)
-  - [ ] 5.1 `tools/test.sh` xanh; mục "Lời giải 6 trận: 6 còn thắng".
-  - [ ] 5.2 Hướng dẫn tác giả thử (tiếng Việt, từng bước): sửa thử một số trong `chi_so.json` (ví dụ Bộ binh `mau` 3 → 4) → `tools/test.sh` → đọc mục "Lời giải 6 trận" → **trả lại số cũ**. Ghi rõ "thấy gì là đúng".
-  - [ ] 5.3 Cập nhật story, `sprint-status.yaml`; commit.
+- [x] **Task 1: Bộ kiểm lời giải 6 trận** (AC: 1, 2, 5)
+  - [x] 1.1 Tạo `game/tests/solution_check.gd` (`class_name SolutionCheck`, `RefCounted`, thư mục `tests/` như `scenario_runner.gd`): hàm tĩnh nhận `level_path`, `scenario_path`, `Stats` → trả kết quả `{passed: bool, reason: String, round: int, generals: Array}`. Đọc **các bước** từ kịch bản bằng `ScenarioLoader.load_scenario(path, "res://tests/kich_ban", stats)` (`.steps`), **không** dùng `truoc`/`sau` của kịch bản.
+  - [x] 1.2 Chạy: `BattleState.from_level(level, stats)` → `Rules.resolve(state, Command.begin_battle())` → từng bước. `match step.kind` có nhánh `_:` báo lỗi "bước N: lệnh lạ". Hỗ trợ `di`, `danh`, `muu_ke`, `ket_thuc_luot` (6 lời giải hiện chỉ dùng 4 lệnh này — đã kiểm 2026-11-01); gặp `huy` thì báo lỗi rõ chứ không bỏ qua.
+  - [x] 1.3 Lý do trượt, tiếng Việt, theo thứ tự ưu tiên: lệnh bị từ chối (ghi số bước, tướng, ô, câu `reason` của sự kiện REJECTED) → `validate()` không rỗng → trận chưa hết khi hết bước → thua (ghi hiệp, `defeat_reason` đổi ra chữ: dùng đúng khóa dịch mà màn thua đang dùng) → thắng nhưng có tướng gục (ghi tên tướng). Dừng ngay ở lỗi đầu tiên.
+  - [x] 1.4 Danh sách 6 trận lấy từ `game/data/chien_dich.json` (Story 4.2: `CampaignLoader` ở `src/data/campaign_loader.gd`, `CampaignData` ở `src/core/campaign_data.gd`), không viết cứng 6; kịch bản lời giải theo quy ước tên `tests/kich_ban/tran/<id>_loi_giai.json`. Thiếu kịch bản cho một trận trong chuỗi thì báo trượt rõ.
+  - [x] 1.5 `game/tests/test_loi_giai_6_tran.gd`: một test chạy cả chuỗi với `chi_so.json` thật (mọi trận phải đạt); ghi kết quả từng trận ra file cho `tools/test.sh` đọc (mẫu: `KET_QUA_KICH_BAN` ở `tools/test.sh:142` và `test_scenarios.gd:4,9` `RESULT_ENV`). Đặt tên biến môi trường mới, ví dụ `KET_QUA_LOI_GIAI`.
+  - [x] 1.6 Test đột biến (AC 5): đọc chữ của `chi_so.json`, sửa một số trong Dictionary, `JSON.stringify` rồi nạp bằng `StatsLoader.parse_stats(text, "chi_so_dot_bien")` (`stats_loader.gd:52`) — **không** ghi file vào `data/`. Ba ca (a)(b)(c) phải ra đúng lý do. Gợi ý số (phải tự kiểm bằng chạy thử, không đoán): Khoái `tam_di` 3 → 1 (lệnh đi bị từ chối); Bộ binh `mau` 3 → 9 (thua/không hạ kịp); Cung kỵ `sat_thuong` 1 → 3 (tướng gục).
+- [x] **Task 2: Mục "Lời giải 6 trận" trong `tools/test.sh`** (AC: 3)
+  - [x] 2.1 Đọc file kết quả ở 1.5, in mục như AC 3 (cùng kiểu `bao_cao+=(...)` với mục "Kịch bản luật", `tools/test.sh:244–282`). Lời giải hỏng → đưa vào `ly_do_truot`, mã thoát khác 0.
+  - [x] 2.2 Chưa chạy được GUT (quét project hỏng) thì dòng ghi "chưa chạy được", như mục kịch bản.
+  - [x] 2.3 Bản chụp chỉ số (Quyết định 1a): chép `game/data/chi_so.json` → `game/tests/kich_ban/chi_so_kich_ban.json` (nằm trong `tests/` nên preset export đã loại). Đổi `STATS_PATH` của `test_scenarios.gd`, `test_determinism.gd` (nếu nạp chỉ số), `test_tran_02..06.gd` và mọi test chạy kịch bản luật sang bản chụp — `grep -rn "chi_so.json" game/tests` để không sót (2026-11-01 có 13 file: `scenario_viewer.gd`, `test_battle_state.gd`, `test_determinism.gd`, `test_hold_pass.gd`, `test_loaders.gd`, `test_main.gd`, `test_reinforcements.gd`, `test_scenarios.gd`, `test_tran_02..06.gd`). Test luật có con số cụ thể (`test_battle_state`, `test_hold_pass`, `test_reinforcements`) cũng chuyển sang bản chụp. Giữ số thật cho: `test_loaders.gd` (kiểm file thật nạp được) và `test_main.gd` (mở game thật) — nếu `test_main.gd` có chỗ so con số cụ thể thì báo lại trong Debug Log, không tự quyết. `scenario_viewer.gd`/`tools/xem_kich_ban.sh` cũng phải dùng bản chụp, để tác giả xem đúng số kịch bản đang chạy.
+  - [x] 2.4 Test so giá trị hai file (nạp cả hai bằng `StatsLoader`, so từng khóa): hôm nay giống hệt. Ghi khác biệt ra file kết quả để `tools/test.sh` in dòng "Chỉ số thật khác bản chụp kịch bản: …" (thông tin, **không** làm trượt).
+  - [x] 2.5 Kiểm đột biến bằng tay rồi trả lại: sửa tạm một số trong `data/chi_so.json` → `tools/test.sh`: kịch bản luật vẫn xanh, mục "Lời giải 6 trận" đổi theo, dòng "khác bản chụp" hiện. Ghi kết quả vào Debug Log; **trả số cũ trước khi commit**.
+- [x] **Task 3: Story 4.9 có mục quan sát** (AC: 4) — thêm vào phần quan sát của Story 4.9 trong `epics.md` (và file story 4.9 nếu đã có): "Người chơi thắng trận 1–2 không mất tướng ngay lần đầu không".
+- [x] **Task 4: Trau chuốt xem trước** (AC: 6) — tác giả chốt giữ.
+  - [x] 4.1 Đọc `battle_view.gd` `_update_preview`/`_ghosts_of` (dòng ~341–410) và `preview_view.gd`: dữ liệu đã có sẵn trong `events` của `preview_result` (COLLIDED/DAMAGED với `cause`, DROWNED, DIED, TELEGRAPH_CANCELLED…) và `after_state.telegraphs`.
+  - [x] 4.2 Ô đỏ xem trước: tính `TelegraphMarks.hit_cell(after_state, t)` cho mọi đòn, vẽ lớp ô đỏ "sau đòn" (mờ/khác nét) thay cho ô đỏ thật khi đang xem trước; đòn bị hủy thì ô đỏ cũ có dấu gạch. Đòn sẽ trúng quân Nguyên khác hoặc tướng mình: chỉ báo rõ trên ô đó.
+  - [x] 4.3 Chữ chỉ báo va chạm/chết đuối qua `tr()` (khóa mới trong file dịch, dạng `preview.<muc>`), font đủ dấu, không che số thứ tự đòn (NFR9, đã ghi ở đầu `preview_view.gd`).
+  - [x] 4.4 Không test tự động cho phần vẽ (project-context: UI test tay); có test cho **phần tính** (hàm thuần lấy `before`, `after`, `events` → danh sách chỉ báo) đặt trong `src/battle/`, test bằng `BattleState` dựng sẵn. Giữ test "bấm thật khớp xem trước" của 2.12.
+  - [x] 4.5 Chụp GoPeak (`tools/chay.sh --dev --tran=N`) các ca: đẩy va rừng, đẩy xuống sông, đẩy chủ đòn làm ô đỏ dịch, đẩy làm đòn trúng quân Nguyên khác.
+- [x] **Task 5: Kiểm tra, bàn giao** (AC: 7)
+  - [x] 5.1 `tools/test.sh` xanh; mục "Lời giải 6 trận: 6 còn thắng".
+  - [x] 5.2 Hướng dẫn tác giả thử (tiếng Việt, từng bước): sửa thử một số trong `chi_so.json` (ví dụ Bộ binh `mau` 3 → 4) → `tools/test.sh` → đọc mục "Lời giải 6 trận" → **trả lại số cũ**. Ghi rõ "thấy gì là đúng".
+  - [x] 5.3 Cập nhật story, `sprint-status.yaml`; commit.
 
 ## Dev Notes
 
@@ -165,10 +169,50 @@ Chốt 2026-11-01:
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5)
+
 ### Debug Log References
+
+- Nền: HEAD `64b31ba`, `tools/test.sh` 866/866.
+- **Lệch so với story (có lý do):** bản chụp chỉ số đặt ở `game/tests/chi_so_kich_ban.json`, không ở `tests/kich_ban/`: `ScenarioLoader.list_files` quét mọi `.json` trong `tests/kich_ban/` và sẽ coi nó là kịch bản sai định dạng. Mục trong `tools/test.sh` tên "Lời giải các trận" (không viết cứng 6, số trận lấy từ `chien_dich.json`).
+- **Lỗi thật tìm ra khi dò đột biến:** nạp kịch bản lời giải bằng chỉ số đã đổi máu thì bộ nạp từ chối ("`sau.mau` … máu phải là số nguyên từ 1 tới 1") → `SolutionCheck` nạp các bước bằng bản chụp, chơi bằng số thật; có test `test_changed_general_hp_still_loads_solution`.
+- Dò đột biến (script tạm `dotbien.gd`, scratchpad): Kỵ binh `mau` 5 → trận 6 thua hiệp 2 (giặc vào ải); Cung kỵ `mau` 4 → trận 5 thắng nhưng Lão gục hiệp 5; Khoái `tam_di` 1 → trận 1 bước 1 bị từ chối. Ba số này dùng cho AC 5 (dựng từ bản chụp, nên tác giả đổi số thật không làm vỡ chúng).
+- Thử tay Task 2.5 (đã trả số cũ, `git diff game/data/chi_so.json` rỗng):
+  - Bộ binh `mau` 3 → 4: "Lời giải các trận: 2 còn thắng · 4 hỏng" (trận 1 bước 9 bị từ chối, trận 3 hết lời giải mà chưa thắng, trận 4 bước 5, trận 6 bước 14); dòng "ℹ️ Chỉ số thật khác bản chụp: quan_nguyen.bo_binh.mau: kịch bản 3, thật 4". Lần đầu còn 18 test khác đỏ → tìm ra test giao diện (`test_battle_view`, `test_stratagem_view`) mở game với số thật, chuyển sang bản chụp (cả `test_board_view`).
+  - Đổi cùng lúc 10 số (sát thương Khoái, tầm đi Khoái/Kỵ binh, tầm lao Lão, tầm kéo Dư, máu Bộ binh/Dư, tầm bắn Cung kỵ, hai tham số mưu kế): lần đầu `test_loaders › test_real_stats_file_loads` đỏ vì so con số tầm lao trên file thật → chuyển phần so số sang bản chụp, giữ "file thật nạp được". Lần sau: **chỉ** `test_every_campaign_solution_still_wins` đỏ.
+- Hôm nay số thật = bản chụp: `tools/test.sh` không in dòng "ℹ️ … khác bản chụp".
+- Task 3: Story 4.9 trong `epics.md` (dòng ~1385) **đã có** mục "người chơi có thắng trận 1–2 mà không mất tướng ngay lần đầu không"; không sửa gì.
+- Task 4.5: GoPeak `inject_*` không có tác dụng trong phiên này (kể cả phím `T`; runtime addon vẫn "connected", log chỉ có connect/disconnect). Thay bằng script tạm `chup.gd` (scratchpad) mở `main.tscn` có cửa sổ với `--dev --tran=thu_day`, đẩy chuột bằng `root.push_input`, lưu PNG từ viewport. Ảnh: rê Khoái lên Bộ binh `2,3` → bóng 0 máu trên sông + "Chết đuối" + "Hủy đòn 1"; rê lên Bộ binh `1,4` → "Va −1" + "Hủy đòn 2". Sửa sau ảnh: chữ đòn lên mép trên ô, chữ va/chết đuối mép dưới, nền tối; ghi số đòn; chỉ gạch chéo ô đỏ khi sau lệnh không còn đòn nào trúng ô đó. Đòn dời / trúng giặc / trúng tướng ta chưa chụp được trên trận thử có sẵn (đã có test phần tính).
+- `tools/test.sh` cuối: 884/884 GUT (+8 `test_loi_giai_6_tran`, +8 `test_preview_marks`, +1 `test_battle_view`), 173 kịch bản đã duyệt, 3 chưa duyệt, 6/6 lời giải còn thắng.
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
+- **Bộ kiểm lời giải** (`tests/solution_check.gd`, `tests/test_loi_giai_6_tran.gd`): mở từng trận trong `chien_dich.json` từ file thật với `data/chi_so.json`, chạy các bước của `tran_0N_loi_giai.json`; đạt khi không lệnh bị từ chối, thắng, không tướng gục. Lý do trượt tiếng Việt, câu thua lấy đúng chữ bảng kết quả (`ResultBanner.lost_title_key`, tách từ `show_result`, hành vi bảng không đổi).
+- **Bản chụp chỉ số** (`tests/chi_so_kich_ban.json`, `tests/stats_snapshot.gd`): kịch bản luật, test luật có con số, test từng trận, test giao diện và `xem_kich_ban.sh` dùng bản chụp. Giữ số thật: game, bộ kiểm lời giải, `test_loaders` (file thật nạp được), `test_main`.
+- **`tools/test.sh`**: mục "Lời giải các trận" (mỗi trận một dòng ✅/❌), lời giải hỏng thì trượt; dòng "ℹ️ Chỉ số thật khác bản chụp…" chỉ báo, không làm trượt.
+- **Xem trước** (`src/battle/preview_marks.gd`, `preview_view.gd`, `battle_view.gd`): chỉ báo va chạm (Va −1), chết đuối, đòn dời (viền cam ô mới, "Đòn N dời"), hủy đòn ("Hủy đòn N", gạch chéo khi ô hết đòn), đòn sẽ trúng giặc / trúng tướng ta. Bấm thật vẫn khớp xem trước (test 2.12 giữ nguyên, xanh).
+- **Tác giả thử tay:**
+  1. Chỉ số: mở `game/data/chi_so.json`, đổi Bộ binh `"mau": 3` thành `4`, chạy `tools/test.sh`. Thấy mục "Lời giải các trận: 2 còn thắng · 4 hỏng" với lý do từng trận, dòng "ℹ️ Chỉ số thật khác bản chụp…", và **chỉ một** test trượt (`test_every_campaign_solution_still_wins`). **Trả lại số 3**, chạy lại thì xanh.
+  2. Xem trước: `tools/chay.sh --dev --tran=thu_day`, bấm Khoái, rê lên Bộ binh bên phải (sát sông): thấy bóng mờ trên sông, chữ "Chết đuối", chữ "Hủy đòn 1" ở mép trên ô Khoái. Rê lên Bộ binh phía dưới Khoái: chữ "Va −1", "Hủy đòn 2". Rời chuột khỏi mục tiêu thì mọi chữ biến mất. Để ý: chữ "Hủy đòn" che một phần tên "Khoái" — thấy khó chịu thì báo.
 
 ### File List
+
+- `game/tests/solution_check.gd` (mới)
+- `game/tests/stats_snapshot.gd` (mới)
+- `game/tests/chi_so_kich_ban.json` (mới, chép từ `data/chi_so.json`)
+- `game/tests/test_loi_giai_6_tran.gd` (mới)
+- `game/tests/test_preview_marks.gd` (mới)
+- `game/src/battle/preview_marks.gd` (mới)
+- `game/src/battle/preview_view.gd`
+- `game/src/battle/battle_view.gd`
+- `game/src/ui/result_banner.gd`
+- `game/i18n/text.csv`, `game/i18n/text.vi.translation`
+- `game/tests/scenario_viewer.gd`, `test_scenarios.gd`, `test_determinism.gd`, `test_hold_pass.gd`, `test_reinforcements.gd`, `test_tran_02.gd` … `test_tran_06.gd`, `test_loaders.gd`, `test_battle_view.gd`, `test_board_view.gd`, `test_stratagem_view.gd`
+- `tools/test.sh`
+- `_bmad-output/implementation-artifacts/4-6-tinh-chinh-6-tran.md`, `sprint-status.yaml`
+- (các file `.uid` đi kèm script mới)
+
+### Change Log
+
+- 2026-11-01: Bộ kiểm lời giải 6 trận với chỉ số thật, bản chụp chỉ số cho kịch bản/test luật, mục mới trong `tools/test.sh`, chỉ báo chuỗi hệ quả khi xem trước đòn (Story 4.6).

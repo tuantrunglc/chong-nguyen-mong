@@ -103,23 +103,28 @@ func show_result(phase: BattleState.Phase, defeat_reason: String = "", can_conti
 			_relayout()
 			visible = true
 		BattleState.Phase.LOST:
-			if defeat_reason == "het_hiep":
-				_title.add_theme_font_size_override("font_size", LONG_TITLE_FONT_SIZE)
-				_title.text = tr("result.lost_round_limit")
-			elif defeat_reason == "mat_lang":
-				_title.add_theme_font_size_override("font_size", LONG_TITLE_FONT_SIZE)
-				_title.text = tr("result.lost_morale")
-			elif defeat_reason == "quan_nguyen_vao_ai":
-				_title.add_theme_font_size_override("font_size", LONG_TITLE_FONT_SIZE)
-				_title.text = tr("result.lost_pass")
-			else:
-				_title.add_theme_font_size_override("font_size", TITLE_FONT_SIZE)
-				_title.text = tr("result.lost")
+			var key: String = lost_title_key(defeat_reason)
+			_title.add_theme_font_size_override("font_size",
+				TITLE_FONT_SIZE if key == "result.lost" else LONG_TITLE_FONT_SIZE)
+			_title.text = tr(key)
 			_title.add_theme_color_override("font_color", LOST_COLOR)
 			_relayout()
 			visible = true
 		_:
 			hide_result()
+
+
+## Khóa chữ của bảng thua theo defeat_reason ("het_hiep", "mat_lang", "quan_nguyen_vao_ai"); lý do khác là "Thua!".
+## Bộ kiểm lời giải 6 trận (Story 4.6) dùng lại để câu thua giống hệt bảng.
+static func lost_title_key(defeat_reason: String) -> String:
+	match defeat_reason:
+		"het_hiep":
+			return "result.lost_round_limit"
+		"mat_lang":
+			return "result.lost_morale"
+		"quan_nguyen_vao_ai":
+			return "result.lost_pass"
+	return "result.lost"
 
 
 func hide_result() -> void:

@@ -1,17 +1,18 @@
 extends GutTest
-## Chạy mọi kịch bản luật trong tests/kich_ban/ với chỉ số thật (data/chi_so.json).
+## Chạy mọi kịch bản luật trong tests/kich_ban/ với bản chụp chỉ số (tests/chi_so_kich_ban.json, Story 4.6): tác giả
+## sửa data/chi_so.json để cân bằng thì kịch bản đã duyệt không đỏ; lời giải 6 trận kiểm số thật ở test_loi_giai_6_tran.gd.
 ## Đã duyệt mà trượt thì test trượt. Chưa duyệt thì chỉ chạy và ghi kết quả (Story 1.3, AC 4).
 ## Có biến môi trường KET_QUA_KICH_BAN thì ghi kết quả từng kịch bản vào file đó cho tools/test.sh,
 ## mỗi kịch bản một dòng: <da_duyet|chua_duyet|sai_dinh_dang>\t<dat|truot>\t<id>\t<lý do đầu tiên, nếu có>.
 
 const ROOT: String = "res://tests/kich_ban"
-const STATS_PATH: String = "res://data/chi_so.json"
+const STATS_PATH: String = StatsSnapshot.PATH  # bản chụp chỉ số của kịch bản (Story 4.6)
 const RESULT_ENV: String = "KET_QUA_KICH_BAN"
 
 
 func _stats() -> Stats:
 	var r: LoadResult = StatsLoader.load_stats(STATS_PATH)
-	assert_eq(r.errors, [] as Array[String], "chi_so.json nạp được")
+	assert_eq(r.errors, [] as Array[String], "bản chụp chỉ số nạp được")
 	return r.data as Stats
 
 

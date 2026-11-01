@@ -360,6 +360,8 @@ func _update_preview(cell: Vector2i) -> void:
 	_board.preview_view().show_ghosts(
 		_ghosts_of(before, after_state, events),
 		_village_damage_of(before, after_state, events))
+	# Chuỗi hệ quả (Story 4.6): va chạm, chết đuối, đòn địch dời/hủy, đòn sẽ trúng quân khác.
+	_board.preview_view().show_marks(PreviewMarks.compute(before, after_state, events), after_state)
 
 
 func _village_damage_of(before: BattleState, after: BattleState, events: Array[BattleEvent]) -> Dictionary:

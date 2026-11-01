@@ -49,6 +49,7 @@ func after_each() -> void:
 
 func _make_main(level_dir: String = "") -> Node2D:
 	var main: Node2D = (load(MAIN_SCENE) as PackedScene).instantiate() as Node2D
+	main.stats_path = StatsSnapshot.PATH  # con số trong test theo bản chụp của kịch bản (Story 4.6)
 	if not level_dir.is_empty():
 		main.level_dir = level_dir
 	add_child_autofree(main)

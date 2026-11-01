@@ -51,6 +51,7 @@ func _make_main(open: bool = true, open_names: Array = []) -> Node2D:
 	file.store_string(JSON.stringify(data))
 	file.close()
 	var main: Node2D = (load(MAIN_SCENE) as PackedScene).instantiate() as Node2D
+	main.stats_path = StatsSnapshot.PATH  # con số trong test theo bản chụp của kịch bản (Story 4.6)
 	main.level_dir = LEVEL_DIR
 	add_child_autofree(main)
 	return main

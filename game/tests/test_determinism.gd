@@ -3,7 +3,7 @@ extends GutTest
 ## bàn cuối (vị trí, máu, cờ đi/đánh, hiệp, pha, đòn đã báo, ý định AI) và dãy sự kiện của từng lệnh.
 
 const ROOT: String = "res://tests/kich_ban"
-const STATS_PATH: String = "res://data/chi_so.json"
+const STATS_PATH: String = StatsSnapshot.PATH  # bản chụp chỉ số của kịch bản (Story 4.6)
 
 
 ## Một dòng chữ cho bàn cuối; null (kịch bản dừng sớm vì lỗi) thành "".
@@ -41,7 +41,7 @@ static func run_text(result: ScenarioRunner.ScenarioResult) -> Array[String]:
 
 func test_every_scenario_runs_the_same_twice() -> void:
 	var r: LoadResult = StatsLoader.load_stats(STATS_PATH)
-	assert_eq(r.errors, [] as Array[String], "chi_so.json nạp được")
+	assert_eq(r.errors, [] as Array[String], "bản chụp chỉ số nạp được")
 	var stats: Stats = r.data as Stats
 	if stats == null:
 		return

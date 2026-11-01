@@ -1,12 +1,12 @@
 extends GutTest
 ## Kiểm thử cơ chế nhiệm vụ Giữ ải (Story 3.11, FR37, FR23).
 
-const STATS_PATH: String = "res://data/chi_so.json"
+const STATS_PATH: String = StatsSnapshot.PATH  # bản chụp chỉ số của kịch bản (Story 4.6)
 
 
 func _stats() -> Stats:
 	var r: LoadResult = StatsLoader.load_stats(STATS_PATH)
-	assert_eq(r.errors, [] as Array[String], "chi_so.json nạp được")
+	assert_eq(r.errors, [] as Array[String], "bản chụp chỉ số nạp được")
 	return r.data as Stats
 
 

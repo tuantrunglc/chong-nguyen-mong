@@ -1,12 +1,12 @@
 extends GutTest
 ## Kiểm thử cơ chế quân tiếp viện (Story 3.10, FR35).
 
-const STATS_PATH: String = "res://data/chi_so.json"
+const STATS_PATH: String = StatsSnapshot.PATH  # bản chụp chỉ số của kịch bản (Story 4.6)
 
 
 func _stats() -> Stats:
 	var r: LoadResult = StatsLoader.load_stats(STATS_PATH)
-	assert_eq(r.errors, [] as Array[String], "chi_so.json nạp được")
+	assert_eq(r.errors, [] as Array[String], "bản chụp chỉ số nạp được")
 	return r.data as Stats
 
 

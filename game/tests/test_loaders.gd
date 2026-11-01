@@ -851,7 +851,8 @@ func test_real_stats_file_loads() -> void:
 	var r: LoadResult = StatsLoader.load_stats("res://data/chi_so.json")
 	assert_eq(r.errors, [] as Array[String], "data/chi_so.json không có lỗi")
 	assert_true(r.ok)
-	var stats: Stats = r.data as Stats
+	# Con số cụ thể chỉ kiểm trên bản chụp của kịch bản: số thật là của tác giả cân bằng (Story 4.6).
+	var stats: Stats = StatsSnapshot.load_stats().data as Stats
 	assert_not_null(stats)
 	if stats == null:
 		return
@@ -966,7 +967,7 @@ func test_archer_trial_level_begins_with_a_shot() -> void:
 	assert_not_null(level)
 	if level == null:
 		return
-	var stats: Stats = StatsLoader.load_stats("res://data/chi_so.json").data as Stats
+	var stats: Stats = StatsSnapshot.load_stats().data as Stats
 	var controller: BattleController = BattleController.new()
 	controller.start(level, stats)
 	controller.begin()
@@ -1034,10 +1035,10 @@ func test_real_win_trial_level_loads() -> void:
 	assert_eq(level.mission, LevelData.Mission.ELIMINATE)
 
 
-## Chơi thật trên chính file trận: Khoái đẩy, Dư kéo; hết quân Nguyên thì thắng (chỉ số thật của chi_so.json).
+## Chơi thật trên chính file trận: Khoái đẩy, Dư kéo; hết quân Nguyên thì thắng (bản chụp chỉ số của kịch bản, Story 4.6).
 func test_real_win_trial_level_can_be_won_in_one_turn() -> void:
 	var level: LevelData = LevelLoader.load_level("res://data/tran/thu_thang.json").data as LevelData
-	var stats: Stats = StatsLoader.load_stats("res://data/chi_so.json").data as Stats
+	var stats: Stats = StatsSnapshot.load_stats().data as Stats
 	assert_not_null(level)
 	assert_not_null(stats)
 	if level == null or stats == null:
@@ -1057,9 +1058,9 @@ func test_real_win_trial_level_can_be_won_in_one_turn() -> void:
 
 
 ## Trận thử dựng sao cho pha địch chuẩn bị lúc mở trận (Story 2.6) không dời quân nào: các bước tác giả tự test
-## của story cũ vẫn đúng (chỉ số thật của chi_so.json).
+## của story cũ vẫn đúng (bản chụp chỉ số của kịch bản, Story 4.6).
 func _assert_enemies_stay_on_begin(level: LevelData) -> void:
-	var stats: Stats = StatsLoader.load_stats("res://data/chi_so.json").data as Stats
+	var stats: Stats = StatsSnapshot.load_stats().data as Stats
 	var controller: BattleController = BattleController.new()
 	controller.start(level, stats)
 	var before: Array[String] = BoardFixture.picture(controller.snapshot())

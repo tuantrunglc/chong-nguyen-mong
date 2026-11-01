@@ -40,6 +40,12 @@ transition.next,Tiếp
 transition.campaign_won,Đã thắng cả chiến dịch
 transition.menu,Về menu
 notice.morale_lost,"−1 Lòng dân"
+preview.collision,"Va −%d"
+preview.drowned,Chết đuối
+preview.strike_moved,"Đòn %d dời"
+preview.strike_cancelled,"Hủy đòn %d"
+preview.hits_enemy,Trúng giặc
+preview.hits_general,Trúng tướng ta
 notice.stratagem,%s!
 unit.nguyen_khoai,Khoái
 unit.pham_ngu_lao,Lão
