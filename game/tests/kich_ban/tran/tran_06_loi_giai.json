@@ -1,0 +1,244 @@
+{
+  "phien_ban_dinh_dang": 1,
+  "mo_ta": "Lời giải trận 6 (Giữ ải, bắt buộc Sát Thát) không mất tướng: Hiệp 1 dùng Vườn không nhà trống (đốt kho 8,1, Kỵ binh 2,3 và Cung kỵ 4,4 gục, mọi quân Nguyên mất 1 máu), Dư kéo Bộ binh 7,2 xuống sông 7,3, Khoái chém gục Kỵ binh 8,5, Lão lao gục Bộ binh 2,4; Hiệp 2 dùng Sát Thát: Lão lao gục Cung kỵ tiếp viện 2,1, Khoái chém Bộ binh tiếp viện 8,6 mất 3 máu gục ngay sát ải 8,7; Cung kỵ tiếp viện 9,4 tự đi lên chông 9,3 gục; Hiệp 3 Khoái hạ Cung kỵ 9,5, Cung kỵ tiếp viện 0,6 tự đi lên chông 0,4 gục; Hiệp 4 dàn tướng giữ hai cánh; Hiệp 5 Khoái chém gục Kỵ binh tiếp viện 7,5. Thắng ở hiệp 5, cả ba tướng 3/3.",
+  "da_duyet": false,
+  "truoc": {
+    "kieu": "giu_ai",
+    "so_hiep_toi_da": 5,
+    "dia_hinh": [
+      ". . . . . . . . . .",
+      ". . . . . . . . L .",
+      ". # . . . . . . . .",
+      "~ ~ ^ ~ ~ ~ ~ ~ ^ ^",
+      "^ . . . . # . . . .",
+      ". . # . . . . . . .",
+      ". . . # . . . . . .",
+      ". A A . . . . . A ."
+    ],
+    "quan": [
+      ". . . . . . . . . .",
+      ". . . . . . . . . .",
+      ". . . . . . . B . .",
+      ". . K . . . . . . .",
+      ". . B . C . . . . .",
+      ". . . . 1 3 2 . K .",
+      ". . . . . . . . . .",
+      ". . . . . . . . . ."
+    ],
+    "mau": {
+      "2,3": 1,
+      "2,4": 2
+    },
+    "thu_tu_dich": [
+      "2,4",
+      "2,3",
+      "7,2",
+      "4,4",
+      "8,5"
+    ],
+    "tiep_vien": [
+      {
+        "hiep": 2,
+        "o": "9,5",
+        "loai": "B"
+      },
+      {
+        "hiep": 2,
+        "o": "0,0",
+        "loai": "C"
+      },
+      {
+        "hiep": 3,
+        "o": "9,6",
+        "loai": "C"
+      },
+      {
+        "hiep": 3,
+        "o": "9,4",
+        "loai": "C"
+      },
+      {
+        "hiep": 4,
+        "o": "0,6",
+        "loai": "C"
+      },
+      {
+        "hiep": 5,
+        "o": "9,4",
+        "loai": "K"
+      },
+      {
+        "hiep": 5,
+        "o": "0,6",
+        "loai": "B"
+      }
+    ],
+    "muu_ke_mo": [
+      "vuon_khong_nha_trong",
+      "sat_that"
+    ]
+  },
+  "hanh_dong": [
+    {
+      "lenh": "muu_ke",
+      "ten": "vuon_khong_nha_trong"
+    },
+    {
+      "lenh": "di",
+      "tuong": "3",
+      "o": "7,4"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "3",
+      "o": "7,2"
+    },
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "7,5"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "1",
+      "o": "8,5"
+    },
+    {
+      "lenh": "di",
+      "tuong": "2",
+      "o": "4,4"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "2",
+      "o": "2,4"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    },
+    {
+      "lenh": "muu_ke",
+      "ten": "sat_that"
+    },
+    {
+      "lenh": "di",
+      "tuong": "2",
+      "o": "2,4"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "2",
+      "o": "2,1"
+    },
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "8,7"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "1",
+      "o": "8,6"
+    },
+    {
+      "lenh": "di",
+      "tuong": "3",
+      "o": "8,5"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    },
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "9,6"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "1",
+      "o": "9,5"
+    },
+    {
+      "lenh": "di",
+      "tuong": "3",
+      "o": "8,6"
+    },
+    {
+      "lenh": "di",
+      "tuong": "2",
+      "o": "1,6"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    },
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "8,5"
+    },
+    {
+      "lenh": "di",
+      "tuong": "3",
+      "o": "9,6"
+    },
+    {
+      "lenh": "di",
+      "tuong": "2",
+      "o": "1,7"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    },
+    {
+      "lenh": "di",
+      "tuong": "2",
+      "o": "2,6"
+    },
+    {
+      "lenh": "di",
+      "tuong": "1",
+      "o": "7,6"
+    },
+    {
+      "lenh": "danh",
+      "tuong": "1",
+      "o": "7,5"
+    },
+    {
+      "lenh": "di",
+      "tuong": "3",
+      "o": "8,4"
+    },
+    {
+      "lenh": "ket_thuc_luot"
+    }
+  ],
+  "sau": {
+    "dia_hinh": [
+      ". . . . . . . . . .",
+      ". . . . . . . . . .",
+      ". # . . . . . . . .",
+      "~ ~ ^ ~ ~ ~ ~ ~ ^ ^",
+      "^ . . . . # . . . .",
+      ". . # . . . . . . .",
+      ". . . # . . . . . .",
+      ". A A . . . . . A ."
+    ],
+    "quan": [
+      ". . . . . . . . . .",
+      ". . . . . . . . . .",
+      ". . . . . . . . . .",
+      ". . . . . . . . . .",
+      ". . . . . . . . 3 .",
+      ". . . . . . . . . .",
+      ". B 2 . . . . 1 . .",
+      ". . . . . . . . . ."
+    ],
+    "hiep": 5,
+    "ket_qua": "thang",
+    "muu_ke_da_dung": [
+      "vuon_khong_nha_trong",
+      "sat_that"
+    ]
+  }
+}

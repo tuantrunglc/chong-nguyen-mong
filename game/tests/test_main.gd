@@ -911,8 +911,22 @@ func test_transition_to_level_5_lists_new_stratagem() -> void:
 		"trận 5 mở Vườn không nhà trống, trận 4 chưa có")
 
 
-func test_last_level_won_shows_campaign_end_then_menu() -> void:
+## Thắng trận 5: trận 6 là trận kế (Story 4.5), màn chuyển trận chỉ báo Sát Thát (Vườn không nhà trống có từ trận 5).
+func test_transition_to_level_6_lists_new_stratagem() -> void:
 	var main: Node2D = _open("5")
+	_finish(main, BattleState.Phase.WON)
+	_banner(main).next_button().pressed.emit()
+	assert_eq(main._screen, main.Screen.TRANSITION, "trận 5 không còn là trận cuối")
+	assert_eq(_transition(main).stratagem_lines(),
+		[tr("transition.new_stratagem") % tr("stratagem.sat_that")] as Array[String], "trận 6 chỉ mở thêm Sát Thát")
+	_transition(main).next_button().pressed.emit()
+	assert_eq(main._level_id, "tran_06")
+	assert_eq(main._screen, main.Screen.BATTLE)
+	assert_has(Log.get_lines(), "[INFO][battle] nạp trận tran_06")
+
+
+func test_last_level_won_shows_campaign_end_then_menu() -> void:
+	var main: Node2D = _open("6")
 	_finish(main, BattleState.Phase.WON)
 	assert_true(_banner(main).next_button().visible, "trận cuối vẫn có Tiếp")
 	_banner(main).next_button().pressed.emit()
@@ -920,7 +934,7 @@ func test_last_level_won_shows_campaign_end_then_menu() -> void:
 	assert_has(_label_texts(_transition(main)), tr("transition.campaign_won"))
 	assert_false(_transition(main).next_button().visible)
 	assert_true(_transition(main).menu_button().visible)
-	assert_eq(main._level_id, "tran_05", "F5 ở màn kết thúc mở lại trận cuối")
+	assert_eq(main._level_id, "tran_06", "F5 ở màn kết thúc mở lại trận cuối")
 	assert_has(Log.get_lines(), "[INFO][app] thắng cả chiến dịch")
 	_transition(main).menu_button().pressed.emit()
 	assert_eq(main._screen, main.Screen.MENU)
@@ -1059,7 +1073,7 @@ func test_broken_campaign_shows_error_on_new_game() -> void:
 		'[ERROR][data] user://test_main/chien_dich.json: "tran" có "tran_09" nhưng không có file data/tran/tran_09.json')
 
 
-## Mưu kế "vừa mở" chỉ là mưu kế trận kế có mà trận vừa thắng chưa có (trận 6 sẽ mở thêm Sát Thát).
+## Mưu kế "vừa mở" chỉ là mưu kế trận kế có mà trận vừa thắng chưa có (như trận 6 mở thêm Sát Thát).
 func test_transition_lists_only_stratagems_not_open_before() -> void:
 	var source: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/tran/tran_05.json")) as Dictionary
 	DirAccess.make_dir_recursive_absolute(LEVEL_DIR)
@@ -1194,10 +1208,10 @@ func test_back_to_menu_after_save_shows_continue() -> void:
 
 ## Thắng trận cuối: xóa file lưu, màn hình chính không còn "Chơi tiếp".
 func test_last_level_won_clears_save() -> void:
-	_write_save('{"phien_ban": 1, "tran_tiep": "tran_05"}')
+	_write_save('{"phien_ban": 1, "tran_tiep": "tran_06"}')
 	var main: Node2D = _menu_after_open()
 	main.main_menu().continue_button().pressed.emit()
-	assert_eq(main._level_id, "tran_05")
+	assert_eq(main._level_id, "tran_06")
 	_finish(main, BattleState.Phase.WON)
 	assert_false(FileAccess.file_exists(SAVE_FILE))
 	assert_has(Log.get_lines(), "[INFO][save] xóa file lưu: đã thắng cả chiến dịch")

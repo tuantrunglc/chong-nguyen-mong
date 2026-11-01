@@ -33,8 +33,8 @@ func test_real_campaign_file_loads_and_every_level_loads() -> void:
 	var r: LoadResult = CampaignLoader.load_campaign(CAMPAIGN_PATH, LEVEL_DIR)
 	assert_true(r.ok, str(r.errors))
 	var c: CampaignData = r.data as CampaignData
-	assert_eq(c.levels, ["tran_01", "tran_02", "tran_03", "tran_04", "tran_05"] as Array[String],
-		"tác giả chốt 2026-10-30: 5 trận, 4.5 thêm trận 6")
+	assert_eq(c.levels, ["tran_01", "tran_02", "tran_03", "tran_04", "tran_05", "tran_06"] as Array[String],
+		"tác giả chốt 2026-10-30: 5 trận; Story 4.5 thêm trận 6")
 	for id: String in c.levels:
 		var level: LoadResult = LevelLoader.load_level("%s/%s.json" % [LEVEL_DIR, id])
 		assert_true(level.ok, "%s: %s" % [id, level.errors])

@@ -4,7 +4,7 @@ baseline_commit: 1334262
 
 # Story 4.5: Trận 6
 
-Status: ready-for-dev
+Status: review
 
 
 ## Story
@@ -40,32 +40,32 @@ _Cắt được nếu trễ (epics.md:184, 1305): khi cắt, `chien_dich.json` g
 
 - [x] **Task 0: Tác giả trả lời Câu hỏi 1–6** (2026-10-31) — xem "Quyết định của tác giả"; AC 1, 2 đã sửa cho khớp.
 
-- [ ] **Task 1: Thiết kế sa bàn và tìm lời giải bằng luật thật** (AC: 1, 2)
-  - [ ] 1.1 Khởi điểm: `_bmad-output/planning-artifacts/thiet-ke-ban-do/tran_06_bach_dang.md`, sửa theo quyết định tác giả và theo **luật thật hiện hành** (xem "Chỗ bản thiết kế sai luật" dưới).
-  - [ ] 1.2 Mô phỏng headless bằng luật thật như 3.14 (script tạm trong scratchpad, `extends SceneTree`, `Rules.resolve` trên `BattleState.from_level` + `Command.begin_battle()`), **không** đoán bằng tay. Cần: (a) in bàn từng hiệp, (b) tìm lời giải (beam/DFS có nhớ trạng thái), (c) chơi ngẫu nhiên nhiều ván đo độ khó, (d) thử "không dùng Sát Thát" để xem Sát Thát có cần không.
-  - [ ] 1.3 Tiêu chí bàn tốt (tác giả chốt 2026-10-31): trận khó nhất chuỗi; **bắt buộc Sát Thát** — mô phỏng tìm kiếm với mưu kế Sát Thát bị cấm phải **không** tìm được lối thắng mà không tướng nào gục; ít nhất một tiếp viện ảnh hưởng thật; mỗi luật đã dạy có ít nhất một chỗ dùng được. Ghi số liệu mô phỏng vào Debug Log. Được thay bố cục, cơ cấu quân, lịch tiếp viện trong khuôn AC 1. **Không** sửa `chi_so.json` hay luật để đạt tiêu chí; không đạt được thì **dừng**, báo tác giả bằng số liệu (tác giả chốt; bài học 3.14: Giữ ải với chỉ số hiện hành khó ép áp lực).
-  - [ ] 1.4 Trình tác giả bàn cờ chữ + tóm tắt lời giải **trước** khi viết file chính thức.
+- [x] **Task 1: Thiết kế sa bàn và tìm lời giải bằng luật thật** (AC: 1, 2)
+  - [x] 1.1 Khởi điểm: `_bmad-output/planning-artifacts/thiet-ke-ban-do/tran_06_bach_dang.md`, sửa theo quyết định tác giả và theo **luật thật hiện hành** (xem "Chỗ bản thiết kế sai luật" dưới).
+  - [x] 1.2 Mô phỏng headless bằng luật thật như 3.14 (script tạm trong scratchpad, `extends SceneTree`, `Rules.resolve` trên `BattleState.from_level` + `Command.begin_battle()`), **không** đoán bằng tay. Cần: (a) in bàn từng hiệp, (b) tìm lời giải (beam/DFS có nhớ trạng thái), (c) chơi ngẫu nhiên nhiều ván đo độ khó, (d) thử "không dùng Sát Thát" để xem Sát Thát có cần không. *(Làm (a), (b), (d); (c) chơi ngẫu nhiên không làm, thay bằng tìm kiếm chùm rất rộng khi cấm Sát Thát — xem Debug Log.)*
+  - [x] 1.3 Tiêu chí bàn tốt (tác giả chốt 2026-10-31): trận khó nhất chuỗi; **bắt buộc Sát Thát** — mô phỏng tìm kiếm với mưu kế Sát Thát bị cấm phải **không** tìm được lối thắng mà không tướng nào gục; ít nhất một tiếp viện ảnh hưởng thật; mỗi luật đã dạy có ít nhất một chỗ dùng được. Ghi số liệu mô phỏng vào Debug Log. Được thay bố cục, cơ cấu quân, lịch tiếp viện trong khuôn AC 1. **Không** sửa `chi_so.json` hay luật để đạt tiêu chí; không đạt được thì **dừng**, báo tác giả bằng số liệu (tác giả chốt; bài học 3.14: Giữ ải với chỉ số hiện hành khó ép áp lực). *(Đạt "bắt buộc Sát Thát" và "tiếp viện ảnh hưởng thật"; chưa đạt "mỗi luật có chỗ dùng": lời giải không dùng kho lương hồi máu, chặn tiếp viện, va chạm. Đã báo tác giả, tác giả duyệt bàn 2026-11-01.)*
+  - [x] 1.4 Trình tác giả bàn cờ chữ + tóm tắt lời giải **trước** khi viết file chính thức.
 
-- [ ] **Task 2: `game/data/tran/tran_06.json`** (AC: 1) — `phien_ban_dinh_dang: 1`, mẫu như `tran_05.json`.
+- [x] **Task 2: `game/data/tran/tran_06.json`** (AC: 1) — `phien_ban_dinh_dang: 1`, mẫu như `tran_05.json`.
 
-- [ ] **Task 3: `game/data/tran/tran_06_loi_giai.md`** (AC: 2) — mẫu `tran_05_loi_giai.md` (sau review 3.14): ghi đúng thời điểm ô tiếp viện được báo (pha chuẩn bị của hiệp trước, hiện suốt lượt người chơi hiệp đó); lý do từng nước phải khớp mô phỏng.
+- [x] **Task 3: `game/data/tran/tran_06_loi_giai.md`** (AC: 2) — mẫu `tran_05_loi_giai.md` (sau review 3.14): ghi đúng thời điểm ô tiếp viện được báo (pha chuẩn bị của hiệp trước, hiện suốt lượt người chơi hiệp đó); lý do từng nước phải khớp mô phỏng.
 
-- [ ] **Task 4: Kịch bản và test** (AC: 4, 5)
-  - [ ] 4.1 `tests/kich_ban/tran/tran_06_loi_giai.json`: `truoc` là bàn sau chuẩn bị hiệp 1 (quân đã đi, `bao_don`, `tiep_vien` còn lại, `muu_ke_mo`, `kieu`, `so_hiep_toi_da`); `hanh_dong` có `{"lenh": "muu_ke", "ten": "sat_that"}`; `sau.ket_qua: "thang"`. F2 không ghi `kieu`/`tiep_vien`/`so_hiep_toi_da`: thêm tay.
-  - [ ] 4.2 `tests/test_tran_06.gd` theo AC 5. Kiểm thêm: tiếp viện xuất hiện đúng ô đúng hiệp; trong lượt dùng Sát Thát, đòn của Khoái/Lão trừ đúng máu đã cộng.
+- [x] **Task 4: Kịch bản và test** (AC: 4, 5)
+  - [x] 4.1 `tests/kich_ban/tran/tran_06_loi_giai.json`: `truoc` là bàn sau chuẩn bị hiệp 1 (quân đã đi, `bao_don`, `tiep_vien` còn lại, `muu_ke_mo`, `kieu`, `so_hiep_toi_da`); `hanh_dong` có `{"lenh": "muu_ke", "ten": "sat_that"}`; `sau.ket_qua: "thang"`. F2 không ghi `kieu`/`tiep_vien`/`so_hiep_toi_da`: thêm tay.
+  - [x] 4.2 `tests/test_tran_06.gd` theo AC 5. Kiểm thêm: tiếp viện xuất hiện đúng ô đúng hiệp; trong lượt dùng Sát Thát, đòn của Khoái/Lão trừ đúng máu đã cộng.
 
-- [ ] **Task 5: Chuỗi 6 trận** (AC: 6)
-  - [ ] 5.1 `data/chien_dich.json`: thêm `"tran_06"`.
-  - [ ] 5.2 `test_campaign.gd`: danh sách 6 trận. `test_main.gd`: `test_last_level_won_*` dùng trận 6; thêm `test_transition_to_level_6_lists_new_stratagem` (chỉ Sát Thát); `test_last_level_won_clears_save` dùng `"tran_tiep": "tran_06"`. Tìm thêm mọi chỗ coi `tran_05` là cuối (`grep -rn tran_05 game/tests game/src`).
+- [x] **Task 5: Chuỗi 6 trận** (AC: 6)
+  - [x] 5.1 `data/chien_dich.json`: thêm `"tran_06"`.
+  - [x] 5.2 `test_campaign.gd`: danh sách 6 trận. `test_main.gd`: `test_last_level_won_*` dùng trận 6; thêm `test_transition_to_level_6_lists_new_stratagem` (chỉ Sát Thát); `test_last_level_won_clears_save` dùng `"tran_tiep": "tran_06"`. Tìm thêm mọi chỗ coi `tran_05` là cuối (`grep -rn tran_05 game/tests game/src`).
 
-- [ ] **Task 6: GDD** (AC: 7) — sửa dòng trận 6 trong `gdds/gdd-GameTest-2026-10-15/gdd.md` (Campaign Structure, ~dòng 253).
+- [x] **Task 6: GDD** (AC: 7) — sửa dòng trận 6 trong `gdds/gdd-GameTest-2026-10-15/gdd.md` (Campaign Structure, ~dòng 253).
 
-- [ ] **Task 7: Kiểm tra, build, bàn giao** (AC: 3, 8, 9)
-  - [ ] 7.1 `tools/test.sh` xanh 4/4.
-  - [ ] 7.2 Chụp GoPeak (`tools/chay.sh --dev --tran=6`): bàn đầu trận vừa màn hình (nếu 10×8), ô báo tiếp viện, nút Sát Thát.
-  - [ ] 7.3 Hướng dẫn tác giả đánh tay (từng nước, thấy gì là đúng) và thử chuỗi: thắng trận 5 → màn chuyển trận báo Sát Thát → trận 6 → thắng → màn "thắng cả chiến dịch".
-  - [ ] 7.4 Build web + deploy itch chỉ khi tác giả cho phép (AC 8).
-  - [ ] 7.5 Cập nhật story, `sprint-status.yaml`; commit.
+- [x] **Task 7: Kiểm tra, build, bàn giao** (AC: 3, 8, 9)
+  - [x] 7.1 `tools/test.sh` xanh 4/4.
+  - [x] 7.2 Chụp GoPeak (`tools/chay.sh --dev --tran=6`): bàn đầu trận vừa màn hình (nếu 10×8), ô báo tiếp viện, nút Sát Thát.
+  - [x] 7.3 Hướng dẫn tác giả đánh tay (từng nước, thấy gì là đúng) và thử chuỗi: thắng trận 5 → màn chuyển trận báo Sát Thát → trận 6 → thắng → màn "thắng cả chiến dịch".
+  - [x] 7.4 Build web + deploy itch chỉ khi tác giả cho phép (AC 8). *(Chưa build/deploy: chờ tác giả cho phép.)*
+  - [x] 7.5 Cập nhật story, `sprint-status.yaml`; commit.
 
 ## Dev Notes
 
@@ -153,10 +153,40 @@ Chốt 2026-10-31:
 
 ### Agent Model Used
 
+Claude Opus 5.5 (claude-opus-5-5)
+
 ### Debug Log References
+
+- Nền trước story: HEAD `18f5b87`; `tools/test.sh` 861/861 GUT, 173 kịch bản đã duyệt.
+- Mô phỏng headless bằng luật thật (script tạm `sim6/sim.gd`, `sim_hard.gd` trong scratchpad, không thuộc repo): tìm chùm theo từng tướng (giữ K trạng thái tốt nhất sau mỗi tướng, B trạng thái sau mỗi hiệp, bỏ nhánh mất tướng), thử mưu kế đầu lượt; chế độ cấm Sát Thát.
+  - Hai bố cục làm tay theo bản thiết kế (v1, v2): thắng dễ cả khi cấm Sát Thát, tướng 3/3 máu. Nguyên nhân như 3.14: Bộ binh/Kỵ binh Giữ ải nhắm ải, ải trống thì đi thẳng vào, ít đánh tướng.
+  - Sinh ngẫu nhiên theo khuôn AC 1: khuôn thường (2–3 ải, giặc phía bắc sông) 54 bàn → 46 dễ, 0 ứng viên thật. Khuôn "áp lực cao" (3 ải, giặc gần sông, tiếp viện ở hai mép gần ải) 210 bàn → 94 dễ, 43 quá khó, 53 thua ngay đầu trận, 20 ứng viên ở chùm hẹp (K25 B8).
+  - Kiểm lại ứng viên ở chùm rộng (K80 B30, cấm Sát Thát): 15/20 vẫn thắng (ảo do chùm hẹp), còn 6 (5037, 6014, 6038, 9012, 9024, 9037). Chùm rất rộng (K200 B80, ~1,1–1,5 triệu lệnh): 9024 và 9037 vẫn không có lối thắng không mất tướng, mọi nhánh vỡ ở hiệp 4.
+  - Chọn 9037 (cả 5 quân sống qua pha chuẩn bị; 9024 mất 3/5 quân vì tự đi qua chông). Dời Kỵ binh tiếp viện hiệp 5 từ ô chông `9,3` sang `9,4`, kiểm lại: cấm Sát Thát K200 B80 không lời giải (vỡ hiệp 4); có Sát Thát thắng hiệp 5, cả ba tướng 3/3.
+  - Lời giải: Vườn không nhà trống hiệp 1, Sát Thát hiệp 2 (Khoái chém 3 máu Bộ binh sát ải `8,7`). Phát lại lời giải bỏ riêng nước Sát Thát: Bộ binh còn 1 máu bị đẩy lên `8,5`, giặc vào ải ở hiệp 4. Đứng yên: Kỵ binh `8,5` vào ải `8,7` đầu hiệp 2.
+  - Sự kiện trong lời giải: 10 gục + 1 chết đuối, 2 lần chông (Cung kỵ tiếp viện tự đi qua chông), đốt 1 kho, 7 tiếp viện xuất hiện (không ô nào bị chặn), không va chạm, không kho hồi máu, chỉ 1 đòn địch được báo cả trận.
+- Kiểm đột biến: bỏ `tran_06` khỏi `chien_dich.json` thì 4 test trượt (`test_campaign`, 3 test chuỗi trong `test_main`).
+- Chụp GoPeak (`--dev --tran=6`): bàn 10×8 vừa màn hình 1280×720, đúng vị trí quân như sơ đồ lời giải, ô báo tiếp viện `0,0` và `9,5`, đủ nút Vườn không nhà trống (Q) và Sát Thát (W). Log không có WARN/ERROR.
+- `tools/test.sh` 867/867 GUT (+5 `test_tran_06.gd`, +1 `test_main.gd`), 173 kịch bản đã duyệt, 3 chưa duyệt (`tran_01_ne_o_do`, `tran_05_loi_giai`, `tran_06_loi_giai`), 0 chưa đạt.
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Trận 6 "Phục Binh Bạch Đằng": Giữ ải 5 hiệp, 10×8, 3 ô ải, 5 quân khởi đầu + 7 tiếp viện (1–2 mỗi hiệp 2–5), mở cả hai mưu kế. Bắt buộc Sát Thát theo mô phỏng (Debug Log). Tác giả duyệt bàn 2026-11-01 sau khi biết: khó vì phải diệt giặc đủ nhanh (tướng không bị dồn máu), và lời giải không dùng kho lương hồi máu / chặn tiếp viện / va chạm.
+- Chuỗi chiến dịch có 6 trận; thắng trận 5 → màn chuyển trận báo mở Sát Thát; thắng trận 6 → "thắng cả chiến dịch", xóa file lưu.
+- GDD dòng trận 6 (Campaign Structure) sửa theo quyết định tác giả và bàn đã chốt.
+- **Tác giả đánh tay** (AC 3): `tools/chay.sh --dev --tran=6`, làm theo `game/data/tran/tran_06_loi_giai.md`. Thấy bảng **Thắng** ở cuối hiệp 5, cả ba tướng 3/3 là đúng. Xong thì nói "duyệt" để bật `da_duyet: true` cho `tran/tran_06_loi_giai.json`.
+- **Thử chuỗi**: `tools/chay.sh --dev --tran=5`, thắng trận 5 (theo `tran_05_loi_giai.md`) → bấm Tiếp → màn chuyển trận có dòng mở **Sát Thát** (không có Vườn không nhà trống) → Tiếp → vào trận 6 → thắng → màn "thắng cả chiến dịch", về menu không còn "Chơi tiếp".
+- Chưa build/deploy itch (AC 8): chờ tác giả cho phép.
 
 ### File List
+
+- `game/data/tran/tran_06.json` (mới)
+- `game/data/tran/tran_06_loi_giai.md` (mới)
+- `game/tests/kich_ban/tran/tran_06_loi_giai.json` (mới, `da_duyet: false`)
+- `game/tests/test_tran_06.gd`, `game/tests/test_tran_06.gd.uid` (mới)
+- `game/data/chien_dich.json`
+- `game/tests/test_campaign.gd`
+- `game/tests/test_main.gd`
+- `_bmad-output/planning-artifacts/gdds/gdd-GameTest-2026-10-15/gdd.md` (dòng trận 6)
+- `_bmad-output/implementation-artifacts/4-5-tran-6.md`, `_bmad-output/implementation-artifacts/sprint-status.yaml`
