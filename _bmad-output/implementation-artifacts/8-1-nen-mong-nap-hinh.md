@@ -4,7 +4,7 @@ baseline_commit: 167bc96
 
 # Story 8.1: Nền móng nạp hình
 
-Status: review
+Status: done
 
 ## Story
 
