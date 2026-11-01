@@ -64,6 +64,7 @@ func _add_button(key: String, signal_to_emit: Signal) -> Button:
 	button.custom_minimum_size = BUTTON_SIZE
 	# Như nút HUD: không giữ focus, để Space/Enter ở menu không bấm nút (Story 4.1, AC5).
 	button.focus_mode = Control.FOCUS_NONE
+	UiStyle.apply_button(button)
 	button.pressed.connect(func() -> void: signal_to_emit.emit())
 	_buttons.add_child(button)
 	return button

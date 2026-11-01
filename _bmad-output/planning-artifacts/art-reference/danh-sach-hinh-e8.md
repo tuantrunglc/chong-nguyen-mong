@@ -116,7 +116,7 @@ Mỗi quân cần (khung 64×64, hai phe tách màu rõ: Đại Việt đỏ, Ng
 | D3 | Biểu tượng 2 mưu kế | 32×32 | *Vườn không nhà trống* (đuốc/tro tàn), *Sát Thát* (đao lửa hào quang) | Đã xong |
 | D4 | Biểu tượng máu | 24×24 | Trái tim đá quý viền thép | Đã xong |
 | D5 | Biểu tượng Lòng dân | 24×24 | Mái nhà tranh ấm áp | Đã xong |
-| D6 | Biểu tượng hiệp, nhiệm vụ | 32×32 & 24×24 | Tiêu diệt (đao cong bắt chéo), Giữ ải (cổng lũy đá & khiên đồng) | Đã xong (`d6_nhiem_vu_*`) |
+| D6 | Biểu tượng hiệp, nhiệm vụ | 32×32 & 24×24 | Hiệp: Trống trận Đông A (24×24 `d6_hiep_24x24.png`, tác giả duyệt 2026-11-01); Nhiệm vụ: Tiêu diệt (đao cong bắt chéo), Giữ ải (cổng lũy đá & khiên đồng) | Đã xong (`d6_hiep_*`, `d6_nhiem_vu_*`) |
 | D7 | Con trỏ chuột | 32×32 | Thường (mũi tên đồng sơn mài), Chọn được (vòng tròn ngắm), Đánh được (mũi kiếm chữ thập đỏ đồng) | Đã xong (`con_tro/d7_*`) |
 
 ## E. Chân dung (P3)

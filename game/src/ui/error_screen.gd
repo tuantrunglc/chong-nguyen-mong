@@ -48,6 +48,7 @@ func setup(errors: Array[String], dev: bool) -> void:
 	_button = Button.new()
 	_button.text = tr("error.back_to_menu")
 	_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	UiStyle.apply_button(_button)
 	_button.pressed.connect(_on_button_pressed)
 	box.add_child(_button)
 	queue_redraw()

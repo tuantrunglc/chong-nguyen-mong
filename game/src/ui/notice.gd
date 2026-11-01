@@ -30,7 +30,7 @@ func _ready() -> void:
 	style.border_color = BORDER_COLOR
 	style.set_border_width_all(2)
 	style.set_content_margin_all(PADDING)
-	_panel.add_theme_stylebox_override("panel", style)
+	_panel.add_theme_stylebox_override("panel", UiStyle.panel(PADDING, style))
 	add_child(_panel)
 
 	_label = Label.new()

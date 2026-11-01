@@ -18,6 +18,9 @@ signal help_pressed
 const PANEL_POSITION: Vector2 = Vector2(972, 52)
 const PANEL_WIDTH: float = 260.0
 const SEPARATION: int = 12
+## Khung bảng nhô ra khỏi cột nút bấy nhiêu px mỗi phía; khoảng cách biểu tượng với chữ.
+const FRAME_PADDING: float = 12.0
+const ICON_GAP: int = 6
 const BUTTON_HEIGHT: float = 44.0
 ## Màu chữ nổi bật cho hiệp cuối cùng của trận có giới hạn hiệp (Story 3.5).
 const FINAL_ROUND_COLOR: Color = Color(1.0, 0.42, 0.35)
@@ -25,6 +28,16 @@ const FINAL_ROUND_COLOR: Color = Color(1.0, 0.42, 0.35)
 const PHASE_FONT_SIZE: int = 17
 
 var _round_label: Label
+## Biểu tượng cạnh dòng hiệp, Lòng dân, nhiệm vụ (Story 8.5); mỗi dòng là một hàng ngang gồm biểu tượng và chữ.
+var _round_icon: TextureRect
+var _morale_icon: TextureRect
+var _mission_icon: TextureRect
+var _mission_label: Label
+var _morale_row: HBoxContainer
+var _mission_row: HBoxContainer
+## Khung bảng phía sau cột nút (Story 8.5), co theo chiều cao cột.
+var _frame: Panel
+var _box: VBoxContainer
 ## Dòng Lòng dân (Story 3.7); ẩn khi trận không có làng.
 var _morale_label: Label
 ## Dòng pha, luôn hiện khi đang chơi (Story 2.11, AC 4).
@@ -56,22 +69,41 @@ func _ready() -> void:
 	size = Vector2(PANEL_WIDTH, 0)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
+	_frame = Panel.new()
+	_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_frame.add_theme_stylebox_override("panel", UiStyle.panel(-1.0, StyleBoxEmpty.new()))
+	_frame.position = Vector2(-FRAME_PADDING, -FRAME_PADDING)
+	add_child(_frame)
 	var box: VBoxContainer = VBoxContainer.new()
+	_box = box
+	box.resized.connect(_fit_frame)
 	box.size = Vector2(PANEL_WIDTH, 0)
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_theme_constant_override("separation", SEPARATION)
 	add_child(box)
 
+	var round_row: HBoxContainer = _icon_row(box, UiStyle.ICON_ROUND)
+	_round_icon = round_row.get_child(0) as TextureRect
 	_round_label = Label.new()
 	_round_label.theme_type_variation = &"TitleLabel"
 	_round_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box.add_child(_round_label)
+	round_row.add_child(_round_label)
 
+	_mission_row = _icon_row(box, "")
+	_mission_icon = _mission_row.get_child(0) as TextureRect
+	_mission_label = Label.new()
+	_mission_label.add_theme_font_size_override("font_size", PHASE_FONT_SIZE)
+	_mission_row.add_child(_mission_label)
+	_mission_row.visible = false
+
+	_morale_row = _icon_row(box, UiStyle.ICON_MORALE)
+	_morale_icon = _morale_row.get_child(0) as TextureRect
 	_morale_label = Label.new()
 	_morale_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_morale_label.add_theme_font_size_override("font_size", PHASE_FONT_SIZE)
 	_morale_label.visible = false
-	box.add_child(_morale_label)
+	_morale_row.add_child(_morale_label)
+	_morale_row.visible = false
 
 	_phase_label = Label.new()
 	_phase_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -110,7 +142,7 @@ func _ready() -> void:
 ## Có giới hạn hiệp (max_rounds > 0) thì hiện "Hiệp X/Y"; hiệp cuối đổi màu nổi bật (Story 3.5).
 ## Có làng (max_morale > 0) thì hiện "Lòng dân: X/Y" (Story 3.7).
 func show_turn(round_number: int, can_undo: bool, can_replay: bool, replay_left: int, over: bool = false,
-		max_rounds: int = 0, morale: int = 0, max_morale: int = 0) -> void:
+		max_rounds: int = 0, morale: int = 0, max_morale: int = 0, mission: int = -1) -> void:
 	if max_rounds > 0:
 		_round_label.text = tr("hud.round_limit") % [round_number, max_rounds]
 		if round_number >= max_rounds and not over:
@@ -125,6 +157,8 @@ func show_turn(round_number: int, can_undo: bool, can_replay: bool, replay_left:
 		_morale_label.visible = true
 	else:
 		_morale_label.visible = false
+	_morale_row.visible = _morale_label.visible
+	_show_mission(mission)
 	_can_undo = can_undo
 	_can_replay = can_replay
 	_over = over
@@ -149,6 +183,10 @@ func show_stratagems(open_kinds: Array[int], used: Array[int], sat_that_bonus: i
 		_stratagem_buttons.clear()
 		for kind: int in open:
 			var button: Button = _button("", _stratagem_box)
+			var icon_path: String = UiStyle.STRATAGEM_ICONS.get(kind, "") as String
+			if UiStyle.ENABLED and not icon_path.is_empty():
+				button.icon = Art.tex(icon_path)
+				button.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
 			button.pressed.connect(func() -> void: stratagem_pressed.emit(kind))
 			_stratagem_buttons[kind] = button
 	_stratagem_box.visible = not open.is_empty()
@@ -226,6 +264,23 @@ func round_text() -> String:
 	return _round_label.text
 
 
+## Dòng nhiệm vụ: chữ và có đang hiện không (để test); rỗng là đang ẩn.
+func mission_text() -> String:
+	return _mission_label.text if _mission_row.visible else ""
+
+
+func mission_icon() -> Texture2D:
+	return _mission_icon.texture if _mission_row.visible else null
+
+
+func round_icon() -> Texture2D:
+	return _round_icon.texture
+
+
+func morale_icon() -> Texture2D:
+	return _morale_icon.texture if _morale_row.visible else null
+
+
 func morale_text() -> String:
 	return _morale_label.text if _morale_label.visible else ""
 
@@ -264,5 +319,39 @@ func _button(text: String, box: VBoxContainer) -> Button:
 	button.text = text
 	button.focus_mode = Control.FOCUS_NONE
 	button.custom_minimum_size = Vector2(0, BUTTON_HEIGHT)
+	UiStyle.apply_button(button)
 	box.add_child(button)
 	return button
+
+
+## Hàng ngang căn giữa: biểu tượng (con đầu) rồi chữ do người gọi thêm. icon_path rỗng thì để trống, gán sau.
+func _icon_row(parent: Container, icon_path: String) -> HBoxContainer:
+	var row: HBoxContainer = HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", ICON_GAP)
+	var icon: TextureRect = TextureRect.new()
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.custom_minimum_size = Vector2(UiStyle.ICON_SIZE, UiStyle.ICON_SIZE)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	if not icon_path.is_empty():
+		icon.texture = Art.tex(icon_path)
+	row.add_child(icon)
+	parent.add_child(row)
+	return row
+
+
+## Dòng nhiệm vụ theo kiểu trận (LevelData.Mission); mission < 0 là không biết, ẩn dòng.
+func _show_mission(mission: int) -> void:
+	if not UiStyle.MISSION_ICONS.has(mission):
+		_mission_row.visible = false
+		return
+	_mission_icon.texture = Art.tex(UiStyle.MISSION_ICONS[mission] as String)
+	_mission_label.text = tr(UiStyle.MISSION_KEYS[mission] as String)
+	_mission_row.visible = true
+
+
+func _fit_frame() -> void:
+	_frame.size = _box.size + Vector2(FRAME_PADDING, FRAME_PADDING) * 2.0

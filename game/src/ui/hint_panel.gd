@@ -47,7 +47,7 @@ const HELP_ROWS: Array[Array] = [
 
 var _center: CenterContainer
 var _panel: PanelContainer
-var _style: StyleBoxFlat
+var _style: StyleBox
 var _box: VBoxContainer
 ## Bề rộng chữ trong bảng đang dựng (hint và help dùng bề rộng khác nhau).
 var _content_width: float = PANEL_WIDTH - 2.0 * PADDING - 2.0 * BORDER_WIDTH
@@ -62,10 +62,11 @@ func _ready() -> void:
 	add_child(_center)
 	_panel = PanelContainer.new()
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_style = StyleBoxFlat.new()
-	_style.bg_color = BACKGROUND_COLOR
-	_style.border_color = BORDER_COLOR
-	_style.set_border_width_all(BORDER_WIDTH)
+	var flat: StyleBoxFlat = StyleBoxFlat.new()
+	flat.bg_color = BACKGROUND_COLOR
+	flat.border_color = BORDER_COLOR
+	flat.set_border_width_all(BORDER_WIDTH)
+	_style = UiStyle.panel(-1.0, flat)
 	_panel.add_theme_stylebox_override("panel", _style)
 	_center.add_child(_panel)
 	_box = VBoxContainer.new()

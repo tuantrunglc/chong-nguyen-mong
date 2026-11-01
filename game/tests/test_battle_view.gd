@@ -1655,3 +1655,36 @@ func test_enemy_attacks_can_lose_the_battle() -> void:
 	assert_null(_controller(main).snapshot().unit_by_id(1), "Hủy và phím Z không hồi sinh Khoái")
 	assert_eq(_controller(main).snapshot().phase, BattleState.Phase.LOST)
 	assert_true(_banner(main).is_showing())
+
+
+# ---------- Chân dung trong khung thông tin (Story 8.5) ----------
+
+func _tooltip_main() -> Array:
+	var main: Node2D = _make_main()
+	return [main, main._tooltip as Tooltip, _view(main)]
+
+
+func test_hovering_general_shows_portrait_but_enemy_and_terrain_do_not() -> void:
+	var made: Array = _tooltip_main()
+	var tip: Tooltip = made[1] as Tooltip
+	var view: BattleView = made[2] as BattleView
+	var state: BattleState = view._controller.snapshot()
+	var general: Unit = state.units[0]
+	view._update_info(general.cell)
+	assert_true(tip.portrait_visible(), "tướng Đại Việt có chân dung")
+	assert_true(tip.icon_visible(), "có biểu tượng máu")
+	var enemy: Unit = null
+	for unit: Unit in state.units:
+		if unit.faction == Unit.Faction.NGUYEN:
+			enemy = unit
+			break
+	view._update_info(enemy.cell)
+	assert_false(tip.portrait_visible(), "quân Nguyên không có chân dung")
+	assert_true(tip.icon_visible(), "quân Nguyên vẫn có biểu tượng máu")
+	for r: int in range(state.size.y):
+		for c: int in range(state.size.x):
+			if state.unit_at(Vector2i(c, r)) == null:
+				view._update_info(Vector2i(c, r))
+				assert_false(tip.portrait_visible(), "địa hình không có chân dung")
+				assert_false(tip.icon_visible(), "địa hình không có biểu tượng máu")
+				return

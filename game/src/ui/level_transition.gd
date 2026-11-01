@@ -57,6 +57,7 @@ func _add_button(parent: Control, key: String, signal_to_emit: Signal) -> Button
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	# Như nút HUD: không giữ focus, để Space/Enter không bấm nút.
 	button.focus_mode = Control.FOCUS_NONE
+	UiStyle.apply_button(button)
 	button.pressed.connect(func() -> void: signal_to_emit.emit())
 	parent.add_child(button)
 	return button

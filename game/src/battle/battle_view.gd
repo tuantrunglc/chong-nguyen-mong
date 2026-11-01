@@ -435,7 +435,13 @@ func _update_info(cell: Vector2i) -> void:
 		var text: String = _unit_text(unit, state) if unit != null else _terrain_text(state.terrain_at(cell))
 		if state.reinforcement_warnings.has(cell):
 			text += "\n" + tr("tooltip.reinforcement_warning")
-		_tooltip.show_text(text)
+		# Tướng Đại Việt có chân dung; quân có dòng "Máu" ở dòng thứ hai nên đặt biểu tượng máu ở đó.
+		var portrait: Texture2D = null
+		if unit != null and unit.faction == Unit.Faction.DAI_VIET:
+			var portrait_path: String = UiStyle.portrait_path(unit.type)
+			if not portrait_path.is_empty():
+				portrait = Art.tex(portrait_path)
+		_tooltip.show_text(text, portrait, 1 if unit != null else -1)
 	_board.telegraph_view().highlight(_telegraph_cells_of(unit, state))
 
 
@@ -507,7 +513,7 @@ func _update_hud() -> void:
 	var snapshot: BattleState = _controller.snapshot()
 	var over: bool = Rules.is_battle_over(snapshot)
 	_hud.show_turn(snapshot.round_number, _controller.can_undo(), _controller.can_replay(),
-		_controller.replay_left(), over, snapshot.max_rounds, snapshot.morale, snapshot.max_morale)
+		_controller.replay_left(), over, snapshot.max_rounds, snapshot.morale, snapshot.max_morale, snapshot.mission)
 	_hud.show_stratagems(snapshot.stratagems, snapshot.stratagems_used, snapshot.sat_that_bonus())
 	# Dòng pha luôn có khi đang chơi; lúc phát hoạt ảnh pha địch thì báo đúng pha đang chạy (Story 2.11, AC 4).
 	if not over:

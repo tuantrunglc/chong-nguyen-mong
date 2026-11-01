@@ -41,7 +41,7 @@ func _ready() -> void:
 	style.border_color = BORDER_COLOR
 	style.set_border_width_all(BORDER_WIDTH)
 	style.set_content_margin_all(PADDING)
-	panel.add_theme_stylebox_override("panel", style)
+	panel.add_theme_stylebox_override("panel", UiStyle.panel(PADDING, style))
 	add_child(panel)
 
 	var box: VBoxContainer = VBoxContainer.new()
@@ -75,6 +75,7 @@ func _add_button(parent: Control, key: String, signal_to_emit: Signal) -> Button
 	button.text = tr(key)
 	button.focus_mode = Control.FOCUS_NONE
 	button.custom_minimum_size = Vector2(0, BUTTON_HEIGHT)
+	UiStyle.apply_button(button)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.pressed.connect(func() -> void: signal_to_emit.emit())
 	parent.add_child(button)

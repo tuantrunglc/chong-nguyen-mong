@@ -10,6 +10,8 @@ menu.subtitle,"Kháng chiến chống Nguyên Mông, 1288"
 hud.round,Hiệp %d
 hud.round_limit,Hiệp %d/%d
 hud.morale,"Lòng dân: %d/%d"
+hud.mission.eliminate,Tiêu diệt
+hud.mission.hold_pass,Giữ ải
 hud.undo,Hủy (Z)
 hud.replay,Chơi lại (R)
 hud.replay.left,Còn %d lần
