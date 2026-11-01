@@ -61,6 +61,11 @@ func show_ghosts(ghosts: Array[Dictionary], village_damage: Dictionary = {}) -> 
 ## Chỉ báo chuỗi hệ quả (PreviewMarks.compute, Story 4.6); gọi sau show_ghosts của cùng lần xem trước.
 ## state: bản chụp sau lệnh, chỉ đọc độ cao ô.
 func show_marks(marks: Array[Dictionary], state: BattleState) -> void:
+	# Chỉ gỡ nhãn chỉ báo cũ (có MARK_META); nhãn máu của bóng là của show_ghosts.
+	for child: Node in get_children():
+		if child.has_meta(MARK_META):
+			remove_child(child)
+			child.queue_free()
 	_marks = marks.duplicate(true)
 	_marks_state = state
 	var per_slot: Dictionary = {}
@@ -73,9 +78,9 @@ func show_marks(marks: Array[Dictionary], state: BattleState) -> void:
 		per_slot[slot] = stacked + 1
 		var text: String = tr(MARK_KEYS[kind] as String)
 		if kind == PreviewMarks.Kind.COLLISION:
-			text = text % (mark.get("amount", 1) as int)
+			text = text.replace("%d", str(mark.get("amount", 1) as int))
 		elif kind == PreviewMarks.Kind.STRIKE_MOVED or kind == PreviewMarks.Kind.STRIKE_CANCELLED:
-			text = text % (mark.get("order", 0) as int)
+			text = text.replace("%d", str(mark.get("order", 0) as int))
 		var y: float = BoardView.TILE_SIZE * MARK_LABEL_BOTTOM - stacked * MARK_LABEL_STEP if at_bottom \
 			else BoardView.TILE_SIZE * MARK_LABEL_TOP + stacked * MARK_LABEL_STEP
 		var danger: bool = kind == PreviewMarks.Kind.HITS_GENERAL

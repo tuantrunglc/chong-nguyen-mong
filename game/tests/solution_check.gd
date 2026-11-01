@@ -78,13 +78,18 @@ static func check(level_id: String, stats: Stats) -> Outcome:
 ## Chạy lời giải, điền round_number và generals; trả lý do trượt đầu tiên, "" nếu đạt.
 static func _play(level: LevelData, steps: Array[ScenarioData.ScenarioStep], stats: Stats, o: Outcome) -> String:
 	var state: BattleState = BattleState.from_level(level, stats)
+	# Tướng đầu trận (id -> loại quân): tướng cuối trận không còn trên bàn là tướng gục, bất kể sự kiện nào gây ra.
+	var general_types: Dictionary = {}
 	var general_ids: Array[int] = []
 	for u: Unit in state.units:
 		if UnitType.is_general(u.type):
 			general_ids.append(u.id)
-	var deaths: Array[String] = []
+			general_types[u.id] = u.type
+	var fallen: Dictionary = {}
 	var events: Array[BattleEvent] = Rules.resolve(state, Command.begin_battle())
-	_note_deaths(state, events, deaths)
+	for e: BattleEvent in events:
+		if e.type == BattleEvent.Type.REJECTED:
+			return "mở trận bị từ chối: %s" % _reject_text(e, null)
 	var problems: Array[String] = state.validate()
 	if not problems.is_empty():
 		return "bàn mở trận sai: %s" % problems[0]
@@ -94,10 +99,12 @@ static func _play(level: LevelData, steps: Array[ScenarioData.ScenarioStep], sta
 		var step: ScenarioData.ScenarioStep = steps[i]
 		var command: Command
 		match step.kind:
-			"di":
-				command = Command.move(_general_id(step.general), step.cell)
-			"danh":
-				command = Command.attack(_general_id(step.general), step.cell)
+			"di", "danh":
+				if not UnitType.GENERALS.has(step.general):
+					return "bước %d: tướng không có trong danh sách tướng" % [i + 1]
+				var general_id: int = _general_id(step.general)
+				command = Command.move(general_id, step.cell) if step.kind == "di" \
+					else Command.attack(general_id, step.cell)
 			"muu_ke":
 				command = Command.use_stratagem(step.stratagem)
 			"ket_thuc_luot":
@@ -107,8 +114,8 @@ static func _play(level: LevelData, steps: Array[ScenarioData.ScenarioStep], sta
 		events = Rules.resolve(state, command)
 		for e: BattleEvent in events:
 			if e.type == BattleEvent.Type.REJECTED:
-				return "bước %d (%s) bị từ chối: %s" % [i + 1, _describe(step), e.reason]
-		_note_deaths(state, events, deaths)
+				return "bước %d (%s) bị từ chối: %s" % [i + 1, _describe(step), _reject_text(e, step)]
+		_note_deaths(state, general_ids, general_types, fallen)
 		problems = state.validate()
 		if not problems.is_empty():
 			return "bước %d: bàn sai sau lệnh: %s" % [i + 1, problems[0]]
@@ -122,26 +129,56 @@ static func _play(level: LevelData, steps: Array[ScenarioData.ScenarioStep], sta
 			return "thua ở hiệp %d (%s)" % [state.round_number, TranslationServer.translate(
 				ResultBanner.lost_title_key(state.defeat_reason))]
 		BattleState.Phase.WON:
-			if not deaths.is_empty():
-				return "thắng ở hiệp %d nhưng %s" % [state.round_number, ", ".join(deaths)]
+			if not fallen.is_empty():
+				return "thắng ở hiệp %d nhưng %s" % [state.round_number, ", ".join(PackedStringArray(fallen.values()))]
 			return ""
 	return "hết lời giải mà chưa thắng (đang ở hiệp %d)" % state.round_number
 
 
-## Ghi "<tên tướng> gục ở hiệp N" cho mỗi tướng gục trong lô sự kiện này.
-static func _note_deaths(state: BattleState, events: Array[BattleEvent], deaths: Array[String]) -> void:
-	for e: BattleEvent in events:
-		if e.type != BattleEvent.Type.DIED and e.type != BattleEvent.Type.DROWNED:
+## Ghi "<tên tướng> gục ở hiệp N" (một lần, id -> câu) cho mỗi tướng đầu trận nay không còn trên bàn.
+static func _note_deaths(state: BattleState, general_ids: Array[int], general_types: Dictionary,
+		fallen: Dictionary) -> void:
+	for id: int in general_ids:
+		var g: Unit = state.unit_by_id(id)
+		if (g != null and g.is_alive()) or fallen.has(id):
 			continue
-		if e.unit_id < 1 or e.unit_id > UnitType.GENERALS.size():
-			continue
-		deaths.append("%s gục ở hiệp %d" % [ScenarioRunner.UNIT_NAMES.get(UnitType.GENERALS[e.unit_id - 1], "?"),
-			state.round_number])
+		fallen[id] = "%s gục ở hiệp %d" % [ScenarioRunner.UNIT_NAMES.get(general_types[id], "?"), state.round_number]
 
 
 ## Id tướng theo UnitType (UnitFactory: tướng 1–3 theo thứ tự UnitType.GENERALS).
 static func _general_id(general: int) -> int:
 	return UnitType.GENERALS.find(general) + 1
+
+
+## Lý do REJECTED bằng câu người test đọc được; loại lý do chưa có câu riêng thì in chữ của luật.
+static func _reject_text(e: BattleEvent, step: ScenarioData.ScenarioStep) -> String:
+	var cell: String = "" if step == null or step.kind == "muu_ke" or step.kind == "ket_thuc_luot" \
+		else BoardText.cell_text(step.cell)
+	var who: String = "" if step == null else str(ScenarioRunner.UNIT_NAMES.get(step.general, "tướng"))
+	match e.reject:
+		BattleEvent.Reject.UNREACHABLE:
+			return "%s không đi tới được ô %s" % [who, cell]
+		BattleEvent.Reject.NOT_IN_RANGE:
+			return "ô %s ngoài tầm đánh của %s" % [cell, who]
+		BattleEvent.Reject.NO_TARGET:
+			return "ô %s không có ai để đánh" % cell
+		BattleEvent.Reject.BLOCKED:
+			return "đòn vào ô %s bị rừng hoặc kho lương chắn" % cell
+		BattleEvent.Reject.NOT_ADJACENT:
+			return "ô %s không kề %s" % [cell, who]
+		BattleEvent.Reject.ALREADY_MOVED:
+			return "%s đã đi trong lượt này" % who
+		BattleEvent.Reject.ALREADY_ATTACKED:
+			return "%s đã đánh trong lượt này" % who
+		BattleEvent.Reject.NO_UNIT, BattleEvent.Reject.NOT_GENERAL:
+			return "%s không còn trên bàn" % who
+		BattleEvent.Reject.STRATAGEM_LOCKED:
+			return "mưu kế chưa mở trong trận này"
+		BattleEvent.Reject.STRATAGEM_ALREADY_USED:
+			return "mưu kế đã dùng rồi"
+		BattleEvent.Reject.BATTLE_OVER:
+			return "trận đã kết thúc"
+	return e.reason
 
 
 ## "Phạm Ngũ Lão đi 2,4" / "Nguyễn Khoái đánh 8,6" / "mưu kế sat_that" / "kết thúc lượt".

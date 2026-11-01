@@ -141,11 +141,10 @@ fi
 # tests/test_scenarios.gd ghi kết quả từng kịch bản luật vào file này (dòng: trạng thái duyệt, đạt/trượt, tên).
 export KET_QUA_KICH_BAN="$KET_QUA_DIR/kich_ban.txt"
 rm -f "$KET_QUA_KICH_BAN"
-# tests/test_loi_giai_6_tran.gd ghi kết quả lời giải từng trận (dòng: đạt/trượt, câu tóm tắt) và chỗ chỉ số thật khác
-# bản chụp của kịch bản luật (Story 4.6).
+# tests/test_loi_giai_6_tran.gd ghi kết quả lời giải từng trận (dòng: đạt/trượt, câu tóm tắt)
+# (Story 4.6).
 export KET_QUA_LOI_GIAI="$KET_QUA_DIR/loi_giai.txt"
-export KET_QUA_CHI_SO="$KET_QUA_DIR/chi_so_khac.txt"
-rm -f "$KET_QUA_LOI_GIAI" "$KET_QUA_CHI_SO"
+rm -f "$KET_QUA_LOI_GIAI"
 chi_tiet_4=()
 tong=0
 so_truot=0
@@ -316,13 +315,6 @@ if (( da_quet )); then
 		bao_cao+=("      Lời giải các trận: $so_con_thang còn thắng · $so_hong hỏng")
 		bao_cao+=("${dong_tran[@]+"${dong_tran[@]}"}")
 		(( so_hong == 0 )) || ly_do_truot+=("$so_hong lời giải trận không còn thắng")
-	fi
-	# Chỉ báo, không làm trượt: kịch bản luật đang chạy theo bản chụp, không theo số vừa sửa.
-	if [[ -s "$KET_QUA_CHI_SO" ]]; then
-		bao_cao+=("      ℹ️  Chỉ số thật khác bản chụp của kịch bản luật (game/tests/chi_so_kich_ban.json):")
-		while IFS= read -r dong_chi_so; do
-			[[ -n "$dong_chi_so" ]] && bao_cao+=("        $dong_chi_so")
-		done <"$KET_QUA_CHI_SO"
 	fi
 fi
 

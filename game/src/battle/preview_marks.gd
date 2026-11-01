@@ -36,15 +36,26 @@ static func _add_forced_move_marks(before: BattleState, events: Array[BattleEven
 	var at: Dictionary = {}
 	for unit: Unit in before.units:
 		at[unit.id] = unit.cell
-	for event: BattleEvent in events:
+	for i: int in range(events.size()):
+		var event: BattleEvent = events[i]
 		match event.type:
 			BattleEvent.Type.MOVED:
 				at[event.unit_id] = event.to_cell
 			BattleEvent.Type.COLLIDED:
 				marks.append({"kind": Kind.COLLISION, "cell": at.get(event.unit_id, event.to_cell) as Vector2i,
-					"amount": ForcedMove.COLLISION_DAMAGE})
+					"amount": _collision_damage(events, i)})
 			BattleEvent.Type.DROWNED:
 				marks.append({"kind": Kind.DROWNED, "cell": event.to_cell})
+
+
+## Máu quân va thật sự mất: DAMAGED (cause COLLISION) của quân đó ngay sau COLLIDED thứ index.
+static func _collision_damage(events: Array[BattleEvent], index: int) -> int:
+	var unit_id: int = events[index].unit_id
+	for i: int in range(index + 1, events.size()):
+		var e: BattleEvent = events[i]
+		if e.type == BattleEvent.Type.DAMAGED and e.cause == BattleEvent.Cause.COLLISION and e.unit_id == unit_id:
+			return e.amount
+	return 0
 
 
 static func _add_strike_marks(before: BattleState, after: BattleState, marks: Array[Dictionary]) -> void:

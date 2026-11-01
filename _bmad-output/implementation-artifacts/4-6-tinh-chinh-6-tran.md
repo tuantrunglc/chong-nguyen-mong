@@ -4,7 +4,7 @@ baseline_commit: 64b31ba
 
 # Story 4.6: Tinh chỉnh 6 trận
 
-Status: review
+Status: in-progress
 
 
 ## Story
@@ -54,7 +54,7 @@ tôi muốn cả 6 trận vẫn giải được sau mỗi lần tôi chỉnh ch�
   - [x] 2.1 Đọc file kết quả ở 1.5, in mục như AC 3 (cùng kiểu `bao_cao+=(...)` với mục "Kịch bản luật", `tools/test.sh:244–282`). Lời giải hỏng → đưa vào `ly_do_truot`, mã thoát khác 0.
   - [x] 2.2 Chưa chạy được GUT (quét project hỏng) thì dòng ghi "chưa chạy được", như mục kịch bản.
   - [x] 2.3 Bản chụp chỉ số (Quyết định 1a): chép `game/data/chi_so.json` → `game/tests/kich_ban/chi_so_kich_ban.json` (nằm trong `tests/` nên preset export đã loại). Đổi `STATS_PATH` của `test_scenarios.gd`, `test_determinism.gd` (nếu nạp chỉ số), `test_tran_02..06.gd` và mọi test chạy kịch bản luật sang bản chụp — `grep -rn "chi_so.json" game/tests` để không sót (2026-11-01 có 13 file: `scenario_viewer.gd`, `test_battle_state.gd`, `test_determinism.gd`, `test_hold_pass.gd`, `test_loaders.gd`, `test_main.gd`, `test_reinforcements.gd`, `test_scenarios.gd`, `test_tran_02..06.gd`). Test luật có con số cụ thể (`test_battle_state`, `test_hold_pass`, `test_reinforcements`) cũng chuyển sang bản chụp. Giữ số thật cho: `test_loaders.gd` (kiểm file thật nạp được) và `test_main.gd` (mở game thật) — nếu `test_main.gd` có chỗ so con số cụ thể thì báo lại trong Debug Log, không tự quyết. `scenario_viewer.gd`/`tools/xem_kich_ban.sh` cũng phải dùng bản chụp, để tác giả xem đúng số kịch bản đang chạy.
-  - [x] 2.4 Test so giá trị hai file (nạp cả hai bằng `StatsLoader`, so từng khóa): hôm nay giống hệt. Ghi khác biệt ra file kết quả để `tools/test.sh` in dòng "Chỉ số thật khác bản chụp kịch bản: …" (thông tin, **không** làm trượt).
+  - [x] 2.4 Test so giá trị hai file (nạp cả hai, so từng khóa): hôm nay giống hệt, **trượt** nếu lệch (`test_snapshot_matches_real_stats`), thông điệp nêu khóa lệch và nhắc chép bản chụp lại sau khi chỉnh. Không còn dòng "ℹ️" chỉ thông tin ở `tools/test.sh` (review 2026-11-01, quyết định 1a).
   - [x] 2.5 Kiểm đột biến bằng tay rồi trả lại: sửa tạm một số trong `data/chi_so.json` → `tools/test.sh`: kịch bản luật vẫn xanh, mục "Lời giải 6 trận" đổi theo, dòng "khác bản chụp" hiện. Ghi kết quả vào Debug Log; **trả số cũ trước khi commit**.
 - [x] **Task 3: Story 4.9 có mục quan sát** (AC: 4) — thêm vào phần quan sát của Story 4.9 trong `epics.md` (và file story 4.9 nếu đã có): "Người chơi thắng trận 1–2 không mất tướng ngay lần đầu không".
 - [x] **Task 4: Trau chuốt xem trước** (AC: 6) — tác giả chốt giữ.
@@ -67,6 +67,22 @@ tôi muốn cả 6 trận vẫn giải được sau mỗi lần tôi chỉnh ch�
   - [x] 5.1 `tools/test.sh` xanh; mục "Lời giải 6 trận: 6 còn thắng".
   - [x] 5.2 Hướng dẫn tác giả thử (tiếng Việt, từng bước): sửa thử một số trong `chi_so.json` (ví dụ Bộ binh `mau` 3 → 4) → `tools/test.sh` → đọc mục "Lời giải 6 trận" → **trả lại số cũ**. Ghi rõ "thấy gì là đúng".
   - [x] 5.3 Cập nhật story, `sprint-status.yaml`; commit.
+
+### Review Findings
+
+*Code review 2026-11-01 (Blind Hunter, Edge Case Hunter, Acceptance Auditor), diff `64b31ba..6a6b7cf`. 12 phát hiện bị loại vì nhiễu hoặc chủ ý.*
+
+- [x] [Review][Patch] (Tác giả chọn 1a, 2026-11-01) Thêm test khẳng định hôm nay `chi_so_kich_ban.json` và `chi_so.json` giống hệt về giá trị (`StatsSnapshot.differences()` rỗng), lý do trượt in rõ khóa nào lệch và nhắc "chép bản chụp lại sau khi chỉnh". Sửa Task 2.4 cho khớp (không còn "chỉ thông tin") và bỏ cách ghi file chỉ-thông-tin nếu thừa; `test_stats_diff_is_reported` hiện là test không thể trượt [game/tests/test_loi_giai_6_tran.gd:63]
+- [x] [Review][Dismiss] (Tác giả chọn 2c, 2026-11-01) Giữ chỉ báo va chạm một nhãn "Va −1", bóng máu đã đủ cho người chơi. Không sửa [game/src/battle/preview_marks.gd:43]
+- [ ] [Review][Decision→Tác giả] (Tác giả chọn 3a, 2026-11-01) Tác giả tự thử 3 ca chưa chụp (đòn dời, trúng giặc, trúng tướng ta) trong game rồi duyệt; dev không cần chụp thêm. Việc này không chặn các patch, nhưng story chỉ `done` sau khi tác giả duyệt — Task 4.5
+- [x] [Review][Patch] Tướng gục chỉ phát hiện qua sự kiện DIED/DROWNED với id 1–3, tên lấy `UnitType.GENERALS[id-1]`; tướng biến mất không kèm sự kiện thì vẫn "đạt", trận ít hơn 3 tướng có thể gán tên sai. Đổi thành so tướng đầu trận (`general_ids`) với cuối trận, tên theo loại quân thật [game/tests/solution_check.gd:132]
+- [x] [Review][Patch] `begin_battle` bị từ chối không được kiểm, lời giải chạy tiếp trên bàn chưa mở và báo lỗi ở "bước 1" gây hiểu lầm. Dùng cùng vòng kiểm `REJECTED` như các bước sau, báo "mở trận bị từ chối" [game/tests/solution_check.gd:86]
+- [x] [Review][Patch] `_general_id` trả 0 khi tướng không có trong `GENERALS`, lệnh bị từ chối với lý do khó hiểu. Báo rõ "tướng không có trong danh sách" [game/tests/solution_check.gd:143]
+- [x] [Review][Patch] Lý do lệnh bị từ chối in thẳng `e.reason` (chữ cho dev, không qua `tr()`), trong khi spec ví dụ là câu người test đọc được ("Lão không đi tới được ô 2,4") [game/tests/solution_check.gd:104]
+- [x] [Review][Patch] `StatsSnapshot.differences()` im lặng khi file thiếu hoặc JSON hỏng (`parse_string` trả null cả hai bên thì "không khác biệt"). Trả một dòng lỗi rõ khi giá trị không phải `Dictionary` [game/tests/stats_snapshot.gd:18]
+- [x] [Review][Patch] Số "Va −%d" lấy từ hằng `ForcedMove.COLLISION_DAMAGE`, không từ sự kiện `DAMAGED` (cause COLLISION): lệch khi luật đổi hoặc quân còn 1 máu [game/src/battle/preview_marks.gd:44]
+- [x] [Review][Patch] `tr(key) % n` ném lỗi runtime nếu khóa chưa dịch (tr trả lại chính khóa). Dùng `.replace("%d", str(n))` hoặc chỉ format khi có `%` [game/src/battle/preview_view.gd:78]
+- [x] [Review][Patch] `show_marks` không gọi `_clear_labels`, chỉ đúng khi luôn gọi ngay sau `show_ghosts`; gọi riêng sẽ chồng nhãn. Tự xóa nhãn đầu hàm hoặc ghi ràng buộc [game/src/battle/preview_view.gd:46]
 
 ## Dev Notes
 

@@ -16,8 +16,14 @@ static func load_stats() -> LoadResult:
 ## Các chỗ số thật khác bản chụp, mỗi chỗ một câu "tuong.nguyen_khoai.sat_thuong: kịch bản 2, thật 3".
 ## Rỗng khi giống hệt về giá trị (khác khoảng trắng hay thứ tự khóa không tính).
 static func differences() -> Array[String]:
-	return diff_values(JSON.parse_string(FileAccess.get_file_as_string(PATH)),
-		JSON.parse_string(FileAccess.get_file_as_string(REAL_PATH)))
+	var snapshot: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATH))
+	var real: Variant = JSON.parse_string(FileAccess.get_file_as_string(REAL_PATH))
+	# File thiếu hoặc JSON hỏng: parse_string trả null, không được coi là "không khác biệt".
+	if not snapshot is Dictionary:
+		return ["%s thiếu hoặc không phải JSON đúng" % PATH] as Array[String]
+	if not real is Dictionary:
+		return ["%s thiếu hoặc không phải JSON đúng" % REAL_PATH] as Array[String]
+	return diff_values(snapshot, real)
 
 
 ## Như differences() nhưng trên hai giá trị JSON đã đọc (để test).

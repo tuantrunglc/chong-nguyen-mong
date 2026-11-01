@@ -2,12 +2,10 @@ extends GutTest
 ## Lời giải 6 trận (Story 4.6): mỗi lời giải đã ghi chạy lại từ file trận thật với chỉ số THẬT (data/chi_so.json),
 ## để tác giả sửa chỉ số rồi biết ngay trận nào còn thắng không mất tướng. Không so máu, ô hay số hiệp.
 ## Có biến môi trường KET_QUA_LOI_GIAI thì ghi mỗi trận một dòng cho tools/test.sh: <dat|truot>\t<câu tóm tắt>.
-## Có KET_QUA_CHI_SO thì ghi các chỗ chỉ số thật khác bản chụp của kịch bản luật (mỗi chỗ một dòng).
 
 const CAMPAIGN_PATH: String = "res://data/chien_dich.json"
 const STATS_PATH: String = "res://data/chi_so.json"
 const RESULT_ENV: String = "KET_QUA_LOI_GIAI"
-const STATS_DIFF_ENV: String = "KET_QUA_CHI_SO"
 
 
 func _stats_text() -> String:
@@ -60,9 +58,15 @@ func test_stats_diff_lists_changed_values() -> void:
 	] as Array[String])
 
 
-func test_stats_diff_is_reported() -> void:
-	_write_lines(STATS_DIFF_ENV, PackedStringArray(StatsSnapshot.differences()))
-	pass_test("đã ghi khác biệt chỉ số (nếu có)")
+## Hôm nay bản chụp = số thật. Tác giả cân bằng chi_so.json thì test này đỏ, nhắc chép bản chụp lại có chủ đích.
+func test_snapshot_matches_real_stats() -> void:
+	var diffs: Array[String] = StatsSnapshot.differences()
+	assert_eq(diffs, [] as Array[String], ("chi_so.json lệch bản chụp tests/chi_so_kich_ban.json: %s. Muốn kịch bản luật theo "
+		+ "số mới thì chép chi_so.json đè lên bản chụp rồi chạy lại test") % "; ".join(diffs))
+
+
+func test_snapshot_diff_reports_missing_file_values() -> void:
+	assert_ne(StatsSnapshot.diff_values(null, {"a": 1.0}), [] as Array[String], "bản chụp thiếu thì có khác biệt")
 
 
 ## Ca (a): Khoái chỉ đi được 1 ô thì nước đi đầu của lời giải trận 1 bị từ chối.
@@ -71,6 +75,7 @@ func test_reports_rejected_step() -> void:
 	assert_false(o.passed)
 	assert_string_contains(o.reason, "bị từ chối")
 	assert_string_contains(o.reason, "bước 1")
+	assert_string_contains(o.reason, "không đi tới được ô")
 
 
 ## Ca (b): Kỵ binh 5 máu thì hiệp 1 trận 6 không hạ được Kỵ binh 8,5, nó phi vào ải 8,7 đầu hiệp 2.
