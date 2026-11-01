@@ -70,6 +70,31 @@ Không nhớ đang ở bước nào thì chạy `/bmad-help`.
 
 - Ước tính: nếu itch.io nén `index.wasm` khi gửi thì tải khoảng 10 MB → 4–5 giây; nếu không nén thì khoảng 40 MB → 16 giây, vượt mục tiêu 10 giây.
 
+### Đo hiệu năng và trình duyệt (Story 4.7)
+
+Máy đo được (AI, 2026-11-01, commit `68dc441-sua`):
+
+| Mục | Kết quả |
+|---|---|
+| Bản nén / chưa nén (`tools/build_web.sh`) | 10.6 MB / 40.3 MB (giới hạn nén 25 MB) |
+| Pha địch dài nhất mỗi trận, theo lời giải (số sự kiện, giây trước khi co về trần 3 giây) | T1: 6, 1.04 · T2: 10, 1.46 · T3: 7, 0.68 · T4: 4, 0.64 · T5: 6, 1.04 · T6: 17, 2.62 |
+| Không kẹt trận (đứng yên, chỉ kết thúc lượt) | 6/6 trận kết thúc (đều thua): T1 sau 6 lượt, T2 3, T3 3, T4 2, T5 2, T6 1; bàn hợp lệ sau mỗi lệnh |
+
+Tác giả đo (điền số, rồi báo AI):
+
+1. Chạy `tools/build_web.sh` (nếu chưa), rồi `tools/chay_web.sh`. Mở link `http://127.0.0.1:8060/index.html?dev=1&tran=6`.
+2. Góc dưới trái có dòng "FPS 60 (thấp nhất 52)". Chơi theo `game/data/tran/tran_06_loi_giai.md` tới hiệp 4–5, đọc số. Nhấn F4 để xóa số "thấp nhất" rồi đo lại.
+3. Lặp lại với Chrome, Firefox, Edge. Mỗi trình duyệt chơi trận 1 đến hết (`?dev=1`), rồi vào trận 6.
+4. Đo tải ở 20 Mbps: Chrome mở link itch.io, F12 › Network, tick Disable cache, Throttling › Add profile 20 Mbps, F5, đọc Finish ở góc dưới.
+
+| Trình duyệt | Mở được, bàn vẽ đúng | Chữ có dấu đúng | `user://` còn sau F5 | FPS trận 1 | FPS trận 6 (thấp nhất) |
+|---|---|---|---|---|---|
+| Chrome | | | | | |
+| Firefox | | | | | |
+| Edge | | | | | |
+
+Máy đo (CPU/GPU): ______ · Thời gian tải 20 Mbps: ______
+
 ## Lưu ý
 
 - Toàn bộ quyết định và lý do nằm trong `decision-log.md` của GDD và `.decision-log.md` của brief.

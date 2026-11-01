@@ -50,10 +50,15 @@ func played() -> Array[BattleEvent]:
 ## Ước lượng thời lượng phát của danh sách này, chặn ở `MAX_PHASE_SECONDS`.
 ## Chỉ để test và để đọc; `play()` tự canh đồng hồ thật nên không phụ thuộc hàm này.
 func total_seconds(events: Array[BattleEvent]) -> float:
+	return minf(raw_seconds(events), MAX_PHASE_SECONDS)
+
+
+## Tổng thời lượng trước khi bị co về MAX_PHASE_SECONDS (Story 4.7: đo pha dài nhất mỗi trận).
+func raw_seconds(events: Array[BattleEvent]) -> float:
 	var sum: float = 0.0
 	for event: BattleEvent in events:
 		sum += _base_seconds(event)
-	return minf(sum, MAX_PHASE_SECONDS)
+	return sum
 
 
 ## Đổi tốc độ phát (Story 4.4). Đang phát thì có hiệu lực từ sự kiện kế tiếp (động tác đang chạy dài ≤ 0,22 s),

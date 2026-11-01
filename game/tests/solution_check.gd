@@ -24,6 +24,8 @@ class Outcome:
 	var round_number: int = 0
 	## "Nguyễn Khoái 3" cho mỗi tướng còn trên bàn, theo id.
 	var generals: Array[String] = []
+	## Nhật ký sự kiện của từng pha địch đã chạy: pha chuẩn bị lúc mở trận rồi mỗi lệnh kết thúc lượt (Story 4.7).
+	var enemy_phase_logs: Array[Array] = []
 
 	## "Trận 1 — …: thắng ở hiệp 3, đủ 2 tướng (Nguyễn Khoái 3, Phạm Ngũ Lão 3)" hoặc "Trận 5 — …: <lý do>".
 	func summary() -> String:
@@ -87,6 +89,7 @@ static func _play(level: LevelData, steps: Array[ScenarioData.ScenarioStep], sta
 			general_types[u.id] = u.type
 	var fallen: Dictionary = {}
 	var events: Array[BattleEvent] = Rules.resolve(state, Command.begin_battle())
+	o.enemy_phase_logs.append(events)
 	for e: BattleEvent in events:
 		if e.type == BattleEvent.Type.REJECTED:
 			return "mở trận bị từ chối: %s" % _reject_text(e, null)
@@ -112,6 +115,8 @@ static func _play(level: LevelData, steps: Array[ScenarioData.ScenarioStep], sta
 			_:
 				return "bước %d: lệnh \"%s\" không dùng được trong lời giải" % [i + 1, step.kind]
 		events = Rules.resolve(state, command)
+		if step.kind == "ket_thuc_luot":
+			o.enemy_phase_logs.append(events)
 		for e: BattleEvent in events:
 			if e.type == BattleEvent.Type.REJECTED:
 				return "bước %d (%s) bị từ chối: %s" % [i + 1, _describe(step), _reject_text(e, step)]

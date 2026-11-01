@@ -1,7 +1,7 @@
 extends GutTest
 ## Phím F1–F5 chỉ có tác dụng khi bật dev; không bật dev thì không có chữ "DEV", không có log, không phát signal.
 ## F1 phát f1_pressed (main.gd bật/tắt tọa độ), F2 phát f2_pressed (main.gd sao chép báo lỗi), F3 phát f3_pressed
-## (ý định AI), F5 phát f5_pressed (main.gd nạp lại dữ liệu); F4 mới chỉ ghi log.
+## (ý định AI), F5 phát f5_pressed (main.gd nạp lại dữ liệu); F4 phát f4_pressed (xóa số FPS thấp nhất, Story 4.7).
 ## Bật dev thì chữ DEV kèm số lần mở (nếu có).
 
 const ACTIONS: Array[String] = ["dev_f1", "dev_f2", "dev_f3", "dev_f4", "dev_f5"]
@@ -55,6 +55,7 @@ func test_dev_off_keys_do_nothing() -> void:
 	assert_signal_not_emitted(tools, "f1_pressed")
 	assert_signal_not_emitted(tools, "f2_pressed")
 	assert_signal_not_emitted(tools, "f3_pressed")
+	assert_signal_not_emitted(tools, "f4_pressed")
 	assert_signal_not_emitted(tools, "f5_pressed")
 
 
@@ -64,9 +65,9 @@ func test_dev_on_shows_badge_and_logs_each_key() -> void:
 	assert_signal_emit_count(tools, "f1_pressed", 1)
 	assert_signal_emit_count(tools, "f2_pressed", 1)
 	assert_signal_emit_count(tools, "f3_pressed", 1)
+	assert_signal_emit_count(tools, "f4_pressed", 1)
 	assert_signal_emit_count(tools, "f5_pressed", 1)
-	assert_eq(Log.get_lines(), PackedStringArray(["[DEBUG][dev] f4: không dùng"]),
-		"F1, F2, F3, F5 đều có công cụ; chỉ F4 còn câu log")
+	assert_eq(Log.get_lines(), PackedStringArray(), "cả năm phím đều có công cụ, không còn câu log")
 	assert_true(tools.is_processing_unhandled_input(), "nhận phím")
 	var badge: Label = null
 	for child: Node in tools.get_children():

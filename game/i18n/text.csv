@@ -164,5 +164,6 @@ tooltip.attack_charge,"Xung phong hướng %s, đòn số %d"
 tooltip.no_attack,Không có đòn nào
 tooltip.reinforcement_warning,"Quân tiếp viện xuất hiện hiệp sau (đứng chặn: mất 1 máu, hủy tiếp viện)"
 dev.copied,Đã sao chép báo lỗi
+dev.fps,FPS %d (thấp nhất %d)
 dev.copied_no_battle,Đã sao chép báo lỗi (không có trận)
 board.damage_penalty,−%d

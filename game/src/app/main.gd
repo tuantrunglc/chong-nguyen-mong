@@ -29,6 +29,8 @@ var _controller: BattleController = null
 var _coord_overlay: CoordOverlay = null
 ## Chỉ có khi bật dev (F3, Story 2.6).
 var _ai_overlay: AiIntentOverlay = null
+## Chỉ có khi bật dev (Story 4.7, F4 xóa số thấp nhất).
+var _fps_overlay: FpsOverlay = null
 var _error_screen: ErrorScreen = null
 var _main_menu: MainMenu
 var _level_transition: LevelTransition
@@ -130,6 +132,10 @@ func _ready() -> void:
 		# Bật F3 trong trận rồi về menu (hay sang màn chuyển trận): bảng nằm dưới hai màn đó, không vẽ đè lên chữ.
 		move_child(_ai_overlay, _main_menu.get_index())
 		dev_tools.f3_pressed.connect(_toggle_ai_intents)
+		# Story 4.7: bộ đếm FPS nằm ở CanvasLayer riêng (layer cao nhất), nên thứ tự con không ảnh hưởng.
+		_fps_overlay = FpsOverlay.new()
+		add_child(_fps_overlay)
+		dev_tools.f4_pressed.connect(_fps_overlay.reset)
 		dev_tools.f5_pressed.connect(_reload_data)
 		dev_tools.f2_pressed.connect(_on_f2)
 

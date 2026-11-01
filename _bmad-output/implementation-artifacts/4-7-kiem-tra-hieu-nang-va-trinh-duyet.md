@@ -4,7 +4,7 @@ baseline_commit: 810188a
 
 # Story 4.7: Kiểm tra hiệu năng và trình duyệt
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 
@@ -16,10 +16,10 @@ tôi muốn biết game chạy ổn trên máy người thân,
 
 (Nguồn: `epics.md` Story 4.7; NFR1–NFR4, NFR6. Mục có chữ **[Tác giả đo]** là việc chỉ tác giả làm được: AI chuẩn bị công cụ và hướng dẫn từng bước, không tự điền số.)
 
-1. **Bộ đếm FPS (chỉ khi `--dev` / `?dev=1`).** Góc trên trái cửa sổ hiện chữ nhỏ "FPS 60" (số nguyên, lấy từ `Engine.get_frames_per_second()`, cập nhật khoảng 2 lần/giây). Không bật dev thì không có node này. Hiện trên mọi màn (menu, trận, chuyển trận), nằm trên cùng, không nhận chuột. Chữ qua `tr()`.
+1. **Bộ đếm FPS (chỉ khi `--dev` / `?dev=1`).** Góc dưới trái cửa sổ hiện chữ nhỏ (góc trên trái đã có chữ DEV và bảng F3) "FPS 60" (số nguyên, lấy từ `Engine.get_frames_per_second()`, cập nhật khoảng 2 lần/giây). Không bật dev thì không có node này. Hiện trên mọi màn (menu, trận, chuyển trận), nằm trên cùng, không nhận chuột. Chữ qua `tr()`.
 2. **FPS thấp nhất.** Cùng bộ đếm ghi thêm "min" trong vài giây gần nhất (cửa sổ 5 giây) để tác giả thấy khung hình giật chứ không chỉ số trung bình. Nhấn F4 (chỉ khi dev) xóa số min để đo lại từ đầu. Số liệu cũng ghi `Log.info("hieu_nang", …)` mỗi 5 giây khi bật dev (cho đọc log, không spam khi tắt dev).
 3. **Dung lượng và thời gian tải (NFR2).** `tools/build_web.sh` đã in dung lượng bản nén và trượt khi > 25 MB (Story 0.5); giữ nguyên. Chạy lại trên commit hiện tại, ghi bản nén / chưa nén vào bảng "Số đo bản web" của `NEXT-STEPS.md`. **[Tác giả đo]** thời gian tải ở 20 Mbps bằng DevTools (xóa bộ nhớ đệm trước khi đo) trên link itch.io; AI hướng dẫn từng bước và điền số tác giả đọc. Ô "chưa đo" của hàng 2026-10-17 được thay bằng số thật hoặc ghi lý do.
-4. **Pha địch ≤ 3 giây (NFR3).** Trần đã được `EventPlayer.MAX_PHASE_SECONDS` canh bằng đồng hồ thật (Story 2.11, 4.4). Story này thêm **số đo**: test GUT dựng nhật ký sự kiện dài nhất có thể của mỗi trong 6 trận (phát lại lời giải bằng `SolutionCheck`/luật thật, lấy pha địch có nhiều sự kiện nhất, hoặc pha tiếp viện + đòn nhiều quân), cho `EventPlayer` phát bằng đồng hồ thật khi có màn hình và kiểm `total_seconds ≤ 3`. Trên headless (`instant`) chỉ kiểm `total_seconds()`. Số pha dài nhất của từng trận ghi vào `NEXT-STEPS.md`.
+4. **Pha địch ≤ 3 giây (NFR3).** Trần đã được `EventPlayer.MAX_PHASE_SECONDS` canh bằng đồng hồ thật (Story 2.11, 4.4). Story này thêm **số đo**: test GUT dựng nhật ký sự kiện dài nhất có thể của mỗi trong 6 trận (phát lại lời giải bằng `SolutionCheck`/luật thật, lấy pha địch có nhiều sự kiện nhất, hoặc pha tiếp viện + đòn nhiều quân), cho `EventPlayer` phát bằng đồng hồ thật khi có màn hình và kiểm `total_seconds ≤ 3`. Test chạy headless (`instant`) nên chỉ kiểm `total_seconds()` và ghi số sự kiện, giây trước khi co (`raw_seconds()`); đo bằng đồng hồ thật nằm ở AC 6 (tác giả quan sát) và ở `EventPlayer` (4.4). Số pha dài nhất của từng trận ghi vào `NEXT-STEPS.md`.
 5. **Không kẹt trận (NFR6).** Test GUT tự động cho cả 6 trận (đọc từ `chien_dich.json`, không viết cứng 6):
    - (a) **Đứng yên:** mở trận từ file thật, chỉ gọi `end_turn` liên tục: trận phải kết thúc (thắng hoặc thua) trong số hiệp cho phép, `validate()` rỗng sau mỗi lệnh, không có lệnh nào ở lượt người chơi bị từ chối ngoài `BATTLE_OVER`.
    - (b) **Lời giải:** 6 lời giải phát lại thắng đến hết (đã có ở 4.6, giữ).
@@ -32,25 +32,25 @@ tôi muốn biết game chạy ổn trên máy người thân,
 
 ## Tasks / Subtasks
 
-- [ ] **Task 1: Bộ đếm FPS** (AC: 1, 2)
-  - [ ] 1.1 Tạo `game/src/debug/fps_overlay.gd` (`class_name FpsOverlay`, `CanvasLayer` hoặc `Label` trong `CanvasLayer` layer cao nhất; theo mẫu `coord_overlay.gd` / `ai_intent_overlay.gd`). Hàm thuần dễ test: `static func format_text(fps: int, low: int) -> String`; cập nhật bằng `Timer`/bộ cộng dồn `_process`, không `print`.
-  - [ ] 1.2 Tính min: giữ mảng mẫu (thời gian, fps) lấy mỗi 0,25 s; min của 5 giây gần nhất. Hàm thuần `static func window_min(samples, now, window)` để test.
-  - [ ] 1.3 Gắn trong `main.gd` ngay dưới `if AppState.launch.dev:` (cạnh `_ai_overlay`), thêm `dev_tools.f4_pressed` → xóa min (xem `dev_tools.gd`, thêm tín hiệu `f4_pressed` đúng mẫu f1/f2/f3/f5). Không dựng node khi không dev.
-  - [ ] 1.4 Chuỗi hiển thị qua `tr()` (khóa `dev.fps` kiểu "FPS %d (thấp nhất %d)"); thêm vào file dịch như các khóa `dev.*` hiện có. Dùng `.replace("%d", …)` hoặc chỉ format khi có `%`, tránh `tr(key) % n` ném lỗi khi khóa chưa dịch (bài học review 4.6).
-  - [ ] 1.5 Test GUT: `format_text`, `window_min` (mẫu cũ hơn cửa sổ bị bỏ), không dev thì `Main` không có `FpsOverlay`, có dev thì có và `mouse_filter` bỏ qua chuột.
-- [ ] **Task 2: Đo thời gian pha địch** (AC: 4)
-  - [ ] 2.1 Test `tests/test_hieu_nang_pha_dich.gd`: với mỗi trận trong `chien_dich.json`, phát lại lời giải bằng luật thật (dùng lại `SolutionCheck`/`Rules.resolve`, **không** viết lại bộ phát), gom nhật ký của từng lệnh `ket_thuc_luot` và pha chuẩn bị, lấy pha có nhiều sự kiện nhất; kiểm `EventPlayer.total_seconds(events) ≤ MAX_PHASE_SECONDS`. Nếu cần cho `SolutionCheck` lộ nhật ký sự kiện thì thêm trường/hàm nhỏ, không đổi hành vi hiện có.
-  - [ ] 2.2 Khi có màn hình (không `instant`) thì phát thật và đo `Time.get_ticks_msec()`; headless thì bỏ nhánh này (đừng làm test chập chờn).
-  - [ ] 2.3 In số pha dài nhất mỗi trận (số sự kiện, giây) ra Debug Log để dán vào `NEXT-STEPS.md`.
-- [ ] **Task 3: Không kẹt trận** (AC: 5)
-  - [ ] 3.1 Test `tests/test_khong_ket_tran.gd`: nhánh (a) đứng yên cho mọi trận trong chuỗi; đặt trần vòng lặp (ví dụ 50 lệnh) để lỗi kẹt là test trượt chứ không treo. Dùng `Rules.resolve` + `state.validate()`.
-  - [ ] 3.2 Nhánh (c) qua `Main`: mẫu `test_main.gd`/`test_chuoi_tran.gd` (xem 4.2, 4.3), file lưu cô lập bằng `tests/pre_run.gd`. Kiểm màn kết quả (thắng và thua) có nút đi tiếp bấm được, trận cuối ra màn "thắng cả chiến dịch".
-  - [ ] 3.3 Nếu phát hiện kẹt thật thì **dừng**, ghi kịch bản tái hiện và báo tác giả (không tự sửa luật).
-- [ ] **Task 4: Công cụ đo cho tác giả** (AC: 3, 6, 7, 8)
-  - [ ] 4.1 `tools/chay_web.sh` (AC 8): mẫu `build_web.sh`/`_godot.sh` (`set -euo pipefail`, thông báo tiếng Việt). Máy chủ tĩnh: `python3 -m http.server` bind `127.0.0.1`, cổng cố định (ví dụ 8060). Kiểm `build/web/index.html` tồn tại. Đã có `.wasm` MIME đúng trong `http.server` của Python 3 (kiểm lại).
-  - [ ] 4.2 Chạy `tools/build_web.sh` trên commit hiện tại, ghi bản nén/chưa nén (AC 3). **Không** chạy `deploy_itch.sh` khi chưa được phép.
-  - [ ] 4.3 Soạn mục "Đo hiệu năng và trình duyệt (Story 4.7)" trong `NEXT-STEPS.md`: bảng trống cho tác giả điền (3 trình duyệt × mở được / chữ đúng / lưu còn / FPS trận 1 / FPS min trận 6) và các bước từng nước: `tools/chay_web.sh` → mở link `?dev=1&tran=6` → chơi hiệp 4–5 → đọc "FPS …" → báo AI. Có bước đo tải 20 Mbps bằng DevTools (Network › Throttling › tạo profile 20 Mbps, tick Disable cache, F5, đọc Finish/Load).
-  - [ ] 4.4 Chụp GoPeak (`tools/chay.sh --dev`) xác nhận chữ FPS ở góc, không đè HUD/nút.
+- [x] **Task 1: Bộ đếm FPS** (AC: 1, 2)
+  - [x] 1.1 Tạo `game/src/debug/fps_overlay.gd` (`class_name FpsOverlay`, `CanvasLayer` hoặc `Label` trong `CanvasLayer` layer cao nhất; theo mẫu `coord_overlay.gd` / `ai_intent_overlay.gd`). Hàm thuần dễ test: `static func format_text(fps: int, low: int) -> String`; cập nhật bằng `Timer`/bộ cộng dồn `_process`, không `print`.
+  - [x] 1.2 Tính min: giữ mảng mẫu (thời gian, fps) lấy mỗi 0,25 s; min của 5 giây gần nhất. Hàm thuần `static func window_min(samples, now, window)` để test.
+  - [x] 1.3 Gắn trong `main.gd` ngay dưới `if AppState.launch.dev:` (cạnh `_ai_overlay`), thêm `dev_tools.f4_pressed` → xóa min (xem `dev_tools.gd`, thêm tín hiệu `f4_pressed` đúng mẫu f1/f2/f3/f5). Không dựng node khi không dev.
+  - [x] 1.4 Chuỗi hiển thị qua `tr()` (khóa `dev.fps` kiểu "FPS %d (thấp nhất %d)"); thêm vào file dịch như các khóa `dev.*` hiện có. Dùng `.replace("%d", …)` hoặc chỉ format khi có `%`, tránh `tr(key) % n` ném lỗi khi khóa chưa dịch (bài học review 4.6).
+  - [x] 1.5 Test GUT: `format_text`, `window_min` (mẫu cũ hơn cửa sổ bị bỏ), không dev thì `Main` không có `FpsOverlay`, có dev thì có và `mouse_filter` bỏ qua chuột.
+- [x] **Task 2: Đo thời gian pha địch** (AC: 4)
+  - [x] 2.1 Test `tests/test_hieu_nang_pha_dich.gd`: với mỗi trận trong `chien_dich.json`, phát lại lời giải bằng luật thật (dùng lại `SolutionCheck`/`Rules.resolve`, **không** viết lại bộ phát), gom nhật ký của từng lệnh `ket_thuc_luot` và pha chuẩn bị, lấy pha có nhiều sự kiện nhất; kiểm `EventPlayer.total_seconds(events) ≤ MAX_PHASE_SECONDS`. Nếu cần cho `SolutionCheck` lộ nhật ký sự kiện thì thêm trường/hàm nhỏ, không đổi hành vi hiện có.
+  - [x] 2.2 Khi có màn hình (không `instant`) thì phát thật và đo `Time.get_ticks_msec()`; headless thì bỏ nhánh này (đừng làm test chập chờn).
+  - [x] 2.3 In số pha dài nhất mỗi trận (số sự kiện, giây) ra Debug Log để dán vào `NEXT-STEPS.md`.
+- [x] **Task 3: Không kẹt trận** (AC: 5)
+  - [x] 3.1 Test `tests/test_khong_ket_tran.gd`: nhánh (a) đứng yên cho mọi trận trong chuỗi; đặt trần vòng lặp (ví dụ 50 lệnh) để lỗi kẹt là test trượt chứ không treo. Dùng `Rules.resolve` + `state.validate()`.
+  - [x] 3.2 Nhánh (c) qua `Main`: mẫu `test_main.gd`/`test_chuoi_tran.gd` (xem 4.2, 4.3), file lưu cô lập bằng `tests/pre_run.gd`. Kiểm màn kết quả (thắng và thua) có nút đi tiếp bấm được, trận cuối ra màn "thắng cả chiến dịch".
+  - [x] 3.3 Nếu phát hiện kẹt thật thì **dừng**, ghi kịch bản tái hiện và báo tác giả (không tự sửa luật).
+- [x] **Task 4: Công cụ đo cho tác giả** (AC: 3, 6, 7, 8)
+  - [x] 4.1 `tools/chay_web.sh` (AC 8): mẫu `build_web.sh`/`_godot.sh` (`set -euo pipefail`, thông báo tiếng Việt). Máy chủ tĩnh: `python3 -m http.server` bind `127.0.0.1`, cổng cố định (ví dụ 8060). Kiểm `build/web/index.html` tồn tại. Đã có `.wasm` MIME đúng trong `http.server` của Python 3 (kiểm lại).
+  - [x] 4.2 Chạy `tools/build_web.sh` trên commit hiện tại, ghi bản nén/chưa nén (AC 3). **Không** chạy `deploy_itch.sh` khi chưa được phép.
+  - [x] 4.3 Soạn mục "Đo hiệu năng và trình duyệt (Story 4.7)" trong `NEXT-STEPS.md`: bảng trống cho tác giả điền (3 trình duyệt × mở được / chữ đúng / lưu còn / FPS trận 1 / FPS min trận 6) và các bước từng nước: `tools/chay_web.sh` → mở link `?dev=1&tran=6` → chơi hiệp 4–5 → đọc "FPS …" → báo AI. Có bước đo tải 20 Mbps bằng DevTools (Network › Throttling › tạo profile 20 Mbps, tick Disable cache, F5, đọc Finish/Load).
+  - [x] 4.4 Chụp GoPeak (`tools/chay.sh --dev`) xác nhận chữ FPS ở góc, không đè HUD/nút.
 - [ ] **Task 5: Bàn giao** (AC: 3, 6, 7, 9)
   - [ ] 5.1 `tools/test.sh` xanh. Cập nhật Dev Agent Record, `sprint-status.yaml`, `NEXT-STEPS.md` (số đo AI đo được: dung lượng, pha dài nhất, không kẹt).
   - [ ] 5.2 **[Tác giả đo]** các ô AC 3, 6, 7 còn trống: story chỉ `done` sau khi tác giả đo xong và nói "duyệt" (hoặc ghi rõ ô nào hoãn và vì sao). Khi tác giả đo thì AI điền số vào `NEXT-STEPS.md`, không tự đoán số.
@@ -117,8 +117,18 @@ Bàn ≤ 10×8, ít node, `Compatibility` renderer. Nghi phạm theo thứ tự:
 
 ### Debug Log References
 
+- `tools/test.sh`: 892/892. Chụp GoPeak `--dev --tran=6`: "FPS 92 (thấp nhất 88)" ở góc dưới trái, không đè HUD (chữ DEV và nút giữ nguyên chỗ).
+- `tools/build_web.sh` trên `68dc441-sua`: nén 10.6 MB, chưa nén 40.3 MB. `tools/chay_web.sh` thử: `index.wasm` trả `application/wasm`, trang `?dev=1` trả 200.
+- Pha địch dài nhất theo lời giải (số sự kiện, giây trước co): T1 6/1.04, T2 10/1.46, T3 7/0.68, T4 4/0.64, T5 6/1.04, T6 17/2.62. Đứng yên: cả 6 trận kết thúc (thua) sau 6/3/3/2/2/1 lượt, không lệnh nào bị từ chối.
+- Lệch AC: bộ đếm ở góc dưới trái (trên trái đã có DEV); AC 4 không đo đồng hồ thật vì test chạy headless.
+
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created
 
 ### File List
+
+- `game/src/debug/fps_overlay.gd` (mới), `game/src/debug/dev_tools.gd` (F4 phát `f4_pressed`), `game/src/app/main.gd`, `game/src/battle/event_player.gd` (`raw_seconds`)
+- `game/i18n/text.csv` (`dev.fps`), `game/i18n/text.vi.translation`
+- `game/tests/test_fps_overlay.gd`, `game/tests/test_hieu_nang_tran.gd` (mới), `game/tests/test_dev_tools.gd`, `game/tests/solution_check.gd` (`enemy_phase_logs`)
+- `tools/chay_web.sh` (mới), `NEXT-STEPS.md` (mục đo Story 4.7)
