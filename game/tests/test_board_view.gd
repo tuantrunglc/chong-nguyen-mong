@@ -503,6 +503,7 @@ func test_red_on_forest_block() -> void:
 
 ## Bàn 10×8 có đủ 7 loại ô: mọi hình có thật, không dòng [ERROR][hinh] nào.
 func test_every_terrain_kind_draws_without_missing_art() -> void:
+	Art.reset_for_test()  # cache và danh sách lỗi đã báo là static: không reset thì lỗi cũ che lỗi mới
 	Log.clear()
 	var board: BoardView = BoardView.new()
 	add_child_autofree(board)
@@ -537,15 +538,39 @@ func test_ground_layers_sit_behind_the_board_and_in_order() -> void:
 	assert_lt(board._ground.get_index(), board.telegraph_view().get_index(), "ô đỏ trên mặt đất")
 
 
-## Nền rừng phủ đủ cửa sổ 1280×720 ở mọi cỡ bàn (vùng cần lát đổi từ tọa độ màn hình về local).
+## Nền rừng phủ đủ cửa sổ 1280×720 ở mọi cỡ bàn: các ô lát (tile_range) đổi ra màn hình phải bao trùm cửa sổ.
 func test_backdrop_covers_the_whole_window_for_every_board_size() -> void:
+	var window: Rect2 = Rect2(Vector2.ZERO, BoardView.viewport_size)
 	for board: BoardView in _boards():
-		var local: Rect2 = board._backdrop.screen_rect()
+		var tiles: Rect2i = board._backdrop.tile_range()
+		var tile: float = float(BoardView.TILE_SIZE)
+		var local: Rect2 = Rect2(Vector2(tiles.position) * tile, Vector2(tiles.size) * tile)
 		var on_screen: Rect2 = Rect2(board.position + local.position * board.scale, local.size * board.scale)
-		assert_true(on_screen.is_equal_approx(Rect2(Vector2.ZERO, BoardView.viewport_size)),
-			"bàn %dx%d: %s" % [board.cols, board.rows, on_screen])
+		assert_true(on_screen.encloses(window), "bàn %dx%d: ô lát %s không phủ cửa sổ" % [board.cols, board.rows, on_screen])
+		assert_lt(tiles.size.x * tiles.size.y, 400, "không lát thừa quá nhiều ô")
 
 
+## Ô sáng (màu + viền) phải khác rõ màu nền ô cỏ và ô sông thật, đo trên hình ô nền.
 func test_reach_cells_stand_out_from_grass_water_and_red() -> void:
-	assert_gt(BoardView.REACH_COLOR.b, BoardView.REACH_COLOR.g - 0.2, "ô sáng ngả xanh dương, không phải xanh lá")
-	assert_gt(BoardView.REACH_COLOR.r, 0.5, "ô sáng nhạt, khác cỏ xanh lá và nước teal")
+	for tile_mask: int in [15, 0]:
+		var base: Color = _average_color(Art.tex(GroundArt.ground_path(tile_mask)))
+		var shown: Color = base.lerp(Color(BoardView.REACH_COLOR, 1.0), BoardView.REACH_COLOR.a)
+		var gap: float = Vector3(shown.r - base.r, shown.g - base.g, shown.b - base.b).length()
+		assert_gt(gap, 0.12, "ô sáng khác ô nền %d" % tile_mask)
+	assert_gt(BoardView.REACH_BORDER_COLOR.a, 0.8, "viền ô sáng đặc, thấy được trên mọi nền")
+	assert_gt(BoardView.REACH_BORDER_WIDTH, 1.0)
+
+
+func _average_color(tex: Texture2D) -> Color:
+	var image: Image = tex.get_image()
+	var sum: Vector3 = Vector3.ZERO
+	var count: int = 0
+	for y: int in image.get_height():
+		for x: int in image.get_width():
+			var c: Color = image.get_pixel(x, y)
+			if c.a > 0.5:
+				sum += Vector3(c.r, c.g, c.b)
+				count += 1
+	assert_gt(count, 0, "hình ô nền có điểm ảnh đặc")
+	sum /= float(maxi(count, 1))
+	return Color(sum.x, sum.y, sum.z)

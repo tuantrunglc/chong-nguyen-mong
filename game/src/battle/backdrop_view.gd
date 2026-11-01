@@ -17,11 +17,20 @@ func screen_rect() -> Rect2:
 	return Rect2(-offset / factor, BoardView.viewport_size / factor)
 
 
-func _draw() -> void:
+## Khoảng ô lát (chỉ số ô 64 px, đầu gồm, cuối không gồm) phủ kín screen_rect().
+func tile_range() -> Rect2i:
 	var tile: float = float(BoardView.TILE_SIZE)
 	var area: Rect2 = screen_rect()
 	var first: Vector2i = Vector2i(floori(area.position.x / tile), floori(area.position.y / tile))
 	var last: Vector2i = Vector2i(ceili(area.end.x / tile), ceili(area.end.y / tile))
+	return Rect2i(first, last - first)
+
+
+func _draw() -> void:
+	var tile: float = float(BoardView.TILE_SIZE)
+	var range: Rect2i = tile_range()
+	var first: Vector2i = range.position
+	var last: Vector2i = range.end
 	for ty: int in range(first.y, last.y):
 		for tx: int in range(first.x, last.x):
 			var cell: Vector2i = Vector2i(tx, ty)

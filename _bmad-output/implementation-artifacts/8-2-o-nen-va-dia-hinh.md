@@ -4,7 +4,7 @@ baseline_commit: 142292a
 
 # Story 8.2: Ô nền và địa hình
 
-Status: review
+Status: done
 
 ## Story
 
@@ -66,6 +66,26 @@ _Chốt 2026-11-01 (tác giả): 6 trận hiện có đều là đất liền v�
   - [x] 6.2 Ảnh có **ô sáng** và **ô đỏ báo đòn** cùng lúc, và có đường đi trên sông: `inject_mouse_click` của GoPeak **không có tác dụng** trên game này (ghi ở bộ nhớ dự án và Story 4.6); dùng script tạm trong scratchpad (`push_input` vào viewport gốc) hoặc `tools/chay.sh --dev` kèm tham số có sẵn nếu có, **không** sửa code game để tiện chụp.
   - [x] 6.3 `tools/test.sh` xanh; `tools/build_web.sh`; ghi FPS trận 6 và dung lượng.
   - [x] 6.4 Cập nhật Dev Agent Record, File List, `sprint-status.yaml` (`8-2-...: review`). Cập nhật `CREDITS.md` **không cần** (hình đã có dòng ở 8.1).
+
+### Review Findings
+
+_Code review 2026-11-01, commit `6fb4bef` (Blind + Edge + Auditor)._
+
+- [x] [Review][Patch] Nền rừng che mất tiêu đề: `main.gd` thêm `_title_label` trước `_board_view`, `BackdropView` (show_behind_parent, phủ 1280×720) vẽ sau nên đè lên chữ; ảnh `8-2-2-tran-6.png` không thấy tiêu đề ở giữa trên. Cần đưa tiêu đề lên trên nền (thêm sau `_board_view` hoặc `z_index`) và có test [game/src/app/main.gd:61-72, game/src/battle/backdrop_view.gd:9]
+- [x] [Review][Patch] Task 6.1/6.2: đã chụp bổ sung với nền rừng mới của tác giả: `8-2-5` (trận 5, ô sáng + ô đỏ + ô ải), `8-2-6` (trận 6), `8-2-7` (trận 2, rừng), `8-2-8` (trận 3, hầm chông, rừng ở hàng 0 không bị cắt). Còn thiếu: ảnh đường đi trên mặt sông (AC 7 gạch ba), tác giả tự thử hoặc báo.
+- [x] [Review][Patch] `test_reach_cells_stand_out...` chỉ so hằng `REACH_COLOR` (luôn đúng), không chứng minh ô sáng khác cỏ/nước/ô đỏ, không kiểm viền. Viết lại theo hành vi hoặc tính tương phản với màu 16 ô nền [game/tests/test_board_view.gd ~469]
+- [x] [Review][Patch] `test_backdrop_covers_the_whole_window` là tautology (đảo công thức `screen_rect()`), không bắt lỗi vòng lát `floori/ceili` trong `_draw`. Kiểm số ô lát thật phủ hết cửa sổ với 5×5 đến 10×8 [game/tests/test_board_view.gd ~461]
+- [x] [Review][Patch] `test_every_terrain_kind_draws_without_missing_art` có thể xanh giả: `Art._cache`/`_reported` là static, không gọi `Art.reset_for_test()`, và không chứng minh `_draw` đã chạy. Reset cache đầu test, kiểm trực tiếp từng đường dẫn nạp được [game/tests/test_board_view.gd ~424-438]
+- [x] [Review][Patch] `show_state` gọi `_ground.show_state(state)` không kiểm null, trong khi `setup` có kiểm; `setup` kiểm `_ground` rồi dùng `_backdrop` không kiểm [game/src/battle/board_view.gd:286-288,327]
+- [x] [Review][Defer] (trận 3 hàng 0 nhìn ổn, chưa đè tiêu đề) Rừng/kho/làng cao 96px ở hàng 0 nhô lên trên mép bàn (~30px), có thể đè tiêu đề/bảng gợi ý; chưa trận nào đặt ở hàng 0, AC 6 chưa có test — deferred, latent
+- [x] [Review][Defer] Nền không vẽ lại khi cửa sổ/`viewport_size` đổi, chỉ khi `setup` — deferred, chưa có đường đổi cỡ cửa sổ
+- [x] [Review][Defer] Cắt ô ghép giả định hình 64×64 (không nhân tỷ lệ), test chỉ kiểm file tồn tại — deferred, đổi độ phân giải mới lộ
+- [x] [Review][Defer] `TerrainBlock._draw` gọi `Art.tex("")` với loại ngoài FOREST/GRANARY/VILLAGE (`block_path` trả `""`), và `tex.get_height()` trên null sẽ crash — deferred, `BLOCK_KINDS` chỉ có 3 loại
+- [x] [Review][Defer] `variant()` `x*31+y*17 mod 4` thực chất `(3x+y) mod 4` ra sọc chéo; khối rừng dùng `(x+y) mod 2` riêng — deferred, thẩm mỹ, tác giả xem ảnh quyết
+- [x] [Review][Defer] Mã chết: `SHOW_TERRAIN_LABELS=false` khiến nhánh nhãn và tham số `height` của `TerrainBlock` không dùng; `EDGE_SHADE` có thể còn thừa — deferred, chờ Câu hỏi 1 của tác giả
+- [x] [Review][Defer] `GroundView.show_state` vẽ lại và duyệt (cols+1)×(rows+1) giao điểm mỗi lần dù địa hình không đổi; `cols/rows` lặp hai nơi — deferred, chưa đo thấy chậm
+
+**Dismissed (noise):** 9 mục (test gắn chỉ số con, hằng viền thứ ba, tên `mask()`, `uid`, `scale` bằng 0, bàn kích thước 0, đổi tên `backdrop_path`, v.v.).
 
 ## Dev Notes
 

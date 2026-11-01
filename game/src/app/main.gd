@@ -66,10 +66,11 @@ func _ready() -> void:
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title_label.size = Vector2(BoardView.viewport_size.x, TITLE_HEIGHT)
 	_title_label.position = Vector2(0, TITLE_TOP)
-	add_child(_title_label)
 
 	_board_view = BoardView.new()
 	add_child(_board_view)
+	# Tiêu đề thêm sau bàn: nền rừng (con của bàn) phủ cả cửa sổ, tiêu đề phải vẽ đè lên nó.
+	add_child(_title_label)
 	_battle_input = BattleInput.new()
 	_battle_input.setup(_board_view)
 	add_child(_battle_input)

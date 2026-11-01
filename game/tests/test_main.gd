@@ -180,6 +180,11 @@ func test_title_label_sits_above_board() -> void:
 	assert_lte(title.position.y + title.size.y, board.board_rect().position.y, "tiêu đề không đè lên bàn cờ")
 
 
+func test_title_label_is_drawn_over_the_backdrop() -> void:
+	var main: Node2D = _make_main()
+	assert_gt(main._title_label.get_index(), main._board_view.get_index(), "nền rừng của bàn vẽ trước tiêu đề")
+
+
 func test_window_title_uses_translated_text() -> void:
 	get_window().title = ""
 	_make_main()

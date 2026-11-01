@@ -283,7 +283,7 @@ func setup(new_cols: int = EMPTY_SIZE.x, new_rows: int = EMPTY_SIZE.y) -> void:
 	var factor: float = fit_scale(local.size, AREA.size)
 	scale = Vector2(factor, factor)
 	position = (AREA.get_center() - local.get_center() * factor).round()
-	if _ground != null:
+	if _ground != null and _backdrop != null:
 		_ground.setup(cols, rows)
 		_backdrop.queue_redraw()
 	_redraw()
@@ -324,7 +324,8 @@ func show_state(state: BattleState) -> void:
 		clear_selection()
 	# Bàn đổi thì bóng xem trước của lệnh cũ không còn nghĩa.
 	_preview.clear()
-	_ground.show_state(state)
+	if _ground != null:
+		_ground.show_state(state)
 	_rebuild_terrain()
 	_sync_tokens()
 	_telegraph.show_state(state)
