@@ -42,6 +42,7 @@ var _level_transition: LevelTransition
 var _saved_level_id: String = ""
 var _title_label: Label
 var _board_view: BoardView
+var _weather_overlay: WeatherOverlay
 var _battle_input: BattleInput
 var _battle_view: BattleView
 var _hud: Hud
@@ -81,6 +82,10 @@ func _ready() -> void:
 
 	_board_view = BoardView.new()
 	add_child(_board_view)
+	# Hiệu ứng lá bay và sương mù rừng (Story 8.4+).
+	_weather_overlay = WeatherOverlay.new()
+	_weather_overlay.name = "WeatherOverlay"
+	add_child(_weather_overlay)
 	# Tiêu đề thêm sau bàn: nền rừng (con của bàn) phủ cả cửa sổ, tiêu đề phải vẽ đè lên nó.
 	add_child(_title_label)
 	_battle_input = BattleInput.new()
@@ -541,6 +546,8 @@ func _set_cover(cover: Control) -> void:
 	_main_menu.visible = cover == _main_menu
 	_level_transition.visible = cover == _level_transition
 	_title_label.visible = cover == null
+	if _weather_overlay != null:
+		_weather_overlay.visible = cover == null
 
 
 ## Màn hình chính (để test).

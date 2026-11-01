@@ -478,10 +478,8 @@ func add_reinforcement_token(p_id: int, p_type: int, at_cell: Vector2i, p_hp: in
 
 func _draw() -> void:
 	var surface: Rect2 = Rect2(0, 0, cols * TILE_SIZE, rows * TILE_SIZE)
-	# Mặt đất (cỏ, sông, hầm chông) do GroundView vẽ phía dưới. Mép bàn: cạnh trước dày EDGE_DEPTH.
-	var edge: Rect2 = Rect2(0, surface.end.y, surface.size.x, EDGE_DEPTH)
-	draw_rect(edge, EDGE_COLOR)
-	draw_rect(edge, LINE_COLOR, false, 1.5)
+	# Khung sa bàn gỗ lim dát đồng bao quanh bàn cờ (Story 8.2).
+	_draw_board_frame(cols, rows)
 	for c: int in range(1, cols):
 		draw_line(Vector2(c * TILE_SIZE, 0), Vector2(c * TILE_SIZE, surface.end.y), GRID_COLOR, GRID_WIDTH, true)
 	for r: int in range(1, rows):
@@ -509,6 +507,31 @@ func _draw() -> void:
 		draw_polyline(points, PATH_COLOR, PATH_WIDTH, true)
 		# Bỏ điểm cuối trùng điểm đầu: đa giác không nhận điểm lặp.
 		draw_colored_polygon(_ellipse(_top_center(_path[_path.size() - 1]), PATH_END_RADIUS).slice(0, SELECT_POINTS), PATH_COLOR)
+
+
+## Khung sa bàn gỗ lim dát đồng bao quanh bàn cờ (Story 8.2).
+func _draw_board_frame(p_cols: int, p_rows: int) -> void:
+	var tile: int = TILE_SIZE
+	var top_tex: Texture2D = Art.tex("dia_hinh/tex_khung_canh_tren_64x16.png")
+	var bot_tex: Texture2D = Art.tex("dia_hinh/tex_khung_canh_duoi_64x16.png")
+	var left_tex: Texture2D = Art.tex("dia_hinh/tex_khung_canh_trai_16x64.png")
+	var right_tex: Texture2D = Art.tex("dia_hinh/tex_khung_canh_phai_16x64.png")
+	var tl_tex: Texture2D = Art.tex("dia_hinh/tex_khung_goc_tren_trai_32x32.png")
+	var tr_tex: Texture2D = Art.tex("dia_hinh/tex_khung_goc_tren_phai_32x32.png")
+	var bl_tex: Texture2D = Art.tex("dia_hinh/tex_khung_goc_duoi_trai_32x32.png")
+	var br_tex: Texture2D = Art.tex("dia_hinh/tex_khung_goc_duoi_phai_32x32.png")
+	var w: float = float(p_cols * tile)
+	var h: float = float(p_rows * tile)
+	for c: int in range(p_cols):
+		draw_texture(top_tex, Vector2(c * tile, -16.0))
+		draw_texture(bot_tex, Vector2(c * tile, h))
+	for r: int in range(p_rows):
+		draw_texture(left_tex, Vector2(-16.0, r * tile))
+		draw_texture(right_tex, Vector2(w, r * tile))
+	draw_texture(tl_tex, Vector2(-16.0, -16.0))
+	draw_texture(tr_tex, Vector2(w - 16.0, -16.0))
+	draw_texture(bl_tex, Vector2(-16.0, h - 16.0))
+	draw_texture(br_tex, Vector2(w - 16.0, h - 16.0))
 
 
 ## Mặt trên của ô (ô ải nâng lên theo bệ).
