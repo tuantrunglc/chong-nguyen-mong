@@ -150,3 +150,99 @@ func test_speed_back_to_normal_mid_play_slows_the_rest() -> void:
 	assert_gte(elapsed, 0.3 + 0.7 * EventPlayer.FAST_SPEED - 0.4, "tắt tua giữa chừng (đo được %.2f s)" % elapsed)
 	assert_lte(elapsed, EventPlayer.MAX_PHASE_SECONDS + 0.25, "vẫn trong trần pha (đo được %.2f s)" % elapsed)
 	assert_eq(player.played().size(), 60, "không bỏ sự kiện nào")
+
+
+# ---------- Khung chuyển động và hiệu ứng (Story 8.4) ----------
+
+func _run(player: EventPlayer, events: Array[BattleEvent], state: BattleState, done: Array) -> void:
+	await player.play(events, state)
+	done[0] = true
+
+
+func _anim_log() -> Array[BattleEvent]:
+	return [
+		BattleEvent.moved(KHOAI, Vector2i(0, 0), Vector2i(1, 0), BattleEvent.Cause.WALK),
+		BattleEvent.attacked(KHOAI, Vector2i(3, 0)),
+		BattleEvent.damaged(BO_BINH, 1, BattleEvent.Cause.STRIKE),
+		BattleEvent.died(BO_BINH, Vector2i(3, 0)),
+	]
+
+
+func test_clips_and_effects_play_then_clean_up() -> void:
+	Art.reset_for_test()
+	var state: BattleState = BoardFixture.state({Vector2i(0, 0): "1", Vector2i(3, 0): "B"})
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	board.show_state(state)
+	var player: EventPlayer = _player(board)
+	player.instant = false
+	var khoai: UnitToken = board.tokens()[KHOAI] as UnitToken
+	var bo_binh: UnitToken = board.tokens()[BO_BINH] as UnitToken
+	var done: Array = [false]
+	var started: int = Time.get_ticks_msec()
+	_run(player, _anim_log(), state, done)
+	await wait_seconds(0.06)
+	assert_true(khoai.has_clip(), "đang đi thì phát khung đi")
+	assert_eq(khoai.facing_name(), "east", "hướng đứng theo hướng vừa đi")
+	await wait_seconds(0.22)
+	assert_gt(board.fx_layer().active_count(), 0, "đang đánh thì có vệt chém")
+	assert_true(khoai.has_clip(), "đang đánh thì phát khung đánh")
+	await wait_until(func() -> bool: return done[0] as bool, 4.0)
+	var elapsed: float = float(Time.get_ticks_msec() - started) / 1000.0
+	assert_lte(elapsed, EventPlayer.MAX_PHASE_SECONDS + 0.15, "hoạt ảnh không kéo dài pha (đo %.2f s)" % elapsed)
+	await wait_seconds(0.1)
+	assert_eq(board.fx_layer().active_count(), 0, "hiệu ứng tự gỡ")
+	assert_false(khoai.has_clip(), "không còn khung chạy dở")
+	assert_eq(khoai.modulate, Color.WHITE, "quân sống về màu trắng")
+	assert_false(bo_binh.visible, "quân gục bị ẩn")
+	assert_eq(player.played().size(), 4, "vẫn phát đủ sự kiện")
+
+
+func test_stop_clears_clips_and_effects() -> void:
+	Art.reset_for_test()
+	var state: BattleState = BoardFixture.state({Vector2i(0, 0): "1", Vector2i(3, 0): "B"})
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	board.show_state(state)
+	var player: EventPlayer = _player(board)
+	player.instant = false
+	var events: Array[BattleEvent] = [BattleEvent.attacked(KHOAI, Vector2i(3, 0))]
+	_run(player, events, state, [false])
+	await wait_seconds(0.05)
+	assert_gt(board.fx_layer().active_count(), 0, "đề bài: đang có hiệu ứng")
+	player.stop()
+	assert_eq(board.fx_layer().active_count(), 0, "stop() xóa hiệu ứng")
+	assert_false((board.tokens()[KHOAI] as UnitToken).has_clip(), "stop() gỡ khung")
+
+
+func test_show_state_clears_clips_and_effects() -> void:
+	Art.reset_for_test()
+	var state: BattleState = BoardFixture.state({Vector2i(0, 0): "1", Vector2i(3, 0): "B"})
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	board.show_state(state)
+	var player: EventPlayer = _player(board)
+	player.instant = false
+	_run(player, _anim_log(), state, [false])
+	await wait_seconds(0.25)
+	board.show_state(state)
+	assert_eq(board.fx_layer().active_count(), 0, "show_state xóa hiệu ứng đang bay")
+	assert_false((board.tokens()[KHOAI] as UnitToken).has_clip(), "UnitToken.update gỡ khung")
+	player.stop()
+
+
+func test_instant_mode_makes_no_clips_or_effects() -> void:
+	var state: BattleState = BoardFixture.state({Vector2i(0, 0): "1", Vector2i(3, 0): "B"})
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	board.show_state(state)
+	var player: EventPlayer = _player(board)
+	var events: Array[BattleEvent] = _anim_log()
+	player.play_now(events, state)
+	assert_eq(board.fx_layer().active_count(), 0, "play_now không tạo hiệu ứng")
+	assert_false((board.tokens()[KHOAI] as UnitToken).has_clip(), "play_now không phát khung")
+	assert_eq(player.played().size(), 4)
+	assert_eq(player.played()[1].type, BattleEvent.Type.ATTACKED, "thứ tự cũ giữ nguyên")
+	player.instant = true
+	await player.play(events, state)
+	assert_eq(board.fx_layer().active_count(), 0, "instant không tạo hiệu ứng")

@@ -94,6 +94,7 @@ var _telegraph: TelegraphView
 ## Nhãn số máu mất do hầm chông trên ô sáng (Story 3.4).
 var _damage_labels: Node2D
 var _preview: PreviewView
+var _fx: FxLayer
 ## id quân -> UnitToken
 var _tokens: Dictionary = {}
 ## Tướng đang chọn: ô của nó (NO_CELL là không chọn), các ô sáng, đường đi đang vẽ (không gồm ô tướng).
@@ -304,6 +305,9 @@ func _ready() -> void:
 	_world = Node2D.new()
 	_world.y_sort_enabled = true
 	add_child(_world)
+	# Hiệu ứng (Story 8.4): trên đồng quân, dưới bóng xem trước, viền mục tiêu và số thứ tự đòn.
+	_fx = FxLayer.new()
+	add_child(_fx)
 	# Bóng mờ xem trước đòn (Story 2.12): trên đồng quân, dưới viền mục tiêu và lớp số thứ tự đòn.
 	_preview = PreviewView.new()
 	add_child(_preview)
@@ -322,14 +326,21 @@ func show_state(state: BattleState) -> void:
 		setup(state.size.x, state.size.y)
 	else:
 		clear_selection()
-	# Bàn đổi thì bóng xem trước của lệnh cũ không còn nghĩa.
+	# Bàn đổi thì bóng xem trước của lệnh cũ không còn nghĩa; hiệu ứng đang bay cũng vậy.
 	_preview.clear()
+	if _fx != null:
+		_fx.clear()
 	if _ground != null:
 		_ground.show_state(state)
 	_rebuild_terrain()
 	_sync_tokens()
 	_telegraph.show_state(state)
 	_redraw()
+
+
+## Lớp hiệu ứng (Story 8.4) cho EventPlayer và test.
+func fx_layer() -> FxLayer:
+	return _fx
 
 
 ## Ô đỏ báo đòn đang vẽ.
@@ -425,16 +436,23 @@ func _sync_tokens() -> void:
 				if old.unit_type == unit.type:
 					old.update(unit, lift)
 					old.set_facing(UnitArt.facing_for(unit, _state))
+					old.set_aura(_has_aura(unit))
 					continue
 				_remove_token(unit.id)
 			var token: UnitToken = UnitToken.new()
 			token.setup(unit, lift)
 			token.set_facing(UnitArt.facing_for(unit, _state))
+			token.set_aura(_has_aura(unit))
 			_world.add_child(token)
 			_tokens[unit.id] = token
 	for id: int in _tokens.keys():
 		if not alive.has(id):
 			_remove_token(id)
+
+
+## Hào quang Sát Thát: tướng Đại Việt còn sống khi mưu kế đang có hiệu lực (theo bản chụp).
+func _has_aura(unit: Unit) -> bool:
+	return _state != null and _state.sat_that_active and unit.faction == Unit.Faction.DAI_VIET
 
 
 func _remove_token(id: int) -> void:
@@ -519,13 +537,9 @@ func _draw_reinforcement_marker(cell: Vector2i) -> void:
 	var rect: Rect2 = _top_rect(cell).grow(-3.0)
 	draw_rect(rect, REINFORCEMENT_FILL, true)
 	draw_rect(rect, REINFORCEMENT_BORDER, false, 3.0)
-	var center: Vector2 = _top_center(cell)
-	var chevron: PackedVector2Array = PackedVector2Array([
-		center + Vector2(-12, -8),
-		center + Vector2(0, 4),
-		center + Vector2(12, -8)
-	])
-	draw_polyline(chevron, REINFORCEMENT_BORDER, 3.0)
+	# Dấu cờ thay cho mũi tên; nền và viền cam giữ nguyên để phân biệt với ô đỏ báo đòn (FR35).
+	var flag: Texture2D = Art.tex(FxArt.DAU_TIEP_VIEN)
+	draw_texture(flag, _top_center(cell) - flag.get_size() / 2.0)
 
 
 ## Elip khép kín (vòng chọn, chấm cuối đường đi) nằm trên mặt ô nhìn chếch.

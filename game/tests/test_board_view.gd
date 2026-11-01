@@ -656,3 +656,21 @@ func _row_has_pixel(image: Image, y: int) -> bool:
 			return true
 	return false
 
+
+# ---------- Hào quang Sát Thát (Story 8.4) ----------
+
+func test_aura_follows_snapshot_for_dai_viet_only() -> void:
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	var units: Dictionary = {Vector2i(0, 1): "1", Vector2i(2, 1): "2", Vector2i(0, 5): "B"}
+	var on: BattleState = BoardFixture.state(units)
+	on.sat_that_active = true
+	board.show_state(on)
+	assert_true((board.tokens()[1] as UnitToken).has_aura(), "Khoái có hào quang")
+	assert_true((board.tokens()[2] as UnitToken).has_aura(), "Lão có hào quang")
+	assert_false((board.tokens()[101] as UnitToken).has_aura(), "quân Nguyên không có")
+	var off: BattleState = BoardFixture.state(units)
+	board.show_state(off)
+	assert_false((board.tokens()[1] as UnitToken).has_aura(), "bản chụp mới tắt thì tắt")
+	board.show_state(on)
+	assert_true((board.tokens()[1] as UnitToken).has_aura(), "bật lại theo bản chụp (hoàn tác, nạp lại)")

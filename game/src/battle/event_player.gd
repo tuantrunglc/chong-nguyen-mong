@@ -19,6 +19,12 @@ const LUNGE_DISTANCE: float = 12.0
 const SHAKE_DISTANCE: float = 5.0
 ## Tốc độ khi tua nhanh pha địch (Story 4.4, FR42): mọi thời lượng, sàn và trần của pha đều chia cho số này.
 const FAST_SPEED: float = 3.0
+## Đặt false để tắt khung chuyển động và hiệu ứng (Story 8.4) mà không xóa code: chỉ còn tween như trước.
+const ANIMATE_CLIPS: bool = true
+## Phần cuối của thời lượng gục/chết đuối dành cho mờ dần.
+const FADE_PORTION: float = 0.3
+## Hiệu ứng đặt trên thân quân: cao hơn chân bấy nhiêu px.
+const BODY_LIFT: float = 16.0
 
 ## Bật khi chạy không có màn hình (GUT): áp dụng ngay, không chờ khung hình nào, để test không phải await.
 var instant: bool = DisplayServer.get_name() == "headless"
@@ -109,6 +115,11 @@ func stop() -> void:
 	if _active_tween != null:
 		_active_tween.kill()
 		_active_tween = null
+	if _board != null:
+		for token: UnitToken in _board.tokens().values():
+			token.clear_clip()
+		if _board.fx_layer() != null:
+			_board.fx_layer().clear()
 
 
 ## Bắt đầu một lượt phát mới; trả số lượt để vòng lặp tự kiểm.
@@ -146,24 +157,40 @@ func _play_one(event: BattleEvent, seconds: float, snapshot: BattleState) -> voi
 	match event.type:
 		BattleEvent.Type.MOVED:
 			if token != null:
+				if event.cause == BattleEvent.Cause.WALK:
+					_start_clip(token, UnitAnim.Clip.WALK, UnitAnim.walk_facing(event.from_cell, event.to_cell), seconds)
 				await _tween_to(token, "position", _move_target(token, event, snapshot), seconds)
 		BattleEvent.Type.ATTACKED:
 			if token != null:
+				var attack_facing: String = UnitAnim.attack_facing(token.position, BoardView.cell_center(event.to_cell))
+				_start_clip(token, UnitAnim.Clip.ATTACK, attack_facing, seconds)
+				_spawn_fx(event, token, seconds, snapshot)
 				await _lunge(token, event, seconds)
 		BattleEvent.Type.COLLIDED:
+			_spawn_fx(event, token, seconds, snapshot)
 			await _collide(token, event, seconds)
-		BattleEvent.Type.DAMAGED, BattleEvent.Type.TELEGRAPHED:
+		BattleEvent.Type.DAMAGED:
+			if token != null:
+				_spawn_fx(event, token, seconds, snapshot)
+				if _start_clip(token, UnitAnim.Clip.HURT, token.facing_name(), seconds):
+					await _wait(seconds)
+				else:
+					await _flash(token, seconds)
+		BattleEvent.Type.TELEGRAPHED:
 			if token != null:
 				await _flash(token, seconds)
 		BattleEvent.Type.HEALED:
 			if token != null:
+				_spawn_fx(event, token, seconds, snapshot)
 				await _flash_heal(token, seconds)
 		BattleEvent.Type.DIED, BattleEvent.Type.DROWNED:
 			if token != null:
+				_spawn_fx(event, token, seconds, snapshot)
 				await _sink_or_fade(token, event, seconds)
 		BattleEvent.Type.VILLAGE_DAMAGED:
 			if _notice != null:
 				_notice.show_text(TranslationServer.translate("notice.morale_lost"))
+			_spawn_fx(event, null, seconds, snapshot)
 			await _flash_village(event.to_cell, seconds)
 		BattleEvent.Type.REINFORCEMENT_SPAWNED:
 			if _board != null:
@@ -180,6 +207,7 @@ func _play_one(event: BattleEvent, seconds: float, snapshot: BattleState) -> voi
 		BattleEvent.Type.REINFORCEMENT_BLOCKED:
 			await _flash_blocked(event.to_cell, seconds)
 		BattleEvent.Type.GRANARY_BURNED:
+			_spawn_fx(event, null, seconds, snapshot)
 			await _flash_burn(event.to_cell, seconds)
 		_:
 			await _wait(seconds * 0.5)
@@ -229,7 +257,8 @@ func _flash_blocked(cell: Vector2i, seconds: float) -> void:
 
 ## Kho lương bị đốt (Vườn không nhà trống, Story 3.12): nháy màu lửa; kho biến mất khi bàn vẽ bản chụp cuối.
 func _flash_burn(cell: Vector2i, seconds: float) -> void:
-	await _flash_cell(cell, Color(1.0, 0.45, 0.05, 0.85), seconds)
+	# Lửa bằng hình (Story 8.4) chiếm chỗ chính; ô nháy màu giữ nhạt để hình đủ nổi.
+	await _flash_cell(cell, Color(1.0, 0.45, 0.05, 0.35), seconds)
 
 
 ## Nháy một ô bằng màu color rồi mờ dần trong seconds giây.
@@ -317,15 +346,72 @@ func _flash_heal(token: UnitToken, seconds: float) -> void:
 	await _wait(seconds)
 
 
-## Gục: mờ hẳn. Chết đuối: chìm xuống rồi mờ. Cả hai ẩn đồng quân; `show_state` sau đó gỡ hẳn.
+## Gục: khung gục rồi mờ dần ở cuối. Chết đuối: khung chết đuối nếu quân có bộ này, không thì chìm xuống rồi mờ.
+## Cả hai ẩn đồng quân; `show_state` sau đó gỡ hẳn.
 func _sink_or_fade(token: UnitToken, event: BattleEvent, seconds: float) -> void:
+	var clip: int = UnitAnim.Clip.DROWN if event.type == BattleEvent.Type.DROWNED else UnitAnim.Clip.DIE
+	var animated: bool = _start_clip(token, clip, token.facing_name(), seconds, true)
 	var tween: Tween = _new_tween()
-	if event.type == BattleEvent.Type.DROWNED:
-		tween.set_parallel(true)
-		tween.tween_property(token, "position", token.position + Vector2(0.0, 10.0), seconds)
-	tween.tween_property(token, "modulate:a", 0.0, seconds)
+	if animated:
+		tween.tween_interval(seconds * (1.0 - FADE_PORTION))
+		tween.tween_property(token, "modulate:a", 0.0, seconds * FADE_PORTION)
+	else:
+		if event.type == BattleEvent.Type.DROWNED:
+			tween.set_parallel(true)
+			tween.tween_property(token, "position", token.position + Vector2(0.0, 10.0), seconds)
+		tween.tween_property(token, "modulate:a", 0.0, seconds)
 	await _wait(seconds)
 	token.visible = false
+
+
+## Phát khung chuyển động của quân và đặt hướng đứng theo động tác (AC 6). Trả true nếu có khung để phát.
+## Khung thiếu thì Art.tex đã ghi lỗi và trả ô hồng: game không sập.
+func _start_clip(token: UnitToken, clip: int, facing: String, seconds: float, hold: bool = false) -> bool:
+	if not ANIMATE_CLIPS:
+		return false
+	if clip == UnitAnim.Clip.WALK or clip == UnitAnim.Clip.ATTACK:
+		var index: int = UnitArt.facing_index(facing)
+		if index >= 0:
+			token.set_facing(index)
+	var paths: Array[String] = UnitAnim.frame_paths(token.unit_type, clip, facing)
+	if paths.is_empty():
+		return false
+	var frames: Array[Texture2D] = []
+	for path: String in paths:
+		frames.append(Art.tex(path))
+	token.play_clip(frames, seconds, hold)
+	return token.has_clip()
+
+
+## Đẩy các hiệu ứng của sự kiện sang lớp hiệu ứng; chạy song song với tween chính. snapshot có thể null.
+func _spawn_fx(event: BattleEvent, token: UnitToken, seconds: float, snapshot: BattleState) -> void:
+	if not ANIMATE_CLIPS or _board == null or _board.fx_layer() == null:
+		return
+	var layer: FxLayer = _board.fx_layer()
+	for fx: Dictionary in FxArt.plan(event, snapshot):
+		var cell_point: Vector2 = _cell_point(fx["to_cell"] as Vector2i, snapshot)
+		match fx["style"] as String:
+			FxArt.STYLE_TRAVEL:
+				if token != null:
+					var from: Vector2 = token.position + Vector2(0.0, -BODY_LIFT)
+					layer.spawn_travel(FxArt.bay_path(fx["kind"] as String, from, cell_point), from, cell_point, seconds)
+			FxArt.STYLE_FRAMES:
+				layer.spawn_frames(fx["paths"] as Array[String], cell_point, seconds)
+			_:
+				var center: Vector2 = cell_point
+				if fx["at_unit"] as bool:
+					if token == null:
+						continue
+					center = token.position + Vector2(0.0, -BODY_LIFT)
+				layer.spawn_static(fx["path"] as String, center, seconds, fx["style"] as String)
+
+
+## Tâm thân quân đứng ở ô cell (trừ độ cao bệ nếu có bản chụp).
+func _cell_point(cell: Vector2i, snapshot: BattleState) -> Vector2:
+	var lift: float = 0.0
+	if snapshot != null and snapshot.in_bounds(cell):
+		lift = BoardView.surface_height(snapshot.terrain_at(cell))
+	return BoardView.cell_center(cell) - Vector2(0.0, lift + BODY_LIFT)
 
 
 func _tween_to(node: Node2D, property: String, target: Variant, seconds: float) -> void:

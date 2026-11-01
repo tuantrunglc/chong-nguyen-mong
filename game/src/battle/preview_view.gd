@@ -172,11 +172,11 @@ func _draw() -> void:
 	for ghost: Dictionary in _ghosts:
 		var pos: Vector2 = ghost.get("pos", Vector2.ZERO) as Vector2
 		var faction: int = ghost.get("faction", Unit.Faction.NGUYEN) as int
-		var color: Color = UnitToken.DAI_VIET_COLOR if faction == Unit.Faction.DAI_VIET else UnitToken.NGUYEN_COLOR
-		color.a = GHOST_ALPHA
-		draw_circle(pos + Vector2(0.0, -UnitToken.TOKEN_LIFT), UnitToken.RADIUS, color)
-		draw_arc(pos + Vector2(0.0, -UnitToken.TOKEN_LIFT), UnitToken.RADIUS, 0.0, TAU, 32,
-			Color(1.0, 1.0, 1.0, GHOST_ALPHA), 2.0)
+		# Hình đứng yên của quân, mờ (Story 8.4); hướng mặc định theo phe vì bóng không biết địch gần nhất.
+		var facing: int = UnitArt.DEFAULT_FACING_DAI_VIET if faction == Unit.Faction.DAI_VIET else UnitArt.DEFAULT_FACING_NGUYEN
+		var texture: Texture2D = Art.tex(UnitArt.sprite_path(ghost.get("type", -1) as int, facing))
+		draw_texture(texture, pos + Vector2(-UnitToken.SPRITE_SIZE / 2.0, UnitToken.FOOT_DROP - UnitToken.SPRITE_FEET_Y),
+			Color(1.0, 1.0, 1.0, GHOST_ALPHA))
 	# Gạch chéo ô đỏ cũ chỉ khi sau lệnh không còn đòn nào trúng ô đó (một ô có thể chịu nhiều đòn).
 	var still_hit: Dictionary = {} if _marks_state == null else TelegraphMarks.cells(_marks_state)
 	for mark: Dictionary in _marks:
