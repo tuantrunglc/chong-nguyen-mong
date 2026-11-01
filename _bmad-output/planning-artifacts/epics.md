@@ -1387,3 +1387,98 @@ tôi muốn quan sát 3–5 người thân chơi,
 **Và** phiếu có thêm một mục: người chơi có thua vì hết hiệp hoặc mất Lòng dân không, và thua rồi có tự chơi lại không
 **Và** ghi nhận xét cho các mục [KIỂM TRA KHI PLAYTEST E4]: tầm kéo Trần Khánh Dư, độ mạnh Vườn không nhà trống, luật tướng gục bị nhấc khỏi bàn
 **Và** đạt ≥ 3/5 dấu hiệu thì quyết định chuyển sang giai đoạn 1
+
+## Epic 8: Hình ảnh và âm thanh
+
+_Thêm 2026-11-01 (tác giả chốt: giữ nhãn E8, làm trước E5–E7 để duyệt giao diện). Chỉ đổi hình và tiếng, **không đổi luật**. Hình nguồn ở `img/pixellab-thu/toi_uu/`, hồ sơ ở `_bmad-output/planning-artifacts/art-reference/` (`ban-giao-asset.md`, `danh-sach-hinh-e8.md`). Ô đỏ báo đòn, số thứ tự ra đòn, ô sáng, đường đi vẫn vẽ bằng code (NFR9). Bản nén web ≤ 25MB. Mỗi hình đưa vào game có một dòng trong `game/assets/CREDITS.md`. Mỗi story: `tools/test.sh` xanh, tác giả duyệt bằng mắt._
+
+### Story 8.1: Nền móng nạp hình
+
+Là tác giả,
+tôi muốn hình đã vẽ nằm đúng chỗ trong game,
+để các story sau chỉ việc gắn vào.
+
+**Tiêu chí nghiệm thu:**
+
+**Khi** chạy game
+**Thì** không đổi gì nhìn thấy, nhưng hình đã chốt nằm ở `game/assets/` theo tên `tex_*.png`, lọc `Nearest`, đúng bảng màu Resurrect 64
+**Và** `CREDITS.md` có một dòng cho mỗi hình; có test kiểm mọi hình trong `assets/` đều có dòng CREDITS
+**Và** lỗi nạp hình ghi `ERROR` bằng tiếng Việt
+
+### Story 8.2: Ô nền và địa hình
+
+Là người chơi,
+tôi muốn bàn cờ có cỏ, sông, rừng, làng như một chiến trường thật,
+để nhìn là biết chỗ nào là gì.
+
+**Tiêu chí nghiệm thu:**
+
+**Khi** vào bất kỳ trận nào
+**Thì** ô đất, sông (ghép bờ 16 ô), rừng, hầm chông, kho lương, làng, ô ải và viền quanh bàn hiện bằng hình thay cho hình vẽ bằng code
+**Và** trận biển (Vân Đồn) dùng nền vẽ liền một tấm; vật trên bàn vẫn là hình rời
+**Và** luật ô (đi được, chặn) không đổi; mọi test luật vẫn xanh
+**Và** ô đỏ báo đòn, ô sáng, đường đi vẫn nổi rõ trên nền mới
+
+### Story 8.3: Quân đứng yên
+
+Là người chơi,
+tôi muốn thấy ba tướng và ba loại quân Nguyên bằng hình,
+để phân biệt phe và loại quân ngay.
+
+**Tiêu chí nghiệm thu:**
+
+**Khi** vào trận
+**Thì** Nguyễn Khoái, Phạm Ngũ Lão, Trần Khánh Dư, Bộ binh, Kỵ binh, Cung kỵ hiện bằng hình đúng hướng, có bóng và chấm máu
+**Và** Đại Việt nhận ra bằng đỏ, Nguyên bằng xám xanh
+**Và** "đã đi", "đã đánh" vẫn là tô mờ bằng code
+
+### Story 8.4: Hoạt ảnh và hiệu ứng
+
+Là người chơi,
+tôi muốn quân đi, đánh, trúng đòn, gục có chuyển động,
+để thấy rõ chuyện gì vừa xảy ra.
+
+**Tiêu chí nghiệm thu:**
+
+**Khi** phát lại sự kiện (Story 2.11)
+**Thì** quân đi, đánh, trúng đòn, gục, rơi sông có hoạt ảnh; lao bay, mũi tên, va chạm, nước bắn, chông, lửa kho, hào quang Sát Thát, dấu tiếp viện, hồi máu, khói làng hiện đúng lúc
+**Và** nút tua nhanh pha địch vẫn giữ mỗi pha ≤ 3 giây (NFR3)
+**Và** 60 FPS ở trận 6, hiệp nhiều quân nhất (NFR1), đo lại như Story 4.7
+
+### Story 8.5: Giao diện
+
+Là người chơi,
+tôi muốn khung, nút, biểu tượng đúng phong cách,
+để game nhìn thống nhất.
+
+**Tiêu chí nghiệm thu:**
+
+**Khi** xem HUD, nút, gợi ý, bảng thông tin tướng
+**Thì** dùng khung 9-slice, nút 4 trạng thái, biểu tượng mưu kế, máu, Lòng dân, hiệp, nhiệm vụ, con trỏ chuột
+**Và** bảng thông tin tướng có chân dung (nội dung chữ chờ tác giả chốt)
+**Và** chữ tiếng Việt vẫn đọc rõ, nằm trong `text.csv`
+
+### Story 8.6: Màn hình chính và màn chuyển trận
+
+Là người chơi,
+tôi muốn mở game thấy cảnh Bạch Đằng và logo,
+để có không khí ngay từ đầu.
+
+**Tiêu chí nghiệm thu:**
+
+**Khi** mở game
+**Thì** màn hình chính có nền sông Bạch Đằng và logo; màn chuyển trận dùng hình cùng phong cách
+**Và** biểu tượng game và ảnh bìa itch.io được cập nhật
+
+### Story 8.7: Âm thanh
+
+Là người chơi,
+tôi muốn nghe tiếng đánh, đẩy, nước, và nhạc nền,
+để trận đánh có sức nặng.
+
+**Tiêu chí nghiệm thu:**
+
+**Khi** đẩy, kéo, phóng lao, va chạm, rơi sông, trúng chông, thắng, thua
+**Thì** có tiếng tương ứng (khoảng 10 file CC0), nút tắt tiếng, nhạc nền
+**Và** giấy phép từng file ghi ở `CREDITS.md`
+_Cắt được nếu trễ: làm sau 8.6._

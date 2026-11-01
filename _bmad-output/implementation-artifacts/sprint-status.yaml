@@ -105,3 +105,12 @@ development_status:
   4-8-goi-y-luat-dau-tran: done
   4-9-choi-thu-voi-nguoi-than: backlog
   epic-4-retrospective: optional
+  epic-8: in-progress  # hình và âm thanh; làm trước E5–E7 (tác giả chốt 2026-11-01)
+  8-1-nen-mong-nap-hinh: review
+  8-2-o-nen-va-dia-hinh: backlog
+  8-3-quan-dung-yen: backlog
+  8-4-hoat-anh-va-hieu-ung: backlog
+  8-5-giao-dien: backlog
+  8-6-man-hinh-chinh-va-man-chuyen-tran: backlog
+  8-7-am-thanh: backlog
+  epic-8-retrospective: optional

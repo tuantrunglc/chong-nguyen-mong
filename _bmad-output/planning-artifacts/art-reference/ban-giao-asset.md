@@ -131,5 +131,7 @@ Game chưa có chỗ nạp hình (phần đó thuộc E8). Để xem thử, ché
 
 ## Lưu ý
 
+- **2026-11-01 (Story 8.1):** hình bản cuối đã chép vào `game/assets/textures/` bằng `tools/nap_hinh.sh` (415 file, đổi tên `tex_*.png`; chạy lại khi vẽ lại hình ở `img/`). Game gọi hình qua `Art.tex()`. Chưa chép: chân dung E4, thuyền (làm ở E7), ảnh bìa itch.io.
+
 - Thư mục `img/` là chỗ để bản nháp và ảnh thử, chưa phải asset của game. Asset thật vào `game/assets/` khi làm E8, theo quy ước đặt tên `tex_*.png`.
 - MCP chỉ để nhìn và thử. Code game thật chỉ sửa trong story E8, có test đi kèm.
