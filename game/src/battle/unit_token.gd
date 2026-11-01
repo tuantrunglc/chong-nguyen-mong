@@ -1,25 +1,34 @@
 class_name UnitToken
 extends Node2D
-## Đồng quân tròn có chữ, đứng trên ô bàn nhìn chếch, có bóng dưới chân, kèm chấm máu ở góc dưới phải.
-## position là chân đồng: tâm mặt trên của ô (BoardView.cell_center, cộng độ cao bệ ô ải nếu có).
-## Đồng nhô lên ô phía trên nhưng không với tới tâm ô đó, và không lấn sang ô hai bên.
+## Quân đứng yên bằng hình (Story 8.3), có bóng dưới chân, kèm chấm máu ở góc dưới phải thân.
+## position là chân quân: tâm mặt trên của ô (BoardView.cell_center, cộng độ cao bệ ô ải nếu có).
+## Vùng bấm vẫn là hình tròn cũ quanh thân (RADIUS, TOKEN_LIFT) nên khung bàn và pick_cell không đổi.
 ## Chỉ vẽ theo bản chụp, không giữ tham chiếu tới trạng thái đang sống.
 
 const RADIUS: float = 24.0
-## Tâm đồng cao hơn chân đồng. Đủ nhỏ để đồng không với tới tâm ô hàng xóm (BoardView.pick_cell).
+## Tâm vùng bấm cao hơn chân. Đủ nhỏ để vùng bấm không với tới tâm ô hàng xóm (BoardView.pick_cell).
 const TOKEN_LIFT: float = 20.0
-const SHADOW_COLOR: Color = Color(0.0, 0.0, 0.0, 0.3)
-const SHADOW_RADIUS: Vector2 = Vector2(22, 8)
-const SHADOW_POINTS: int = 24
-const BORDER_WIDTH: float = 3.0
+## Chân hình quân nằm thấp hơn position bấy nhiêu px (chân vẫn trong ô, đỉnh đầu không vượt đỉnh vùng bấm cũ).
+const FOOT_DROP: float = 18.0
+## Hàng điểm ảnh cuối cùng của chân trong khung 64×64 (hộp bao đo ở Story 8.3: chân ở y 61..63).
+const SPRITE_FEET_Y: float = 62.0
+const SPRITE_SIZE: float = 64.0
+## Bóng 32×16 đặt giữa dưới chân.
+const SHADOW_TEXTURE: String = "giao_dien/tex_bong_do_quan_32x16.png"
+const SHADOW_SIZE: Vector2 = Vector2(32, 16)
+const SHADOW_RAISE: float = 2.0
+## Chữ tên trên quân: tắt từ Story 8.3 (hình đủ để nhận ra, tooltip vẫn có tên). Đặt true để hiện lại.
+const SHOW_NAMES: bool = false
+## Màu nhân vào hình quân: đã đi hơi xỉn ngả đỏ nhạt, đã đánh xám nhạt rõ hơn (tác giả chốt 2026-10-18: hai trạng thái
+## khác hẳn nhau, không dùng độ trong suốt). Nhân vào phần vẽ hình, không phải `modulate` của cả token
+## (hoạt ảnh `_flash` dùng `modulate` của token).
+const MOVED_TINT: Color = Color(0.78, 0.70, 0.70)
+const ATTACKED_TINT: Color = Color(0.60, 0.60, 0.62)
+## Màu phe: PreviewView vẫn dùng cho bóng mờ xem trước.
 const DAI_VIET_COLOR: Color = Color(0.70, 0.13, 0.13)
-## Tướng đã đi trong lượt: đỏ xỉn, không dùng độ trong suốt (bóng mờ dành cho xem trước ở E2).
-const DAI_VIET_MOVED_COLOR: Color = Color(0.55, 0.40, 0.38)
-const DAI_VIET_TEXT_COLOR: Color = Color(1.0, 0.95, 0.80)
-## Tướng đã đánh: xám nhạt, chữ xám đậm (tác giả chốt 2026-10-18), khác hẳn đỏ xỉn "đã đi". Không dùng trong suốt.
-const ATTACKED_COLOR: Color = Color(0.72, 0.72, 0.70)
-const ATTACKED_TEXT_COLOR: Color = Color(0.25, 0.25, 0.25)
 const NGUYEN_COLOR: Color = Color(0.17, 0.20, 0.28)
+const DAI_VIET_TEXT_COLOR: Color = Color(1.0, 0.95, 0.80)
+const ATTACKED_TEXT_COLOR: Color = Color(0.25, 0.25, 0.25)
 const NGUYEN_TEXT_COLOR: Color = Color(1.0, 1.0, 1.0)
 const NAME_FONT_SIZE: int = 15
 const HP_RADIUS: float = 9.0
@@ -48,6 +57,8 @@ var cell: Vector2i = Vector2i.ZERO
 var _faction: Unit.Faction = Unit.Faction.DAI_VIET
 var _moved: bool = false
 var _attacked: bool = false
+## Hướng đứng, chỉ số của UnitArt.FACING_NAMES. BoardView đặt theo địch gần nhất.
+var _facing: int = UnitArt.DEFAULT_FACING_DAI_VIET
 var _name_label: Label
 var _hp_label: Label
 
@@ -57,6 +68,7 @@ func setup(unit: Unit, lift: float = 0.0) -> void:
 	unit_id = unit.id
 	unit_type = unit.type
 	_faction = unit.faction
+	_facing = UnitArt.DEFAULT_FACING_DAI_VIET if _faction == Unit.Faction.DAI_VIET else UnitArt.DEFAULT_FACING_NGUYEN
 	var text_color: Color = DAI_VIET_TEXT_COLOR if _faction == Unit.Faction.DAI_VIET else NGUYEN_TEXT_COLOR
 
 	var coin: Vector2 = Vector2(0, -TOKEN_LIFT)
@@ -65,6 +77,7 @@ func setup(unit: Unit, lift: float = 0.0) -> void:
 	_name_label.theme_type_variation = &"TitleLabel"
 	_name_label.add_theme_font_size_override("font_size", NAME_FONT_SIZE)
 	_name_label.add_theme_color_override("font_color", text_color)
+	_name_label.visible = SHOW_NAMES
 
 	_hp_label = _centered_label(Vector2(HP_RADIUS * 2, HP_RADIUS * 2), coin + HP_OFFSET)
 	_hp_label.add_theme_font_size_override("font_size", HP_FONT_SIZE)
@@ -120,22 +133,32 @@ func _centered_label(box: Vector2, center: Vector2) -> Label:
 	return label
 
 
+func set_facing(p_facing: int) -> void:
+	var wrapped: int = posmod(p_facing, UnitArt.FACING_NAMES.size())
+	if wrapped != _facing:
+		_facing = wrapped
+		queue_redraw()
+
+
+func facing() -> int:
+	return _facing
+
+
+## Màu nhân của hình theo trạng thái: đã đánh rõ hơn đã đi; trắng là còn nguyên lượt.
+## Chỉ quân Đại Việt đổi màu: cờ của quân Nguyên còn nguyên suốt lượt người chơi, tô xỉn sẽ dễ nhầm là quân ta hết lượt.
+func tint() -> Color:
+	if _faction != Unit.Faction.DAI_VIET:
+		return Color.WHITE
+	if _attacked:
+		return ATTACKED_TINT
+	return MOVED_TINT if _moved else Color.WHITE
+
+
 func _draw() -> void:
-	var shadow: PackedVector2Array = PackedVector2Array()
-	for i: int in range(SHADOW_POINTS):
-		var angle: float = TAU * i / SHADOW_POINTS
-		shadow.append(Vector2(cos(angle) * SHADOW_RADIUS.x, sin(angle) * SHADOW_RADIUS.y))
-	draw_colored_polygon(shadow, SHADOW_COLOR)
+	draw_texture(Art.tex(SHADOW_TEXTURE), Vector2(-SHADOW_SIZE.x / 2.0, FOOT_DROP - SHADOW_RAISE - SHADOW_SIZE.y / 2.0))
+	var origin: Vector2 = Vector2(-SPRITE_SIZE / 2.0, FOOT_DROP - SPRITE_FEET_Y)
+	draw_texture(Art.tex(UnitArt.sprite_path(unit_type, _facing)), origin, tint())
 	var coin: Vector2 = Vector2(0, -TOKEN_LIFT)
-	draw_circle(coin, RADIUS, _fill_color())
-	draw_circle(coin, RADIUS, BoardView.LINE_COLOR, false, BORDER_WIDTH, true)
 	draw_circle(coin + HP_OFFSET, HP_RADIUS, HP_COLOR)
 	draw_circle(coin + HP_OFFSET, HP_RADIUS, BoardView.LINE_COLOR, false, HP_BORDER_WIDTH, true)
 
-
-func _fill_color() -> Color:
-	if _faction == Unit.Faction.NGUYEN:
-		return NGUYEN_COLOR
-	if _attacked:
-		return ATTACKED_COLOR
-	return DAI_VIET_MOVED_COLOR if _moved else DAI_VIET_COLOR

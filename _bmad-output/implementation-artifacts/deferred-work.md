@@ -272,3 +272,10 @@
 - **`variant()` hash ra sọc chéo** (`(3x+y) mod 4`), khối rừng dùng `(x+y) mod 2` riêng; xem ảnh rồi tác giả quyết.
 - **Mã chết sau `SHOW_TERRAIN_LABELS=false`**: nhánh nhãn, tham số `height` của `TerrainBlock`, có thể cả `EDGE_SHADE`; dọn khi chốt Câu hỏi 1.
 - **`GroundView` vẽ lại toàn bộ mỗi `show_state`** và giữ `cols/rows` song song với BoardView; chưa đo chậm.
+
+## Deferred from: code review of 8-3-quan-dung-yen (2026-11-01)
+
+- Hướng quân không cập nhật khi quân đi hoặc tiếp viện xuất hiện giữa hoạt ảnh (chỉ đổi ở `show_state`); Story 8.4 xử lý.
+- `UnitToken.hit()` vẫn là vòng tròn tại tâm đồng cũ, lệch với hình mới.
+- Hằng thừa sau khi bỏ đồng tròn (`NGUYEN_COLOR`, `DAI_VIET_COLOR`, `RADIUS`...) trong `unit_token.gd`.
+- `_name_label` đặt màu chữ Đại Việt cho cả quân Nguyên khi hết `_attacked` (nhãn đang ẩn).

@@ -424,10 +424,12 @@ func _sync_tokens() -> void:
 				var old: UnitToken = _tokens[unit.id] as UnitToken
 				if old.unit_type == unit.type:
 					old.update(unit, lift)
+					old.set_facing(UnitArt.facing_for(unit, _state))
 					continue
 				_remove_token(unit.id)
 			var token: UnitToken = UnitToken.new()
 			token.setup(unit, lift)
+			token.set_facing(UnitArt.facing_for(unit, _state))
 			_world.add_child(token)
 			_tokens[unit.id] = token
 	for id: int in _tokens.keys():
@@ -450,6 +452,7 @@ func add_reinforcement_token(p_id: int, p_type: int, at_cell: Vector2i, p_hp: in
 	var lift: float = _surface(at_cell)
 	var token: UnitToken = UnitToken.new()
 	token.setup(u, lift)
+	token.set_facing(UnitArt.facing_for(u, _state))
 	_world.add_child(token)
 	_tokens[p_id] = token
 	return token

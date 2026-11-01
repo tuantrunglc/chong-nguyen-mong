@@ -574,3 +574,85 @@ func _average_color(tex: Texture2D) -> Color:
 	assert_gt(count, 0, "hình ô nền có điểm ảnh đặc")
 	sum /= float(maxi(count, 1))
 	return Color(sum.x, sum.y, sum.z)
+
+
+# ---------- Quân đứng yên bằng hình (Story 8.3) ----------
+
+func _six_type_board() -> BoardView:
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	# Ba tướng ở hàng 1, ba loại quân Nguyên ở hàng 5, bàn 7×7.
+	var units: Dictionary = {
+		Vector2i(0, 1): "1", Vector2i(2, 1): "2", Vector2i(4, 1): "3",
+		Vector2i(0, 5): "B", Vector2i(2, 5): "K", Vector2i(4, 5): "C",
+	}
+	board.show_state(BoardFixture.state(units))
+	return board
+
+
+func test_every_unit_type_shows_its_own_sprite_without_error() -> void:
+	Art.reset_for_test()
+	Log.clear()
+	var board: BoardView = _six_type_board()
+	var seen: Dictionary = {}
+	for token: UnitToken in board.tokens().values():
+		var path: String = UnitArt.sprite_path(token.unit_type, token.facing())
+		var tex: Texture2D = Art.tex(path)
+		assert_eq(tex.get_size(), Vector2(64, 64), "hình thật, không phải ô hồng: %s" % path)
+		seen[path] = true
+	assert_eq(seen.size(), 6, "6 loại quân ra 6 hình khác nhau")
+	for line: String in Log.get_lines():
+		assert_false(line.contains("[ERROR][hinh]"), line)
+
+
+func test_tokens_face_nearest_enemy_and_refresh_on_new_state() -> void:
+	var board: BoardView = _six_type_board()
+	var khoai: UnitToken = board.tokens()[1] as UnitToken
+	# Địch gần Khoái nhất là Bộ binh ở (0,5): thẳng xuống phía nam.
+	assert_eq(khoai.facing(), UnitArt.facing_index("south"))
+	var bo_binh: UnitToken = board.tokens()[101] as UnitToken
+	assert_eq(bo_binh.facing(), UnitArt.facing_index("north"), "Bộ binh quay lên về Khoái")
+	# Bản chụp mới: Bộ binh dời sang phải Khoái, hướng tính lại.
+	board.show_state(BoardFixture.state({Vector2i(0, 1): "1", Vector2i(3, 1): "B"}))
+	khoai = board.tokens()[1] as UnitToken
+	assert_eq(khoai.facing(), UnitArt.facing_index("east"), "hướng tính lại mỗi lần show_state")
+
+
+func test_token_names_hidden_but_text_kept() -> void:
+	var board: BoardView = _six_type_board()
+	var khoai: UnitToken = board.tokens()[1] as UnitToken
+	assert_false(UnitToken.SHOW_NAMES, "chữ tên tắt mặc định")
+	assert_eq(khoai.name_text(), tr("unit.nguyen_khoai"), "nhãn vẫn còn để bật lại")
+	assert_eq(khoai.hp_text(), "3", "chấm máu luôn hiện")
+
+
+func test_pick_cell_on_sprite_body_selects_its_cell() -> void:
+	var board: BoardView = _six_type_board()
+	for token: UnitToken in board.tokens().values():
+		# Giữa thân hình: giữa vùng bấm cũ.
+		var body: Vector2 = token.position + Vector2(0, -UnitToken.TOKEN_LIFT)
+		assert_eq(board.pick_cell(body), token.cell, "bấm vào thân quân %d" % token.unit_id)
+
+
+func test_sprite_head_stays_inside_board_rect() -> void:
+	# Tướng đứng trên bệ ô ải ở hàng 0: chỗ khung bàn sát đầu quân nhất.
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	board.show_state(BoardFixture.state({Vector2i(0, 0): "1", Vector2i(3, 3): "B"}, {Vector2i(0, 0): "A"}))
+	var top_limit: float = board._local_rect().position.y
+	for token: UnitToken in board.tokens().values():
+		var image: Image = Art.tex(UnitArt.sprite_path(token.unit_type, token.facing())).get_image()
+		var first_row: int = 0
+		while first_row < image.get_height() and not _row_has_pixel(image, first_row):
+			first_row += 1
+		# Đỉnh khung hình là position.y + FOOT_DROP - SPRITE_FEET_Y; đỉnh thật của hình thấp hơn first_row dòng.
+		var head_y: float = token.position.y + UnitToken.FOOT_DROP - UnitToken.SPRITE_FEET_Y + first_row
+		assert_gte(head_y, top_limit, "đầu quân %d không vượt khung bàn (đầu %.1f, khung %.1f)" % [token.unit_id, head_y, top_limit])
+
+
+func _row_has_pixel(image: Image, y: int) -> bool:
+	for x: int in range(image.get_width()):
+		if image.get_pixel(x, y).a > 0.1:
+			return true
+	return false
+
