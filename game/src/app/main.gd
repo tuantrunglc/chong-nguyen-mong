@@ -317,7 +317,7 @@ func _show_transition() -> void:
 		for kind: int in _level.stratagems:
 			if not won_level.stratagems.has(kind):
 				opened.append(kind)
-		_level_transition.show_next(_level.name, opened)
+		_level_transition.show_next(_level.name, opened, _level.mission, next_id)
 		Log.info("app", "chuyển trận %s -> %s" % [won_id, next_id])
 	_set_cover(_level_transition)
 	_screen = Screen.TRANSITION

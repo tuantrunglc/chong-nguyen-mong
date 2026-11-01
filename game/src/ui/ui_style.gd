@@ -47,6 +47,12 @@ const MISSION_ICONS: Dictionary = {
 	LevelData.Mission.ELIMINATE: "giao_dien/tex_nhiem_vu_tieu_diet_24x24.png",
 	LevelData.Mission.HOLD_PASS: "giao_dien/tex_nhiem_vu_giu_ai_24x24.png",
 }
+## Bản 32×32 của biểu tượng nhiệm vụ, dùng ở màn chuyển trận (Story 8.6).
+const MISSION_ICONS_LARGE: Dictionary = {
+	LevelData.Mission.ELIMINATE: "giao_dien/tex_nhiem_vu_tieu_diet_32x32.png",
+	LevelData.Mission.HOLD_PASS: "giao_dien/tex_nhiem_vu_giu_ai_32x32.png",
+}
+const MISSION_ICON_LARGE_SIZE: float = 32.0
 const MISSION_KEYS: Dictionary = {
 	LevelData.Mission.ELIMINATE: "hud.mission.eliminate",
 	LevelData.Mission.HOLD_PASS: "hud.mission.hold_pass",

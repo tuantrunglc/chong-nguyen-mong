@@ -283,3 +283,9 @@
 ## Deferred from: code review of 8-5-giao-dien (2026-11-01)
 
 - Chưa có test i18n kiểm khóa `hud.mission.*` có mặt trong bản dịch biên dịch; dự án chưa có test i18n nào.
+
+## Deferred from: code review of 8-6-man-hinh-chinh-va-man-chuyen-tran (2026-11-01)
+
+- Khung tối mờ lặp ở `MainMenu` và `LevelTransition`; gom vào `UiStyle` khi cần.
+- `LevelTransition.show_next` dùng `mission = -1` làm số ma thuật; hai bảng `MISSION_KEYS`/`MISSION_ICONS_LARGE` chưa có test đồng bộ.
+- `img/pixellab-thu/cong-cu/chup.gd` lặp mã và ngoài File List; commit theo từng đường dẫn.

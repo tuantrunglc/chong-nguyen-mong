@@ -721,7 +721,8 @@ func test_no_tran_shows_main_menu() -> void:
 	assert_eq(menu.new_game_button().text, tr("menu.new_game"))
 	assert_eq(menu.new_game_button().focus_mode, Control.FOCUS_NONE, "nút không giữ focus: Space ở menu không bấm nút")
 	var texts: Array[String] = _label_texts(menu)
-	assert_has(texts, tr("app.title"))
+	assert_eq(menu.title_text(), tr("app.title"), "tên game có dạng chữ cho trợ năng")
+	assert_does_not_have(texts, tr("app.title"), "tên game là hình logo (Story 8.6), không còn Label")
 	assert_has(texts, tr("menu.subtitle"))
 	assert_eq(_tokens(main).size(), 0)
 	assert_has(Log.get_lines(), "[INFO][app] mở màn hình chính")
@@ -886,6 +887,21 @@ func test_next_shows_transition_to_level_2() -> void:
 	assert_false(_transition(main).menu_button().visible)
 	assert_eq(main._level_id, "tran_02")
 	assert_has(Log.get_lines(), "[INFO][app] chuyển trận tran_01 -> tran_02")
+
+
+## Story 8.6: màn chuyển trận nhận tranh và kiểu trận của trận sắp vào (mỗi trận một tranh theo bảng ScreenArt).
+func test_transition_gets_picture_and_mission_of_next_level() -> void:
+	for pair: Array in [["1", "tran_02", ScreenArt.TRANSITION_BINH_THAN], ["3", "tran_04", ScreenArt.TRANSITION_VAN_KIEP],
+			["5", "tran_06", ScreenArt.TRANSITION_BACH_DANG]]:
+		var main: Node2D = _open(pair[0] as String)
+		_finish(main, BattleState.Phase.WON)
+		_banner(main).next_button().pressed.emit()
+		assert_eq(main._level_id, pair[1] as String)
+		assert_eq(_transition(main).backdrop_path(), pair[2] as String, pair[1] as String)
+		var mission: int = (main._level as LevelData).mission
+		assert_eq(_transition(main).mission_text(), tr(UiStyle.MISSION_KEYS[mission] as String), "dòng nhiệm vụ của " + (pair[1] as String))
+		main.queue_free()
+		await get_tree().process_frame
 
 
 ## AC3: vào trận mới thì các tướng đủ máu theo chi_so.json, không mang máu từ trận trước.

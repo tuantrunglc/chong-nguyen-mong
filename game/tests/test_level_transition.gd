@@ -17,7 +17,7 @@ func _texts(node: Node) -> Array[String]:
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
 		stack.append_array(n.get_children())
-		if n is Label and (n as Label).visible:
+		if n is Label and (n as Label).is_visible_in_tree():
 			out.append((n as Label).text)
 	return out
 
@@ -80,3 +80,42 @@ func test_buttons_emit_signals_and_take_no_focus() -> void:
 	assert_signal_emitted(screen, "menu_pressed")
 	for button: Button in [screen.next_button(), screen.menu_button()]:
 		assert_eq(button.focus_mode, Control.FOCUS_NONE, "Space không bấm nút " + button.text)
+
+
+# ---------- Tranh nền và dòng nhiệm vụ (Story 8.6) ----------
+
+func test_backdrop_follows_the_level_about_to_start() -> void:
+	var screen: LevelTransition = _screen()
+	var none: Array[int] = []
+	screen.show_next("Trận 2", none, LevelData.Mission.ELIMINATE, "tran_02")
+	assert_eq(screen.backdrop_path(), ScreenArt.TRANSITION_BINH_THAN)
+	screen.show_next("Trận 4", none, LevelData.Mission.ELIMINATE, "tran_04")
+	assert_eq(screen.backdrop_path(), ScreenArt.TRANSITION_VAN_KIEP)
+	screen.show_next("Trận 6", none, LevelData.Mission.HOLD_PASS, "tran_06")
+	assert_eq(screen.backdrop_path(), ScreenArt.TRANSITION_BACH_DANG)
+	screen.show_campaign_end()
+	assert_eq(screen.backdrop_path(), ScreenArt.campaign_end())
+
+
+func test_mission_row_shows_large_icon_and_text() -> void:
+	var screen: LevelTransition = _screen()
+	var none: Array[int] = []
+	screen.show_next("Trận 3", none, LevelData.Mission.HOLD_PASS, "tran_03")
+	assert_eq(screen.mission_text(), tr("hud.mission.hold_pass"))
+	assert_eq(screen.mission_icon().get_size(), Vector2(32, 32), "dùng bản 32×32")
+	assert_eq(screen.mission_icon().resource_path, "res://assets/textures/giao_dien/tex_nhiem_vu_giu_ai_32x32.png")
+	screen.show_next("Trận 4", none, LevelData.Mission.ELIMINATE, "tran_04")
+	assert_eq(screen.mission_text(), tr("hud.mission.eliminate"))
+	assert_has(_texts(screen), tr("hud.mission.eliminate"))
+
+
+func test_mission_row_hidden_when_unknown_and_at_campaign_end() -> void:
+	var screen: LevelTransition = _screen()
+	var none: Array[int] = []
+	screen.show_next("Trận 2", none)
+	assert_eq(screen.mission_text(), "", "không truyền kiểu trận thì ẩn dòng")
+	assert_null(screen.mission_icon())
+	screen.show_next("Trận 2", none, LevelData.Mission.ELIMINATE, "tran_02")
+	screen.show_campaign_end()
+	assert_eq(screen.mission_text(), "", "màn thắng cả chiến dịch không có dòng nhiệm vụ")
+	assert_does_not_have(_texts(screen), tr("hud.mission.eliminate"))
