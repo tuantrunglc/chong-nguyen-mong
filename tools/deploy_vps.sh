@@ -11,4 +11,4 @@ echo "Đang đồng bộ lên VPS (saa-vps:/var/www/chong-nguyen-mong/)..."
 rsync -avz --delete "$REPO_ROOT/build/web/" saa-vps:/var/www/chong-nguyen-mong/
 
 echo "✅ Đã cập nhật xong bản web trên VPS!"
-echo "👉 Mở thử: http://45.77.174.70/"
+echo "👉 Mở thử: https://chong-nguyen-mong.duckdns.org/"
