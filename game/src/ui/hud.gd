@@ -209,7 +209,8 @@ func show_turn(round_number: int, can_undo: bool, can_replay: bool, replay_left:
 ## (Stratagem.SLOTS); đã dùng thì mờ và ghi "đã dùng". Dựng lại nút chỉ khi danh sách mưu kế mở đổi (trận mới).
 ## `sat_that_bonus` > 0: Sát Thát đang có hiệu lực trong lượt này, nút ghi "đang +N sát thương" thay cho "đã dùng"
 ## (tác giả chốt 2026-10-27, Story 3.13): mưu kế này không để lại dấu gì trên bàn.
-func show_stratagems(open_kinds: Array[int], used: Array[int], sat_that_bonus: int = 0) -> void:
+## `stats` điền con số vào chú thích nút (số cân bằng chỉ nằm trong chi_so.json); null thì nút không có chú thích.
+func show_stratagems(open_kinds: Array[int], used: Array[int], sat_that_bonus: int = 0, stats: Stats = null) -> void:
 	var open: Array[int] = Stratagem.in_key_order(open_kinds)
 	if open != _stratagem_kinds():
 		for button: Button in _stratagem_buttons.values():
@@ -217,7 +218,7 @@ func show_stratagems(open_kinds: Array[int], used: Array[int], sat_that_bonus: i
 		_stratagem_buttons.clear()
 		for kind: int in open:
 			var button: Button = _button("", _stratagem_box)
-			button.tooltip_text = tr("stratagem.tip." + Stratagem.name_of(kind))
+			button.tooltip_text = _stratagem_tip(kind, stats)
 			var icon_path: String = UiStyle.STRATAGEM_ICONS.get(kind, "") as String
 			if UiStyle.ENABLED and not icon_path.is_empty():
 				button.icon = Art.tex(icon_path)
@@ -236,6 +237,19 @@ func show_stratagems(open_kinds: Array[int], used: Array[int], sat_that_bonus: i
 		else:
 			button.text = tr("hud." + key)
 	_apply_disabled()
+
+
+## Chú thích công dụng của mưu kế, con số lấy từ chỉ số.
+func _stratagem_tip(kind: int, stats: Stats) -> String:
+	if stats == null:
+		return ""
+	var key: String = "stratagem.tip." + Stratagem.name_of(kind)
+	match kind:
+		Stratagem.Kind.VUON_KHONG_NHA_TRONG:
+			return tr(key) % stats.stratagem_damage(kind)
+		Stratagem.Kind.SAT_THAT:
+			return tr(key) % stats.strike_bonus(kind)
+	return tr(key)
 
 
 func _stratagem_kinds() -> Array[int]:

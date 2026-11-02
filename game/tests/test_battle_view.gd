@@ -796,7 +796,69 @@ func test_tooltip_enemy_without_attack_shows_movement_and_attack_desc() -> void:
 	assert_true(_board(main).enemy_reach_cells().is_empty(), "rời chuột thì xóa vùng di chuyển")
 
 
-## Rê lên quân Nguyên thì chỉ ô đỏ của chính nó nổi bật (Story 2.10, AC 2).
+## Vùng di chuyển của địch bỏ ô sông, ô rừng và ô có quân khác; ô quá tầm đi (đường vòng dài hơn) cũng không sáng.
+func test_enemy_reach_skips_river_forest_and_occupied_cells() -> void:
+	var main: Node2D = _make_level_main(HUY_DIR, HUY_LEVEL, {
+		"phien_ban_dinh_dang": 1,
+		"ten": "Thử vùng đi địch",
+		"kieu": "tieu_diet",
+		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . ~ . . .", ". . . . # . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"quan": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . 1 B . . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"thu_tu_dich": ["3,3"],
+		"tiep_vien": [],
+		"muu_ke_mo": [],
+	})
+	_hover_by_mouse(main, Vector2i(3, 3))
+	var reach: Array[Vector2i] = _board(main).enemy_reach_cells()
+	assert_false(reach.is_empty(), "điều kiện trước: Bộ binh có vùng đi")
+	assert_false(reach.has(Vector2i(3, 2)), "không bước xuống sông")
+	assert_false(reach.has(Vector2i(4, 3)), "không bước vào rừng")
+	assert_false(reach.has(Vector2i(2, 3)), "không bước vào ô có tướng")
+	assert_false(reach.has(Vector2i(3, 1)), "ô sau sông phải đi vòng, quá tầm 2")
+	assert_true(reach.has(Vector2i(3, 4)), "ô kề trống thì sáng")
+	assert_true(reach.has(Vector2i(3, 5)), "ô cách 2 bước thì sáng")
+
+
+## Bấm hết lượt khi chuột đang ở trên quân Nguyên: vùng đi của bàn cũ tắt ngay lúc hoạt ảnh bắt đầu.
+func test_enemy_reach_clears_when_playback_starts() -> void:
+	var main: Node2D = _make_attack_main()
+	_hover_by_mouse(main, Vector2i(3, 3))
+	assert_false(_board(main).enemy_reach_cells().is_empty(), "điều kiện trước: đang hiện vùng đi")
+	_view(main).event_player().instant = false
+	_press_physical(main, KEY_SPACE)
+	assert_true(_view(main).is_playing(), "hoạt ảnh pha địch đang chạy")
+	assert_true(_board(main).enemy_reach_cells().is_empty(), "vừa bắt đầu phát thì vùng đi phải tắt")
+	await wait_seconds(5.0)
+	assert_false(_view(main).is_playing(), "phát xong thì mở khóa")
+
+
+## Tướng đứng trên ô tiếp viện: không có khung thông tin quân, nhưng vẫn cảnh báo đứng chặn mất máu.
+func test_general_on_reinforcement_cell_still_shows_warning() -> void:
+	var main: Node2D = _make_level_main(HUY_DIR, HUY_LEVEL, {
+		"phien_ban_dinh_dang": 1,
+		"ten": "Thử tướng chặn tiếp viện",
+		"kieu": "giu_ai",
+		"so_hiep_toi_da": 3,
+		"dia_hinh": [". . . . . . .", ". . . . . . .", ". . . . . . .", ". . . . . . .",
+			". . . . . . .", ". . . . . . .", "A . . . . . ."],
+		"quan": [". . . . . . .", ". . . . . . .", ". . 1 . . . .", ". . . . . . .",
+			". . . . . . .", ". . . . . . .", ". . . . . . ."],
+		"thu_tu_dich": [],
+		"tiep_vien": [{"hiep": 2, "o": "2,2", "loai": "B"}],
+		"muu_ke_mo": [],
+	})
+	assert_true(_controller(main).snapshot().reinforcement_warnings.has(Vector2i(2, 2)), "điều kiện trước: ô 2,2 báo tiếp viện")
+	var tip: Tooltip = _tooltip(main)
+	_hover_by_mouse(main, Vector2i(2, 2))
+	assert_true(tip.visible_now(), "tướng trên ô tiếp viện vẫn có cảnh báo")
+	assert_true(tip.text().contains("Ô tiếp viện"), "hiện tiêu đề Ô tiếp viện")
+	assert_false(tip.text().contains("Máu"), "không hiện khung thông tin tướng (đã có bảng tướng)")
+	assert_false(tip.icon_visible(), "không có biểu tượng máu")
+
+
+## Rê lên ô tiếp viện trống: chỉ tiêu đề và cảnh báo tiếp viện, không ghép dòng hiệu ứng đồng bằng.
 func test_hover_reinforcement_warning_shows_clean_title_and_no_plain_effect() -> void:
 	var main: Node2D = _make_level_main(HUY_DIR, HUY_LEVEL, {
 		"phien_ban_dinh_dang": 1,
@@ -1750,14 +1812,14 @@ func test_hovering_general_shows_portrait_but_enemy_and_terrain_do_not() -> void
 	for r: int in range(state.size.y):
 		for c: int in range(state.size.x):
 			var cell: Vector2i = Vector2i(c, r)
-			if state.unit_at(cell) == null and (state.terrain_at(cell) != Terrain.PLAIN or state.reinforcement_warnings.has(cell)):
+			if special_cell.x < 0 and state.unit_at(cell) == null \
+					and (state.terrain_at(cell) != Terrain.PLAIN or state.reinforcement_warnings.has(cell)):
 				special_cell = cell
-				break
-	if special_cell.x >= 0:
-		view._update_info(special_cell)
-		assert_true(tip.visible_now(), "địa hình đặc biệt hoặc tiếp viện hiện tooltip")
-		assert_false(tip.portrait_visible(), "địa hình không có chân dung")
-		assert_false(tip.icon_visible(), "địa hình không có biểu tượng máu")
+	assert_true(special_cell.x >= 0, "điều kiện trước: trận thử có ô địa hình đặc biệt hoặc ô tiếp viện")
+	view._update_info(special_cell)
+	assert_true(tip.visible_now(), "địa hình đặc biệt hoặc tiếp viện hiện tooltip")
+	assert_false(tip.portrait_visible(), "địa hình không có chân dung")
+	assert_false(tip.icon_visible(), "địa hình không có biểu tượng máu")
 	assert_true(view._unit_text(general, state).split("\n")[BattleView.UNIT_HP_LINE].begins_with("Máu"),
 		"dòng UNIT_HP_LINE đúng là dòng Máu")
 

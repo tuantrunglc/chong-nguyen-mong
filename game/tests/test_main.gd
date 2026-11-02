@@ -220,6 +220,17 @@ func test_tran_1_loads_level_1() -> void:
 	assert_true(main._board_view.visible)
 
 
+## Trận vừa giữ làng vừa giới hạn hiệp (trận 4): câu nhiệm vụ nói đủ cả hai điều kiện thua.
+func test_mission_goal_of_village_level_names_round_limit() -> void:
+	AppState.launch.tran = "4"
+	var main: Node2D = _make_main()
+	var level: LevelData = main._level as LevelData
+	assert_gt(level.long_dan, 0, "trận 4 có làng")
+	assert_gt(level.max_rounds, 0, "trận 4 có giới hạn hiệp")
+	var expected: String = tr("mission.goal") % (tr("mission.desc.eliminate_village_timed") % level.max_rounds)
+	assert_eq(main._level_mission_goal(level), expected)
+
+
 func test_tran_option_picks_level_file() -> void:
 	AppState.launch.tran = "9"
 	DirAccess.make_dir_recursive_absolute(LEVEL_DIR)

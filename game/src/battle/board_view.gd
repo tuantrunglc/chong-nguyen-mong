@@ -303,7 +303,7 @@ static func board_center() -> Vector2:
 	return AREA.get_center()
 
 
-## Canh bàn cols × rows giữa màn hình (tâm x = 640), thu theo bậc nguyên nếu không vừa; góc bàn rơi đúng điểm ảnh nguyên.
+## Canh bàn cols × rows giữa vùng sa bàn AREA (bên trái HUD), thu theo bậc nguyên nếu không vừa; góc bàn rơi đúng điểm ảnh nguyên.
 func setup(new_cols: int = EMPTY_SIZE.x, new_rows: int = EMPTY_SIZE.y) -> void:
 	cols = new_cols
 	rows = new_rows

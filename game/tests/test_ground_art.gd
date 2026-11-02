@@ -61,7 +61,6 @@ func test_variant_is_in_range_and_deterministic() -> void:
 			var first: int = GroundArt.variant(cell, count)
 			assert_between(first, 0, count - 1, "ô %s chia %d" % [cell, count])
 			assert_eq(GroundArt.variant(cell, count), first, "cùng ô cùng kết quả")
-		assert_eq(GroundArt.has_co_le(cell), GroundArt.has_co_le(cell), "has_co_le tất định")
 
 
 func test_every_variant_appears_on_the_biggest_board() -> void:
@@ -89,3 +88,32 @@ func test_every_art_path_exists() -> void:
 		assert_true(ResourceLoader.exists(ASSET_DIR + "dia_hinh/tex_o_ai_doi_trai_%d.png" % i), "ô ải đôi trái %d" % i)
 		assert_true(ResourceLoader.exists(ASSET_DIR + "dia_hinh/tex_o_ai_doi_phai_%d.png" % i), "ô ải đôi phải %d" % i)
 		assert_true(ResourceLoader.exists(ASSET_DIR + "dia_hinh/tex_o_ai_doi_giua_%d.png" % i), "ô ải đôi giữa %d" % i)
+
+
+## Dãy ải ngang: ô lẻ dùng hình bệ đá; dãy 2 ô ghép trái + phải; dãy 3 ô thêm mảnh giữa. Mọi mảnh của một dãy
+## cùng kiểu hình với ô đầu dãy, kể cả dãy chạm mép bàn.
+func test_pass_run_pieces_share_one_variant() -> void:
+	var size: Vector2i = Vector2i(10, 3)
+	for start: int in range(0, 8):
+		var cells: Dictionary = {}
+		for dx: int in range(3):
+			cells[Vector2i(start + dx, 1)] = "A"
+		var state: BattleState = _state(".", cells, size)
+		var v: int = GroundArt.variant(Vector2i(start, 1), GroundArt.PASS_PAIR_VARIANTS)
+		assert_eq(GroundArt.pass_path(Vector2i(start, 1), state), "dia_hinh/tex_o_ai_doi_trai_%d.png" % v, "đầu dãy từ %d" % start)
+		assert_eq(GroundArt.pass_path(Vector2i(start + 1, 1), state), "dia_hinh/tex_o_ai_doi_giua_%d.png" % v, "giữa dãy từ %d" % start)
+		assert_eq(GroundArt.pass_path(Vector2i(start + 2, 1), state), "dia_hinh/tex_o_ai_doi_phai_%d.png" % v, "cuối dãy từ %d" % start)
+		for dx: int in range(3):
+			assert_true(ResourceLoader.exists(ASSET_DIR + GroundArt.pass_path(Vector2i(start + dx, 1), state)), "hình có thật")
+
+
+func test_single_pass_and_pass_pair_pick_the_right_piece() -> void:
+	var lone: BattleState = _state(".", {Vector2i(1, 1): "A"})
+	assert_eq(GroundArt.pass_path(Vector2i(1, 1), lone), GroundArt.pass_path(Vector2i(1, 1)), "ô ải lẻ dùng hình bệ đá")
+	# Hai ô ải chồng dọc không ghép: mỗi ô vẫn là ô lẻ.
+	var column: BattleState = _state(".", {Vector2i(1, 0): "A", Vector2i(1, 1): "A"})
+	assert_eq(GroundArt.pass_path(Vector2i(1, 0), column), GroundArt.pass_path(Vector2i(1, 0)), "dãy dọc không ghép")
+	var pair: BattleState = _state(".", {Vector2i(1, 1): "A", Vector2i(2, 1): "A"})
+	var v: int = GroundArt.variant(Vector2i(1, 1), GroundArt.PASS_PAIR_VARIANTS)
+	assert_eq(GroundArt.pass_path(Vector2i(1, 1), pair), "dia_hinh/tex_o_ai_doi_trai_%d.png" % v)
+	assert_eq(GroundArt.pass_path(Vector2i(2, 1), pair), "dia_hinh/tex_o_ai_doi_phai_%d.png" % v, "mép phải bàn")

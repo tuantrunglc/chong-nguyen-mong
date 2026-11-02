@@ -21,7 +21,8 @@ func _init() -> void:
 
 
 func _process(delta: float) -> void:
-	if not visible:
+	# Bàn đang ẩn (menu, màn chuyển trận) thì không vẽ lại.
+	if not is_visible_in_tree():
 		return
 	_wave_time += delta
 	if _wave_time >= WAVE_INTERVAL:

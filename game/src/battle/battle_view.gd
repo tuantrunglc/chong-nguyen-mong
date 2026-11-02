@@ -87,6 +87,8 @@ func start(controller: BattleController) -> void:
 	_preview_cell = BoardView.NO_CELL
 	_hud.set_locked(false)
 	_shown_general = NONE
+	if _board != null:
+		_board.clear_enemy_reach()
 	_deselect()
 	_update_hud()
 
@@ -281,6 +283,9 @@ func _on_events_resolved(events: Array[BattleEvent], snapshot: BattleState) -> v
 	_clear_preview()
 	if _board != null:
 		_board.clear_selection()
+		# Vùng đi của quân Nguyên là của bàn cũ: quân sắp đi, bị đẩy hoặc gục trong lúc phát. Phát xong
+		# `_finish_playback` vẽ lại theo ô đang trỏ.
+		_board.clear_enemy_reach()
 	_enemy_turn = _pending_enemy_turn
 	_pending_enemy_turn = false
 	# Không gọi `_update_hud()` ở đây: bản chụp đã là trạng thái SAU lệnh, vẽ số hiệp mới giữa lúc phát sẽ
@@ -439,26 +444,25 @@ func _update_info(cell: Vector2i) -> void:
 		return
 	var unit: Unit = state.unit_at(cell)
 	if _tooltip != null:
-		# Tác giả chốt (2026-11-02): Bỏ tooltip lơ lửng cho tướng Đại Việt (đã có bảng tướng ở HUD).
-		if unit != null and unit.faction == Unit.Faction.DAI_VIET:
+		# Tác giả chốt (2026-11-02): Bỏ tooltip lơ lửng cho tướng Đại Việt (đã có bảng tướng ở HUD). Riêng tướng
+		# đứng trên ô tiếp viện vẫn được cảnh báo: đứng chặn thì mất máu, bảng tướng không nói điều này.
+		var general: bool = unit != null and unit.faction == Unit.Faction.DAI_VIET
+		var text: String = ""
+		if unit != null and not general:
+			text = _unit_text(unit, state)
+			if state.reinforcement_warnings.has(cell):
+				text += "\n" + tr("tooltip.reinforcement_warning")
+		elif state.reinforcement_warnings.has(cell):
+			# Ô tiếp viện: chỉ hiện thông tin tiếp viện, không ghép Đồng bằng / Không có hiệu ứng.
+			text = "%s\n%s" % [tr("tooltip.reinforcement_title"), tr("tooltip.reinforcement_warning")]
+		elif unit == null and state.terrain_at(cell) != Terrain.PLAIN:
+			# Ô Đồng bằng thường không hiện bảng 'Không có hiệu ứng' nữa để tránh rối mắt.
+			text = _terrain_text(state.terrain_at(cell))
+
+		if text.is_empty():
 			_tooltip.hide_tooltip()
 		else:
-			var text: String = ""
-			if unit != null:
-				text = _unit_text(unit, state)
-				if state.reinforcement_warnings.has(cell):
-					text += "\n" + tr("tooltip.reinforcement_warning")
-			elif state.reinforcement_warnings.has(cell):
-				# Ô tiếp viện: chỉ hiện thông tin tiếp viện, không ghép Đồng bằng / Không có hiệu ứng.
-				text = "%s\n%s" % [tr("tooltip.reinforcement_title"), tr("tooltip.reinforcement_warning")]
-			elif state.terrain_at(cell) != Terrain.PLAIN:
-				# Ô Đồng bằng thường không hiện bảng 'Không có hiệu ứng' nữa để tránh rối mắt.
-				text = _terrain_text(state.terrain_at(cell))
-
-			if text.is_empty():
-				_tooltip.hide_tooltip()
-			else:
-				_tooltip.show_text(text, null, UNIT_HP_LINE if unit != null else -1)
+			_tooltip.show_text(text, null, UNIT_HP_LINE if unit != null and not general else -1)
 	_board.telegraph_view().highlight(_telegraph_cells_of(unit, state))
 	if unit != null and unit.faction == Unit.Faction.NGUYEN:
 		_board.show_enemy_reach(_enemy_reach_cells_of(unit, state))
@@ -573,7 +577,7 @@ func _update_hud() -> void:
 	var over: bool = Rules.is_battle_over(snapshot)
 	_hud.show_turn(snapshot.round_number, _controller.can_undo(), _controller.can_replay(),
 		_controller.replay_left(), over, snapshot.max_rounds, snapshot.morale, snapshot.max_morale, snapshot.mission)
-	_hud.show_stratagems(snapshot.stratagems, snapshot.stratagems_used, snapshot.sat_that_bonus())
+	_hud.show_stratagems(snapshot.stratagems, snapshot.stratagems_used, snapshot.sat_that_bonus(), snapshot.stats)
 	_update_general_panel(snapshot, over)
 	# Dòng pha luôn có khi đang chơi; lúc phát hoạt ảnh pha địch thì báo đúng pha đang chạy (Story 2.11, AC 4).
 	if not over:

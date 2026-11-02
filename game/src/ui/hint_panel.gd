@@ -22,7 +22,7 @@ const HINT_FONT_SIZE: int = 20
 const BODY_FONT_SIZE: int = 17
 const NOTE_FONT_SIZE: int = 15
 const PANEL_WIDTH: float = 720.0
-## Bảng gợi ý đầu trận: căn giữa màn hình (tâm x = 640), nhét vừa dải trống dưới hoặc trên bàn cờ.
+## Bảng gợi ý đầu trận: căn giữa vùng sa bàn (tâm theo BoardView.AREA, bên trái HUD), nhét vừa dải trống dưới hoặc trên bàn cờ.
 const HINT_PANEL_WIDTH: float = 900.0
 const HINT_PADDING: int = 5
 const HINT_SEPARATION: int = 0

@@ -189,7 +189,9 @@ func place_at(anchor: Vector2) -> void:
 	var pos: Vector2 = anchor + CURSOR_OFFSET
 	if anchor.y > screen.y * 0.5 or pos.y + size.y > screen.y - SCREEN_MARGIN:
 		pos.y = anchor.y - size.y - CURSOR_OFFSET.y
-	if pos.x + size.x > screen.x - SCREEN_MARGIN or (anchor.x < 964.0 and pos.x + size.x > 964.0):
+	# Neo trên bàn cờ mà khung tràn qua mép phải bàn (sang cột HUD) thì cũng lật sang trái.
+	var board_right: float = BoardView.AREA.end.x
+	if pos.x + size.x > screen.x - SCREEN_MARGIN or (anchor.x < board_right and pos.x + size.x > board_right):
 		pos.x = anchor.x - size.x - CURSOR_OFFSET.x
 	pos.x = clampf(pos.x, SCREEN_MARGIN, maxf(SCREEN_MARGIN, screen.x - size.x - SCREEN_MARGIN))
 	pos.y = clampf(pos.y, SCREEN_MARGIN, maxf(SCREEN_MARGIN, screen.y - size.y - SCREEN_MARGIN))

@@ -19,7 +19,9 @@ hud.mission.desc.hold_pass,Cầm cự %d hiệp
 mission.desc.eliminate,Tiêu diệt toàn bộ quân Nguyên trên sa bàn
 mission.desc.eliminate_timed,Quét sạch giặc trước khi hết %d hiệp
 mission.desc.eliminate_village,Tiêu diệt địch và bảo vệ làng (Lòng dân > 0)
-mission.desc.hold_pass,Cầm cự %d hiệp, tuyệt đối không để giặc vào Cửa Ải
+mission.desc.eliminate_village_timed,Tiêu diệt địch trước khi hết %d hiệp và bảo vệ làng (Lòng dân > 0)
+mission.goal,⚔ NHIỆM VỤ: %s
+mission.desc.hold_pass,"Cầm cự %d hiệp, tuyệt đối không để giặc vào Cửa Ải"
 mission.tip.eliminate,Chiến thắng khi diệt sạch mọi quân Nguyên trên bàn cờ. Thất bại nếu toàn bộ tướng Đại Việt gục ngã.
 mission.tip.eliminate_timed,"Chiến thắng khi diệt sạch quân Nguyên trong %d hiệp. Thất bại nếu hết hiệp hoặc toàn bộ tướng gục ngã."
 mission.tip.eliminate_village,"Chiến thắng khi diệt sạch quân Nguyên. Thất bại nếu Lòng dân về 0 hoặc toàn bộ tướng gục ngã."
@@ -39,8 +41,8 @@ hud.stratagem.used,%s: đã dùng
 hud.stratagem.active,%s: đang +%d sát thương
 stratagem.vuon_khong_nha_trong,Vườn không nhà trống
 stratagem.sat_that,Sát Thát
-stratagem.tip.vuon_khong_nha_trong,"Vườn không nhà trống (Q): Đốt cháy toàn bộ kho lương trên sa bàn, trừ 1 máu toàn bộ quân Nguyên. Dùng 1 lần mỗi trận, không tốn lượt tướng."
-stratagem.tip.sat_that,"Sát Thát (W): Toàn bộ đòn đánh của tướng được +1 sát thương trong lượt này. Dùng 1 lần mỗi trận, không tốn lượt tướng."
+stratagem.tip.vuon_khong_nha_trong,"Vườn không nhà trống (Q): Đốt cháy toàn bộ kho lương trên sa bàn, trừ %d máu toàn bộ quân Nguyên. Dùng 1 lần mỗi trận, không tốn lượt tướng."
+stratagem.tip.sat_that,"Sát Thát (W): Toàn bộ đòn đánh của tướng được +%d sát thương trong lượt này. Dùng 1 lần mỗi trận, không tốn lượt tướng."
 hud.confirm_attack,Bấm lần nữa để đánh
 hud.phase.player,"Lượt của bạn"
 hud.phase.enemy,"Quân Nguyên đang ra đòn"
@@ -215,7 +217,7 @@ help.attack.how,Bấm vào mục tiêu trong tầm (tướng đã đi rồi thì
 help.info,Xem thông tin
 help.info.how,Rê chuột lên quân hoặc lên ô
 help.stratagem,Dùng mưu kế
-help.stratagem.how,"Bấm nút hoặc phím Q, W: Q (Vườn không nhà trống: đốt kho lương, -1 máu giặc) · W (Sát Thát: +1 sát thương đòn tướng trong lượt)"
+help.stratagem.how,"Bấm nút hoặc phím Q, W: Q (Vườn không nhà trống: đốt kho lương, trừ máu giặc) · W (Sát Thát: tăng sát thương đòn tướng trong lượt)"
 help.undo,Hủy nước đi
 help.undo.how,Bấm nút Hủy · phím Z
 help.end_turn,Kết thúc lượt

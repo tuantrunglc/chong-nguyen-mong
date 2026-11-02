@@ -43,3 +43,17 @@ func test_every_key_translates_on_english_machine() -> void:
 
 func test_fallback_locale_is_vietnamese() -> void:
 	assert_eq(ProjectSettings.get_setting("internationalization/locale/fallback"), "vi")
+
+
+## Mỗi dòng đúng số cột của dòng tiêu đề: chữ có dấu phẩy mà quên ngoặc kép thì Godot cắt mất nửa câu sau dấu phẩy.
+func test_every_row_has_exactly_the_header_columns() -> void:
+	var file: FileAccess = FileAccess.open(CSV_PATH, FileAccess.READ)
+	assert_not_null(file, "mở được text.csv")
+	var header: PackedStringArray = file.get_csv_line()
+	var line_number: int = 1
+	while not file.eof_reached():
+		var row: PackedStringArray = file.get_csv_line()
+		line_number += 1
+		if row.size() == 1 and row[0].is_empty():
+			continue
+		assert_eq(row.size(), header.size(), "dòng %d (%s) có dấu phẩy chưa bọc ngoặc kép" % [line_number, row[0]])

@@ -55,16 +55,23 @@ static func pass_path(cell: Vector2i, state: BattleState = null) -> String:
 	if state != null:
 		var has_left: bool = cell.x > 0 and state.terrain_at(cell + Vector2i(-1, 0)) == Terrain.PASS
 		var has_right: bool = cell.x < state.size.x - 1 and state.terrain_at(cell + Vector2i(1, 0)) == Terrain.PASS
+		# Cả dãy ải dùng chung kiểu hình của ô đầu dãy (bên trái), để các mảnh trái/giữa/phải khớp nhau.
+		var run_v: int = variant(_pass_run_start(cell, state), PASS_PAIR_VARIANTS)
 		if not has_left and has_right:
-			var pair_v: int = variant(cell, PASS_PAIR_VARIANTS)
-			return "dia_hinh/tex_o_ai_doi_trai_%d.png" % pair_v
+			return "dia_hinh/tex_o_ai_doi_trai_%d.png" % run_v
 		elif has_left and not has_right:
-			var left_v: int = variant(cell + Vector2i(-1, 0), PASS_PAIR_VARIANTS)
-			return "dia_hinh/tex_o_ai_doi_phai_%d.png" % left_v
+			return "dia_hinh/tex_o_ai_doi_phai_%d.png" % run_v
 		elif has_left and has_right:
-			var mid_v: int = variant(cell, PASS_PAIR_VARIANTS)
-			return "dia_hinh/tex_o_ai_doi_giua_%d.png" % mid_v
+			return "dia_hinh/tex_o_ai_doi_giua_%d.png" % run_v
 	return "dia_hinh/tex_o_ai_be_da_%d.png" % variant(cell, PASS_VARIANTS)
+
+
+## Ô ải đầu tiên (trái nhất) của dãy ải ngang chứa cell.
+static func _pass_run_start(cell: Vector2i, state: BattleState) -> Vector2i:
+	var start: Vector2i = cell
+	while start.x > 0 and state.terrain_at(start + Vector2i(-1, 0)) == Terrain.PASS:
+		start += Vector2i(-1, 0)
+	return start
 
 
 ## Hình khối nhô lên: rừng, kho lương, làng.

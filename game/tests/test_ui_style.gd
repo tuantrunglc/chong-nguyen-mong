@@ -92,7 +92,8 @@ func test_hud_buttons_use_texture_styles() -> void:
 
 func test_stratagem_buttons_have_their_own_icons() -> void:
 	var hud: Hud = _hud()
-	hud.show_stratagems([Stratagem.Kind.VUON_KHONG_NHA_TRONG, Stratagem.Kind.SAT_THAT], [] as Array[int])
+	hud.show_stratagems([Stratagem.Kind.VUON_KHONG_NHA_TRONG, Stratagem.Kind.SAT_THAT], [] as Array[int], 0,
+		BoardFixture.stats())
 	var vknt: Button = hud.stratagem_button(Stratagem.Kind.VUON_KHONG_NHA_TRONG)
 	var sat_that: Button = hud.stratagem_button(Stratagem.Kind.SAT_THAT)
 	assert_eq(vknt.icon.resource_path, GIAO_DIEN + "tex_ke_vuon_khong_nha_trong.png")
@@ -361,3 +362,24 @@ func test_general_panel_ignores_non_generals_and_uses_frame() -> void:
 	hud.show_general(UnitType.BO_BINH, 3, (StatsSnapshot.load_stats().data as Stats))
 	assert_eq(hud.general_panel().shown_type(), -1)
 	assert_true(hud.general_panel().get_theme_stylebox("panel") is StyleBoxTexture, "khung 9-slice như bảng nút")
+
+
+## Con số trong chú thích mưu kế lấy từ chỉ số (chi_so.json), không viết cứng trong chữ.
+func test_stratagem_tooltips_read_numbers_from_stats() -> void:
+	var hud: Hud = _hud()
+	var stats: Stats = Stats.new(BoardFixture.values(), {
+		Stratagem.Kind.VUON_KHONG_NHA_TRONG: {"sat_thuong": 2},
+		Stratagem.Kind.SAT_THAT: {"cong_sat_thuong": 3},
+	})
+	hud.show_stratagems([Stratagem.Kind.VUON_KHONG_NHA_TRONG, Stratagem.Kind.SAT_THAT], [] as Array[int], 0, stats)
+	assert_true(hud.stratagem_button(Stratagem.Kind.VUON_KHONG_NHA_TRONG).tooltip_text.contains("2 máu"),
+		"VKNT ghi số máu từ chỉ số")
+	assert_true(hud.stratagem_button(Stratagem.Kind.SAT_THAT).tooltip_text.contains("+3 sát thương"),
+		"Sát Thát ghi số sát thương từ chỉ số")
+
+
+## Mỗi mưu kế có chú thích trong text.csv, để thêm mưu kế mới không hiện khóa thô cho người chơi.
+func test_every_stratagem_has_a_tooltip_key() -> void:
+	for slot: Array in Stratagem.SLOTS:
+		var key: String = "stratagem.tip." + Stratagem.name_of(slot[0] as int)
+		assert_ne(tr(key), key, "thiếu chú thích %s" % key)

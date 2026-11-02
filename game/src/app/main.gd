@@ -530,13 +530,20 @@ func _show_help() -> void:
 func _level_mission_goal(level: LevelData) -> String:
 	if level == null:
 		return ""
+	return tr("mission.goal") % _level_mission_desc(level)
+
+
+## Một câu nhiệm vụ đủ mọi điều kiện thua của trận: làng và giới hạn hiệp có thể cùng lúc (trận 4).
+func _level_mission_desc(level: LevelData) -> String:
 	if level.mission == LevelData.Mission.HOLD_PASS:
-		return "⚔ NHIỆM VỤ: " + tr("mission.desc.hold_pass") % level.max_rounds
+		return tr("mission.desc.hold_pass") % level.max_rounds
+	if level.long_dan > 0 and level.max_rounds > 0:
+		return tr("mission.desc.eliminate_village_timed") % level.max_rounds
 	if level.long_dan > 0:
-		return "⚔ NHIỆM VỤ: " + tr("mission.desc.eliminate_village")
+		return tr("mission.desc.eliminate_village")
 	if level.max_rounds > 0:
-		return "⚔ NHIỆM VỤ: " + tr("mission.desc.eliminate_timed") % level.max_rounds
-	return "⚔ NHIỆM VỤ: " + tr("mission.desc.eliminate")
+		return tr("mission.desc.eliminate_timed") % level.max_rounds
+	return tr("mission.desc.eliminate")
 
 
 ## Vẽ bản chụp lên bàn cờ (và tọa độ F1 nếu bật dev); null là bàn trống.
