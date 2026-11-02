@@ -1362,7 +1362,9 @@ func test_fast_forward_off_by_default() -> void:
 	var button: Button = _fast_button(main)
 	assert_eq(button.text, "Tua nhanh (T): tắt")
 	assert_eq(button.focus_mode, Control.FOCUS_NONE)
-	assert_gt(button.get_index(), (main._hud as Hud).end_turn_button().get_index(), "dưới Kết thúc lượt")
+	# Nút tua lên thanh tiêu đề cạnh nút Âm thanh (2026-11-02), nhường cột phải cho bảng thông tin tướng.
+	assert_lt(button.get_global_rect().end.y, (main._hud as Hud).end_turn_button().get_global_rect().position.y,
+		"trên thanh tiêu đề")
 	assert_false((main._battle_view as BattleView).fast_forward())
 	assert_has(Log.get_lines(), "[INFO][settings] tốc độ hoạt ảnh pha địch 1")
 

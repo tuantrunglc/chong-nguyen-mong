@@ -1692,3 +1692,52 @@ func test_hovering_general_shows_portrait_but_enemy_and_terrain_do_not() -> void
 	assert_false(tip.icon_visible(), "địa hình không có biểu tượng máu")
 	assert_true(view._unit_text(general, state).split("\n")[BattleView.UNIT_HP_LINE].begins_with("Máu"),
 		"dòng UNIT_HP_LINE đúng là dòng Máu")
+
+
+# ---------- Bảng thông tin tướng (tác giả chốt 2026-11-02) ----------
+
+func test_general_panel_hidden_until_a_general_is_selected() -> void:
+	var main: Node2D = _make_main()
+	assert_eq(_hud(main).general_panel().shown_type(), -1, "mở trận chưa chọn ai thì bảng ẩn")
+
+
+func test_selecting_khoai_shows_his_panel_with_stats_from_data() -> void:
+	var main: Node2D = _make_main()
+	_press_key(main, 1)
+	var panel: GeneralPanel = _hud(main).general_panel()
+	assert_eq(panel.shown_type(), UnitType.NGUYEN_KHOAI)
+	assert_not_null(panel.portrait(), "có chân dung")
+	var text: String = panel.text()
+	assert_string_contains(text, "Nguyễn Khoái")
+	assert_string_contains(text, "Máu 3/3")
+	assert_string_contains(text, "Đi: 3\u00a0ô")
+	assert_string_contains(text, "2 sát thương, đẩy lùi 1\u00a0ô")
+	assert_string_contains(text, "Bạch Đằng")
+	assert_string_contains(text, "Mẹo:")
+
+
+func test_general_panel_stays_after_deselect_and_follows_new_selection() -> void:
+	var main: Node2D = _make_main()
+	_press_key(main, 1)
+	_press_key(main, 1)
+	assert_eq(_view(main).selected_id(), BattleView.NONE)
+	assert_eq(_hud(main).general_panel().shown_type(), UnitType.NGUYEN_KHOAI, "bỏ chọn vẫn giữ bảng")
+	_click(main, LAO_CELL)
+	assert_eq(_hud(main).general_panel().shown_type(), UnitType.PHAM_NGU_LAO)
+	assert_string_contains(_hud(main).general_panel().text(), "xa 2–4\u00a0ô")
+
+
+func test_general_panel_stays_after_end_turn() -> void:
+	var main: Node2D = _make_main()
+	_press_key(main, 2)
+	_press_physical(main, KEY_SPACE)
+	assert_eq(_hud(main).general_panel().shown_type(), UnitType.PHAM_NGU_LAO)
+
+
+func test_general_panel_resets_on_new_battle() -> void:
+	var main: Node2D = _make_main()
+	_press_key(main, 1)
+	_press_physical(main, KEY_R)
+	assert_eq(_hud(main).general_panel().shown_type(), UnitType.NGUYEN_KHOAI, "chơi lại hiệp vẫn cùng trận")
+	main._start_battle()
+	assert_eq(_hud(main).general_panel().shown_type(), -1, "trận mới thì bảng ẩn")

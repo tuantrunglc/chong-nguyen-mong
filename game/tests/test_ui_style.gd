@@ -299,3 +299,54 @@ func test_hint_panel_content_margin_never_smaller_than_frame_edge() -> void:
 	assert_gte(style.get_content_margin(SIDE_LEFT), UiStyle.PANEL_MARGIN, "chữ không đè góc trang trí")
 	assert_eq(panel._content_width, HintPanel.HINT_PANEL_WIDTH - 2.0 * style.get_content_margin(SIDE_LEFT),
 		"bề rộng chữ tính theo lề thật")
+
+
+# ---------- Bảng thông tin tướng (tác giả chốt 2026-11-02) ----------
+
+## Cột đầy nhất của từng kiểu trận thật, có dòng nhắc: trận 6 (giới hạn hiệp, hai mưu kế) và trận 4 (giới hạn hiệp,
+## làng, không mưu kế). Bảng tướng của cả ba tướng nằm dưới cột nút, không đè nút, không che nhãn phiên bản.
+func test_general_panel_fits_under_the_fullest_button_column() -> void:
+	var stats: Stats = StatsSnapshot.load_stats().data as Stats
+	var cases: Array[Array] = [
+		[0, [Stratagem.Kind.VUON_KHONG_NHA_TRONG, Stratagem.Kind.SAT_THAT] as Array[int]],
+		[3, [] as Array[int]],
+	]
+	for item: Array in cases:
+		var hud: Hud = _hud()
+		hud.show_turn(3, true, true, 1, false, 6, item[0] as int, item[0] as int, LevelData.Mission.HOLD_PASS)
+		hud.show_stratagems(item[1] as Array[int], [] as Array[int])
+		hud.show_phase(false)
+		hud.show_hint("Bấm lần nữa để đánh")
+		for unit_type: int in GeneralPanel.KEYS:
+			hud.show_general(unit_type, 3, stats)
+			await get_tree().process_frame
+			await get_tree().process_frame
+			var buttons: Rect2 = hud._frame.get_global_rect()
+			var panel: Rect2 = hud.general_panel().get_global_rect()
+			var label: String = "%s, làng %d" % [GeneralPanel.KEYS[unit_type], item[0]]
+			assert_gte(panel.position.y, buttons.end.y + 4.0, "%s: bảng tướng nằm dưới cột nút, cách ít nhất 4 px" % label)
+			assert_lte(panel.end.y, Hud.GENERAL_BOTTOM + 0.5, "%s: chừa nhãn phiên bản" % label)
+			assert_lte(panel.end.x, 1280.0, label)
+			assert_almost_eq(panel.size.x, buttons.size.x, 0.5, "%s: cùng bề rộng với khung nút" % label)
+
+
+func test_pair_row_buttons_fit_and_tool_row_sits_in_the_top_bar() -> void:
+	var hud: Hud = _hud()
+	hud.show_fast_forward(true)
+	hud.visible = true  # Hud ẩn tới khi có trận; container ẩn không xếp con.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	for button: Button in [hud.undo_button(), hud.replay_button(), hud.fast_forward_button(), hud.help_button()]:
+		assert_lte(button.get_combined_minimum_size().x, button.size.x + 0.5, "chữ không tràn: " + button.text)
+	assert_lte(hud._box.size.x, Hud.PANEL_WIDTH + 0.5, "cột không phình ra")
+	var tools: Rect2 = hud.fast_forward_button().get_global_rect().merge(hud.help_button().get_global_rect())
+	assert_gte(tools.position.x, 810.0, "không đè ô tiêu đề (x 470–810)")
+	assert_lte(tools.end.x, 1088.0, "không đè nút Âm thanh")
+	assert_lte(tools.end.y, 44.0, "nằm trên thanh tiêu đề, không đè cột nút")
+
+
+func test_general_panel_ignores_non_generals_and_uses_frame() -> void:
+	var hud: Hud = _hud()
+	hud.show_general(UnitType.BO_BINH, 3, (StatsSnapshot.load_stats().data as Stats))
+	assert_eq(hud.general_panel().shown_type(), -1)
+	assert_true(hud.general_panel().get_theme_stylebox("panel") is StyleBoxTexture, "khung 9-slice như bảng nút")

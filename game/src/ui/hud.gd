@@ -16,12 +16,25 @@ signal help_pressed
 
 ## Góc trên trái và bề rộng: bên phải bàn cờ (bàn nằm trong BoardView.AREA, x 16–956).
 const PANEL_POSITION: Vector2 = Vector2(972, 52)
-const PANEL_WIDTH: float = 260.0
-const SEPARATION: int = 12
+## Nới từ 260 (2026-11-02): bảng thông tin tướng bên dưới cần chỗ cho tiểu sử; khung vẫn trong x 964–1272.
+const PANEL_WIDTH: float = 292.0
+## Khoảng cách và chiều cao nút thu gọn (2026-11-02) để chừa chỗ cho bảng thông tin tướng bên dưới.
+const SEPARATION: int = 8
 ## Khung bảng nhô ra khỏi cột nút bấy nhiêu px mỗi phía; khoảng cách biểu tượng với chữ.
 const FRAME_PADDING: float = 8.0
 const ICON_GAP: int = 6
-const BUTTON_HEIGHT: float = 44.0
+const BUTTON_HEIGHT: float = 36.0
+## Cỡ chữ của nút đứng chung hàng (Hủy/Chơi lại, Tua nhanh/?), nhỏ hơn chữ thường cho vừa chỗ.
+const PAIR_FONT_SIZE: int = 14
+## Hàng Tua nhanh / "?" nằm trên thanh tiêu đề, sát trái nút Âm thanh (2026-11-02, nhường chỗ cho bảng tướng).
+## Tọa độ màn hình: mép phải = mép trái nút Âm thanh (main.gd: 1280 − 176 − 8) trừ 8 px; cao bằng nút Âm thanh.
+const TOOL_ROW_RIGHT: float = 1088.0
+const TOOL_ROW_TOP: float = 8.0
+const TOOL_ROW_HEIGHT: float = 32.0
+const FAST_BUTTON_WIDTH: float = 160.0
+const HELP_BUTTON_WIDTH: float = 96.0
+## Đáy bảng thông tin tướng (tọa độ màn hình): chừa nhãn phiên bản ở góc dưới phải.
+const GENERAL_BOTTOM: float = 688.0
 ## Màu chữ nổi bật cho hiệp cuối cùng của trận có giới hạn hiệp (Story 3.5).
 const FINAL_ROUND_COLOR: Color = Color(1.0, 0.42, 0.35)
 ## Dòng báo pha ("Lượt của bạn" / "Quân Nguyên đang ra đòn"), nhỏ hơn số hiệp.
@@ -57,6 +70,9 @@ var _stratagem_buttons: Dictionary = {}
 var _stratagems_used: Array[int] = []
 ## Dòng nhắc dưới các nút ("Bấm lần nữa để đánh"); rỗng thì ẩn.
 var _hint_label: Label
+## Bảng thông tin tướng vừa chọn (2026-11-02), bám đáy cột phải; không nằm trong cột nút nên dòng nhắc hiện/ẩn
+## không làm bảng nhảy.
+var _general_panel: GeneralPanel
 ## Trạng thái để tính lại nút khi khóa/mở (Story 2.11: đang phát hoạt ảnh thì không bấm được).
 var _can_undo: bool = false
 var _can_replay: bool = false
@@ -112,9 +128,10 @@ func _ready() -> void:
 	_phase_label.visible = false
 	box.add_child(_phase_label)
 
-	_undo_button = _button(tr("hud.undo"), box)
+	var edit_row: HBoxContainer = _pair_row(box)
+	_undo_button = _button(tr("hud.undo"), edit_row)
 	_undo_button.pressed.connect(func() -> void: undo_pressed.emit())
-	_replay_button = _button(tr("hud.replay"), box)
+	_replay_button = _button(tr("hud.replay"), edit_row)
 	_replay_button.pressed.connect(func() -> void: replay_pressed.emit())
 	_replay_label = Label.new()
 	_replay_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -126,15 +143,32 @@ func _ready() -> void:
 	box.add_child(_stratagem_box)
 	_end_turn_button = _button(tr("hud.end_turn"), box)
 	_end_turn_button.pressed.connect(func() -> void: end_turn_pressed.emit())
-	_fast_button = _button(tr("hud.fast.off"), box)
+
+	var tool_row: HBoxContainer = HBoxContainer.new()
+	tool_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tool_row.add_theme_constant_override("separation", SEPARATION)
+	var tool_width: float = FAST_BUTTON_WIDTH + HELP_BUTTON_WIDTH + SEPARATION
+	tool_row.position = Vector2(TOOL_ROW_RIGHT - tool_width, TOOL_ROW_TOP) - PANEL_POSITION
+	tool_row.size = Vector2(tool_width, TOOL_ROW_HEIGHT)
+	add_child(tool_row)
+	_fast_button = _button(tr("hud.fast.off"), tool_row)
+	_fast_button.custom_minimum_size = Vector2(FAST_BUTTON_WIDTH, TOOL_ROW_HEIGHT)
+	_fast_button.size_flags_horizontal = Control.SIZE_FILL
 	_fast_button.pressed.connect(func() -> void: fast_forward_pressed.emit())
-	_help_button = _button(tr("hud.help"), box)
+	_help_button = _button(tr("hud.help"), tool_row)
+	_help_button.custom_minimum_size = Vector2(HELP_BUTTON_WIDTH, TOOL_ROW_HEIGHT)
+	_help_button.size_flags_horizontal = Control.SIZE_FILL
 	_help_button.pressed.connect(func() -> void: help_pressed.emit())
 	_hint_label = Label.new()
 	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint_label.visible = false
 	box.add_child(_hint_label)
+
+	_general_panel = GeneralPanel.new(PANEL_WIDTH + FRAME_PADDING * 2.0)
+	_general_panel.position.x = -FRAME_PADDING
+	_general_panel.resized.connect(_place_general_panel)
+	add_child(_general_panel)
 
 
 ## Hiện bảng với số hiệp; nút Hủy mờ khi không có gì để hủy, nút Chơi lại mờ khi đã dùng/không chơi lại được.
@@ -314,12 +348,45 @@ func help_button() -> Button:
 	return _help_button
 
 
-func _button(text: String, box: VBoxContainer) -> Button:
+## Bảng thông tin tướng (2026-11-02): chân dung, tên, chỉ số, tiểu sử, mẹo. Giữ tới khi gọi lại với tướng khác.
+func show_general(unit_type: int, hp: int, stats: Stats) -> void:
+	_general_panel.show_general(unit_type, hp, stats)
+	_place_general_panel()
+
+
+func hide_general() -> void:
+	_general_panel.hide_panel()
+
+
+func general_panel() -> GeneralPanel:
+	return _general_panel
+
+
+func _place_general_panel() -> void:
+	# Co theo nội dung (tiểu sử mỗi tướng dài ngắn khác nhau) rồi bám đáy.
+	var height: float = _general_panel.get_combined_minimum_size().y
+	_general_panel.size = Vector2(PANEL_WIDTH + FRAME_PADDING * 2.0, height)
+	_general_panel.position.y = GENERAL_BOTTOM - PANEL_POSITION.y - height
+
+
+## Hàng ngang hai nút chia đôi bề rộng cột.
+func _pair_row(box: VBoxContainer) -> HBoxContainer:
+	var row: HBoxContainer = HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", SEPARATION)
+	box.add_child(row)
+	return row
+
+
+func _button(text: String, box: BoxContainer) -> Button:
 	var button: Button = Button.new()
 	button.text = text
 	button.focus_mode = Control.FOCUS_NONE
 	button.custom_minimum_size = Vector2(0, BUTTON_HEIGHT)
 	UiStyle.apply_button(button)
+	if box is HBoxContainer:
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.add_theme_font_size_override("font_size", PAIR_FONT_SIZE)
 	box.add_child(button)
 	return button
 

@@ -166,6 +166,16 @@ tooltip.hp,Máu %d/%d
 tooltip.attack_cell,"Đánh ô %s, đòn số %d"
 tooltip.attack_charge,"Xung phong hướng %s, đòn số %d"
 tooltip.no_attack,Không có đòn nào
+general.move,Đi: %d ô
+general.attack.nguyen_khoai,"Chém ô kề: %d sát thương, đẩy lùi %d ô"
+general.attack.pham_ngu_lao,"Ném lao xa %d–%d ô: %d sát thương"
+general.attack.tran_khanh_du,"Móc địch xa %d–%d ô, kéo về %d ô"
+general.bio.nguyen_khoai,"Tướng nhà Trần, chỉ huy quân Thánh dực đánh trận Bạch Đằng năm 1288, sau được phong tước hầu. (Đại Việt sử ký toàn thư)"
+general.bio.pham_ngu_lao,"Tướng nhà Trần, môn khách của Hưng Đạo Vương. Năm 1288 phục kích quân Nguyên ở ải Nội Bàng. (Việt Nam sử lược)"
+general.bio.tran_khanh_du,"Phó tướng giữ Vân Đồn, đánh tan đoàn thuyền lương của Trương Văn Hổ, khiến giặc thiếu lương. (Đại Việt sử ký toàn thư)"
+general.tip.nguyen_khoai,"Mẹo: đẩy địch xuống sông là địch chìm; đẩy vào quân khác thì cả hai mất máu."
+general.tip.pham_ngu_lao,"Mẹo: lao bay qua ô kề, trúng quân đầu tiên trên đường, kể cả tướng mình."
+general.tip.tran_khanh_du,"Mẹo: kéo địch qua hầm chông hoặc xuống sông. Quân đứng kề thì không kéo được."
 tooltip.reinforcement_warning,"Quân tiếp viện xuất hiện hiệp sau (đứng chặn: mất 1 máu, hủy tiếp viện)"
 dev.copied,Đã sao chép báo lỗi
 dev.fps,FPS %d (thấp nhất %d)

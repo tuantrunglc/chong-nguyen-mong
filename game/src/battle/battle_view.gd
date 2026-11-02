@@ -45,6 +45,9 @@ var _preview_cell: Vector2i = BoardView.NO_CELL
 var _preview_count: int = 0
 ## Tua nhanh pha địch đang bật (Story 4.4). Giữ qua các trận; main.gd đặt từ settings.cfg lúc mở game.
 var _fast: bool = false
+## Id tướng đang hiện trên bảng thông tin tướng (2026-11-02); khác `_selected`: bảng giữ nguyên sau khi bỏ chọn, tới khi
+## chọn tướng khác. NONE là bảng ẩn.
+var _shown_general: int = NONE
 
 
 func setup(board: BoardView, input: BattleInput, hud: Hud, tooltip: Tooltip = null, notice: Notice = null) -> void:
@@ -83,6 +86,7 @@ func start(controller: BattleController) -> void:
 	_pending_enemy_turn = false
 	_preview_cell = BoardView.NO_CELL
 	_hud.set_locked(false)
+	_shown_general = NONE
 	_deselect()
 	_update_hud()
 
@@ -504,11 +508,13 @@ func _select(id: int) -> void:
 	# Đổi tướng thì kết quả đòn khác: bóng của tướng trước không được giữ lại (Story 2.12 review).
 	_preview_cell = BoardView.NO_CELL
 	_selected = id
+	_shown_general = id
 	_cells = _controller.reachable(id)
 	_targets = _controller.attack_targets(id)
 	var cell_penalties: Dictionary = _controller.movement_penalties(id)
 	var snapshot: BattleState = _controller.snapshot()
 	_board.show_selection(snapshot.unit_by_id(id).cell, _cells, _targets, cell_penalties)
+	_update_general_panel(snapshot, false)
 	_set_pending(BoardView.NO_CELL)
 	# Chuột có thể đang nằm sẵn trên một ô vừa sáng: vẽ đường đi ngay, không chờ rê sang ô khác.
 	# Đồng quân vừa dời có thể che ô đang trỏ: chọn lại ô dưới chuột trước.
@@ -522,9 +528,21 @@ func _update_hud() -> void:
 	_hud.show_turn(snapshot.round_number, _controller.can_undo(), _controller.can_replay(),
 		_controller.replay_left(), over, snapshot.max_rounds, snapshot.morale, snapshot.max_morale, snapshot.mission)
 	_hud.show_stratagems(snapshot.stratagems, snapshot.stratagems_used, snapshot.sat_that_bonus())
+	_update_general_panel(snapshot, over)
 	# Dòng pha luôn có khi đang chơi; lúc phát hoạt ảnh pha địch thì báo đúng pha đang chạy (Story 2.11, AC 4).
 	if not over:
 		_hud.show_phase(_playing and _enemy_turn)
+
+
+## Bảng thông tin tướng theo bản chụp: máu đổi sau đòn thì cập nhật; hết trận thì ẩn (bảng Thắng/Thua là thứ duy
+## nhất cần đọc). Tướng đã gục (không còn trên bàn) vẫn hiện, máu 0.
+func _update_general_panel(snapshot: BattleState, over: bool) -> void:
+	var unit: Unit = snapshot.unit_by_id(_shown_general) if _shown_general != NONE else null
+	if over or _shown_general == NONE:
+		_hud.hide_general()
+		return
+	var unit_type: int = unit.type if unit != null else _hud.general_panel().shown_type()
+	_hud.show_general(unit_type, unit.hp if unit != null else 0, snapshot.stats)
 
 
 ## Trận đã kết thúc (thắng hoặc thua).
