@@ -185,6 +185,20 @@ func test_title_label_is_drawn_over_the_backdrop() -> void:
 	assert_gt(main._title_label.get_index(), main._board_view.get_index(), "nền rừng của bàn vẽ trước tiêu đề")
 
 
+func test_title_panel_width_at_least_340_and_expands_for_long_text() -> void:
+	var main: Node2D = _make_main()
+	var panel: Panel = main._title_panel
+	var label: Label = main._title_label
+	assert_gte(panel.size.x, 340.0, "khung tiêu đề tối thiểu 340 px")
+	assert_eq(panel.size.x, label.size.x, "nhãn và khung cùng bề rộng")
+	var old_width: float = panel.size.x
+	label.text = "Tiêu đề trận chiến rất là dài để kiểm tra độ giãn của khung tiêu đề"
+	main._update_title_layout()
+	assert_gt(panel.size.x, old_width, "chữ dài hơn thì khung giãn rộng ra")
+	assert_almost_eq(panel.position.x + panel.size.x / 2.0, BoardView.AREA.get_center().x, 1.0,
+		"khung tiêu đề vẫn căn giữa bàn cờ")
+
+
 func test_window_title_uses_translated_text() -> void:
 	get_window().title = ""
 	_make_main()
@@ -229,6 +243,8 @@ func test_mission_goal_of_village_level_names_round_limit() -> void:
 	assert_gt(level.max_rounds, 0, "trận 4 có giới hạn hiệp")
 	var expected: String = tr("mission.goal") % (tr("mission.desc.eliminate_village_timed") % level.max_rounds)
 	assert_eq(main._level_mission_goal(level), expected)
+	assert_eq(main._level_mission_tip(level), tr("mission.tip.eliminate_village_timed") % level.max_rounds,
+		"câu giải thắng/thua cũng nói đủ hiệp và làng")
 
 
 func test_tran_option_picks_level_file() -> void:

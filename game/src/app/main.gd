@@ -16,6 +16,9 @@ const SOUND_ACTION: String = "toggle_sound"
 ## Tiêu đề nằm phía trên bàn cờ (vùng bàn cờ BoardView.AREA bắt đầu ở y = 52).
 const TITLE_TOP: int = 4
 const TITLE_HEIGHT: int = 44
+const TITLE_MIN_WIDTH: float = 340.0
+const TITLE_PADDING_X: float = 32.0
+const TITLE_PANEL_HEIGHT: float = 38.0
 ## Thư mục file trận thật. Chuỗi trận luôn kiểm tên trận ở đây, kể cả khi test đổi level_dir để mở trận thử.
 const DATA_LEVEL_DIR: String = "res://data/tran"
 
@@ -77,11 +80,6 @@ func _ready() -> void:
 	_title_panel = Panel.new()
 	_title_panel.name = "TitlePanel"
 	_title_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var panel_w: float = 340.0
-	var panel_h: float = 38.0
-	var center_x: float = BoardView.AREA.get_center().x
-	_title_panel.size = Vector2(panel_w, panel_h)
-	_title_panel.position = Vector2(center_x - panel_w / 2.0, TITLE_TOP + (TITLE_HEIGHT - panel_h) / 2.0)
 	var title_style: StyleBoxTexture = UiStyle.panel(6.0) as StyleBoxTexture
 	title_style.modulate_color = Color(1.15, 0.95, 0.70)
 	_title_panel.add_theme_stylebox_override("panel", title_style)
@@ -91,8 +89,6 @@ func _ready() -> void:
 	_title_label.theme_type_variation = &"TitleLabel"
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_title_label.size = Vector2(panel_w, TITLE_HEIGHT)
-	_title_label.position = Vector2(center_x - panel_w / 2.0, TITLE_TOP)
 	_title_label.add_theme_color_override("font_color", Color(1.0, 0.90, 0.50))
 	_title_label.add_theme_color_override("font_outline_color", Color(0.18, 0.13, 0.18))
 	_title_label.add_theme_constant_override("outline_size", 4)
@@ -108,6 +104,7 @@ func _ready() -> void:
 	# Tiêu đề thêm sau bàn: nền rừng (con của bàn) phủ cả cửa sổ, tiêu đề phải vẽ đè lên nó.
 	add_child(_title_panel)
 	add_child(_title_label)
+	_update_title_layout()
 	_battle_input = BattleInput.new()
 	_battle_input.setup(_board_view)
 	add_child(_battle_input)
@@ -524,7 +521,7 @@ func _show_help() -> void:
 	if _screen != Screen.BATTLE or _level == null:
 		return
 	_hint_pending = false
-	_hint_panel.show_help(_level.hints, _level_mission_goal(_level))
+	_hint_panel.show_help(_level.hints, _level_mission_goal(_level), _level_mission_tip(_level))
 
 
 func _level_mission_goal(level: LevelData) -> String:
@@ -533,17 +530,31 @@ func _level_mission_goal(level: LevelData) -> String:
 	return tr("mission.goal") % _level_mission_desc(level)
 
 
+## Câu giải thích thắng/thua của trận, dưới dòng nhiệm vụ trong bảng "?".
+func _level_mission_tip(level: LevelData) -> String:
+	if level == null:
+		return ""
+	var key: String = "mission.tip." + _level_mission_kind(level)
+	return tr(key) % level.max_rounds if level.max_rounds > 0 else tr(key)
+
+
 ## Một câu nhiệm vụ đủ mọi điều kiện thua của trận: làng và giới hạn hiệp có thể cùng lúc (trận 4).
 func _level_mission_desc(level: LevelData) -> String:
+	var key: String = "mission.desc." + _level_mission_kind(level)
+	return tr(key) % level.max_rounds if level.max_rounds > 0 else tr(key)
+
+
+## Hậu tố khóa chữ nhiệm vụ theo kiểu trận: chung cho mission.desc.* và mission.tip.*.
+func _level_mission_kind(level: LevelData) -> String:
 	if level.mission == LevelData.Mission.HOLD_PASS:
-		return tr("mission.desc.hold_pass") % level.max_rounds
+		return "hold_pass"
 	if level.long_dan > 0 and level.max_rounds > 0:
-		return tr("mission.desc.eliminate_village_timed") % level.max_rounds
+		return "eliminate_village_timed"
 	if level.long_dan > 0:
-		return tr("mission.desc.eliminate_village")
+		return "eliminate_village"
 	if level.max_rounds > 0:
-		return tr("mission.desc.eliminate_timed") % level.max_rounds
-	return tr("mission.desc.eliminate")
+		return "eliminate_timed"
+	return "eliminate"
 
 
 ## Vẽ bản chụp lên bàn cờ (và tọa độ F1 nếu bật dev); null là bàn trống.
@@ -605,4 +616,21 @@ func level_transition() -> LevelTransition:
 func _read_version() -> String:
 	var value: Variant = ProjectSettings.get_setting("application/config/version", "0.0.0")
 	return str(value)
+
+
+## Khung tiêu đề tự giãn theo độ dài chữ, tối thiểu TITLE_MIN_WIDTH (340 px) và căn giữa bàn cờ.
+func _update_title_layout() -> void:
+	if _title_panel == null or _title_label == null:
+		return
+	var font: Font = _title_label.get_theme_font("font", &"TitleLabel")
+	var font_size: int = _title_label.get_theme_font_size("font_size", &"TitleLabel")
+	var text_w: float = 0.0
+	if font != null:
+		text_w = font.get_string_size(_title_label.text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size).x
+	var panel_w: float = maxf(TITLE_MIN_WIDTH, text_w + TITLE_PADDING_X)
+	var center_x: float = BoardView.AREA.get_center().x
+	_title_panel.size = Vector2(panel_w, TITLE_PANEL_HEIGHT)
+	_title_panel.position = Vector2(center_x - panel_w / 2.0, TITLE_TOP + (TITLE_HEIGHT - TITLE_PANEL_HEIGHT) / 2.0)
+	_title_label.size = Vector2(panel_w, TITLE_HEIGHT)
+	_title_label.position = Vector2(center_x - panel_w / 2.0, TITLE_TOP)
 

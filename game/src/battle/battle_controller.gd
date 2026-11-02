@@ -280,6 +280,15 @@ func reachable(unit_id: int) -> Array[Vector2i]:
 	return RulesMove.reachable(_state, unit)
 
 
+## Vùng có thể đi của quân Nguyên unit_id theo bàn hiện tại (rê chuột lên quân). Không phải quân Nguyên, không
+## có quân đó, hoặc trận đã hết, thì [].
+func enemy_reach(unit_id: int) -> Array[Vector2i]:
+	var unit: Unit = _state.unit_by_id(unit_id)
+	if unit == null or unit.faction != Unit.Faction.NGUYEN or Rules.is_battle_over(_state):
+		return []
+	return RulesMove.move_area(_state, unit)
+
+
 ## Đường đi của quân unit_id tới cell (không gồm ô đang đứng); không tới được thì [].
 func path_to(unit_id: int, cell: Vector2i) -> Array[Vector2i]:
 	var unit: Unit = _state.unit_by_id(unit_id)

@@ -49,12 +49,9 @@ const MAX_WIDTH: float = 340.0
 const CONTENT_MARGIN: float = 8.0
 ## Chừa một chút cho dấu tiếng Việt và cho số đo của font khỏi cụt chữ.
 const WIDTH_SLACK: float = 4.0
-## Khoảng cách chân dung với chữ, và biểu tượng máu với chữ (px).
-const PORTRAIT_GAP: float = 8.0
+## Khoảng cách biểu tượng máu với chữ (px).
 const ICON_GAP: float = 4.0
 
-var _row: HBoxContainer
-var _portrait: TextureRect
 var _icon: TextureRect
 var _label: Label
 ## Chữ gốc chưa ngắt dòng (text() trả lại đúng chữ này).
@@ -71,25 +68,12 @@ func _init() -> void:
 	style.set_corner_radius_all(4)
 	style.set_content_margin_all(CONTENT_MARGIN)
 	add_theme_stylebox_override("panel", UiStyle.tooltip(CONTENT_MARGIN, style))
-	_row = HBoxContainer.new()
-	_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_row.add_theme_constant_override("separation", int(PORTRAIT_GAP))
-	add_child(_row)
-	# Chân dung tướng (Story 8.5): chỉ hiện khi có.
-	_portrait = TextureRect.new()
-	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_portrait.custom_minimum_size = Vector2(UiStyle.PORTRAIT_SIZE, UiStyle.PORTRAIT_SIZE)
-	_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_portrait.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	_portrait.visible = false
-	_row.add_child(_portrait)
 	_label = Label.new()
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	# Không dùng tự xuống dòng của Label: nó đo chiều cao theo bề rộng đang có (của lần hiện trước), nên khung cứ cao
 	# như cột (đo thật: 164×589 px cho hai dòng chữ, 340×2101 px cho một dòng dài). Tự ngắt dòng ở _fit_width.
 	_label.autowrap_mode = TextServer.AUTOWRAP_OFF
-	_row.add_child(_label)
+	add_child(_label)
 	# Biểu tượng máu đứng trước dòng "Máu" (Story 8.5); đặt theo dòng ở _fit_width.
 	_icon = TextureRect.new()
 	_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -102,15 +86,12 @@ func _init() -> void:
 
 
 ## Hiện khung với nội dung mới; khung tự đo lại kích thước và bám con trỏ.
-## portrait: chân dung bên trái (tướng Đại Việt), null thì ẩn. icon_line: số thứ tự dòng (đếm theo dòng nguồn, từ 0)
-## được đặt biểu tượng máu đứng trước, -1 là không có.
-func show_text(text: String, portrait: Texture2D = null, icon_line: int = -1) -> void:
+## icon_line: số thứ tự dòng (đếm theo dòng nguồn, từ 0) được đặt biểu tượng máu đứng trước, -1 là không có.
+func show_text(text: String, icon_line: int = -1) -> void:
 	if text.is_empty():
 		hide_tooltip()
 		return
 	_text = text
-	_portrait.texture = portrait
-	_portrait.visible = portrait != null and UiStyle.ENABLED
 	visible = true
 	_fit_width(text, icon_line)
 	reset_size()
@@ -127,8 +108,6 @@ func _fit_width(text: String, icon_line: int = -1) -> void:
 		return
 	var font_size: int = _label.get_theme_font_size("font_size")
 	var room: float = MAX_WIDTH - CONTENT_MARGIN * 2.0
-	if _portrait.visible:
-		room -= UiStyle.PORTRAIT_SIZE + PORTRAIT_GAP
 	var lines: PackedStringArray = PackedStringArray()
 	var widest: float = 0.0
 	var icon_row: int = -1
@@ -167,13 +146,7 @@ func hide_tooltip() -> void:
 	visible = false
 	_text = ""
 	_label.text = ""
-	_portrait.visible = false
 	_icon.visible = false
-
-
-## Chân dung đang hiện (để test).
-func portrait_visible() -> bool:
-	return _portrait.visible
 
 
 func icon_visible() -> bool:

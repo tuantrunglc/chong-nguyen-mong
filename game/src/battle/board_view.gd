@@ -55,7 +55,8 @@ const NO_CELL: Vector2i = Vector2i(-1, -1)
 const REACH_COLOR: Color = Color(0.78, 0.90, 1.0, 0.50)
 const REACH_BORDER_COLOR: Color = Color(1.0, 1.0, 1.0, 0.95)
 const REACH_BORDER_WIDTH: float = 2.0
-## Vùng di chuyển của quân địch (cơ chế kiểu Into the Breach): ô vàng cam viền sáng
+## Vùng có thể đi của quân Nguyên khi rê chuột lên nó: ô vàng cam viền sáng. Đang chọn tướng thì chỉ vẽ viền, không
+## tô, để ô đi được của tướng vẫn rõ.
 const ENEMY_REACH_COLOR: Color = Color(0.95, 0.65, 0.15, 0.28)
 const ENEMY_REACH_BORDER_COLOR: Color = Color(1.0, 0.85, 0.35, 0.90)
 const ENEMY_REACH_BORDER_WIDTH: float = 2.0
@@ -265,6 +266,11 @@ func clear_enemy_reach() -> void:
 
 func enemy_reach_cells() -> Array[Vector2i]:
 	return _enemy_reach_cells.duplicate()
+
+
+## Vùng đi của quân Nguyên có tô nền không: chỉ khi chưa chọn tướng nào.
+func enemy_reach_filled() -> bool:
+	return _selected_cell == NO_CELL
 
 
 func target_cells() -> Array[Vector2i]:
@@ -523,7 +529,8 @@ func _draw() -> void:
 				draw_rect(_top_rect(cell), REACH_COLOR)
 				draw_rect(_top_rect(cell).grow(-REACH_BORDER_WIDTH / 2.0), REACH_BORDER_COLOR, false, REACH_BORDER_WIDTH)
 			if _enemy_reach_cells.has(cell):
-				draw_rect(_top_rect(cell), ENEMY_REACH_COLOR)
+				if enemy_reach_filled():
+					draw_rect(_top_rect(cell), ENEMY_REACH_COLOR)
 				draw_rect(_top_rect(cell).grow(-ENEMY_REACH_BORDER_WIDTH / 2.0), ENEMY_REACH_BORDER_COLOR, false, ENEMY_REACH_BORDER_WIDTH)
 			if cell == _selected_cell:
 				draw_polyline(_ellipse(_top_center(cell), SELECT_RADIUS), SELECT_COLOR, SELECT_WIDTH, true)

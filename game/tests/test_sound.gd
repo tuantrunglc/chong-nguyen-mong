@@ -46,10 +46,10 @@ func test_music_starts_when_unlocked() -> void:
 func test_same_sound_is_not_stacked() -> void:
 	_sound.unlock()
 	assert_true(_sound.play_sfx(SoundMap.CHEM))
-	assert_false(_sound.play_sfx(SoundMap.CHEM), "cùng tiếng trong 0,05 giây chỉ phát một lần")
+	assert_false(_sound.play_sfx(SoundMap.CHEM), "cùng tiếng trong %d ms chỉ phát một lần" % Sound.DEDUPE_MSEC)
 	assert_true(_sound.play_sfx(SoundMap.VA_CHAM), "tiếng khác vẫn phát")
 	assert_eq(_sound.played_log, [SoundMap.CHEM, SoundMap.VA_CHAM] as Array[String])
-	await wait_seconds(0.12)
+	await wait_seconds((Sound.DEDUPE_MSEC * 3.0) / 1000.0)
 	assert_true(_sound.play_sfx(SoundMap.CHEM), "qua khoảng chờ thì phát lại được")
 
 

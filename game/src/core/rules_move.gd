@@ -10,6 +10,13 @@ static func reachable(state: BattleState, unit: Unit) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
 	if unit.has_moved or unit.has_attacked:
 		return cells
+	return move_area(state, unit)
+
+
+## Mọi ô quân dừng được trong tầm đi theo bàn hiện tại, không xét đã đi hay chưa, theo thứ tự đọc bàn. Dùng cho
+## vùng có thể đi của quân Nguyên: không đoán quân sẽ đi đâu, chỉ cho biết nó với tới được những ô nào.
+static func move_area(state: BattleState, unit: Unit) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
 	for cell: Variant in _paths(state, unit).keys():
 		cells.append(cell as Vector2i)
 	cells.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.y < b.y or (a.y == b.y and a.x < b.x))

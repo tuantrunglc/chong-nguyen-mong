@@ -1791,7 +1791,7 @@ func _tooltip_main() -> Array:
 	return [main, main._tooltip as Tooltip, _view(main)]
 
 
-func test_hovering_general_shows_portrait_but_enemy_and_terrain_do_not() -> void:
+func test_hovering_general_hides_tooltip_and_enemy_terrain_show_tooltip() -> void:
 	var made: Array = _tooltip_main()
 	var tip: Tooltip = made[1] as Tooltip
 	var view: BattleView = made[2] as BattleView
@@ -1806,7 +1806,6 @@ func test_hovering_general_shows_portrait_but_enemy_and_terrain_do_not() -> void
 			break
 	view._update_info(enemy.cell)
 	assert_true(tip.visible_now(), "quân Nguyên vẫn có tooltip")
-	assert_false(tip.portrait_visible(), "quân Nguyên không có chân dung")
 	assert_true(tip.icon_visible(), "quân Nguyên vẫn có biểu tượng máu")
 	var special_cell: Vector2i = Vector2i(-1, -1)
 	for r: int in range(state.size.y):
@@ -1818,7 +1817,6 @@ func test_hovering_general_shows_portrait_but_enemy_and_terrain_do_not() -> void
 	assert_true(special_cell.x >= 0, "điều kiện trước: trận thử có ô địa hình đặc biệt hoặc ô tiếp viện")
 	view._update_info(special_cell)
 	assert_true(tip.visible_now(), "địa hình đặc biệt hoặc tiếp viện hiện tooltip")
-	assert_false(tip.portrait_visible(), "địa hình không có chân dung")
 	assert_false(tip.icon_visible(), "địa hình không có biểu tượng máu")
 	assert_true(view._unit_text(general, state).split("\n")[BattleView.UNIT_HP_LINE].begins_with("Máu"),
 		"dòng UNIT_HP_LINE đúng là dòng Máu")

@@ -462,10 +462,10 @@ func _update_info(cell: Vector2i) -> void:
 		if text.is_empty():
 			_tooltip.hide_tooltip()
 		else:
-			_tooltip.show_text(text, null, UNIT_HP_LINE if unit != null and not general else -1)
+			_tooltip.show_text(text, UNIT_HP_LINE if unit != null and not general else -1)
 	_board.telegraph_view().highlight(_telegraph_cells_of(unit, state))
 	if unit != null and unit.faction == Unit.Faction.NGUYEN:
-		_board.show_enemy_reach(_enemy_reach_cells_of(unit, state))
+		_board.show_enemy_reach(_controller.enemy_reach(unit.id))
 	else:
 		_board.clear_enemy_reach()
 
@@ -529,18 +529,6 @@ func _telegraph_cells_of(unit: Unit, state: BattleState) -> Array[Vector2i]:
 	for t: Telegraph in state.telegraphs:
 		if t.owner_id == unit.id:
 			cells.append_array(TelegraphMarks.path_cells(state, t))
-	return cells
-
-
-## Các ô quân Nguyên có thể di chuyển tới (Into the Breach movement range).
-func _enemy_reach_cells_of(unit: Unit, state: BattleState) -> Array[Vector2i]:
-	if unit == null or unit.faction != Unit.Faction.NGUYEN:
-		return []
-	var paths: Dictionary = Pathfinding.find_paths(state, unit, state.stats.move_range(unit.type))
-	var cells: Array[Vector2i] = []
-	for c: Variant in paths.keys():
-		cells.append(c as Vector2i)
-	cells.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.y < b.y or (a.y == b.y and a.x < b.x))
 	return cells
 
 

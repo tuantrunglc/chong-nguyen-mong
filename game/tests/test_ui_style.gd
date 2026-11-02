@@ -54,6 +54,17 @@ func test_apply_button_sets_all_states_and_drops_focus_outline() -> void:
 	assert_true(button.get_theme_stylebox("focus") is StyleBoxEmpty, "không vẽ viền focus")
 
 
+func test_apply_primary_button_sets_highlighted_style_and_larger_font() -> void:
+	var button: Button = Button.new()
+	add_child_autofree(button)
+	UiStyle.apply_primary_button(button)
+	for style_name: String in ["normal", "hover", "pressed", "disabled"]:
+		assert_true(button.get_theme_stylebox(style_name) is StyleBoxTexture, style_name)
+	assert_eq(button.get_theme_font_size("font_size"), 17, "chữ to hơn nút thường (17)")
+	var normal: StyleBoxTexture = button.get_theme_stylebox("normal") as StyleBoxTexture
+	assert_gt(normal.modulate_color.r, 1.0, "màu sáng nổi bật")
+
+
 func test_all_ui_art_files_exist() -> void:
 	var paths: Array[String] = [UiStyle.ICON_ROUND, UiStyle.ICON_HP, UiStyle.ICON_MORALE]
 	for path: Variant in UiStyle.STRATAGEM_ICONS.values():
@@ -156,27 +167,9 @@ func test_tooltip_uses_texture_frame() -> void:
 	assert_true(tip.get_theme_stylebox("panel") is StyleBoxTexture)
 
 
-func test_tooltip_portrait_widens_the_box_and_keeps_text() -> void:
-	var tip: Tooltip = _tooltip()
-	tip.show_text(SHORT_TEXT)
-	await get_tree().process_frame
-	var plain: Vector2 = tip.size
-	assert_false(tip.portrait_visible())
-	tip.show_text(SHORT_TEXT, Art.tex("chan_dung/tex_chan_dung_khoai.png"))
-	await get_tree().process_frame
-	assert_true(tip.portrait_visible())
-	assert_gte(tip.size.x, plain.x + UiStyle.PORTRAIT_SIZE, "khung rộng thêm cỡ chân dung")
-	assert_gte(tip.size.y, UiStyle.PORTRAIT_SIZE, "khung cao ít nhất bằng chân dung")
-	assert_eq(tip.text(), SHORT_TEXT, "chữ gốc không đổi")
-	tip.show_text(SHORT_TEXT)
-	await get_tree().process_frame
-	assert_false(tip.portrait_visible(), "dòng sau không chân dung thì ẩn")
-	assert_eq(tip.size, plain, "về cỡ cũ")
-
-
 func test_tooltip_hp_icon_shows_on_requested_line_only() -> void:
 	var tip: Tooltip = _tooltip()
-	tip.show_text(SHORT_TEXT, null, 1)
+	tip.show_text(SHORT_TEXT, 1)
 	await get_tree().process_frame
 	assert_true(tip.icon_visible())
 	assert_eq(tip.text(), SHORT_TEXT)
@@ -189,9 +182,9 @@ func test_tooltip_hp_icon_shows_on_requested_line_only() -> void:
 	assert_gt(tip.size.y, two_lines, "thêm dòng thì khung cao thêm, không bị khóa cỡ")
 
 
-func test_tooltip_with_portrait_stays_on_screen_near_the_edge() -> void:
+func test_tooltip_stays_on_screen_near_the_edge() -> void:
 	var tip: Tooltip = _tooltip()
-	tip.show_text(SHORT_TEXT, Art.tex("chan_dung/tex_chan_dung_khoai.png"))
+	tip.show_text(SHORT_TEXT)
 	await get_tree().process_frame
 	var screen: Vector2 = tip.get_viewport_rect().size
 	tip.place_at(screen - Vector2(2, 2))
@@ -202,7 +195,7 @@ func test_tooltip_with_portrait_stays_on_screen_near_the_edge() -> void:
 func test_tooltip_hp_icon_sits_on_the_hp_line_even_with_line_spacing() -> void:
 	var tip: Tooltip = _tooltip()
 	tip._label.add_theme_constant_override("line_spacing", 6)
-	tip.show_text(SHORT_TEXT, null, 1)
+	tip.show_text(SHORT_TEXT, 1)
 	await get_tree().process_frame
 	var font: Font = tip._label.get_theme_font("font")
 	var line_height: float = font.get_height(tip._label.get_theme_font_size("font_size"))
@@ -215,7 +208,7 @@ func test_tooltip_hp_icon_sits_on_the_hp_line_even_with_line_spacing() -> void:
 func test_tooltip_wrapped_hp_line_keeps_indent_on_every_physical_line() -> void:
 	var tip: Tooltip = _tooltip()
 	var long_hp: String = "Tên\nMáu " + "rất dài ".repeat(40) + "\nĐòn"
-	tip.show_text(long_hp, null, 1)
+	tip.show_text(long_hp, 1)
 	await get_tree().process_frame
 	var lines: PackedStringArray = tip._label.text.split("\n")
 	assert_gt(lines.size(), 3, "dòng Máu dài phải bị ngắt")

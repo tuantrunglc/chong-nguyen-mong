@@ -110,7 +110,8 @@ func _hint_area(board_rect: Rect2) -> Rect2:
 
 
 ## Bảng "?" : nhiệm vụ (nếu có), gợi ý của trận rồi bảng thao tác, giữa bàn cờ.
-func show_help(keys: Array[String], mission_goal: String = "") -> void:
+## `mission_tip`: câu giải thích thắng/thua, nằm ngay dưới dòng nhiệm vụ.
+func show_help(keys: Array[String], mission_goal: String = "", mission_tip: String = "") -> void:
 	_clear()
 	_set_layout(PANEL_WIDTH, PADDING)
 	_lines.clear()
@@ -119,6 +120,11 @@ func show_help(keys: Array[String], mission_goal: String = "") -> void:
 		mission_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		mission_label.custom_minimum_size = Vector2(_content_width, 0)
 		_box.add_child(mission_label)
+	if not mission_tip.is_empty():
+		var tip_label: Label = _label(mission_tip, BODY_FONT_SIZE, HINT_COLOR)
+		tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		tip_label.custom_minimum_size = Vector2(_content_width, 0)
+		_box.add_child(tip_label)
 	for key: String in keys:
 		_lines.append(tr(key))
 		_add_label(_lines[_lines.size() - 1], HINT_FONT_SIZE, HINT_COLOR)

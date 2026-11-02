@@ -12,10 +12,6 @@ hud.round_limit,Hiệp %d/%d
 hud.morale,"Lòng dân: %d/%d"
 hud.mission.eliminate,Tiêu diệt
 hud.mission.hold_pass,Giữ ải
-hud.mission.desc.eliminate,Quét sạch giặc
-hud.mission.desc.timed,Trước hiệp %d
-hud.mission.desc.village,Giữ làng
-hud.mission.desc.hold_pass,Cầm cự %d hiệp
 mission.desc.eliminate,Tiêu diệt toàn bộ quân Nguyên trên sa bàn
 mission.desc.eliminate_timed,Quét sạch giặc trước khi hết %d hiệp
 mission.desc.eliminate_village,Tiêu diệt địch và bảo vệ làng (Lòng dân > 0)
@@ -25,6 +21,7 @@ mission.desc.hold_pass,"Cầm cự %d hiệp, tuyệt đối không để giặc
 mission.tip.eliminate,Chiến thắng khi diệt sạch mọi quân Nguyên trên bàn cờ. Thất bại nếu toàn bộ tướng Đại Việt gục ngã.
 mission.tip.eliminate_timed,"Chiến thắng khi diệt sạch quân Nguyên trong %d hiệp. Thất bại nếu hết hiệp hoặc toàn bộ tướng gục ngã."
 mission.tip.eliminate_village,"Chiến thắng khi diệt sạch quân Nguyên. Thất bại nếu Lòng dân về 0 hoặc toàn bộ tướng gục ngã."
+mission.tip.eliminate_village_timed,"Chiến thắng khi diệt sạch quân Nguyên trong %d hiệp. Thất bại nếu hết hiệp, Lòng dân về 0 hoặc toàn bộ tướng gục ngã."
 mission.tip.hold_pass,"Chiến thắng khi cầm cự qua %d hiệp. Thất bại nếu bất kỳ quân Nguyên nào lọt vào ô Cửa Ải hoặc toàn bộ tướng gục ngã."
 hud.undo,Hủy (Z)
 hud.replay,Chơi lại (R)
@@ -215,7 +212,7 @@ help.move.how,Bấm vào ô sáng
 help.attack,Đánh
 help.attack.how,Bấm vào mục tiêu trong tầm (tướng đã đi rồi thì bấm thêm lần nữa để xác nhận)
 help.info,Xem thông tin
-help.info.how,Rê chuột lên quân hoặc lên ô
+help.info.how,"Rê chuột lên quân hoặc lên ô (quân Nguyên: ô viền cam là vùng nó có thể đi tới)"
 help.stratagem,Dùng mưu kế
 help.stratagem.how,"Bấm nút hoặc phím Q, W: Q (Vườn không nhà trống: đốt kho lương, trừ máu giặc) · W (Sát Thát: tăng sát thương đòn tướng trong lượt)"
 help.undo,Hủy nước đi

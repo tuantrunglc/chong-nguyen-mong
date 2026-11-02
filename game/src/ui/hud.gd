@@ -142,6 +142,7 @@ func _ready() -> void:
 	_stratagem_box.add_theme_constant_override("separation", SEPARATION)
 	box.add_child(_stratagem_box)
 	_end_turn_button = _button(tr("hud.end_turn"), box)
+	UiStyle.apply_primary_button(_end_turn_button)
 	_end_turn_button.pressed.connect(func() -> void: end_turn_pressed.emit())
 
 	var tool_row: HBoxContainer = HBoxContainer.new()
