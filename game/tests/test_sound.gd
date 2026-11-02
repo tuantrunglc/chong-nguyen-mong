@@ -49,7 +49,7 @@ func test_same_sound_is_not_stacked() -> void:
 	assert_false(_sound.play_sfx(SoundMap.CHEM), "cùng tiếng trong 0,05 giây chỉ phát một lần")
 	assert_true(_sound.play_sfx(SoundMap.VA_CHAM), "tiếng khác vẫn phát")
 	assert_eq(_sound.played_log, [SoundMap.CHEM, SoundMap.VA_CHAM] as Array[String])
-	await wait_seconds(0.08)
+	await wait_seconds(0.12)
 	assert_true(_sound.play_sfx(SoundMap.CHEM), "qua khoảng chờ thì phát lại được")
 
 

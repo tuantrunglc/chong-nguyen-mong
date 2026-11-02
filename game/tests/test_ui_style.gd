@@ -98,6 +98,17 @@ func test_stratagem_buttons_have_their_own_icons() -> void:
 	assert_eq(vknt.icon.resource_path, GIAO_DIEN + "tex_ke_vuon_khong_nha_trong.png")
 	assert_eq(sat_that.icon.resource_path, GIAO_DIEN + "tex_ke_sat_that.png")
 	assert_eq(sat_that.text, "Sát Thát (W)", "chữ nút giữ nguyên")
+	assert_true(vknt.tooltip_text.contains("Vườn không nhà trống"), "nút VKNT có tooltip")
+	assert_true(vknt.tooltip_text.contains("kho lương"), "tooltip giải thích tác dụng")
+	assert_true(sat_that.tooltip_text.contains("Sát Thát"), "nút Sát Thát có tooltip")
+	assert_true(sat_that.tooltip_text.contains("+1 sát thương"), "tooltip giải thích tác dụng")
+	var custom_tip: Control = vknt._make_custom_tooltip(vknt.tooltip_text) as Control
+	assert_not_null(custom_tip, "nút mưu kế sinh custom tooltip")
+	assert_true(custom_tip is PanelContainer, "tooltip dạng khung bảng mỹ thuật")
+	var tip_label: Label = custom_tip.get_child(0) as Label
+	assert_not_null(tip_label, "tooltip có nhãn chữ")
+	assert_eq(tip_label.autowrap_mode, TextServer.AUTOWRAP_WORD_SMART, "chữ tự ngắt dòng gọn gàng")
+	custom_tip.free()
 
 
 func test_hud_round_row_has_icon_and_unchanged_text() -> void:

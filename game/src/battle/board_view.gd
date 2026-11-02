@@ -14,7 +14,7 @@ static var viewport_size: Vector2 = Vector2(
 	ProjectSettings.get_setting("display/window/size/viewport_height") as int
 )
 ## Vùng trống cho bàn (tọa độ màn hình): dưới tiêu đề, trái bảng HUD, trên nhãn phiên bản.
-const AREA: Rect2 = Rect2(16, 52, 940, 612)
+const AREA: Rect2 = Rect2(16, 52, 948, 612)
 const LINE_COLOR: Color = Color(0.36, 0.24, 0.14)
 ## Lưới ô mờ trên mặt đất bằng hình (Story 8.2), để vẫn đếm được ô khi tính đòn.
 const GRID_COLOR: Color = Color(0.0, 0.0, 0.0, 0.25)
@@ -55,6 +55,10 @@ const NO_CELL: Vector2i = Vector2i(-1, -1)
 const REACH_COLOR: Color = Color(0.78, 0.90, 1.0, 0.50)
 const REACH_BORDER_COLOR: Color = Color(1.0, 1.0, 1.0, 0.95)
 const REACH_BORDER_WIDTH: float = 2.0
+## Vùng di chuyển của quân địch (cơ chế kiểu Into the Breach): ô vàng cam viền sáng
+const ENEMY_REACH_COLOR: Color = Color(0.95, 0.65, 0.15, 0.28)
+const ENEMY_REACH_BORDER_COLOR: Color = Color(1.0, 0.85, 0.35, 0.90)
+const ENEMY_REACH_BORDER_WIDTH: float = 2.0
 ## Viền quanh ô mục tiêu đánh được (tác giả chốt 2026-10-18: trắng), chỉ viền, không tô: ô đỏ báo đòn E2 tô kín.
 ## Ô chờ xác nhận (tướng đã đi, bấm lần đầu) viền dày gấp đôi.
 const TARGET_COLOR: Color = Color(1.0, 1.0, 1.0)
@@ -104,6 +108,8 @@ var _lit_cells: Array[Vector2i] = []
 var _target_cells: Array[Vector2i] = []
 var _pending_cell: Vector2i = NO_CELL
 var _path: Array[Vector2i] = []
+## Vùng di chuyển của quân địch đang trỏ chuột.
+var _enemy_reach_cells: Array[Vector2i] = []
 
 
 ## Tâm ô trên mặt đất, tính trong tọa độ của BoardView (gốc là góc trên trái của ô 0,0).
@@ -245,6 +251,22 @@ func lit_cells() -> Array[Vector2i]:
 	return _lit_cells.duplicate()
 
 
+func show_enemy_reach(cells: Array[Vector2i]) -> void:
+	_enemy_reach_cells = cells.duplicate()
+	_redraw()
+
+
+func clear_enemy_reach() -> void:
+	if _enemy_reach_cells.is_empty():
+		return
+	_enemy_reach_cells = []
+	_redraw()
+
+
+func enemy_reach_cells() -> Array[Vector2i]:
+	return _enemy_reach_cells.duplicate()
+
+
 func target_cells() -> Array[Vector2i]:
 	return _target_cells.duplicate()
 
@@ -276,14 +298,19 @@ static func fit_scale(board_size: Vector2, area_size: Vector2) -> float:
 	return 1.0 / k
 
 
-## Canh bàn cols × rows giữa AREA, thu theo bậc nguyên nếu không vừa; góc bàn rơi đúng điểm ảnh nguyên.
+## Tâm căn giữa của bàn cờ trên màn hình: trục ngang và trục dọc đúng giữa vùng sa bàn tác chiến (bên trái HUD).
+static func board_center() -> Vector2:
+	return AREA.get_center()
+
+
+## Canh bàn cols × rows giữa màn hình (tâm x = 640), thu theo bậc nguyên nếu không vừa; góc bàn rơi đúng điểm ảnh nguyên.
 func setup(new_cols: int = EMPTY_SIZE.x, new_rows: int = EMPTY_SIZE.y) -> void:
 	cols = new_cols
 	rows = new_rows
 	var local: Rect2 = _local_rect()
 	var factor: float = fit_scale(local.size, AREA.size)
 	scale = Vector2(factor, factor)
-	position = (AREA.get_center() - local.get_center() * factor).round()
+	position = (board_center() - local.get_center() * factor).round()
 	if _ground != null and _backdrop != null:
 		_ground.setup(cols, rows)
 		_backdrop.queue_redraw()
@@ -491,10 +518,13 @@ func _draw() -> void:
 		for c: int in range(cols):
 			var cell: Vector2i = Vector2i(c, r)
 			if _state != null and _state.terrain_at(cell) == Terrain.PASS:
-				draw_texture(Art.tex(GroundArt.pass_path(cell)), cell_rect(cell).position - Vector2(0, PASS_SPRITE_LIFT))
+				draw_texture(Art.tex(GroundArt.pass_path(cell, _state)), cell_rect(cell).position - Vector2(0, PASS_SPRITE_LIFT))
 			if _lit_cells.has(cell):
 				draw_rect(_top_rect(cell), REACH_COLOR)
 				draw_rect(_top_rect(cell).grow(-REACH_BORDER_WIDTH / 2.0), REACH_BORDER_COLOR, false, REACH_BORDER_WIDTH)
+			if _enemy_reach_cells.has(cell):
+				draw_rect(_top_rect(cell), ENEMY_REACH_COLOR)
+				draw_rect(_top_rect(cell).grow(-ENEMY_REACH_BORDER_WIDTH / 2.0), ENEMY_REACH_BORDER_COLOR, false, ENEMY_REACH_BORDER_WIDTH)
 			if cell == _selected_cell:
 				draw_polyline(_ellipse(_top_center(cell), SELECT_RADIUS), SELECT_COLOR, SELECT_WIDTH, true)
 	if _state != null and not _state.reinforcement_warnings.is_empty():

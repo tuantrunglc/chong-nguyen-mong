@@ -86,7 +86,7 @@ func _relayout() -> void:
 	var panel_size: Vector2 = PANEL_SIZE.max(_panel.get_combined_minimum_size()).ceil()
 	_panel.size = panel_size
 	size = panel_size
-	position = (BoardView.AREA.get_center() - panel_size / 2.0).round()
+	position = (BoardView.board_center() - panel_size / 2.0).round()
 
 
 ## Hiện bảng theo pha: WON là "Thắng!", LOST là "Thua!" (hoặc "Thua: hết hiệp" nếu defeat_reason là "het_hiep"); pha khác thì ẩn bảng.

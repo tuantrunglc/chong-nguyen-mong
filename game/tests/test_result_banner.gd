@@ -55,7 +55,7 @@ func test_banner_sits_inside_the_board_area_and_does_not_cover_it() -> void:
 	assert_true(BoardView.AREA.encloses(rect), "bảng nằm gọn trong vùng bàn cờ")
 	assert_lt(rect.size.x, BoardView.AREA.size.x / 2.0, "không che hết bàn: hẹp hơn nửa bề rộng")
 	assert_lt(rect.size.y, BoardView.AREA.size.y / 2.0, "không che hết bàn: thấp hơn nửa bề cao")
-	assert_almost_eq(rect.get_center(), BoardView.AREA.get_center(), Vector2(1, 1), "giữa bàn")
+	assert_almost_eq(rect.get_center(), BoardView.board_center(), Vector2(1, 1), "giữa bàn")
 
 
 ## Khung đủ chỗ cho chữ "Thắng!"/"Thua!"/"Thua: hết hiệp", khoảng cách, các nút (một hoặc hai), đệm và viền.

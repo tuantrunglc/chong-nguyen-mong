@@ -217,6 +217,7 @@ func show_stratagems(open_kinds: Array[int], used: Array[int], sat_that_bonus: i
 		_stratagem_buttons.clear()
 		for kind: int in open:
 			var button: Button = _button("", _stratagem_box)
+			button.tooltip_text = tr("stratagem.tip." + Stratagem.name_of(kind))
 			var icon_path: String = UiStyle.STRATAGEM_ICONS.get(kind, "") as String
 			if UiStyle.ENABLED and not icon_path.is_empty():
 				button.icon = Art.tex(icon_path)
@@ -378,8 +379,13 @@ func _pair_row(box: VBoxContainer) -> HBoxContainer:
 	return row
 
 
+class StyledButton extends Button:
+	func _make_custom_tooltip(for_text: String) -> Object:
+		return UiStyle.create_custom_tooltip(for_text)
+
+
 func _button(text: String, box: BoxContainer) -> Button:
-	var button: Button = Button.new()
+	var button: Button = StyledButton.new()
 	button.text = text
 	button.focus_mode = Control.FOCUS_NONE
 	button.custom_minimum_size = Vector2(0, BUTTON_HEIGHT)

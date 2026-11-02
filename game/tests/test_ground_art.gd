@@ -61,6 +61,7 @@ func test_variant_is_in_range_and_deterministic() -> void:
 			var first: int = GroundArt.variant(cell, count)
 			assert_between(first, 0, count - 1, "ô %s chia %d" % [cell, count])
 			assert_eq(GroundArt.variant(cell, count), first, "cùng ô cùng kết quả")
+		assert_eq(GroundArt.has_co_le(cell), GroundArt.has_co_le(cell), "has_co_le tất định")
 
 
 func test_every_variant_appears_on_the_biggest_board() -> void:
@@ -79,7 +80,12 @@ func test_every_art_path_exists() -> void:
 		for c: int in range(10):
 			var cell: Vector2i = Vector2i(c, r)
 			assert_true(ResourceLoader.exists(ASSET_DIR + GroundArt.spikes_path(cell)), "hầm chông %s" % cell)
+			assert_true(ResourceLoader.exists(ASSET_DIR + GroundArt.co_le_path(cell)), "cỏ lẻ %s" % cell)
 			assert_true(ResourceLoader.exists(ASSET_DIR + GroundArt.pass_path(cell)), "ô ải %s" % cell)
 			assert_true(ResourceLoader.exists(ASSET_DIR + GroundArt.backdrop_path(cell)), "nền rừng %s" % cell)
 			for kind: int in [Terrain.FOREST, Terrain.GRANARY, Terrain.VILLAGE]:
 				assert_true(ResourceLoader.exists(ASSET_DIR + GroundArt.block_path(kind, cell)), "khối %d %s" % [kind, cell])
+	for i: int in range(GroundArt.PASS_PAIR_VARIANTS):
+		assert_true(ResourceLoader.exists(ASSET_DIR + "dia_hinh/tex_o_ai_doi_trai_%d.png" % i), "ô ải đôi trái %d" % i)
+		assert_true(ResourceLoader.exists(ASSET_DIR + "dia_hinh/tex_o_ai_doi_phai_%d.png" % i), "ô ải đôi phải %d" % i)
+		assert_true(ResourceLoader.exists(ASSET_DIR + "dia_hinh/tex_o_ai_doi_giua_%d.png" % i), "ô ải đôi giữa %d" % i)

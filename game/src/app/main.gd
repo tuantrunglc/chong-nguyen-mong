@@ -40,6 +40,7 @@ var _main_menu: MainMenu
 var _level_transition: LevelTransition
 ## Trận kế tiếp đọc từ file lưu lúc hiện màn hình chính; "" khi không có file lưu dùng được (Story 4.3).
 var _saved_level_id: String = ""
+var _title_panel: Panel = null
 var _title_label: Label
 var _board_view: BoardView
 var _weather_overlay: WeatherOverlay
@@ -73,12 +74,30 @@ func _ready() -> void:
 	add_child(_sound)
 	Sound.host = _sound
 
+	_title_panel = Panel.new()
+	_title_panel.name = "TitlePanel"
+	_title_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var panel_w: float = 340.0
+	var panel_h: float = 38.0
+	var center_x: float = BoardView.AREA.get_center().x
+	_title_panel.size = Vector2(panel_w, panel_h)
+	_title_panel.position = Vector2(center_x - panel_w / 2.0, TITLE_TOP + (TITLE_HEIGHT - panel_h) / 2.0)
+	var title_style: StyleBoxTexture = UiStyle.panel(6.0) as StyleBoxTexture
+	title_style.modulate_color = Color(1.15, 0.95, 0.70)
+	_title_panel.add_theme_stylebox_override("panel", title_style)
+
 	_title_label = Label.new()
 	_title_label.text = tr("app.title")
 	_title_label.theme_type_variation = &"TitleLabel"
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_title_label.size = Vector2(BoardView.viewport_size.x, TITLE_HEIGHT)
-	_title_label.position = Vector2(0, TITLE_TOP)
+	_title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_title_label.size = Vector2(panel_w, TITLE_HEIGHT)
+	_title_label.position = Vector2(center_x - panel_w / 2.0, TITLE_TOP)
+	_title_label.add_theme_color_override("font_color", Color(1.0, 0.90, 0.50))
+	_title_label.add_theme_color_override("font_outline_color", Color(0.18, 0.13, 0.18))
+	_title_label.add_theme_constant_override("outline_size", 4)
+	_title_label.add_theme_color_override("font_shadow_color", Color(0.05, 0.04, 0.06, 0.8))
+	_title_label.add_theme_constant_override("shadow_offset_y", 2)
 
 	_board_view = BoardView.new()
 	add_child(_board_view)
@@ -87,6 +106,7 @@ func _ready() -> void:
 	_weather_overlay.name = "WeatherOverlay"
 	add_child(_weather_overlay)
 	# Tiêu đề thêm sau bàn: nền rừng (con của bàn) phủ cả cửa sổ, tiêu đề phải vẽ đè lên nó.
+	add_child(_title_panel)
 	add_child(_title_label)
 	_battle_input = BattleInput.new()
 	_battle_input.setup(_board_view)
@@ -139,6 +159,7 @@ func _ready() -> void:
 	_sound_button.size = SOUND_BUTTON_SIZE
 	_sound_button.position = Vector2(BoardView.viewport_size.x - SOUND_BUTTON_SIZE.x - SOUND_BUTTON_MARGIN, SOUND_BUTTON_MARGIN)
 	UiStyle.apply_button(_sound_button)
+	_sound_button.add_theme_font_size_override("font_size", 14)
 	_sound_button.pressed.connect(_toggle_sound)
 	add_child(_sound_button)
 	_refresh_sound_button()
@@ -503,7 +524,19 @@ func _show_help() -> void:
 	if _screen != Screen.BATTLE or _level == null:
 		return
 	_hint_pending = false
-	_hint_panel.show_help(_level.hints)
+	_hint_panel.show_help(_level.hints, _level_mission_goal(_level))
+
+
+func _level_mission_goal(level: LevelData) -> String:
+	if level == null:
+		return ""
+	if level.mission == LevelData.Mission.HOLD_PASS:
+		return "⚔ NHIỆM VỤ: " + tr("mission.desc.hold_pass") % level.max_rounds
+	if level.long_dan > 0:
+		return "⚔ NHIỆM VỤ: " + tr("mission.desc.eliminate_village")
+	if level.max_rounds > 0:
+		return "⚔ NHIỆM VỤ: " + tr("mission.desc.eliminate_timed") % level.max_rounds
+	return "⚔ NHIỆM VỤ: " + tr("mission.desc.eliminate")
 
 
 ## Vẽ bản chụp lên bàn cờ (và tọa độ F1 nếu bật dev); null là bàn trống.
@@ -546,6 +579,8 @@ func _set_cover(cover: Control) -> void:
 	_main_menu.visible = cover == _main_menu
 	_level_transition.visible = cover == _level_transition
 	_title_label.visible = cover == null
+	if _title_panel != null:
+		_title_panel.visible = cover == null
 	if _weather_overlay != null:
 		_weather_overlay.visible = cover == null
 

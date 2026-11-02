@@ -439,17 +439,31 @@ func _update_info(cell: Vector2i) -> void:
 		return
 	var unit: Unit = state.unit_at(cell)
 	if _tooltip != null:
-		var text: String = _unit_text(unit, state) if unit != null else _terrain_text(state.terrain_at(cell))
-		if state.reinforcement_warnings.has(cell):
-			text += "\n" + tr("tooltip.reinforcement_warning")
-		# Tướng Đại Việt có chân dung; biểu tượng máu đặt ở dòng UNIT_HP_LINE.
-		var portrait: Texture2D = null
+		# Tác giả chốt (2026-11-02): Bỏ tooltip lơ lửng cho tướng Đại Việt (đã có bảng tướng ở HUD).
 		if unit != null and unit.faction == Unit.Faction.DAI_VIET:
-			var portrait_path: String = UiStyle.portrait_path(unit.type)
-			if not portrait_path.is_empty():
-				portrait = Art.tex(portrait_path)
-		_tooltip.show_text(text, portrait, UNIT_HP_LINE if unit != null else -1)
+			_tooltip.hide_tooltip()
+		else:
+			var text: String = ""
+			if unit != null:
+				text = _unit_text(unit, state)
+				if state.reinforcement_warnings.has(cell):
+					text += "\n" + tr("tooltip.reinforcement_warning")
+			elif state.reinforcement_warnings.has(cell):
+				# Ô tiếp viện: chỉ hiện thông tin tiếp viện, không ghép Đồng bằng / Không có hiệu ứng.
+				text = "%s\n%s" % [tr("tooltip.reinforcement_title"), tr("tooltip.reinforcement_warning")]
+			elif state.terrain_at(cell) != Terrain.PLAIN:
+				# Ô Đồng bằng thường không hiện bảng 'Không có hiệu ứng' nữa để tránh rối mắt.
+				text = _terrain_text(state.terrain_at(cell))
+
+			if text.is_empty():
+				_tooltip.hide_tooltip()
+			else:
+				_tooltip.show_text(text, null, UNIT_HP_LINE if unit != null else -1)
 	_board.telegraph_view().highlight(_telegraph_cells_of(unit, state))
+	if unit != null and unit.faction == Unit.Faction.NGUYEN:
+		_board.show_enemy_reach(_enemy_reach_cells_of(unit, state))
+	else:
+		_board.clear_enemy_reach()
 
 
 ## Số thứ tự (từ 0) của dòng "Máu" trong _unit_text: khung thông tin đặt biểu tượng máu ở dòng này.
@@ -460,8 +474,24 @@ func _unit_text(unit: Unit, state: BattleState) -> String:
 	var lines: PackedStringArray = PackedStringArray()
 	lines.append(tr(Tooltip.UNIT_NAMES[unit.type] as String))
 	lines.append(tr("tooltip.hp") % [unit.hp, state.stats.max_hp(unit.type)])
+	if unit.faction == Unit.Faction.NGUYEN:
+		lines.append(tr("tooltip.move") % state.stats.move_range(unit.type))
+		var desc: String = _enemy_attack_desc(unit.type, state.stats)
+		if not desc.is_empty():
+			lines.append(desc)
 	lines.append(_attack_text(unit, state))
 	return "\n".join(lines)
+
+
+func _enemy_attack_desc(type: int, stats: Stats) -> String:
+	match type:
+		UnitType.BO_BINH:
+			return tr("tooltip.attack.bo_binh") % stats.damage(type)
+		UnitType.KY_BINH:
+			return tr("tooltip.attack.ky_binh") % stats.damage(type)
+		UnitType.CUNG_KY:
+			return tr("tooltip.attack.cung_ky") % [stats.shoot_min_range(type), stats.shoot_max_range(type), stats.damage(type)]
+	return ""
 
 
 ## Chữ "đòn sắp đánh" của quân này. Đòn đã bị hủy (chủ đòn gục, ô đích ngoài bàn, Kỵ binh sát mép hướng ra
@@ -473,11 +503,14 @@ func _attack_text(unit: Unit, state: BattleState) -> String:
 			continue
 		var hit: Vector2i = TelegraphMarks.hit_cell(state, t)
 		if hit == Telegraph.NO_CELL:
-			return tr("tooltip.no_attack")
+			return tr("tooltip.this_round_none") if unit.faction == Unit.Faction.NGUYEN else tr("tooltip.no_attack")
+		var act: String = ""
 		if t.kind == Telegraph.Kind.DIRECTION:
-			return tr("tooltip.attack_charge") % [tr(Tooltip.DIRECTION_NAMES[t.offset] as String), t.order]
-		return tr("tooltip.attack_cell") % [BoardText.cell_text(hit), t.order]
-	return tr("tooltip.no_attack")
+			act = tr("tooltip.attack_charge") % [tr(Tooltip.DIRECTION_NAMES[t.offset] as String), t.order]
+		else:
+			act = tr("tooltip.attack_cell") % [BoardText.cell_text(hit), t.order]
+		return tr("tooltip.this_round_attack") % act if unit.faction == Unit.Faction.NGUYEN else act
+	return tr("tooltip.this_round_none") if unit.faction == Unit.Faction.NGUYEN else tr("tooltip.no_attack")
 
 
 func _terrain_text(terrain: int) -> String:
@@ -495,6 +528,18 @@ func _telegraph_cells_of(unit: Unit, state: BattleState) -> Array[Vector2i]:
 	return cells
 
 
+## Các ô quân Nguyên có thể di chuyển tới (Into the Breach movement range).
+func _enemy_reach_cells_of(unit: Unit, state: BattleState) -> Array[Vector2i]:
+	if unit == null or unit.faction != Unit.Faction.NGUYEN:
+		return []
+	var paths: Dictionary = Pathfinding.find_paths(state, unit, state.stats.move_range(unit.type))
+	var cells: Array[Vector2i] = []
+	for c: Variant in paths.keys():
+		cells.append(c as Vector2i)
+	cells.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.y < b.y or (a.y == b.y and a.x < b.x))
+	return cells
+
+
 ## Ẩn khung thông tin và bỏ nổi bật ô đỏ (hết trận, dừng trận).
 func _hide_info() -> void:
 	_clear_preview()
@@ -502,6 +547,7 @@ func _hide_info() -> void:
 		_tooltip.hide_tooltip()
 	if _board != null:
 		_board.telegraph_view().highlight([] as Array[Vector2i])
+		_board.clear_enemy_reach()
 
 
 func _select(id: int) -> void:

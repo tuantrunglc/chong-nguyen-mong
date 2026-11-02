@@ -66,12 +66,14 @@ const PORTRAITS: Dictionary = {
 const PORTRAIT_SIZE: float = 96.0
 
 static var _button_styles: Dictionary = {}
+static var _primary_button_styles: Dictionary = {}
 ## Khung mẫu dựng một lần theo (đường dẫn, lề hình, lề trong); mỗi lần gọi trả bản sao để người dùng đổi lề riêng.
 static var _frame_templates: Dictionary = {}
 
 
 static func reset_for_test() -> void:
 	_button_styles = {}
+	_primary_button_styles = {}
 	_frame_templates = {}
 
 
@@ -82,6 +84,22 @@ static func panel(content_margin: float = -1.0, fallback: StyleBox = null) -> St
 
 static func tooltip(content_margin: float = -1.0, fallback: StyleBox = null) -> StyleBox:
 	return _frame(TOOLTIP_TEXTURE, TOOLTIP_MARGIN, content_margin, fallback)
+
+
+## Tạo khung chú thích tùy biến đồng bộ mỹ thuật Đông A cho các Control có tooltip_text.
+static func create_custom_tooltip(for_text: String, width: float = 280.0) -> Control:
+	var panel: PanelContainer = PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", tooltip(8.0))
+	var label: Label = Label.new()
+	label.text = for_text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size = Vector2(width, 0)
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", Color(0.96, 0.94, 0.90))
+	label.add_theme_color_override("font_shadow_color", Color(0.06, 0.04, 0.03, 0.85))
+	label.add_theme_constant_override("shadow_offset_y", 1)
+	panel.add_child(label)
+	return panel
 
 
 static func button(state: int) -> StyleBoxTexture:
@@ -113,6 +131,40 @@ static func apply_button(target: Button) -> void:
 	target.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	for color_name: String in BUTTON_FONT_COLORS:
 		target.add_theme_color_override(color_name, BUTTON_FONT_COLORS[color_name] as Color)
+
+
+static func primary_button(state: int) -> StyleBoxTexture:
+	if not BUTTON_TEXTURES.has(state):
+		state = ButtonState.NORMAL
+	if _primary_button_styles.has(state):
+		return _primary_button_styles[state] as StyleBoxTexture
+	var style: StyleBoxTexture = _texture_box(BUTTON_TEXTURES[state] as String, BUTTON_MARGIN)
+	style.set_content_margin_all(BUTTON_CONTENT_MARGIN)
+	match state:
+		ButtonState.NORMAL:
+			style.modulate_color = Color(1.35, 1.15, 0.75)
+		ButtonState.HOVER:
+			style.modulate_color = Color(1.50, 1.35, 0.90)
+		ButtonState.PRESSED:
+			style.modulate_color = Color(1.10, 0.95, 0.65)
+		ButtonState.DISABLED:
+			style.modulate_color = Color(0.80, 0.75, 0.70)
+	_primary_button_styles[state] = style
+	return style
+
+
+## Gắn kiểu nút chính nổi bật (Kết thúc lượt).
+static func apply_primary_button(target: Button) -> void:
+	apply_button(target)
+	if not ENABLED:
+		return
+	target.add_theme_stylebox_override("normal", primary_button(ButtonState.NORMAL))
+	target.add_theme_stylebox_override("hover", primary_button(ButtonState.HOVER))
+	target.add_theme_stylebox_override("pressed", primary_button(ButtonState.PRESSED))
+	target.add_theme_stylebox_override("disabled", primary_button(ButtonState.DISABLED))
+	target.add_theme_color_override("font_color", Color(1.0, 0.98, 0.88))
+	target.add_theme_color_override("font_hover_color", Color(1.0, 1.0, 1.0))
+	target.add_theme_font_size_override("font_size", 17)
 
 
 ## Đường dẫn chân dung của tướng, "" nếu không phải tướng Đại Việt.

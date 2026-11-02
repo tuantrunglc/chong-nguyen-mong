@@ -180,17 +180,17 @@ func icon_visible() -> bool:
 	return _icon.visible
 
 
-## Đặt khung cạnh điểm neo, lật sang trái/trên khi sát mép màn hình.
+## Đặt khung cạnh điểm neo: khi ở nửa dưới màn hình lật lên trên để không đè lên bàn cờ/bảng tướng (tác giả chốt 2026-11-02).
 func place_at(anchor: Vector2) -> void:
 	if get_viewport() == null:
 		position = anchor + CURSOR_OFFSET
 		return
 	var screen: Vector2 = get_viewport_rect().size
 	var pos: Vector2 = anchor + CURSOR_OFFSET
-	if pos.x + size.x > screen.x - SCREEN_MARGIN:
-		pos.x = anchor.x - size.x - CURSOR_OFFSET.x
-	if pos.y + size.y > screen.y - SCREEN_MARGIN:
+	if anchor.y > screen.y * 0.5 or pos.y + size.y > screen.y - SCREEN_MARGIN:
 		pos.y = anchor.y - size.y - CURSOR_OFFSET.y
+	if pos.x + size.x > screen.x - SCREEN_MARGIN or (anchor.x < 964.0 and pos.x + size.x > 964.0):
+		pos.x = anchor.x - size.x - CURSOR_OFFSET.x
 	pos.x = clampf(pos.x, SCREEN_MARGIN, maxf(SCREEN_MARGIN, screen.x - size.x - SCREEN_MARGIN))
 	pos.y = clampf(pos.y, SCREEN_MARGIN, maxf(SCREEN_MARGIN, screen.y - size.y - SCREEN_MARGIN))
 	position = pos

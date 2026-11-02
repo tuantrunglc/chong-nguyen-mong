@@ -6,8 +6,10 @@ extends RefCounted
 ## Số kiểu hình có sẵn.
 const SPIKES_VARIANTS: int = 4
 const PASS_VARIANTS: int = 4
+const PASS_PAIR_VARIANTS: int = 2
 const FOREST_VARIANTS: int = 2
 const BACKDROP_VARIANTS: int = 4
+const CO_LE_VARIANTS: int = 4
 const TILE_COUNT: int = 16
 ## Hai rừng, theo (cột + hàng) chẵn lẻ: chẵn là tre trúc, lẻ là cây rậm.
 const FOREST_PATHS: Array[String] = ["dia_hinh/tex_rung_tre_truc.png", "dia_hinh/tex_rung_cay_ram.png"]
@@ -39,7 +41,29 @@ static func spikes_path(cell: Vector2i) -> String:
 	return "dia_hinh/tex_ham_chong_%d.png" % variant(cell, SPIKES_VARIANTS)
 
 
-static func pass_path(cell: Vector2i) -> String:
+static func co_le_path(cell: Vector2i) -> String:
+	return "dia_hinh/tex_o_co_le_%d.png" % variant(cell, CO_LE_VARIANTS)
+
+
+## Trả về true nếu ô đất trống cell có bụi cỏ lẻ/hoa dại/sỏi đá. Tỉ lệ ~57% số ô đất.
+static func has_co_le(cell: Vector2i) -> bool:
+	return posmod(cell.x * 37 + cell.y * 19, 7) < 4
+
+
+## Đường dẫn hình Cửa Ải: nếu đứng cạnh ô ải khác theo hàng ngang thì tự động ghép thành Đại Quan Ải liền mạch.
+static func pass_path(cell: Vector2i, state: BattleState = null) -> String:
+	if state != null:
+		var has_left: bool = cell.x > 0 and state.terrain_at(cell + Vector2i(-1, 0)) == Terrain.PASS
+		var has_right: bool = cell.x < state.size.x - 1 and state.terrain_at(cell + Vector2i(1, 0)) == Terrain.PASS
+		if not has_left and has_right:
+			var pair_v: int = variant(cell, PASS_PAIR_VARIANTS)
+			return "dia_hinh/tex_o_ai_doi_trai_%d.png" % pair_v
+		elif has_left and not has_right:
+			var left_v: int = variant(cell + Vector2i(-1, 0), PASS_PAIR_VARIANTS)
+			return "dia_hinh/tex_o_ai_doi_phai_%d.png" % left_v
+		elif has_left and has_right:
+			var mid_v: int = variant(cell, PASS_PAIR_VARIANTS)
+			return "dia_hinh/tex_o_ai_doi_giua_%d.png" % mid_v
 	return "dia_hinh/tex_o_ai_be_da_%d.png" % variant(cell, PASS_VARIANTS)
 
 

@@ -22,11 +22,11 @@ const HINT_FONT_SIZE: int = 20
 const BODY_FONT_SIZE: int = 17
 const NOTE_FONT_SIZE: int = 15
 const PANEL_WIDTH: float = 720.0
-## Bảng gợi ý đầu trận: rộng hơn và đệm mỏng hơn để thấp, nhét vừa dải trống dưới hoặc trên bàn cờ.
+## Bảng gợi ý đầu trận: căn giữa màn hình (tâm x = 640), nhét vừa dải trống dưới hoặc trên bàn cờ.
 const HINT_PANEL_WIDTH: float = 900.0
 const HINT_PADDING: int = 5
 const HINT_SEPARATION: int = 0
-const HINT_LINE_FONT_SIZE: int = 18
+const HINT_LINE_FONT_SIZE: int = 16
 ## Khoảng giữ trống: mép trên (chữ tên game), mép dưới (nhãn FPS và phiên bản), và khe giữa bàn với bảng.
 const TOP_LIMIT: float = 48.0
 const BOTTOM_LIMIT: float = 714.0
@@ -92,27 +92,33 @@ func show_hint(keys: Array[String], board_rect: Rect2 = Rect2()) -> void:
 
 ## Dải màn hình để đặt bảng gợi ý (xem show_hint). Cao tối thiểu bằng chiều cao bảng.
 func _hint_area(board_rect: Rect2) -> Rect2:
-	var area: Rect2 = BoardView.AREA
+	var area_pos_x: float = BoardView.AREA.position.x + (BoardView.AREA.size.x - HINT_PANEL_WIDTH) / 2.0
+	var area_width: float = HINT_PANEL_WIDTH
 	var needed: float = _panel.get_combined_minimum_size().y
 	# Hết chỗ trống: dán sát đáy màn hình để che ít bàn nhất (bàn 10×8 gần lấp hết vùng chơi).
-	var fallback: Rect2 = Rect2(area.position.x, BOTTOM_LIMIT - needed, area.size.x, needed)
+	var fallback: Rect2 = Rect2(area_pos_x, BOTTOM_LIMIT - needed, area_width, needed)
 	if board_rect.size == Vector2.ZERO:
 		return fallback
-	var below: Rect2 = Rect2(area.position.x, board_rect.end.y + BOARD_GAP, area.size.x,
+	var below: Rect2 = Rect2(area_pos_x, board_rect.end.y + BOARD_GAP, area_width,
 		BOTTOM_LIMIT - board_rect.end.y - BOARD_GAP)
 	if below.size.y >= needed:
 		return below
-	var above: Rect2 = Rect2(area.position.x, TOP_LIMIT, area.size.x, board_rect.position.y - BOARD_GAP - TOP_LIMIT)
+	var above: Rect2 = Rect2(area_pos_x, TOP_LIMIT, area_width, board_rect.position.y - BOARD_GAP - TOP_LIMIT)
 	if above.size.y >= needed:
 		return above
 	return fallback
 
 
-## Bảng "?" : gợi ý của trận (nếu có) rồi bảng thao tác, giữa bàn cờ.
-func show_help(keys: Array[String]) -> void:
+## Bảng "?" : nhiệm vụ (nếu có), gợi ý của trận rồi bảng thao tác, giữa bàn cờ.
+func show_help(keys: Array[String], mission_goal: String = "") -> void:
 	_clear()
 	_set_layout(PANEL_WIDTH, PADDING)
 	_lines.clear()
+	if not mission_goal.is_empty():
+		var mission_label: Label = _label(mission_goal, HINT_FONT_SIZE, Color(1.0, 0.92, 0.50))
+		mission_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		mission_label.custom_minimum_size = Vector2(_content_width, 0)
+		_box.add_child(mission_label)
 	for key: String in keys:
 		_lines.append(tr(key))
 		_add_label(_lines[_lines.size() - 1], HINT_FONT_SIZE, HINT_COLOR)
@@ -227,6 +233,8 @@ func _label(text: String, font_size: int, color: Color) -> Label:
 	label.text = text
 	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_color_override("font_color", color)
+	label.add_theme_color_override("font_shadow_color", Color(0.06, 0.04, 0.03, 0.85))
+	label.add_theme_constant_override("shadow_offset_y", 1)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	return label

@@ -286,7 +286,7 @@ func test_board_size_follows_level() -> void:
 
 
 func test_level_1_board_unchanged() -> void:
-	assert_eq(_board(_make_main()).position, Vector2(262, 139), "như sau Story 1.8")
+	assert_eq(_board(_make_main()).position, Vector2(266, 139), "bàn trận 1 căn giữa sa bàn tác chiến")
 
 
 func test_fit_scale_uses_whole_steps() -> void:
@@ -674,3 +674,16 @@ func test_aura_follows_snapshot_for_dai_viet_only() -> void:
 	assert_false((board.tokens()[1] as UnitToken).has_aura(), "bản chụp mới tắt thì tắt")
 	board.show_state(on)
 	assert_true((board.tokens()[1] as UnitToken).has_aura(), "bật lại theo bản chụp (hoàn tác, nạp lại)")
+
+
+# ---------- Vùng di chuyển của quân địch (cơ chế kiểu Into the Breach) ----------
+
+func test_enemy_reach_cells_can_be_shown_and_cleared() -> void:
+	var board: BoardView = BoardView.new()
+	add_child_autofree(board)
+	assert_eq(board.enemy_reach_cells(), [] as Array[Vector2i], "mặc định rỗng")
+	var sample: Array[Vector2i] = [Vector2i(2, 3), Vector2i(2, 4)]
+	board.show_enemy_reach(sample)
+	assert_eq(board.enemy_reach_cells(), sample, "hiện các ô đi được của địch")
+	board.clear_enemy_reach()
+	assert_eq(board.enemy_reach_cells(), [] as Array[Vector2i], "xóa sạch khi ẩn")
